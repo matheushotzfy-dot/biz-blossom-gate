@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Wallet, FileText, Percent, Building2, ArrowDownToLine,
   ShoppingCart, Package, ExternalLink, LogOut, CreditCard, UserCircle,
-  Webhook, Ticket, ChevronDown,
+  Webhook, Ticket, ChevronDown, BookOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +29,7 @@ const salesItems = [
   { title: "Checkout", url: "/vendas/checkout", icon: ExternalLink },
   { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
   { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
+  { title: "Documentação API", url: "/vendas/documentacao", icon: BookOpen },
 ];
 
 export function AppSidebar() {

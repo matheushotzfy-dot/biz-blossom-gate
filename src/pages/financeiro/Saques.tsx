@@ -36,7 +36,7 @@ export default function Saques() {
     if (!user) return;
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
-    const feeAmount = 2.00;
+    const feeAmount = 5.00;
     const { error } = await supabase.from("withdrawals").insert({
       user_id: user.id,
       bank_account_id: selectedAccount || null,
@@ -73,7 +73,7 @@ export default function Saques() {
               <div>
                 <Label>Valor (R$)</Label>
                 <Input type="number" step="0.01" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required />
-                <p className="text-xs text-muted-foreground mt-1">Taxa de saque: R$ 2,00</p>
+                <p className="text-xs text-muted-foreground mt-1">Taxa de saque: R$ 5,00</p>
               </div>
               <div>
                 <Label>Conta Bancária</Label>

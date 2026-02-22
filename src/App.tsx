@@ -17,6 +17,7 @@ import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
 import Cupons from "./pages/vendas/Cupons";
 import Webhooks from "./pages/vendas/Webhooks";
+import Documentacao from "./pages/vendas/Documentacao";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PublicCheckout from "./pages/PublicCheckout";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/vendas/checkout" element={<Checkout />} />
             <Route path="/vendas/cupons" element={<Cupons />} />
             <Route path="/vendas/webhooks" element={<Webhooks />} />
+            <Route path="/vendas/documentacao" element={<Documentacao />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
