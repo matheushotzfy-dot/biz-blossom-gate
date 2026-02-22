@@ -56,6 +56,45 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       fees: {
         Row: {
           created_at: string
@@ -124,6 +163,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           avatar_url: string | null
           created_at: string
           document_number: string | null
@@ -132,10 +172,13 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          pix_key: string | null
+          pix_key_type: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          account_status?: string
           avatar_url?: string | null
           created_at?: string
           document_number?: string | null
@@ -144,10 +187,13 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          account_status?: string
           avatar_url?: string | null
           created_at?: string
           document_number?: string | null
@@ -156,6 +202,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -228,6 +276,39 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_configs: {
+        Row: {
+          created_at: string
+          events: string[]
+          id: string
+          is_active: boolean
+          secret: string | null
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          secret?: string | null
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          secret?: string | null
+          updated_at?: string
+          url?: string
           user_id?: string
         }
         Relationships: []

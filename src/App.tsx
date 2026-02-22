@@ -15,9 +15,12 @@ import Saques from "./pages/financeiro/Saques";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
+import Cupons from "./pages/vendas/Cupons";
+import Webhooks from "./pages/vendas/Webhooks";
 import Admin from "./pages/admin/Admin";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import PublicCheckout from "./pages/PublicCheckout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +33,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/pay/:slug" element={<PublicCheckout />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route
             element={
@@ -49,6 +53,8 @@ const App = () => (
             <Route path="/vendas" element={<Vendas />} />
             <Route path="/vendas/produtos" element={<Produtos />} />
             <Route path="/vendas/checkout" element={<Checkout />} />
+            <Route path="/vendas/cupons" element={<Cupons />} />
+            <Route path="/vendas/webhooks" element={<Webhooks />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             <Route path="/admin/configuracoes" element={<AdminConfiguracoes />} />
