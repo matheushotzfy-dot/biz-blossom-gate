@@ -17,9 +17,8 @@ import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
 import Cupons from "./pages/vendas/Cupons";
 import Webhooks from "./pages/vendas/Webhooks";
-import Admin from "./pages/admin/Admin";
-import AdminUsuarios from "./pages/admin/AdminUsuarios";
-import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import PublicCheckout from "./pages/PublicCheckout";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +34,12 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/pay/:slug" element={<PublicCheckout />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          
+          {/* Admin Master - Separate login and dashboard */}
+          <Route path="/admin-admin" element={<AdminLogin />} />
+          <Route path="/admin-admin/dashboard" element={<AdminDashboard />} />
+
+          {/* User Dashboard */}
           <Route
             element={
               <RequireAuth>
@@ -55,9 +60,6 @@ const App = () => (
             <Route path="/vendas/checkout" element={<Checkout />} />
             <Route path="/vendas/cupons" element={<Cupons />} />
             <Route path="/vendas/webhooks" element={<Webhooks />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-            <Route path="/admin/configuracoes" element={<AdminConfiguracoes />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
