@@ -35,7 +35,8 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        toast.success("Conta criada! Verifique seu e-mail para confirmar.");
+        toast.success("Conta criada com sucesso!");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast.error(error.message || "Erro ao processar");
