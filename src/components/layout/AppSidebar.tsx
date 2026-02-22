@@ -1,35 +1,14 @@
 import {
-  LayoutDashboard,
-  Wallet,
-  FileText,
-  Percent,
-  Building2,
-  ArrowDownToLine,
-  ShoppingCart,
-  Package,
-  ExternalLink,
-  Shield,
-  Users,
-  Settings,
-  LogOut,
-  CreditCard,
-  UserCircle,
-  Webhook,
-  Ticket,
+  LayoutDashboard, Wallet, FileText, Percent, Building2, ArrowDownToLine,
+  ShoppingCart, Package, ExternalLink, LogOut, CreditCard, UserCircle,
+  Webhook, Ticket, ChevronDown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter,
 } from "@/components/ui/sidebar";
 
 const mainItems = [
@@ -40,7 +19,7 @@ const financeItems = [
   { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
   { title: "Taxas", url: "/financeiro/taxas", icon: Percent },
   { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
-  { title: "Identidade", url: "/financeiro/identidade", icon: UserCircle },
+  { title: "Identidade & KYC", url: "/financeiro/identidade", icon: UserCircle },
   { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },
 ];
 
@@ -52,14 +31,7 @@ const salesItems = [
   { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
 ];
 
-const adminItems = [
-  { title: "Painel Admin", url: "/admin", icon: Shield },
-  { title: "Usuários", url: "/admin/usuarios", icon: Users },
-  { title: "Configurações", url: "/admin/configuracoes", icon: Settings },
-];
-
 export function AppSidebar() {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -74,74 +46,60 @@ export function AppSidebar() {
           <NavLink
             to={item.url}
             end={item.url === "/dashboard"}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200"
-            activeClassName="bg-sidebar-accent text-primary font-semibold"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 group"
+            activeClassName="bg-primary/10 text-primary font-semibold shadow-sm"
           >
-            <item.icon className="h-4 w-4 shrink-0" />
-            <span className="text-sm">{item.title}</span>
+            <item.icon className="h-[18px] w-[18px] shrink-0 group-hover:scale-105 transition-transform" />
+            <span className="text-[13px]">{item.title}</span>
           </NavLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
     ));
 
   return (
-    <Sidebar className="w-64 border-r border-sidebar-border gradient-sidebar">
-      <div className="p-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-lg gradient-primary flex items-center justify-center">
-            <CreditCard className="h-5 w-5 text-primary-foreground" />
+    <Sidebar className="w-[260px] border-r border-sidebar-border bg-[hsl(220,30%,5%)]">
+      {/* Logo */}
+      <div className="p-5 border-b border-sidebar-border/50">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20">
+            <CreditCard className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-sidebar-accent-foreground tracking-tight">PayGate</h1>
-            <p className="text-[11px] text-sidebar-foreground">Gateway de Pagamentos</p>
+            <h1 className="text-[15px] font-bold text-white tracking-tight">PayGate</h1>
+            <p className="text-[10px] text-zinc-500">Gateway de Pagamentos</p>
           </div>
         </div>
       </div>
 
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
             Principal
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(mainItems)}</SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent><SidebarMenu>{renderItems(mainItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold px-3 mb-1">
+        <SidebarGroup className="mt-5">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
             Financeiro
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(financeItems)}</SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent><SidebarMenu>{renderItems(financeItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold px-3 mb-1">
+        <SidebarGroup className="mt-5">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
             Vendas
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(salesItems)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold px-3 mb-1">
-            Administração
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(adminItems)}</SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent><SidebarMenu>{renderItems(salesItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-sidebar-border">
+      <SidebarFooter className="p-3 border-t border-sidebar-border/50">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 w-full text-sm"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full text-[13px] group"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-[18px] w-[18px] group-hover:scale-105 transition-transform" />
           <span>Sair</span>
         </button>
       </SidebarFooter>
