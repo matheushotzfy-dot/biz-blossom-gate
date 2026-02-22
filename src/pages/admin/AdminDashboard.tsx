@@ -70,11 +70,22 @@ export default function AdminDashboard() {
   });
 
   const handleWithdrawalAction = async (id: string, action: "approved" | "rejected") => {
-    const update: any = { status: action };
-    if (action === "approved") update.processed_at = new Date().toISOString();
-    const { error } = await supabase.from("withdrawals").update(update).eq("id", id);
-    if (error) { toast.error("Erro ao processar"); return; }
-    toast.success(action === "approved" ? "Saque aprovado!" : "Saque recusado");
+    if (action === "approved") {
+      // Use PodPay cash-out via edge function
+      toast.info("Processando saque via PIX...");
+      const { data, error } = await supabase.functions.invoke("podpay-cashout", {
+        body: { withdrawalId: id },
+      });
+      if (error || !data?.success) {
+        toast.error(data?.error || error?.message || "Erro ao processar saque");
+        return;
+      }
+      toast.success("Saque aprovado e enviado via PIX!");
+    } else {
+      const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id);
+      if (error) { toast.error("Erro ao recusar"); return; }
+      toast.success("Saque recusado");
+    }
     loadData();
   };
 
