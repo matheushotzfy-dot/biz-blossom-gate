@@ -53,13 +53,13 @@ export default function Auth() {
               <CreditCard className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">PayGate</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">PayGate</h1>
               <p className="text-sm text-muted-foreground">Gateway de Pagamentos</p>
             </div>
           </div>
 
           <div className="glass-card rounded-2xl p-8">
-            <h2 className="text-xl font-bold mb-1">
+            <h2 className="text-xl font-bold mb-1 text-foreground">
               {isLogin ? "Entrar na sua conta" : "Criar nova conta"}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
