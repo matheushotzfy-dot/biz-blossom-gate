@@ -14,6 +14,8 @@ import {
   LogOut,
   CreditCard,
   UserCircle,
+  Webhook,
+  Ticket,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -46,6 +48,8 @@ const salesItems = [
   { title: "Vendas", url: "/vendas", icon: ShoppingCart },
   { title: "Produtos", url: "/vendas/produtos", icon: Package },
   { title: "Checkout", url: "/vendas/checkout", icon: ExternalLink },
+  { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
+  { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
 ];
 
 const adminItems = [
