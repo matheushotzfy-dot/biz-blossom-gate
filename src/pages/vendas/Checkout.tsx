@@ -69,8 +69,8 @@ export default function Checkout() {
         </Panel>
       </div>
 
-      {/* Mobile cards — redesigned */}
-      <div className="md:hidden space-y-3">
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3 w-full min-w-0">
         {products.length === 0 ? (
           <div className="text-center py-16">
             <div className="mx-auto h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
@@ -82,7 +82,7 @@ export default function Checkout() {
         ) : products.map((p) => (
           <div
             key={p.id}
-            className="rounded-2xl relative transition-all duration-500"
+            className="rounded-2xl overflow-hidden transition-all duration-500"
             style={{
               background: "var(--glass-bg)",
               border: "1px solid var(--glass-border)",
@@ -90,9 +90,8 @@ export default function Checkout() {
               boxShadow: "var(--card-shadow)",
             }}
           >
-            <div className="absolute top-0 left-0 w-full h-[1px] rounded-t-2xl" style={{ background: "var(--top-line)" }} />
-            {/* Product header */}
-            <div className="p-4 pb-3 relative">
+            {/* Header */}
+            <div className="p-4 pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {p.image_url ? (
@@ -117,25 +116,29 @@ export default function Checkout() {
                 </button>
               </div>
             </div>
+
+            {/* Link preview */}
             {p.checkout_url && (
-              <div className="mx-4 mb-3 px-3 py-2 rounded-lg bg-muted/40 border border-border/50">
+              <div className="mx-4 mb-3 px-3 py-2 rounded-xl bg-muted/40 border border-border/50">
                 <p className="text-[10px] font-mono text-muted-foreground truncate">{p.checkout_url}</p>
               </div>
             )}
+
+            {/* Actions */}
             {p.checkout_url && (
-              <div className="flex border-t border-border/50 rounded-b-2xl">
+              <div className="grid grid-cols-2 border-t border-border/50">
                 <button
                   onClick={() => openCheckout(p.checkout_url!)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors border-r border-border/50 rounded-bl-2xl"
+                  className="flex items-center justify-center gap-1.5 py-3 text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors border-r border-border/50"
                 >
                   <Eye className="h-3.5 w-3.5" /> Ver
                 </button>
                 <button
                   onClick={() => copyLink(p.id, p.checkout_url!)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[12px] font-semibold text-primary hover:bg-primary/5 transition-colors rounded-br-2xl"
+                  className="flex items-center justify-center gap-1.5 py-3 text-[12px] font-semibold text-primary hover:bg-primary/5 transition-colors"
                 >
                   {copiedId === p.id ? (
-                    <><CheckCircle className="h-3.5 w-3.5" /> Copiado!</>
+                    <><CheckCircle className="h-3.5 w-3.5" /> Copiado</>
                   ) : (
                     <><Copy className="h-3.5 w-3.5" /> Copiar</>
                   )}

@@ -4,7 +4,7 @@ import React from "react";
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="space-y-5 relative pb-8 min-h-screen animate-fade-in"
+      className="space-y-5 relative pb-8 min-h-screen animate-fade-in overflow-x-hidden"
       style={{ background: "var(--page-bg)" }}
     >
       {/* Ambient mesh */}
