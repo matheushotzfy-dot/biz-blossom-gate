@@ -5,35 +5,35 @@ import { ArrowDownToLine, Plus, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { PageShell, Panel, PageTitle, DataTable } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
-const pixKeyTypes: Record<string, string> = {
-  cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Chave Aleatória", phone: "Telefone", random: "Aleatória",
+const pixKeyTypeLabels: Record<string, string> = {
+  cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Aleatória",
 };
+
+type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
 
 export default function Saques() {
   const { user } = useAuth();
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
-  const [pixKey, setPixKey] = useState<string | null>(null);
-  const [pixKeyType, setPixKeyType] = useState<string | null>(null);
+  const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
+  const [selectedPixKeyId, setSelectedPixKeyId] = useState("");
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
 
   const loadData = async () => {
     if (!user?.id) return;
-    const [wRes, pRes] = await Promise.all([
+    const [wRes, pkRes] = await Promise.all([
       supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("profiles").select("pix_key, pix_key_type").eq("user_id", user.id).single(),
+      supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at") as any,
     ]);
     if (wRes.data) setWithdrawals(wRes.data);
-    if (pRes.data) {
-      setPixKey(pRes.data.pix_key);
-      setPixKeyType(pRes.data.pix_key_type);
-    }
+    if (pkRes.data) setPixKeys(pkRes.data as PixKey[]);
   };
 
   useEffect(() => { loadData(); }, [user?.id]);
@@ -41,14 +41,19 @@ export default function Saques() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!pixKey) { toast.error("Cadastre uma chave PIX em Dados Bancários primeiro"); return; }
+    if (pixKeys.length === 0) { toast.error("Cadastre uma chave PIX em Dados Bancários"); return; }
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
+
+    // Sync selected PIX key to profile for cashout edge function
+    const selected = pixKeys.find(k => k.id === selectedPixKeyId) || pixKeys[0];
+    await supabase.from("profiles").update({ pix_key: selected.key_value, pix_key_type: selected.key_type }).eq("user_id", user.id);
+
     const feeAmount = 5.00;
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
     if (error) { toast.error("Erro ao solicitar saque"); return; }
     toast.success("Saque solicitado!");
-    setOpen(false); setAmount(""); loadData();
+    setOpen(false); setAmount(""); setSelectedPixKeyId(""); loadData();
   };
 
   const totalPending = withdrawals.filter((w) => w.status === "pending").reduce((acc, w) => acc + Number(w.amount), 0);
@@ -71,19 +76,28 @@ export default function Saques() {
               </div>
               <div>
                 <Label className="text-foreground/70">Chave PIX</Label>
-                {pixKey ? (
-                  <div className="flex items-center gap-2 p-3 rounded-xl border border-white/[0.08] bg-white/[0.03] mt-1">
-                    <Key className="h-4 w-4 text-[#00FFA3]" />
-                    <div>
-                      <p className="text-[11px] text-foreground/40">{pixKeyTypes[pixKeyType || ""] || pixKeyType}</p>
-                      <p className="font-mono text-foreground text-[13px]">{pixKey}</p>
-                    </div>
-                  </div>
+                {pixKeys.length > 0 ? (
+                  <Select value={selectedPixKeyId || pixKeys[0]?.id} onValueChange={setSelectedPixKeyId}>
+                    <SelectTrigger className="text-foreground mt-1">
+                      <SelectValue placeholder="Selecione a chave PIX" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pixKeys.map((pk) => (
+                        <SelectItem key={pk.id} value={pk.id}>
+                          <span className="flex items-center gap-2">
+                            <Key className="h-3 w-3 text-[#00FFA3]" />
+                            <span className="text-xs text-muted-foreground">{pixKeyTypeLabels[pk.key_type] || pk.key_type}:</span>
+                            <span className="font-mono">{pk.key_value}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <p className="text-xs text-destructive mt-1">Cadastre uma chave PIX em Dados Bancários primeiro</p>
                 )}
               </div>
-              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={!pixKey}>Solicitar Saque</Button>
+              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={pixKeys.length === 0}>Solicitar Saque</Button>
             </form>
           </DialogContent>
         </Dialog>
