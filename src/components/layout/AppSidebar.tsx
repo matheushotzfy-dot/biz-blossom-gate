@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Wallet, FileText, Percent, Building2, ArrowDownToLine,
   ShoppingCart, Package, ExternalLink, LogOut, CreditCard, UserCircle,
-  Webhook, Ticket, ChevronDown, BookOpen,
+  Webhook, Ticket, ChevronDown, BookOpen, PlayCircle, Layers,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -27,9 +27,14 @@ const salesItems = [
   { title: "Vendas", url: "/vendas", icon: ShoppingCart },
   { title: "Produtos", url: "/vendas/produtos", icon: Package },
   { title: "Checkout", url: "/vendas/checkout", icon: ExternalLink },
+  { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
   { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
   { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
   { title: "Documentação API", url: "/vendas/documentacao", icon: BookOpen },
+];
+
+const memberItems = [
+  { title: "Meus Cursos", url: "/membros", icon: PlayCircle },
 ];
 
 export function AppSidebar() {
@@ -92,6 +97,13 @@ export function AppSidebar() {
             Vendas
           </SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{renderItems(salesItems)}</SidebarMenu></SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-5">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
+            Área de Membros
+          </SidebarGroupLabel>
+          <SidebarGroupContent><SidebarMenu>{renderItems(memberItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
