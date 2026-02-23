@@ -20,7 +20,26 @@ Deno.serve(async (req) => {
 
     const data = payload.data || payload;
     const podpayStatus = data.status;
+    const podpayPaymentId = data.id ? String(data.id) : null;
+    const podpayEventId = payload.event_id ? String(payload.event_id) : null;
     const externalRef = data.externalRef;
+
+    // === IDEMPOTENCY: Check if this event was already processed ===
+    if (podpayEventId) {
+      const { data: existingEvent } = await supabase
+        .from('transactions')
+        .select('id')
+        .eq('podpay_event_id', podpayEventId)
+        .maybeSingle();
+
+      if (existingEvent) {
+        console.log('Event already processed, skipping:', podpayEventId);
+        return new Response(
+          JSON.stringify({ success: true, message: 'Already processed' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // Map PodPay status to our status
     const statusMap: Record<string, string> = {
@@ -39,27 +58,71 @@ Deno.serve(async (req) => {
 
     const ourStatus = statusMap[podpayStatus] || 'pending';
 
-    // Update transaction by product_id (externalRef)
-    if (externalRef) {
+    // === Find transaction by podpay_payment_id first, then fallback to product_id ===
+    let transactionId: string | null = null;
+
+    if (podpayPaymentId) {
+      const { data: tx } = await supabase
+        .from('transactions')
+        .select('id, status')
+        .eq('podpay_payment_id', podpayPaymentId)
+        .maybeSingle();
+
+      if (tx) {
+        transactionId = tx.id;
+        
+        // Don't downgrade completed status (idempotency)
+        const finalStatuses = ['completed', 'refunded', 'chargeback'];
+        if (finalStatuses.includes(tx.status) && !finalStatuses.includes(ourStatus)) {
+          console.log(`Skipping status downgrade: ${tx.status} -> ${ourStatus}`);
+          return new Response(
+            JSON.stringify({ success: true, message: 'Status not downgraded' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const updateData: Record<string, unknown> = { status: ourStatus };
+        if (podpayEventId) updateData.podpay_event_id = podpayEventId;
+
+        const { error } = await supabase
+          .from('transactions')
+          .update(updateData)
+          .eq('id', tx.id);
+
+        if (error) {
+          console.error('Error updating transaction:', error);
+        } else {
+          console.log(`Transaction ${tx.id} updated to ${ourStatus}`);
+        }
+      }
+    }
+
+    // Fallback: update by product_id if no podpay_payment_id match
+    if (!transactionId && externalRef) {
+      const updateData: Record<string, unknown> = { status: ourStatus };
+      if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
+      if (podpayEventId) updateData.podpay_event_id = podpayEventId;
+
       const { error } = await supabase
         .from('transactions')
-        .update({ status: ourStatus })
+        .update(updateData)
         .eq('product_id', externalRef)
         .eq('status', 'pending');
 
       if (error) {
-        console.error('Error updating transaction:', error);
+        console.error('Error updating transaction by product_id:', error);
       } else {
-        console.log(`Transaction updated to ${ourStatus}`);
+        console.log(`Transaction updated to ${ourStatus} via product_id fallback`);
       }
     }
 
-    // Forward to user's webhook if configured
-    if (externalRef) {
+    // === Forward to user's webhook if configured ===
+    const productId = externalRef;
+    if (productId) {
       const { data: product } = await supabase
         .from('products')
         .select('user_id')
-        .eq('id', externalRef)
+        .eq('id', productId)
         .single();
 
       if (product) {
@@ -79,7 +142,12 @@ Deno.serve(async (req) => {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     event: eventType,
-                    data: payload,
+                    data: {
+                      transaction_id: transactionId,
+                      podpay_payment_id: podpayPaymentId,
+                      status: ourStatus,
+                      product_id: productId,
+                    },
                     timestamp: new Date().toISOString(),
                   }),
                 });
