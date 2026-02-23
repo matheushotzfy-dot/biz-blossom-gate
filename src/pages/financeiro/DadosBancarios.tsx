@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function DadosBancarios() {
@@ -28,107 +29,64 @@ export default function DadosBancarios() {
     e.preventDefault();
     if (!user) return;
     const { error } = await supabase.from("bank_accounts").insert({ ...form, user_id: user.id });
-    if (error) { toast.error("Erro ao cadastrar conta"); return; }
-    toast.success("Conta cadastrada com sucesso!");
+    if (error) { toast.error("Erro ao cadastrar"); return; }
+    toast.success("Conta cadastrada!");
     setOpen(false);
     setForm({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
     loadAccounts();
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("bank_accounts").delete().eq("id", id);
-    if (error) { toast.error("Erro ao remover"); return; }
+    await supabase.from("bank_accounts").delete().eq("id", id);
     toast.success("Conta removida");
     loadAccounts();
   };
 
   return (
-    <div className="space-y-6 dark">
+    <PageShell>
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-primary" /> Dados Bancários
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">Gerencie suas contas bancárias para saques</p>
-        </div>
+        <PageTitle icon={<Building2 className="h-6 w-6" />} title="Dados Bancários" subtitle="Gerencie suas contas para saques" />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gradient-primary text-primary-foreground gap-2"><Plus className="h-4 w-4" /> Nova Conta</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}><Plus className="h-4 w-4" /> Nova Conta</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Cadastrar Conta Bancária</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Banco</Label>
-                  <Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required />
-                </div>
-                <div>
-                  <Label>Código</Label>
-                  <Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="Ex: 001" />
-                </div>
+                <div><Label>Banco</Label><Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required /></div>
+                <div><Label>Código</Label><Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="001" /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Agência</Label>
-                  <Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} placeholder="0001" required />
-                </div>
-                <div>
-                  <Label>Conta</Label>
-                  <Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} placeholder="12345-6" required />
-                </div>
+                <div><Label>Agência</Label><Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required /></div>
+                <div><Label>Conta</Label><Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required /></div>
               </div>
-              <div>
-                <Label>Tipo de Conta</Label>
-                <Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="corrente">Conta Corrente</SelectItem>
-                    <SelectItem value="poupanca">Conta Poupança</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Nome do Titular</Label>
-                <Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required />
-              </div>
-              <div>
-                <Label>CPF/CNPJ do Titular</Label>
-                <Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required />
-              </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground">Cadastrar</Button>
+              <div><Label>Tipo</Label><Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="corrente">Corrente</SelectItem><SelectItem value="poupanca">Poupança</SelectItem></SelectContent></Select></div>
+              <div><Label>Titular</Label><Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required /></div>
+              <div><Label>CPF/CNPJ</Label><Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required /></div>
+              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>Cadastrar</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {accounts.length === 0 ? (
-          <div className="col-span-full bg-card rounded-xl border border-border p-12 text-center">
-            <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">Nenhuma conta bancária cadastrada</p>
-          </div>
-        ) : (
-          accounts.map((acc) => (
-            <div key={acc.id} className="stat-card">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold">{acc.bank_name}</h3>
-                  <p className="text-sm text-muted-foreground">{acc.bank_code ? `Cód: ${acc.bank_code}` : ""}</p>
-                </div>
-                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(acc.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="mt-3 space-y-1 text-sm">
-                <p>Ag: <span className="font-mono">{acc.agency}</span> | Conta: <span className="font-mono">{acc.account_number}</span></p>
-                <p className="capitalize">{acc.account_type === "corrente" ? "Conta Corrente" : "Conta Poupança"}</p>
-                <p className="text-muted-foreground">{acc.holder_name} — {acc.holder_document}</p>
-              </div>
+          <div className="col-span-full text-center py-12 text-white/20"><Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhuma conta cadastrada</p></div>
+        ) : accounts.map((acc) => (
+          <Panel key={acc.id}>
+            <div className="flex justify-between items-start">
+              <div><h3 className="font-bold text-white text-[14px]">{acc.bank_name}</h3>{acc.bank_code && <p className="text-[11px] text-white/30">Cód: {acc.bank_code}</p>}</div>
+              <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
-          ))
-        )}
+            <div className="mt-3 space-y-1 text-[13px] text-white/50">
+              <p>Ag: <span className="font-mono text-white/70">{acc.agency}</span> | Conta: <span className="font-mono text-white/70">{acc.account_number}</span></p>
+              <p className="capitalize">{acc.account_type === "corrente" ? "Conta Corrente" : "Poupança"}</p>
+              <p className="text-white/30">{acc.holder_name} — {acc.holder_document}</p>
+            </div>
+          </Panel>
+        ))}
       </div>
-    </div>
+    </PageShell>
   );
 }
