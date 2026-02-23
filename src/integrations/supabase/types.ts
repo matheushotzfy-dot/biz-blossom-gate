@@ -212,6 +212,7 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          checkout_session_id: string | null
           created_at: string
           customer_document: string | null
           customer_email: string | null
@@ -220,12 +221,16 @@ export type Database = {
           id: string
           net_amount: number
           payment_method: string | null
+          podpay_event_id: string | null
+          podpay_payment_id: string | null
           product_id: string | null
           status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           amount: number
+          checkout_session_id?: string | null
           created_at?: string
           customer_document?: string | null
           customer_email?: string | null
@@ -234,12 +239,16 @@ export type Database = {
           id?: string
           net_amount?: number
           payment_method?: string | null
+          podpay_event_id?: string | null
+          podpay_payment_id?: string | null
           product_id?: string | null
           status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          checkout_session_id?: string | null
           created_at?: string
           customer_document?: string | null
           customer_email?: string | null
@@ -248,8 +257,11 @@ export type Database = {
           id?: string
           net_amount?: number
           payment_method?: string | null
+          podpay_event_id?: string | null
+          podpay_payment_id?: string | null
           product_id?: string | null
           status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
