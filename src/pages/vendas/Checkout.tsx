@@ -12,7 +12,7 @@ export default function Checkout() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("products").select("*").eq("status", "active").order("created_at", { ascending: false })
+    supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setProducts(data); });
   }, [user]);
 
