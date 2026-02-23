@@ -18,6 +18,9 @@ import Checkout from "./pages/vendas/Checkout";
 import Cupons from "./pages/vendas/Cupons";
 import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
+import Conteudo from "./pages/vendas/Conteudo";
+import MemberArea from "./pages/membros/MemberArea";
+import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PublicCheckout from "./pages/PublicCheckout";
@@ -62,6 +65,9 @@ const App = () => (
             <Route path="/vendas/cupons" element={<Cupons />} />
             <Route path="/vendas/webhooks" element={<Webhooks />} />
             <Route path="/vendas/documentacao" element={<Documentacao />} />
+            <Route path="/vendas/conteudo" element={<Conteudo />} />
+            <Route path="/membros" element={<MemberArea />} />
+            <Route path="/membros/curso/:courseId" element={<CoursePage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
