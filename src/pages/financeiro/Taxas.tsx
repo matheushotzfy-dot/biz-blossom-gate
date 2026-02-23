@@ -15,20 +15,20 @@ export default function Taxas() {
     <PageShell>
       <PageTitle icon={<Percent className="h-6 w-6" />} title="Taxas e Tarifas" subtitle="Taxas aplicadas às suas transações" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         {fees.map((fee) => (
           <Panel key={fee.id}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
-                <Zap className="h-5 w-5" />
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
+                <Zap className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h3 className="font-bold text-foreground text-[14px]">{fee.name}</h3>
+              <h3 className="font-bold text-foreground text-[12px] md:text-[14px] leading-tight">{fee.name}</h3>
             </div>
-            <p className="text-[28px] font-extrabold text-foreground">
+            <p className="text-xl md:text-[28px] font-extrabold text-foreground">
               {fee.fee_type === "percentage" ? `${fee.value}%` : `R$ ${Number(fee.value).toFixed(2)}`}
             </p>
-            <p className="text-[12px] text-muted-foreground mt-2">{fee.description}</p>
-            <span className="inline-block mt-3 text-[10px] px-3 py-1 rounded-lg font-semibold capitalize text-muted-foreground bg-muted/50">
+            <p className="text-[11px] md:text-[12px] text-muted-foreground mt-1 md:mt-2 line-clamp-2">{fee.description}</p>
+            <span className="inline-block mt-2 md:mt-3 text-[9px] md:text-[10px] px-2 md:px-3 py-0.5 md:py-1 rounded-lg font-semibold capitalize text-muted-foreground bg-muted/50">
               {fee.fee_type === "percentage" ? "Percentual" : "Valor Fixo"}
             </span>
           </Panel>

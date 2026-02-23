@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle, DataTable } from "@/components/PageShell";
+import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const pixKeyTypeLabels: Record<string, string> = {
@@ -63,7 +63,7 @@ export default function Saques() {
         <PageTitle icon={<ArrowDownToLine className="h-6 w-6" />} title="Saques" subtitle="Solicite e acompanhe seus saques" />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> Novo Saque</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Novo</span> Saque</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Solicitar Saque</DialogTitle></DialogHeader>
@@ -77,9 +77,7 @@ export default function Saques() {
                 <Label>Chave PIX</Label>
                 {pixKeys.length > 0 ? (
                   <Select value={selectedPixKeyId || pixKeys[0]?.id} onValueChange={setSelectedPixKeyId}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Selecione a chave PIX" />
-                    </SelectTrigger>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione a chave PIX" /></SelectTrigger>
                     <SelectContent>
                       {pixKeys.map((pk) => (
                         <SelectItem key={pk.id} value={pk.id}>
@@ -102,25 +100,66 @@ export default function Saques() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Panel><p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Pendentes</p><p className="text-[22px] font-extrabold mt-2 text-warning">R$ {totalPending.toFixed(2)}</p></Panel>
-        <Panel><p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total de Saques</p><p className="text-[22px] font-extrabold mt-2 text-foreground">{withdrawals.length}</p></Panel>
+      <div className="grid grid-cols-2 gap-2 md:gap-3">
+        <Panel>
+          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Pendentes</p>
+          <p className="text-base md:text-[22px] font-extrabold mt-1 md:mt-2 text-warning truncate">R$ {totalPending.toFixed(2)}</p>
+        </Panel>
+        <Panel>
+          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total Saques</p>
+          <p className="text-base md:text-[22px] font-extrabold mt-1 md:mt-2 text-foreground">{withdrawals.length}</p>
+        </Panel>
       </div>
 
-      <DataTable headers={["ID", "Valor", "Taxa", "Líquido", "Status", "Data"]}>
+      {/* Desktop table */}
+      <div className="hidden md:block">
+        <Panel>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  {["ID", "Valor", "Taxa", "Líquido", "Status", "Data"].map((h) => (
+                    <th key={h} className="text-left p-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawals.length === 0 ? (
+                  <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Nenhum saque realizado</td></tr>
+                ) : withdrawals.map((w) => (
+                  <tr key={w.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{w.id.slice(0, 8)}</td>
+                    <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(w.amount).toFixed(2)}</td>
+                    <td className="p-3.5 font-semibold text-[13px] text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
+                    <td className="p-3.5 font-semibold text-[13px] text-primary">R$ {Number(w.net_amount).toFixed(2)}</td>
+                    <td className="p-3.5"><StatusBadge status={w.status} /></td>
+                    <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-2">
         {withdrawals.length === 0 ? (
-          <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Nenhum saque realizado</td></tr>
+          <Panel><p className="text-center text-muted-foreground text-sm py-4">Nenhum saque realizado</p></Panel>
         ) : withdrawals.map((w) => (
-          <tr key={w.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-            <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{w.id.slice(0, 8)}</td>
-            <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(w.amount).toFixed(2)}</td>
-            <td className="p-3.5 font-semibold text-[13px] text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
-            <td className="p-3.5 font-semibold text-[13px] text-primary">R$ {Number(w.net_amount).toFixed(2)}</td>
-            <td className="p-3.5"><StatusBadge status={w.status} /></td>
-            <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
-          </tr>
+          <Panel key={w.id}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-foreground font-bold text-base">R$ {Number(w.amount).toFixed(2)}</span>
+              <StatusBadge status={w.status} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-primary font-semibold text-sm">Líq. R$ {Number(w.net_amount).toFixed(2)}</span>
+              <span className="text-muted-foreground text-xs">{new Date(w.created_at).toLocaleDateString("pt-BR")}</span>
+            </div>
+            <p className="text-muted-foreground text-[11px] mt-1">Taxa: R$ {Number(w.fee_amount).toFixed(2)}</p>
+          </Panel>
         ))}
-      </DataTable>
+      </div>
     </PageShell>
   );
 }

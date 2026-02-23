@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Building2, Plus, Trash2, Key } from "lucide-react";
@@ -206,12 +206,12 @@ export default function DadosBancarios() {
       <Panel>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center gradient-primary">
+            <div className="h-9 w-9 rounded-xl flex items-center justify-center gradient-primary shrink-0">
               <Key className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground text-[15px]">Chaves PIX</h3>
-              <p className="text-[11px] text-muted-foreground">Até 3 chaves • Utilizadas para saques</p>
+              <h3 className="font-bold text-foreground text-[14px] md:text-[15px]">Chaves PIX</h3>
+              <p className="text-[10px] md:text-[11px] text-muted-foreground">Até 3 chaves • Utilizadas para saques</p>
             </div>
           </div>
           <span className="text-[12px] font-mono text-muted-foreground">{pixKeys.length}/3</span>
@@ -221,11 +221,11 @@ export default function DadosBancarios() {
           <div className="space-y-2 mb-4">
             {pixKeys.map((pk) => (
               <div key={pk.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
-                <div>
+                <div className="min-w-0">
                   <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">{pixTypeLabel(pk.key_type)}</p>
-                  <p className="font-mono text-foreground text-[14px] mt-0.5">{pk.key_value}</p>
+                  <p className="font-mono text-foreground text-[13px] md:text-[14px] mt-0.5 truncate">{pk.key_value}</p>
                 </div>
-                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeletePix(pk.id)}>
+                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={() => handleDeletePix(pk.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -235,7 +235,7 @@ export default function DadosBancarios() {
 
         {pixKeys.length < 3 && (
           <div className="space-y-3 pt-2 border-t border-border">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="text-muted-foreground text-[12px]">Tipo da Chave</Label>
                 <Select value={newPixType} onValueChange={(v) => { setNewPixType(v); setNewPixValue(""); setPixError(null); }}>
@@ -256,7 +256,7 @@ export default function DadosBancarios() {
               </div>
             </div>
             {pixError && <p className="text-[12px] text-destructive">{pixError}</p>}
-            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2 gradient-primary text-primary-foreground">
+            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2 gradient-primary text-primary-foreground w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Adicionar Chave
             </Button>
           </div>
@@ -268,7 +268,7 @@ export default function DadosBancarios() {
         <h3 className="text-muted-foreground text-[12px] uppercase tracking-widest font-semibold">Contas Bancárias</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> Nova Conta</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nova</span> Conta</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Cadastrar Conta Bancária</DialogTitle></DialogHeader>
@@ -290,19 +290,22 @@ export default function DadosBancarios() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
         {accounts.length === 0 ? (
           <div className="col-span-full text-center py-12 text-muted-foreground"><Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhuma conta cadastrada</p></div>
         ) : accounts.map((acc) => (
           <Panel key={acc.id}>
             <div className="flex justify-between items-start">
-              <div><h3 className="font-bold text-foreground text-[14px]">{acc.bank_name}</h3>{acc.bank_code && <p className="text-[11px] text-muted-foreground">Cód: {acc.bank_code}</p>}</div>
-              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
+              <div className="min-w-0">
+                <h3 className="font-bold text-foreground text-[14px]">{acc.bank_name}</h3>
+                {acc.bank_code && <p className="text-[11px] text-muted-foreground">Cód: {acc.bank_code}</p>}
+              </div>
+              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
             <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
               <p>Ag: <span className="font-mono text-foreground/70">{acc.agency}</span> | Conta: <span className="font-mono text-foreground/70">{acc.account_number}</span></p>
               <p className="capitalize">{acc.account_type === "corrente" ? "Conta Corrente" : "Poupança"}</p>
-              <p className="text-muted-foreground/60">{acc.holder_name} — {acc.holder_document}</p>
+              <p className="text-muted-foreground/60 truncate">{acc.holder_name} — {acc.holder_document}</p>
             </div>
           </Panel>
         ))}
