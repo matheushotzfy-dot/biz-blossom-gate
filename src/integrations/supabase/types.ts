@@ -284,6 +284,30 @@ export type Database = {
           },
         ]
       }
+      pix_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_type: string
+          key_value: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_type: string
+          key_value: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_type?: string
+          key_value?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           checkout_url: string | null
