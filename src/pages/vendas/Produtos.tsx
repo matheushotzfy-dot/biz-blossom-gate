@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Package, Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,14 +17,34 @@ export default function Produtos() {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", description: "", price: "" });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadProducts = async () => {
     if (!user) return;
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
     if (data) setProducts(data);
   };
 
   useEffect(() => { loadProducts(); }, [user]);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop();
+    const path = `${user!.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file);
+    if (error) {
+      toast.error("Erro ao enviar imagem");
+      return null;
+    }
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,26 +52,53 @@ export default function Produtos() {
     const price = parseFloat(form.price);
     if (isNaN(price) || price <= 0) { toast.error("Preço inválido"); return; }
 
-    if (editId) {
-      const { error } = await supabase.from("products").update({ name: form.name, description: form.description, price }).eq("id", editId);
-      if (error) { toast.error("Erro ao atualizar"); return; }
-      toast.success("Produto atualizado!");
-    } else {
-      const slug = crypto.randomUUID().slice(0, 8);
-      const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-      const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl });
-      if (error) { toast.error("Erro ao criar produto"); return; }
-      toast.success("Produto criado!");
+    setUploading(true);
+    let imageUrl: string | null = null;
+    if (imageFile) {
+      imageUrl = await uploadImage(imageFile);
     }
+
+    try {
+      if (editId) {
+        const updateData: Record<string, unknown> = { name: form.name, description: form.description, price };
+        if (imageUrl) updateData.image_url = imageUrl;
+        const { error } = await supabase.from("products").update(updateData).eq("id", editId);
+        if (error) { toast.error("Erro ao atualizar"); return; }
+        toast.success("Produto atualizado!");
+      } else {
+        const slug = crypto.randomUUID().slice(0, 8);
+        const checkoutUrl = `${window.location.origin}/pay/${slug}`;
+        const { error } = await supabase.from("products").insert({
+          name: form.name,
+          description: form.description,
+          price,
+          user_id: user.id,
+          checkout_url: checkoutUrl,
+          image_url: imageUrl,
+        });
+        if (error) { toast.error("Erro ao criar produto"); return; }
+        toast.success("Produto criado!");
+      }
+      resetForm();
+      loadProducts();
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const resetForm = () => {
     setOpen(false);
     setEditId(null);
     setForm({ name: "", description: "", price: "" });
-    loadProducts();
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleEdit = (p: Tables<"products">) => {
     setEditId(p.id);
     setForm({ name: p.name, description: p.description || "", price: String(p.price) });
+    setImagePreview(p.image_url || null);
+    setImageFile(null);
     setOpen(true);
   };
 
@@ -60,6 +107,17 @@ export default function Produtos() {
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Produto removido");
     loadProducts();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem deve ter no máximo 5MB");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   return (
@@ -71,13 +129,45 @@ export default function Produtos() {
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Cadastre e gerencie seus produtos</p>
         </div>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm({ name: "", description: "", price: "" }); } }}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground gap-2"><Plus className="h-4 w-4" /> Novo Produto</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{editId ? "Editar Produto" : "Novo Produto"}</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Image upload */}
+              <div>
+                <Label>Imagem do produto</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                {imagePreview ? (
+                  <div className="relative mt-2 rounded-xl overflow-hidden border border-border">
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setImageFile(null); setImagePreview(null); }}
+                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-2 w-full h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <ImagePlus className="h-8 w-8" />
+                    <span className="text-xs font-medium">Clique para adicionar imagem</span>
+                  </button>
+                )}
+              </div>
               <div>
                 <Label>Nome</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -90,7 +180,9 @@ export default function Produtos() {
                 <Label>Preço (R$)</Label>
                 <Input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
               </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground">{editId ? "Salvar" : "Criar Produto"}</Button>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={uploading}>
+                {uploading ? "Enviando..." : editId ? "Salvar" : "Criar Produto"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -105,6 +197,9 @@ export default function Produtos() {
         ) : (
           products.map((p) => (
             <div key={p.id} className="stat-card flex flex-col">
+              {p.image_url && (
+                <img src={p.image_url} alt={p.name} className="w-full h-36 object-cover rounded-xl mb-3" />
+              )}
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="font-semibold">{p.name}</h3>
