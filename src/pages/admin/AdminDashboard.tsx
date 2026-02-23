@@ -4,12 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Shield, Users, Package, DollarSign, ArrowDownToLine, CheckCircle2,
-  XCircle, AlertTriangle, TrendingUp, Activity, Eye, Settings,
-  BarChart3, Wallet, Globe, Zap, LogOut,
+  XCircle, AlertTriangle, TrendingUp, Activity, Settings,
+  BarChart3, Wallet, Zap, LogOut, Landmark, PiggyBank,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
 
   const loadData = async () => {
     const [txRes, pRes, prodRes, wRes] = await Promise.all([
-      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(500),
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("products").select("*"),
       supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(50),
@@ -53,11 +53,32 @@ export default function AdminDashboard() {
 
   if (loading) return <div className="min-h-screen bg-[hsl(220,25%,4%)] flex items-center justify-center"><div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
-  const approved = transactions.filter((t) => t.status === "approved");
-  const totalRevenue = approved.reduce((a, t) => a + Number(t.amount), 0);
+  const approved = transactions.filter((t) => t.status === "approved" || t.status === "completed");
+  const totalVolume = approved.reduce((a, t) => a + Number(t.amount), 0);
   const totalFees = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const totalNet = approved.reduce((a, t) => a + Number(t.net_amount), 0);
   const pendingWd = withdrawals.filter((w) => w.status === "pending");
   const pendingAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
+
+  // Per-client breakdown
+  const clientMap = new Map<string, { userId: string; volume: number; fees: number; net: number; txCount: number; name: string; email: string }>();
+  approved.forEach((t) => {
+    const existing = clientMap.get(t.user_id) || { userId: t.user_id, volume: 0, fees: 0, net: 0, txCount: 0, name: "", email: "" };
+    existing.volume += Number(t.amount);
+    existing.fees += Number(t.fee_amount);
+    existing.net += Number(t.net_amount);
+    existing.txCount += 1;
+    clientMap.set(t.user_id, existing);
+  });
+  // Enrich with profile data
+  clientMap.forEach((client, userId) => {
+    const profile = profiles.find((p) => p.user_id === userId);
+    if (profile) {
+      client.name = profile.full_name || "Sem nome";
+      client.email = profile.email || "";
+    }
+  });
+  const clientBreakdown = Array.from(clientMap.values()).sort((a, b) => b.volume - a.volume);
 
   const statusCounts = transactions.reduce((acc, t) => { acc[t.status] = (acc[t.status] || 0) + 1; return acc; }, {} as Record<string, number>);
   const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
@@ -66,21 +87,19 @@ export default function AdminDashboard() {
   const chartData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (6 - i));
     const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-    const dayTx = transactions.filter((t) => new Date(t.created_at).toDateString() === d.toDateString() && t.status === "approved");
-    return { name: dayStr, receita: dayTx.reduce((a, t) => a + Number(t.amount), 0), taxas: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0) };
+    const dayTx = approved.filter((t) => new Date(t.created_at).toDateString() === d.toDateString());
+    return {
+      name: dayStr,
+      volume: dayTx.reduce((a, t) => a + Number(t.amount), 0),
+      lucro: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0),
+    };
   });
 
   const handleWithdrawalAction = async (id: string, action: "approved" | "rejected") => {
     if (action === "approved") {
-      // Use PodPay cash-out via edge function
       toast.info("Processando saque via PIX...");
-      const { data, error } = await supabase.functions.invoke("podpay-cashout", {
-        body: { withdrawalId: id },
-      });
-      if (error || !data?.success) {
-        toast.error(data?.error || error?.message || "Erro ao processar saque");
-        return;
-      }
+      const { data, error } = await supabase.functions.invoke("podpay-cashout", { body: { withdrawalId: id } });
+      if (error || !data?.success) { toast.error(data?.error || error?.message || "Erro ao processar saque"); return; }
       toast.success("Saque aprovado e enviado via PIX!");
       await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {
@@ -104,6 +123,8 @@ export default function AdminDashboard() {
     await supabase.auth.signOut();
     navigate("/admin-matheus");
   };
+
+  const fmtCurrency = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
   return (
     <div className="min-h-screen bg-[hsl(220,25%,4%)] text-white">
@@ -135,19 +156,20 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-[1400px] mx-auto p-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <AdminStat icon={<Users className="h-5 w-5" />} label="Usuários" value={String(profiles.length)} color="from-blue-500/15 to-blue-500/5" iconColor="text-blue-400" />
-          <AdminStat icon={<Package className="h-5 w-5" />} label="Produtos" value={String(products.length)} color="from-violet-500/15 to-violet-500/5" iconColor="text-violet-400" />
-          <AdminStat icon={<DollarSign className="h-5 w-5" />} label="Receita Total" value={`R$ ${totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} sub={`R$ ${totalFees.toFixed(2)} em taxas`} color="from-emerald-500/15 to-emerald-500/5" iconColor="text-emerald-400" />
-          <AdminStat icon={<ArrowDownToLine className="h-5 w-5" />} label="Saques Pendentes" value={`R$ ${pendingAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} sub={`${pendingWd.length} solicitações`} color="from-amber-500/15 to-amber-500/5" iconColor="text-amber-400" alert={pendingWd.length > 0} />
+        {/* ===== GATEWAY KPI CARDS ===== */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <AdminStat icon={<DollarSign className="h-5 w-5" />} label="Volume Total (GMV)" value={fmtCurrency(totalVolume)} sub={`${approved.length} transações`} color="from-emerald-500/15 to-emerald-500/5" iconColor="text-emerald-400" />
+          <AdminStat icon={<PiggyBank className="h-5 w-5" />} label="Lucro da Gateway" value={fmtCurrency(totalFees)} sub="Taxas cobradas" color="from-amber-500/15 to-amber-500/5" iconColor="text-amber-400" highlight />
+          <AdminStat icon={<Landmark className="h-5 w-5" />} label="Distribuído (Sellers)" value={fmtCurrency(totalNet)} sub="Líquido dos vendedores" color="from-blue-500/15 to-blue-500/5" iconColor="text-blue-400" />
+          <AdminStat icon={<Users className="h-5 w-5" />} label="Vendedores" value={String(profiles.length)} sub={`${clientBreakdown.length} com vendas`} color="from-violet-500/15 to-violet-500/5" iconColor="text-violet-400" />
+          <AdminStat icon={<ArrowDownToLine className="h-5 w-5" />} label="Saques Pendentes" value={fmtCurrency(pendingAmount)} sub={`${pendingWd.length} solicitações`} color="from-red-500/15 to-red-500/5" iconColor="text-red-400" alert={pendingWd.length > 0} />
         </div>
 
-        {/* Charts */}
+        {/* ===== CHARTS ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 bg-[hsl(220,25%,7%)] rounded-2xl border border-[hsl(220,20%,10%)] p-6">
             <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-              <span className="w-1 h-5 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-full" /> Receita vs Taxas (7 dias)
+              <span className="w-1 h-5 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-full" /> Volume vs Lucro Gateway (7 dias)
             </h3>
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={chartData}>
@@ -156,13 +178,20 @@ export default function AdminDashboard() {
                     <stop offset="5%" stopColor="hsl(152,60%,45%)" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="hsl(152,60%,45%)" stopOpacity={0} />
                   </linearGradient>
+                  <linearGradient id="lucroGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(35,90%,55%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(35,90%,55%)" stopOpacity={0} />
+                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,20%,10%)" />
                 <XAxis dataKey="name" stroke="hsl(220,10%,35%)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="hsl(220,10%,35%)" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(220,25%,6%)", border: "1px solid hsl(220,20%,12%)", borderRadius: "12px", fontSize: "12px" }} />
-                <Area type="monotone" dataKey="receita" stroke="hsl(152,60%,45%)" fill="url(#adGrad)" strokeWidth={2} />
-                <Area type="monotone" dataKey="taxas" stroke="hsl(35,90%,55%)" fillOpacity={0.08} fill="hsl(35,90%,55%)" strokeWidth={2} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "hsl(220,25%,6%)", border: "1px solid hsl(220,20%,12%)", borderRadius: "12px", fontSize: "12px" }}
+                  formatter={(value: number, name: string) => [fmtCurrency(value), name === "volume" ? "Volume" : "Lucro Gateway"]}
+                />
+                <Area type="monotone" dataKey="volume" stroke="hsl(152,60%,45%)" fill="url(#adGrad)" strokeWidth={2} />
+                <Area type="monotone" dataKey="lucro" stroke="hsl(35,90%,55%)" fill="url(#lucroGrad)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -180,6 +209,63 @@ export default function AdminDashboard() {
             ) : (
               <div className="flex items-center justify-center h-[200px] text-sm text-zinc-500">Sem dados</div>
             )}
+          </div>
+        </div>
+
+        {/* ===== PER-CLIENT BREAKDOWN ===== */}
+        <div className="bg-[hsl(220,25%,7%)] rounded-2xl border border-[hsl(220,20%,10%)]">
+          <div className="p-5 border-b border-[hsl(220,20%,10%)]">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <span className="w-1 h-5 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-full" />
+              <TrendingUp className="h-4 w-4 text-emerald-400" /> Volume por Vendedor
+            </h3>
+            <p className="text-[10px] text-zinc-500 mt-1">Breakdown de faturamento, taxas cobradas e líquido por cliente</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[hsl(220,20%,10%)] text-zinc-500 text-xs">
+                  <th className="text-left p-4 font-medium">Vendedor</th>
+                  <th className="text-left p-4 font-medium">Transações</th>
+                  <th className="text-right p-4 font-medium">Volume (GMV)</th>
+                  <th className="text-right p-4 font-medium">Taxa Cobrada</th>
+                  <th className="text-right p-4 font-medium">Líquido Seller</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clientBreakdown.length === 0 ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-zinc-500 text-xs">Nenhuma venda registrada</td></tr>
+                ) : (
+                  clientBreakdown.map((c) => (
+                    <tr key={c.userId} className="border-b border-[hsl(220,20%,8%)] hover:bg-white/[0.02] transition-colors">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                            {(c.name || "?").charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold">{c.name || "Sem nome"}</p>
+                            <p className="text-[10px] text-zinc-500">{c.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4 text-xs font-medium">{c.txCount}</td>
+                      <td className="p-4 text-xs font-bold text-right">{fmtCurrency(c.volume)}</td>
+                      <td className="p-4 text-xs text-amber-400 font-bold text-right">{fmtCurrency(c.fees)}</td>
+                      <td className="p-4 text-xs text-emerald-400 font-bold text-right">{fmtCurrency(c.net)}</td>
+                    </tr>
+                  ))
+                )}
+                {clientBreakdown.length > 0 && (
+                  <tr className="border-t-2 border-[hsl(220,20%,14%)] bg-white/[0.02]">
+                    <td className="p-4 text-xs font-bold" colSpan={2}>TOTAL</td>
+                    <td className="p-4 text-xs font-bold text-right">{fmtCurrency(totalVolume)}</td>
+                    <td className="p-4 text-xs font-bold text-amber-400 text-right">{fmtCurrency(totalFees)}</td>
+                    <td className="p-4 text-xs font-bold text-emerald-400 text-right">{fmtCurrency(totalNet)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -282,16 +368,16 @@ export default function AdminDashboard() {
   );
 }
 
-function AdminStat({ icon, label, value, sub, color, iconColor, alert }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string; iconColor: string; alert?: boolean }) {
+function AdminStat({ icon, label, value, sub, color, iconColor, alert, highlight }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string; iconColor: string; alert?: boolean; highlight?: boolean }) {
   return (
-    <div className={`relative overflow-hidden bg-[hsl(220,25%,7%)] rounded-2xl border border-[hsl(220,20%,10%)] p-5 ${alert ? "border-amber-500/30" : ""}`}>
+    <div className={`relative overflow-hidden bg-[hsl(220,25%,7%)] rounded-2xl border p-5 ${alert ? "border-amber-500/30" : highlight ? "border-amber-500/20" : "border-[hsl(220,20%,10%)]"}`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${color}`} />
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium">{label}</span>
-          <div className={`h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center ${iconColor}`}>{icon}</div>
+          <div className={`h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center ${iconColor}`}>{icon}</div>
         </div>
-        <p className="text-xl font-bold">{value}</p>
+        <p className={`text-xl font-bold ${highlight ? "text-amber-400" : "text-white"}`}>{value}</p>
         {sub && <p className="text-[10px] text-zinc-500 mt-1">{sub}</p>}
       </div>
     </div>
