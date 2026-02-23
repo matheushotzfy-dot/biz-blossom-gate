@@ -6,10 +6,11 @@ import {
   AlertCircle, RefreshCw, ArrowDownRight, CircleDollarSign,
   ArrowUpRight, Eye, Target, Trophy, Zap,
   Activity, BarChart3, PieChart as PieChartIcon, ChevronDown, CalendarDays,
+  Lock, CreditCard, FileText, Receipt,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell,
+  PieChart, Pie, Cell,
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
@@ -75,7 +76,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[3]); // 7 dias default
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[0]); // Hoje por padrão
 
   useEffect(() => {
     if (!user?.id) return;
@@ -116,7 +117,7 @@ export default function Dashboard() {
   const totalFees = approvedTx.reduce((a, t) => a + Number(t.fee_amount), 0);
   const ticketMedio = approvedTx.length > 0 ? totalRevenue / approvedTx.length : 0;
   const pendingWd = withdrawals.filter((w) => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);
-  const conversionRate = filteredTx.length > 0 ? ((approvedTx.length / filteredTx.length) * 100).toFixed(1) : "0.0";
+  const conversionRate = filteredTx.length > 0 ? ((approvedTx.length / filteredTx.length) * 100).toFixed(1) : "0";
   const chargebacks = filteredTx.filter((t) => t.status === "chargeback").length;
   const refunds = filteredTx.filter((t) => t.status === "refunded").length;
 
@@ -124,7 +125,16 @@ export default function Dashboard() {
   const cardTx = approvedTx.filter((t) => t.payment_method === "credit_card");
   const boletoTx = approvedTx.filter((t) => t.payment_method === "boleto");
 
-  // Chart data based on period
+  const pixAll = filteredTx.filter((t) => t.payment_method === "pix");
+  const cardAll = filteredTx.filter((t) => t.payment_method === "credit_card");
+  const boletoAll = filteredTx.filter((t) => t.payment_method === "boleto");
+
+  const pixConv = pixAll.length > 0 ? ((pixTx.length / pixAll.length) * 100).toFixed(0) : "0";
+  const cardConv = cardAll.length > 0 ? ((cardTx.length / cardAll.length) * 100).toFixed(0) : "0";
+  const boletoConv = boletoAll.length > 0 ? ((boletoTx.length / boletoAll.length) * 100).toFixed(0) : "0";
+  const chargebackRate = filteredTx.length > 0 ? ((chargebacks / filteredTx.length) * 100).toFixed(2) : "0";
+
+  // Chart data
   const chartDays = Math.max(selectedPeriod.days || 1, 1);
   const chartData = useMemo(() => {
     const days = Math.min(chartDays, 30);
@@ -161,53 +171,42 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 8);
 
-  /* ---- Period label for header ---- */
-  const periodLabel = useMemo(() => {
-    const today = brasiliaToday();
-    if (selectedPeriod.days === 0) return today.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" });
-    if (selectedPeriod.days === 1) {
-      const y = new Date(today); y.setDate(y.getDate() - 1);
-      return y.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" });
-    }
-    const start = new Date(today); start.setDate(start.getDate() - selectedPeriod.days);
-    return `${start.toLocaleDateString("pt-BR", { day: "numeric", month: "short" })} — ${today.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}`;
-  }, [selectedPeriod]);
-
   return (
-    <div className="space-y-5 animate-fade-in relative">
-      {/* Ambient glow */}
+    <div className="space-y-6 animate-fade-in relative pb-8">
+      {/* Ambient effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px] animate-float" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-info/[0.03] rounded-full blur-[100px] animate-float" style={{ animationDelay: "3s" }} />
+        <div className="absolute top-[-20%] right-[-10%] w-[700px] h-[700px] bg-primary/[0.025] rounded-full blur-[150px] animate-float" />
+        <div className="absolute bottom-[-15%] left-[-8%] w-[500px] h-[500px] bg-info/[0.02] rounded-full blur-[130px] animate-float" style={{ animationDelay: "3s" }} />
+        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-primary/[0.015] rounded-full blur-[100px] animate-float" style={{ animationDelay: "5s" }} />
       </div>
 
       {/* ===== Header ===== */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground font-display">
-            Dashboard
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-display">
+            Olá, {profile?.full_name?.split(" ")[0] || "Usuário"} 👋
           </h1>
-          <p className="text-xs text-foreground/40 mt-1">Visão geral do seu negócio</p>
+          <p className="text-xs text-foreground/40 mt-0.5">Aqui está o resumo do seu negócio</p>
         </div>
 
         {/* Period Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2.5 glass-card hover:bg-white/[0.06] rounded-2xl px-4 py-2.5 text-xs font-semibold text-foreground/80 transition-all duration-300 border border-white/[0.06] hover:border-primary/20 group">
+            <button className="flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-primary/20 rounded-xl px-4 py-2.5 text-xs font-bold text-foreground/80 transition-all duration-300 group">
               <CalendarDays className="h-3.5 w-3.5 text-primary" />
-              <span>{selectedPeriod.label}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-foreground/40 group-hover:text-primary transition-colors" />
+              {selectedPeriod.label}
+              <ChevronDown className="h-3 w-3 text-foreground/30 group-hover:text-primary transition-colors" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[hsl(225,25%,6%)] border-white/[0.08] backdrop-blur-xl rounded-xl p-1 min-w-[160px]">
+          <DropdownMenuContent align="end" className="bg-[hsl(225,28%,7%)] border-white/[0.08] backdrop-blur-2xl rounded-xl p-1.5 min-w-[150px]">
             {PERIOD_OPTIONS.map((opt) => (
               <DropdownMenuItem
                 key={opt.label}
                 onClick={() => setSelectedPeriod(opt)}
-                className={`rounded-lg text-xs font-medium cursor-pointer px-3 py-2.5 transition-all ${
+                className={`rounded-lg text-xs font-semibold cursor-pointer px-3 py-2.5 transition-all ${
                   selectedPeriod.label === opt.label
                     ? "bg-primary/10 text-primary"
-                    : "text-foreground/60 hover:text-foreground hover:bg-white/[0.04]"
+                    : "text-foreground/50 hover:text-foreground hover:bg-white/[0.05]"
                 }`}
               >
                 {opt.label}
@@ -217,291 +216,280 @@ export default function Dashboard() {
         </DropdownMenu>
       </div>
 
-      {/* Date Range Indicator */}
-      <div className="flex items-center gap-2 text-[11px] text-foreground/40">
-        <Clock className="h-3 w-3 text-primary/60" />
-        <span>{periodLabel}</span>
-      </div>
-
-      {/* ===== Milestone ===== */}
-      <div className="glass-card rounded-2xl p-5 relative overflow-hidden border border-white/[0.04]">
-        <div className="absolute inset-0 dot-grid opacity-20" />
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-[0_0_20px_hsl(152,68%,46%,0.15)]">
-                <Trophy className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <span className="text-sm font-bold text-foreground">Premiações</span>
-                <p className="text-[10px] text-foreground/40">Próximo nível: {milestone.next.label}</p>
-              </div>
-            </div>
-            <span className="text-sm font-extrabold text-primary font-display">
-              {fmtCurrency(allTimeRevenue)}
-            </span>
-          </div>
-          <div className="w-full bg-white/[0.04] rounded-full h-2.5 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-400 to-primary transition-all duration-1000 shadow-[0_0_20px_hsl(152,68%,46%,0.5)]"
-              style={{ width: `${Math.max(milestone.pct, 2)}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-3">
-            {MILESTONES.map((m) => (
-              <div key={m.label} className="flex flex-col items-center">
-                <div className={`h-2 w-2 rounded-full transition-all ${
-                  allTimeRevenue >= m.value
-                    ? "bg-primary shadow-[0_0_8px_hsl(152,68%,46%,0.6)]"
-                    : "bg-white/10"
-                }`} />
-                <span className={`text-[9px] mt-1 font-semibold ${
-                  allTimeRevenue >= m.value ? "text-primary" : "text-foreground/30"
-                }`}>
-                  {m.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ===== KPI Cards ===== */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* ===== Top KPI Row ===== */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
-          label="Total em Vendas"
+          label="Receita bruta"
           value={fmtCurrency(totalRevenue)}
-          subtitle={`${approvedTx.length} vendas aprovadas`}
-          icon={<DollarSign className="h-5 w-5" />}
-          accentClass="from-primary/20 to-primary/5"
+          sub={`${approvedTx.length} vendas`}
+          icon={<DollarSign className="h-4 w-4" />}
+          iconBg="bg-primary/10 text-primary"
+          trend={approvedTx.length > 0 ? "up" : undefined}
         />
         <KpiCard
-          label="Ticket Médio"
-          value={fmtCurrency(ticketMedio)}
-          subtitle={approvedTx.length > 0 ? "média por venda" : "sem vendas"}
-          icon={<TrendingUp className="h-5 w-5" />}
-          accentClass="from-info/20 to-info/5"
-        />
-        <KpiCard
-          label="Pedidos Pagos"
-          value={String(approvedTx.length)}
-          subtitle={`de ${filteredTx.length} transações`}
-          icon={<ShoppingCart className="h-5 w-5" />}
-          accentClass="from-chart-3/20 to-chart-3/5"
-        />
-        <KpiCard
-          label="Saldo Disponível"
+          label="Receita líquida"
           value={fmtCurrency(totalNet)}
-          subtitle={pendingWd > 0 ? `${fmtCurrency(pendingWd)} pendente` : "Pronto para saque"}
-          icon={<Wallet className="h-5 w-5" />}
-          accentClass="from-warning/20 to-warning/5"
-          action={{ label: "Solicitar Saque", href: "/financeiro/saques" }}
+          sub={`- ${fmtCurrency(totalFees)} taxas`}
+          icon={<TrendingUp className="h-4 w-4" />}
+          iconBg="bg-info/10 text-info"
+        />
+        <KpiCard
+          label="Ticket médio"
+          value={fmtCurrency(ticketMedio)}
+          sub={approvedTx.length > 0 ? "por venda" : "—"}
+          icon={<Receipt className="h-4 w-4" />}
+          iconBg="bg-chart-3/10 text-chart-3"
+        />
+        <KpiCard
+          label="Saldo disponível"
+          value={fmtCurrency(totalNet)}
+          sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : "Disponível para saque"}
+          icon={<Wallet className="h-4 w-4" />}
+          iconBg="bg-warning/10 text-warning"
+          action={{ label: "Sacar", href: "/financeiro/saques" }}
         />
       </div>
 
-      {/* ===== Payment Methods ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <MethodCard label="PIX" value={pixTx.reduce((a, t) => a + Number(t.amount), 0)} count={pixTx.length} total={filteredTx.filter((t) => t.payment_method === "pix").length} emoji="⚡" />
-        <MethodCard label="Cartão" value={cardTx.reduce((a, t) => a + Number(t.amount), 0)} count={cardTx.length} total={filteredTx.filter((t) => t.payment_method === "credit_card").length} emoji="💳" />
-        <MethodCard label="Boleto" value={boletoTx.reduce((a, t) => a + Number(t.amount), 0)} count={boletoTx.length} total={filteredTx.filter((t) => t.payment_method === "boleto").length} emoji="📄" />
-      </div>
-
-      {/* ===== Middle Row ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        {/* Financial Summary */}
+      {/* ===== Progress & Conversion Row ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Progress Card - inspired by Screenshot_29 */}
         <GlassPanel>
-          <SectionTitle icon={<CircleDollarSign className="h-4 w-4 text-primary" />}>Resumo Financeiro</SectionTitle>
-          <div className="grid grid-cols-2 gap-2.5 mt-4">
-            <MetricTile icon={<RefreshCw className="h-3.5 w-3.5 text-primary" />} label="Conversão" value={`${conversionRate}%`} />
-            <MetricTile icon={<AlertCircle className="h-3.5 w-3.5 text-warning" />} label="Pre-Chargeback" value="0" />
-            <MetricTile icon={<ArrowDownRight className="h-3.5 w-3.5 text-destructive" />} label="Chargeback" value={String(chargebacks)} />
-            <MetricTile icon={<CircleDollarSign className="h-3.5 w-3.5 text-info" />} label="Reembolsos" value={String(refunds)} />
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-1 h-5 rounded-full bg-primary" />
+            <h3 className="text-sm font-bold text-foreground">Progresso</h3>
           </div>
-        </GlassPanel>
 
-        {/* Progress */}
-        <GlassPanel>
-          <SectionTitle icon={<Target className="h-4 w-4 text-primary" />}>Progresso</SectionTitle>
-          <div className="mt-4 space-y-3">
-            <div className="flex justify-between text-xs text-foreground/50">
-              <span>Faturado</span><span>Hoje</span>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1 mb-5">
+            <div>
+              <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">Total faturado</p>
+              <p className="text-2xl font-extrabold text-foreground font-display mt-0.5">{fmtCurrency(allTimeRevenue)}</p>
             </div>
-            <div className="flex justify-between">
-              <span className="text-xl font-extrabold text-foreground font-display">{fmtCurrency(allTimeRevenue)}</span>
-              <span className="text-xl font-extrabold text-primary font-display">{fmtCurrency(todayRevenue)}</span>
+            <div className="text-right">
+              <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">Vendas diárias</p>
+              <p className="text-2xl font-extrabold text-primary font-display mt-0.5">{fmtCurrency(todayRevenue)} <span className="text-sm font-bold text-primary/70">/ dia</span></p>
             </div>
-            <div className="w-full bg-white/[0.04] rounded-full h-2 overflow-hidden">
+            <div>
+              <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold mt-3">Falta para</p>
+              <p className="text-lg font-bold text-foreground/70 font-display">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold mt-3">Meta atual</p>
+              <p className="text-lg font-bold text-primary font-display">{milestone.next.label}</p>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="relative">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-bold text-foreground/50">Início</span>
+              </div>
+              <span className="text-[10px] text-foreground/40 italic">{milestone.pct.toFixed(0)}% do caminho até a meta</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-foreground/50">{milestone.next.label}</span>
+                <Lock className="h-3.5 w-3.5 text-foreground/30" />
+              </div>
+            </div>
+            <div className="w-full bg-white/[0.06] rounded-full h-3 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-700 shadow-[0_0_10px_hsl(152,68%,46%,0.4)]"
-                style={{ width: `${Math.max(milestone.pct, 1)}%` }}
-              />
+                className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-400 to-primary transition-all duration-1000 relative"
+                style={{ width: `${Math.max(milestone.pct, 2)}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 animate-shimmer" />
+              </div>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-foreground/40">Falta {fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</span>
-              <span className="text-primary font-bold">{milestone.pct.toFixed(0)}%</span>
+            <div className="flex justify-between mt-2">
+              <span className="text-[10px] text-foreground/30">PRÓXIMA META</span>
+              <span className="text-sm font-extrabold text-foreground font-display">
+                {MILESTONES[milestone.tier + 2]?.label || "🏆"}
+              </span>
             </div>
           </div>
         </GlassPanel>
 
-        {/* Monitoring */}
+        {/* Conversion Card - inspired by Screenshot_27 */}
         <GlassPanel>
-          <div className="flex items-center justify-between mb-4">
-            <SectionTitle icon={<Zap className="h-4 w-4 text-primary" />}>Monitoramento</SectionTitle>
-            <span className="flex items-center gap-1.5 text-[10px] text-primary font-semibold">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(152,68%,46%,0.8)]" />
-              Online
-            </span>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <RefreshCw className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Conversão</h3>
+              <p className="text-[10px] text-foreground/40">Relação entre pagamentos gerados e concluídos.</p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-y-5">
-            <MonitorItem label="Tempo Médio" value="0 ms" />
-            <MonitorItem label="Conversão" value={`${conversionRate}%`} accent />
-            <MonitorItem label="API/min" value="0.0" />
-            <MonitorItem label="Webhook" value="100%" accent />
+
+          <div className="space-y-4">
+            <ConversionRow icon={<TrendingUp className="h-4 w-4" />} label="Conversão Geral" value={`${conversionRate}%`} pct={Number(conversionRate)} color="primary" />
+            <ConversionRow icon={<Zap className="h-4 w-4" />} label="Pix" value={`${pixConv}%`} pct={Number(pixConv)} color="primary" />
+            <ConversionRow icon={<CreditCard className="h-4 w-4" />} label="Cartão de Crédito" value={`${cardConv}%`} pct={Number(cardConv)} color="info" />
+            <ConversionRow icon={<FileText className="h-4 w-4" />} label="Boleto" value={`${boletoConv}%`} pct={Number(boletoConv)} color="warning" />
+            <ConversionRow icon={<AlertCircle className="h-4 w-4" />} label="Taxa de estorno" value={`${chargebackRate}%`} pct={Number(chargebackRate)} color="destructive" />
           </div>
         </GlassPanel>
       </div>
 
-      {/* ===== Bottom Row: Chart + Pie + Activity ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+      {/* ===== Chart + Financial Summary ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Area Chart */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-7">
           <GlassPanel>
-            <SectionTitle icon={<BarChart3 className="h-4 w-4 text-primary" />}>
-              Vendas ({selectedPeriod.label})
-            </SectionTitle>
-            <div className="mt-4">
-              <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(225, 20%, 12%)" vertical={false} />
-                  <XAxis dataKey="name" stroke="hsl(225, 10%, 30%)" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(225, 10%, 30%)" fontSize={10} tickFormatter={(v) => `${v}`} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(225, 25%, 6%)",
-                      border: "1px solid hsl(225, 20%, 12%)",
-                      borderRadius: "12px",
-                      fontSize: "11px",
-                      boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-                      color: "white",
-                    }}
-                    formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]}
-                    labelStyle={{ color: "hsl(0, 0%, 50%)" }}
-                  />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(152, 68%, 46%)" strokeWidth={2} fill="url(#areaGrad)" dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-5 rounded-full bg-primary" />
+                <h3 className="text-sm font-bold text-foreground">Vendas ({selectedPeriod.label})</h3>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,68%,46%,0.8)]" />
+                Tempo real
+              </div>
             </div>
+            <ResponsiveContainer width="100%" height={240}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(225, 20%, 10%)" vertical={false} />
+                <XAxis dataKey="name" stroke="hsl(225, 10%, 25%)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(225, 10%, 25%)" fontSize={10} tickFormatter={(v) => `${v}`} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(225, 28%, 7%)",
+                    border: "1px solid hsl(225, 20%, 14%)",
+                    borderRadius: "12px",
+                    fontSize: "11px",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                    color: "white",
+                  }}
+                  formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]}
+                  labelStyle={{ color: "hsl(0, 0%, 45%)" }}
+                />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(152, 68%, 46%)" strokeWidth={2.5} fill="url(#areaGrad)" dot={false} activeDot={{ r: 4, fill: "hsl(152, 68%, 46%)", stroke: "hsl(225, 28%, 7%)", strokeWidth: 2 }} />
+              </AreaChart>
+            </ResponsiveContainer>
           </GlassPanel>
         </div>
 
-        {/* Pie Chart */}
-        <div className="lg:col-span-3">
+        {/* Financial Summary + Status */}
+        <div className="lg:col-span-5 space-y-4">
+          {/* Quick stats */}
           <GlassPanel>
-            <SectionTitle icon={<PieChartIcon className="h-4 w-4 text-primary" />}>Status</SectionTitle>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 rounded-full bg-primary" />
+              <h3 className="text-sm font-bold text-foreground">Resumo Financeiro</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <MiniStat label="Receita Bruta" value={fmtCurrency(totalRevenue)} accent />
+              <MiniStat label="Taxas" value={`- ${fmtCurrency(totalFees)}`} />
+              <MiniStat label="Chargebacks" value={String(chargebacks)} />
+              <MiniStat label="Reembolsos" value={String(refunds)} />
+            </div>
+          </GlassPanel>
+
+          {/* Status Pie */}
+          <GlassPanel>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1 h-5 rounded-full bg-primary" />
+              <h3 className="text-sm font-bold text-foreground">Status</h3>
+            </div>
             {pieData.length > 0 ? (
-              <>
-                <ResponsiveContainer width="100%" height={170}>
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width={120} height={120}>
                   <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={68} dataKey="value" paddingAngle={4} strokeWidth={0}>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={36} outerRadius={56} dataKey="value" paddingAngle={3} strokeWidth={0}>
                       {pieData.map((_, i) => (
                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(225, 25%, 6%)",
-                        border: "1px solid hsl(225, 20%, 12%)",
-                        borderRadius: "12px",
-                        fontSize: "11px",
-                        color: "white",
-                      }}
-                    />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="flex flex-wrap gap-2 justify-center mt-1">
-                  {pieData.map((d, i) => (
-                    <div key={d.name} className="flex items-center gap-1.5 text-[10px]">
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                      <span className="capitalize text-foreground/50">{d.name}</span>
-                      <span className="font-bold text-foreground">{d.value}</span>
-                    </div>
-                  ))}
+                <div className="flex-1 space-y-1.5">
+                  {pieData.map((d, i) => {
+                    const statusLabels: Record<string, string> = { completed: "Aprovado", pending: "Pendente", failed: "Falhou", refunded: "Reembolso", chargeback: "Chargeback" };
+                    return (
+                      <div key={d.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                          <span className="text-xs text-foreground/60 font-medium">{statusLabels[d.name] || d.name}</span>
+                        </div>
+                        <span className="text-xs font-bold text-foreground">{d.value}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-[170px] text-sm text-foreground/30">Sem dados</div>
+              <div className="flex items-center justify-center h-[100px] text-xs text-foreground/30">Sem dados</div>
             )}
           </GlassPanel>
         </div>
-
-        {/* Activity Feed */}
-        <div className="lg:col-span-4">
-          <GlassPanel>
-            <div className="flex items-center justify-between mb-4">
-              <SectionTitle icon={<Activity className="h-4 w-4 text-primary" />}>Atividade</SectionTitle>
-              <div className="flex items-center gap-1.5 text-[10px] text-primary font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,68%,46%,0.8)]" />
-                Ao vivo
-              </div>
-            </div>
-            <div className="space-y-0.5 max-h-[240px] overflow-y-auto pr-1 custom-scrollbar">
-              {recentActivity.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 text-foreground/30">
-                  <Eye className="h-6 w-6 mb-2 opacity-30" />
-                  <p className="text-xs">Nenhuma atividade</p>
-                </div>
-              ) : (
-                recentActivity.map((item) => {
-                  const isTx = "payment_method" in item;
-                  const statusMap: Record<string, { color: string; label: string }> = {
-                    completed: { color: "text-primary", label: "Aprovado" },
-                    approved: { color: "text-primary", label: "Aprovado" },
-                    pending: { color: "text-warning", label: "Pendente" },
-                    paid: { color: "text-primary", label: "Pago" },
-                    requested: { color: "text-warning", label: "Solicitado" },
-                    failed: { color: "text-destructive", label: "Falhou" },
-                    rejected: { color: "text-destructive", label: "Recusado" },
-                    refunded: { color: "text-info", label: "Reembolso" },
-                    chargeback: { color: "text-destructive", label: "Chargeback" },
-                  };
-                  const st = statusMap[item.status] || { color: "text-foreground/40", label: item.status };
-                  return (
-                    <div key={item.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-white/[0.03] transition-colors border-b border-white/[0.03] last:border-0">
-                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${isTx ? "bg-primary/10 text-primary" : "bg-info/10 text-info"}`}>
-                        {isTx ? <DollarSign className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
-                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${st.color} ${st.color.replace("text-", "bg-")}/10`}>
-                            {st.label}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-foreground/40 truncate mt-0.5">
-                          {isTx ? (item as Tables<"transactions">).customer_name || "Nova transação" : "Solicitação de saque"}
-                        </p>
-                      </div>
-                      <span className="text-[10px] text-foreground/30 whitespace-nowrap">{formatRelativeTime(item.created_at)}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            <div className="flex gap-2 mt-3 pt-3 border-t border-white/[0.04]">
-              <Link to="/financeiro/extrato" className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
-                Ver Transações <ArrowUpRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </GlassPanel>
-        </div>
       </div>
+
+      {/* ===== Activity Feed ===== */}
+      <GlassPanel>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 rounded-full bg-primary" />
+            <h3 className="text-sm font-bold text-foreground">Atividade Recente</h3>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,68%,46%,0.8)]" />
+              Ao vivo
+            </div>
+            <Link to="/financeiro/extrato" className="text-[10px] text-foreground/40 hover:text-primary font-semibold flex items-center gap-1 transition-colors">
+              Ver tudo <ArrowUpRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {recentActivity.length === 0 ? (
+            <div className="col-span-2 flex flex-col items-center justify-center py-12 text-foreground/20">
+              <Eye className="h-8 w-8 mb-3" />
+              <p className="text-xs font-medium">Nenhuma atividade recente</p>
+            </div>
+          ) : (
+            recentActivity.map((item) => {
+              const isTx = "payment_method" in item;
+              const statusMap: Record<string, { color: string; label: string }> = {
+                completed: { color: "text-primary bg-primary/10", label: "Aprovado" },
+                approved: { color: "text-primary bg-primary/10", label: "Aprovado" },
+                pending: { color: "text-warning bg-warning/10", label: "Pendente" },
+                paid: { color: "text-primary bg-primary/10", label: "Pago" },
+                requested: { color: "text-warning bg-warning/10", label: "Solicitado" },
+                failed: { color: "text-destructive bg-destructive/10", label: "Falhou" },
+                rejected: { color: "text-destructive bg-destructive/10", label: "Recusado" },
+                refunded: { color: "text-info bg-info/10", label: "Reembolso" },
+                chargeback: { color: "text-destructive bg-destructive/10", label: "Chargeback" },
+              };
+              const st = statusMap[item.status] || { color: "text-foreground/40 bg-white/5", label: item.status };
+              return (
+                <div key={item.id} className="flex items-center gap-3 py-3 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300 border border-white/[0.03]">
+                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${isTx ? "bg-primary/10 text-primary" : "bg-info/10 text-info"}`}>
+                    {isTx ? <DollarSign className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${st.color}`}>
+                        {st.label}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-foreground/35 truncate mt-0.5">
+                      {isTx ? (item as Tables<"transactions">).customer_name || "Transação" : "Saque"}
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-foreground/25 whitespace-nowrap font-medium">{formatRelativeTime(item.created_at)}</span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </GlassPanel>
     </div>
   );
 }
@@ -510,40 +498,34 @@ export default function Dashboard() {
 
 function GlassPanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="glass-card rounded-2xl p-5 relative overflow-hidden border border-white/[0.04] hover:border-white/[0.06] transition-colors duration-500">
+    <div className="bg-white/[0.02] backdrop-blur-2xl rounded-2xl p-5 relative overflow-hidden border border-white/[0.05] hover:border-white/[0.08] transition-all duration-500">
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       <div className="relative">{children}</div>
     </div>
   );
 }
 
-function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
-  return (
-    <h3 className="text-sm font-bold flex items-center gap-2 text-foreground">
-      {icon}
-      {children}
-    </h3>
-  );
-}
-
-function KpiCard({ label, value, subtitle, icon, accentClass, action }: {
-  label: string; value: string; subtitle?: string; icon: React.ReactNode; accentClass: string; action?: { label: string; href: string };
+function KpiCard({ label, value, sub, icon, iconBg, trend, action }: {
+  label: string; value: string; sub?: string; icon: React.ReactNode; iconBg: string; trend?: "up" | "down"; action?: { label: string; href: string };
 }) {
   return (
-    <div className="glass-card rounded-2xl p-5 group relative overflow-hidden border border-white/[0.04] hover:border-primary/10 transition-all duration-500">
-      <div className={`absolute -top-10 -right-10 w-28 h-28 bg-gradient-to-br ${accentClass} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+    <div className="bg-white/[0.02] backdrop-blur-2xl rounded-2xl p-5 group relative overflow-hidden border border-white/[0.05] hover:border-primary/15 transition-all duration-500 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_-10px_hsl(152,68%,46%,0.15)]">
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      <div className="absolute -top-16 -right-16 w-32 h-32 bg-primary/[0.03] rounded-full blur-2xl group-hover:bg-primary/[0.06] transition-all duration-700" />
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-wider">{label}</h4>
-          <div className="h-9 w-9 rounded-xl bg-white/[0.04] backdrop-blur-sm flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors duration-500">
+          <p className="text-[10px] font-bold text-foreground/35 uppercase tracking-wider">{label}</p>
+          <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${iconBg} transition-all duration-300`}>
             {icon}
           </div>
         </div>
-        <p className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground font-display">{value}</p>
-        {subtitle && <p className="text-[10px] text-foreground/40 mt-1.5">{subtitle}</p>}
+        <p className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground font-display">{value}</p>
+        <div className="flex items-center justify-between mt-1.5">
+          <p className="text-[10px] text-foreground/35">{sub}</p>
+          {trend === "up" && <ArrowUpRight className="h-3.5 w-3.5 text-primary" />}
+        </div>
         {action && (
-          <Link to={action.href} className="text-xs text-primary font-bold mt-3 inline-flex items-center gap-1.5 hover:gap-2.5 transition-all duration-300">
+          <Link to={action.href} className="text-[10px] text-primary font-bold mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all duration-300">
             {action.label} <ArrowUpRight className="h-3 w-3" />
           </Link>
         )}
@@ -552,38 +534,45 @@ function KpiCard({ label, value, subtitle, icon, accentClass, action }: {
   );
 }
 
-function MethodCard({ label, value, count, total, emoji }: { label: string; value: number; count: number; total: number; emoji: string }) {
-  const convRate = total > 0 ? ((count / total) * 100).toFixed(0) : "0";
+function ConversionRow({ icon, label, value, pct, color }: { icon: React.ReactNode; label: string; value: string; pct: number; color: string }) {
+  const colorMap: Record<string, string> = {
+    primary: "bg-primary",
+    info: "bg-info",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
+  };
+  const iconBgMap: Record<string, string> = {
+    primary: "bg-primary/10 text-primary",
+    info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning",
+    destructive: "bg-destructive/10 text-destructive",
+  };
   return (
-    <div className="glass-card rounded-2xl p-5 group border border-white/[0.04] hover:border-white/[0.06] transition-colors duration-500">
-      <div className="flex items-center gap-3 mb-3">
-        <span className="text-lg">{emoji}</span>
-        <h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-wider">{label}</h4>
+    <div className="flex items-center gap-3">
+      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${iconBgMap[color] || iconBgMap.primary}`}>
+        {icon}
       </div>
-      <p className="text-xl font-extrabold text-foreground font-display">{fmtCurrency(value)}</p>
-      <div className="flex items-center gap-2 mt-2">
-        <span className="text-[10px] text-foreground/40">{count}/{total} pedidos</span>
-        <span className="text-[10px] text-primary font-bold">{convRate}%</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-semibold text-foreground/70">{label}</span>
+          <span className="text-xs font-bold text-foreground">{value}</span>
+        </div>
+        <div className="w-full bg-white/[0.06] rounded-full h-1.5 overflow-hidden">
+          <div
+            className={`h-full rounded-full ${colorMap[color] || colorMap.primary} transition-all duration-700`}
+            style={{ width: `${Math.max(pct, 0)}%` }}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
-function MetricTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function MiniStat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="text-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
-      <div className="flex justify-center mb-1.5">{icon}</div>
-      <p className="text-[9px] text-foreground/40 uppercase tracking-wider font-semibold">{label}</p>
-      <p className="text-lg font-bold text-foreground mt-0.5">{value}</p>
-    </div>
-  );
-}
-
-function MonitorItem({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div>
-      <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">{label}</p>
-      <p className={`text-lg font-bold mt-0.5 ${accent ? "text-primary" : "text-foreground"}`}>{value}</p>
+    <div className="bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
+      <p className="text-[9px] text-foreground/35 uppercase tracking-wider font-bold">{label}</p>
+      <p className={`text-base font-bold mt-1 ${accent ? "text-primary" : "text-foreground"} font-display`}>{value}</p>
     </div>
   );
 }
