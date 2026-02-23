@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-
+import { QRCodeSVG } from "qrcode.react";
 type Product = {
   id: string;
   name: string;
@@ -146,6 +146,8 @@ export default function PublicCheckout() {
       setTransactionId(result.transactionId);
 
       if (data.resumed) {
+        if (result.pix) setPixData(result.pix);
+        if (result.boleto) setBoletoData(result.boleto);
         setCheckoutState("pending");
         toast.info("Retomando pagamento pendente...");
         return;
@@ -316,21 +318,21 @@ export default function PublicCheckout() {
               <h3 className="text-sm font-semibold flex items-center gap-2 mb-5 justify-center text-emerald-400">
                 <QrCode className="h-4 w-4" /> Escaneie o QR Code PIX
               </h3>
-              {pixData.qrCode && (
+              {(pixData.qrcode || pixData.qrCode || pixData.qrCodeText) && (
                 <div className="flex justify-center mb-5">
                   <div className="bg-white p-4 rounded-2xl shadow-2xl">
-                    <img src={`data:image/png;base64,${pixData.qrCode}`} alt="QR Code PIX" className="h-52 w-52" />
+                    <QRCodeSVG value={pixData.qrcode || pixData.qrCodeText || pixData.qrCode} size={208} />
                   </div>
                 </div>
               )}
               <p className="text-xs text-white/30 mb-4 flex items-center gap-1 justify-center">
                 <Clock className="h-3 w-3" /> Expira em 30 minutos
               </p>
-              {pixData.qrCodeText && (
+              {(pixData.qrcode || pixData.qrCodeText) && (
                 <Button
                   type="button"
                   className="w-full gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-white rounded-2xl h-12 transition-all"
-                  onClick={() => { navigator.clipboard.writeText(pixData.qrCodeText); toast.success("Código copiado!"); }}
+                  onClick={() => { navigator.clipboard.writeText(pixData.qrcode || pixData.qrCodeText); toast.success("Código copiado!"); }}
                 >
                   <Copy className="h-4 w-4" /> Copiar código PIX
                 </Button>
