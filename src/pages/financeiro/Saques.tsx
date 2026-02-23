@@ -20,16 +20,17 @@ export default function Saques() {
   const [selectedAccount, setSelectedAccount] = useState("");
 
   const loadData = async () => {
-    if (!user) return;
+    if (!user?.id) return;
+    const uid = user.id;
     const [wRes, baRes] = await Promise.all([
-      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }),
-      supabase.from("bank_accounts").select("*"),
+      supabase.from("withdrawals").select("*").eq("user_id", uid).order("created_at", { ascending: false }),
+      supabase.from("bank_accounts").select("*").eq("user_id", uid),
     ]);
     if (wRes.data) setWithdrawals(wRes.data);
     if (baRes.data) setBankAccounts(baRes.data);
   };
 
-  useEffect(() => { loadData(); }, [user]);
+  useEffect(() => { loadData(); }, [user?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

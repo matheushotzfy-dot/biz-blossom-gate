@@ -10,10 +10,11 @@ export default function Vendas() {
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("transactions").select("*").order("created_at", { ascending: false })
+    if (!user?.id) return;
+    const uid = user.id;
+    supabase.from("transactions").select("*").eq("user_id", uid).order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setTransactions(data); });
-  }, [user]);
+  }, [user?.id]);
 
   const approved = transactions.filter((t) => t.status === "approved");
   const totalSales = approved.reduce((a, t) => a + Number(t.amount), 0);
