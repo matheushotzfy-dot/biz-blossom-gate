@@ -1,33 +1,39 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowDownToLine, Plus } from "lucide-react";
+import { ArrowDownToLine, Plus, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { PageShell, Panel, PageTitle, DataTable } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
+const pixKeyTypes: Record<string, string> = {
+  cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Chave Aleatória", phone: "Telefone", random: "Aleatória",
+};
+
 export default function Saques() {
   const { user } = useAuth();
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
-  const [bankAccounts, setBankAccounts] = useState<Tables<"bank_accounts">[]>([]);
+  const [pixKey, setPixKey] = useState<string | null>(null);
+  const [pixKeyType, setPixKeyType] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
-  const [selectedAccount, setSelectedAccount] = useState("");
 
   const loadData = async () => {
     if (!user?.id) return;
-    const [wRes, baRes] = await Promise.all([
+    const [wRes, pRes] = await Promise.all([
       supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("bank_accounts").select("*").eq("user_id", user.id),
+      supabase.from("profiles").select("pix_key, pix_key_type").eq("user_id", user.id).single(),
     ]);
     if (wRes.data) setWithdrawals(wRes.data);
-    if (baRes.data) setBankAccounts(baRes.data);
+    if (pRes.data) {
+      setPixKey(pRes.data.pix_key);
+      setPixKeyType(pRes.data.pix_key_type);
+    }
   };
 
   useEffect(() => { loadData(); }, [user?.id]);
@@ -35,13 +41,14 @@ export default function Saques() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!pixKey) { toast.error("Cadastre uma chave PIX em Dados Bancários primeiro"); return; }
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
     const feeAmount = 5.00;
-    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, bank_account_id: selectedAccount || null, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
+    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
     if (error) { toast.error("Erro ao solicitar saque"); return; }
     toast.success("Saque solicitado!");
-    setOpen(false); setAmount(""); setSelectedAccount(""); loadData();
+    setOpen(false); setAmount(""); loadData();
   };
 
   const totalPending = withdrawals.filter((w) => w.status === "pending").reduce((acc, w) => acc + Number(w.amount), 0);
@@ -63,14 +70,20 @@ export default function Saques() {
                 <p className="text-xs text-foreground/40 mt-1">Taxa de saque: R$ 5,00</p>
               </div>
               <div>
-                <Label className="text-foreground/70">Conta Bancária</Label>
-                <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                  <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione uma conta" /></SelectTrigger>
-                  <SelectContent>{bankAccounts.map((acc) => (<SelectItem key={acc.id} value={acc.id}>{acc.bank_name} — Ag: {acc.agency} Conta: {acc.account_number}</SelectItem>))}</SelectContent>
-                </Select>
-                {bankAccounts.length === 0 && <p className="text-xs text-destructive mt-1">Cadastre uma conta bancária primeiro</p>}
+                <Label className="text-foreground/70">Chave PIX</Label>
+                {pixKey ? (
+                  <div className="flex items-center gap-2 p-3 rounded-xl border border-white/[0.08] bg-white/[0.03] mt-1">
+                    <Key className="h-4 w-4 text-[#00FFA3]" />
+                    <div>
+                      <p className="text-[11px] text-foreground/40">{pixKeyTypes[pixKeyType || ""] || pixKeyType}</p>
+                      <p className="font-mono text-foreground text-[13px]">{pixKey}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-destructive mt-1">Cadastre uma chave PIX em Dados Bancários primeiro</p>
+                )}
               </div>
-              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={bankAccounts.length === 0}>Solicitar Saque</Button>
+              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={!pixKey}>Solicitar Saque</Button>
             </form>
           </DialogContent>
         </Dialog>
