@@ -12,23 +12,23 @@ interface StatCardProps {
 
 export function StatCard({ title, value, icon: Icon, change, changeType = "neutral", className }: StatCardProps) {
   return (
-    <div className={cn("stat-card animate-slide-up", className)}>
+    <div className={cn("glass-card-hover rounded-2xl p-5 animate-slide-up", className)}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-muted-foreground font-medium">{title}</p>
-          <p className="text-2xl font-bold mt-1 tracking-tight">{value}</p>
+          <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">{title}</p>
+          <p className="text-2xl font-extrabold mt-2 tracking-tight text-foreground font-display">{value}</p>
           {change && (
             <p className={cn(
-              "text-xs font-medium mt-2",
-              changeType === "positive" && "text-success",
+              "text-xs font-semibold mt-2",
+              changeType === "positive" && "text-primary",
               changeType === "negative" && "text-destructive",
-              changeType === "neutral" && "text-muted-foreground"
+              changeType === "neutral" && "text-foreground/40"
             )}>
               {change}
             </p>
           )}
         </div>
-        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
           <Icon className="h-5 w-5 text-primary" />
         </div>
       </div>

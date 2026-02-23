@@ -3,18 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DollarSign, TrendingUp, ShoppingCart, Wallet, Clock, CheckCircle2,
-  AlertCircle, RefreshCw, ArrowDownRight, CircleDollarSign, Volume2,
-  Lock, ArrowUpRight, Eye, Target, Trophy, Zap, Shield,
+  AlertCircle, RefreshCw, ArrowDownRight, CircleDollarSign,
+  Lock, ArrowUpRight, Eye, Target, Trophy, Zap, Shield, Activity,
+  Sparkles, BarChart3, PieChart as PieChartIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar,
+  BarChart, Bar, PieChart, Pie, Cell,
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 
-// Milestone tiers
 const MILESTONES = [
   { label: "Início", value: 0 },
   { label: "10K", value: 10000 },
@@ -37,7 +37,7 @@ function getCurrentMilestone(revenue: number) {
 }
 
 const fmtCurrency = (v: number) => {
-  if (v === 0) return "—";
+  if (v === 0) return "R$ 0,00";
   return `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 };
 
@@ -80,6 +80,10 @@ export default function Dashboard() {
     return { name: dayStr, vendas: dayTx.reduce((a, t) => a + Number(t.amount), 0) };
   });
 
+  const statusCounts = transactions.reduce((acc, t) => { acc[t.status] = (acc[t.status] || 0) + 1; return acc; }, {} as Record<string, number>);
+  const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
+  const PIE_COLORS = ["hsl(152,68%,46%)", "hsl(38,95%,55%)", "hsl(0,72%,51%)", "hsl(210,75%,55%)", "hsl(280,65%,55%)"];
+
   const milestone = getCurrentMilestone(totalRevenue);
   const dailyRevenue = chartData[chartData.length - 1]?.vendas || 0;
 
@@ -88,50 +92,67 @@ export default function Dashboard() {
     .slice(0, 8);
 
   return (
-    <div className="space-y-5 animate-fade-in">
-      {/* Header + Milestone Bar */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-6 animate-fade-in relative">
+      {/* Background ambient effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px] animate-float" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-info/[0.03] rounded-full blur-[100px] animate-float" style={{ animationDelay: '3s' }} />
+      </div>
+
+      {/* Header */}
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground text-sm mt-0.5">Veja o resumo de seu desempenho!</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="h-4 w-4 text-primary animate-glow-pulse" />
+              <span className="text-xs font-semibold text-primary uppercase tracking-widest">Visão Geral</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground font-display">
+              Dashboard
+            </h1>
           </div>
-          <div className="flex items-center gap-2 bg-card/60 backdrop-blur-xl border border-border/30 rounded-2xl px-4 py-2.5 text-xs text-muted-foreground shadow-lg shadow-black/5 shrink-0">
+          <div className="flex items-center gap-2 glass-card rounded-2xl px-4 py-2.5 text-xs text-foreground/60 shrink-0">
             <Clock className="h-3.5 w-3.5 text-primary" />
             <span className="hidden sm:inline">
-              {new Date(Date.now() - 30 * 86400000).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
-              {" - "}
-              {new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+              {new Date(Date.now() - 30 * 86400000).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
+              {" — "}
+              {new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}
             </span>
             <span className="sm:hidden">Últimos 30 dias</span>
           </div>
         </div>
 
-        {/* Milestone Progress - Top Bar */}
-        <div className="bg-card/60 backdrop-blur-xl border border-border/30 rounded-2xl p-4 shadow-lg shadow-black/5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">Premiações</span>
-            </div>
-            <span className="text-xs text-primary font-semibold bg-primary/10 px-2.5 py-1 rounded-full">
-              {fmtCurrency(totalRevenue)} / R$ {(milestone.next.value / 1000).toFixed(0)}K
-            </span>
-          </div>
+        {/* Milestone Bar */}
+        <div className="glass-card rounded-2xl p-5 glow-primary relative overflow-hidden">
+          <div className="absolute inset-0 dot-grid opacity-30" />
           <div className="relative">
-            <div className="w-full bg-muted/30 rounded-full h-3 overflow-hidden backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <Trophy className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <span className="text-sm font-bold text-foreground">Premiações</span>
+                  <p className="text-[10px] text-foreground/40">Próximo nível: {milestone.next.label}</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-xl">
+                {fmtCurrency(totalRevenue)}
+              </span>
+            </div>
+            <div className="w-full bg-white/[0.04] rounded-full h-3 overflow-hidden backdrop-blur-sm">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-400 to-primary transition-all duration-1000 shadow-[0_0_16px_hsl(152,60%,45%,0.6)]"
+                className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-400 to-primary transition-all duration-1000 shadow-[0_0_20px_hsl(152,68%,46%,0.5)]"
                 style={{ width: `${Math.max(milestone.pct, 2)}%` }}
               />
             </div>
-            <div className="flex justify-between mt-2">
+            <div className="flex justify-between mt-2.5">
               {MILESTONES.map((m) => (
                 <div key={m.label} className="flex flex-col items-center">
-                  <div className={`h-2.5 w-2.5 rounded-full border-2 transition-all ${
-                    totalRevenue >= m.value ? "bg-primary border-primary shadow-[0_0_8px_hsl(152,60%,45%,0.6)]" : "bg-muted/50 border-border/50"
+                  <div className={`h-2 w-2 rounded-full transition-all ${
+                    totalRevenue >= m.value ? "bg-primary shadow-[0_0_8px_hsl(152,68%,46%,0.6)]" : "bg-white/10"
                   }`} />
-                  <span className={`text-[9px] mt-1 font-medium ${totalRevenue >= m.value ? "text-primary" : "text-muted-foreground/60"}`}>
+                  <span className={`text-[9px] mt-1 font-semibold ${totalRevenue >= m.value ? "text-primary" : "text-foreground/30"}`}>
                     {m.label}
                   </span>
                 </div>
@@ -141,188 +162,183 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <KpiCard
-          label="Total em Vendas"
-          value={fmtCurrency(totalRevenue)}
-          subtitle="durante este período."
-          icon={<DollarSign className="h-5 w-5" />}
-          accentColor="text-primary"
-        />
-        <KpiCard
-          label="Ticket Médio"
-          value={fmtCurrency(ticketMedio)}
-          subtitle={approvedTx.length > 0 ? `em ${approvedTx.length} vendas neste período.` : "sem vendas ainda"}
-          icon={<TrendingUp className="h-5 w-5" />}
-          accentColor="text-primary"
-        />
-        <KpiCard
-          label="Pedidos Pagos"
-          value={approvedTx.length > 0 ? String(approvedTx.length) : "—"}
-          subtitle={transactions.length > 0 ? `em ${transactions.length} transações geradas.` : "nenhuma transação"}
-          icon={<ShoppingCart className="h-5 w-5" />}
-          accentColor="text-primary"
-        />
-        <KpiCard
-          label="Saldo Disponível"
-          value={fmtCurrency(totalNet)}
-          subtitle={pendingWd > 0 ? `${fmtCurrency(pendingWd)} pendente` : "Pronto para saque"}
-          icon={<Wallet className="h-5 w-5" />}
-          accentColor="text-primary"
-          action={{ label: "Solicitar Saque", href: "/financeiro/saques" }}
-        />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard label="Total em Vendas" value={fmtCurrency(totalRevenue)} subtitle={`${approvedTx.length} vendas aprovadas`} icon={<DollarSign className="h-5 w-5" />} glowColor="primary" />
+        <KpiCard label="Ticket Médio" value={fmtCurrency(ticketMedio)} subtitle={approvedTx.length > 0 ? `média por venda` : "sem vendas"} icon={<TrendingUp className="h-5 w-5" />} glowColor="info" />
+        <KpiCard label="Pedidos Pagos" value={approvedTx.length > 0 ? String(approvedTx.length) : "0"} subtitle={`de ${transactions.length} transações`} icon={<ShoppingCart className="h-5 w-5" />} glowColor="chart-3" />
+        <KpiCard label="Saldo Disponível" value={fmtCurrency(totalNet)} subtitle={pendingWd > 0 ? `${fmtCurrency(pendingWd)} pendente` : "Pronto para saque"} icon={<Wallet className="h-5 w-5" />} glowColor="warning" action={{ label: "Solicitar Saque", href: "/financeiro/saques" }} />
       </div>
 
-      {/* Vendas por método */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-        <MethodCard label="Vendas no Pix" value={pixTx.reduce((a,t) => a + Number(t.amount), 0)} count={pixTx.length} total={transactions.filter(t => t.payment_method === "pix").length} />
-        <MethodCard label="Vendas no Cartão" value={cardTx.reduce((a,t) => a + Number(t.amount), 0)} count={cardTx.length} total={transactions.filter(t => t.payment_method === "credit_card").length} />
-        <MethodCard label="Vendas no Boleto" value={boletoTx.reduce((a,t) => a + Number(t.amount), 0)} count={boletoTx.length} total={transactions.filter(t => t.payment_method === "boleto").length} />
+      {/* Payment Methods */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <MethodCard label="PIX" value={pixTx.reduce((a,t) => a + Number(t.amount), 0)} count={pixTx.length} total={transactions.filter(t => t.payment_method === "pix").length} emoji="⚡" />
+        <MethodCard label="Cartão" value={cardTx.reduce((a,t) => a + Number(t.amount), 0)} count={cardTx.length} total={transactions.filter(t => t.payment_method === "credit_card").length} emoji="💳" />
+        <MethodCard label="Boleto" value={boletoTx.reduce((a,t) => a + Number(t.amount), 0)} count={boletoTx.length} total={transactions.filter(t => t.payment_method === "boleto").length} emoji="📄" />
       </div>
 
-      {/* Middle Row: Progress + Financial Summary + Monitoring */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
-        {/* Progress Card */}
-        <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-5 shadow-lg shadow-black/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/8 to-transparent rounded-bl-full" />
-          <SectionTitle icon={<Target className="h-4 w-4 text-primary" />}>Progresso</SectionTitle>
-          <div className="mt-4 space-y-3">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Total faturado</span><span>Vendas diárias</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-lg font-bold text-foreground">{fmtCurrency(totalRevenue)}</span>
-              <span className="text-lg font-bold text-primary">{fmtCurrency(dailyRevenue)} / dia</span>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Falta para</span><span>Meta atual</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm font-semibold text-foreground">{fmtCurrency(Math.max(0, milestone.next.value - totalRevenue))}</span>
-              <span className="text-sm font-semibold text-foreground">{milestone.next.label}</span>
-            </div>
-            <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-700 shadow-[0_0_10px_hsl(152,60%,45%,0.5)]" style={{ width: `${Math.max(milestone.pct, 1)}%` }} />
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                <span>{milestone.pct.toFixed(0)}% do caminho até a meta</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-1 text-xs"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Início</div>
-              <div className="flex items-center gap-1 text-xs"><Lock className="h-3 w-3 text-muted-foreground" /> <span className="font-bold">{milestone.next.label}</span></div>
+      {/* Middle Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Financial Summary */}
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
+          <div className="relative">
+            <SectionTitle icon={<CircleDollarSign className="h-4 w-4 text-primary" />}>Resumo Financeiro</SectionTitle>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <MetricCard icon={<RefreshCw className="h-4 w-4 text-primary" />} label="Conversão" value={`${conversionRate}%`} />
+              <MetricCard icon={<AlertCircle className="h-4 w-4 text-warning" />} label="Pre-Chargeback" value="0" />
+              <MetricCard icon={<ArrowDownRight className="h-4 w-4 text-destructive" />} label="Chargeback" value={String(chargebacks)} />
+              <MetricCard icon={<CircleDollarSign className="h-4 w-4 text-info" />} label="Reembolsos" value={String(refunds)} />
             </div>
           </div>
         </div>
 
-        {/* Financial Summary */}
-        <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-5 shadow-lg shadow-black/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-info/8 to-transparent rounded-bl-full" />
-          <SectionTitle icon={<CircleDollarSign className="h-4 w-4 text-primary" />}>Resumo Financeiro</SectionTitle>
-          <div className="grid grid-cols-2 gap-3 mt-4">
-            <MetricCard icon={<RefreshCw className="h-5 w-5 text-primary" />} label="Conversão" value={`${conversionRate}%`} change="+0%" />
-            <MetricCard icon={<AlertCircle className="h-5 w-5 text-warning" />} label="Pre-Chargeback" value="0" change="+0%" />
-            <MetricCard icon={<ArrowDownRight className="h-5 w-5 text-destructive" />} label="Chargeback" value={String(chargebacks)} change="+0%" />
-            <MetricCard icon={<CircleDollarSign className="h-5 w-5 text-info" />} label="Reembolsos" value={String(refunds)} change="+0%" />
+        {/* Progress */}
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-info/5 to-transparent rounded-bl-full" />
+          <div className="relative">
+            <SectionTitle icon={<Target className="h-4 w-4 text-primary" />}>Progresso</SectionTitle>
+            <div className="mt-4 space-y-4">
+              <div>
+                <div className="flex justify-between text-xs text-foreground/50 mb-1">
+                  <span>Faturado</span><span>Hoje</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xl font-bold text-foreground">{fmtCurrency(totalRevenue)}</span>
+                  <span className="text-xl font-bold text-primary">{fmtCurrency(dailyRevenue)}</span>
+                </div>
+              </div>
+              <div className="w-full bg-white/[0.04] rounded-full h-2 overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-700 shadow-[0_0_10px_hsl(152,68%,46%,0.4)]" style={{ width: `${Math.max(milestone.pct, 1)}%` }} />
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-foreground/40">Falta {fmtCurrency(Math.max(0, milestone.next.value - totalRevenue))}</span>
+                <span className="text-primary font-bold">{milestone.pct.toFixed(0)}%</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Monitoring */}
-        <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-5 shadow-lg shadow-black/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-success/8 to-transparent rounded-bl-full" />
-          <div className="flex items-center justify-between mb-4">
-            <SectionTitle icon={<Zap className="h-4 w-4 text-primary" />}>Monitoramento</SectionTitle>
-            <span className="text-[10px] text-muted-foreground bg-muted/30 backdrop-blur-sm px-2 py-0.5 rounded-full">Atualizado agora</span>
-          </div>
-          <div className="grid grid-cols-2 gap-y-5 mt-2">
-            <MonitorItem label="Tempo Médio" value="0 ms" />
-            <MonitorItem label="Taxa Conversão" value={`${conversionRate} %`} accent />
-            <MonitorItem label="API/minuto" value="0.0" />
-            <MonitorItem label="Webhook OK" value="100.0 %" accent />
-          </div>
-          <div className="border-t border-border/30 mt-5 pt-3 flex justify-between text-xs text-muted-foreground">
-            <span>0 chamadas/24h</span>
-            <span className="text-primary font-medium">Todos webhooks OK</span>
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-success/5 to-transparent rounded-bl-full" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <SectionTitle icon={<Zap className="h-4 w-4 text-primary" />}>Monitoramento</SectionTitle>
+              <span className="flex items-center gap-1.5 text-[10px] text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(152,68%,46%,0.8)]" />
+                Online
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-y-5">
+              <MonitorItem label="Tempo Médio" value="0 ms" />
+              <MonitorItem label="Conversão" value={`${conversionRate}%`} accent />
+              <MonitorItem label="API/min" value="0.0" />
+              <MonitorItem label="Webhook" value="100%" accent />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Row: Chart + Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 md:gap-4">
-        {/* Chart */}
-        <div className="lg:col-span-3 bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-5 shadow-lg shadow-black/5">
-          <SectionTitle icon={<TrendingUp className="h-4 w-4 text-primary" />}>Vendas por dia</SectionTitle>
+      {/* Bottom Row: Chart + Pie + Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Bar Chart */}
+        <div className="lg:col-span-5 glass-card rounded-2xl p-5">
+          <SectionTitle icon={<BarChart3 className="h-4 w-4 text-primary" />}>Vendas (7 dias)</SectionTitle>
           <div className="mt-4">
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={chartData} barCategoryGap="20%">
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={chartData} barCategoryGap="25%">
                 <defs>
-                  <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(152, 60%, 45%)" stopOpacity={1} />
-                    <stop offset="100%" stopColor="hsl(152, 60%, 45%)" stopOpacity={0.4} />
+                  <linearGradient id="barGrad2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0.2} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 12%)" vertical={false} />
-                <XAxis dataKey="name" stroke="hsl(220, 10%, 40%)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(220, 10%, 40%)" fontSize={11} tickFormatter={(v) => `R$ ${v}`} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(225, 20%, 12%)" vertical={false} />
+                <XAxis dataKey="name" stroke="hsl(225, 10%, 35%)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(225, 10%, 35%)" fontSize={11} tickFormatter={(v) => `${v}`} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "hsl(220, 25%, 8%)", border: "1px solid hsl(220, 20%, 15%)", borderRadius: "16px", fontSize: "12px", boxShadow: "0 16px 48px rgba(0,0,0,0.4)", backdropFilter: "blur(20px)" }}
+                  contentStyle={{ backgroundColor: "hsl(225, 25%, 8%)", border: "1px solid hsl(225, 20%, 14%)", borderRadius: "16px", fontSize: "12px", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", color: "white" }}
                   formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]}
+                  labelStyle={{ color: "hsl(0, 0%, 70%)" }}
                 />
-                <Bar dataKey="vendas" fill="url(#barGrad)" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="vendas" fill="url(#barGrad2)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
+        {/* Pie Chart */}
+        <div className="lg:col-span-3 glass-card rounded-2xl p-5">
+          <SectionTitle icon={<PieChartIcon className="h-4 w-4 text-primary" />}>Status</SectionTitle>
+          {pieData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={180}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" paddingAngle={4} strokeWidth={0}>
+                    {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(225, 25%, 8%)", border: "1px solid hsl(225, 20%, 14%)", borderRadius: "12px", fontSize: "12px", color: "white" }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-2 justify-center mt-1">
+                {pieData.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-1.5 text-xs">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                    <span className="capitalize text-foreground/50">{d.name}</span>
+                    <span className="font-bold text-foreground">{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-[180px] text-sm text-foreground/30">Sem dados</div>
+          )}
+        </div>
+
         {/* Activity */}
-        <div className="lg:col-span-2 bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-5 shadow-lg shadow-black/5">
+        <div className="lg:col-span-4 glass-card rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <SectionTitle icon={<Volume2 className="h-4 w-4 text-primary" />}>Atividade Recente</SectionTitle>
+            <SectionTitle icon={<Activity className="h-4 w-4 text-primary" />}>Atividade</SectionTitle>
             <div className="flex items-center gap-1.5 text-xs text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,60%,45%,0.8)]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,68%,46%,0.8)]" />
               <span className="font-medium">Ao vivo</span>
             </div>
           </div>
-          <div className="space-y-0.5 max-h-[280px] overflow-y-auto pr-1">
+          <div className="space-y-0.5 max-h-[260px] overflow-y-auto pr-1">
             {recentActivity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Eye className="h-8 w-8 mb-2 opacity-20" />
-                <p className="text-sm">Nenhuma atividade recente</p>
+              <div className="flex flex-col items-center justify-center py-10 text-foreground/30">
+                <Eye className="h-6 w-6 mb-2 opacity-30" />
+                <p className="text-xs">Nenhuma atividade</p>
               </div>
             ) : (
               recentActivity.map((item) => {
                 const isTx = "payment_method" in item;
                 const statusColor = item.status === "approved" || item.status === "paid" ? "text-primary" : item.status === "pending" || item.status === "requested" ? "text-warning" : "text-destructive";
-                const statusLabel: Record<string, string> = { approved: "Aprovado", pending: "Pendente", paid: "Pago", requested: "Solicitado", failed: "Falhou", rejected: "Recusado", refunded: "Reembolsado", chargeback: "Chargeback", under_review: "Em análise" };
+                const statusLabel: Record<string, string> = { approved: "Aprovado", pending: "Pendente", paid: "Pago", requested: "Solicitado", failed: "Falhou", rejected: "Recusado", refunded: "Reembolso", chargeback: "Chargeback" };
                 return (
-                  <div key={item.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-muted/20 transition-colors border-b border-border/20 last:border-0">
-                    <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 backdrop-blur-sm ${isTx ? "bg-primary/10 text-primary" : "bg-info/10 text-info"}`}>
+                  <div key={item.id} className="flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-white/[0.03] transition-colors border-b border-white/[0.04] last:border-0">
+                    <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${isTx ? "bg-primary/10 text-primary" : "bg-info/10 text-info"}`}>
                       {isTx ? <DollarSign className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
+                        <span className="font-bold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
                         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${statusColor} ${statusColor.replace("text-", "bg-")}/10`}>{statusLabel[item.status] || item.status}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      <p className="text-[11px] text-foreground/40 truncate mt-0.5">
                         {isTx ? (item as Tables<"transactions">).customer_name || "Nova transação" : "Solicitação de saque"}
                       </p>
                     </div>
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">{formatRelativeTime(item.created_at)}</span>
+                    <span className="text-[10px] text-foreground/30 whitespace-nowrap">{formatRelativeTime(item.created_at)}</span>
                   </div>
                 );
               })
             )}
           </div>
-          <div className="flex gap-2 mt-3 pt-3 border-t border-border/30">
-            <Link to="/financeiro/extrato" className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+          <div className="flex gap-2 mt-3 pt-3 border-t border-white/[0.04]">
+            <Link to="/financeiro/extrato" className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
               Ver Transações <ArrowUpRight className="h-3 w-3" />
-            </Link>
-            <Link to="/financeiro/taxas" className="text-xs text-primary font-medium hover:underline flex items-center gap-1 ml-auto">
-              Ver Taxas <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
@@ -335,34 +351,31 @@ export default function Dashboard() {
 
 function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <h3 className="text-sm font-semibold flex items-center gap-2">
-      {icon || <span className="w-1 h-5 bg-gradient-to-b from-primary to-emerald-400 rounded-full" />}
+    <h3 className="text-sm font-bold flex items-center gap-2 text-foreground">
+      {icon}
       {children}
     </h3>
   );
 }
 
-function KpiCard({ label, value, subtitle, icon, accentColor, action }: {
-  label: string; value: string; subtitle?: string; icon: React.ReactNode; accentColor: string; action?: { label: string; href: string };
+function KpiCard({ label, value, subtitle, icon, glowColor, action }: {
+  label: string; value: string; subtitle?: string; icon: React.ReactNode; glowColor: string; action?: { label: string; href: string };
 }) {
   return (
-    <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-4 md:p-5 shadow-lg shadow-black/5 hover:shadow-xl hover:border-primary/30 transition-all duration-300 group relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="glass-card-hover rounded-2xl p-5 group relative overflow-hidden">
+      <div className="absolute -top-16 -right-16 w-32 h-32 bg-primary/[0.04] rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       <div className="relative">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="w-1 h-4 bg-primary rounded-full shadow-[0_0_4px_hsl(152,60%,45%,0.4)]" />
-            <h4 className="text-xs font-semibold text-foreground/70">{label}</h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-xs font-semibold text-foreground/50 uppercase tracking-wider">{label}</h4>
+          <div className="h-9 w-9 rounded-xl bg-white/[0.04] backdrop-blur-sm flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors duration-500">
+            {icon}
           </div>
-          <div className={`h-8 w-8 md:h-9 md:w-9 rounded-xl bg-primary/10 backdrop-blur-sm flex items-center justify-center ${accentColor}`}>{icon}</div>
         </div>
-        <p className="text-xl md:text-2xl font-extrabold tracking-tight mt-1 text-foreground">{value}</p>
-        {subtitle && <p className="text-[11px] text-foreground/60 mt-1">{subtitle}</p>}
+        <p className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground font-display">{value}</p>
+        {subtitle && <p className="text-[11px] text-foreground/40 mt-1.5">{subtitle}</p>}
         {action && (
-          <Link to={action.href} className="text-xs text-primary font-semibold mt-2 inline-flex items-center gap-1.5 hover:gap-2 transition-all">
-            <span className="h-4 w-4 rounded-full border-2 border-primary flex items-center justify-center text-[8px] font-bold">+</span>
-            {action.label}
+          <Link to={action.href} className="text-xs text-primary font-bold mt-3 inline-flex items-center gap-1.5 hover:gap-2.5 transition-all duration-300">
+            {action.label} <ArrowUpRight className="h-3 w-3" />
           </Link>
         )}
       </div>
@@ -370,28 +383,29 @@ function KpiCard({ label, value, subtitle, icon, accentColor, action }: {
   );
 }
 
-function MethodCard({ label, value, count, total }: { label: string; value: number; count: number; total: number }) {
+function MethodCard({ label, value, count, total, emoji }: { label: string; value: number; count: number; total: number; emoji: string }) {
   const convRate = total > 0 ? ((count / total) * 100).toFixed(0) : "0";
   return (
-    <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-4 md:p-5 shadow-lg shadow-black/5 hover:border-primary/20 transition-all">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="w-1 h-4 bg-primary rounded-full shadow-[0_0_4px_hsl(152,60%,45%,0.4)]" />
-        <h4 className="text-xs font-semibold text-foreground/70">{label}</h4>
+    <div className="glass-card-hover rounded-2xl p-5 group">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-xl">{emoji}</span>
+        <h4 className="text-xs font-bold text-foreground/50 uppercase tracking-wider">{label}</h4>
       </div>
-      <p className="text-xl font-extrabold text-foreground">{fmtCurrency(value)}</p>
-      <p className="text-[11px] text-foreground/60 mt-1">{convRate}% de conversão</p>
-      <p className="text-[11px] text-foreground/60">{count} de {total} pedidos</p>
+      <p className="text-xl font-extrabold text-foreground font-display">{fmtCurrency(value)}</p>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="text-[11px] text-foreground/40">{count}/{total} pedidos</span>
+        <span className="text-[11px] text-primary font-bold">{convRate}%</span>
+      </div>
     </div>
   );
 }
 
-function MetricCard({ icon, label, value, change }: { icon: React.ReactNode; label: string; value: string; change: string }) {
+function MetricCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="text-center p-3 rounded-xl bg-muted/10 backdrop-blur-sm border border-border/20">
+    <div className="text-center p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
       <div className="flex justify-center mb-2">{icon}</div>
-      <p className="text-[10px] text-foreground/60 uppercase tracking-wider">{label}</p>
-      <p className="text-lg font-bold mt-1 text-foreground">{value}</p>
-      <p className="text-[10px] text-foreground/60 mt-0.5">{change}</p>
+      <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">{label}</p>
+      <p className="text-lg font-bold text-foreground mt-0.5">{value}</p>
     </div>
   );
 }
@@ -399,7 +413,7 @@ function MetricCard({ icon, label, value, change }: { icon: React.ReactNode; lab
 function MonitorItem({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] text-foreground/60 uppercase tracking-wider">{label}</p>
+      <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">{label}</p>
       <p className={`text-lg font-bold mt-0.5 ${accent ? "text-primary" : "text-foreground"}`}>{value}</p>
     </div>
   );
@@ -409,10 +423,10 @@ function formatRelativeTime(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "agora";
-  if (mins < 60) return `há ${mins} min`;
+  if (mins < 60) return `${mins}min`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `há ${hours} horas`;
+  if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `há ${days} dias`;
-  return `há ${Math.floor(days / 30)} meses`;
+  if (days < 30) return `${days}d`;
+  return `${Math.floor(days / 30)}m`;
 }

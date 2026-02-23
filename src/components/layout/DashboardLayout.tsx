@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Outlet } from "react-router-dom";
-import { Menu, Bell, Search } from "lucide-react";
+import { Menu, Bell, Search, Command } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,30 +23,33 @@ export function DashboardLayout() {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-h-screen">
-          <header className="h-[60px] flex items-center border-b border-border/30 px-4 md:px-6 bg-card/40 backdrop-blur-2xl sticky top-0 z-10 gap-3">
+          <header className="h-16 flex items-center border-b border-white/[0.04] px-4 md:px-6 bg-background/60 backdrop-blur-2xl sticky top-0 z-10 gap-3">
             <SidebarTrigger className="mr-2 lg:hidden">
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5 text-foreground" />
             </SidebarTrigger>
 
             <div className="hidden md:flex relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar..." className="pl-9 h-9 bg-muted/20 border-border/20 rounded-xl text-sm backdrop-blur-sm" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-foreground/30" />
+              <Input placeholder="Buscar..." className="pl-9 h-9 bg-white/[0.03] border-white/[0.06] rounded-xl text-sm text-foreground placeholder:text-foreground/30 focus:border-primary/30 focus:bg-white/[0.05] transition-all" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-foreground/20 text-[10px]">
+                <Command className="h-3 w-3" />K
+              </div>
             </div>
 
             <div className="flex-1" />
 
-            <button className="relative p-2.5 rounded-xl hover:bg-muted/20 transition-colors backdrop-blur-sm">
-              <Bell className="h-4 w-4 text-muted-foreground" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-card shadow-[0_0_6px_hsl(152,60%,45%,0.6)]" />
+            <button className="relative p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors">
+              <Bell className="h-4 w-4 text-foreground/50" />
+              <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full shadow-[0_0_8px_hsl(152,68%,46%,0.6)]" />
             </button>
 
-            <div className="flex items-center gap-3 ml-2 pl-3 border-l border-border/30">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-xs font-bold text-primary shadow-sm backdrop-blur-sm">
+            <div className="flex items-center gap-3 ml-2 pl-3 border-l border-white/[0.06]">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-bold text-primary shadow-[0_0_12px_hsl(152,68%,46%,0.15)]">
                 {(profile?.full_name || "U").charAt(0).toUpperCase()}
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-semibold leading-none">{profile?.full_name || "Usuário"}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{profile?.email || ""}</p>
+                <p className="text-sm font-bold leading-none text-foreground">{profile?.full_name || "Usuário"}</p>
+                <p className="text-[10px] text-foreground/40 mt-0.5">{profile?.email || ""}</p>
               </div>
             </div>
           </header>
