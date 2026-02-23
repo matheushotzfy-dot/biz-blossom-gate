@@ -44,8 +44,26 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (existing && existing.podpay_payment_id) {
-        // Return existing payment data - don't create duplicate
-        console.log('Returning existing pending transaction:', existing.id);
+        // Fetch current transaction details from PodPay to get PIX/boleto data
+        console.log('Resuming existing pending transaction:', existing.id);
+        let pixData = null;
+        let boletoData = null;
+        try {
+          const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
+          const secretKey = Deno.env.get('PODPAY_SECRET_KEY')!;
+          const auth = 'Basic ' + btoa(publicKey + ':' + secretKey);
+          const txResp = await fetch(`https://api.podpay.co/v1/transactions/${existing.podpay_payment_id}`, {
+            headers: { 'Authorization': auth, 'Accept': 'application/json' },
+          });
+          if (txResp.ok) {
+            const txData = await txResp.json();
+            pixData = txData.data?.pix || txData.pix || null;
+            boletoData = txData.data?.boleto || txData.boleto || null;
+          }
+        } catch (e) {
+          console.error('Error fetching PodPay transaction:', e);
+        }
+
         return new Response(
           JSON.stringify({
             success: true,
@@ -54,6 +72,8 @@ Deno.serve(async (req) => {
               transactionId: existing.id,
               podpayId: existing.podpay_payment_id,
               status: 'pending',
+              pix: pixData,
+              boleto: boletoData,
             },
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
