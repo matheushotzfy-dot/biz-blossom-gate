@@ -23,25 +23,25 @@ export function DashboardLayout() {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-h-screen">
-          <header className="h-[60px] flex items-center border-b border-border/50 px-4 md:px-6 bg-card/60 backdrop-blur-md sticky top-0 z-10 gap-3">
+          <header className="h-[60px] flex items-center border-b border-border/30 px-4 md:px-6 bg-card/40 backdrop-blur-2xl sticky top-0 z-10 gap-3">
             <SidebarTrigger className="mr-2 lg:hidden">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
 
             <div className="hidden md:flex relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar..." className="pl-9 h-9 bg-muted/30 border-border/30 rounded-xl text-sm" />
+              <Input placeholder="Buscar..." className="pl-9 h-9 bg-muted/20 border-border/20 rounded-xl text-sm backdrop-blur-sm" />
             </div>
 
             <div className="flex-1" />
 
-            <button className="relative p-2.5 rounded-xl hover:bg-muted/30 transition-colors">
+            <button className="relative p-2.5 rounded-xl hover:bg-muted/20 transition-colors backdrop-blur-sm">
               <Bell className="h-4 w-4 text-muted-foreground" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-card" />
+              <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-card shadow-[0_0_6px_hsl(152,60%,45%,0.6)]" />
             </button>
 
-            <div className="flex items-center gap-3 ml-2 pl-3 border-l border-border/50">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-xs font-bold text-primary shadow-sm">
+            <div className="flex items-center gap-3 ml-2 pl-3 border-l border-border/30">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-xs font-bold text-primary shadow-sm backdrop-blur-sm">
                 {(profile?.full_name || "U").charAt(0).toUpperCase()}
               </div>
               <div className="hidden md:block">

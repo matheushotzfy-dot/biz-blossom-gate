@@ -37,8 +37,8 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
           {/* Admin Master - Separate login and dashboard */}
-          <Route path="/admin-admin" element={<AdminLogin />} />
-          <Route path="/admin-admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-matheus" element={<AdminLogin />} />
+          <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
 
           {/* User Dashboard */}
           <Route

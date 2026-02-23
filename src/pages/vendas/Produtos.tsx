@@ -37,7 +37,8 @@ export default function Produtos() {
       if (error) { toast.error("Erro ao atualizar"); return; }
       toast.success("Produto atualizado!");
     } else {
-      const checkoutUrl = `${window.location.origin}/checkout/${crypto.randomUUID().slice(0, 8)}`;
+      const slug = crypto.randomUUID().slice(0, 8);
+      const checkoutUrl = `${window.location.origin}/pay/${slug}`;
       const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl });
       if (error) { toast.error("Erro ao criar produto"); return; }
       toast.success("Produto criado!");
