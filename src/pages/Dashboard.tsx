@@ -2,10 +2,10 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  DollarSign, TrendingUp, ShoppingCart, Wallet, Clock, CheckCircle2,
-  AlertCircle, RefreshCw, ArrowDownRight, CircleDollarSign,
-  ArrowUpRight, Eye, Target, Trophy, Zap,
-  Activity, BarChart3, PieChart as PieChartIcon, ChevronDown, CalendarDays,
+  DollarSign, TrendingUp, Wallet, CheckCircle2,
+  AlertCircle, RefreshCw, ArrowDownRight,
+  ArrowUpRight, Eye, Trophy, Zap,
+  ChevronDown, CalendarDays,
   Lock, CreditCard, FileText, Receipt,
 } from "lucide-react";
 import {
@@ -172,16 +172,27 @@ export default function Dashboard() {
     .slice(0, 8);
 
   return (
-    <div className="space-y-6 animate-fade-in relative pb-8">
-      {/* Ambient effects */}
+    <div className="space-y-5 relative pb-8">
+      {/* ===== Cinematic Background ===== */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-[-20%] right-[-10%] w-[700px] h-[700px] bg-primary/[0.025] rounded-full blur-[150px] animate-float" />
-        <div className="absolute bottom-[-15%] left-[-8%] w-[500px] h-[500px] bg-info/[0.02] rounded-full blur-[130px] animate-float" style={{ animationDelay: "3s" }} />
-        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-primary/[0.015] rounded-full blur-[100px] animate-float" style={{ animationDelay: "5s" }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(circle at 20% 30%, rgba(0,255,170,0.07), transparent 40%),
+              radial-gradient(circle at 80% 70%, rgba(0,148,255,0.06), transparent 40%),
+              radial-gradient(circle at 60% 20%, rgba(124,58,237,0.04), transparent 35%),
+              hsl(225, 25%, 6%)
+            `,
+          }}
+        />
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-primary/[0.03] rounded-full blur-[180px] animate-float" />
+        <div className="absolute bottom-[-15%] left-[-8%] w-[600px] h-[600px] bg-info/[0.025] rounded-full blur-[160px] animate-float" style={{ animationDelay: "3s" }} />
+        <div className="absolute top-[50%] left-[40%] w-[400px] h-[400px] bg-[hsl(280,65%,55%)]/[0.02] rounded-full blur-[120px] animate-float" style={{ animationDelay: "5s" }} />
       </div>
 
       {/* ===== Header ===== */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-display">
             Olá, {profile?.full_name?.split(" ")[0] || "Usuário"} 👋
@@ -192,18 +203,30 @@ export default function Dashboard() {
         {/* Period Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-primary/20 rounded-xl px-4 py-2.5 text-xs font-bold text-foreground/80 transition-all duration-300 group">
+            <button className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-foreground/80 transition-all duration-300 group rounded-2xl border border-white/[0.06] hover:border-primary/20"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                backdropFilter: "blur(20px)",
+                boxShadow: "0 0 0 1px rgba(0,255,170,0.03), 0 4px 20px rgba(0,0,0,0.3)",
+              }}
+            >
               <CalendarDays className="h-3.5 w-3.5 text-primary" />
               {selectedPeriod.label}
               <ChevronDown className="h-3 w-3 text-foreground/30 group-hover:text-primary transition-colors" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[hsl(225,28%,7%)] border-white/[0.08] backdrop-blur-2xl rounded-xl p-1.5 min-w-[150px]">
+          <DropdownMenuContent align="end" className="border-white/[0.08] rounded-2xl p-1.5 min-w-[160px]"
+            style={{
+              background: "rgba(11,15,23,0.95)",
+              backdropFilter: "blur(30px)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
+            }}
+          >
             {PERIOD_OPTIONS.map((opt) => (
               <DropdownMenuItem
                 key={opt.label}
                 onClick={() => setSelectedPeriod(opt)}
-                className={`rounded-lg text-xs font-semibold cursor-pointer px-3 py-2.5 transition-all ${
+                className={`rounded-xl text-xs font-semibold cursor-pointer px-3 py-2.5 transition-all ${
                   selectedPeriod.label === opt.label
                     ? "bg-primary/10 text-primary"
                     : "text-foreground/50 hover:text-foreground hover:bg-white/[0.05]"
@@ -217,13 +240,13 @@ export default function Dashboard() {
       </div>
 
       {/* ===== Top KPI Row ===== */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
         <KpiCard
           label="Receita bruta"
           value={fmtCurrency(totalRevenue)}
           sub={`${approvedTx.length} vendas`}
           icon={<DollarSign className="h-4 w-4" />}
-          iconBg="bg-primary/10 text-primary"
+          glowColor="0,255,170"
           trend={approvedTx.length > 0 ? "up" : undefined}
         />
         <KpiCard
@@ -231,42 +254,47 @@ export default function Dashboard() {
           value={fmtCurrency(totalNet)}
           sub={`- ${fmtCurrency(totalFees)} taxas`}
           icon={<TrendingUp className="h-4 w-4" />}
-          iconBg="bg-info/10 text-info"
+          glowColor="0,148,255"
         />
         <KpiCard
           label="Ticket médio"
           value={fmtCurrency(ticketMedio)}
           sub={approvedTx.length > 0 ? "por venda" : "—"}
           icon={<Receipt className="h-4 w-4" />}
-          iconBg="bg-chart-3/10 text-chart-3"
+          glowColor="124,58,237"
         />
         <KpiCard
           label="Saldo disponível"
           value={fmtCurrency(totalNet)}
           sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : "Disponível para saque"}
           icon={<Wallet className="h-4 w-4" />}
-          iconBg="bg-warning/10 text-warning"
+          glowColor="255,170,0"
           action={{ label: "Sacar", href: "/financeiro/saques" }}
         />
       </div>
 
-      {/* ===== Progress & Conversion Row ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Progress Card - inspired by Screenshot_29 */}
-        <GlassPanel>
+      {/* ===== Mirrored: Progress + Conversion ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        {/* Progress Card */}
+        <CinematicPanel glowPosition="top-left" glowColor="0,255,170">
           <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-5 rounded-full bg-primary" />
-            <h3 className="text-sm font-bold text-foreground">Progresso</h3>
+            <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,255,170,0.1)", boxShadow: "0 0 20px rgba(0,255,170,0.15)" }}>
+              <Trophy className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Progresso</h3>
+              <p className="text-[10px] text-foreground/30">Meta de faturamento</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-x-8 gap-y-1 mb-5">
             <div>
               <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">Total faturado</p>
-              <p className="text-2xl font-extrabold text-foreground font-display mt-0.5">{fmtCurrency(allTimeRevenue)}</p>
+              <p className="text-2xl font-extrabold text-foreground font-display mt-0.5" style={{ textShadow: "0 0 30px rgba(0,255,170,0.15)" }}>{fmtCurrency(allTimeRevenue)}</p>
             </div>
             <div className="text-right">
               <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold">Vendas diárias</p>
-              <p className="text-2xl font-extrabold text-primary font-display mt-0.5">{fmtCurrency(todayRevenue)} <span className="text-sm font-bold text-primary/70">/ dia</span></p>
+              <p className="text-2xl font-extrabold text-primary font-display mt-0.5" style={{ textShadow: "0 0 20px rgba(0,255,170,0.25)" }}>{fmtCurrency(todayRevenue)} <span className="text-sm font-bold text-primary/70">/ dia</span></p>
             </div>
             <div>
               <p className="text-[10px] text-foreground/40 uppercase tracking-wider font-semibold mt-3">Falta para</p>
@@ -285,18 +313,22 @@ export default function Dashboard() {
                 <CheckCircle2 className="h-4 w-4 text-primary" />
                 <span className="text-[10px] font-bold text-foreground/50">Início</span>
               </div>
-              <span className="text-[10px] text-foreground/40 italic">{milestone.pct.toFixed(0)}% do caminho até a meta</span>
+              <span className="text-[10px] text-foreground/40 italic">{milestone.pct.toFixed(0)}%</span>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-foreground/50">{milestone.next.label}</span>
                 <Lock className="h-3.5 w-3.5 text-foreground/30" />
               </div>
             </div>
-            <div className="w-full bg-white/[0.06] rounded-full h-3 overflow-hidden">
+            <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-400 to-primary transition-all duration-1000 relative"
-                style={{ width: `${Math.max(milestone.pct, 2)}%` }}
+                className="h-full rounded-full relative transition-all duration-1000"
+                style={{
+                  width: `${Math.max(milestone.pct, 2)}%`,
+                  background: "linear-gradient(90deg, hsl(152,68%,46%), hsl(152,80%,60%), hsl(152,68%,46%))",
+                  boxShadow: "0 0 20px rgba(0,255,170,0.4), 0 0 60px rgba(0,255,170,0.1)",
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 animate-shimmer" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/25 animate-shimmer" />
               </div>
             </div>
             <div className="flex justify-between mt-2">
@@ -306,94 +338,109 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-        </GlassPanel>
+        </CinematicPanel>
 
-        {/* Conversion Card - inspired by Screenshot_27 */}
-        <GlassPanel>
+        {/* Conversion Card (mirror) */}
+        <CinematicPanel glowPosition="top-right" glowColor="0,148,255">
           <div className="flex items-center gap-3 mb-5">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <RefreshCw className="h-5 w-5 text-primary" />
+            <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,148,255,0.1)", boxShadow: "0 0 20px rgba(0,148,255,0.15)" }}>
+              <RefreshCw className="h-4 w-4 text-info" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">Conversão</h3>
-              <p className="text-[10px] text-foreground/40">Relação entre pagamentos gerados e concluídos.</p>
+              <p className="text-[10px] text-foreground/30">Taxa de sucesso por método</p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <ConversionRow icon={<TrendingUp className="h-4 w-4" />} label="Conversão Geral" value={`${conversionRate}%`} pct={Number(conversionRate)} color="primary" />
-            <ConversionRow icon={<Zap className="h-4 w-4" />} label="Pix" value={`${pixConv}%`} pct={Number(pixConv)} color="primary" />
-            <ConversionRow icon={<CreditCard className="h-4 w-4" />} label="Cartão de Crédito" value={`${cardConv}%`} pct={Number(cardConv)} color="info" />
-            <ConversionRow icon={<FileText className="h-4 w-4" />} label="Boleto" value={`${boletoConv}%`} pct={Number(boletoConv)} color="warning" />
-            <ConversionRow icon={<AlertCircle className="h-4 w-4" />} label="Taxa de estorno" value={`${chargebackRate}%`} pct={Number(chargebackRate)} color="destructive" />
+          <div className="space-y-3.5">
+            <ConversionRow icon={<TrendingUp className="h-4 w-4" />} label="Conversão Geral" value={`${conversionRate}%`} pct={Number(conversionRate)} glowColor="0,255,170" />
+            <ConversionRow icon={<Zap className="h-4 w-4" />} label="Pix" value={`${pixConv}%`} pct={Number(pixConv)} glowColor="0,255,170" />
+            <ConversionRow icon={<CreditCard className="h-4 w-4" />} label="Cartão de Crédito" value={`${cardConv}%`} pct={Number(cardConv)} glowColor="0,148,255" />
+            <ConversionRow icon={<FileText className="h-4 w-4" />} label="Boleto" value={`${boletoConv}%`} pct={Number(boletoConv)} glowColor="255,170,0" />
+            <ConversionRow icon={<AlertCircle className="h-4 w-4" />} label="Taxa de estorno" value={`${chargebackRate}%`} pct={Number(chargebackRate)} glowColor="255,60,60" />
           </div>
-        </GlassPanel>
+        </CinematicPanel>
       </div>
 
-      {/* ===== Chart + Financial Summary ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      {/* ===== Chart + Financial (Mirrored) ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
         {/* Area Chart */}
         <div className="lg:col-span-7">
-          <GlassPanel>
+          <CinematicPanel glowPosition="bottom-left" glowColor="0,255,170">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-1 h-5 rounded-full bg-primary" />
+                <div className="w-1 h-5 rounded-full bg-primary" style={{ boxShadow: "0 0 8px rgba(0,255,170,0.5)" }} />
                 <h3 className="text-sm font-bold text-foreground">Vendas ({selectedPeriod.label})</h3>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,68%,46%,0.8)]" />
+              <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,255,170,0.06)", boxShadow: "0 0 15px rgba(0,255,170,0.08)" }}>
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" style={{ boxShadow: "0 0 8px rgba(0,255,170,0.8)" }} />
                 Tempo real
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={chartData}>
                 <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="hsl(152, 68%, 46%)" stopOpacity={0} />
+                  <linearGradient id="neonGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(0,255,170,0.3)" stopOpacity={1} />
+                    <stop offset="50%" stopColor="rgba(0,255,170,0.08)" stopOpacity={1} />
+                    <stop offset="100%" stopColor="rgba(0,255,170,0)" stopOpacity={1} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(225, 20%, 10%)" vertical={false} />
-                <XAxis dataKey="name" stroke="hsl(225, 10%, 25%)" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(225, 10%, 25%)" fontSize={10} tickFormatter={(v) => `${v}`} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.12)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="rgba(255,255,255,0.12)" fontSize={10} tickFormatter={(v) => `${v}`} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(225, 28%, 7%)",
-                    border: "1px solid hsl(225, 20%, 14%)",
-                    borderRadius: "12px",
+                    background: "rgba(11,15,23,0.95)",
+                    border: "1px solid rgba(0,255,170,0.15)",
+                    borderRadius: "16px",
                     fontSize: "11px",
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(0,255,170,0.08)",
                     color: "white",
+                    backdropFilter: "blur(20px)",
                   }}
                   formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]}
-                  labelStyle={{ color: "hsl(0, 0%, 45%)" }}
+                  labelStyle={{ color: "rgba(255,255,255,0.4)" }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(152, 68%, 46%)" strokeWidth={2.5} fill="url(#areaGrad)" dot={false} activeDot={{ r: 4, fill: "hsl(152, 68%, 46%)", stroke: "hsl(225, 28%, 7%)", strokeWidth: 2 }} />
+                <Area
+                  type="monotone"
+                  dataKey="vendas"
+                  stroke="rgba(0,255,170,0.9)"
+                  strokeWidth={2.5}
+                  fill="url(#neonGrad)"
+                  dot={false}
+                  activeDot={{
+                    r: 5,
+                    fill: "hsl(152, 68%, 46%)",
+                    stroke: "rgba(0,255,170,0.3)",
+                    strokeWidth: 6,
+                    style: { filter: "drop-shadow(0 0 8px rgba(0,255,170,0.6))" } as React.CSSProperties,
+                  }}
+                  style={{ filter: "drop-shadow(0 0 6px rgba(0,255,170,0.3))" }}
+                />
               </AreaChart>
             </ResponsiveContainer>
-          </GlassPanel>
+          </CinematicPanel>
         </div>
 
-        {/* Financial Summary + Status */}
+        {/* Financial Summary + Status (Mirror) */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Quick stats */}
-          <GlassPanel>
+          <CinematicPanel glowPosition="top-right" glowColor="124,58,237">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-1 h-5 rounded-full bg-primary" />
+              <div className="w-1 h-5 rounded-full" style={{ background: "hsl(280,65%,55%)", boxShadow: "0 0 8px rgba(124,58,237,0.5)" }} />
               <h3 className="text-sm font-bold text-foreground">Resumo Financeiro</h3>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <MiniStat label="Receita Bruta" value={fmtCurrency(totalRevenue)} accent />
-              <MiniStat label="Taxas" value={`- ${fmtCurrency(totalFees)}`} />
-              <MiniStat label="Chargebacks" value={String(chargebacks)} />
-              <MiniStat label="Reembolsos" value={String(refunds)} />
+              <MiniStat label="Receita Bruta" value={fmtCurrency(totalRevenue)} glowColor="0,255,170" accent />
+              <MiniStat label="Taxas" value={`- ${fmtCurrency(totalFees)}`} glowColor="255,170,0" />
+              <MiniStat label="Chargebacks" value={String(chargebacks)} glowColor="255,60,60" />
+              <MiniStat label="Reembolsos" value={String(refunds)} glowColor="0,148,255" />
             </div>
-          </GlassPanel>
+          </CinematicPanel>
 
-          {/* Status Pie */}
-          <GlassPanel>
+          <CinematicPanel glowPosition="bottom-right" glowColor="0,148,255">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-1 h-5 rounded-full bg-primary" />
+              <div className="w-1 h-5 rounded-full bg-info" style={{ boxShadow: "0 0 8px rgba(0,148,255,0.5)" }} />
               <h3 className="text-sm font-bold text-foreground">Status</h3>
             </div>
             {pieData.length > 0 ? (
@@ -413,7 +460,7 @@ export default function Dashboard() {
                     return (
                       <div key={d.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length], boxShadow: `0 0 8px ${PIE_COLORS[i % PIE_COLORS.length]}40` }} />
                           <span className="text-xs text-foreground/60 font-medium">{statusLabels[d.name] || d.name}</span>
                         </div>
                         <span className="text-xs font-bold text-foreground">{d.value}</span>
@@ -425,107 +472,182 @@ export default function Dashboard() {
             ) : (
               <div className="flex items-center justify-center h-[100px] text-xs text-foreground/30">Sem dados</div>
             )}
-          </GlassPanel>
+          </CinematicPanel>
         </div>
       </div>
 
       {/* ===== Activity Feed ===== */}
-      <GlassPanel>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full bg-primary" />
-            <h3 className="text-sm font-bold text-foreground">Atividade Recente</h3>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_hsl(152,68%,46%,0.8)]" />
-              Ao vivo
+      <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <CinematicPanel glowPosition="bottom-center" glowColor="0,255,170">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 rounded-full bg-primary" style={{ boxShadow: "0 0 8px rgba(0,255,170,0.5)" }} />
+              <h3 className="text-sm font-bold text-foreground">Atividade Recente</h3>
             </div>
-            <Link to="/financeiro/extrato" className="text-[10px] text-foreground/40 hover:text-primary font-semibold flex items-center gap-1 transition-colors">
-              Ver tudo <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {recentActivity.length === 0 ? (
-            <div className="col-span-2 flex flex-col items-center justify-center py-12 text-foreground/20">
-              <Eye className="h-8 w-8 mb-3" />
-              <p className="text-xs font-medium">Nenhuma atividade recente</p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-[10px] text-primary font-bold px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,255,170,0.06)" }}>
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" style={{ boxShadow: "0 0 8px rgba(0,255,170,0.8)" }} />
+                Ao vivo
+              </div>
+              <Link to="/financeiro/extrato" className="text-[10px] text-foreground/40 hover:text-primary font-semibold flex items-center gap-1 transition-colors duration-300">
+                Ver tudo <ArrowUpRight className="h-3 w-3" />
+              </Link>
             </div>
-          ) : (
-            recentActivity.map((item) => {
-              const isTx = "payment_method" in item;
-              const statusMap: Record<string, { color: string; label: string }> = {
-                completed: { color: "text-primary bg-primary/10", label: "Aprovado" },
-                approved: { color: "text-primary bg-primary/10", label: "Aprovado" },
-                pending: { color: "text-warning bg-warning/10", label: "Pendente" },
-                paid: { color: "text-primary bg-primary/10", label: "Pago" },
-                requested: { color: "text-warning bg-warning/10", label: "Solicitado" },
-                failed: { color: "text-destructive bg-destructive/10", label: "Falhou" },
-                rejected: { color: "text-destructive bg-destructive/10", label: "Recusado" },
-                refunded: { color: "text-info bg-info/10", label: "Reembolso" },
-                chargeback: { color: "text-destructive bg-destructive/10", label: "Chargeback" },
-              };
-              const st = statusMap[item.status] || { color: "text-foreground/40 bg-white/5", label: item.status };
-              return (
-                <div key={item.id} className="flex items-center gap-3 py-3 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300 border border-white/[0.03]">
-                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${isTx ? "bg-primary/10 text-primary" : "bg-info/10 text-info"}`}>
-                    {isTx ? <DollarSign className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${st.color}`}>
-                        {st.label}
-                      </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {recentActivity.length === 0 ? (
+              <div className="col-span-2 flex flex-col items-center justify-center py-12 text-foreground/20">
+                <Eye className="h-8 w-8 mb-3" />
+                <p className="text-xs font-medium">Nenhuma atividade recente</p>
+              </div>
+            ) : (
+              recentActivity.map((item) => {
+                const isTx = "payment_method" in item;
+                const statusMap: Record<string, { color: string; label: string; glow: string }> = {
+                  completed: { color: "text-primary", label: "Aprovado", glow: "0,255,170" },
+                  approved: { color: "text-primary", label: "Aprovado", glow: "0,255,170" },
+                  pending: { color: "text-warning", label: "Pendente", glow: "255,170,0" },
+                  paid: { color: "text-primary", label: "Pago", glow: "0,255,170" },
+                  requested: { color: "text-warning", label: "Solicitado", glow: "255,170,0" },
+                  failed: { color: "text-destructive", label: "Falhou", glow: "255,60,60" },
+                  rejected: { color: "text-destructive", label: "Recusado", glow: "255,60,60" },
+                  refunded: { color: "text-info", label: "Reembolso", glow: "0,148,255" },
+                  chargeback: { color: "text-destructive", label: "Chargeback", glow: "255,60,60" },
+                };
+                const st = statusMap[item.status] || { color: "text-foreground/40", label: item.status, glow: "255,255,255" };
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 py-3 px-3 rounded-2xl transition-all duration-300 border border-white/[0.04] hover:border-white/[0.08] group cursor-default"
+                    style={{
+                      background: "rgba(255,255,255,0.02)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                      e.currentTarget.style.boxShadow = `0 0 30px rgba(${st.glow},0.05)`;
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }}
+                  >
+                    <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{
+                      background: isTx ? "rgba(0,255,170,0.08)" : "rgba(0,148,255,0.08)",
+                      boxShadow: isTx ? "0 0 15px rgba(0,255,170,0.1)" : "0 0 15px rgba(0,148,255,0.1)",
+                    }}>
+                      {isTx ? <DollarSign className="h-4 w-4 text-primary" /> : <ArrowDownRight className="h-4 w-4 text-info" />}
                     </div>
-                    <p className="text-[11px] text-foreground/35 truncate mt-0.5">
-                      {isTx ? (item as Tables<"transactions">).customer_name || "Transação" : "Saque"}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${st.color}`} style={{ background: `rgba(${st.glow},0.08)` }}>
+                          {st.label}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-foreground/35 truncate mt-0.5">
+                        {isTx ? (item as Tables<"transactions">).customer_name || "Transação" : "Saque"}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-foreground/25 whitespace-nowrap font-medium">{formatRelativeTime(item.created_at)}</span>
                   </div>
-                  <span className="text-[10px] text-foreground/25 whitespace-nowrap font-medium">{formatRelativeTime(item.created_at)}</span>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </GlassPanel>
+                );
+              })
+            )}
+          </div>
+        </CinematicPanel>
+      </div>
     </div>
   );
 }
 
 /* ============ Sub-components ============ */
 
-function GlassPanel({ children }: { children: React.ReactNode }) {
+function CinematicPanel({ children, glowPosition, glowColor }: { children: React.ReactNode; glowPosition?: string; glowColor?: string }) {
+  const gc = glowColor || "0,255,170";
+  const glowStyles: Record<string, React.CSSProperties> = {
+    "top-left": { top: "-40%", left: "-20%", width: "300px", height: "300px" },
+    "top-right": { top: "-40%", right: "-20%", width: "300px", height: "300px" },
+    "bottom-left": { bottom: "-40%", left: "-20%", width: "300px", height: "300px" },
+    "bottom-right": { bottom: "-40%", right: "-20%", width: "300px", height: "300px" },
+    "bottom-center": { bottom: "-30%", left: "30%", width: "300px", height: "300px" },
+  };
+  const glowStyle = glowStyles[glowPosition || "top-left"] || glowStyles["top-left"];
+
   return (
-    <div className="bg-white/[0.02] backdrop-blur-2xl rounded-2xl p-5 relative overflow-hidden border border-white/[0.05] hover:border-white/[0.08] transition-all duration-500">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+    <div
+      className="rounded-[18px] p-5 relative overflow-hidden transition-all duration-500 group/panel"
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        backdropFilter: "blur(24px)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        boxShadow: `0 0 0 1px rgba(${gc},0.03), 0 10px 40px rgba(0,0,0,0.5)`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.1)";
+        e.currentTarget.style.boxShadow = `0 0 0 1px rgba(${gc},0.06), 0 15px 50px rgba(0,0,0,0.6), 0 0 40px rgba(${gc},0.04)`;
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.06)";
+        e.currentTarget.style.boxShadow = `0 0 0 1px rgba(${gc},0.03), 0 10px 40px rgba(0,0,0,0.5)`;
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      {/* Top highlight line */}
+      <div className="absolute top-0 left-0 w-full h-[1px]" style={{ background: `linear-gradient(90deg, transparent, rgba(${gc},0.12), transparent)` }} />
+      {/* Ambient glow */}
+      <div
+        className="absolute rounded-full blur-[100px] pointer-events-none opacity-40 group-hover/panel:opacity-60 transition-opacity duration-700"
+        style={{ ...glowStyle, background: `rgba(${gc},0.08)` }}
+      />
       <div className="relative">{children}</div>
     </div>
   );
 }
 
-function KpiCard({ label, value, sub, icon, iconBg, trend, action }: {
-  label: string; value: string; sub?: string; icon: React.ReactNode; iconBg: string; trend?: "up" | "down"; action?: { label: string; href: string };
+function KpiCard({ label, value, sub, icon, glowColor, trend, action }: {
+  label: string; value: string; sub?: string; icon: React.ReactNode; glowColor: string; trend?: "up" | "down"; action?: { label: string; href: string };
 }) {
   return (
-    <div className="bg-white/[0.02] backdrop-blur-2xl rounded-2xl p-5 group relative overflow-hidden border border-white/[0.05] hover:border-primary/15 transition-all duration-500 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_-10px_hsl(152,68%,46%,0.15)]">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-      <div className="absolute -top-16 -right-16 w-32 h-32 bg-primary/[0.03] rounded-full blur-2xl group-hover:bg-primary/[0.06] transition-all duration-700" />
+    <div
+      className="rounded-[18px] p-5 group relative overflow-hidden transition-all duration-500 cursor-default"
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        backdropFilter: "blur(24px)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        boxShadow: `0 0 0 1px rgba(${glowColor},0.03), 0 10px 40px rgba(0,0,0,0.5)`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.border = `1px solid rgba(${glowColor},0.15)`;
+        e.currentTarget.style.boxShadow = `0 0 0 1px rgba(${glowColor},0.08), 0 15px 50px rgba(0,0,0,0.6), 0 0 50px rgba(${glowColor},0.06)`;
+        e.currentTarget.style.transform = "translateY(-3px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.06)";
+        e.currentTarget.style.boxShadow = `0 0 0 1px rgba(${glowColor},0.03), 0 10px 40px rgba(0,0,0,0.5)`;
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      {/* Top highlight */}
+      <div className="absolute top-0 left-0 w-full h-[1px]" style={{ background: `linear-gradient(90deg, transparent, rgba(${glowColor},0.15), transparent)` }} />
+      {/* Corner glow */}
+      <div className="absolute -top-16 -right-16 w-32 h-32 rounded-full blur-[50px] opacity-40 group-hover:opacity-70 transition-all duration-700" style={{ background: `rgba(${glowColor},0.1)` }} />
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] font-bold text-foreground/35 uppercase tracking-wider">{label}</p>
-          <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${iconBg} transition-all duration-300`}>
+          <div className="h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-300" style={{ background: `rgba(${glowColor},0.08)`, boxShadow: `0 0 15px rgba(${glowColor},0.12)`, color: `rgb(${glowColor})` }}>
             {icon}
           </div>
         </div>
-        <p className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground font-display">{value}</p>
+        <p className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground font-display" style={{ textShadow: `0 0 25px rgba(${glowColor},0.15)` }}>{value}</p>
         <div className="flex items-center justify-between mt-1.5">
           <p className="text-[10px] text-foreground/35">{sub}</p>
-          {trend === "up" && <ArrowUpRight className="h-3.5 w-3.5 text-primary" />}
+          {trend === "up" && <ArrowUpRight className="h-3.5 w-3.5 text-primary" style={{ filter: "drop-shadow(0 0 4px rgba(0,255,170,0.4))" }} />}
         </div>
         {action && (
-          <Link to={action.href} className="text-[10px] text-primary font-bold mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all duration-300">
+          <Link to={action.href} className="text-[10px] text-primary font-bold mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all duration-300" style={{ textShadow: "0 0 10px rgba(0,255,170,0.3)" }}>
             {action.label} <ArrowUpRight className="h-3 w-3" />
           </Link>
         )}
@@ -534,33 +656,25 @@ function KpiCard({ label, value, sub, icon, iconBg, trend, action }: {
   );
 }
 
-function ConversionRow({ icon, label, value, pct, color }: { icon: React.ReactNode; label: string; value: string; pct: number; color: string }) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary",
-    info: "bg-info",
-    warning: "bg-warning",
-    destructive: "bg-destructive",
-  };
-  const iconBgMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    info: "bg-info/10 text-info",
-    warning: "bg-warning/10 text-warning",
-    destructive: "bg-destructive/10 text-destructive",
-  };
+function ConversionRow({ icon, label, value, pct, glowColor }: { icon: React.ReactNode; label: string; value: string; pct: number; glowColor: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${iconBgMap[color] || iconBgMap.primary}`}>
+      <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `rgba(${glowColor},0.08)`, boxShadow: `0 0 15px rgba(${glowColor},0.1)`, color: `rgb(${glowColor})` }}>
         {icon}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs font-semibold text-foreground/70">{label}</span>
-          <span className="text-xs font-bold text-foreground">{value}</span>
+          <span className="text-xs font-bold text-foreground" style={{ textShadow: `0 0 15px rgba(${glowColor},0.2)` }}>{value}</span>
         </div>
-        <div className="w-full bg-white/[0.06] rounded-full h-1.5 overflow-hidden">
+        <div className="w-full rounded-full h-1.5 overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
           <div
-            className={`h-full rounded-full ${colorMap[color] || colorMap.primary} transition-all duration-700`}
-            style={{ width: `${Math.max(pct, 0)}%` }}
+            className="h-full rounded-full transition-all duration-700"
+            style={{
+              width: `${Math.max(pct, 0)}%`,
+              background: `rgb(${glowColor})`,
+              boxShadow: `0 0 10px rgba(${glowColor},0.4)`,
+            }}
           />
         </div>
       </div>
@@ -568,11 +682,12 @@ function ConversionRow({ icon, label, value, pct, color }: { icon: React.ReactNo
   );
 }
 
-function MiniStat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function MiniStat({ label, value, accent, glowColor }: { label: string; value: string; accent?: boolean; glowColor?: string }) {
+  const gc = glowColor || "255,255,255";
   return (
-    <div className="bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
+    <div className="rounded-xl p-3 border border-white/[0.04] transition-all duration-300 hover:border-white/[0.08]" style={{ background: "rgba(255,255,255,0.02)" }}>
       <p className="text-[9px] text-foreground/35 uppercase tracking-wider font-bold">{label}</p>
-      <p className={`text-base font-bold mt-1 ${accent ? "text-primary" : "text-foreground"} font-display`}>{value}</p>
+      <p className={`text-base font-bold mt-1 font-display ${accent ? "text-primary" : "text-foreground"}`} style={{ textShadow: accent ? `0 0 20px rgba(${gc},0.25)` : "none" }}>{value}</p>
     </div>
   );
 }
