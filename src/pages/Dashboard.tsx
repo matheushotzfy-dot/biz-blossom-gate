@@ -61,7 +61,7 @@ export default function Dashboard() {
     });
   }, [user?.id]);
 
-  const approvedTx = transactions.filter((t) => t.status === "approved");
+  const approvedTx = transactions.filter((t) => t.status === "completed");
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.amount), 0);
   const totalNet = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
   const totalFees = approvedTx.reduce((a, t) => a + Number(t.fee_amount), 0);
@@ -75,9 +75,14 @@ export default function Dashboard() {
   const boletoTx = approvedTx.filter(t => t.payment_method === "boleto");
 
   const chartData = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (6 - i));
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-    const dayTx = transactions.filter((t) => new Date(t.created_at).toDateString() === d.toDateString() && t.status === "approved");
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+    const d = new Date(now); d.setDate(d.getDate() - (6 - i));
+    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
+    const dayTx = transactions.filter((t) => {
+      const txDate = new Date(t.created_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      const compareDate = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return txDate === compareDate && t.status === "completed";
+    });
     return { name: dayStr, vendas: dayTx.reduce((a, t) => a + Number(t.amount), 0) };
   });
 

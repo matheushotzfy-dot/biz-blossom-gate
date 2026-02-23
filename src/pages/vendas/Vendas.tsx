@@ -16,7 +16,7 @@ export default function Vendas() {
       .then(({ data }) => { if (data) setTransactions(data); });
   }, [user?.id]);
 
-  const approved = transactions.filter((t) => t.status === "approved");
+  const approved = transactions.filter((t) => t.status === "completed");
   const totalSales = approved.reduce((a, t) => a + Number(t.amount), 0);
   const avgTicket = approved.length > 0 ? totalSales / approved.length : 0;
 
