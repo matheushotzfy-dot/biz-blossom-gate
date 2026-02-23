@@ -30,7 +30,7 @@ const salesItems = [
   { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
   { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
   { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
-  { title: "Documentação API", url: "/vendas/documentacao", icon: BookOpen },
+  { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
 ];
 
 const memberItems = [
@@ -52,67 +52,67 @@ export function AppSidebar() {
           <NavLink
             to={item.url}
             end={item.url === "/dashboard"}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 group"
-            activeClassName="bg-primary/10 text-primary font-semibold shadow-sm"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground/50 hover:bg-white/[0.04] hover:text-foreground transition-all duration-300 group"
+            activeClassName="bg-primary/10 text-primary font-semibold shadow-[0_0_12px_hsl(152,68%,46%,0.1)]"
           >
-            <item.icon className="h-[18px] w-[18px] shrink-0 group-hover:scale-105 transition-transform" />
-            <span className="text-[13px]">{item.title}</span>
+            <item.icon className="h-[17px] w-[17px] shrink-0 group-hover:scale-110 transition-transform duration-300" />
+            <span className="text-[13px] font-medium">{item.title}</span>
           </NavLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
     ));
 
   return (
-    <Sidebar className="w-[260px] border-r border-sidebar-border bg-[hsl(220,30%,5%)]">
+    <Sidebar className="w-[260px] border-r border-white/[0.04] gradient-sidebar">
       {/* Logo */}
-      <div className="p-5 border-b border-sidebar-border/50">
+      <div className="p-5 border-b border-white/[0.04]">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20 glow-primary">
             <CreditCard className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-white tracking-tight">PayGate</h1>
-            <p className="text-[10px] text-zinc-500">Gateway de Pagamentos</p>
+            <h1 className="text-[15px] font-bold text-foreground tracking-tight font-display">PayGate</h1>
+            <p className="text-[10px] text-foreground/30">Gateway de Pagamentos</p>
           </div>
         </div>
       </div>
 
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-foreground/20 font-bold px-3 mb-1">
             Principal
           </SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{renderItems(mainItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup className="mt-5">
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-foreground/20 font-bold px-3 mb-1">
             Financeiro
           </SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{renderItems(financeItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup className="mt-5">
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-foreground/20 font-bold px-3 mb-1">
             Vendas
           </SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{renderItems(salesItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup className="mt-5">
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-semibold px-3 mb-1">
-            Área de Membros
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-foreground/20 font-bold px-3 mb-1">
+            Membros
           </SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{renderItems(memberItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-sidebar-border/50">
+      <SidebarFooter className="p-3 border-t border-white/[0.04]">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full text-[13px] group"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground/30 hover:bg-destructive/10 hover:text-destructive transition-all duration-300 w-full text-[13px] font-medium group"
         >
-          <LogOut className="h-[18px] w-[18px] group-hover:scale-105 transition-transform" />
+          <LogOut className="h-[17px] w-[17px] group-hover:scale-110 transition-transform duration-300" />
           <span>Sair</span>
         </button>
       </SidebarFooter>
