@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, QrCode, FileText, Shield, CheckCircle2, Copy, Clock, Lock, Loader2, RefreshCw } from "lucide-react";
+import { CreditCard, QrCode, FileText, Shield, CheckCircle2, Copy, Clock, Lock, Loader2, RefreshCw, Sparkles, Zap, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,6 @@ type Product = {
 type PaymentMethod = "pix" | "credit_card" | "boleto";
 type CheckoutState = "form" | "pending" | "approved" | "failed";
 
-// Generate a unique session ID per checkout attempt
 function getCheckoutSessionId(slug: string): string {
   const key = `checkout_session_${slug}`;
   let sessionId = sessionStorage.getItem(key);
@@ -41,19 +40,16 @@ export default function PublicCheckout() {
   const [method, setMethod] = useState<PaymentMethod>("pix");
   const [processing, setProcessing] = useState(false);
   const [checkoutState, setCheckoutState] = useState<CheckoutState>("form");
-  const processingRef = useRef(false); // Anti double-click
+  const processingRef = useRef(false);
 
-  // Payment result
   const [pixData, setPixData] = useState<any>(null);
   const [boletoData, setBoletoData] = useState<any>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
 
-  // Customer form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [document, setDocument] = useState("");
 
-  // Card
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
@@ -62,14 +58,14 @@ export default function PublicCheckout() {
 
   useEffect(() => {
     if (!slug) return;
-    supabase.from("products").select("*").eq("status", "active").ilike("checkout_url", `%${slug}%`).limit(1).single()
+    // Match by slug at end of checkout_url
+    supabase.from("products").select("*").eq("status", "active").ilike("checkout_url", `%/${slug}`).limit(1).maybeSingle()
       .then(({ data }) => {
         if (data) setProduct(data as Product);
         setLoading(false);
       });
   }, [slug]);
 
-  // Poll payment status when pending
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
     const interval = setInterval(async () => {
@@ -118,7 +114,6 @@ export default function PublicCheckout() {
 
     try {
       const sessionId = getCheckoutSessionId(slug || "default");
-
       const payload: Record<string, unknown> = {
         productId: product.id,
         paymentMethod: method,
@@ -139,9 +134,7 @@ export default function PublicCheckout() {
         };
       }
 
-      const { data, error } = await supabase.functions.invoke("podpay-create-transaction", {
-        body: payload,
-      });
+      const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
 
       if (error || !data?.success) {
         toast.error(data?.error || error?.message || "Erro ao processar pagamento");
@@ -153,7 +146,6 @@ export default function PublicCheckout() {
       setTransactionId(result.transactionId);
 
       if (data.resumed) {
-        // Resumed existing payment
         setCheckoutState("pending");
         toast.info("Retomando pagamento pendente...");
         return;
@@ -204,111 +196,140 @@ export default function PublicCheckout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#05050a]">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse" />
+          <Loader2 className="h-10 w-10 animate-spin text-emerald-400 relative z-10" />
+        </div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#05050a] text-white px-4">
         <div className="text-center">
+          <div className="h-20 w-20 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mx-auto mb-6">
+            <Sparkles className="h-10 w-10 text-white/30" />
+          </div>
           <h1 className="text-2xl font-bold mb-2">Produto não encontrado</h1>
-          <p className="text-gray-500">Verifique o link e tente novamente.</p>
+          <p className="text-white/40">Verifique o link e tente novamente.</p>
         </div>
       </div>
     );
   }
 
-  // === APPROVED STATE ===
+  const price = Number(product.price);
+  const installmentOptions = Array.from({ length: 12 }, (_, i) => {
+    const n = i + 1;
+    const val = n === 1 ? price : price * (1 + 0.0199 * (n - 1)) / n;
+    return { n, val, total: n === 1 ? price : val * n };
+  });
+
+  // === APPROVED ===
   if (checkoutState === "approved") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0a0a0a] text-white">
-        <div className="text-center animate-slide-up max-w-md">
-          <div className="h-24 w-24 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6 ring-2 ring-emerald-500/30">
-            <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#05050a] text-white">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/[0.03] rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/[0.02] rounded-full blur-3xl" />
+        </div>
+        <div className="text-center animate-slide-up max-w-md relative z-10">
+          <div className="relative mx-auto mb-8 w-28 h-28">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse" />
+            <div className="relative h-28 w-28 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+              <CheckCircle2 className="h-14 w-14 text-white" />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Pagamento Confirmado!</h1>
-          <p className="text-gray-400 mb-6">
-            Seu pagamento de <strong className="text-white">R$ {Number(product.price).toFixed(2)}</strong> foi processado com sucesso.
+          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">Pagamento Confirmado!</h1>
+          <p className="text-white/50 mb-8 text-lg">
+            Seu pagamento de <strong className="text-emerald-400 font-semibold">R$ {price.toFixed(2)}</strong> foi aprovado.
           </p>
-          <div className="rounded-xl p-4 bg-white/5 border border-white/10">
-            <p className="text-sm text-gray-500">Produto</p>
-            <p className="font-semibold">{product.name}</p>
+          <div className="rounded-2xl p-5 bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
+            <p className="text-xs text-white/30 uppercase tracking-widest mb-1">Produto</p>
+            <p className="font-semibold text-lg">{product.name}</p>
           </div>
-          <p className="text-xs text-gray-500 mt-6">Confirmação enviada para {email}</p>
+          <p className="text-xs text-white/30 mt-8">Confirmação enviada para {email}</p>
         </div>
       </div>
     );
   }
 
-  // === FAILED STATE ===
+  // === FAILED ===
   if (checkoutState === "failed") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0a0a0a] text-white">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#05050a] text-white">
         <div className="text-center animate-slide-up max-w-md">
-          <div className="h-24 w-24 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-6 ring-2 ring-red-500/30">
-            <CreditCard className="h-12 w-12 text-red-500" />
+          <div className="relative mx-auto mb-8 w-28 h-28">
+            <div className="absolute inset-0 rounded-full bg-red-500/20 blur-xl animate-pulse" />
+            <div className="relative h-28 w-28 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-2xl shadow-red-500/30">
+              <CreditCard className="h-14 w-14 text-white" />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Pagamento Recusado</h1>
-          <p className="text-gray-400 mb-6">
-            Não foi possível processar o pagamento. Tente novamente com outro método ou cartão.
+          <h1 className="text-4xl font-bold mb-3">Pagamento Recusado</h1>
+          <p className="text-white/50 mb-8 text-lg">
+            Não foi possível processar o pagamento. Tente novamente.
           </p>
           <Button
             onClick={retryPayment}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-12 px-8 gap-2"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white rounded-2xl h-14 px-10 gap-2 text-base font-semibold shadow-xl shadow-emerald-500/20 transition-all hover:shadow-emerald-500/30 hover:scale-[1.02]"
           >
-            <RefreshCw className="h-4 w-4" /> Tentar Novamente
+            <RefreshCw className="h-5 w-5" /> Tentar Novamente
           </Button>
         </div>
       </div>
     );
   }
 
-  // === PENDING STATE (PIX/Boleto waiting) ===
+  // === PENDING ===
   if (checkoutState === "pending") {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
-        <div className="max-w-lg mx-auto px-4 py-8 md:py-16">
-          <div className="text-center mb-8">
-            <div className="h-16 w-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4 ring-2 ring-yellow-500/30 animate-pulse">
-              <Clock className="h-8 w-8 text-yellow-500" />
+      <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#05050a] text-white">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/[0.02] rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-lg mx-auto px-4 py-12 md:py-20 relative z-10">
+          <div className="text-center mb-10">
+            <div className="relative mx-auto mb-6 w-20 h-20">
+              <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-xl animate-pulse" />
+              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-2xl shadow-amber-500/20">
+                <Clock className="h-10 w-10 text-white" />
+              </div>
             </div>
-            <h1 className="text-2xl font-bold mb-1">Pagamento Pendente</h1>
-            <p className="text-gray-400 text-sm">Aguardando confirmação do pagamento</p>
+            <h1 className="text-3xl font-bold mb-2">Aguardando Pagamento</h1>
+            <p className="text-white/40">Finalize o pagamento para confirmar</p>
           </div>
 
-          <div className="rounded-2xl p-6 bg-white/[0.03] border border-white/10 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-400 text-sm">Produto</span>
+          <div className="rounded-3xl p-6 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm mb-6">
+            <div className="flex justify-between items-center mb-4 pb-4 border-b border-white/[0.06]">
+              <span className="text-white/40 text-sm">Produto</span>
               <span className="font-semibold">{product.name}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Valor</span>
-              <span className="font-bold text-xl text-emerald-400">R$ {Number(product.price).toFixed(2)}</span>
+              <span className="text-white/40 text-sm">Valor</span>
+              <span className="font-bold text-2xl text-emerald-400">R$ {price.toFixed(2)}</span>
             </div>
           </div>
 
-          {/* PIX QR Code */}
           {pixData && (
-            <div className="rounded-2xl p-6 bg-white/[0.03] border border-white/10 mb-6">
-              <h3 className="text-sm font-semibold flex items-center gap-2 mb-4 text-center justify-center">
-                <QrCode className="h-4 w-4 text-emerald-400" /> Escaneie o QR Code PIX
+            <div className="rounded-3xl p-6 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm mb-6">
+              <h3 className="text-sm font-semibold flex items-center gap-2 mb-5 justify-center text-emerald-400">
+                <QrCode className="h-4 w-4" /> Escaneie o QR Code PIX
               </h3>
               {pixData.qrCode && (
-                <div className="flex justify-center mb-4">
-                  <div className="bg-white p-3 rounded-xl">
-                    <img src={`data:image/png;base64,${pixData.qrCode}`} alt="QR Code PIX" className="h-48 w-48" />
+                <div className="flex justify-center mb-5">
+                  <div className="bg-white p-4 rounded-2xl shadow-2xl">
+                    <img src={`data:image/png;base64,${pixData.qrCode}`} alt="QR Code PIX" className="h-52 w-52" />
                   </div>
                 </div>
               )}
-              <p className="text-xs text-gray-400 mb-3 flex items-center gap-1 justify-center">
+              <p className="text-xs text-white/30 mb-4 flex items-center gap-1 justify-center">
                 <Clock className="h-3 w-3" /> Expira em 30 minutos
               </p>
               {pixData.qrCodeText && (
                 <Button
-                  type="button" variant="outline" className="w-full gap-2 border-white/10 hover:bg-white/5"
+                  type="button"
+                  className="w-full gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-white rounded-2xl h-12 transition-all"
                   onClick={() => { navigator.clipboard.writeText(pixData.qrCodeText); toast.success("Código copiado!"); }}
                 >
                   <Copy className="h-4 w-4" /> Copiar código PIX
@@ -317,18 +338,17 @@ export default function PublicCheckout() {
             </div>
           )}
 
-          {/* Boleto */}
           {boletoData && (
-            <div className="rounded-2xl p-6 bg-white/[0.03] border border-white/10 mb-6 space-y-3">
-              <h3 className="text-sm font-semibold text-center">Boleto gerado — vencimento em 3 dias úteis</h3>
+            <div className="rounded-3xl p-6 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm mb-6 space-y-3">
+              <h3 className="text-sm font-semibold text-center text-emerald-400">Boleto gerado — vencimento em 3 dias úteis</h3>
               {boletoData.url && (
-                <Button type="button" variant="outline" className="w-full gap-2 border-white/10 hover:bg-white/5"
+                <Button type="button" className="w-full gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-white rounded-2xl h-12"
                   onClick={() => window.open(boletoData.url, "_blank")}>
                   <FileText className="h-4 w-4" /> Visualizar Boleto
                 </Button>
               )}
               {boletoData.barCode && (
-                <Button type="button" variant="outline" className="w-full gap-2 border-white/10 hover:bg-white/5"
+                <Button type="button" className="w-full gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-white rounded-2xl h-12"
                   onClick={() => { navigator.clipboard.writeText(boletoData.barCode); toast.success("Código copiado!"); }}>
                   <Copy className="h-4 w-4" /> Copiar código de barras
                 </Button>
@@ -337,10 +357,10 @@ export default function PublicCheckout() {
           )}
 
           <div className="text-center">
-            <p className="text-xs text-gray-500 flex items-center justify-center gap-1 mb-4">
+            <p className="text-xs text-white/20 flex items-center justify-center gap-1 mb-4">
               <RefreshCw className="h-3 w-3 animate-spin" /> Verificando status automaticamente...
             </p>
-            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-white" onClick={retryPayment}>
+            <Button variant="ghost" size="sm" className="text-white/30 hover:text-white" onClick={retryPayment}>
               Cancelar e tentar outro método
             </Button>
           </div>
@@ -350,128 +370,141 @@ export default function PublicCheckout() {
   }
 
   // === FORM STATE ===
-  const price = Number(product.price);
-  const installmentOptions = Array.from({ length: 12 }, (_, i) => {
-    const n = i + 1;
-    const val = n === 1 ? price : price * (1 + 0.0199 * (n - 1)) / n;
-    return { n, val, total: n === 1 ? price : val * n };
-  });
+  const inputClass = "mt-1.5 h-12 rounded-xl bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all";
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <div className="max-w-lg mx-auto px-4 py-8 md:py-16">
+    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#05050a] text-white relative overflow-hidden">
+      {/* Ambient effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-emerald-500/[0.03] rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-emerald-500/[0.02] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/[0.01] rounded-full blur-3xl" />
+      </div>
+
+      <div className="max-w-[480px] mx-auto px-4 py-8 md:py-14 relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
-            <Lock className="h-7 w-7 text-white" />
+          <div className="relative inline-block mb-5">
+            <div className="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-lg" />
+            <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-emerald-500/25">
+              <Zap className="h-8 w-8 text-white" />
+            </div>
           </div>
-          <h1 className="text-xl font-bold mb-1">{product.name}</h1>
-          {product.description && <p className="text-sm text-gray-400">{product.description}</p>}
+          <h1 className="text-2xl font-bold mb-1.5 tracking-tight">{product.name}</h1>
+          {product.description && <p className="text-sm text-white/40 max-w-xs mx-auto">{product.description}</p>}
         </div>
 
-        {/* Price card */}
-        <div className="rounded-2xl p-6 mb-6 text-center bg-white/[0.03] border border-white/10 backdrop-blur-sm">
-          <p className="text-sm text-gray-400 mb-1">Total a pagar</p>
-          <p className="text-4xl font-bold tracking-tight">
-            R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </p>
-          {method === "credit_card" && installments !== "1" && (
-            <p className="text-sm text-emerald-400 mt-1">
-              ou {installments}x de R$ {installmentOptions[parseInt(installments) - 1]?.val.toFixed(2)}
+        {/* Price hero */}
+        <div className="rounded-3xl p-7 mb-7 text-center bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] to-transparent" />
+          <div className="relative z-10">
+            <p className="text-xs text-white/30 uppercase tracking-[0.2em] mb-2 font-medium">Total a pagar</p>
+            <p className="text-5xl font-bold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+              R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-          )}
+            {method === "credit_card" && installments !== "1" && (
+              <p className="text-sm text-emerald-400 mt-2 font-medium">
+                ou {installments}x de R$ {installmentOptions[parseInt(installments) - 1]?.val.toFixed(2)}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Payment method tabs */}
-        <div className="flex rounded-xl p-1 mb-6 bg-white/[0.03] border border-white/10">
+        <div className="flex rounded-2xl p-1.5 mb-7 bg-white/[0.02] border border-white/[0.06]">
           {([
-            { id: "pix" as const, icon: QrCode, label: "PIX" },
-            { id: "credit_card" as const, icon: CreditCard, label: "Cartão" },
-            { id: "boleto" as const, icon: FileText, label: "Boleto" },
+            { id: "pix" as const, icon: QrCode, label: "PIX", badge: "Instantâneo" },
+            { id: "credit_card" as const, icon: CreditCard, label: "Cartão", badge: "Até 12x" },
+            { id: "boleto" as const, icon: FileText, label: "Boleto", badge: "1-3 dias" },
           ]).map((m) => (
             <button
               key={m.id}
               onClick={() => { setMethod(m.id); setPixData(null); setBoletoData(null); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 flex flex-col items-center gap-1 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 method === m.id
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 scale-[1.02]"
+                  : "text-white/30 hover:text-white/60"
               }`}
             >
-              <m.icon className="h-4 w-4" />
-              {m.label}
+              <m.icon className="h-5 w-5" />
+              <span className="text-xs font-semibold">{m.label}</span>
             </button>
           ))}
         </div>
 
-        <form onSubmit={handlePay}>
+        <form onSubmit={handlePay} className="space-y-5">
           {/* Customer info */}
-          <div className="rounded-2xl p-5 mb-4 space-y-4 bg-white/[0.03] border border-white/10">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <span className="h-1 w-4 bg-emerald-500 rounded-full" />
-              Seus dados
+          <div className="rounded-3xl p-6 space-y-4 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 flex items-center gap-2">
+              <span className="h-1 w-5 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full" />
+              Dados pessoais
             </h3>
             <div>
-              <Label className="text-xs text-gray-300">Nome completo</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+              <Label className="text-xs text-white/50 font-medium">Nome completo</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome completo" required className={inputClass} />
             </div>
             <div>
-              <Label className="text-xs text-gray-300">E-mail</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+              <Label className="text-xs text-white/50 font-medium">E-mail</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required className={inputClass} />
             </div>
             <div>
-              <Label className="text-xs text-gray-300">CPF</Label>
-              <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+              <Label className="text-xs text-white/50 font-medium">CPF</Label>
+              <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} />
             </div>
           </div>
 
           {/* PIX info */}
           {method === "pix" && (
-            <div className="rounded-2xl p-5 mb-4 bg-white/[0.03] border border-white/10">
-              <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
-                <span className="h-1 w-4 bg-emerald-500 rounded-full" />
-                Pagamento via PIX
-              </h3>
-              <p className="text-sm text-gray-400">
-                Clique em "Pagar" para gerar o QR Code PIX. Pagamento confirmado instantaneamente.
+            <div className="rounded-3xl p-6 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <QrCode className="h-5 w-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold">Pagamento via PIX</h3>
+                  <p className="text-xs text-white/30">Confirmação instantânea</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/40">
+                Clique em "Pagar" para gerar o QR Code PIX.
               </p>
             </div>
           )}
 
           {/* Credit Card */}
           {method === "credit_card" && (
-            <div className="rounded-2xl p-5 mb-4 space-y-4 bg-white/[0.03] border border-white/10">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <span className="h-1 w-4 bg-emerald-500 rounded-full" />
-                Dados do Cartão
+            <div className="rounded-3xl p-6 space-y-4 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 flex items-center gap-2">
+                <span className="h-1 w-5 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full" />
+                Dados do cartão
               </h3>
               <div>
-                <Label className="text-xs text-gray-300">Número do cartão</Label>
-                <Input value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+                <Label className="text-xs text-white/50 font-medium">Número do cartão</Label>
+                <Input value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" required className={inputClass} />
               </div>
               <div>
-                <Label className="text-xs text-gray-300">Nome no cartão</Label>
-                <Input value={cardName} onChange={(e) => setCardName(e.target.value.toUpperCase())} placeholder="Como está no cartão" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+                <Label className="text-xs text-white/50 font-medium">Nome no cartão</Label>
+                <Input value={cardName} onChange={(e) => setCardName(e.target.value.toUpperCase())} placeholder="Como está no cartão" required className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-gray-300">Validade</Label>
-                  <Input value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+                  <Label className="text-xs text-white/50 font-medium">Validade</Label>
+                  <Input value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-300">CVV</Label>
-                  <Input value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" required className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500" />
+                  <Label className="text-xs text-white/50 font-medium">CVV</Label>
+                  <Input value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" required className={inputClass} />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-gray-300">Parcelas</Label>
+                <Label className="text-xs text-white/50 font-medium">Parcelas</Label>
                 <select
                   value={installments}
                   onChange={(e) => setInstallments(e.target.value)}
-                  className="w-full mt-1 h-10 rounded-md border bg-white/5 border-white/10 text-white px-3 text-sm"
+                  className="w-full mt-1.5 h-12 rounded-xl border bg-white/[0.04] border-white/[0.08] text-white px-4 text-sm focus:border-emerald-500/50 focus:outline-none transition-all"
                 >
                   {installmentOptions.map((opt) => (
-                    <option key={opt.n} value={opt.n} className="bg-[#1a1a1a]">
+                    <option key={opt.n} value={opt.n} className="bg-[#111]">
                       {opt.n}x de R$ {opt.val.toFixed(2)} {opt.n === 1 ? "(à vista)" : `(total R$ ${opt.total.toFixed(2)})`}
                     </option>
                   ))}
@@ -482,13 +515,18 @@ export default function PublicCheckout() {
 
           {/* Boleto info */}
           {method === "boleto" && (
-            <div className="rounded-2xl p-5 mb-4 bg-white/[0.03] border border-white/10">
-              <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
-                <span className="h-1 w-4 bg-emerald-500 rounded-full" />
-                Boleto Bancário
-              </h3>
-              <p className="text-sm text-gray-400">
-                O boleto será gerado após clicar em "Pagar". Prazo de compensação: 1-3 dias úteis.
+            <div className="rounded-3xl p-6 bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold">Boleto Bancário</h3>
+                  <p className="text-xs text-white/30">Compensação em 1-3 dias úteis</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/40">
+                O boleto será gerado após clicar em "Pagar".
               </p>
             </div>
           )}
@@ -497,28 +535,44 @@ export default function PublicCheckout() {
           <Button
             type="submit"
             disabled={processing}
-            className="w-full h-14 text-base font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-[60px] text-base font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-2xl shadow-emerald-500/25 transition-all duration-300 hover:shadow-emerald-500/40 hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {processing ? (
               <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
                 Processando...
               </span>
             ) : (
-              <>
-                <Lock className="h-4 w-4 mr-2" />
+              <span className="flex items-center gap-2">
+                <Lock className="h-4 w-4" />
                 Pagar R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-              </>
+              </span>
             )}
           </Button>
 
-          {/* Security badges */}
-          <div className="flex items-center justify-center gap-6 mt-6 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> SSL Seguro</span>
-            <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Dados protegidos</span>
+          {/* Trust badges */}
+          <div className="flex items-center justify-center gap-8 mt-8">
+            <div className="flex flex-col items-center gap-1">
+              <div className="h-8 w-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+                <Lock className="h-3.5 w-3.5 text-emerald-400" />
+              </div>
+              <span className="text-[10px] text-white/20 font-medium">SSL 256-bit</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="h-8 w-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              </div>
+              <span className="text-[10px] text-white/20 font-medium">Dados seguros</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="h-8 w-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+                <Shield className="h-3.5 w-3.5 text-emerald-400" />
+              </div>
+              <span className="text-[10px] text-white/20 font-medium">Antifraude</span>
+            </div>
           </div>
 
-          <p className="text-center text-[10px] text-gray-600 mt-4">
+          <p className="text-center text-[10px] text-white/15 mt-4">
             Processado com segurança • Ao pagar você concorda com os termos de uso
           </p>
         </form>

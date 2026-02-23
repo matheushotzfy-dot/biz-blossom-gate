@@ -21,6 +21,16 @@ export default function Checkout() {
     toast.success("Link copiado!");
   };
 
+  const getSlug = (url: string) => {
+    const parts = url.split("/");
+    return parts[parts.length - 1];
+  };
+
+  const openCheckout = (url: string) => {
+    const slug = getSlug(url);
+    window.open(`/pay/${slug}`, "_blank");
+  };
+
   return (
     <div className="space-y-6 dark">
       <div>
@@ -32,7 +42,7 @@ export default function Checkout() {
 
       <div className="bg-card rounded-xl border border-border">
         <div className="p-5 border-b border-border">
-          <h3 className="text-sm font-semibold">Links de Pagamento</h3>
+          <h3 className="text-sm font-semibold text-foreground">Links de Pagamento</h3>
           <p className="text-xs text-muted-foreground mt-1">Compartilhe esses links para receber pagamentos</p>
         </div>
         <div className="divide-y divide-border">
@@ -42,17 +52,22 @@ export default function Checkout() {
             products.map((p) => (
               <div key={p.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-sm">{p.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">R$ {Number(p.price).toFixed(2)}</p>
+                  <h4 className="font-semibold text-sm text-foreground">{p.name}</h4>
+                  <p className="text-xs text-foreground mt-0.5">R$ {Number(p.price).toFixed(2)}</p>
                   {p.checkout_url && (
                     <p className="text-xs font-mono text-primary mt-1 truncate">{p.checkout_url}</p>
                   )}
                 </div>
                 <div className="flex gap-2 ml-4">
                   {p.checkout_url && (
-                    <Button variant="outline" size="sm" className="gap-1" onClick={() => copyLink(p.checkout_url!)}>
-                      <Copy className="h-3 w-3" /> Copiar
-                    </Button>
+                    <>
+                      <Button variant="outline" size="sm" className="gap-1" onClick={() => openCheckout(p.checkout_url!)}>
+                        <Eye className="h-3 w-3" /> Visualizar
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-1" onClick={() => copyLink(p.checkout_url!)}>
+                        <Copy className="h-3 w-3" /> Copiar
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -62,7 +77,7 @@ export default function Checkout() {
       </div>
 
       <div className="bg-card rounded-xl border border-border p-6">
-        <h3 className="font-semibold mb-3">Como usar o Checkout</h3>
+        <h3 className="font-semibold mb-3 text-foreground">Como usar o Checkout</h3>
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>1. Cadastre um produto na seção <strong className="text-foreground">Produtos</strong>.</p>
           <p>2. Um link de checkout será gerado automaticamente.</p>
