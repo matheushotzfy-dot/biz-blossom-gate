@@ -48,17 +48,18 @@ export default function Dashboard() {
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
+    const uid = user.id;
     Promise.all([
-      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(50),
-      supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(10),
+      supabase.from("transactions").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(50),
+      supabase.from("profiles").select("*").eq("user_id", uid).single(),
+      supabase.from("withdrawals").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(10),
     ]).then(([txRes, profileRes, wdRes]) => {
       if (txRes.data) setTransactions(txRes.data);
       if (profileRes.data) setProfile(profileRes.data);
       if (wdRes.data) setWithdrawals(wdRes.data);
     });
-  }, [user]);
+  }, [user?.id]);
 
   const approvedTx = transactions.filter((t) => t.status === "approved");
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.amount), 0);

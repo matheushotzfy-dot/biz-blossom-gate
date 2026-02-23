@@ -15,10 +15,11 @@ export default function Extrato() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("transactions").select("*").order("created_at", { ascending: false })
+    if (!user?.id) return;
+    const uid = user.id;
+    supabase.from("transactions").select("*").eq("user_id", uid).order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setTransactions(data); });
-  }, [user]);
+  }, [user?.id]);
 
   const filtered = transactions.filter((tx) => {
     const matchSearch = !search || tx.customer_name?.toLowerCase().includes(search.toLowerCase()) || tx.id.includes(search);
