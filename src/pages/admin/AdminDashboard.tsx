@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     if (!user) return;
     supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle()
       .then(({ data }) => {
-        if (!data) { navigate("/admin-admin"); return; }
+        if (!data) { navigate("/admin-matheus"); return; }
         setIsAdmin(true);
         setLoading(false);
         loadData();
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/admin-admin");
+    navigate("/admin-matheus");
   };
 
   return (
@@ -115,10 +115,10 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/admin-admin/usuarios" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
+          <Link to="/admin-matheus/usuarios" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
             <Users className="h-3.5 w-3.5" /> Usuários
           </Link>
-          <Link to="/admin-admin/configuracoes" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
+          <Link to="/admin-matheus/configuracoes" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
             <Settings className="h-3.5 w-3.5" /> Config
           </Link>
           <button onClick={handleLogout} className="text-xs text-zinc-500 hover:text-red-400 flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-red-500/5 transition-colors ml-2">

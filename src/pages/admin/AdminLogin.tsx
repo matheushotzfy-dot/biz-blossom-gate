@@ -39,7 +39,7 @@ export default function AdminLogin() {
       }
 
       toast.success("Bem-vindo ao painel administrativo!");
-      navigate("/admin-admin/dashboard");
+      navigate("/admin-matheus/dashboard");
     } catch (err: any) {
       setError(err.message || "Credenciais inválidas");
     } finally {
