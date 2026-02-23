@@ -11,10 +11,11 @@ export default function Checkout() {
   const [products, setProducts] = useState<Tables<"products">[]>([]);
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: false })
+    if (!user?.id) return;
+    const uid = user.id;
+    supabase.from("products").select("*").eq("user_id", uid).eq("status", "active").order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setProducts(data); });
-  }, [user]);
+  }, [user?.id]);
 
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url);
