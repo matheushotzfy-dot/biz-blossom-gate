@@ -177,7 +177,6 @@ export default function DadosBancarios() {
     setNewPixType("");
     setNewPixValue("");
     loadPixKeys();
-    // Sync first key to profiles for cashout compatibility
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };
     if (keys && keys.length > 0) {
       await supabase.from("profiles").update({ pix_key: keys[0].key_value, pix_key_type: keys[0].key_type }).eq("user_id", user.id);
@@ -189,7 +188,6 @@ export default function DadosBancarios() {
     await supabase.from("pix_keys").delete().eq("id", id);
     toast.success("Chave removida");
     loadPixKeys();
-    // Sync profiles
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };
     if (keys && keys.length > 0) {
       await supabase.from("profiles").update({ pix_key: keys[0].key_value, pix_key_type: keys[0].key_type }).eq("user_id", user.id);
@@ -208,27 +206,26 @@ export default function DadosBancarios() {
       <Panel>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)" }}>
-              <Key className="h-4 w-4 text-[#080c18]" />
+            <div className="h-9 w-9 rounded-xl flex items-center justify-center gradient-primary">
+              <Key className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-[15px]">Chaves PIX</h3>
-              <p className="text-[11px] text-white/30">Até 3 chaves • Utilizadas para saques</p>
+              <h3 className="font-bold text-foreground text-[15px]">Chaves PIX</h3>
+              <p className="text-[11px] text-muted-foreground">Até 3 chaves • Utilizadas para saques</p>
             </div>
           </div>
-          <span className="text-[12px] font-mono text-white/30">{pixKeys.length}/3</span>
+          <span className="text-[12px] font-mono text-muted-foreground">{pixKeys.length}/3</span>
         </div>
 
-        {/* Existing keys */}
         {pixKeys.length > 0 && (
           <div className="space-y-2 mb-4">
             {pixKeys.map((pk) => (
-              <div key={pk.id} className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div key={pk.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
                 <div>
-                  <p className="text-[11px] text-white/30 uppercase tracking-wider font-semibold">{pixTypeLabel(pk.key_type)}</p>
-                  <p className="font-mono text-white text-[14px] mt-0.5">{pk.key_value}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">{pixTypeLabel(pk.key_type)}</p>
+                  <p className="font-mono text-foreground text-[14px] mt-0.5">{pk.key_value}</p>
                 </div>
-                <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDeletePix(pk.id)}>
+                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeletePix(pk.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -236,31 +233,30 @@ export default function DadosBancarios() {
           </div>
         )}
 
-        {/* Add new key */}
         {pixKeys.length < 3 && (
-          <div className="space-y-3 pt-2 border-t border-white/[0.04]">
+          <div className="space-y-3 pt-2 border-t border-border">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-white/50 text-[12px]">Tipo da Chave</Label>
+                <Label className="text-muted-foreground text-[12px]">Tipo da Chave</Label>
                 <Select value={newPixType} onValueChange={(v) => { setNewPixType(v); setNewPixValue(""); setPixError(null); }}>
-                  <SelectTrigger className="text-white border-white/[0.08] bg-white/[0.03]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {pixKeyTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-white/50 text-[12px]">Chave PIX</Label>
+                <Label className="text-muted-foreground text-[12px]">Chave PIX</Label>
                 <Input
                   value={newPixValue}
                   onChange={e => { setNewPixValue(formatPixInput(newPixType, e.target.value)); setPixError(null); }}
                   placeholder={getPlaceholder(newPixType)}
-                  className="border-white/[0.08] bg-white/[0.03] text-white font-mono"
+                  className="font-mono"
                 />
               </div>
             </div>
-            {pixError && <p className="text-[12px] text-red-400">{pixError}</p>}
-            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>
+            {pixError && <p className="text-[12px] text-destructive">{pixError}</p>}
+            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2 gradient-primary text-primary-foreground">
               <Plus className="h-4 w-4" /> Adicionar Chave
             </Button>
           </div>
@@ -269,10 +265,10 @@ export default function DadosBancarios() {
 
       {/* Bank Accounts Section */}
       <div className="flex items-center justify-between">
-        <h3 className="text-white/40 text-[12px] uppercase tracking-widest font-semibold">Contas Bancárias</h3>
+        <h3 className="text-muted-foreground text-[12px] uppercase tracking-widest font-semibold">Contas Bancárias</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}><Plus className="h-4 w-4" /> Nova Conta</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> Nova Conta</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Cadastrar Conta Bancária</DialogTitle></DialogHeader>
@@ -288,7 +284,7 @@ export default function DadosBancarios() {
               <div><Label>Tipo</Label><Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="corrente">Corrente</SelectItem><SelectItem value="poupanca">Poupança</SelectItem></SelectContent></Select></div>
               <div><Label>Titular</Label><Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required /></div>
               <div><Label>CPF/CNPJ</Label><Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required /></div>
-              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>Cadastrar</Button>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground">Cadastrar</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -296,17 +292,17 @@ export default function DadosBancarios() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {accounts.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-white/20"><Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhuma conta cadastrada</p></div>
+          <div className="col-span-full text-center py-12 text-muted-foreground"><Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhuma conta cadastrada</p></div>
         ) : accounts.map((acc) => (
           <Panel key={acc.id}>
             <div className="flex justify-between items-start">
-              <div><h3 className="font-bold text-white text-[14px]">{acc.bank_name}</h3>{acc.bank_code && <p className="text-[11px] text-white/30">Cód: {acc.bank_code}</p>}</div>
-              <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
+              <div><h3 className="font-bold text-foreground text-[14px]">{acc.bank_name}</h3>{acc.bank_code && <p className="text-[11px] text-muted-foreground">Cód: {acc.bank_code}</p>}</div>
+              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
-            <div className="mt-3 space-y-1 text-[13px] text-white/50">
-              <p>Ag: <span className="font-mono text-white/70">{acc.agency}</span> | Conta: <span className="font-mono text-white/70">{acc.account_number}</span></p>
+            <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
+              <p>Ag: <span className="font-mono text-foreground/70">{acc.agency}</span> | Conta: <span className="font-mono text-foreground/70">{acc.account_number}</span></p>
               <p className="capitalize">{acc.account_type === "corrente" ? "Conta Corrente" : "Poupança"}</p>
-              <p className="text-white/30">{acc.holder_name} — {acc.holder_document}</p>
+              <p className="text-muted-foreground/60">{acc.holder_name} — {acc.holder_document}</p>
             </div>
           </Panel>
         ))}

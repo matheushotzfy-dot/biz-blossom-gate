@@ -27,24 +27,24 @@ export default function Checkout() {
 
       <Panel>
         <div className="mb-4">
-          <h3 className="text-[14px] font-bold text-white">Links de Pagamento</h3>
-          <p className="text-[11px] text-white/25 mt-0.5">Compartilhe para receber pagamentos</p>
+          <h3 className="text-[14px] font-bold text-foreground">Links de Pagamento</h3>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Compartilhe para receber pagamentos</p>
         </div>
         <div className="space-y-1">
           {products.length === 0 ? (
-            <div className="py-8 text-center text-white/20 text-[13px]">Crie um produto para gerar um link</div>
+            <div className="py-8 text-center text-muted-foreground text-[13px]">Crie um produto para gerar um link</div>
           ) : products.map((p) => (
-            <div key={p.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.02] transition-colors">
+            <div key={p.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors">
               <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-[13px] text-white">{p.name}</h4>
-                <p className="text-[12px] text-white/50 mt-0.5">R$ {Number(p.price).toFixed(2)}</p>
-                {p.checkout_url && <p className="text-[11px] font-mono mt-0.5 truncate" style={{ color: "#00FFA3" }}>{p.checkout_url}</p>}
+                <h4 className="font-bold text-[13px] text-foreground">{p.name}</h4>
+                <p className="text-[12px] text-muted-foreground mt-0.5">R$ {Number(p.price).toFixed(2)}</p>
+                {p.checkout_url && <p className="text-[11px] font-mono mt-0.5 truncate text-primary">{p.checkout_url}</p>}
               </div>
               <div className="flex gap-2 ml-4">
                 {p.checkout_url && (
                   <>
-                    <Button variant="outline" size="sm" className="gap-1 border-white/[0.06] text-white/50 hover:text-white rounded-xl text-[12px]" onClick={() => openCheckout(p.checkout_url!)}><Eye className="h-3 w-3" /> Ver</Button>
-                    <Button variant="outline" size="sm" className="gap-1 border-white/[0.06] text-white/50 hover:text-white rounded-xl text-[12px]" onClick={() => copyLink(p.checkout_url!)}><Copy className="h-3 w-3" /> Copiar</Button>
+                    <Button variant="outline" size="sm" className="gap-1 rounded-xl text-[12px]" onClick={() => openCheckout(p.checkout_url!)}><Eye className="h-3 w-3" /> Ver</Button>
+                    <Button variant="outline" size="sm" className="gap-1 rounded-xl text-[12px]" onClick={() => copyLink(p.checkout_url!)}><Copy className="h-3 w-3" /> Copiar</Button>
                   </>
                 )}
               </div>
@@ -54,12 +54,12 @@ export default function Checkout() {
       </Panel>
 
       <Panel>
-        <h3 className="font-bold mb-3 text-white text-[14px]">Como usar</h3>
-        <div className="space-y-2 text-[13px] text-white/40">
-          <p>1. Cadastre um produto em <strong className="text-white/60">Produtos</strong>.</p>
+        <h3 className="font-bold mb-3 text-foreground text-[14px]">Como usar</h3>
+        <div className="space-y-2 text-[13px] text-muted-foreground">
+          <p>1. Cadastre um produto em <strong className="text-foreground/70">Produtos</strong>.</p>
           <p>2. O link é gerado automaticamente.</p>
           <p>3. Compartilhe com seus clientes.</p>
-          <p>4. Acompanhe no <strong className="text-white/60">Dashboard</strong>.</p>
+          <p>4. Acompanhe no <strong className="text-foreground/70">Dashboard</strong>.</p>
         </div>
       </Panel>
     </PageShell>

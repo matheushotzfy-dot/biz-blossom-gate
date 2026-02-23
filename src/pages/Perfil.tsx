@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const MILESTONES = [
@@ -86,22 +87,17 @@ export default function Perfil() {
     setUploading(false);
   };
 
-  const statusLabels: Record<string, { label: string; color: string }> = {
-    approved: { label: "Aprovada", color: "#00FFA3" },
-    pending_review: { label: "Em análise", color: "#FFAA00" },
-    rejected: { label: "Reprovada", color: "#FF4D6A" },
-    blocked: { label: "Bloqueada", color: "#FF4D6A" },
+  const statusLabels: Record<string, { label: string; cls: string }> = {
+    approved: { label: "Aprovada", cls: "text-primary bg-primary/10 border-primary/15" },
+    pending_review: { label: "Em análise", cls: "text-warning bg-warning/10 border-warning/15" },
+    rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10 border-destructive/15" },
+    blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15" },
   };
   const accStatus = statusLabels[profile?.account_status || "pending_review"] || statusLabels.pending_review;
 
   return (
-    <div className="space-y-5 relative pb-8 min-h-screen animate-fade-in" style={{ background: "linear-gradient(165deg, #080c18 0%, #0d1225 30%, #0a0f1e 60%, #0c1029 100%)" }}>
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute w-[600px] h-[600px] -top-[200px] -right-[100px] rounded-full opacity-[0.05]" style={{ background: "radial-gradient(circle, #7C3AED, transparent 70%)" }} />
-        <div className="absolute w-[500px] h-[500px] bottom-[-100px] left-[-100px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #00FFA3, transparent 70%)" }} />
-      </div>
-
-      <h1 className="text-[26px] font-extrabold text-white tracking-tight">Meu Perfil</h1>
+    <PageShell>
+      <PageTitle icon={<User className="h-6 w-6" />} title="Meu Perfil" subtitle="Gerencie suas informações pessoais" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Avatar + Info Card */}
@@ -109,11 +105,11 @@ export default function Perfil() {
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-4">
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
-              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer" onClick={() => fileRef.current?.click()} style={{ background: "linear-gradient(135deg, rgba(0,255,163,0.15), rgba(0,148,255,0.1))", boxShadow: "0 0 30px rgba(0,255,163,0.1)" }}>
+              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer bg-primary/10" onClick={() => fileRef.current?.click()}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold" style={{ color: "#00FFA3" }}>
+                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-primary">
                     {(profile?.full_name || "U").charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -121,11 +117,11 @@ export default function Perfil() {
                   <Camera className="h-5 w-5 text-white" />
                 </div>
               </div>
-              {uploading && <div className="absolute inset-0 flex items-center justify-center"><div className="h-6 w-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>}
+              {uploading && <div className="absolute inset-0 flex items-center justify-center"><div className="h-6 w-6 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" /></div>}
             </div>
-            <h2 className="text-lg font-bold text-white">{profile?.full_name || "Usuário"}</h2>
-            <p className="text-[12px] text-white/30 mt-0.5">{profile?.email || ""}</p>
-            <div className="flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-[11px] font-bold" style={{ color: accStatus.color, background: `${accStatus.color}10`, border: `1px solid ${accStatus.color}15` }}>
+            <h2 className="text-lg font-bold text-foreground">{profile?.full_name || "Usuário"}</h2>
+            <p className="text-[12px] text-muted-foreground mt-0.5">{profile?.email || ""}</p>
+            <div className={`flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-[11px] font-bold border ${accStatus.cls}`}>
               <Shield className="h-3 w-3" /> {accStatus.label}
             </div>
           </div>
@@ -133,21 +129,21 @@ export default function Perfil() {
 
         {/* Edit Profile */}
         <Panel>
-          <h3 className="text-[14px] font-bold text-white mb-4">Dados Pessoais</h3>
+          <h3 className="text-[14px] font-bold text-foreground mb-4">Dados Pessoais</h3>
           <form onSubmit={handleSave} className="space-y-3">
             <div>
-              <Label className="text-[10px] text-white/30 uppercase tracking-widest">Nome completo</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" />
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Nome completo</Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1 h-10" />
             </div>
             <div>
-              <Label className="text-[10px] text-white/30 uppercase tracking-widest">E-mail</Label>
-              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" type="email" />
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">E-mail</Label>
+              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 h-10" type="email" />
             </div>
             <div>
-              <Label className="text-[10px] text-white/30 uppercase tracking-widest">Telefone</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" placeholder="(11) 99999-9999" />
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Telefone</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 h-10" placeholder="(11) 99999-9999" />
             </div>
-            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={saving}>
+            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground" disabled={saving}>
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
           </form>
@@ -155,20 +151,20 @@ export default function Perfil() {
 
         {/* Limites + Taxas */}
         <Panel>
-          <h3 className="text-[14px] font-bold text-white mb-4">Limites & Taxas</h3>
+          <h3 className="text-[14px] font-bold text-foreground mb-4">Limites & Taxas</h3>
           <div className="space-y-3">
-            <InfoRow label="Limite diário PIX" value="R$ 50.000,00" color="#00FFA3" />
-            <InfoRow label="Limite diário Saque" value="R$ 30.000,00" color="#0094FF" />
-            <InfoRow label="Saques por dia" value="5 operações" color="#A855F7" />
-            <div className="pt-3 mt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold mb-2">Suas Taxas</p>
+            <InfoRow label="Limite diário PIX" value="R$ 50.000,00" cls="text-primary" />
+            <InfoRow label="Limite diário Saque" value="R$ 30.000,00" cls="text-info" />
+            <InfoRow label="Saques por dia" value="5 operações" cls="text-foreground" />
+            <div className="pt-3 mt-2" style={{ borderTop: "1px solid var(--glass-separator)" }}>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">Suas Taxas</p>
               {fees.map((f) => (
                 <div key={f.id} className="flex items-center justify-between py-1.5">
-                  <span className="text-[12px] text-white/40">{f.name}</span>
-                  <span className="text-[12px] font-bold text-white">{f.fee_type === "percentage" ? `${f.value}%` : `R$ ${Number(f.value).toFixed(2)}`}</span>
+                  <span className="text-[12px] text-muted-foreground">{f.name}</span>
+                  <span className="text-[12px] font-bold text-foreground">{f.fee_type === "percentage" ? `${f.value}%` : `R$ ${Number(f.value).toFixed(2)}`}</span>
                 </div>
               ))}
-              {fees.length === 0 && <p className="text-[11px] text-white/20">Nenhuma taxa configurada</p>}
+              {fees.length === 0 && <p className="text-[11px] text-muted-foreground">Nenhuma taxa configurada</p>}
             </div>
           </div>
         </Panel>
@@ -177,71 +173,62 @@ export default function Perfil() {
       {/* Progress */}
       <Panel>
         <div className="flex items-center gap-3 mb-5">
-          <div className="h-10 w-10 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(0,255,163,0.15), rgba(0,255,163,0.05))", boxShadow: "0 0 25px rgba(0,255,163,0.1)" }}>
-            <Trophy className="h-5 w-5" style={{ color: "#00FFA3" }} />
+          <div className="h-10 w-10 rounded-2xl flex items-center justify-center bg-primary/10">
+            <Trophy className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="text-[14px] font-bold text-white">Progresso de Faturamento</h3>
-            <p className="text-[11px] text-white/25">Acompanhe sua evolução</p>
+            <h3 className="text-[14px] font-bold text-foreground">Progresso de Faturamento</h3>
+            <p className="text-[11px] text-muted-foreground">Acompanhe sua evolução</p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-5">
           <div>
-            <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">Total faturado</p>
-            <p className="text-[22px] font-extrabold text-white mt-1" style={{ textShadow: "0 0 20px rgba(0,255,163,0.1)" }}>{fmtCurrency(allTimeRevenue)}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total faturado</p>
+            <p className="text-[22px] font-extrabold text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">Meta atual</p>
-            <p className="text-[22px] font-extrabold mt-1" style={{ color: "#00FFA3" }}>{milestone.next.label}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Meta atual</p>
+            <p className="text-[22px] font-extrabold mt-1 text-primary">{milestone.next.label}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">Falta</p>
-            <p className="text-[22px] font-extrabold text-white/60 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Falta</p>
+            <p className="text-[22px] font-extrabold text-foreground/60 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
           </div>
         </div>
 
         <div>
           <div className="flex justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#00FFA3" }} />
-              <span className="text-[10px] font-bold text-white/40">{milestone.pct.toFixed(0)}%</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[10px] font-bold text-muted-foreground">{milestone.pct.toFixed(0)}%</span>
             </div>
-            <span className="text-[10px] font-bold text-white/25">{milestone.next.label}</span>
+            <span className="text-[10px] font-bold text-muted-foreground">{milestone.next.label}</span>
           </div>
-          <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
-            <div className="h-full rounded-full relative transition-all duration-1000" style={{ width: `${Math.max(milestone.pct, 2)}%`, background: "linear-gradient(90deg, #00FFA3, #00D48B)", boxShadow: "0 0 15px rgba(0,255,163,0.35), 0 0 40px rgba(0,255,163,0.1)" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 animate-shimmer" />
+          <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: "var(--bar-track)" }}>
+            <div className="h-full rounded-full relative transition-all duration-1000 bg-gradient-to-r from-primary to-emerald-400" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 15px hsl(var(--primary) / 0.35)" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent animate-shimmer" style={{ backgroundImage: `linear-gradient(to right, transparent, var(--shimmer-color))` }} />
             </div>
           </div>
           <div className="flex justify-between mt-3">
-            {MILESTONES.slice(1).map((m, i) => (
+            {MILESTONES.slice(1).map((m) => (
               <div key={m.label} className="text-center">
-                <div className="h-2 w-2 rounded-full mx-auto mb-1" style={{ background: allTimeRevenue >= m.value ? "#00FFA3" : "rgba(255,255,255,0.08)", boxShadow: allTimeRevenue >= m.value ? "0 0 8px rgba(0,255,163,0.4)" : "none" }} />
-                <span className="text-[9px] text-white/25 font-bold">{m.label}</span>
+                <div className="h-2 w-2 rounded-full mx-auto mb-1" style={{ background: allTimeRevenue >= m.value ? "hsl(var(--primary))" : "var(--bar-track)", boxShadow: allTimeRevenue >= m.value ? "0 0 8px hsl(var(--primary) / 0.4)" : "none" }} />
+                <span className="text-[9px] text-muted-foreground font-bold">{m.label}</span>
               </div>
             ))}
           </div>
         </div>
       </Panel>
-    </div>
+    </PageShell>
   );
 }
 
-function Panel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl p-5 relative overflow-hidden transition-all duration-500" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)" }}>
-      <div className="absolute top-0 left-0 w-full h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)" }} />
-      <div className="relative">{children}</div>
-    </div>
-  );
-}
-
-function InfoRow({ label, value, color }: { label: string; value: string; color: string }) {
+function InfoRow({ label, value, cls }: { label: string; value: string; cls: string }) {
   return (
     <div className="flex items-center justify-between py-1.5">
-      <span className="text-[12px] text-white/40">{label}</span>
-      <span className="text-[12px] font-bold" style={{ color }}>{value}</span>
+      <span className="text-[12px] text-muted-foreground">{label}</span>
+      <span className={`text-[12px] font-bold ${cls}`}>{value}</span>
     </div>
   );
 }

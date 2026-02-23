@@ -25,23 +25,23 @@ export default function Vendas() {
       <PageTitle icon={<ShoppingCart className="h-6 w-6" />} title="Vendas" subtitle="Visão geral das suas vendas" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <MetricMini icon={<DollarSign className="h-5 w-5" />} label="Total Vendido" value={`R$ ${totalSales.toFixed(2)}`} sub={`${approved.length} vendas`} accent="#00FFA3" />
-        <MetricMini icon={<TrendingUp className="h-5 w-5" />} label="Ticket Médio" value={`R$ ${avgTicket.toFixed(2)}`} accent="#0094FF" />
-        <MetricMini icon={<CreditCard className="h-5 w-5" />} label="Conversão" value={`${transactions.length > 0 ? ((approved.length / transactions.length) * 100).toFixed(0) : 0}%`} accent="#A855F7" />
+        <MetricMini icon={<DollarSign className="h-5 w-5" />} label="Total Vendido" value={`R$ ${totalSales.toFixed(2)}`} sub={`${approved.length} vendas`} cls="text-primary bg-primary/10" />
+        <MetricMini icon={<TrendingUp className="h-5 w-5" />} label="Ticket Médio" value={`R$ ${avgTicket.toFixed(2)}`} cls="text-info bg-info/10" />
+        <MetricMini icon={<CreditCard className="h-5 w-5" />} label="Conversão" value={`${transactions.length > 0 ? ((approved.length / transactions.length) * 100).toFixed(0) : 0}%`} cls="text-purple-500 bg-purple-500/10" />
       </div>
 
       <DataTable headers={["ID", "Cliente", "E-mail", "Valor", "Método", "Status", "Data"]}>
         {transactions.length === 0 ? (
-          <tr><td colSpan={7} className="p-8 text-center text-white/20">Nenhuma venda encontrada</td></tr>
+          <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>
         ) : transactions.map((tx) => (
-          <tr key={tx.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-            <td className="p-3.5 font-mono text-[11px] text-white/35">{tx.id.slice(0, 8)}</td>
-            <td className="p-3.5 text-white font-medium text-[13px]">{tx.customer_name || "—"}</td>
-            <td className="p-3.5 text-white/40 text-[13px]">{tx.customer_email || "—"}</td>
-            <td className="p-3.5 font-bold text-white text-[13px]">R$ {Number(tx.amount).toFixed(2)}</td>
-            <td className="p-3.5 capitalize text-white/50 text-[13px]">{tx.payment_method}</td>
+          <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+            <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
+            <td className="p-3.5 text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</td>
+            <td className="p-3.5 text-muted-foreground text-[13px]">{tx.customer_email || "—"}</td>
+            <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.amount).toFixed(2)}</td>
+            <td className="p-3.5 capitalize text-muted-foreground text-[13px]">{tx.payment_method}</td>
             <td className="p-3.5"><StatusBadge status={tx.status} /></td>
-            <td className="p-3.5 text-white/30 text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
+            <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
           </tr>
         ))}
       </DataTable>
@@ -49,15 +49,15 @@ export default function Vendas() {
   );
 }
 
-function MetricMini({ icon, label, value, sub, accent }: { icon: React.ReactNode; label: string; value: string; sub?: string; accent: string }) {
+function MetricMini({ icon, label, value, sub, cls }: { icon: React.ReactNode; label: string; value: string; sub?: string; cls: string }) {
   return (
     <Panel>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest">{label}</p>
-        <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: `${accent}10`, color: accent }}>{icon}</div>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{label}</p>
+        <div className={`h-8 w-8 rounded-xl flex items-center justify-center ${cls}`}>{icon}</div>
       </div>
-      <p className="text-[22px] font-extrabold text-white" style={{ textShadow: `0 0 25px ${accent}15` }}>{value}</p>
-      {sub && <p className="text-[11px] mt-1" style={{ color: accent }}>{sub}</p>}
+      <p className="text-[22px] font-extrabold text-foreground">{value}</p>
+      {sub && <p className="text-[11px] mt-1 text-primary">{sub}</p>}
     </Panel>
   );
 }

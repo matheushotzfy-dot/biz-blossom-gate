@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { RequireAuth } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -32,51 +33,51 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/pay/:slug" element={<PublicCheckout />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
-          {/* Admin Master - Separate login and dashboard */}
-          <Route path="/admin-matheus" element={<AdminLogin />} />
-          <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin-matheus/auditoria" element={<AdminAuditoria />} />
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/pay/:slug" element={<PublicCheckout />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            
+            {/* Admin Master */}
+            <Route path="/admin-matheus" element={<AdminLogin />} />
+            <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin-matheus/auditoria" element={<AdminAuditoria />} />
 
-          {/* User Dashboard */}
-          <Route
-            element={
-              <RequireAuth>
-                <div className="dark">
+            {/* User Dashboard */}
+            <Route
+              element={
+                <RequireAuth>
                   <DashboardLayout />
-                </div>
-              </RequireAuth>
-            }
-          >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/perfil" element={<Perfil />} />
-            <Route path="/financeiro/extrato" element={<Extrato />} />
-            <Route path="/financeiro/taxas" element={<Taxas />} />
-            <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
-            <Route path="/financeiro/identidade" element={<Identidade />} />
-            <Route path="/financeiro/saques" element={<Saques />} />
-            <Route path="/vendas" element={<Vendas />} />
-            <Route path="/vendas/produtos" element={<Produtos />} />
-            <Route path="/vendas/checkout" element={<Checkout />} />
-            <Route path="/vendas/cupons" element={<Cupons />} />
-            <Route path="/vendas/webhooks" element={<Webhooks />} />
-            <Route path="/vendas/documentacao" element={<Documentacao />} />
-            <Route path="/vendas/conteudo" element={<Conteudo />} />
-            <Route path="/membros" element={<MemberArea />} />
-            <Route path="/membros/curso/:courseId" element={<CoursePage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+                </RequireAuth>
+              }
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/perfil" element={<Perfil />} />
+              <Route path="/financeiro/extrato" element={<Extrato />} />
+              <Route path="/financeiro/taxas" element={<Taxas />} />
+              <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
+              <Route path="/financeiro/identidade" element={<Identidade />} />
+              <Route path="/financeiro/saques" element={<Saques />} />
+              <Route path="/vendas" element={<Vendas />} />
+              <Route path="/vendas/produtos" element={<Produtos />} />
+              <Route path="/vendas/checkout" element={<Checkout />} />
+              <Route path="/vendas/cupons" element={<Cupons />} />
+              <Route path="/vendas/webhooks" element={<Webhooks />} />
+              <Route path="/vendas/documentacao" element={<Documentacao />} />
+              <Route path="/vendas/conteudo" element={<Conteudo />} />
+              <Route path="/membros" element={<MemberArea />} />
+              <Route path="/membros/curso/:courseId" element={<CoursePage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

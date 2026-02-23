@@ -34,7 +34,7 @@ export default function Cupons() {
       <div className="flex items-center justify-between">
         <PageTitle icon={<Ticket className="h-6 w-6" />} title="Cupons" subtitle="Crie e gerencie cupons promocionais" />
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button className="gap-2 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}><Plus className="h-4 w-4" /> Novo Cupom</Button></DialogTrigger>
+          <DialogTrigger asChild><Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> Novo Cupom</Button></DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Novo Cupom</DialogTitle></DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
@@ -42,7 +42,7 @@ export default function Cupons() {
               <div><Label>Tipo</Label><Select value={form.discount_type} onValueChange={(v) => setForm({ ...form, discount_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="percentage">Porcentagem (%)</SelectItem><SelectItem value="fixed">Valor fixo (R$)</SelectItem></SelectContent></Select></div>
               <div><Label>Valor</Label><Input type="number" step="0.01" value={form.discount_value} onChange={(e) => setForm({ ...form, discount_value: e.target.value })} required /></div>
               <div><Label>Max. usos</Label><Input type="number" value={form.max_uses} onChange={(e) => setForm({ ...form, max_uses: e.target.value })} placeholder="Ilimitado" /></div>
-              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>Criar</Button>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground">Criar</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -50,19 +50,19 @@ export default function Cupons() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {coupons.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-white/20"><Ticket className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhum cupom</p></div>
+          <div className="col-span-full text-center py-12 text-muted-foreground"><Ticket className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhum cupom</p></div>
         ) : coupons.map((c) => (
           <Panel key={c.id}>
             <div className="flex items-center justify-between mb-3">
-              <span className="font-mono text-lg font-bold" style={{ color: "#00FFA3" }}>{c.code}</span>
+              <span className="font-mono text-lg font-bold text-primary">{c.code}</span>
               <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c.id, c.is_active)} />
             </div>
             <div className="space-y-1.5 text-[13px]">
-              <div className="flex justify-between"><span className="text-white/30">Desconto</span><span className="font-bold text-white">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : `R$ ${Number(c.discount_value).toFixed(2)}`}</span></div>
-              <div className="flex justify-between"><span className="text-white/30">Usos</span><span className="font-bold text-white">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : ""}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Desconto</span><span className="font-bold text-foreground">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : `R$ ${Number(c.discount_value).toFixed(2)}`}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Usos</span><span className="font-bold text-foreground">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : ""}</span></div>
             </div>
-            <div className="mt-3 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <Button variant="ghost" size="sm" className="text-red-400 w-full gap-1 hover:text-red-300 hover:bg-red-500/5" onClick={() => deleteCoupon(c.id)}><Trash2 className="h-3 w-3" /> Remover</Button>
+            <div className="mt-3 pt-3 border-t border-border">
+              <Button variant="ghost" size="sm" className="text-destructive w-full gap-1 hover:text-destructive hover:bg-destructive/5" onClick={() => deleteCoupon(c.id)}><Trash2 className="h-3 w-3" /> Remover</Button>
             </div>
           </Panel>
         ))}
