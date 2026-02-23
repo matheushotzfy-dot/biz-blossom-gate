@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function Produtos() {
@@ -23,10 +24,11 @@ export default function Produtos() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
+
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => { if (data) setProducts(data); });
+    loadProducts();
   }, [user?.id]);
 
   const loadProducts = async () => {
@@ -123,11 +125,24 @@ export default function Produtos() {
             {p.checkout_url && <p className="text-[10px] text-muted-foreground/60 mb-3 flex items-center gap-1 font-mono truncate"><ExternalLink className="h-3 w-3 shrink-0" />{p.checkout_url}</p>}
             <div className="flex gap-2 pt-3 border-t border-border">
               <Button variant="outline" size="sm" className="flex-1 gap-1 rounded-xl text-[12px]" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
+              <Button variant="outline" size="sm" className="gap-1 rounded-xl text-[12px]" onClick={() => setSettingsProduct(p)}>
+                <Settings className="h-3 w-3" />
+                <span className="hidden sm:inline">Checkout</span>
+              </Button>
               <Button variant="outline" size="sm" className="text-destructive hover:text-destructive rounded-xl" onClick={() => handleDelete(p.id)}><Trash2 className="h-3 w-3" /></Button>
             </div>
           </Panel>
         ))}
       </div>
+
+      {settingsProduct && (
+        <CheckoutSettingsDialog
+          product={settingsProduct}
+          open={!!settingsProduct}
+          onOpenChange={(v) => { if (!v) setSettingsProduct(null); }}
+          onSaved={loadProducts}
+        />
+      )}
     </PageShell>
   );
 }

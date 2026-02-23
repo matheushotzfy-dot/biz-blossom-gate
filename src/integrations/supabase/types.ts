@@ -317,6 +317,18 @@ export type Database = {
       }
       products: {
         Row: {
+          checkout_address_required: boolean | null
+          checkout_banner_desktop_url: string | null
+          checkout_banner_mobile_url: string | null
+          checkout_boleto_enabled: boolean | null
+          checkout_button_color: string | null
+          checkout_credit_card_enabled: boolean | null
+          checkout_email_confirm: boolean | null
+          checkout_guarantee_enabled: boolean | null
+          checkout_pix_enabled: boolean | null
+          checkout_social_proof: boolean | null
+          checkout_timer_enabled: boolean | null
+          checkout_timer_minutes: number | null
           checkout_url: string | null
           created_at: string
           description: string | null
@@ -329,6 +341,18 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          checkout_address_required?: boolean | null
+          checkout_banner_desktop_url?: string | null
+          checkout_banner_mobile_url?: string | null
+          checkout_boleto_enabled?: boolean | null
+          checkout_button_color?: string | null
+          checkout_credit_card_enabled?: boolean | null
+          checkout_email_confirm?: boolean | null
+          checkout_guarantee_enabled?: boolean | null
+          checkout_pix_enabled?: boolean | null
+          checkout_social_proof?: boolean | null
+          checkout_timer_enabled?: boolean | null
+          checkout_timer_minutes?: number | null
           checkout_url?: string | null
           created_at?: string
           description?: string | null
@@ -341,6 +365,18 @@ export type Database = {
           user_id: string
         }
         Update: {
+          checkout_address_required?: boolean | null
+          checkout_banner_desktop_url?: string | null
+          checkout_banner_mobile_url?: string | null
+          checkout_boleto_enabled?: boolean | null
+          checkout_button_color?: string | null
+          checkout_credit_card_enabled?: boolean | null
+          checkout_email_confirm?: boolean | null
+          checkout_guarantee_enabled?: boolean | null
+          checkout_pix_enabled?: boolean | null
+          checkout_social_proof?: boolean | null
+          checkout_timer_enabled?: boolean | null
+          checkout_timer_minutes?: number | null
           checkout_url?: string | null
           created_at?: string
           description?: string | null
@@ -656,6 +692,18 @@ export type Database = {
     Views: {
       products_public: {
         Row: {
+          checkout_address_required: boolean | null
+          checkout_banner_desktop_url: string | null
+          checkout_banner_mobile_url: string | null
+          checkout_boleto_enabled: boolean | null
+          checkout_button_color: string | null
+          checkout_credit_card_enabled: boolean | null
+          checkout_email_confirm: boolean | null
+          checkout_guarantee_enabled: boolean | null
+          checkout_pix_enabled: boolean | null
+          checkout_social_proof: boolean | null
+          checkout_timer_enabled: boolean | null
+          checkout_timer_minutes: number | null
           checkout_url: string | null
           created_at: string | null
           description: string | null
@@ -666,6 +714,18 @@ export type Database = {
           status: string | null
         }
         Insert: {
+          checkout_address_required?: boolean | null
+          checkout_banner_desktop_url?: string | null
+          checkout_banner_mobile_url?: string | null
+          checkout_boleto_enabled?: boolean | null
+          checkout_button_color?: string | null
+          checkout_credit_card_enabled?: boolean | null
+          checkout_email_confirm?: boolean | null
+          checkout_guarantee_enabled?: boolean | null
+          checkout_pix_enabled?: boolean | null
+          checkout_social_proof?: boolean | null
+          checkout_timer_enabled?: boolean | null
+          checkout_timer_minutes?: number | null
           checkout_url?: string | null
           created_at?: string | null
           description?: string | null
@@ -676,6 +736,18 @@ export type Database = {
           status?: string | null
         }
         Update: {
+          checkout_address_required?: boolean | null
+          checkout_banner_desktop_url?: string | null
+          checkout_banner_mobile_url?: string | null
+          checkout_boleto_enabled?: boolean | null
+          checkout_button_color?: string | null
+          checkout_credit_card_enabled?: boolean | null
+          checkout_email_confirm?: boolean | null
+          checkout_guarantee_enabled?: boolean | null
+          checkout_pix_enabled?: boolean | null
+          checkout_social_proof?: boolean | null
+          checkout_timer_enabled?: boolean | null
+          checkout_timer_minutes?: number | null
           checkout_url?: string | null
           created_at?: string | null
           description?: string | null
