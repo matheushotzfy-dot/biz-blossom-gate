@@ -60,25 +60,25 @@ export default function AdminConteudo() {
       <div className="flex items-center justify-between">
         <PageTitle icon={<BookOpen className="h-6 w-6" />} title="Conteúdo" subtitle="Gerencie cursos, módulos e aulas" />
         <Dialog open={courseDialog} onOpenChange={setCourseDialog}>
-          <DialogTrigger asChild><Button size="sm" className="gap-1 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} onClick={() => { setEditCourseId(null); setCourseForm({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" }); }}><Plus className="h-4 w-4" /> Curso</Button></DialogTrigger>
-          <DialogContent><DialogHeader><DialogTitle>{editCourseId ? "Editar" : "Novo"} Curso</DialogTitle></DialogHeader><div className="space-y-4"><div><Label>Título</Label><Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} /></div><div><Label>Descrição</Label><Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} /></div><div><Label>Categoria</Label><Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} /></div><div><Label>Thumbnail</Label><Input value={courseForm.thumbnail_url} onChange={e => setCourseForm(p => ({ ...p, thumbnail_url: e.target.value }))} placeholder="https://..." /></div><div><Label>Produto</Label><Select value={courseForm.product_id} onValueChange={v => setCourseForm(p => ({ ...p, product_id: v }))}><SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger><SelectContent><SelectItem value="none">Nenhum</SelectItem>{products.map(p => (<SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>))}</SelectContent></Select></div><Button onClick={saveCourse} className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>Salvar</Button></div></DialogContent>
+          <DialogTrigger asChild><Button size="sm" className="gap-1 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground" onClick={() => { setEditCourseId(null); setCourseForm({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" }); }}><Plus className="h-4 w-4" /> Curso</Button></DialogTrigger>
+          <DialogContent><DialogHeader><DialogTitle>{editCourseId ? "Editar" : "Novo"} Curso</DialogTitle></DialogHeader><div className="space-y-4"><div><Label>Título</Label><Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} /></div><div><Label>Descrição</Label><Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} /></div><div><Label>Categoria</Label><Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} /></div><div><Label>Thumbnail</Label><Input value={courseForm.thumbnail_url} onChange={e => setCourseForm(p => ({ ...p, thumbnail_url: e.target.value }))} placeholder="https://..." /></div><div><Label>Produto</Label><Select value={courseForm.product_id} onValueChange={v => setCourseForm(p => ({ ...p, product_id: v }))}><SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger><SelectContent><SelectItem value="none">Nenhum</SelectItem>{products.map(p => (<SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>))}</SelectContent></Select></div><Button onClick={saveCourse} className="w-full gradient-primary text-primary-foreground">Salvar</Button></div></DialogContent>
         </Dialog>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="space-y-2">
-          <p className="text-[10px] text-white/20 uppercase tracking-widest font-bold px-1">Cursos</p>
-          {courses.length === 0 ? <p className="text-[13px] text-white/20 text-center py-4">Nenhum curso</p> : courses.map(c => (
-            <div key={c.id} onClick={() => setSelectedCourse(c.id)} className={`rounded-xl p-3.5 cursor-pointer transition-all ${selectedCourse === c.id ? "" : "hover:bg-white/[0.02]"}`} style={{ background: selectedCourse === c.id ? "rgba(0,255,163,0.05)" : "rgba(255,255,255,0.02)", border: `1px solid ${selectedCourse === c.id ? "rgba(0,255,163,0.12)" : "rgba(255,255,255,0.04)"}` }}>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold px-1">Cursos</p>
+          {courses.length === 0 ? <p className="text-[13px] text-muted-foreground text-center py-4">Nenhum curso</p> : courses.map(c => (
+            <div key={c.id} onClick={() => setSelectedCourse(c.id)} className={`rounded-xl p-3.5 cursor-pointer transition-all border ${selectedCourse === c.id ? "border-primary/20 bg-primary/5" : "border-border bg-muted/20 hover:bg-muted/40"}`}>
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-[13px] text-white">{c.title}</h4>
+                <h4 className="font-bold text-[13px] text-foreground">{c.title}</h4>
                 <div className="flex gap-0.5">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published); }}>{c.is_published ? <Eye className="h-3 w-3" style={{ color: "#00FFA3" }} /> : <EyeOff className="h-3 w-3 text-white/20" />}</Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white/30" onClick={e => { e.stopPropagation(); setEditCourseId(c.id); setCourseForm({ title: c.title, description: c.description || "", category: c.category || "geral", product_id: c.product_id || "", thumbnail_url: c.thumbnail_url || "" }); setCourseDialog(true); }}><Edit className="h-3 w-3" /></Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400" onClick={e => { e.stopPropagation(); deleteCourse(c.id); }}><Trash2 className="h-3 w-3" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published); }}>{c.is_published ? <Eye className="h-3 w-3 text-primary" /> : <EyeOff className="h-3 w-3 text-muted-foreground" />}</Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={e => { e.stopPropagation(); setEditCourseId(c.id); setCourseForm({ title: c.title, description: c.description || "", category: c.category || "geral", product_id: c.product_id || "", thumbnail_url: c.thumbnail_url || "" }); setCourseDialog(true); }}><Edit className="h-3 w-3" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); deleteCourse(c.id); }}><Trash2 className="h-3 w-3" /></Button>
                 </div>
               </div>
-              <p className="text-[11px] text-white/25 mt-1">{c.category} • {c.is_published ? "Publicado" : "Rascunho"}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{c.category} • {c.is_published ? "Publicado" : "Rascunho"}</p>
             </div>
           ))}
         </div>
@@ -87,36 +87,36 @@ export default function AdminConteudo() {
           {selectedCourse ? (
             <>
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Módulos & Aulas</p>
-                <Dialog open={moduleDialog} onOpenChange={setModuleDialog}><DialogTrigger asChild><Button size="sm" variant="outline" className="gap-1 border-white/[0.06] text-white/50 rounded-xl text-[12px]"><Plus className="h-3 w-3" /> Módulo</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Novo Módulo</DialogTitle></DialogHeader><div className="space-y-4"><div><Label>Título</Label><Input value={moduleForm.title} onChange={e => setModuleForm(p => ({ ...p, title: e.target.value }))} /></div><div><Label>Descrição</Label><Textarea value={moduleForm.description} onChange={e => setModuleForm(p => ({ ...p, description: e.target.value }))} /></div><Button onClick={saveModule} className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>Salvar</Button></div></DialogContent></Dialog>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Módulos & Aulas</p>
+                <Dialog open={moduleDialog} onOpenChange={setModuleDialog}><DialogTrigger asChild><Button size="sm" variant="outline" className="gap-1 rounded-xl text-[12px]"><Plus className="h-3 w-3" /> Módulo</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Novo Módulo</DialogTitle></DialogHeader><div className="space-y-4"><div><Label>Título</Label><Input value={moduleForm.title} onChange={e => setModuleForm(p => ({ ...p, title: e.target.value }))} /></div><div><Label>Descrição</Label><Textarea value={moduleForm.description} onChange={e => setModuleForm(p => ({ ...p, description: e.target.value }))} /></div><Button onClick={saveModule} className="w-full gradient-primary text-primary-foreground">Salvar</Button></div></DialogContent></Dialog>
               </div>
-              {modules.length === 0 ? <div className="text-center py-12 text-white/20 text-[13px]">Adicione módulos</div> : modules.map(mod => (
+              {modules.length === 0 ? <div className="text-center py-12 text-muted-foreground text-[13px]">Adicione módulos</div> : modules.map(mod => (
                 <Panel key={mod.id} className="p-0">
-                  <div className="flex items-center justify-between p-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                    <div className="flex items-center gap-2"><Layers className="h-4 w-4" style={{ color: "#00FFA3" }} /><h4 className="font-bold text-[13px] text-white">{mod.title}</h4><span className="text-[11px] text-white/25">({mod.lessons.length})</span></div>
+                  <div className="flex items-center justify-between p-3.5 border-b border-border">
+                    <div className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /><h4 className="font-bold text-[13px] text-foreground">{mod.title}</h4><span className="text-[11px] text-muted-foreground">({mod.lessons.length})</span></div>
                     <div className="flex gap-0.5">
-                      <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px] text-white/40" onClick={() => { setLessonModuleId(mod.id); setLessonForm({ title: "", description: "", video_url: "", duration_minutes: "0", is_free: false }); setLessonDialog(true); }}><Plus className="h-3 w-3" /> Aula</Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-red-400" onClick={() => deleteModule(mod.id)}><Trash2 className="h-3 w-3" /></Button>
+                      <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px] text-muted-foreground" onClick={() => { setLessonModuleId(mod.id); setLessonForm({ title: "", description: "", video_url: "", duration_minutes: "0", is_free: false }); setLessonDialog(true); }}><Plus className="h-3 w-3" /> Aula</Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteModule(mod.id)}><Trash2 className="h-3 w-3" /></Button>
                     </div>
                   </div>
                   {mod.lessons.length > 0 && mod.lessons.map((lesson: any, idx: number) => (
-                    <div key={lesson.id} className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.02] transition-colors" style={{ borderBottom: "1px solid rgba(255,255,255,0.02)" }}>
-                      <span className="text-[11px] text-white/20 w-5">{idx + 1}</span>
-                      <PlayCircle className="h-4 w-4 text-white/20 shrink-0" />
-                      <div className="flex-1 min-w-0"><p className="text-[13px] text-white/60 truncate">{lesson.title}</p><div className="flex items-center gap-2 mt-0.5">{lesson.duration_minutes > 0 && <span className="text-[10px] text-white/20">{lesson.duration_minutes}min</span>}{lesson.is_free && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ color: "#00FFA3", background: "rgba(0,255,163,0.08)" }}>FREE</span>}{lesson.video_url && <LinkIcon className="h-3 w-3 text-white/15" />}</div></div>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-red-400 shrink-0" onClick={() => deleteLesson(lesson.id)}><Trash2 className="h-3 w-3" /></Button>
+                    <div key={lesson.id} className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-muted/30 transition-colors border-b border-border/50">
+                      <span className="text-[11px] text-muted-foreground w-5">{idx + 1}</span>
+                      <PlayCircle className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                      <div className="flex-1 min-w-0"><p className="text-[13px] text-foreground/60 truncate">{lesson.title}</p><div className="flex items-center gap-2 mt-0.5">{lesson.duration_minutes > 0 && <span className="text-[10px] text-muted-foreground">{lesson.duration_minutes}min</span>}{lesson.is_free && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold text-primary bg-primary/10">FREE</span>}{lesson.video_url && <LinkIcon className="h-3 w-3 text-muted-foreground/30" />}</div></div>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive shrink-0" onClick={() => deleteLesson(lesson.id)}><Trash2 className="h-3 w-3" /></Button>
                     </div>
                   ))}
                 </Panel>
               ))}
             </>
           ) : (
-            <div className="text-center py-20 text-white/15"><Layers className="h-12 w-12 mx-auto mb-4 opacity-30" /><p className="text-[13px]">Selecione um curso</p></div>
+            <div className="text-center py-20 text-muted-foreground/40"><Layers className="h-12 w-12 mx-auto mb-4 opacity-30" /><p className="text-[13px]">Selecione um curso</p></div>
           )}
         </div>
       </div>
 
-      <Dialog open={lessonDialog} onOpenChange={setLessonDialog}><DialogContent><DialogHeader><DialogTitle>Nova Aula</DialogTitle></DialogHeader><div className="space-y-4"><div><Label>Título</Label><Input value={lessonForm.title} onChange={e => setLessonForm(p => ({ ...p, title: e.target.value }))} /></div><div><Label>Descrição</Label><Textarea value={lessonForm.description} onChange={e => setLessonForm(p => ({ ...p, description: e.target.value }))} /></div><div><Label>URL vídeo</Label><Input value={lessonForm.video_url} onChange={e => setLessonForm(p => ({ ...p, video_url: e.target.value }))} placeholder="https://youtu.be/..." /></div><div><Label>Duração (min)</Label><Input type="number" value={lessonForm.duration_minutes} onChange={e => setLessonForm(p => ({ ...p, duration_minutes: e.target.value }))} /></div><div className="flex items-center gap-2"><Switch checked={lessonForm.is_free} onCheckedChange={v => setLessonForm(p => ({ ...p, is_free: v }))} /><Label>Gratuita</Label></div><Button onClick={saveLesson} className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}>Salvar</Button></div></DialogContent></Dialog>
+      <Dialog open={lessonDialog} onOpenChange={setLessonDialog}><DialogContent><DialogHeader><DialogTitle>Nova Aula</DialogTitle></DialogHeader><div className="space-y-4"><div><Label>Título</Label><Input value={lessonForm.title} onChange={e => setLessonForm(p => ({ ...p, title: e.target.value }))} /></div><div><Label>Descrição</Label><Textarea value={lessonForm.description} onChange={e => setLessonForm(p => ({ ...p, description: e.target.value }))} /></div><div><Label>URL vídeo</Label><Input value={lessonForm.video_url} onChange={e => setLessonForm(p => ({ ...p, video_url: e.target.value }))} placeholder="https://youtu.be/..." /></div><div><Label>Duração (min)</Label><Input type="number" value={lessonForm.duration_minutes} onChange={e => setLessonForm(p => ({ ...p, duration_minutes: e.target.value }))} /></div><div className="flex items-center gap-2"><Switch checked={lessonForm.is_free} onCheckedChange={v => setLessonForm(p => ({ ...p, is_free: v }))} /><Label>Gratuita</Label></div><Button onClick={saveLesson} className="w-full gradient-primary text-primary-foreground">Salvar</Button></div></DialogContent></Dialog>
     </PageShell>
   );
 }

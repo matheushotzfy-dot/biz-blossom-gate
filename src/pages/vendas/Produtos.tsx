@@ -81,7 +81,7 @@ export default function Produtos() {
         <PageTitle icon={<Package className="h-6 w-6" />} title="Produtos" subtitle="Cadastre e gerencie seus produtos" />
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}><Plus className="h-4 w-4" /> Novo Produto</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> Novo Produto</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{editId ? "Editar Produto" : "Novo Produto"}</DialogTitle></DialogHeader>
@@ -103,7 +103,7 @@ export default function Produtos() {
               <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
               <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
               <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required /></div>
-              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={uploading}>{uploading ? "Enviando..." : editId ? "Salvar" : "Criar"}</Button>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={uploading}>{uploading ? "Enviando..." : editId ? "Salvar" : "Criar"}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -111,19 +111,19 @@ export default function Produtos() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {products.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-white/20"><Package className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhum produto</p></div>
+          <div className="col-span-full text-center py-12 text-muted-foreground"><Package className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhum produto</p></div>
         ) : products.map((p) => (
           <Panel key={p.id}>
             {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-36 object-cover rounded-xl mb-3" />}
             <div className="flex justify-between items-start mb-2">
-              <div><h3 className="font-bold text-white text-[14px]">{p.name}</h3><p className="text-[20px] font-extrabold mt-1" style={{ color: "#00FFA3" }}>R$ {Number(p.price).toFixed(2)}</p></div>
+              <div><h3 className="font-bold text-foreground text-[14px]">{p.name}</h3><p className="text-[20px] font-extrabold mt-1 text-primary">R$ {Number(p.price).toFixed(2)}</p></div>
               <StatusBadge status={p.status} />
             </div>
-            {p.description && <p className="text-[12px] text-white/30 mb-3 line-clamp-2">{p.description}</p>}
-            {p.checkout_url && <p className="text-[10px] text-white/20 mb-3 flex items-center gap-1 font-mono truncate"><ExternalLink className="h-3 w-3 shrink-0" />{p.checkout_url}</p>}
-            <div className="flex gap-2 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <Button variant="outline" size="sm" className="flex-1 gap-1 border-white/[0.06] text-white/50 hover:text-white rounded-xl text-[12px]" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
-              <Button variant="outline" size="sm" className="text-red-400 hover:text-red-300 border-white/[0.06] hover:bg-red-500/5 rounded-xl" onClick={() => handleDelete(p.id)}><Trash2 className="h-3 w-3" /></Button>
+            {p.description && <p className="text-[12px] text-muted-foreground mb-3 line-clamp-2">{p.description}</p>}
+            {p.checkout_url && <p className="text-[10px] text-muted-foreground/60 mb-3 flex items-center gap-1 font-mono truncate"><ExternalLink className="h-3 w-3 shrink-0" />{p.checkout_url}</p>}
+            <div className="flex gap-2 pt-3 border-t border-border">
+              <Button variant="outline" size="sm" className="flex-1 gap-1 rounded-xl text-[12px]" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
+              <Button variant="outline" size="sm" className="text-destructive hover:text-destructive rounded-xl" onClick={() => handleDelete(p.id)}><Trash2 className="h-3 w-3" /></Button>
             </div>
           </Panel>
         ))}

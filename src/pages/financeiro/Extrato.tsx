@@ -35,24 +35,24 @@ export default function Extrato() {
     <PageShell>
       <div className="flex items-center justify-between">
         <PageTitle icon={<FileText className="h-6 w-6" />} title="Extrato" subtitle="Histórico completo de transações" />
-        <Button variant="outline" size="sm" className="gap-2 border-white/[0.06] text-white/50 hover:text-white hover:bg-white/[0.04] rounded-xl">
+        <Button variant="outline" size="sm" className="gap-2 rounded-xl">
           <Download className="h-4 w-4" /> Exportar
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Panel><p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold">Total Bruto</p><p className="text-[22px] font-extrabold mt-2 text-white">R$ {total.toFixed(2)}</p></Panel>
-        <Panel><p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold">Total Taxas</p><p className="text-[22px] font-extrabold mt-2" style={{ color: "#FFAA00" }}>R$ {totalFees.toFixed(2)}</p></Panel>
-        <Panel><p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold">Total Líquido</p><p className="text-[22px] font-extrabold mt-2" style={{ color: "#00FFA3" }}>R$ {totalNet.toFixed(2)}</p></Panel>
+        <Panel><p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total Bruto</p><p className="text-[22px] font-extrabold mt-2 text-foreground">R$ {total.toFixed(2)}</p></Panel>
+        <Panel><p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total Taxas</p><p className="text-[22px] font-extrabold mt-2 text-warning">R$ {totalFees.toFixed(2)}</p></Panel>
+        <Panel><p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total Líquido</p><p className="text-[22px] font-extrabold mt-2 text-primary">R$ {totalNet.toFixed(2)}</p></Panel>
       </div>
 
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
-          <Input placeholder="Buscar por nome ou ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-white/[0.03] border-white/[0.06] text-white placeholder:text-white/20 rounded-xl" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Buscar por nome ou ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 rounded-xl" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[160px] bg-white/[0.03] border-white/[0.06] text-white rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-[160px] rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="completed">Aprovado</SelectItem>
@@ -64,17 +64,17 @@ export default function Extrato() {
 
       <DataTable headers={["ID", "Cliente", "Valor", "Taxa", "Líquido", "Método", "Status", "Data"]}>
         {filtered.length === 0 ? (
-          <tr><td colSpan={8} className="p-8 text-center text-white/20">Nenhuma transação encontrada</td></tr>
+          <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhuma transação encontrada</td></tr>
         ) : filtered.map((tx) => (
-          <tr key={tx.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-            <td className="p-3.5 font-mono text-[11px] text-white/35">{tx.id.slice(0, 8)}</td>
-            <td className="p-3.5 text-white font-medium text-[13px]">{tx.customer_name || "—"}</td>
-            <td className="p-3.5 font-bold text-white text-[13px]">R$ {Number(tx.amount).toFixed(2)}</td>
-            <td className="p-3.5 font-semibold text-[13px]" style={{ color: "#FFAA00" }}>R$ {Number(tx.fee_amount).toFixed(2)}</td>
-            <td className="p-3.5 font-semibold text-[13px]" style={{ color: "#00FFA3" }}>R$ {Number(tx.net_amount).toFixed(2)}</td>
-            <td className="p-3.5 capitalize text-white/50 text-[13px]">{tx.payment_method}</td>
+          <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+            <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
+            <td className="p-3.5 text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</td>
+            <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.amount).toFixed(2)}</td>
+            <td className="p-3.5 font-semibold text-[13px] text-warning">R$ {Number(tx.fee_amount).toFixed(2)}</td>
+            <td className="p-3.5 font-semibold text-[13px] text-primary">R$ {Number(tx.net_amount).toFixed(2)}</td>
+            <td className="p-3.5 capitalize text-muted-foreground text-[13px]">{tx.payment_method}</td>
             <td className="p-3.5"><StatusBadge status={tx.status} /></td>
-            <td className="p-3.5 text-white/30 text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
+            <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
           </tr>
         ))}
       </DataTable>

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { BookOpen, ChevronDown, ChevronRight, Shield, Zap, Code2 } from "lucide-react";
-import { toast } from "sonner";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 
 const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID || "sua-api"}.supabase.co/functions/v1`;
@@ -27,8 +26,8 @@ export default function Documentacao() {
         {[{ icon: Shield, label: "Segurança", value: "SSL + Token Auth" }, { icon: Zap, label: "Latência", value: "< 200ms" }, { icon: Code2, label: "Formato", value: "REST / JSON" }].map((item) => (
           <Panel key={item.label}>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,255,163,0.08)", color: "#00FFA3" }}><item.icon className="h-5 w-5" /></div>
-              <div><p className="text-[11px] text-white/25">{item.label}</p><p className="text-[14px] font-bold text-white">{item.value}</p></div>
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary"><item.icon className="h-5 w-5" /></div>
+              <div><p className="text-[11px] text-muted-foreground">{item.label}</p><p className="text-[14px] font-bold text-foreground">{item.value}</p></div>
             </div>
           </Panel>
         ))}
@@ -37,19 +36,19 @@ export default function Documentacao() {
       <div className="space-y-1.5">
         {sections.map((section) => (
           <Panel key={section.id} className="p-0">
-            <button onClick={() => setOpenSection(openSection === section.id ? null : section.id)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors text-left">
-              <span className="font-bold text-[13px] text-white flex items-center gap-2"><span className="w-1 h-4 rounded-full" style={{ background: "#00FFA3" }} />{section.title}</span>
-              {openSection === section.id ? <ChevronDown className="h-4 w-4 text-white/20" /> : <ChevronRight className="h-4 w-4 text-white/20" />}
+            <button onClick={() => setOpenSection(openSection === section.id ? null : section.id)} className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left">
+              <span className="font-bold text-[13px] text-foreground flex items-center gap-2"><span className="w-1 h-4 rounded-full bg-primary" />{section.title}</span>
+              {openSection === section.id ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
             </button>
             {openSection === section.id && (
-              <div className="px-4 pb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                <div className="mt-3 text-[13px] text-white/40 whitespace-pre-wrap leading-relaxed"
+              <div className="px-4 pb-4 border-t border-border">
+                <div className="mt-3 text-[13px] text-muted-foreground whitespace-pre-wrap leading-relaxed"
                   dangerouslySetInnerHTML={{
                     __html: section.content
-                      .replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, _lang, code) => `<pre class="rounded-xl p-4 overflow-x-auto text-[11px] font-mono text-white/70 my-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04)"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`)
-                      .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded text-[11px] font-mono" style="background:rgba(0,255,163,0.06);color:#00FFA3">$1</code>')
-                      .replace(/### (.+)/g, '<h3 class="text-white font-bold text-[14px] mt-4 mb-2">$1</h3>')
-                      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/70">$1</strong>')
+                      .replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, _lang, code) => `<pre class="rounded-xl p-4 overflow-x-auto text-[11px] font-mono my-3 bg-muted/50 border border-border text-foreground/70"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`)
+                      .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded text-[11px] font-mono bg-primary/10 text-primary">$1</code>')
+                      .replace(/### (.+)/g, '<h3 class="text-foreground font-bold text-[14px] mt-4 mb-2">$1</h3>')
+                      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground/70">$1</strong>')
                       .replace(/\n/g, "<br/>")
                   }}
                 />
