@@ -1,5 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { MobileBottomNav } from "./MobileBottomNav";
+import { MobileRevenueBar } from "./MobileRevenueBar";
 import { Outlet } from "react-router-dom";
 import { Menu, Bell, Search, Command, Trophy, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,12 +62,13 @@ export function DashboardLayout() {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-h-screen">
-          <header className="h-16 flex items-center border-b border-border px-4 md:px-6 bg-background/60 backdrop-blur-2xl sticky top-0 z-10 gap-3">
+          {/* Desktop header */}
+          <header className="h-16 hidden md:flex items-center border-b border-border px-4 md:px-6 bg-background/60 backdrop-blur-2xl sticky top-0 z-10 gap-3">
             <SidebarTrigger className="mr-2 lg:hidden">
               <Menu className="h-5 w-5 text-foreground" />
             </SidebarTrigger>
 
-            <div className="hidden md:flex relative flex-1 max-w-sm">
+            <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input placeholder="Buscar..." className="pl-9 h-9 bg-muted/50 border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/30 transition-all" />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted-foreground/50 text-[10px]">
@@ -76,7 +79,7 @@ export function DashboardLayout() {
             <div className="flex-1" />
 
             {/* Milestone Progress Bar */}
-            <div className="hidden md:flex items-center gap-2.5 bg-muted/50 border border-border rounded-xl px-3 py-1.5 min-w-[220px]">
+            <div className="flex items-center gap-2.5 bg-muted/50 border border-border rounded-xl px-3 py-1.5 min-w-[220px]">
               <Trophy className="h-4 w-4 text-primary shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
@@ -116,16 +119,23 @@ export function DashboardLayout() {
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-bold text-primary shadow-[0_0_12px_hsl(152,68%,46%,0.15)]">
                 {(profile?.full_name || "U").charAt(0).toUpperCase()}
               </div>
-              <div className="hidden md:block">
+              <div>
                 <p className="text-sm font-bold leading-none text-foreground">{profile?.full_name || "Usuário"}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{profile?.email || ""}</p>
               </div>
             </div>
           </header>
-          <div className="flex-1 p-4 md:p-6 overflow-auto">
+
+          {/* Mobile revenue bar */}
+          <MobileRevenueBar />
+
+          <div className="flex-1 p-3 md:p-6 overflow-auto pb-20 md:pb-6">
             <Outlet />
           </div>
         </main>
+
+        {/* Mobile bottom nav */}
+        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );

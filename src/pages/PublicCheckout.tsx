@@ -14,7 +14,6 @@ type Product = {
   description: string | null;
   price: number;
   image_url: string | null;
-  user_id: string;
 };
 
 type PaymentMethod = "pix" | "credit_card" | "boleto";
