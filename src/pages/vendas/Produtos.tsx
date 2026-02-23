@@ -22,8 +22,19 @@ export default function Produtos() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    const uid = user.id;
+    supabase
+      .from("products")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => { if (data) setProducts(data); });
+  }, [user?.id]);
+
   const loadProducts = async () => {
-    if (!user) return;
+    if (!user?.id) return;
     const { data } = await supabase
       .from("products")
       .select("*")
@@ -31,8 +42,6 @@ export default function Produtos() {
       .order("created_at", { ascending: false });
     if (data) setProducts(data);
   };
-
-  useEffect(() => { loadProducts(); }, [user]);
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop();
