@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { StatusBadge } from "@/components/StatusBadge";
+import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -81,10 +82,12 @@ export default function AdminDashboard() {
         return;
       }
       toast.success("Saque aprovado e enviado via PIX!");
+      await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {
       const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id);
       if (error) { toast.error("Erro ao recusar"); return; }
       toast.success("Saque recusado");
+      await logAdminAction("reject_withdrawal", "withdrawal", id);
     }
     loadData();
   };
@@ -93,6 +96,7 @@ export default function AdminDashboard() {
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
+    await logAdminAction(status === "approved" ? "approve_user" : "block_user", "profile", userId, { new_status: status });
     loadData();
   };
 
@@ -117,6 +121,9 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3">
           <Link to="/admin-matheus/usuarios" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
             <Users className="h-3.5 w-3.5" /> Usuários
+          </Link>
+          <Link to="/admin-matheus/auditoria" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
+            <Activity className="h-3.5 w-3.5" /> Auditoria
           </Link>
           <Link to="/admin-matheus/configuracoes" className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
             <Settings className="h-3.5 w-3.5" /> Config

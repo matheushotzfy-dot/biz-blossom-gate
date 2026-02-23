@@ -192,15 +192,15 @@ export default function Dashboard() {
               <span>Total faturado</span><span>Vendas diárias</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-lg font-bold">{fmtCurrency(totalRevenue)}</span>
+              <span className="text-lg font-bold text-foreground">{fmtCurrency(totalRevenue)}</span>
               <span className="text-lg font-bold text-primary">{fmtCurrency(dailyRevenue)} / dia</span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Falta para</span><span>Meta atual</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-semibold">{fmtCurrency(Math.max(0, milestone.next.value - totalRevenue))}</span>
-              <span className="text-sm font-semibold">{milestone.next.label}</span>
+              <span className="text-sm font-semibold text-foreground">{fmtCurrency(Math.max(0, milestone.next.value - totalRevenue))}</span>
+              <span className="text-sm font-semibold text-foreground">{milestone.next.label}</span>
             </div>
             <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
               <div className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-700 shadow-[0_0_10px_hsl(152,60%,45%,0.5)]" style={{ width: `${Math.max(milestone.pct, 1)}%` }} />
@@ -304,7 +304,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm">{fmtCurrency(Number(item.amount))}</span>
+                        <span className="font-semibold text-sm text-foreground">{fmtCurrency(Number(item.amount))}</span>
                         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${statusColor} ${statusColor.replace("text-", "bg-")}/10`}>{statusLabel[item.status] || item.status}</span>
                       </div>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">
@@ -353,12 +353,12 @@ function KpiCard({ label, value, subtitle, icon, accentColor, action }: {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="w-1 h-4 bg-primary rounded-full shadow-[0_0_4px_hsl(152,60%,45%,0.4)]" />
-            <h4 className="text-xs font-semibold text-muted-foreground">{label}</h4>
+            <h4 className="text-xs font-semibold text-foreground/70">{label}</h4>
           </div>
           <div className={`h-8 w-8 md:h-9 md:w-9 rounded-xl bg-primary/10 backdrop-blur-sm flex items-center justify-center ${accentColor}`}>{icon}</div>
         </div>
-        <p className="text-xl md:text-2xl font-extrabold tracking-tight mt-1">{value}</p>
-        {subtitle && <p className="text-[11px] text-muted-foreground mt-1">{subtitle}</p>}
+        <p className="text-xl md:text-2xl font-extrabold tracking-tight mt-1 text-foreground">{value}</p>
+        {subtitle && <p className="text-[11px] text-foreground/60 mt-1">{subtitle}</p>}
         {action && (
           <Link to={action.href} className="text-xs text-primary font-semibold mt-2 inline-flex items-center gap-1.5 hover:gap-2 transition-all">
             <span className="h-4 w-4 rounded-full border-2 border-primary flex items-center justify-center text-[8px] font-bold">+</span>
@@ -376,11 +376,11 @@ function MethodCard({ label, value, count, total }: { label: string; value: numb
     <div className="bg-card/60 backdrop-blur-xl rounded-2xl border border-border/30 p-4 md:p-5 shadow-lg shadow-black/5 hover:border-primary/20 transition-all">
       <div className="flex items-center gap-2 mb-2">
         <span className="w-1 h-4 bg-primary rounded-full shadow-[0_0_4px_hsl(152,60%,45%,0.4)]" />
-        <h4 className="text-xs font-semibold text-muted-foreground">{label}</h4>
+        <h4 className="text-xs font-semibold text-foreground/70">{label}</h4>
       </div>
-      <p className="text-xl font-extrabold">{fmtCurrency(value)}</p>
-      <p className="text-[11px] text-muted-foreground mt-1">{convRate}% de conversão</p>
-      <p className="text-[11px] text-muted-foreground">{count} de {total} pedidos</p>
+      <p className="text-xl font-extrabold text-foreground">{fmtCurrency(value)}</p>
+      <p className="text-[11px] text-foreground/60 mt-1">{convRate}% de conversão</p>
+      <p className="text-[11px] text-foreground/60">{count} de {total} pedidos</p>
     </div>
   );
 }
@@ -389,9 +389,9 @@ function MetricCard({ icon, label, value, change }: { icon: React.ReactNode; lab
   return (
     <div className="text-center p-3 rounded-xl bg-muted/10 backdrop-blur-sm border border-border/20">
       <div className="flex justify-center mb-2">{icon}</div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className="text-lg font-bold mt-1">{value}</p>
-      <p className="text-[10px] text-muted-foreground mt-0.5">{change}</p>
+      <p className="text-[10px] text-foreground/60 uppercase tracking-wider">{label}</p>
+      <p className="text-lg font-bold mt-1 text-foreground">{value}</p>
+      <p className="text-[10px] text-foreground/60 mt-0.5">{change}</p>
     </div>
   );
 }
@@ -399,8 +399,8 @@ function MetricCard({ icon, label, value, change }: { icon: React.ReactNode; lab
 function MonitorItem({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className={`text-lg font-bold mt-0.5 ${accent ? "text-primary" : ""}`}>{value}</p>
+      <p className="text-[10px] text-foreground/60 uppercase tracking-wider">{label}</p>
+      <p className={`text-lg font-bold mt-0.5 ${accent ? "text-primary" : "text-foreground"}`}>{value}</p>
     </div>
   );
 }
