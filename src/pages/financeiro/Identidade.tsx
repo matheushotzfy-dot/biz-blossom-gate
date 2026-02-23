@@ -11,13 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
-const STATUS_MAP: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  approved: { label: "Conta Aprovada", icon: <CheckCircle2 className="h-5 w-5" />, color: "text-primary", bg: "bg-primary/10" },
-  pending_review: { label: "Em Análise", icon: <Clock className="h-5 w-5" />, color: "text-amber-500", bg: "bg-amber-500/10" },
-  rejected: { label: "Reprovada", icon: <XCircle className="h-5 w-5" />, color: "text-red-500", bg: "bg-red-500/10" },
-  blocked: { label: "Bloqueada", icon: <AlertTriangle className="h-5 w-5" />, color: "text-red-500", bg: "bg-red-500/10" },
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  approved: { label: "Conta Aprovada", color: "#00FFA3" },
+  pending_review: { label: "Em Análise", color: "#FFAA00" },
+  rejected: { label: "Reprovada", color: "#FF4D6A" },
+  blocked: { label: "Bloqueada", color: "#FF4D6A" },
 };
 
 export default function Identidade() {
@@ -39,7 +40,6 @@ export default function Identidade() {
         setPixForm({ pix_key_type: data.pix_key_type || "cpf", pix_key: data.pix_key || "" });
       }
     });
-    // Load existing KYC docs
     loadKycDocs();
   }, [user]);
 
@@ -52,9 +52,7 @@ export default function Identidade() {
       if (data && data.length > 0) {
         const { data: urlData } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
         docs[type] = urlData?.publicUrl || null;
-      } else {
-        docs[type] = null;
-      }
+      } else { docs[type] = null; }
     }
     setKycDocs(docs);
   };
@@ -65,7 +63,7 @@ export default function Identidade() {
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${type}.${ext}`;
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
-    if (error) { toast.error("Erro no upload"); } else { toast.success("Documento enviado!"); await loadKycDocs(); }
+    if (error) toast.error("Erro no upload"); else { toast.success("Documento enviado!"); await loadKycDocs(); }
     setUploading(null);
   };
 
@@ -100,176 +98,107 @@ export default function Identidade() {
   const completionPct = Math.round((completionSteps.filter((s) => s.done).length / completionSteps.length) * 100);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <UserCircle className="h-6 w-6 text-primary" /> Identidade & KYC
-        </h1>
-        <p className="text-muted-foreground text-sm mt-0.5">Dados pessoais, documentos e verificação de identidade</p>
-      </div>
+    <PageShell>
+      <PageTitle icon={<UserCircle className="h-6 w-6" />} title="Identidade & KYC" subtitle="Dados pessoais, documentos e verificação" />
 
       {/* Status Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm">
-          <SectionTitle>Status da Conta</SectionTitle>
-          <div className={`flex items-center gap-3 p-4 rounded-xl mt-4 ${status.bg} border border-border/30`}>
-            <span className={status.color}>{status.icon}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <Panel>
+          <h3 className="text-[13px] font-bold text-white mb-3">Status da Conta</h3>
+          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: `${status.color}08`, border: `1px solid ${status.color}15` }}>
+            <Shield className="h-5 w-5" style={{ color: status.color }} />
             <div>
-              <p className={`font-semibold text-sm ${status.color}`}>{status.label}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {profile?.account_status === "approved" ? "Conta verificada e ativa" : "Complete seus dados para aprovação"}
-              </p>
+              <p className="font-semibold text-[13px]" style={{ color: status.color }}>{status.label}</p>
+              <p className="text-[10px] text-white/30">{profile?.account_status === "approved" ? "Conta verificada" : "Complete seus dados"}</p>
             </div>
           </div>
-        </div>
-        <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <SectionTitle>Progresso do Cadastro</SectionTitle>
-            <span className="text-sm font-bold text-primary">{completionPct}%</span>
+        </Panel>
+        <Panel>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[13px] font-bold text-white">Progresso</h3>
+            <span className="text-[13px] font-bold" style={{ color: "#00FFA3" }}>{completionPct}%</span>
           </div>
-          <div className="w-full h-2.5 bg-muted/50 rounded-full mt-4 mb-4 overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-700 shadow-[0_0_8px_hsl(152,60%,45%,0.4)]" style={{ width: `${completionPct}%` }} />
+          <div className="w-full h-2 rounded-full overflow-hidden mb-3" style={{ background: "rgba(255,255,255,0.04)" }}>
+            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${completionPct}%`, background: "linear-gradient(90deg, #00FFA3, #00D48B)", boxShadow: "0 0 10px rgba(0,255,163,0.3)" }} />
           </div>
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-1">
             {completionSteps.map((step) => (
               <div key={step.label} className="flex items-center gap-1.5 text-[10px]">
-                {step.done ? <CheckCircle2 className="h-3 w-3 text-primary shrink-0" /> : <div className="h-3 w-3 rounded-full border border-muted-foreground/30 shrink-0" />}
-                <span className={step.done ? "text-foreground" : "text-muted-foreground"}>{step.label}</span>
+                {step.done ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#00FFA3" }} /> : <div className="h-3 w-3 rounded-full border border-white/15 shrink-0" />}
+                <span className={step.done ? "text-white/60" : "text-white/25"}>{step.label}</span>
               </div>
             ))}
           </div>
-        </div>
-        <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm">
-          <SectionTitle>Segurança</SectionTitle>
-          <div className="space-y-3 mt-4">
-            {[
-              { icon: Shield, label: "Criptografia SSL", active: true },
-              { icon: FileCheck, label: "LGPD Compliant", active: true },
-              { icon: Key, label: "2FA", active: false },
-            ].map((item) => (
+        </Panel>
+        <Panel>
+          <h3 className="text-[13px] font-bold text-white mb-3">Segurança</h3>
+          <div className="space-y-2.5">
+            {[{ icon: Shield, label: "Criptografia SSL", active: true }, { icon: FileCheck, label: "LGPD Compliant", active: true }, { icon: Key, label: "2FA", active: false }].map((item) => (
               <div key={item.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs">
-                  <item.icon className={`h-3.5 w-3.5 ${item.active ? "text-primary" : "text-muted-foreground"}`} />
-                  <span>{item.label}</span>
-                </div>
-                <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${item.active ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted/50"}`}>
-                  {item.active ? "Ativo" : "Em breve"}
-                </span>
+                <div className="flex items-center gap-2 text-[12px] text-white/50"><item.icon className="h-3.5 w-3.5" style={{ color: item.active ? "#00FFA3" : "rgba(255,255,255,0.2)" }} /><span>{item.label}</span></div>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ color: item.active ? "#00FFA3" : "rgba(255,255,255,0.2)", background: item.active ? "rgba(0,255,163,0.06)" : "rgba(255,255,255,0.02)" }}>{item.active ? "Ativo" : "Em breve"}</span>
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
       </div>
 
-      {/* Forms + KYC */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Personal data */}
-        <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm">
-          <SectionTitle>Dados Pessoais</SectionTitle>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Nome Completo</Label>
-              <div className="relative mt-1.5"><UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="pl-10 bg-muted/30 border-border/50 h-11" placeholder="Seu nome completo" /></div>
+      {/* Forms */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <Panel>
+          <h3 className="text-[13px] font-bold text-white mb-4">Dados Pessoais</h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">Nome</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">E-mail</Label><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" type="email" /></div>
+              <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">E-mail</Label>
-                <div className="relative mt-1.5"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="pl-10 bg-muted/30 border-border/50 h-11" type="email" /></div>
-              </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Telefone</Label>
-                <div className="relative mt-1.5"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="pl-10 bg-muted/30 border-border/50 h-11" placeholder="(11) 99999-9999" /></div>
-              </div>
+              <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">Tipo Doc.</Label><Select value={form.document_type} onValueChange={(v) => setForm({ ...form, document_type: v })}><SelectTrigger className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem></SelectContent></Select></div>
+              <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">Nº Documento</Label><Input value={form.document_number} onChange={(e) => setForm({ ...form, document_number: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Tipo Documento</Label>
-                <Select value={form.document_type} onValueChange={(v) => setForm({ ...form, document_type: v })}>
-                  <SelectTrigger className="mt-1.5 bg-muted/30 border-border/50 h-11"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Nº Documento</Label>
-                <div className="relative mt-1.5"><FileCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input value={form.document_number} onChange={(e) => setForm({ ...form, document_number: e.target.value })} className="pl-10 bg-muted/30 border-border/50 h-11" placeholder="000.000.000-00" /></div>
-              </div>
-            </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground gap-2 h-11 rounded-xl shadow-lg shadow-primary/20" disabled={loading}>
-              <Save className="h-4 w-4" /> {loading ? "Salvando..." : "Salvar Dados"}
-            </Button>
+            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={loading}><Save className="h-4 w-4 mr-2" />{loading ? "Salvando..." : "Salvar"}</Button>
           </form>
-        </div>
+        </Panel>
 
-        <div className="space-y-4">
-          {/* PIX */}
-          <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <SectionTitle>Chave PIX</SectionTitle>
-              {pixForm.pix_key && <span className="text-[9px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Configurada</span>}
+        <div className="space-y-3">
+          <Panel>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[13px] font-bold text-white">Chave PIX</h3>
+              {pixForm.pix_key && <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ color: "#00FFA3", background: "rgba(0,255,163,0.06)" }}>Configurada</span>}
             </div>
-            <form onSubmit={handlePixSubmit} className="space-y-4 mt-4">
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Tipo da Chave</Label>
-                <Select value={pixForm.pix_key_type} onValueChange={(v) => setPixForm({ ...pixForm, pix_key_type: v })}>
-                  <SelectTrigger className="mt-1.5 bg-muted/30 border-border/50 h-11"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="email">E-mail</SelectItem><SelectItem value="phone">Telefone</SelectItem><SelectItem value="random">Chave Aleatória</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Chave PIX</Label>
-                <div className="relative mt-1.5"><Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input value={pixForm.pix_key} onChange={(e) => setPixForm({ ...pixForm, pix_key: e.target.value })} className="pl-10 bg-muted/30 border-border/50 h-11" placeholder="Sua chave PIX" /></div>
-              </div>
-              <Button type="submit" variant="outline" className="w-full gap-2 h-11 rounded-xl border-primary/30 text-primary hover:bg-primary/10" disabled={pixLoading}>
-                <Save className="h-4 w-4" /> {pixLoading ? "Salvando..." : "Salvar Chave PIX"}
-              </Button>
+            <form onSubmit={handlePixSubmit} className="space-y-3">
+              <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">Tipo</Label><Select value={pixForm.pix_key_type} onValueChange={(v) => setPixForm({ ...pixForm, pix_key_type: v })}><SelectTrigger className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="email">E-mail</SelectItem><SelectItem value="phone">Telefone</SelectItem><SelectItem value="random">Aleatória</SelectItem></SelectContent></Select></div>
+              <div><Label className="text-[10px] text-white/25 uppercase tracking-widest">Chave</Label><Input value={pixForm.pix_key} onChange={(e) => setPixForm({ ...pixForm, pix_key: e.target.value })} className="mt-1 bg-white/[0.03] border-white/[0.06] text-white h-10" /></div>
+              <Button type="submit" variant="outline" className="w-full h-10 rounded-xl text-[13px] border-white/[0.06] text-white/60 hover:text-white hover:bg-white/[0.04]" disabled={pixLoading}><Save className="h-4 w-4 mr-2" />{pixLoading ? "Salvando..." : "Salvar PIX"}</Button>
             </form>
-          </div>
+          </Panel>
 
-          {/* KYC Upload */}
-          <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm">
-            <SectionTitle>Verificação KYC</SectionTitle>
-            <p className="text-[10px] text-muted-foreground mt-2 mb-4">Envie fotos do seu documento e uma selfie segurando-o para verificação.</p>
-            <div className="space-y-3">
-              <DocUploadSlot type="front" label="Documento (Frente)" description="RG, CNH ou Passaporte" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} />
-              <DocUploadSlot type="back" label="Documento (Verso)" description="Verso do documento" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} />
-              <DocUploadSlot type="selfie" label="Selfie com Documento" description="Foto do rosto segurando o documento" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} />
+          <Panel>
+            <h3 className="text-[13px] font-bold text-white mb-3">Verificação KYC</h3>
+            <p className="text-[11px] text-white/25 mb-3">Envie fotos do documento e selfie para verificação.</p>
+            <div className="space-y-2">
+              <DocSlot type="front" label="Documento (Frente)" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} />
+              <DocSlot type="back" label="Documento (Verso)" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} />
+              <DocSlot type="selfie" label="Selfie com Documento" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} />
             </div>
-            <p className="text-[9px] text-muted-foreground mt-4">Formatos aceitos: JPG, PNG, PDF. Tamanho máximo: 5MB por arquivo.</p>
-          </div>
+          </Panel>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="text-sm font-semibold flex items-center gap-2">
-      <span className="w-1 h-5 bg-gradient-to-b from-primary to-emerald-400 rounded-full" />
-      {children}
-    </h3>
-  );
-}
-
-function DocUploadSlot({ type, label, description, icon, preview, uploading, onUpload }: {
-  type: string; label: string; description: string; icon: React.ReactNode; preview: string | null; uploading: boolean; onUpload: (file: File) => void;
-}) {
+function DocSlot({ type, label, icon, preview, uploading, onUpload }: { type: string; label: string; icon: React.ReactNode; preview: string | null; uploading: boolean; onUpload: (file: File) => void }) {
   const ref = useRef<HTMLInputElement>(null);
   return (
-    <div
-      onClick={() => !uploading && ref.current?.click()}
-      className={`relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer group
-        ${preview ? "border-primary/30 bg-primary/5" : "border-border/50 bg-muted/20 hover:border-primary/30 hover:bg-primary/5"}`}
-    >
+    <div onClick={() => !uploading && ref.current?.click()} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group transition-all" style={{ background: preview ? "rgba(0,255,163,0.04)" : "rgba(255,255,255,0.02)", border: `1px solid ${preview ? "rgba(0,255,163,0.12)" : "rgba(255,255,255,0.04)"}` }}>
       <input ref={ref} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
-      <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${preview ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"}`}>
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: preview ? "rgba(0,255,163,0.1)" : "rgba(255,255,255,0.03)", color: preview ? "#00FFA3" : "rgba(255,255,255,0.2)" }}>
         {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : preview ? <CheckCircle2 className="h-5 w-5" /> : icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium">{label}</p>
-        <p className="text-[10px] text-muted-foreground">{preview ? "Documento enviado ✓" : description}</p>
-      </div>
-      <Upload className={`h-4 w-4 shrink-0 transition-colors ${preview ? "text-primary" : "text-muted-foreground group-hover:text-primary"}`} />
+      <div className="flex-1"><p className="text-[13px] font-medium text-white/70">{label}</p><p className="text-[10px] text-white/25">{preview ? "Enviado ✓" : "Clique para enviar"}</p></div>
+      <Upload className="h-4 w-4 shrink-0" style={{ color: preview ? "#00FFA3" : "rgba(255,255,255,0.15)" }} />
     </div>
   );
 }

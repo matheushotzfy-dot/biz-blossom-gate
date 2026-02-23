@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
+import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function Produtos() {
@@ -24,22 +25,13 @@ export default function Produtos() {
 
   useEffect(() => {
     if (!user?.id) return;
-    const uid = user.id;
-    supabase
-      .from("products")
-      .select("*")
-      .eq("user_id", uid)
-      .order("created_at", { ascending: false })
+    supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
       .then(({ data }) => { if (data) setProducts(data); });
   }, [user?.id]);
 
   const loadProducts = async () => {
     if (!user?.id) return;
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    const { data } = await supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (data) setProducts(data);
   };
 
@@ -47,10 +39,7 @@ export default function Produtos() {
     const ext = file.name.split(".").pop();
     const path = `${user!.id}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file);
-    if (error) {
-      toast.error("Erro ao enviar imagem");
-      return null;
-    }
+    if (error) { toast.error("Erro ao enviar imagem"); return null; }
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
     return data.publicUrl;
   };
@@ -60,13 +49,9 @@ export default function Produtos() {
     if (!user) return;
     const price = parseFloat(form.price);
     if (isNaN(price) || price <= 0) { toast.error("Preço inválido"); return; }
-
     setUploading(true);
     let imageUrl: string | null = null;
-    if (imageFile) {
-      imageUrl = await uploadImage(imageFile);
-    }
-
+    if (imageFile) imageUrl = await uploadImage(imageFile);
     try {
       if (editId) {
         const updateData: Record<string, unknown> = { name: form.name, description: form.description, price };
@@ -77,164 +62,72 @@ export default function Produtos() {
       } else {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { error } = await supabase.from("products").insert({
-          name: form.name,
-          description: form.description,
-          price,
-          user_id: user.id,
-          checkout_url: checkoutUrl,
-          image_url: imageUrl,
-        });
+        const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl, image_url: imageUrl });
         if (error) { toast.error("Erro ao criar produto"); return; }
         toast.success("Produto criado!");
       }
-      resetForm();
-      loadProducts();
-    } finally {
-      setUploading(false);
-    }
+      resetForm(); loadProducts();
+    } finally { setUploading(false); }
   };
 
-  const resetForm = () => {
-    setOpen(false);
-    setEditId(null);
-    setForm({ name: "", description: "", price: "" });
-    setImageFile(null);
-    setImagePreview(null);
-  };
-
-  const handleEdit = (p: Tables<"products">) => {
-    setEditId(p.id);
-    setForm({ name: p.name, description: p.description || "", price: String(p.price) });
-    setImagePreview(p.image_url || null);
-    setImageFile(null);
-    setOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) { toast.error("Erro ao remover"); return; }
-    toast.success("Produto removido");
-    loadProducts();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Imagem deve ter no máximo 5MB");
-      return;
-    }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
+  const resetForm = () => { setOpen(false); setEditId(null); setForm({ name: "", description: "", price: "" }); setImageFile(null); setImagePreview(null); };
+  const handleEdit = (p: Tables<"products">) => { setEditId(p.id); setForm({ name: p.name, description: p.description || "", price: String(p.price) }); setImagePreview(p.image_url || null); setImageFile(null); setOpen(true); };
+  const handleDelete = async (id: string) => { const { error } = await supabase.from("products").delete().eq("id", id); if (error) { toast.error("Erro"); return; } toast.success("Removido"); loadProducts(); };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; } setImageFile(file); setImagePreview(URL.createObjectURL(file)); };
 
   return (
-    <div className="space-y-6 dark">
+    <PageShell>
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Package className="h-6 w-6 text-primary" /> Produtos
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">Cadastre e gerencie seus produtos</p>
-        </div>
+        <PageTitle icon={<Package className="h-6 w-6" />} title="Produtos" subtitle="Cadastre e gerencie seus produtos" />
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="gradient-primary text-primary-foreground gap-2"><Plus className="h-4 w-4" /> Novo Produto</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}><Plus className="h-4 w-4" /> Novo Produto</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{editId ? "Editar Produto" : "Novo Produto"}</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Image upload */}
               <div>
-                <Label>Imagem do produto</Label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
+                <Label>Imagem</Label>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                 {imagePreview ? (
                   <div className="relative mt-2 rounded-xl overflow-hidden border border-border">
                     <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => { setImageFile(null); setImagePreview(null); }}
-                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center text-white"><X className="h-4 w-4" /></button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="mt-2 w-full h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <ImagePlus className="h-8 w-8" />
-                    <span className="text-xs font-medium">Clique para adicionar imagem</span>
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 w-full h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                    <ImagePlus className="h-8 w-8" /><span className="text-xs font-medium">Adicionar imagem</span>
                   </button>
                 )}
               </div>
-              <div>
-                <Label>Nome</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              </div>
-              <div>
-                <Label>Descrição</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
-              </div>
-              <div>
-                <Label>Preço (R$)</Label>
-                <Input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-              </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={uploading}>
-                {uploading ? "Enviando..." : editId ? "Salvar" : "Criar Produto"}
-              </Button>
+              <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+              <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+              <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required /></div>
+              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={uploading}>{uploading ? "Enviando..." : editId ? "Salvar" : "Criar"}</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {products.length === 0 ? (
-          <div className="col-span-full bg-card rounded-xl border border-border p-12 text-center">
-            <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">Nenhum produto cadastrado</p>
-          </div>
-        ) : (
-          products.map((p) => (
-            <div key={p.id} className="stat-card flex flex-col">
-              {p.image_url && (
-                <img src={p.image_url} alt={p.name} className="w-full h-36 object-cover rounded-xl mb-3" />
-              )}
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold">{p.name}</h3>
-                  <p className="text-2xl font-bold text-primary mt-1">R$ {Number(p.price).toFixed(2)}</p>
-                </div>
-                <StatusBadge status={p.status} />
-              </div>
-              {p.description && <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{p.description}</p>}
-              {p.checkout_url && (
-                <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
-                  <ExternalLink className="h-3 w-3" />
-                  <span className="font-mono truncate">{p.checkout_url}</span>
-                </p>
-              )}
-              <div className="flex gap-2 mt-auto pt-3 border-t border-border/50">
-                <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => handleEdit(p)}>
-                  <Edit className="h-3 w-3" /> Editar
-                </Button>
-                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive gap-1" onClick={() => handleDelete(p.id)}>
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </div>
+          <div className="col-span-full text-center py-12 text-white/20"><Package className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhum produto</p></div>
+        ) : products.map((p) => (
+          <Panel key={p.id}>
+            {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-36 object-cover rounded-xl mb-3" />}
+            <div className="flex justify-between items-start mb-2">
+              <div><h3 className="font-bold text-white text-[14px]">{p.name}</h3><p className="text-[20px] font-extrabold mt-1" style={{ color: "#00FFA3" }}>R$ {Number(p.price).toFixed(2)}</p></div>
+              <StatusBadge status={p.status} />
             </div>
-          ))
-        )}
+            {p.description && <p className="text-[12px] text-white/30 mb-3 line-clamp-2">{p.description}</p>}
+            {p.checkout_url && <p className="text-[10px] text-white/20 mb-3 flex items-center gap-1 font-mono truncate"><ExternalLink className="h-3 w-3 shrink-0" />{p.checkout_url}</p>}
+            <div className="flex gap-2 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+              <Button variant="outline" size="sm" className="flex-1 gap-1 border-white/[0.06] text-white/50 hover:text-white rounded-xl text-[12px]" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
+              <Button variant="outline" size="sm" className="text-red-400 hover:text-red-300 border-white/[0.06] hover:bg-red-500/5 rounded-xl" onClick={() => handleDelete(p.id)}><Trash2 className="h-3 w-3" /></Button>
+            </div>
+          </Panel>
+        ))}
       </div>
-    </div>
+    </PageShell>
   );
 }

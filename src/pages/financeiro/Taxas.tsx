@@ -1,60 +1,51 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Percent, Zap } from "lucide-react";
+import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function Taxas() {
   const [fees, setFees] = useState<Tables<"fees">[]>([]);
 
   useEffect(() => {
-    supabase.from("fees").select("*").order("created_at").then(({ data }) => {
-      if (data) setFees(data);
-    });
+    supabase.from("fees").select("*").order("created_at").then(({ data }) => { if (data) setFees(data); });
   }, []);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2 text-foreground font-display">
-          <Percent className="h-6 w-6 text-primary" /> Taxas e Tarifas
-        </h1>
-        <p className="text-foreground/40 text-sm mt-1">Taxas aplicadas às suas transações</p>
-      </div>
+    <PageShell>
+      <PageTitle icon={<Percent className="h-6 w-6" />} title="Taxas e Tarifas" subtitle="Taxas aplicadas às suas transações" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {fees.map((fee) => (
-          <div key={fee.id} className="glass-card-hover rounded-2xl p-5 group">
+          <Panel key={fee.id}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                <Zap className="h-5 w-5 text-primary" />
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,255,163,0.08)", color: "#00FFA3" }}>
+                <Zap className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-foreground">{fee.name}</h3>
+              <h3 className="font-bold text-white text-[14px]">{fee.name}</h3>
             </div>
-            <p className="text-3xl font-extrabold text-foreground font-display">
+            <p className="text-[28px] font-extrabold text-white" style={{ textShadow: "0 0 20px rgba(0,255,163,0.1)" }}>
               {fee.fee_type === "percentage" ? `${fee.value}%` : `R$ ${Number(fee.value).toFixed(2)}`}
             </p>
-            <p className="text-sm text-foreground/40 mt-2">{fee.description}</p>
-            <span className="inline-block mt-3 text-xs px-3 py-1.5 rounded-xl bg-white/[0.04] text-foreground/50 font-semibold capitalize">
+            <p className="text-[12px] text-white/30 mt-2">{fee.description}</p>
+            <span className="inline-block mt-3 text-[10px] px-3 py-1 rounded-lg font-semibold capitalize text-white/40" style={{ background: "rgba(255,255,255,0.03)" }}>
               {fee.fee_type === "percentage" ? "Percentual" : "Valor Fixo"}
             </span>
-          </div>
+          </Panel>
         ))}
         {fees.length === 0 && (
-          <div className="col-span-full glass-card rounded-2xl p-8 text-center text-foreground/30">
-            Nenhuma taxa configurada
-          </div>
+          <div className="col-span-full text-center py-12 text-white/20 text-[13px]">Nenhuma taxa configurada</div>
         )}
       </div>
 
-      <div className="glass-card rounded-2xl p-6">
-        <h3 className="font-bold mb-4 text-foreground">Como as taxas funcionam</h3>
-        <div className="space-y-3 text-sm text-foreground/50">
-          <p>• <strong className="text-foreground">Taxas percentuais</strong> são calculadas sobre o valor bruto da transação.</p>
-          <p>• <strong className="text-foreground">Taxas fixas</strong> são cobradas por operação realizada.</p>
-          <p>• O valor líquido é calculado automaticamente: <span className="text-foreground font-mono">valor bruto - taxas = valor líquido</span>.</p>
-          <p>• As taxas podem variar conforme o método de pagamento utilizado.</p>
+      <Panel>
+        <h3 className="font-bold mb-4 text-white text-[14px]">Como as taxas funcionam</h3>
+        <div className="space-y-2.5 text-[13px] text-white/40">
+          <p>• <strong className="text-white/70">Taxas percentuais</strong> são calculadas sobre o valor bruto da transação.</p>
+          <p>• <strong className="text-white/70">Taxas fixas</strong> são cobradas por operação realizada.</p>
+          <p>• O valor líquido é calculado: <span className="text-white/60 font-mono text-[12px]">valor bruto - taxas = líquido</span>.</p>
         </div>
-      </div>
-    </div>
+      </Panel>
+    </PageShell>
   );
 }

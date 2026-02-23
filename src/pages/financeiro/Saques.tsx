@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
+import { PageShell, Panel, PageTitle, DataTable } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function Saques() {
@@ -21,10 +22,9 @@ export default function Saques() {
 
   const loadData = async () => {
     if (!user?.id) return;
-    const uid = user.id;
     const [wRes, baRes] = await Promise.all([
-      supabase.from("withdrawals").select("*").eq("user_id", uid).order("created_at", { ascending: false }),
-      supabase.from("bank_accounts").select("*").eq("user_id", uid),
+      supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("bank_accounts").select("*").eq("user_id", user.id),
     ]);
     if (wRes.data) setWithdrawals(wRes.data);
     if (baRes.data) setBankAccounts(baRes.data);
@@ -38,35 +38,21 @@ export default function Saques() {
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
     const feeAmount = 5.00;
-    const { error } = await supabase.from("withdrawals").insert({
-      user_id: user.id,
-      bank_account_id: selectedAccount || null,
-      amount: numAmount,
-      fee_amount: feeAmount,
-      net_amount: numAmount - feeAmount,
-    });
+    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, bank_account_id: selectedAccount || null, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
     if (error) { toast.error("Erro ao solicitar saque"); return; }
-    toast.success("Saque solicitado com sucesso!");
-    setOpen(false);
-    setAmount("");
-    setSelectedAccount("");
-    loadData();
+    toast.success("Saque solicitado!");
+    setOpen(false); setAmount(""); setSelectedAccount(""); loadData();
   };
 
   const totalPending = withdrawals.filter((w) => w.status === "pending").reduce((acc, w) => acc + Number(w.amount), 0);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <PageShell>
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2 text-foreground font-display">
-            <ArrowDownToLine className="h-6 w-6 text-primary" /> Saques
-          </h1>
-          <p className="text-foreground/40 text-sm mt-1">Solicite e acompanhe seus saques</p>
-        </div>
+        <PageTitle icon={<ArrowDownToLine className="h-6 w-6" />} title="Saques" subtitle="Solicite e acompanhe seus saques" />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gradient-primary text-primary-foreground gap-2 shadow-lg shadow-primary/20"><Plus className="h-4 w-4" /> Novo Saque</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }}><Plus className="h-4 w-4" /> Novo Saque</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle className="text-foreground">Solicitar Saque</DialogTitle></DialogHeader>
@@ -80,65 +66,35 @@ export default function Saques() {
                 <Label className="text-foreground/70">Conta Bancária</Label>
                 <Select value={selectedAccount} onValueChange={setSelectedAccount}>
                   <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione uma conta" /></SelectTrigger>
-                  <SelectContent>
-                    {bankAccounts.map((acc) => (
-                      <SelectItem key={acc.id} value={acc.id}>
-                        {acc.bank_name} — Ag: {acc.agency} Conta: {acc.account_number}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectContent>{bankAccounts.map((acc) => (<SelectItem key={acc.id} value={acc.id}>{acc.bank_name} — Ag: {acc.agency} Conta: {acc.account_number}</SelectItem>))}</SelectContent>
                 </Select>
                 {bankAccounts.length === 0 && <p className="text-xs text-destructive mt-1">Cadastre uma conta bancária primeiro</p>}
               </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={bankAccounts.length === 0}>
-                Solicitar Saque
-              </Button>
+              <Button type="submit" className="w-full" style={{ background: "linear-gradient(135deg, #00FFA3, #00D48B)", color: "#080c18" }} disabled={bankAccounts.length === 0}>Solicitar Saque</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-card rounded-2xl p-5">
-          <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">Pendentes</p>
-          <p className="text-2xl font-extrabold mt-2 text-warning font-display">R$ {totalPending.toFixed(2)}</p>
-        </div>
-        <div className="glass-card rounded-2xl p-5">
-          <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">Total de Saques</p>
-          <p className="text-2xl font-extrabold mt-2 text-foreground font-display">{withdrawals.length}</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Panel><p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold">Pendentes</p><p className="text-[22px] font-extrabold mt-2" style={{ color: "#FFAA00" }}>R$ {totalPending.toFixed(2)}</p></Panel>
+        <Panel><p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold">Total de Saques</p><p className="text-[22px] font-extrabold mt-2 text-white">{withdrawals.length}</p></Panel>
       </div>
 
-      <div className="glass-card rounded-2xl overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[0.04] text-foreground/40">
-              <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider">ID</th>
-              <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider">Valor</th>
-              <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider">Taxa</th>
-              <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider">Líquido</th>
-              <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider">Status</th>
-              <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {withdrawals.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-foreground/30">Nenhum saque realizado</td></tr>
-            ) : (
-              withdrawals.map((w) => (
-                <tr key={w.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="p-4 font-mono text-xs text-foreground/50">{w.id.slice(0, 8)}</td>
-                  <td className="p-4 font-bold text-foreground">R$ {Number(w.amount).toFixed(2)}</td>
-                  <td className="p-4 text-warning font-semibold">R$ {Number(w.fee_amount).toFixed(2)}</td>
-                  <td className="p-4 text-primary font-semibold">R$ {Number(w.net_amount).toFixed(2)}</td>
-                  <td className="p-4"><StatusBadge status={w.status} /></td>
-                  <td className="p-4 text-foreground/40">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <DataTable headers={["ID", "Valor", "Taxa", "Líquido", "Status", "Data"]}>
+        {withdrawals.length === 0 ? (
+          <tr><td colSpan={6} className="p-8 text-center text-white/20">Nenhum saque realizado</td></tr>
+        ) : withdrawals.map((w) => (
+          <tr key={w.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+            <td className="p-3.5 font-mono text-[11px] text-white/35">{w.id.slice(0, 8)}</td>
+            <td className="p-3.5 font-bold text-white text-[13px]">R$ {Number(w.amount).toFixed(2)}</td>
+            <td className="p-3.5 font-semibold text-[13px]" style={{ color: "#FFAA00" }}>R$ {Number(w.fee_amount).toFixed(2)}</td>
+            <td className="p-3.5 font-semibold text-[13px]" style={{ color: "#00FFA3" }}>R$ {Number(w.net_amount).toFixed(2)}</td>
+            <td className="p-3.5"><StatusBadge status={w.status} /></td>
+            <td className="p-3.5 text-white/30 text-[13px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+          </tr>
+        ))}
+      </DataTable>
+    </PageShell>
   );
 }
