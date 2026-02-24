@@ -568,6 +568,75 @@ export type Database = {
         }
         Relationships: []
       }
+      product_pixels: {
+        Row: {
+          api_token: string | null
+          boleto_conversion_value: number
+          created_at: string
+          disable_bump_events: boolean
+          domain: string | null
+          events: Json
+          fire_on_boleto: boolean
+          fire_on_pix_qr: boolean
+          id: string
+          is_active: boolean
+          pix_conversion_value: number
+          pixel_id: string
+          platform: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          api_token?: string | null
+          boleto_conversion_value?: number
+          created_at?: string
+          disable_bump_events?: boolean
+          domain?: string | null
+          events?: Json
+          fire_on_boleto?: boolean
+          fire_on_pix_qr?: boolean
+          id?: string
+          is_active?: boolean
+          pix_conversion_value?: number
+          pixel_id: string
+          platform: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          api_token?: string | null
+          boleto_conversion_value?: number
+          created_at?: string
+          disable_bump_events?: boolean
+          domain?: string | null
+          events?: Json
+          fire_on_boleto?: boolean
+          fire_on_pix_qr?: boolean
+          id?: string
+          is_active?: boolean
+          pix_conversion_value?: number
+          pixel_id?: string
+          platform?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_pixels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_pixels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           checkout_address_required: boolean | null
