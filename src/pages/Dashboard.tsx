@@ -165,20 +165,15 @@ export default function Dashboard() {
       {/* ===== Header ===== */}
       <div className="flex items-center justify-between animate-fade-in">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-[26px] font-extrabold tracking-tight text-foreground font-display">
-              {profile?.full_name?.split(" ")[0] || "Usuário"}
-            </h1>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-primary bg-primary/10 border border-primary/10">
-              <Sparkles className="h-3 w-3" /> Online
-            </div>
-          </div>
-          <p className="text-[13px] text-muted-foreground mt-1 font-medium">Resumo do seu negócio</p>
+          <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground font-display">
+            Dashboard
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-1 font-medium">Veja o resumo do seu desempenho!</p>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-muted-foreground rounded-full transition-all duration-300 hover:text-foreground group bg-muted/50 border border-border">
+            <button className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-muted-foreground rounded-xl transition-all duration-300 hover:text-foreground group border border-border bg-card/60 backdrop-blur-sm">
               <CalendarDays className="h-3.5 w-3.5 text-primary" />
               {selectedPeriod.label}
               <ChevronDown className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -196,207 +191,211 @@ export default function Dashboard() {
 
       {/* ===== KPI Cards ===== */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "0.05s" }}>
-        <MetricCard label="Receita" value={fmtCurrency(totalRevenue)} sub={`${approvedTx.length} vendas`} accent="primary" icon={<DollarSign className="h-5 w-5" />} trend={approvedTx.length > 0} />
-        <MetricCard label="Ticket Médio" value={fmtCurrency(ticketMedio)} sub={approvedTx.length > 0 ? "por venda" : "—"} accent="info" icon={<TrendingUp className="h-5 w-5" />} />
-        <MetricCard label="Conversão" value={`${conversionRate}%`} sub={`${filteredTx.length} transações`} accent="purple" icon={<Receipt className="h-5 w-5" />} />
-        <MetricCard label="Saldo Disponível" value={fmtCurrency(totalRevenue)} sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : "Livre para saque"} accent="warning" icon={<Wallet className="h-5 w-5" />} action={{ label: "Sacar", href: "/financeiro/saques" }} />
+        <MetricCard label="Total em Vendas" value={fmtCurrency(totalRevenue)} sub="durante este período." accent="primary" icon={<DollarSign className="h-5 w-5" />} trend={approvedTx.length > 0} />
+        <MetricCard label="Ticket Médio" value={fmtCurrency(ticketMedio)} sub={approvedTx.length > 0 ? `em ${approvedTx.length} vendas neste período.` : "—"} accent="primary" icon={<TrendingUp className="h-5 w-5" />} />
+        <MetricCard label="Pedidos Pagos" value={String(approvedTx.length)} sub={`em ${filteredTx.length} transações geradas neste período.`} accent="primary" icon={<Receipt className="h-5 w-5" />} />
+        <MetricCard label="Saldo Disponível" value={fmtCurrency(totalRevenue)} sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : ""} accent="primary" icon={<Wallet className="h-5 w-5" />} action={{ label: "Solicitar Saque", href: "/financeiro/saques" }} />
       </div>
 
-      {/* ===== FULL-WIDTH CHART ===== */}
-      <div className="animate-fade-in rounded-2xl overflow-hidden relative" style={{ animationDelay: "0.1s", background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "var(--card-shadow)" }}>
-        <div className="absolute top-0 left-0 w-full h-[1px]" style={{ background: "var(--top-line)" }} />
-        <div className="px-5 pt-5 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h3 className="text-[15px] font-bold text-foreground">Vendas</h3>
-            <span className="text-[11px] text-muted-foreground font-medium">{selectedPeriod.label}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full text-primary bg-primary/5 border border-primary/10">
-            <span className="h-[6px] w-[6px] rounded-full animate-pulse bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
-            Tempo real
-          </div>
-        </div>
-        <div className="px-2 pb-3">
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                  <stop offset="40%" stopColor="hsl(var(--primary))" stopOpacity={0.06} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="name" stroke="hsl(var(--border))" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-              <YAxis stroke="hsl(var(--border))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}`} width={40} />
-              <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: `1px solid var(--tooltip-border)`, borderRadius: "14px", fontSize: "12px", boxShadow: "var(--hover-card-shadow)", color: "var(--tooltip-text)", backdropFilter: "blur(20px)", padding: "10px 14px" }} formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]} labelStyle={{ color: "var(--tooltip-text)", opacity: 0.5 }} />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#chartFill)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 8 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
 
-      {/* ===== Middle Row: Progress + Conversion ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+      {/* ===== Middle Row: Progress + Conversion + Monitoring ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s" }}>
         {/* Progress */}
-        <Panel>
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-10 w-10 rounded-2xl flex items-center justify-center bg-primary/10">
-              <Trophy className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-[14px] font-bold text-foreground">Progresso</h3>
-              <p className="text-[11px] text-muted-foreground">Meta de faturamento</p>
-            </div>
-          </div>
+        <Panel title="Progresso">
           <div className="grid grid-cols-2 gap-4 mb-5">
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total faturado</p>
-              <p className="text-[22px] font-extrabold text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
+              <p className="text-lg font-extrabold text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Hoje</p>
-              <p className="text-[22px] font-extrabold mt-1 text-primary">{fmtCurrency(todayRevenue)}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Vendas diárias</p>
+              <p className="text-lg font-extrabold mt-1 text-primary">{fmtCurrency(todayRevenue)} / dia</p>
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Falta para meta</p>
-              <p className="text-[16px] font-bold text-foreground/60 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Falta para</p>
+              <p className="text-[15px] font-bold text-foreground/60 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Meta</p>
-              <p className="text-[16px] font-bold mt-1 text-primary">{milestone.next.label}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Meta atual</p>
+              <p className="text-[15px] font-bold mt-1 text-foreground">{milestone.next.label}</p>
             </div>
           </div>
           {/* Bar */}
           <div>
-            <div className="flex justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[10px] font-bold text-muted-foreground">{milestone.pct.toFixed(0)}%</span>
-              </div>
-              <span className="text-[10px] font-bold text-muted-foreground">{milestone.next.label}</span>
-            </div>
             <div className="w-full rounded-full h-2.5 overflow-hidden" style={{ background: "var(--bar-track)" }}>
               <div className="h-full rounded-full relative transition-all duration-1000 bg-gradient-to-r from-primary to-emerald-400" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 15px hsl(var(--primary) / 0.35)" }}>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent animate-shimmer" style={{ backgroundImage: `linear-gradient(to right, transparent, var(--shimmer-color))` }} />
               </div>
             </div>
-            <div className="flex justify-between mt-2">
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Próxima</span>
-              <span className="text-[12px] font-extrabold text-foreground/60">{MILESTONES[milestone.tier + 2]?.label || "🏆 Topo"}</span>
+            <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                <span className="text-[10px] font-bold text-muted-foreground">{milestone.pct.toFixed(0)}% do caminho até a meta</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-2 pt-2" style={{ borderTop: "1px solid var(--glass-separator)" }}>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">PRÓXIMA META</span>
+              <span className="text-[15px] font-extrabold text-foreground">{MILESTONES[milestone.tier + 2]?.label || "🏆 Topo"}</span>
             </div>
           </div>
         </Panel>
 
-        {/* Conversion */}
-        <Panel>
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-10 w-10 rounded-2xl flex items-center justify-center bg-info/10">
-              <RefreshCw className="h-5 w-5 text-info" />
+        {/* Resumo Financeiro */}
+        <Panel title="Resumo Financeiro">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-[11px] text-muted-foreground">Conversão</p>
+              <p className="text-lg font-extrabold text-foreground">{conversionRate}%</p>
+              <p className="text-[10px] text-primary font-semibold">+0%</p>
             </div>
-            <div>
-              <h3 className="text-[14px] font-bold text-foreground">Conversão</h3>
-              <p className="text-[11px] text-muted-foreground">Taxa por método de pagamento</p>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
+                <AlertCircle className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-[11px] text-muted-foreground">Pre-Chargeback</p>
+              <p className="text-lg font-extrabold text-foreground">0</p>
+              <p className="text-[10px] text-primary font-semibold">+0%</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
+                <RefreshCw className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-[11px] text-muted-foreground">Chargeback</p>
+              <p className="text-lg font-extrabold text-foreground">{chargebacks}</p>
+              <p className="text-[10px] text-primary font-semibold">+0%</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
+                <ArrowDownRight className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-[11px] text-muted-foreground">Qtde. Reembolsos</p>
+              <p className="text-lg font-extrabold text-foreground">{refunds}</p>
+              <p className="text-[10px] text-primary font-semibold">+0%</p>
             </div>
           </div>
-          <div className="space-y-3">
-            <ConvBar icon={<TrendingUp className="h-4 w-4" />} label="Geral" value={`${conversionRate}%`} pct={Number(conversionRate)} color="hsl(var(--primary))" />
-            <ConvBar icon={<Zap className="h-4 w-4" />} label="Pix" value={`${pixConv}%`} pct={Number(pixConv)} color="hsl(var(--primary))" />
-            <ConvBar icon={<CreditCard className="h-4 w-4" />} label="Cartão" value={`${cardConv}%`} pct={Number(cardConv)} color="hsl(var(--info))" />
-            <ConvBar icon={<FileText className="h-4 w-4" />} label="Boleto" value={`${boletoConv}%`} pct={Number(boletoConv)} color="hsl(var(--warning))" />
-            <ConvBar icon={<AlertCircle className="h-4 w-4" />} label="Estorno" value={`${chargebackRate}%`} pct={Number(chargebackRate)} color="hsl(var(--destructive))" />
+        </Panel>
+
+        {/* Monitoramento */}
+        <Panel title="Monitoramento" titleRight="Atualizado há alguns segundos">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Tempo Médio</p>
+              <p className="text-lg font-extrabold text-foreground mt-1">0 ms</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Taxa Conversão</p>
+              <p className="text-lg font-extrabold text-primary mt-1">{conversionRate} %</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">API/minuto</p>
+              <p className="text-lg font-extrabold text-foreground mt-1">0.0</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Webhook OK</p>
+              <p className="text-lg font-extrabold text-primary mt-1">100.0 %</p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 flex items-center justify-between" style={{ borderTop: "1px solid var(--glass-separator)" }}>
+            <span className="text-[10px] text-muted-foreground">0 chamadas/24h</span>
+            <span className="text-[10px] text-primary font-semibold">Todos webhooks OK</span>
           </div>
         </Panel>
       </div>
 
-      {/* ===== Bottom Row: Financial + Status + Activity ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-        {/* Financial */}
-        <Panel>
-          <h3 className="text-[14px] font-bold text-foreground mb-4">Resumo Financeiro</h3>
-          <div className="space-y-3">
-            <FinRow label="Receita Total" value={fmtCurrency(totalRevenue)} color="hsl(var(--primary))" />
-            <FinRow label="Chargebacks" value={String(chargebacks)} color="hsl(var(--destructive))" />
-            <FinRow label="Reembolsos" value={String(refunds)} color="hsl(var(--info))" />
+      {/* ===== Bottom Row: Chart + Activity ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        {/* Chart – spans 3 cols */}
+        <div className="lg:col-span-3 rounded-2xl overflow-hidden relative" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "var(--card-shadow)" }}>
+          <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
+          <div className="px-5 pt-5 pb-2 flex items-center justify-between">
+            <h3 className="text-[15px] font-bold text-foreground flex items-center gap-2">
+              <span className="h-4 w-[3px] rounded-full bg-primary inline-block" />
+              Vendas
+            </h3>
           </div>
-        </Panel>
+          <div className="px-2 pb-3">
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                    <stop offset="40%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" stroke="hsl(var(--border))" fontSize={11} tickLine={false} axisLine={false} dy={8} />
+                <YAxis stroke="hsl(var(--border))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$ ${v.toFixed(2)}`} width={60} />
+                <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: `1px solid var(--tooltip-border)`, borderRadius: "14px", fontSize: "12px", boxShadow: "var(--hover-card-shadow)", color: "var(--tooltip-text)", backdropFilter: "blur(20px)", padding: "10px 14px" }} formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]} labelStyle={{ color: "var(--tooltip-text)", opacity: 0.5 }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#chartFill)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 8 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-        {/* Status Pie */}
-        <Panel>
-          <h3 className="text-[14px] font-bold text-foreground mb-3">Status</h3>
-          {pieData.length > 0 ? (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width={110} height={110}>
-                <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={34} outerRadius={52} dataKey="value" paddingAngle={4} strokeWidth={0}>
-                    {pieData.map((_, i) => (<Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-2">
-                {pieData.map((d, i) => {
-                  const labels: Record<string, string> = { completed: "Aprovado", pending: "Pendente", failed: "Falhou", refunded: "Reembolso", chargeback: "Chargeback" };
+        {/* Activity – spans 2 cols */}
+        <div className="lg:col-span-2 rounded-2xl relative overflow-hidden" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "var(--card-shadow)" }}>
+          <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
+          <div className="px-5 pt-5 pb-2 flex items-center justify-between">
+            <h3 className="text-[15px] font-bold text-foreground flex items-center gap-2">
+              <span className="h-4 w-[3px] rounded-full bg-primary inline-block" />
+              Atividade Recente
+            </h3>
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-primary">
+              <span className="h-[6px] w-[6px] rounded-full animate-pulse bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
+              Ao vivo
+            </div>
+          </div>
+          <div className="px-5 pb-5">
+            <div className="flex gap-1.5 mb-3 flex-wrap">
+              {["Todas", "Transações", "Saques"].map((tab, i) => (
+                <span key={tab} className={`text-[10px] font-semibold px-3 py-1 rounded-full cursor-pointer transition-all ${i === 0 ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}>{tab}</span>
+              ))}
+            </div>
+            <div className="flex items-center justify-between mb-3">
+              <Link to="/financeiro/extrato" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 transition-colors">
+                Ver Transações <ArrowUpRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-1">
+              {recentActivity.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/40">
+                  <Eye className="h-7 w-7 mb-2" />
+                  <p className="text-[11px]">Nenhuma atividade</p>
+                </div>
+              ) : (
+                recentActivity.slice(0, 5).map((item) => {
+                  const isTx = "payment_method" in item;
+                  const stMap: Record<string, { c: string; l: string }> = {
+                    completed: { c: "hsl(var(--primary))", l: "Aprovado" }, approved: { c: "hsl(var(--primary))", l: "Aprovado" },
+                    pending: { c: "hsl(var(--warning))", l: "Pendente" }, paid: { c: "hsl(var(--primary))", l: "Pago" },
+                    failed: { c: "hsl(var(--destructive))", l: "Falhou" }, rejected: { c: "hsl(var(--destructive))", l: "Recusado" },
+                    refunded: { c: "hsl(var(--info))", l: "Reembolso" }, chargeback: { c: "hsl(var(--destructive))", l: "Chargeback" },
+                    requested: { c: "hsl(var(--warning))", l: "Solicitado" },
+                  };
+                  const st = stMap[item.status] || { c: "hsl(var(--muted-foreground))", l: item.status };
                   return (
-                    <div key={d.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                        <span className="text-[12px] text-muted-foreground">{labels[d.name] || d.name}</span>
+                    <div key={item.id} className="flex items-center gap-2.5 py-2 px-2.5 rounded-xl transition-all duration-200 hover:bg-muted/10">
+                      <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${st.c} 12%, transparent)` }}>
+                        {isTx ? <DollarSign className="h-3.5 w-3.5" style={{ color: st.c }} /> : <ArrowDownRight className="h-3.5 w-3.5" style={{ color: st.c }} />}
                       </div>
-                      <span className="text-[12px] font-bold text-foreground">{d.value}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[12px] font-bold text-foreground">{fmtCurrency(Number(item.amount))}</span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ color: st.c, background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>{st.l}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{isTx ? "Nova transação " + st.l.toLowerCase() : "Saque " + st.l.toLowerCase()}</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground font-medium">há {formatRelativeTime(item.created_at)}</span>
                     </div>
                   );
-                })}
-              </div>
+                })
+              )}
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-[110px] text-[12px] text-muted-foreground">Sem dados</div>
-          )}
-        </Panel>
-
-        {/* Activity */}
-        <Panel>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[14px] font-bold text-foreground">Atividade</h3>
-            <Link to="/financeiro/extrato" className="text-[11px] text-muted-foreground hover:text-primary font-medium flex items-center gap-1 transition-colors">
-              Ver tudo <ArrowUpRight className="h-3 w-3" />
-            </Link>
           </div>
-          <div className="space-y-1.5">
-            {recentActivity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/40">
-                <Eye className="h-7 w-7 mb-2" />
-                <p className="text-[11px]">Nenhuma atividade</p>
-              </div>
-            ) : (
-              recentActivity.slice(0, 5).map((item) => {
-                const isTx = "payment_method" in item;
-                const stMap: Record<string, { c: string; l: string }> = {
-                  completed: { c: "hsl(var(--primary))", l: "Aprovado" }, approved: { c: "hsl(var(--primary))", l: "Aprovado" },
-                  pending: { c: "hsl(var(--warning))", l: "Pendente" }, paid: { c: "hsl(var(--primary))", l: "Pago" },
-                  failed: { c: "hsl(var(--destructive))", l: "Falhou" }, rejected: { c: "hsl(var(--destructive))", l: "Recusado" },
-                  refunded: { c: "hsl(var(--info))", l: "Reembolso" }, chargeback: { c: "hsl(var(--destructive))", l: "Chargeback" },
-                  requested: { c: "hsl(var(--warning))", l: "Solicitado" },
-                };
-                const st = stMap[item.status] || { c: "hsl(var(--muted-foreground))", l: item.status };
-                return (
-                  <div key={item.id} className="flex items-center gap-2.5 py-2 px-2.5 rounded-xl transition-all duration-200" style={{ background: "transparent" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "var(--glass-hover)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-                  >
-                    <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>
-                      {isTx ? <DollarSign className="h-3.5 w-3.5" style={{ color: st.c }} /> : <ArrowDownRight className="h-3.5 w-3.5" style={{ color: st.c }} />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[12px] font-bold text-foreground">{fmtCurrency(Number(item.amount))}</span>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ color: st.c, background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>{st.l}</span>
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground font-medium">{formatRelativeTime(item.created_at)}</span>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </Panel>
+        </div>
       </div>
     </div>
   );
@@ -404,10 +403,19 @@ export default function Dashboard() {
 
 /* ============ Sub-components ============ */
 
-function Panel({ children }: { children: React.ReactNode }) {
+function Panel({ children, title, titleRight }: { children: React.ReactNode; title?: string; titleRight?: string }) {
   return (
     <div className="rounded-2xl p-5 relative overflow-hidden transition-all duration-500" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(20px)", boxShadow: "var(--card-shadow)" }}>
-      <div className="absolute top-0 left-0 w-full h-[1px]" style={{ background: "var(--top-line)" }} />
+      <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
+      {title && (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[15px] font-bold text-foreground flex items-center gap-2">
+            <span className="h-4 w-[3px] rounded-full bg-primary inline-block" />
+            {title}
+          </h3>
+          {titleRight && <span className="text-[10px] text-muted-foreground">{titleRight}</span>}
+        </div>
+      )}
       <div className="relative">{children}</div>
     </div>
   );
@@ -429,10 +437,11 @@ function MetricCard({ label, value, sub, accent, icon, trend, action }: {
       onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "var(--hover-card-shadow)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "var(--card-shadow)"; }}
     >
-      <div className="absolute top-0 left-0 w-full h-[1px]" style={{ background: "var(--top-line)" }} />
+      {/* Left accent bar */}
+      <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{label}</p>
+          <p className="text-[11px] font-semibold text-muted-foreground">{label}</p>
           <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: `color-mix(in srgb, ${color} 10%, transparent)`, color }}>
             {icon}
           </div>
@@ -443,8 +452,8 @@ function MetricCard({ label, value, sub, accent, icon, trend, action }: {
           {trend && <ArrowUpRight className="h-3.5 w-3.5" style={{ color }} />}
         </div>
         {action && (
-          <Link to={action.href} className="text-[10px] font-bold mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all duration-300" style={{ color }}>
-            {action.label} <ArrowUpRight className="h-3 w-3" />
+          <Link to={action.href} className="text-[11px] font-bold mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all duration-300 text-primary">
+            <CheckCircle2 className="h-3 w-3" /> {action.label}
           </Link>
         )}
       </div>
