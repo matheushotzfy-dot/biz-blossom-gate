@@ -185,69 +185,99 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
         {/* Progresso */}
         <Card>
-          <CardHead title="Progresso" />
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
-            <Stat label="Total faturado" value={fmt(allTimeRevenue)} />
-            <Stat label="Vendas diárias" value={`${fmt(todayRevenue)} / dia`} highlight />
-            <Stat label="Falta para" value={fmt(Math.max(0, milestone.next.value - allTimeRevenue))} muted />
-            <Stat label="Meta atual" value={milestone.next.label} />
-          </div>
-          <div className="w-full rounded-full h-3 overflow-hidden bg-muted/20">
-            <div
-              className="h-full rounded-full relative transition-all duration-1000"
-              style={{
-                width: `${Math.max(milestone.pct, 2)}%`,
-                background: "linear-gradient(90deg, hsl(var(--primary)), hsl(152 80% 55%))",
-                boxShadow: "0 0 20px hsl(var(--primary) / 0.4)",
-              }}
-            >
-              <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: "linear-gradient(to right, transparent, var(--shimmer-color))", backgroundSize: "200% 100%" }} />
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Zap className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-[15px] font-bold text-foreground tracking-tight">Progresso</h3>
+              <p className="text-[10px] text-muted-foreground">Rumo à próxima meta</p>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-semibold text-muted-foreground">{milestone.pct.toFixed(0)}% do caminho até a meta</span>
-            </div>
+
+          {/* Big number */}
+          <div className="flex items-end gap-3 mb-5">
+            <p className="text-3xl font-black text-foreground tracking-tighter leading-none">{fmt(allTimeRevenue)}</p>
+            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg mb-0.5">{milestone.pct.toFixed(0)}%</span>
           </div>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span className="text-xs text-muted-foreground">Início</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-muted-foreground/40" />
-              <div className="text-right">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Próxima Meta</p>
-                <p className="text-lg font-black text-foreground">{MILESTONES[milestone.tier + 2]?.label || "🏆"}</p>
+
+          {/* Progress bar */}
+          <div className="relative mb-4">
+            <div className="w-full rounded-full h-3.5 overflow-hidden" style={{ background: "var(--bar-track)" }}>
+              <div
+                className="h-full rounded-full relative transition-all duration-1000 ease-out"
+                style={{
+                  width: `${Math.max(milestone.pct, 3)}%`,
+                  background: "linear-gradient(90deg, hsl(var(--primary)), hsl(152 75% 55%), hsl(180 70% 50%))",
+                  boxShadow: "0 0 24px hsl(var(--primary) / 0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
+                }}
+              >
+                <div className="absolute inset-0 animate-shimmer rounded-full" style={{ backgroundImage: "linear-gradient(90deg, transparent 0%, var(--shimmer-color) 50%, transparent 100%)", backgroundSize: "200% 100%" }} />
               </div>
+            </div>
+            {/* Milestone markers */}
+            <div className="flex justify-between mt-2">
+              {MILESTONES.slice(0, 5).map((m, i) => (
+                <div key={m.label} className="flex flex-col items-center">
+                  <div className={`h-1.5 w-1.5 rounded-full mb-1 ${allTimeRevenue >= m.value ? "bg-primary" : "bg-muted-foreground/20"}`} />
+                  <span className={`text-[9px] font-bold ${allTimeRevenue >= m.value ? "text-primary" : "text-muted-foreground/40"}`}>{m.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/20">
+            <div className="rounded-xl p-3" style={{ background: "var(--glass-subtle)" }}>
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Hoje</p>
+              <p className="text-sm font-black text-primary">{fmt(todayRevenue)}</p>
+            </div>
+            <div className="rounded-xl p-3" style={{ background: "var(--glass-subtle)" }}>
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Próxima Meta</p>
+              <p className="text-sm font-black text-foreground">{milestone.next.label}</p>
             </div>
           </div>
         </Card>
 
         {/* Resumo Financeiro */}
         <Card>
-          <CardHead title="Resumo Financeiro" />
-          <div className="grid grid-cols-2 gap-5">
-            <MetricBlock icon={<TrendingUp />} label="Conversão" value={`${conversionRate}%`} delta="+0%" />
-            <MetricBlock icon={<AlertCircle />} label="Pre-Chargeback" value="0" delta="+0%" />
-            <MetricBlock icon={<RefreshCw />} label="Chargeback" value={String(chargebacks)} delta="+0%" />
-            <MetricBlock icon={<ArrowDownRight />} label="Reembolsos" value={String(refunds)} delta="+0%" />
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Receipt className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-[15px] font-bold text-foreground tracking-tight">Resumo Financeiro</h3>
+              <p className="text-[10px] text-muted-foreground">Métricas de conversão</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <FinancialRow icon={<TrendingUp className="h-4 w-4" />} label="Conversão" value={`${conversionRate}%`} color="primary" />
+            <FinancialRow icon={<AlertCircle className="h-4 w-4" />} label="Pre-Chargeback" value="0" color="warning" />
+            <FinancialRow icon={<RefreshCw className="h-4 w-4" />} label="Chargeback" value={String(chargebacks)} subtext={`${chargebackRate}%`} color="destructive" />
+            <FinancialRow icon={<ArrowDownRight className="h-4 w-4" />} label="Reembolsos" value={String(refunds)} color="info" />
           </div>
         </Card>
 
         {/* Monitoramento */}
         <Card>
-          <CardHead title="Monitoramento" right="Atualizado agora" />
-          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-            <Stat label="Tempo Médio" value="0 ms" />
-            <Stat label="Taxa Conversão" value={`${conversionRate} %`} highlight />
-            <Stat label="API/minuto" value="0.0" />
-            <Stat label="Webhook OK" value="100.0 %" highlight />
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-[15px] font-bold text-foreground tracking-tight">Monitoramento</h3>
+              <p className="text-[10px] text-muted-foreground">Status em tempo real</p>
+            </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-border/30 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">0 chamadas/24h</span>
-            <span className="text-xs text-primary font-semibold flex items-center gap-1"><Shield className="h-3 w-3" /> Todos webhooks OK</span>
+          <div className="space-y-3">
+            <MonitorRow label="API Status" value="Online" status="ok" />
+            <MonitorRow label="Webhooks" value="100%" status="ok" />
+            <MonitorRow label="Conversão" value={`${conversionRate}%`} status={Number(conversionRate) > 50 ? "ok" : "warn"} />
+            <MonitorRow label="Latência" value="0 ms" status="ok" />
+          </div>
+          <div className="mt-4 pt-3 border-t border-border/20 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-[11px] text-muted-foreground font-medium">Todos os sistemas operacionais</span>
           </div>
         </Card>
       </div>
@@ -256,33 +286,63 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 animate-fade-in" style={{ animationDelay: "0.15s" }}>
         {/* Chart */}
         <Card className="lg:col-span-3">
-          <CardHead title="Vendas" />
-          <div className="-mx-2">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-bold text-foreground tracking-tight">Vendas Diárias</h3>
+                <p className="text-[10px] text-muted-foreground">{selectedPeriod.label}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-black text-foreground tracking-tight">{fmt(totalRevenue)}</p>
+              <p className="text-[10px] text-primary font-bold">{approvedTx.length} vendas aprovadas</p>
+            </div>
+          </div>
+          <div className="-mx-2 mt-4">
             <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                    <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.2)" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-                <YAxis stroke="hsl(var(--muted-foreground) / 0.2)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$ ${v}`} width={55} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} tickLine={false} axisLine={false} dy={8} fontWeight={500} />
+                <YAxis stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} width={50} fontWeight={500} />
                 <Tooltip
                   contentStyle={{
                     background: "var(--tooltip-bg)",
                     border: "1px solid var(--tooltip-border)",
-                    borderRadius: "12px",
+                    borderRadius: "14px",
                     fontSize: "12px",
                     boxShadow: "var(--hover-card-shadow)",
                     color: "var(--tooltip-text)",
-                    backdropFilter: "blur(16px)",
-                    padding: "10px 14px",
+                    backdropFilter: "blur(20px)",
+                    padding: "12px 16px",
                   }}
                   formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]}
-                  labelStyle={{ color: "var(--tooltip-text)", opacity: 0.5 }}
+                  labelStyle={{ color: "var(--tooltip-text)", opacity: 0.5, fontSize: "10px", marginBottom: "4px" }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 1, strokeDasharray: "4 4" }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#chartGrad)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 8 }} />
+                <Area
+                  type="monotone"
+                  dataKey="vendas"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2.5}
+                  fill="url(#chartGrad)"
+                  dot={false}
+                  activeDot={{
+                    r: 6,
+                    fill: "hsl(var(--primary))",
+                    stroke: "hsl(var(--primary-foreground))",
+                    strokeWidth: 3,
+                    style: { filter: "drop-shadow(0 0 8px hsl(var(--primary) / 0.5))" },
+                  }}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -405,24 +465,38 @@ function KpiCard({ icon, label, value, desc, color, action }: {
   );
 }
 
-function MetricBlock({ icon, label, value, delta }: { icon: React.ReactNode; label: string; value: string; delta: string }) {
+function FinancialRow({ icon, label, value, subtext, color }: { icon: React.ReactNode; label: string; value: string; subtext?: string; color: string }) {
+  const colorMap: Record<string, string> = {
+    primary: "hsl(var(--primary))",
+    warning: "hsl(var(--warning))",
+    destructive: "hsl(var(--destructive))",
+    info: "hsl(var(--info))",
+  };
+  const c = colorMap[color] || colorMap.primary;
   return (
-    <div className="flex flex-col items-center text-center py-3 px-2 rounded-xl bg-muted/10 border border-border/20">
-      <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary mb-2.5">
+    <div className="flex items-center gap-3 p-3 rounded-xl transition-colors" style={{ background: "var(--glass-subtle)" }}>
+      <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${c} 12%, transparent)`, color: c }}>
         {icon}
       </div>
-      <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
-      <p className="text-lg font-black text-foreground mt-0.5">{value}</p>
-      <p className="text-[10px] text-primary font-bold mt-0.5">{delta}</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-[12px] text-muted-foreground font-medium">{label}</p>
+      </div>
+      <div className="text-right">
+        <p className="text-base font-black text-foreground">{value}</p>
+        {subtext && <p className="text-[10px] font-bold" style={{ color: c }}>{subtext}</p>}
+      </div>
     </div>
   );
 }
 
-function Stat({ label, value, highlight, muted: isMuted }: { label: string; value: string; highlight?: boolean; muted?: boolean }) {
+function MonitorRow({ label, value, status }: { label: string; value: string; status: "ok" | "warn" | "error" }) {
+  const colors = { ok: "hsl(var(--primary))", warn: "hsl(var(--warning))", error: "hsl(var(--destructive))" };
+  const c = colors[status];
   return (
-    <div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1">{label}</p>
-      <p className={`text-base font-extrabold ${highlight ? "text-primary" : isMuted ? "text-muted-foreground" : "text-foreground"}`}>{value}</p>
+    <div className="flex items-center gap-3 p-3 rounded-xl transition-colors" style={{ background: "var(--glass-subtle)" }}>
+      <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: c, boxShadow: `0 0 8px ${c}` }} />
+      <span className="text-[12px] text-muted-foreground font-medium flex-1">{label}</span>
+      <span className="text-sm font-bold text-foreground">{value}</span>
     </div>
   );
 }
