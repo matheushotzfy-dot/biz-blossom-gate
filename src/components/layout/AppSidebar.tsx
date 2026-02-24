@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Wallet, FileText, Percent, Building2, ArrowDownToLine,
+  LayoutDashboard, Wallet, FileText, Building2, ArrowDownToLine,
   ShoppingCart, Package, ExternalLink, LogOut, CreditCard, UserCircle,
   Webhook, Ticket, BookOpen, PlayCircle, Layers, User,
 } from "lucide-react";
@@ -17,7 +17,7 @@ const mainItems = [
 
 const financeItems = [
   { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
-  { title: "Taxas", url: "/financeiro/taxas", icon: Percent },
+  
   { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
   { title: "Identidade & KYC", url: "/financeiro/identidade", icon: UserCircle },
   { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },

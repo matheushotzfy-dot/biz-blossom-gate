@@ -49,9 +49,9 @@ export function DashboardLayout() {
     const uid = user.id;
     supabase.from("profiles").select("*").eq("user_id", uid).single()
       .then(({ data }) => { if (data) setProfile(data); });
-    supabase.from("transactions").select("amount").eq("user_id", uid).eq("status", "completed")
+    supabase.from("transactions").select("net_amount").eq("user_id", uid).eq("status", "completed")
       .then(({ data }) => {
-        if (data) setAllTimeRevenue(data.reduce((a, t) => a + Number(t.amount), 0));
+        if (data) setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
       });
   }, [user]);
 

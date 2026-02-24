@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Camera, Trophy, Percent, Wallet, Shield, CheckCircle2, Lock } from "lucide-react";
+import { User, Camera, Trophy, Wallet, Shield, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +36,7 @@ const fmtCurrency = (v: number) =>
 export default function Perfil() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
-  const [fees, setFees] = useState<Tables<"fees">[]>([]);
+  
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
   const [saving, setSaving] = useState(false);
@@ -48,15 +48,13 @@ export default function Perfil() {
     const uid = user.id;
     Promise.all([
       supabase.from("profiles").select("*").eq("user_id", uid).single(),
-      supabase.from("fees").select("*"),
-      supabase.from("transactions").select("amount").eq("user_id", uid).eq("status", "completed"),
-    ]).then(([pRes, fRes, tRes]) => {
+      supabase.from("transactions").select("net_amount").eq("user_id", uid).eq("status", "completed"),
+    ]).then(([pRes, tRes]) => {
       if (pRes.data) {
         setProfile(pRes.data);
         setForm({ full_name: pRes.data.full_name || "", email: pRes.data.email || "", phone: pRes.data.phone || "" });
       }
-      if (fRes.data) setFees(fRes.data);
-      if (tRes.data) setAllTimeRevenue(tRes.data.reduce((a, t) => a + Number(t.amount), 0));
+      if (tRes.data) setAllTimeRevenue(tRes.data.reduce((a, t) => a + Number(t.net_amount), 0));
     });
   }, [user]);
 
@@ -149,23 +147,13 @@ export default function Perfil() {
           </form>
         </Panel>
 
-        {/* Limites + Taxas */}
+        {/* Limites */}
         <Panel>
-          <h3 className="text-[14px] font-bold text-foreground mb-4">Limites & Taxas</h3>
+          <h3 className="text-[14px] font-bold text-foreground mb-4">Limites</h3>
           <div className="space-y-3">
             <InfoRow label="Limite diário PIX" value="R$ 50.000,00" cls="text-primary" />
             <InfoRow label="Limite diário Saque" value="R$ 30.000,00" cls="text-info" />
             <InfoRow label="Saques por dia" value="5 operações" cls="text-foreground" />
-            <div className="pt-3 mt-2" style={{ borderTop: "1px solid var(--glass-separator)" }}>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-2">Suas Taxas</p>
-              {fees.map((f) => (
-                <div key={f.id} className="flex items-center justify-between py-1.5">
-                  <span className="text-[12px] text-muted-foreground">{f.name}</span>
-                  <span className="text-[12px] font-bold text-foreground">{f.fee_type === "percentage" ? `${f.value}%` : `R$ ${Number(f.value).toFixed(2)}`}</span>
-                </div>
-              ))}
-              {fees.length === 0 && <p className="text-[11px] text-muted-foreground">Nenhuma taxa configurada</p>}
-            </div>
           </div>
         </Panel>
       </div>
