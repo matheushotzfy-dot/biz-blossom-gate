@@ -215,14 +215,10 @@ export default function Dashboard() {
                 <div className="absolute inset-0 animate-shimmer rounded-full" style={{ backgroundImage: "linear-gradient(90deg, transparent 0%, var(--shimmer-color) 50%, transparent 100%)", backgroundSize: "200% 100%" }} />
               </div>
             </div>
-            {/* Milestone markers */}
+            {/* Current range labels */}
             <div className="flex justify-between mt-2">
-              {MILESTONES.slice(0, 5).map((m, i) => (
-                <div key={m.label} className="flex flex-col items-center">
-                  <div className={`h-1.5 w-1.5 rounded-full mb-1 ${allTimeRevenue >= m.value ? "bg-primary" : "bg-muted-foreground/20"}`} />
-                  <span className={`text-[9px] font-bold ${allTimeRevenue >= m.value ? "text-primary" : "text-muted-foreground/40"}`}>{m.label}</span>
-                </div>
-              ))}
+              <span className="text-[10px] font-bold text-primary">{milestone.current.label === "Início" ? "R$ 0" : milestone.current.label}</span>
+              <span className="text-[10px] font-bold text-muted-foreground">{milestone.next.label}</span>
             </div>
           </div>
 
