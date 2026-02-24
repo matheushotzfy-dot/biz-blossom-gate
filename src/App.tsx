@@ -26,6 +26,7 @@ import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAuditoria from "./pages/admin/AdminAuditoria";
+import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/admin-matheus" element={<AdminLogin />} />
             <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
             <Route path="/admin-matheus/auditoria" element={<AdminAuditoria />} />
+            <Route path="/admin-matheus/configuracoes" element={<AdminConfiguracoes />} />
 
             {/* User Dashboard */}
             <Route
