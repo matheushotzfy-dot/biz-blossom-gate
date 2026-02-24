@@ -5,6 +5,16 @@ const corsHeaders = {
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+/** Log only safe fields — never PII, card data, or full payloads */
+function safeLog(message: string, context: Record<string, unknown> = {}) {
+  const safe: Record<string, unknown> = {};
+  const ALLOWED_KEYS = ['transactionId', 'productId', 'status', 'amount', 'paymentMethod', 'podpayId', 'error', 'code', 'resumed'];
+  for (const key of ALLOWED_KEYS) {
+    if (key in context) safe[key] = context[key];
+  }
+  console.log(`[podpay-create-transaction] ${message}`, JSON.stringify(safe));
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -45,7 +55,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (existing && existing.podpay_payment_id) {
-        console.log('Resuming existing pending transaction:', existing.id);
+        safeLog('Resuming existing pending transaction', { transactionId: existing.id, resumed: true });
         let pixData = null;
         let boletoData = null;
         try {
@@ -61,7 +71,7 @@ Deno.serve(async (req) => {
             boletoData = txData.data?.boleto || txData.boleto || null;
           }
         } catch (e) {
-          console.error('Error fetching PodPay transaction:', e);
+          safeLog('Error fetching PodPay transaction', { error: e instanceof Error ? e.message : 'unknown' });
         }
 
         return new Response(
@@ -151,7 +161,7 @@ Deno.serve(async (req) => {
       podpayPayload.boleto = { expiresInDays: 3 };
     }
 
-    console.log('Creating PodPay transaction:', JSON.stringify(podpayPayload));
+    safeLog('Creating PodPay transaction', { productId: product.id, paymentMethod, amount: amountInCents });
 
     const response = await fetch('https://api.podpay.co/v1/transactions', {
       method: 'POST',
@@ -166,16 +176,15 @@ Deno.serve(async (req) => {
     const podpayData = await response.json();
 
     if (!response.ok) {
-      console.error('PodPay error:', JSON.stringify(podpayData));
+      safeLog('PodPay error', { status: response.status, error: podpayData.message || 'Payment failed' });
       return new Response(
         JSON.stringify({ success: false, error: podpayData.message || 'Payment failed', details: podpayData }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('PodPay response:', JSON.stringify(podpayData));
-
     const podpayId = podpayData.data?.id || podpayData.id;
+    safeLog('PodPay transaction created', { podpayId, status: podpayData.data?.status || podpayData.status });
 
     // === Save transaction ===
     const { data: transaction, error: txError } = await supabase.from('transactions').insert({
@@ -195,7 +204,7 @@ Deno.serve(async (req) => {
     }).select().single();
 
     if (txError) {
-      console.error('DB error:', txError);
+      safeLog('DB error saving transaction', { error: txError.message, code: txError.code });
       if (txError.code === '23505') {
         return new Response(
           JSON.stringify({ success: false, error: 'Payment already exists for this session' }),
@@ -219,7 +228,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error:', error);
+    safeLog('Internal error', { error: error instanceof Error ? error.message : 'Unknown error' });
     return new Response(
       JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Internal error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

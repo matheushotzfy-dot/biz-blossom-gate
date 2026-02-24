@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { RequireAuth } from "@/hooks/useAuth";
+import { RequireAdmin } from "@/hooks/useAdminGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
@@ -44,11 +45,11 @@ const App = () => (
             <Route path="/pay/:slug" element={<PublicCheckout />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
-            {/* Admin Master */}
+            {/* Admin Master — server-side role verification */}
             <Route path="/admin-matheus" element={<AdminLogin />} />
-            <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin-matheus/auditoria" element={<AdminAuditoria />} />
-            <Route path="/admin-matheus/configuracoes" element={<AdminConfiguracoes />} />
+            <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+            <Route path="/admin-matheus/auditoria" element={<RequireAdmin><AdminAuditoria /></RequireAdmin>} />
+            <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
 
             {/* User Dashboard */}
             <Route
