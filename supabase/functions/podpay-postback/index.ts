@@ -11,8 +11,53 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const payload = await req.json();
-    console.log('Postback received:', JSON.stringify(payload));
+    const rawBody = await req.text();
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid JSON' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // === Signature verification ===
+    const signature = req.headers.get('x-podpay-signature') || req.headers.get('x-signature');
+    const webhookSecret = Deno.env.get('PODPAY_SECRET_KEY');
+
+    if (webhookSecret) {
+      if (!signature) {
+        console.error('Missing webhook signature');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Missing signature' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(webhookSecret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+      const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+      const computed = Array.from(new Uint8Array(mac))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+
+      if (signature !== computed) {
+        console.error('Invalid webhook signature');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Invalid signature' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    console.log('Postback received, event_id:', payload.event_id);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
