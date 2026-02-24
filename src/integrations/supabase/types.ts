@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      acquirers: {
+        Row: {
+          api_endpoint: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          api_endpoint?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          api_endpoint?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action: string
@@ -610,6 +646,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: string
+          acquirer_id: string | null
           avatar_url: string | null
           created_at: string
           document_number: string | null
@@ -621,11 +658,13 @@ export type Database = {
           phone: string | null
           pix_key: string | null
           pix_key_type: string | null
+          seller_type: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           account_status?: string
+          acquirer_id?: string | null
           avatar_url?: string | null
           created_at?: string
           document_number?: string | null
@@ -637,11 +676,13 @@ export type Database = {
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          seller_type?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           account_status?: string
+          acquirer_id?: string | null
           avatar_url?: string | null
           created_at?: string
           document_number?: string | null
@@ -653,10 +694,63 @@ export type Database = {
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          seller_type?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_acquirer_id_fkey"
+            columns: ["acquirer_id"]
+            isOneToOne: false
+            referencedRelation: "acquirers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_acquirer_config: {
+        Row: {
+          acquirer_id: string
+          admin_user_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          priority: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acquirer_id: string
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          priority?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acquirer_id?: string
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          priority?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_acquirer_config_acquirer_id_fkey"
+            columns: ["acquirer_id"]
+            isOneToOne: false
+            referencedRelation: "acquirers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {

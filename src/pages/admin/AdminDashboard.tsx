@@ -20,6 +20,7 @@ import AdminCouponsTab from "./tabs/AdminCouponsTab";
 import AdminCoursesTab from "./tabs/AdminCoursesTab";
 import AdminAuditTab from "./tabs/AdminAuditTab";
 import AdminSettingsTab from "./tabs/AdminSettingsTab";
+import AdminAcquirersTab from "./tabs/AdminAcquirersTab";
 
 const SIDEBAR_SECTIONS = [
   {
@@ -30,6 +31,12 @@ const SIDEBAR_SECTIONS = [
       { id: "sellers", label: "Vendedores", icon: Users },
       { id: "products", label: "Produtos", icon: Package },
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine },
+    ],
+  },
+  {
+    title: "Pagamentos",
+    items: [
+      { id: "acquirers", label: "Adquirentes", icon: CreditCard },
     ],
   },
   {
@@ -51,7 +58,7 @@ const SIDEBAR_SECTIONS = [
   },
 ] as const;
 
-type TabId = "overview" | "transactions" | "sellers" | "products" | "withdrawals" | "medpix" | "refunds" | "premed" | "coupons" | "courses" | "audit" | "settings";
+type TabId = "overview" | "transactions" | "sellers" | "products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "coupons" | "courses" | "audit" | "settings";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -269,6 +276,9 @@ export default function AdminDashboard() {
           )}
           {activeTab === "withdrawals" && (
             <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} fmtCurrency={fmtCurrency} />
+          )}
+          {activeTab === "acquirers" && (
+            <AdminAcquirersTab />
           )}
           {activeTab === "medpix" && (
             <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} fmtCurrency={fmtCurrency} />
