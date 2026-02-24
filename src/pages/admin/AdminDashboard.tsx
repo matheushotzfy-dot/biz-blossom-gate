@@ -272,7 +272,7 @@ export default function AdminDashboard() {
             />
           )}
           {activeTab === "products" && (
-            <AdminProductsTab products={products} profiles={profiles} fmtCurrency={fmtCurrency} />
+            <AdminProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} onReload={loadData} />
           )}
           {activeTab === "withdrawals" && (
             <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} fmtCurrency={fmtCurrency} />
