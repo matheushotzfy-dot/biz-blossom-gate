@@ -258,6 +258,7 @@ export type Database = {
       }
       modules: {
         Row: {
+          banner_url: string | null
           course_id: string
           created_at: string
           description: string | null
@@ -266,6 +267,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          banner_url?: string | null
           course_id: string
           created_at?: string
           description?: string | null
@@ -274,6 +276,7 @@ export type Database = {
           title: string
         }
         Update: {
+          banner_url?: string | null
           course_id?: string
           created_at?: string
           description?: string | null
