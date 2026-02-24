@@ -38,9 +38,9 @@ export function MobileRevenueBar() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("transactions").select("amount").eq("user_id", user.id).eq("status", "completed")
+    supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed")
       .then(({ data }) => {
-        if (data) setRevenue(data.reduce((a, t) => a + Number(t.amount), 0));
+        if (data) setRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
       });
   }, [user]);
 

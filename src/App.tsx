@@ -10,7 +10,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
 import Extrato from "./pages/financeiro/Extrato";
-import Taxas from "./pages/financeiro/Taxas";
+
 import DadosBancarios from "./pages/financeiro/DadosBancarios";
 import Identidade from "./pages/financeiro/Identidade";
 import Saques from "./pages/financeiro/Saques";
@@ -59,7 +59,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/financeiro/extrato" element={<Extrato />} />
-              <Route path="/financeiro/taxas" element={<Taxas />} />
+              
               <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
               <Route path="/financeiro/identidade" element={<Identidade />} />
               <Route path="/financeiro/saques" element={<Saques />} />

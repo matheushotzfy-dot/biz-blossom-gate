@@ -105,9 +105,7 @@ export default function Dashboard() {
   }, [transactions, selectedPeriod]);
 
   const approvedTx = filteredTx.filter((t) => t.status === "completed");
-  const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.amount), 0);
-  const totalNet = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
-  const totalFees = approvedTx.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
   const ticketMedio = approvedTx.length > 0 ? totalRevenue / approvedTx.length : 0;
   const pendingWd = withdrawals.filter((w) => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);
   const conversionRate = filteredTx.length > 0 ? ((approvedTx.length / filteredTx.length) * 100).toFixed(1) : "0";
@@ -135,7 +133,7 @@ export default function Dashboard() {
       const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
       const compareDate = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       const dayTx = transactions.filter((t) => toBrasiliaDate(t.created_at) === compareDate && t.status === "completed");
-      return { name: dayStr, vendas: dayTx.reduce((a, t) => a + Number(t.amount), 0) };
+      return { name: dayStr, vendas: dayTx.reduce((a, t) => a + Number(t.net_amount), 0) };
     });
   }, [transactions, chartDays]);
 
@@ -143,12 +141,12 @@ export default function Dashboard() {
   const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
 
   const allCompleted = transactions.filter((t) => t.status === "completed");
-  const allTimeRevenue = allCompleted.reduce((a, t) => a + Number(t.amount), 0);
+  const allTimeRevenue = allCompleted.reduce((a, t) => a + Number(t.net_amount), 0);
   const milestone = getCurrentMilestone(allTimeRevenue);
 
   const todayRevenue = useMemo(() => {
     const todayStr = brasiliaToday().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-    return transactions.filter((t) => toBrasiliaDate(t.created_at) === todayStr && t.status === "completed").reduce((a, t) => a + Number(t.amount), 0);
+    return transactions.filter((t) => toBrasiliaDate(t.created_at) === todayStr && t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0);
   }, [transactions]);
 
   const recentActivity = [...transactions.slice(0, 5), ...withdrawals.slice(0, 3)]
@@ -198,10 +196,10 @@ export default function Dashboard() {
 
       {/* ===== KPI Cards ===== */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "0.05s" }}>
-        <MetricCard label="Receita Bruta" value={fmtCurrency(totalRevenue)} sub={`${approvedTx.length} vendas`} accent="primary" icon={<DollarSign className="h-5 w-5" />} trend={approvedTx.length > 0} />
-        <MetricCard label="Receita Líquida" value={fmtCurrency(totalNet)} sub={`-${fmtCurrency(totalFees)} taxas`} accent="info" icon={<TrendingUp className="h-5 w-5" />} />
-        <MetricCard label="Ticket Médio" value={fmtCurrency(ticketMedio)} sub={approvedTx.length > 0 ? "por venda" : "—"} accent="purple" icon={<Receipt className="h-5 w-5" />} />
-        <MetricCard label="Saldo Disponível" value={fmtCurrency(totalNet)} sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : "Livre para saque"} accent="warning" icon={<Wallet className="h-5 w-5" />} action={{ label: "Sacar", href: "/financeiro/saques" }} />
+        <MetricCard label="Receita" value={fmtCurrency(totalRevenue)} sub={`${approvedTx.length} vendas`} accent="primary" icon={<DollarSign className="h-5 w-5" />} trend={approvedTx.length > 0} />
+        <MetricCard label="Ticket Médio" value={fmtCurrency(ticketMedio)} sub={approvedTx.length > 0 ? "por venda" : "—"} accent="info" icon={<TrendingUp className="h-5 w-5" />} />
+        <MetricCard label="Conversão" value={`${conversionRate}%`} sub={`${filteredTx.length} transações`} accent="purple" icon={<Receipt className="h-5 w-5" />} />
+        <MetricCard label="Saldo Disponível" value={fmtCurrency(totalRevenue)} sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : "Livre para saque"} accent="warning" icon={<Wallet className="h-5 w-5" />} action={{ label: "Sacar", href: "/financeiro/saques" }} />
       </div>
 
       {/* ===== FULL-WIDTH CHART ===== */}
@@ -315,13 +313,9 @@ export default function Dashboard() {
         <Panel>
           <h3 className="text-[14px] font-bold text-foreground mb-4">Resumo Financeiro</h3>
           <div className="space-y-3">
-            <FinRow label="Receita Bruta" value={fmtCurrency(totalRevenue)} color="hsl(var(--primary))" />
-            <FinRow label="Taxas Cobradas" value={`-${fmtCurrency(totalFees)}`} color="hsl(var(--warning))" />
+            <FinRow label="Receita Total" value={fmtCurrency(totalRevenue)} color="hsl(var(--primary))" />
             <FinRow label="Chargebacks" value={String(chargebacks)} color="hsl(var(--destructive))" />
             <FinRow label="Reembolsos" value={String(refunds)} color="hsl(var(--info))" />
-            <div className="pt-3 mt-3" style={{ borderTop: "1px solid var(--glass-separator)" }}>
-              <FinRow label="Líquido Final" value={fmtCurrency(totalNet)} color="hsl(var(--primary))" bold />
-            </div>
           </div>
         </Panel>
 

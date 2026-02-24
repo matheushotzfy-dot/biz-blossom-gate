@@ -17,7 +17,7 @@ export default function Vendas() {
   }, [user?.id]);
 
   const approved = transactions.filter((t) => t.status === "completed");
-  const totalSales = approved.reduce((a, t) => a + Number(t.amount), 0);
+  const totalSales = approved.reduce((a, t) => a + Number(t.net_amount), 0);
   const avgTicket = approved.length > 0 ? totalSales / approved.length : 0;
 
   return (
@@ -50,7 +50,7 @@ export default function Vendas() {
                     <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
                     <td className="p-3.5 text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</td>
                     <td className="p-3.5 text-muted-foreground text-[13px]">{tx.customer_email || "—"}</td>
-                    <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.amount).toFixed(2)}</td>
+                    <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.net_amount).toFixed(2)}</td>
                     <td className="p-3.5 capitalize text-muted-foreground text-[13px]">{tx.payment_method}</td>
                     <td className="p-3.5"><StatusBadge status={tx.status} /></td>
                     <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
@@ -73,7 +73,7 @@ export default function Vendas() {
               <StatusBadge status={tx.status} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-foreground font-bold text-base">R$ {Number(tx.amount).toFixed(2)}</span>
+              <span className="text-foreground font-bold text-base">R$ {Number(tx.net_amount).toFixed(2)}</span>
               <span className="text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
             <div className="flex items-center gap-2 mt-1.5">

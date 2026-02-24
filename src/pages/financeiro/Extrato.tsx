@@ -27,9 +27,7 @@ export default function Extrato() {
     return matchSearch && matchStatus;
   });
 
-  const total = filtered.reduce((acc, t) => acc + Number(t.amount), 0);
-  const totalFees = filtered.reduce((acc, t) => acc + Number(t.fee_amount), 0);
-  const totalNet = filtered.reduce((acc, t) => acc + Number(t.net_amount), 0);
+  const total = filtered.reduce((acc, t) => acc + Number(t.net_amount), 0);
 
   return (
     <PageShell>
@@ -40,20 +38,15 @@ export default function Extrato() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 md:gap-3">
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Bruto</p>
-          <p className="text-base md:text-[22px] font-extrabold mt-1 md:mt-2 text-foreground truncate">R$ {total.toFixed(2)}</p>
-        </Panel>
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Taxas</p>
-          <p className="text-base md:text-[22px] font-extrabold mt-1 md:mt-2 text-warning truncate">R$ {totalFees.toFixed(2)}</p>
-        </Panel>
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Líquido</p>
-          <p className="text-base md:text-[22px] font-extrabold mt-1 md:mt-2 text-primary truncate">R$ {totalNet.toFixed(2)}</p>
-        </Panel>
-      </div>
+      <Panel>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total</p>
+            <p className="text-base md:text-[22px] font-extrabold mt-1 md:mt-2 text-primary truncate">R$ {total.toFixed(2)}</p>
+          </div>
+          <p className="text-[11px] text-muted-foreground">{filtered.length} transações</p>
+        </div>
+      </Panel>
 
       <div className="flex gap-2 md:gap-3">
         <div className="relative flex-1">
@@ -78,21 +71,19 @@ export default function Extrato() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  {["ID", "Cliente", "Valor", "Taxa", "Líquido", "Método", "Status", "Data"].map((h) => (
+                  {["ID", "Cliente", "Valor", "Método", "Status", "Data"].map((h) => (
                     <th key={h} className="text-left p-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhuma transação encontrada</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Nenhuma transação encontrada</td></tr>
                 ) : filtered.map((tx) => (
                   <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                     <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
                     <td className="p-3.5 text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</td>
-                    <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.amount).toFixed(2)}</td>
-                    <td className="p-3.5 font-semibold text-[13px] text-warning">R$ {Number(tx.fee_amount).toFixed(2)}</td>
-                    <td className="p-3.5 font-semibold text-[13px] text-primary">R$ {Number(tx.net_amount).toFixed(2)}</td>
+                    <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.net_amount).toFixed(2)}</td>
                     <td className="p-3.5 capitalize text-muted-foreground text-[13px]">{tx.payment_method}</td>
                     <td className="p-3.5"><StatusBadge status={tx.status} /></td>
                     <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
@@ -115,8 +106,7 @@ export default function Extrato() {
               <StatusBadge status={tx.status} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-foreground font-bold text-base">R$ {Number(tx.amount).toFixed(2)}</span>
-              <span className="text-primary font-semibold text-sm">Líq. R$ {Number(tx.net_amount).toFixed(2)}</span>
+              <span className="text-foreground font-bold text-base">R$ {Number(tx.net_amount).toFixed(2)}</span>
             </div>
             <div className="flex items-center gap-2 mt-1.5">
               <span className="text-muted-foreground text-[11px] capitalize">{tx.payment_method || "—"}</span>
