@@ -184,7 +184,7 @@ export default function AdminConteudo() {
   };
 
   const loadProducts = async () => {
-    const { data } = await supabase.from("products").select("id, name").eq("status", "active");
+    const { data } = await supabase.from("products").select("id, name");
     if (data) setProducts(data);
   };
 
@@ -664,10 +664,12 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
               <span className="flex items-center gap-1"><Layers className="h-3 w-3" />{stats.modules} módulos</span>
               <span className="flex items-center gap-1"><PlayCircle className="h-3 w-3" />{stats.lessons} aulas</span>
             </div>
-            {product && (
+            {course.product_id && (
               <div className="flex items-center gap-1.5 mt-2">
-                <LinkIcon className="h-3 w-3 text-primary" />
-                <span className="text-[11px] text-primary font-semibold">Produto associado</span>
+                <LinkIcon className={`h-3 w-3 ${product ? "text-primary" : "text-destructive"}`} />
+                <span className={`text-[11px] font-semibold ${product ? "text-primary" : "text-destructive"}`}>
+                  {product ? `Produto: ${product.name}` : "Produto removido"}
+                </span>
               </div>
             )}
           </div>
