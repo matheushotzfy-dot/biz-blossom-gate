@@ -19,6 +19,13 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
 
   const getSellerName = (userId: string) => profiles.find(p => p.user_id === userId)?.full_name || "—";
   const getSellerEmail = (userId: string) => profiles.find(p => p.user_id === userId)?.email || "";
+  const getSellerType = (userId: string) => profiles.find(p => p.user_id === userId)?.seller_type || null;
+
+  const SellerTypeBadge = ({ type }: { type: string | null }) => {
+    if (type === "black") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700">B</span>;
+    if (type === "white") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-slate-200/10 text-slate-400 border border-slate-500/20">W</span>;
+    return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">?</span>;
+  };
 
   const pending = withdrawals.filter(w => w.status === "pending");
   const approved = withdrawals.filter(w => w.status === "approved");
@@ -67,7 +74,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-white/[0.04]">
-              {["ID", "Vendedor", "Valor Bruto", "Taxa", "Líquido", "Status", "Data", "Processado", "Ações"].map(h => (
+              {["ID", "Vendedor", "Tipo", "Valor Bruto", "Taxa", "Líquido", "Status", "Data", "Processado", "Ações"].map(h => (
                 <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>
               ))}
             </tr></thead>
@@ -76,6 +83,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                 <tr key={w.id} className={`border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors ${w.status === "pending" ? "bg-amber-500/[0.02]" : ""}`}>
                   <td className="p-3 font-mono text-[10px] text-white/25">{w.id.slice(0, 8)}</td>
                   <td className="p-3"><div><p className="text-xs font-bold">{getSellerName(w.user_id)}</p><p className="text-[10px] text-white/25">{getSellerEmail(w.user_id)}</p></div></td>
+                  <td className="p-3"><SellerTypeBadge type={getSellerType(w.user_id)} /></td>
                   <td className="p-3 text-xs font-extrabold">R$ {Number(w.amount).toFixed(2)}</td>
                   <td className="p-3 text-xs text-amber-400">R$ {Number(w.fee_amount).toFixed(2)}</td>
                   <td className="p-3 text-xs text-emerald-400 font-bold">R$ {Number(w.net_amount).toFixed(2)}</td>
@@ -96,7 +104,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={9} className="p-10 text-center text-white/20 text-xs">Nenhum saque</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-white/20 text-xs">Nenhum saque</td></tr>}
             </tbody>
           </table>
         </div>

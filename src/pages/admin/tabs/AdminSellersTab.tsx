@@ -5,7 +5,7 @@ import {
   Users, Search, Ban, CheckCircle2, Eye, MoreHorizontal, Activity, Package,
   Trash2, Edit, Plus, Clock, Wallet, ArrowDownToLine, ShoppingCart,
   FileText, Globe, DollarSign, XCircle, Save, CreditCard, Shield, Landmark,
-  Key, TrendingUp, Percent, BarChart3,
+  Key, TrendingUp, Percent, BarChart3, MessageSquareText, AlertTriangle,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [kycImages, setKycImages] = useState<string[]>([]);
   const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [selectedAcquirerId, setSelectedAcquirerId] = useState<string>("");
+  const [adminNotes, setAdminNotes] = useState("");
+  const [userDisputes, setUserDisputes] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.from("acquirers").select("*").eq("is_active", true).then(({ data }) => {
@@ -83,7 +85,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const openUserDetail = async (profile: Tables<"profiles">) => {
     setSelectedUser(profile);
     setLoading(true);
-    const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes] = await Promise.all([
+    const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes] = await Promise.all([
       supabase.from("activity_logs").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
       supabase.from("products").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
       supabase.from("withdrawals").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
@@ -91,6 +93,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       supabase.from("custom_user_fees").select("*").eq("user_id", profile.user_id).maybeSingle(),
       supabase.from("balance_adjustments").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
       supabase.from("pix_keys").select("*").eq("user_id", profile.user_id),
+      supabase.from("disputes").select("*").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }),
     ]);
     if (logsRes.data) setUserLogs(logsRes.data as any);
     if (productsRes.data) setUserProducts(productsRes.data);
@@ -98,7 +101,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (txRes.data) setUserTransactions(txRes.data);
     if (adjRes.data) setBalanceAdjustments(adjRes.data);
     if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
-    setSelectedAcquirerId((profile as any).acquirer_id || "");
+    if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
+    setSelectedAcquirerId(profile.acquirer_id || "");
+    setAdminNotes((profile as any).admin_notes || "");
     if (feesRes.data) {
       setCustomFees({
         transaction_percentage: feesRes.data.transaction_percentage?.toString() || "",
@@ -116,6 +121,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       } else setKycImages([]);
     } catch { setKycImages([]); }
     setLoading(false);
+  };
+
+  const handleSaveAdminNotes = async () => {
+    if (!selectedUser) return;
+    const { error } = await supabase.from("profiles").update({ admin_notes: adminNotes } as any).eq("user_id", selectedUser.user_id);
+    if (error) { toast.error("Erro ao salvar notas"); return; }
+    toast.success("Observações salvas!");
+    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: adminNotes });
   };
 
   const handleUserStatus = async (userId: string, status: string) => {
@@ -216,6 +229,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const adjustmentsTotal = balanceAdjustments.reduce((a, adj) => a + (adj.type === "credit" ? Number(adj.amount) : -Number(adj.amount)), 0);
   const userAvailableBalance = userTotalNet - userTotalWithdrawn - userPendingWd + adjustmentsTotal;
   const userConversion = userTransactions.length > 0 ? ((userApproved.length / userTransactions.length) * 100).toFixed(1) : "0.0";
+
+  // Med stats
+  const userMedTotal = userDisputes.length;
+  const userMedOpen = userDisputes.filter(d => d.status === "open" || d.status === "in_review").length;
+  const userMedResolved = userDisputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length;
+  const userMedAmount = userDisputes.reduce((a: number, d: any) => a + Number(d.amount || 0), 0);
+  const userMedRate = userApproved.length > 0 ? ((userMedTotal / userApproved.length) * 100).toFixed(2) : "0.00";
 
   const buyersMap = new Map<string, { name: string; email: string; phone: string; total: number; count: number }>();
   userTransactions.forEach(t => {
@@ -342,17 +362,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               </div>
 
               {/* Secondary KPIs */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-2">
                 <MiniKpi label="Total Sacado" value={fmtCurrency(userTotalWithdrawn)} color="amber" />
                 <MiniKpi label="Taxa Saque Paga" value={fmtCurrency(userTotalWdFees)} color="amber" />
                 <MiniKpi label="Saque Pendente" value={fmtCurrency(userPendingWd)} color="blue" />
                 <MiniKpi label="Clientes" value={String(buyers.length)} color="violet" />
+                <MiniKpi label={`Disputas (${userMedRate}%)`} value={`${userMedTotal} (${fmtCurrency(userMedAmount)})`} color="amber" />
               </div>
 
               <Tabs defaultValue="info" className="mt-4">
                 <TabsList className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-1 flex-wrap h-auto gap-1">
                   {[
                     { v: "info", l: "Info & KYC", i: FileText },
+                    { v: "notes", l: "Observações", i: MessageSquareText },
+                    { v: "disputes", l: `Disputas (${userMedTotal})`, i: AlertTriangle },
                     { v: "pix", l: "Chaves PIX", i: Key },
                     { v: "acquirer", l: "Adquirente", i: Landmark },
                     { v: "financial", l: "Financeiro", i: Wallet },
@@ -408,6 +431,73 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     </div>
                   )}
                   {kycImages.length === 0 && <p className="text-xs text-white/20">Nenhum documento KYC enviado</p>}
+                </TabsContent>
+
+                {/* ── Observações Admin ── */}
+                <TabsContent value="notes" className="mt-4 space-y-4">
+                  <AdminPanel>
+                    <PanelTitle color="violet" icon={<MessageSquareText className="h-4 w-4" />}>Observações sobre o Seller</PanelTitle>
+                    <div className="mt-4 space-y-3">
+                      <textarea
+                        value={adminNotes}
+                        onChange={e => setAdminNotes(e.target.value)}
+                        rows={8}
+                        placeholder="Escreva observações, anotações internas, histórico de comunicação, alertas, etc..."
+                        className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.12] resize-none"
+                      />
+                      <Button size="sm" className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs" onClick={handleSaveAdminNotes}>
+                        <Save className="h-3 w-3 mr-1" /> Salvar Observações
+                      </Button>
+                    </div>
+                  </AdminPanel>
+                </TabsContent>
+
+                {/* ── Disputas do Seller ── */}
+                <TabsContent value="disputes" className="mt-4 space-y-4">
+                  {/* Med stats */}
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                    <MiniKpi label="Total Disputas" value={String(userMedTotal)} color="amber" />
+                    <MiniKpi label="Abertas" value={String(userMedOpen)} color="amber" />
+                    <MiniKpi label="Resolvidas" value={String(userMedResolved)} color="emerald" />
+                    <MiniKpi label="Valor Total" value={fmtCurrency(userMedAmount)} color="amber" />
+                    <MiniKpi label="Taxa Med (%)" value={`${userMedRate}%`} color="blue" />
+                  </div>
+                  {/* By type */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: "MedPix", count: userDisputes.filter((d: any) => d.type === "medpix").length, amount: userDisputes.filter((d: any) => d.type === "medpix").reduce((a: number, d: any) => a + Number(d.amount || 0), 0), color: "text-amber-400" },
+                      { label: "Pre-Med PIX", count: userDisputes.filter((d: any) => d.type === "pre_med_pix").length, amount: userDisputes.filter((d: any) => d.type === "pre_med_pix").reduce((a: number, d: any) => a + Number(d.amount || 0), 0), color: "text-orange-400" },
+                      { label: "Reembolso", count: userDisputes.filter((d: any) => d.type === "refund").length, amount: userDisputes.filter((d: any) => d.type === "refund").reduce((a: number, d: any) => a + Number(d.amount || 0), 0), color: "text-red-400" },
+                    ].map(dt => (
+                      <div key={dt.label} className="bg-white/[0.02] rounded-xl border border-white/[0.04] p-4 text-center">
+                        <p className="text-[10px] text-white/30 uppercase tracking-wider">{dt.label}</p>
+                        <p className={`text-xl font-black mt-1 ${dt.color}`}>{dt.count}</p>
+                        <p className="text-[10px] text-white/25 mt-1">{fmtCurrency(dt.amount)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* List */}
+                  <AdminPanel>
+                    <PanelTitle color="amber" icon={<AlertTriangle className="h-4 w-4" />}>Histórico de Disputas</PanelTitle>
+                    <div className="overflow-x-auto mt-4">
+                      <table className="w-full text-sm">
+                        <thead><tr className="border-b border-white/[0.04]">{["Tipo","Valor","Status","Comprador","Motivo","Data"].map(h=>(<th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>))}</tr></thead>
+                        <tbody>
+                          {userDisputes.map((d: any) => (
+                            <tr key={d.id} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                              <td className="p-3 text-[10px] font-bold uppercase">{d.type}</td>
+                              <td className="p-3 text-xs font-bold text-amber-400">{fmtCurrency(Number(d.amount))}</td>
+                              <td className="p-3"><StatusBadge status={d.status} /></td>
+                              <td className="p-3 text-xs">{d.buyer_name || "—"}</td>
+                              <td className="p-3 text-[11px] text-white/40 max-w-[200px] truncate">{d.reason || "—"}</td>
+                              <td className="p-3 text-[10px] text-white/25">{new Date(d.created_at).toLocaleDateString("pt-BR")}</td>
+                            </tr>
+                          ))}
+                          {userDisputes.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-white/20 text-xs">Sem disputas</td></tr>}
+                        </tbody>
+                      </table>
+                    </div>
+                  </AdminPanel>
                 </TabsContent>
 
                 {/* ── Chaves PIX ── */}
