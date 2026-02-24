@@ -56,8 +56,8 @@ export function AppSidebar() {
           <NavLink
             to={item.url}
             end={item.url === "/dashboard"}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-300 group relative overflow-hidden"
-            activeClassName="text-sidebar-foreground font-semibold bg-sidebar-accent"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent transition-all duration-300 group relative overflow-hidden"
+            activeClassName="text-primary font-semibold bg-sidebar-accent"
           >
             {/* Active indicator glow */}
             <div className="absolute inset-0 opacity-0 group-[.active]:opacity-100 transition-opacity duration-300 bg-primary/5" />
