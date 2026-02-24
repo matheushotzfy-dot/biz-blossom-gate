@@ -80,6 +80,36 @@ export type Database = {
         }
         Relationships: []
       }
+      balance_adjustments: {
+        Row: {
+          admin_user_id: string
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          admin_user_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          admin_user_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bank_accounts: {
         Row: {
           account_number: string
@@ -214,6 +244,101 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_user_fees: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          id: string
+          transaction_fixed: number | null
+          transaction_percentage: number | null
+          updated_at: string
+          user_id: string
+          withdrawal_fee: number | null
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          transaction_fixed?: number | null
+          transaction_percentage?: number | null
+          updated_at?: string
+          user_id: string
+          withdrawal_fee?: number | null
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          transaction_fixed?: number | null
+          transaction_percentage?: number | null
+          updated_at?: string
+          user_id?: string
+          withdrawal_fee?: number | null
+        }
+        Relationships: []
+      }
+      disputes: {
+        Row: {
+          admin_notes: string | null
+          admin_user_id: string | null
+          amount: number
+          buyer_email: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          resolved_at: string | null
+          seller_user_id: string
+          status: string
+          transaction_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          admin_user_id?: string | null
+          amount?: number
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          resolved_at?: string | null
+          seller_user_id: string
+          status?: string
+          transaction_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          admin_user_id?: string | null
+          amount?: number
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          resolved_at?: string | null
+          seller_user_id?: string
+          status?: string
+          transaction_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -492,6 +617,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          last_ip: string | null
           phone: string | null
           pix_key: string | null
           pix_key_type: string | null
@@ -507,6 +633,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_ip?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
@@ -522,6 +649,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_ip?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
