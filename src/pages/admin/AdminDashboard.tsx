@@ -24,6 +24,7 @@ import AdminAuditTab from "./tabs/AdminAuditTab";
 import AdminSettingsTab from "./tabs/AdminSettingsTab";
 import AdminAcquirersTab from "./tabs/AdminAcquirersTab";
 import AdminEmployeesTab from "./tabs/AdminEmployeesTab";
+import AdminTopSellersTab from "./tabs/AdminTopSellersTab";
 
 // Tabs accessible by employees (restricted)
 const EMPLOYEE_ALLOWED_TABS = new Set(["overview", "sellers", "products", "transactions"]);
@@ -36,6 +37,7 @@ const SIDEBAR_SECTIONS = [
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
       { id: "sellers", label: "Vendedores", icon: Users, employeeAccess: true },
       { id: "products", label: "Produtos", icon: Package, employeeAccess: true },
+      { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
     ],
   },
@@ -65,7 +67,7 @@ const SIDEBAR_SECTIONS = [
   },
 ] as const;
 
-type TabId = "overview" | "transactions" | "sellers" | "products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings";
+type TabId = "overview" | "transactions" | "sellers" | "products" | "top-sellers" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -335,6 +337,9 @@ export default function AdminDashboard() {
           )}
           {activeTab === "products" && (
             <AdminProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} onReload={loadData} />
+          )}
+          {activeTab === "top-sellers" && isAdmin && (
+            <AdminTopSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
           )}
           {activeTab === "withdrawals" && isAdmin && (
             <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} fmtCurrency={fmtCurrency} />
