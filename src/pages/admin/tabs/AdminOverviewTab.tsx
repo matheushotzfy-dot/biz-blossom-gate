@@ -30,9 +30,10 @@ interface Props {
   onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
   onUserStatus: (userId: string, status: string) => void;
   fmtCurrency: (v: number) => string;
+  isEmployee?: boolean;
 }
 
-export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency }: Props) {
+export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false }: Props) {
   const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [chartFilter, setChartFilter] = useState<"total" | "black" | "white">("total");
@@ -194,20 +195,30 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
   return (
     <div className="space-y-5">
-      {/* ═══ Row 1: Main KPIs ═══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
-        <AdminKpi icon={<DollarSign className="h-5 w-5" />} label="Volume Total" value={fmtCurrency(totalVolume)} sub={`${approved.length} vendas aprovadas`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
-        <AdminKpi icon={<PiggyBank className="h-5 w-5" />} label="Lucro Gateway" value={fmtCurrency(totalFees)} sub={`% ${fmtCurrency(totalFeePercent)} + Fixa ${fmtCurrency(totalFeeFixed)}`} gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" highlight />
-        <AdminKpi icon={<Landmark className="h-5 w-5" />} label="Distribuído" value={fmtCurrency(totalNet)} sub="Líquido sellers" gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
-        <AdminKpi icon={<Percent className="h-5 w-5" />} label="Conversão Total" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length} tx`} gradient="from-cyan-500 to-teal-600" glowColor="rgba(6,182,212,0.15)" />
-        <AdminKpi icon={<ArrowDownToLine className="h-5 w-5" />} label="Total Sacado" value={fmtCurrency(totalWithdrawn)} sub={`Taxas saque: ${fmtCurrency(totalWdFees)}`} gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
-        <AdminKpi icon={<AlertTriangle className="h-5 w-5" />} label="Disputas" value={String(disputes.length)} sub={`${openDisputes} abertas`} gradient="from-orange-500 to-red-600" glowColor="rgba(249,115,22,0.15)" alert={openDisputes > 0} />
-        <AdminKpi icon={<Zap className="h-5 w-5" />} label="Hoje" value={fmtCurrency(todayVolume)} sub={`Lucro: ${fmtCurrency(todayFees)}`} gradient="from-cyan-500 to-teal-600" glowColor="rgba(6,182,212,0.15)" />
-        <AdminKpi icon={<ArrowDownToLine className="h-5 w-5" />} label="Saques Pendentes" value={fmtCurrency(pendingAmount)} sub={`${pendingWd.length} solicitações`} gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" alert={pendingWd.length > 0} />
-      </div>
+      {/* ═══ Row 1: Main KPIs (hidden for employees) ═══ */}
+      {!isEmployee && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
+          <AdminKpi icon={<DollarSign className="h-5 w-5" />} label="Volume Total" value={fmtCurrency(totalVolume)} sub={`${approved.length} vendas aprovadas`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
+          <AdminKpi icon={<PiggyBank className="h-5 w-5" />} label="Lucro Gateway" value={fmtCurrency(totalFees)} sub={`% ${fmtCurrency(totalFeePercent)} + Fixa ${fmtCurrency(totalFeeFixed)}`} gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" highlight />
+          <AdminKpi icon={<Landmark className="h-5 w-5" />} label="Distribuído" value={fmtCurrency(totalNet)} sub="Líquido sellers" gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
+          <AdminKpi icon={<Percent className="h-5 w-5" />} label="Conversão Total" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length} tx`} gradient="from-cyan-500 to-teal-600" glowColor="rgba(6,182,212,0.15)" />
+          <AdminKpi icon={<ArrowDownToLine className="h-5 w-5" />} label="Total Sacado" value={fmtCurrency(totalWithdrawn)} sub={`Taxas saque: ${fmtCurrency(totalWdFees)}`} gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
+          <AdminKpi icon={<AlertTriangle className="h-5 w-5" />} label="Disputas" value={String(disputes.length)} sub={`${openDisputes} abertas`} gradient="from-orange-500 to-red-600" glowColor="rgba(249,115,22,0.15)" alert={openDisputes > 0} />
+          <AdminKpi icon={<Zap className="h-5 w-5" />} label="Hoje" value={fmtCurrency(todayVolume)} sub={`Lucro: ${fmtCurrency(todayFees)}`} gradient="from-cyan-500 to-teal-600" glowColor="rgba(6,182,212,0.15)" />
+          <AdminKpi icon={<ArrowDownToLine className="h-5 w-5" />} label="Saques Pendentes" value={fmtCurrency(pendingAmount)} sub={`${pendingWd.length} solicitações`} gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" alert={pendingWd.length > 0} />
+        </div>
+      )}
+      {isEmployee && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <AdminKpi icon={<Users className="h-5 w-5" />} label="Sellers" value={String(profiles.length)} sub="Total cadastrados" gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
+          <AdminKpi icon={<Package className="h-5 w-5" />} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
+          <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
+          <AdminKpi icon={<Percent className="h-5 w-5" />} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} gradient="from-cyan-500 to-teal-600" glowColor="rgba(6,182,212,0.15)" />
+        </div>
+      )}
 
-      {/* ═══ Row 2: Black vs White + Disputes ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+      {/* ═══ Row 2: Black vs White + Disputes (admin only) ═══ */}
+      {!isEmployee && (<div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
         <div className="rounded-2xl bg-gradient-to-br from-zinc-900/60 to-zinc-800/20 border border-zinc-700/30 p-5 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-500/20 to-transparent" />
           <div className="flex items-center justify-between mb-3">
@@ -245,10 +256,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <div><p className="text-lg font-black text-red-400">{refundCount}</p><p className="text-[9px] text-white/25">Reembolso</p></div>
           </div>
         </div>
-      </div>
+      </div>)}
 
-      {/* ═══ Row 3: Chart with filter + Pie + Methods ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+      {/* ═══ Row 3: Chart with filter + Pie + Methods (admin only) ═══ */}
+      {!isEmployee && (<div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         <div className="lg:col-span-8">
           <AdminPanel>
             <div className="flex items-center justify-between mb-5">
@@ -319,10 +330,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             </div>
           </AdminPanel>
         </div>
-      </div>
+      </div>)}
 
-      {/* ═══ Row 4: Acquirer breakdown (enhanced) ═══ */}
-      {acquirerStats.length > 0 && (
+      {/* ═══ Row 4: Acquirer breakdown (admin only) ═══ */}
+      {!isEmployee && acquirerStats.length > 0 && (
         <AdminPanel>
           <PanelTitle color="blue" icon={<CreditCard className="h-4 w-4" />}>Detalhes por Adquirente</PanelTitle>
           <div className="space-y-4 mt-4">
@@ -351,8 +362,8 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </AdminPanel>
       )}
 
-      {/* ═══ Row 5: Pending Withdrawals segmented ═══ */}
-      <AdminPanel>
+      {/* ═══ Row 5: Pending Withdrawals (admin only) ═══ */}
+      {!isEmployee && (<AdminPanel>
         <div className="flex items-center justify-between mb-4">
           <PanelTitle color="amber" icon={<AlertTriangle className="h-4 w-4" />}>Saques Pendentes</PanelTitle>
           <div className="flex gap-3 text-[10px]">
@@ -394,10 +405,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             </tbody>
           </table>
         </div>
-      </AdminPanel>
+      </AdminPanel>)}
 
-      {/* ═══ Row 6: Seller Ranking ═══ */}
-      <AdminPanel>
+      {/* ═══ Row 6: Seller Ranking (admin only) ═══ */}
+      {!isEmployee && (<AdminPanel>
         <PanelTitle color="emerald" icon={<TrendingUp className="h-4 w-4" />}>Ranking de Vendedores</PanelTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
@@ -422,10 +433,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             </tbody>
           </table>
         </div>
-      </AdminPanel>
+      </AdminPanel>)}
 
       {/* ═══ Row 7: Quick Stats ═══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {!isEmployee && (<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminPanel>
           <div className="flex items-center gap-2 mb-2"><Package className="h-4 w-4 text-violet-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-white/30">Produtos</span></div>
           <p className="text-xl font-black">{products.length}</p>
@@ -446,7 +457,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           <p className="text-xl font-black">{profiles.length}</p>
           <p className="text-[10px] text-white/20 mt-1">{blackSellers.size}B / {whiteSellers.size}W / {unsetSellers.size}?</p>
         </AdminPanel>
-      </div>
+      </div>)}
     </div>
   );
 }
