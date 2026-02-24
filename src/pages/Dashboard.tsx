@@ -4,13 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   DollarSign, TrendingUp, Wallet, CheckCircle2,
   AlertCircle, RefreshCw, ArrowDownRight,
-  ArrowUpRight, Eye, Trophy, Zap,
+  ArrowUpRight, Eye, Zap,
   ChevronDown, CalendarDays,
-  CreditCard, FileText, Receipt, Sparkles,
+  CreditCard, FileText, Receipt,
+  ShoppingCart, Activity, Shield, BarChart3,
+  Lock, Volume2,
 } from "lucide-react";
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar,
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
@@ -38,8 +39,6 @@ const PERIOD_OPTIONS = [
   { label: "30 dias", days: 30 },
 ];
 
-const PIE_COLORS = ["hsl(var(--primary))", "hsl(var(--warning))", "hsl(var(--destructive))", "hsl(var(--info))", "#A855F7"];
-
 function getCurrentMilestone(revenue: number) {
   for (let i = MILESTONES.length - 1; i >= 0; i--) {
     if (revenue >= MILESTONES[i].value) {
@@ -52,7 +51,7 @@ function getCurrentMilestone(revenue: number) {
   return { current: MILESTONES[0], next: MILESTONES[1], pct: (revenue / MILESTONES[1].value) * 100, tier: 0 };
 }
 
-const fmtCurrency = (v: number) =>
+const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 function toBrasiliaDate(dateStr: string) {
@@ -63,7 +62,7 @@ function brasiliaToday() {
   return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
 }
 
-/* ============ Main Component ============ */
+/* ============ Main ============ */
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -108,19 +107,9 @@ export default function Dashboard() {
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
   const ticketMedio = approvedTx.length > 0 ? totalRevenue / approvedTx.length : 0;
   const pendingWd = withdrawals.filter((w) => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);
-  const conversionRate = filteredTx.length > 0 ? ((approvedTx.length / filteredTx.length) * 100).toFixed(1) : "0";
+  const conversionRate = filteredTx.length > 0 ? ((approvedTx.length / filteredTx.length) * 100).toFixed(1) : "0.0";
   const chargebacks = filteredTx.filter((t) => t.status === "chargeback").length;
   const refunds = filteredTx.filter((t) => t.status === "refunded").length;
-
-  const pixTx = approvedTx.filter((t) => t.payment_method === "pix");
-  const cardTx = approvedTx.filter((t) => t.payment_method === "credit_card");
-  const boletoTx = approvedTx.filter((t) => t.payment_method === "boleto");
-  const pixAll = filteredTx.filter((t) => t.payment_method === "pix");
-  const cardAll = filteredTx.filter((t) => t.payment_method === "credit_card");
-  const boletoAll = filteredTx.filter((t) => t.payment_method === "boleto");
-  const pixConv = pixAll.length > 0 ? ((pixTx.length / pixAll.length) * 100).toFixed(0) : "0";
-  const cardConv = cardAll.length > 0 ? ((cardTx.length / cardAll.length) * 100).toFixed(0) : "0";
-  const boletoConv = boletoAll.length > 0 ? ((boletoTx.length / boletoAll.length) * 100).toFixed(0) : "0";
   const chargebackRate = filteredTx.length > 0 ? ((chargebacks / filteredTx.length) * 100).toFixed(2) : "0";
 
   const chartDays = Math.max(selectedPeriod.days || 1, 1);
@@ -137,9 +126,6 @@ export default function Dashboard() {
     });
   }, [transactions, chartDays]);
 
-  const statusCounts = filteredTx.reduce((acc, t) => { acc[t.status] = (acc[t.status] || 0) + 1; return acc; }, {} as Record<string, number>);
-  const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
-
   const allCompleted = transactions.filter((t) => t.status === "completed");
   const allTimeRevenue = allCompleted.reduce((a, t) => a + Number(t.net_amount), 0);
   const milestone = getCurrentMilestone(allTimeRevenue);
@@ -154,34 +140,32 @@ export default function Dashboard() {
     .slice(0, 8);
 
   return (
-    <div className="space-y-5 relative pb-8 min-h-screen" style={{ background: "var(--page-bg)" }}>
-      {/* Mesh gradient overlays */}
+    <div className="space-y-6 relative pb-8 min-h-screen" style={{ background: "var(--page-bg)" }}>
+      {/* Ambient mesh */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute w-[900px] h-[900px] -top-[300px] -left-[200px] rounded-full" style={{ background: `radial-gradient(circle, var(--mesh-green), transparent 70%)`, opacity: "var(--mesh-opacity)" }} />
-        <div className="absolute w-[700px] h-[700px] top-[20%] -right-[200px] rounded-full" style={{ background: `radial-gradient(circle, var(--mesh-purple), transparent 70%)`, opacity: "var(--mesh-opacity)" }} />
-        <div className="absolute w-[600px] h-[600px] bottom-[-200px] left-[30%] rounded-full" style={{ background: `radial-gradient(circle, var(--mesh-blue), transparent 70%)`, opacity: "var(--mesh-opacity)" }} />
+        <div className="absolute w-[800px] h-[800px] -top-[300px] -left-[200px] rounded-full" style={{ background: "radial-gradient(circle, var(--mesh-green), transparent 70%)", opacity: "var(--mesh-opacity)" }} />
+        <div className="absolute w-[600px] h-[600px] top-[30%] -right-[150px] rounded-full" style={{ background: "radial-gradient(circle, var(--mesh-blue), transparent 70%)", opacity: "var(--mesh-opacity)" }} />
       </div>
 
-      {/* ===== Header ===== */}
-      <div className="flex items-center justify-between animate-fade-in">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-fade-in">
         <div>
-          <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground font-display">
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground font-display">
             Dashboard
           </h1>
-          <p className="text-[13px] text-muted-foreground mt-1 font-medium">Veja o resumo do seu desempenho!</p>
+          <p className="text-sm text-muted-foreground mt-1">Veja o resumo do seu desempenho!</p>
         </div>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-muted-foreground rounded-xl transition-all duration-300 hover:text-foreground group border border-border bg-card/60 backdrop-blur-sm">
-              <CalendarDays className="h-3.5 w-3.5 text-primary" />
+            <button className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-xl border border-border bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-all group">
+              <CalendarDays className="h-4 w-4 text-primary" />
               {selectedPeriod.label}
-              <ChevronDown className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+              <ChevronDown className="h-3.5 w-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-2xl p-1.5 min-w-[160px]">
+          <DropdownMenuContent align="end" className="rounded-xl p-1 min-w-[150px]">
             {PERIOD_OPTIONS.map((opt) => (
-              <DropdownMenuItem key={opt.label} onClick={() => setSelectedPeriod(opt)} className={`rounded-xl text-[13px] font-medium cursor-pointer px-3 py-2.5 transition-all ${selectedPeriod.label === opt.label ? "text-primary bg-primary/5" : ""}`}>
+              <DropdownMenuItem key={opt.label} onClick={() => setSelectedPeriod(opt)} className={`rounded-lg text-sm cursor-pointer px-3 py-2 ${selectedPeriod.label === opt.label ? "text-primary font-semibold bg-primary/5" : ""}`}>
                 {opt.label}
               </DropdownMenuItem>
             ))}
@@ -189,213 +173,183 @@ export default function Dashboard() {
         </DropdownMenu>
       </div>
 
-      {/* ===== KPI Cards ===== */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "0.05s" }}>
-        <MetricCard label="Total em Vendas" value={fmtCurrency(totalRevenue)} sub="durante este período." accent="primary" icon={<DollarSign className="h-5 w-5" />} trend={approvedTx.length > 0} />
-        <MetricCard label="Ticket Médio" value={fmtCurrency(ticketMedio)} sub={approvedTx.length > 0 ? `em ${approvedTx.length} vendas neste período.` : "—"} accent="primary" icon={<TrendingUp className="h-5 w-5" />} />
-        <MetricCard label="Pedidos Pagos" value={String(approvedTx.length)} sub={`em ${filteredTx.length} transações geradas neste período.`} accent="primary" icon={<Receipt className="h-5 w-5" />} />
-        <MetricCard label="Saldo Disponível" value={fmtCurrency(totalRevenue)} sub={pendingWd > 0 ? `${fmtCurrency(pendingWd)} em saque` : ""} accent="primary" icon={<Wallet className="h-5 w-5" />} action={{ label: "Solicitar Saque", href: "/financeiro/saques" }} />
+      {/* ── KPI ROW ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: "0.05s" }}>
+        <KpiCard icon={<DollarSign />} label="Total em Vendas" value={fmt(totalRevenue)} desc="durante este período." color="primary" />
+        <KpiCard icon={<BarChart3 />} label="Ticket Médio" value={fmt(ticketMedio)} desc={approvedTx.length > 0 ? `em ${approvedTx.length} vendas neste período.` : "sem vendas no período."} color="primary" />
+        <KpiCard icon={<ShoppingCart />} label="Pedidos Pagos" value={String(approvedTx.length)} desc={`em ${filteredTx.length} transações geradas neste período.`} color="primary" />
+        <KpiCard icon={<Wallet />} label="Saldo Disponível" value={fmt(totalRevenue)} color="primary" action={{ label: "Solicitar Saque", href: "/financeiro/saques" }} />
       </div>
 
-
-      {/* ===== Middle Row: Progress + Conversion + Monitoring ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s" }}>
-        {/* Progress */}
-        <Panel title="Progresso">
-          <div className="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total faturado</p>
-              <p className="text-lg font-extrabold text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Vendas diárias</p>
-              <p className="text-lg font-extrabold mt-1 text-primary">{fmtCurrency(todayRevenue)} / dia</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Falta para</p>
-              <p className="text-[15px] font-bold text-foreground/60 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Meta atual</p>
-              <p className="text-[15px] font-bold mt-1 text-foreground">{milestone.next.label}</p>
+      {/* ── 3-COL: Progress / Resumo / Monitoramento ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        {/* Progresso */}
+        <Card>
+          <CardHead title="Progresso" />
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
+            <Stat label="Total faturado" value={fmt(allTimeRevenue)} />
+            <Stat label="Vendas diárias" value={`${fmt(todayRevenue)} / dia`} highlight />
+            <Stat label="Falta para" value={fmt(Math.max(0, milestone.next.value - allTimeRevenue))} muted />
+            <Stat label="Meta atual" value={milestone.next.label} />
+          </div>
+          <div className="w-full rounded-full h-3 overflow-hidden bg-muted/20">
+            <div
+              className="h-full rounded-full relative transition-all duration-1000"
+              style={{
+                width: `${Math.max(milestone.pct, 2)}%`,
+                background: "linear-gradient(90deg, hsl(var(--primary)), hsl(152 80% 55%))",
+                boxShadow: "0 0 20px hsl(var(--primary) / 0.4)",
+              }}
+            >
+              <div className="absolute inset-0 animate-shimmer" style={{ backgroundImage: "linear-gradient(to right, transparent, var(--shimmer-color))", backgroundSize: "200% 100%" }} />
             </div>
           </div>
-          {/* Bar */}
-          <div>
-            <div className="w-full rounded-full h-2.5 overflow-hidden" style={{ background: "var(--bar-track)" }}>
-              <div className="h-full rounded-full relative transition-all duration-1000 bg-gradient-to-r from-primary to-emerald-400" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 15px hsl(var(--primary) / 0.35)" }}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent animate-shimmer" style={{ backgroundImage: `linear-gradient(to right, transparent, var(--shimmer-color))` }} />
-              </div>
-            </div>
-            <div className="flex items-center justify-between mt-3">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[10px] font-bold text-muted-foreground">{milestone.pct.toFixed(0)}% do caminho até a meta</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mt-2 pt-2" style={{ borderTop: "1px solid var(--glass-separator)" }}>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">PRÓXIMA META</span>
-              <span className="text-[15px] font-extrabold text-foreground">{MILESTONES[milestone.tier + 2]?.label || "🏆 Topo"}</span>
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold text-muted-foreground">{milestone.pct.toFixed(0)}% do caminho até a meta</span>
             </div>
           </div>
-        </Panel>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span className="text-xs text-muted-foreground">Início</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4 text-muted-foreground/40" />
+              <div className="text-right">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Próxima Meta</p>
+                <p className="text-lg font-black text-foreground">{MILESTONES[milestone.tier + 2]?.label || "🏆"}</p>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         {/* Resumo Financeiro */}
-        <Panel title="Resumo Financeiro">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-            <div className="flex flex-col items-center text-center">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-[11px] text-muted-foreground">Conversão</p>
-              <p className="text-lg font-extrabold text-foreground">{conversionRate}%</p>
-              <p className="text-[10px] text-primary font-semibold">+0%</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
-                <AlertCircle className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-[11px] text-muted-foreground">Pre-Chargeback</p>
-              <p className="text-lg font-extrabold text-foreground">0</p>
-              <p className="text-[10px] text-primary font-semibold">+0%</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
-                <RefreshCw className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-[11px] text-muted-foreground">Chargeback</p>
-              <p className="text-lg font-extrabold text-foreground">{chargebacks}</p>
-              <p className="text-[10px] text-primary font-semibold">+0%</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 mb-2">
-                <ArrowDownRight className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-[11px] text-muted-foreground">Qtde. Reembolsos</p>
-              <p className="text-lg font-extrabold text-foreground">{refunds}</p>
-              <p className="text-[10px] text-primary font-semibold">+0%</p>
-            </div>
+        <Card>
+          <CardHead title="Resumo Financeiro" />
+          <div className="grid grid-cols-2 gap-5">
+            <MetricBlock icon={<TrendingUp />} label="Conversão" value={`${conversionRate}%`} delta="+0%" />
+            <MetricBlock icon={<AlertCircle />} label="Pre-Chargeback" value="0" delta="+0%" />
+            <MetricBlock icon={<RefreshCw />} label="Chargeback" value={String(chargebacks)} delta="+0%" />
+            <MetricBlock icon={<ArrowDownRight />} label="Reembolsos" value={String(refunds)} delta="+0%" />
           </div>
-        </Panel>
+        </Card>
 
         {/* Monitoramento */}
-        <Panel title="Monitoramento" titleRight="Atualizado há alguns segundos">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Tempo Médio</p>
-              <p className="text-lg font-extrabold text-foreground mt-1">0 ms</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Taxa Conversão</p>
-              <p className="text-lg font-extrabold text-primary mt-1">{conversionRate} %</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">API/minuto</p>
-              <p className="text-lg font-extrabold text-foreground mt-1">0.0</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Webhook OK</p>
-              <p className="text-lg font-extrabold text-primary mt-1">100.0 %</p>
-            </div>
+        <Card>
+          <CardHead title="Monitoramento" right="Atualizado agora" />
+          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+            <Stat label="Tempo Médio" value="0 ms" />
+            <Stat label="Taxa Conversão" value={`${conversionRate} %`} highlight />
+            <Stat label="API/minuto" value="0.0" />
+            <Stat label="Webhook OK" value="100.0 %" highlight />
           </div>
-          <div className="mt-4 pt-3 flex items-center justify-between" style={{ borderTop: "1px solid var(--glass-separator)" }}>
-            <span className="text-[10px] text-muted-foreground">0 chamadas/24h</span>
-            <span className="text-[10px] text-primary font-semibold">Todos webhooks OK</span>
+          <div className="mt-5 pt-3 border-t border-border/30 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">0 chamadas/24h</span>
+            <span className="text-xs text-primary font-semibold flex items-center gap-1"><Shield className="h-3 w-3" /> Todos webhooks OK</span>
           </div>
-        </Panel>
+        </Card>
       </div>
 
-      {/* ===== Bottom Row: Chart + Activity ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-        {/* Chart – spans 3 cols */}
-        <div className="lg:col-span-3 rounded-2xl overflow-hidden relative" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "var(--card-shadow)" }}>
-          <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
-          <div className="px-5 pt-5 pb-2 flex items-center justify-between">
-            <h3 className="text-[15px] font-bold text-foreground flex items-center gap-2">
-              <span className="h-4 w-[3px] rounded-full bg-primary inline-block" />
-              Vendas
-            </h3>
-          </div>
-          <div className="px-2 pb-3">
-            <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+      {/* ── CHART + ACTIVITY ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+        {/* Chart */}
+        <Card className="lg:col-span-3">
+          <CardHead title="Vendas" />
+          <div className="-mx-2">
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
-                    <stop offset="40%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="hsl(var(--border))" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-                <YAxis stroke="hsl(var(--border))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$ ${v.toFixed(2)}`} width={60} />
-                <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: `1px solid var(--tooltip-border)`, borderRadius: "14px", fontSize: "12px", boxShadow: "var(--hover-card-shadow)", color: "var(--tooltip-text)", backdropFilter: "blur(20px)", padding: "10px 14px" }} formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]} labelStyle={{ color: "var(--tooltip-text)", opacity: 0.5 }} />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#chartFill)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 8 }} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.2)" fontSize={11} tickLine={false} axisLine={false} dy={8} />
+                <YAxis stroke="hsl(var(--muted-foreground) / 0.2)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$ ${v}`} width={55} />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--tooltip-bg)",
+                    border: "1px solid var(--tooltip-border)",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    boxShadow: "var(--hover-card-shadow)",
+                    color: "var(--tooltip-text)",
+                    backdropFilter: "blur(16px)",
+                    padding: "10px 14px",
+                  }}
+                  formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Vendas"]}
+                  labelStyle={{ color: "var(--tooltip-text)", opacity: 0.5 }}
+                />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#chartGrad)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 8 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
-        {/* Activity – spans 2 cols */}
-        <div className="lg:col-span-2 rounded-2xl relative overflow-hidden" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", boxShadow: "var(--card-shadow)" }}>
-          <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
-          <div className="px-5 pt-5 pb-2 flex items-center justify-between">
-            <h3 className="text-[15px] font-bold text-foreground flex items-center gap-2">
-              <span className="h-4 w-[3px] rounded-full bg-primary inline-block" />
-              Atividade Recente
-            </h3>
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-primary">
-              <span className="h-[6px] w-[6px] rounded-full animate-pulse bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
+        {/* Activity */}
+        <Card className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <CardHead title="Atividade Recente" noMargin />
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary">
+              <Volume2 className="h-3 w-3" />
+              <span className="h-1.5 w-1.5 rounded-full animate-pulse bg-primary" />
               Ao vivo
             </div>
           </div>
-          <div className="px-5 pb-5">
-            <div className="flex gap-1.5 mb-3 flex-wrap">
-              {["Todas", "Transações", "Saques"].map((tab, i) => (
-                <span key={tab} className={`text-[10px] font-semibold px-3 py-1 rounded-full cursor-pointer transition-all ${i === 0 ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}>{tab}</span>
-              ))}
-            </div>
-            <div className="flex items-center justify-between mb-3">
-              <Link to="/financeiro/extrato" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 transition-colors">
-                Ver Transações <ArrowUpRight className="h-3 w-3" />
-              </Link>
-            </div>
-            <div className="space-y-1">
-              {recentActivity.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/40">
-                  <Eye className="h-7 w-7 mb-2" />
-                  <p className="text-[11px]">Nenhuma atividade</p>
-                </div>
-              ) : (
-                recentActivity.slice(0, 5).map((item) => {
-                  const isTx = "payment_method" in item;
-                  const stMap: Record<string, { c: string; l: string }> = {
-                    completed: { c: "hsl(var(--primary))", l: "Aprovado" }, approved: { c: "hsl(var(--primary))", l: "Aprovado" },
-                    pending: { c: "hsl(var(--warning))", l: "Pendente" }, paid: { c: "hsl(var(--primary))", l: "Pago" },
-                    failed: { c: "hsl(var(--destructive))", l: "Falhou" }, rejected: { c: "hsl(var(--destructive))", l: "Recusado" },
-                    refunded: { c: "hsl(var(--info))", l: "Reembolso" }, chargeback: { c: "hsl(var(--destructive))", l: "Chargeback" },
-                    requested: { c: "hsl(var(--warning))", l: "Solicitado" },
-                  };
-                  const st = stMap[item.status] || { c: "hsl(var(--muted-foreground))", l: item.status };
-                  return (
-                    <div key={item.id} className="flex items-center gap-2.5 py-2 px-2.5 rounded-xl transition-all duration-200 hover:bg-muted/10">
-                      <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${st.c} 12%, transparent)` }}>
-                        {isTx ? <DollarSign className="h-3.5 w-3.5" style={{ color: st.c }} /> : <ArrowDownRight className="h-3.5 w-3.5" style={{ color: st.c }} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[12px] font-bold text-foreground">{fmtCurrency(Number(item.amount))}</span>
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ color: st.c, background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>{st.l}</span>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">{isTx ? "Nova transação " + st.l.toLowerCase() : "Saque " + st.l.toLowerCase()}</span>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground font-medium">há {formatRelativeTime(item.created_at)}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+
+          {/* Tabs */}
+          <div className="flex gap-1.5 mb-4">
+            {["Todas", "Transações", "Saques"].map((tab, i) => (
+              <span key={tab} className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-all ${i === 0 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted/20"}`}>{tab}</span>
+            ))}
           </div>
-        </div>
+
+          <div className="flex items-center gap-3 mb-3">
+            <Link to="/financeiro/extrato" className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">Ver Transações <ArrowUpRight className="h-3 w-3" /></Link>
+          </div>
+
+          <div className="space-y-1 max-h-[250px] overflow-y-auto pr-1">
+            {recentActivity.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/30">
+                <Eye className="h-8 w-8 mb-2" />
+                <p className="text-xs">Nenhuma atividade</p>
+              </div>
+            ) : (
+              recentActivity.slice(0, 6).map((item) => {
+                const isTx = "payment_method" in item;
+                const stMap: Record<string, { c: string; l: string }> = {
+                  completed: { c: "hsl(var(--primary))", l: "Aprovado" },
+                  approved: { c: "hsl(var(--primary))", l: "Aprovado" },
+                  pending: { c: "hsl(var(--warning))", l: "Pendente" },
+                  paid: { c: "hsl(var(--primary))", l: "Pago" },
+                  failed: { c: "hsl(var(--destructive))", l: "Falhou" },
+                  rejected: { c: "hsl(var(--destructive))", l: "Recusado" },
+                  refunded: { c: "hsl(var(--info))", l: "Reembolso" },
+                  chargeback: { c: "hsl(var(--destructive))", l: "Chargeback" },
+                  requested: { c: "hsl(var(--warning))", l: "Solicitado" },
+                };
+                const st = stMap[item.status] || { c: "hsl(var(--muted-foreground))", l: item.status };
+                return (
+                  <div key={item.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-muted/10 transition-colors">
+                    <div className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${st.c} 12%, transparent)` }}>
+                      {isTx ? <DollarSign className="h-4 w-4" style={{ color: st.c }} /> : <ArrowDownRight className="h-4 w-4" style={{ color: st.c }} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-foreground">{fmt(Number(item.amount))}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md" style={{ color: st.c, background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>{st.l}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{isTx ? "Nova transação" : "Saque"} {st.l.toLowerCase()}</p>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground shrink-0">há {fmtRelTime(item.created_at)}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );
@@ -403,100 +357,84 @@ export default function Dashboard() {
 
 /* ============ Sub-components ============ */
 
-function Panel({ children, title, titleRight }: { children: React.ReactNode; title?: string; titleRight?: string }) {
+function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="rounded-2xl p-5 relative overflow-hidden transition-all duration-500" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(20px)", boxShadow: "var(--card-shadow)" }}>
-      <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
-      {title && (
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[15px] font-bold text-foreground flex items-center gap-2">
-            <span className="h-4 w-[3px] rounded-full bg-primary inline-block" />
-            {title}
-          </h3>
-          {titleRight && <span className="text-[10px] text-muted-foreground">{titleRight}</span>}
-        </div>
-      )}
-      <div className="relative">{children}</div>
-    </div>
-  );
-}
-
-const ACCENT_MAP: Record<string, string> = {
-  primary: "hsl(var(--primary))",
-  info: "hsl(var(--info))",
-  warning: "hsl(var(--warning))",
-  purple: "#A855F7",
-};
-
-function MetricCard({ label, value, sub, accent, icon, trend, action }: {
-  label: string; value: string; sub?: string; accent: string; icon: React.ReactNode; trend?: boolean; action?: { label: string; href: string };
-}) {
-  const color = ACCENT_MAP[accent] || accent;
-  return (
-    <div className="rounded-2xl p-4 lg:p-5 relative overflow-hidden group transition-all duration-500 cursor-default" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)", backdropFilter: "blur(20px)", boxShadow: "var(--card-shadow)" }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "var(--hover-card-shadow)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "var(--card-shadow)"; }}
+    <div
+      className={`rounded-2xl p-5 relative overflow-hidden transition-all duration-300 border border-border/40 bg-card/70 backdrop-blur-xl ${className || ""}`}
+      style={{ boxShadow: "var(--card-shadow)" }}
     >
-      {/* Left accent bar */}
-      <div className="absolute top-0 left-0 w-[3px] h-full bg-primary rounded-l-2xl" />
-      <div className="relative">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[11px] font-semibold text-muted-foreground">{label}</p>
-          <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: `color-mix(in srgb, ${color} 10%, transparent)`, color }}>
-            {icon}
-          </div>
-        </div>
-        <p className="text-[20px] lg:text-[24px] font-extrabold text-foreground tracking-tight">{value}</p>
-        <div className="flex items-center justify-between mt-1.5">
-          <p className="text-[10px] text-muted-foreground">{sub}</p>
-          {trend && <ArrowUpRight className="h-3.5 w-3.5" style={{ color }} />}
-        </div>
-        {action && (
-          <Link to={action.href} className="text-[11px] font-bold mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all duration-300 text-primary">
-            <CheckCircle2 className="h-3 w-3" /> {action.label}
-          </Link>
-        )}
-      </div>
+      <div className="absolute top-0 left-0 w-[3px] h-full rounded-l-2xl bg-primary" />
+      {children}
     </div>
   );
 }
 
-function ConvBar({ icon, label, value, pct, color }: { icon: React.ReactNode; label: string; value: string; pct: number; color: string }) {
+function CardHead({ title, right, noMargin }: { title: string; right?: string; noMargin?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${color} 10%, transparent)`, color }}>
+    <div className={`flex items-center justify-between ${noMargin ? "" : "mb-5"}`}>
+      <h3 className="text-[15px] font-bold text-foreground tracking-tight">{title}</h3>
+      {right && <span className="text-[10px] text-muted-foreground">{right}</span>}
+    </div>
+  );
+}
+
+function KpiCard({ icon, label, value, desc, color, action }: {
+  icon: React.ReactNode; label: string; value: string; desc?: string; color: string;
+  action?: { label: string; href: string };
+}) {
+  return (
+    <div
+      className="rounded-2xl p-4 lg:p-5 relative overflow-hidden group transition-all duration-300 border border-border/40 bg-card/70 backdrop-blur-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5"
+      style={{ boxShadow: "var(--card-shadow)" }}
+    >
+      <div className="absolute top-0 left-0 w-[3px] h-full rounded-l-2xl bg-primary" />
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+        <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+          {icon}
+        </div>
+      </div>
+      <p className="text-xl lg:text-2xl font-black text-foreground tracking-tight">{value}</p>
+      {desc && <p className="text-[11px] text-muted-foreground mt-1.5">{desc}</p>}
+      {action && (
+        <Link to={action.href} className="text-xs font-bold mt-3 inline-flex items-center gap-1.5 text-primary hover:gap-2.5 transition-all">
+          <CheckCircle2 className="h-3.5 w-3.5" /> {action.label}
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function MetricBlock({ icon, label, value, delta }: { icon: React.ReactNode; label: string; value: string; delta: string }) {
+  return (
+    <div className="flex flex-col items-center text-center py-3 px-2 rounded-xl bg-muted/10 border border-border/20">
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary mb-2.5">
         {icon}
       </div>
-      <div className="flex-1">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[12px] font-medium text-muted-foreground">{label}</span>
-          <span className="text-[12px] font-bold text-foreground">{value}</span>
-        </div>
-        <div className="w-full rounded-full h-[5px] overflow-hidden" style={{ background: "var(--bar-track)" }}>
-          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.max(pct, 0)}%`, background: color }} />
-        </div>
-      </div>
+      <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
+      <p className="text-lg font-black text-foreground mt-0.5">{value}</p>
+      <p className="text-[10px] text-primary font-bold mt-0.5">{delta}</p>
     </div>
   );
 }
 
-function FinRow({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
+function Stat({ label, value, highlight, muted: isMuted }: { label: string; value: string; highlight?: boolean; muted?: boolean }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className={`text-[12px] ${bold ? "font-bold text-foreground" : "text-muted-foreground"}`}>{label}</span>
-      <span className={`text-[13px] font-bold`} style={{ color }}>{value}</span>
+    <div>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1">{label}</p>
+      <p className={`text-base font-extrabold ${highlight ? "text-primary" : isMuted ? "text-muted-foreground" : "text-foreground"}`}>{value}</p>
     </div>
   );
 }
 
-function formatRelativeTime(dateStr: string) {
+function fmtRelTime(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "agora";
-  if (mins < 60) return `${mins}min`;
+  if (mins < 60) return `${mins} min`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d`;
-  return `${Math.floor(days / 30)}m`;
+  if (days < 30) return `${days} dias`;
+  return `${Math.floor(days / 30)} m`;
 }
