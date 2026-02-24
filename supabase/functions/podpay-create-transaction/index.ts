@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
       customerName,
       customerEmail,
       customerDocument,
+      customerPhone,
       cardToken,
       ip,
       checkoutSessionId,
@@ -44,7 +45,6 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (existing && existing.podpay_payment_id) {
-        // Fetch current transaction details from PodPay to get PIX/boleto data
         console.log('Resuming existing pending transaction:', existing.id);
         let pixData = null;
         let boletoData = null;
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // === Get product (price comes from DB, NEVER from frontend) ===
+    // === Get product ===
     const { data: product, error: productError } = await supabase
       .from('products')
       .select('*')
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
 
     const podpayId = podpayData.data?.id || podpayData.id;
 
-    // === Save transaction with idempotency keys ===
+    // === Save transaction ===
     const { data: transaction, error: txError } = await supabase.from('transactions').insert({
       user_id: product.user_id,
       product_id: product.id,
@@ -189,13 +189,13 @@ Deno.serve(async (req) => {
       customer_name: customerName,
       customer_email: customerEmail,
       customer_document: customerDocument,
+      customer_phone: customerPhone || null,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       checkout_session_id: checkoutSessionId || null,
     }).select().single();
 
     if (txError) {
       console.error('DB error:', txError);
-      // If it's a unique constraint violation, payment was already created
       if (txError.code === '23505') {
         return new Response(
           JSON.stringify({ success: false, error: 'Payment already exists for this session' }),

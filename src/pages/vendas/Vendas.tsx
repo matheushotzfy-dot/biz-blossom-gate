@@ -37,19 +37,20 @@ export default function Vendas() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  {["ID", "Cliente", "E-mail", "Valor", "Método", "Status", "Data"].map((h) => (
+                  {["ID", "Cliente", "E-mail", "WhatsApp", "Valor", "Método", "Status", "Data"].map((h) => (
                     <th key={h} className="text-left p-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {transactions.length === 0 ? (
-                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>
+                  <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>
                 ) : transactions.map((tx) => (
                   <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                     <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
                     <td className="p-3.5 text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</td>
                     <td className="p-3.5 text-muted-foreground text-[13px]">{tx.customer_email || "—"}</td>
+                    <td className="p-3.5 text-muted-foreground text-[13px]">{(tx as any).customer_phone || "—"}</td>
                     <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.net_amount).toFixed(2)}</td>
                     <td className="p-3.5 capitalize text-muted-foreground text-[13px]">{tx.payment_method}</td>
                     <td className="p-3.5"><StatusBadge status={tx.status} /></td>
@@ -76,10 +77,11 @@ export default function Vendas() {
               <span className="text-foreground font-bold text-base">R$ {Number(tx.net_amount).toFixed(2)}</span>
               <span className="text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-muted-foreground text-[11px] capitalize">{tx.payment_method || "—"}</span>
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span className="text-muted-foreground text-[11px]">{tx.customer_email || "—"}</span>
+              {(tx as any).customer_phone && <><span className="text-muted-foreground text-[11px]">•</span><span className="text-muted-foreground text-[11px]">{(tx as any).customer_phone}</span></>}
               <span className="text-muted-foreground text-[11px]">•</span>
-              <span className="text-muted-foreground text-[11px] font-mono">{tx.id.slice(0, 8)}</span>
+              <span className="text-muted-foreground text-[11px] capitalize">{tx.payment_method || "—"}</span>
             </div>
           </Panel>
         ))}

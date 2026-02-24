@@ -291,6 +291,62 @@ export type Database = {
           },
         ]
       }
+      order_bumps: {
+        Row: {
+          bump_product_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          product_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          bump_product_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          bump_product_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_bumps_bump_product_id_fkey"
+            columns: ["bump_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_bumps_bump_product_id_fkey"
+            columns: ["bump_product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_bumps_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_bumps_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pix_keys: {
         Row: {
           created_at: string
@@ -446,6 +502,7 @@ export type Database = {
           customer_document: string | null
           customer_email: string | null
           customer_name: string | null
+          customer_phone: string | null
           fee_amount: number
           id: string
           net_amount: number
@@ -464,6 +521,7 @@ export type Database = {
           customer_document?: string | null
           customer_email?: string | null
           customer_name?: string | null
+          customer_phone?: string | null
           fee_amount?: number
           id?: string
           net_amount?: number
@@ -482,6 +540,7 @@ export type Database = {
           customer_document?: string | null
           customer_email?: string | null
           customer_name?: string | null
+          customer_phone?: string | null
           fee_amount?: number
           id?: string
           net_amount?: number
