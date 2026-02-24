@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { AlertTriangle, Search, Plus, Save, MessageSquare, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { AlertTriangle, Search, Plus, Save, MessageSquare, Clock, CheckCircle2, XCircle, Package, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -24,10 +24,12 @@ interface Props {
   type: "medpix" | "pre_med_pix" | "refund";
   title: string;
   profiles: Tables<"profiles">[];
+  transactions: Tables<"transactions">[];
+  products: Tables<"products">[];
   fmtCurrency: (v: number) => string;
 }
 
-export default function AdminDisputesTab({ type, title, profiles, fmtCurrency }: Props) {
+export default function AdminDisputesTab({ type, title, profiles, transactions, products, fmtCurrency }: Props) {
   const { user } = useAuth();
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [search, setSearch] = useState("");
@@ -83,19 +85,37 @@ export default function AdminDisputesTab({ type, title, profiles, fmtCurrency }:
   const filtered = disputes.filter(d => {
     if (!search) return true;
     const s = search.toLowerCase();
-    return d.buyer_name?.toLowerCase().includes(s) || d.buyer_email?.toLowerCase().includes(s) || d.reason?.toLowerCase().includes(s);
+    return d.buyer_name?.toLowerCase().includes(s) || d.buyer_email?.toLowerCase().includes(s) || d.reason?.toLowerCase().includes(s) || d.id.toLowerCase().includes(s) || d.transaction_id?.toLowerCase().includes(s);
   });
 
   const getSellerName = (id: string) => profiles.find(p => p.user_id === id)?.full_name || "—";
+  const getSellerEmail = (id: string) => profiles.find(p => p.user_id === id)?.email || "";
+  const getSellerType = (id: string) => profiles.find(p => p.user_id === id)?.seller_type || null;
+
+  const getTransactionDetails = (txId: string | null) => {
+    if (!txId) return null;
+    return transactions.find(t => t.id === txId) || null;
+  };
+
+  const getProductName = (productId: string | null) => {
+    if (!productId) return "—";
+    return products.find(p => p.id === productId)?.name || "—";
+  };
 
   const statusColors: Record<string, string> = { open: "text-amber-400 bg-amber-500/10", in_review: "text-blue-400 bg-blue-500/10", resolved_seller: "text-emerald-400 bg-emerald-500/10", resolved_buyer: "text-emerald-400 bg-emerald-500/10", closed: "text-white/30 bg-white/[0.04]" };
+
+  const SellerTypeBadge = ({ type: t }: { type: string | null }) => {
+    if (t === "black") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700">B</span>;
+    if (t === "white") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-slate-200/10 text-slate-400 border border-slate-500/20">W</span>;
+    return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">?</span>;
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
-          <input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)}
+          <input placeholder="Buscar por nome, e-mail, ID..." value={search} onChange={e => setSearch(e.target.value)}
             className="w-full h-10 pl-10 pr-4 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.12]" />
         </div>
         <Button size="sm" className="bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl text-xs gap-1" onClick={() => setCreating(true)}>
@@ -123,20 +143,47 @@ export default function AdminDisputesTab({ type, title, profiles, fmtCurrency }:
         <PanelTitle color="amber" icon={<AlertTriangle className="h-4 w-4" />}>{title} ({filtered.length})</PanelTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/[0.04]">{["Vendedor","Comprador","Valor","Motivo","Status","Data",""].map(h=>(<th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>))}</tr></thead>
+            <thead><tr className="border-b border-white/[0.04]">{["ID Venda","Vendedor","Tipo","Produto","Comprador","Valor","Status","Data",""].map(h=>(<th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>))}</tr></thead>
             <tbody>
-              {filtered.map(d => (
-                <tr key={d.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer" onClick={() => { setEditing(d); setEditStatus(d.status); setEditNotes(d.admin_notes || ""); }}>
-                  <td className="p-3 text-xs font-bold">{getSellerName(d.seller_user_id)}</td>
-                  <td className="p-3"><div><p className="text-xs">{d.buyer_name || "—"}</p><p className="text-[10px] text-white/30">{d.buyer_email}</p></div></td>
-                  <td className="p-3 text-xs font-bold text-amber-400">{fmtCurrency(d.amount)}</td>
-                  <td className="p-3 text-[11px] text-white/40 max-w-[200px] truncate">{d.reason || "—"}</td>
-                  <td className="p-3"><span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${statusColors[d.status] || ""}`}>{d.status}</span></td>
-                  <td className="p-3 text-[11px] text-white/30">{new Date(d.created_at).toLocaleDateString("pt-BR")}</td>
-                  <td className="p-3"><MessageSquare className="h-3.5 w-3.5 text-white/20" /></td>
-                </tr>
-              ))}
-              {filtered.length === 0 && <tr><td colSpan={7} className="p-10 text-center text-white/20 text-xs">Nenhuma disputa</td></tr>}
+              {filtered.map(d => {
+                const tx = getTransactionDetails(d.transaction_id);
+                const productName = tx ? getProductName(tx.product_id) : "—";
+                const sellerType = getSellerType(d.seller_user_id);
+                return (
+                  <tr key={d.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer" onClick={() => { setEditing(d); setEditStatus(d.status); setEditNotes(d.admin_notes || ""); }}>
+                    <td className="p-3">
+                      <div>
+                        <p className="text-[10px] font-mono text-white/40">{d.transaction_id?.slice(0, 8) || "—"}</p>
+                        <p className="text-[9px] font-mono text-white/20">{d.id.slice(0, 8)}</p>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <SellerTypeBadge type={sellerType} />
+                        <div>
+                          <p className="text-xs font-bold">{getSellerName(d.seller_user_id)}</p>
+                          <p className="text-[10px] text-white/25">{getSellerEmail(d.seller_user_id)}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-3"><SellerTypeBadge type={sellerType} /></td>
+                    <td className="p-3">
+                      <p className="text-[11px] text-white/60">{productName}</p>
+                    </td>
+                    <td className="p-3">
+                      <div>
+                        <p className="text-xs">{d.buyer_name || "—"}</p>
+                        <p className="text-[10px] text-white/30">{d.buyer_email}</p>
+                      </div>
+                    </td>
+                    <td className="p-3 text-xs font-bold text-amber-400">{fmtCurrency(d.amount)}</td>
+                    <td className="p-3"><span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${statusColors[d.status] || ""}`}>{d.status}</span></td>
+                    <td className="p-3 text-[11px] text-white/30">{new Date(d.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className="p-3"><MessageSquare className="h-3.5 w-3.5 text-white/20" /></td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && <tr><td colSpan={9} className="p-10 text-center text-white/20 text-xs">Nenhuma disputa</td></tr>}
             </tbody>
           </table>
         </div>
@@ -156,6 +203,10 @@ export default function AdminDisputesTab({ type, title, profiles, fmtCurrency }:
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label className="text-[10px] text-white/40">ID da Transação (opcional)</Label>
+              <input value={form.transaction_id} onChange={e => setForm(f => ({...f, transaction_id: e.target.value}))} placeholder="ID da transação..." className="w-full h-9 px-3 bg-white/[0.04] border border-white/[0.06] rounded-md text-xs text-white mt-1" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-[10px] text-white/40">Nome comprador</Label><input value={form.buyer_name} onChange={e => setForm(f => ({...f, buyer_name: e.target.value}))} className="w-full h-9 px-3 bg-white/[0.04] border border-white/[0.06] rounded-md text-xs text-white mt-1" /></div>
               <div><Label className="text-[10px] text-white/40">E-mail comprador</Label><input value={form.buyer_email} onChange={e => setForm(f => ({...f, buyer_email: e.target.value}))} className="w-full h-9 px-3 bg-white/[0.04] border border-white/[0.06] rounded-md text-xs text-white mt-1" /></div>
@@ -172,37 +223,72 @@ export default function AdminDisputesTab({ type, title, profiles, fmtCurrency }:
 
       {/* Edit Dialog */}
       <Dialog open={!!editing} onOpenChange={v => { if (!v) setEditing(null); }}>
-        <DialogContent className="max-w-lg bg-[hsl(228,18%,6%)] border-white/[0.06] text-white">
+        <DialogContent className="max-w-2xl bg-[hsl(228,18%,6%)] border-white/[0.06] text-white">
           <DialogHeader><DialogTitle>Detalhes da Disputa</DialogTitle></DialogHeader>
-          {editing && (
-            <div className="space-y-3 mt-2">
-              <div className="grid grid-cols-2 gap-3 text-[11px]">
-                <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]"><p className="text-white/30 text-[10px]">Vendedor</p><p className="font-bold">{getSellerName(editing.seller_user_id)}</p></div>
-                <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]"><p className="text-white/30 text-[10px]">Comprador</p><p className="font-bold">{editing.buyer_name || "—"}</p><p className="text-white/30">{editing.buyer_email}</p></div>
-                <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]"><p className="text-white/30 text-[10px]">Valor</p><p className="font-bold text-amber-400">{fmtCurrency(editing.amount)}</p></div>
-                <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]"><p className="text-white/30 text-[10px]">Data</p><p className="font-bold">{new Date(editing.created_at).toLocaleString("pt-BR")}</p></div>
+          {editing && (() => {
+            const tx = getTransactionDetails(editing.transaction_id);
+            const productName = tx ? getProductName(tx.product_id) : "—";
+            const seller = profiles.find(p => p.user_id === editing.seller_user_id);
+            return (
+              <div className="space-y-4 mt-2">
+                {/* Seller info */}
+                <div className="bg-white/[0.02] rounded-xl border border-white/[0.06] p-4">
+                  <p className="text-[10px] text-white/30 uppercase tracking-wider mb-2 flex items-center gap-1"><User className="h-3 w-3" /> Vendedor</p>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center text-sm font-bold text-blue-400">{(seller?.full_name || "?")[0].toUpperCase()}</div>
+                    <div>
+                      <p className="text-sm font-bold">{seller?.full_name || "—"}</p>
+                      <p className="text-xs text-white/40">{seller?.email} • {seller?.phone || "Sem tel."}</p>
+                      <p className="text-[10px] text-white/20 font-mono">{seller?.document_number || "—"} • PIX: {seller?.pix_key || "—"}</p>
+                    </div>
+                    <div className="ml-auto">
+                      <SellerTypeBadge type={seller?.seller_type || null} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transaction & Product info */}
+                {tx && (
+                  <div className="bg-white/[0.02] rounded-xl border border-white/[0.06] p-4">
+                    <p className="text-[10px] text-white/30 uppercase tracking-wider mb-2 flex items-center gap-1"><Package className="h-3 w-3" /> Transação & Produto</p>
+                    <div className="grid grid-cols-2 gap-3 text-[11px]">
+                      <div><span className="text-white/30">ID Transação:</span> <span className="font-mono font-bold">{tx.id.slice(0, 12)}...</span></div>
+                      <div><span className="text-white/30">Produto:</span> <span className="font-bold">{productName}</span></div>
+                      <div><span className="text-white/30">Valor:</span> <span className="font-bold text-emerald-400">{fmtCurrency(Number(tx.amount))}</span></div>
+                      <div><span className="text-white/30">Método:</span> <span className="font-bold">{tx.payment_method || "—"}</span></div>
+                      <div><span className="text-white/30">Comprador:</span> <span className="font-bold">{tx.customer_name} ({tx.customer_email})</span></div>
+                      <div><span className="text-white/30">Status TX:</span> <StatusBadge status={tx.status} /></div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 text-[11px]">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]"><p className="text-white/30 text-[10px]">Comprador (disputa)</p><p className="font-bold">{editing.buyer_name || "—"}</p><p className="text-white/30">{editing.buyer_email} • {editing.buyer_phone || "Sem tel."}</p></div>
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]"><p className="text-white/30 text-[10px]">Valor Disputado</p><p className="font-bold text-amber-400 text-lg">{fmtCurrency(editing.amount)}</p><p className="text-white/30">Criada em {new Date(editing.created_at).toLocaleString("pt-BR")}</p></div>
+                </div>
+
+                {editing.reason && <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04] text-xs"><p className="text-white/30 text-[10px] mb-1">Motivo</p><p>{editing.reason}</p></div>}
+                <div>
+                  <Label className="text-[10px] text-white/40">Status</Label>
+                  <Select value={editStatus} onValueChange={setEditStatus}>
+                    <SelectTrigger className="bg-white/[0.04] border-white/[0.06] text-xs mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[hsl(228,18%,8%)] border-white/[0.08]">
+                      <SelectItem value="open">Aberta</SelectItem>
+                      <SelectItem value="in_review">Em Análise</SelectItem>
+                      <SelectItem value="resolved_seller">Resolvida (Vendedor)</SelectItem>
+                      <SelectItem value="resolved_buyer">Resolvida (Comprador)</SelectItem>
+                      <SelectItem value="closed">Fechada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[10px] text-white/40">Notas do Admin</Label>
+                  <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} rows={3} className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-md text-xs text-white mt-1 resize-none" />
+                </div>
+                <Button className="w-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl" onClick={handleUpdate}><Save className="h-3 w-3 mr-1" /> Salvar</Button>
               </div>
-              {editing.reason && <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04] text-xs"><p className="text-white/30 text-[10px] mb-1">Motivo</p><p>{editing.reason}</p></div>}
-              <div>
-                <Label className="text-[10px] text-white/40">Status</Label>
-                <Select value={editStatus} onValueChange={setEditStatus}>
-                  <SelectTrigger className="bg-white/[0.04] border-white/[0.06] text-xs mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[hsl(228,18%,8%)] border-white/[0.08]">
-                    <SelectItem value="open">Aberta</SelectItem>
-                    <SelectItem value="in_review">Em Análise</SelectItem>
-                    <SelectItem value="resolved_seller">Resolvida (Vendedor)</SelectItem>
-                    <SelectItem value="resolved_buyer">Resolvida (Comprador)</SelectItem>
-                    <SelectItem value="closed">Fechada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-[10px] text-white/40">Notas do Admin</Label>
-                <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} rows={3} className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-md text-xs text-white mt-1 resize-none" />
-              </div>
-              <Button className="w-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl" onClick={handleUpdate}><Save className="h-3 w-3 mr-1" /> Salvar</Button>
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>

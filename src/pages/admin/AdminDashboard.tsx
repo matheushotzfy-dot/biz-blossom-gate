@@ -281,13 +281,13 @@ export default function AdminDashboard() {
             <AdminAcquirersTab />
           )}
           {activeTab === "medpix" && (
-            <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} fmtCurrency={fmtCurrency} />
+            <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
           )}
           {activeTab === "refunds" && (
-            <AdminDisputesTab type="refund" title="Reembolsos" profiles={profiles} fmtCurrency={fmtCurrency} />
+            <AdminDisputesTab type="refund" title="Reembolsos" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
           )}
           {activeTab === "premed" && (
-            <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} fmtCurrency={fmtCurrency} />
+            <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
           )}
           {activeTab === "coupons" && (
             <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />

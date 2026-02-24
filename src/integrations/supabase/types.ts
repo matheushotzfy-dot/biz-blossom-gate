@@ -647,6 +647,7 @@ export type Database = {
         Row: {
           account_status: string
           acquirer_id: string | null
+          admin_notes: string | null
           avatar_url: string | null
           created_at: string
           document_number: string | null
@@ -665,6 +666,7 @@ export type Database = {
         Insert: {
           account_status?: string
           acquirer_id?: string | null
+          admin_notes?: string | null
           avatar_url?: string | null
           created_at?: string
           document_number?: string | null
@@ -683,6 +685,7 @@ export type Database = {
         Update: {
           account_status?: string
           acquirer_id?: string | null
+          admin_notes?: string | null
           avatar_url?: string | null
           created_at?: string
           document_number?: string | null
