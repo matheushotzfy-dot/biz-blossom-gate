@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, QrCode, FileText, CheckCircle2, Copy, Clock, Loader2, RefreshCw, ShieldCheck, ChevronDown, User, Mail, FileDigit, Phone, MapPin, Sparkles } from "lucide-react";
+import { CreditCard, QrCode, FileText, CheckCircle2, Copy, Clock, Loader2, RefreshCw, ShieldCheck, ChevronDown, User, Mail, FileDigit, Phone, MapPin, Sparkles, Plus, Minus, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,18 @@ type Product = {
   checkout_email_confirm: boolean | null;
 };
 
+type OrderBump = {
+  id: string;
+  bump_product_id: string;
+  bump_product: {
+    id: string;
+    name: string;
+    description: string | null;
+    price: number;
+    image_url: string | null;
+  };
+};
+
 type PaymentMethod = "pix" | "credit_card" | "boleto";
 type CheckoutState = "form" | "pending" | "approved" | "failed";
 
@@ -40,7 +52,6 @@ function getCheckoutSessionId(slug: string): string {
 }
 function clearCheckoutSession(slug: string) { sessionStorage.removeItem(`checkout_session_${slug}`); }
 
-// CPF validation
 function isValidCpf(cpf: string): boolean {
   const digits = cpf.replace(/\D/g, "");
   if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
@@ -86,6 +97,10 @@ export default function PublicCheckout() {
   const [boletoData, setBoletoData] = useState<any>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
 
+  // Order bumps
+  const [orderBumps, setOrderBumps] = useState<OrderBump[]>([]);
+  const [selectedBumps, setSelectedBumps] = useState<Set<string>>(new Set());
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
@@ -98,20 +113,17 @@ export default function PublicCheckout() {
   const [cardName, setCardName] = useState("");
   const [installments, setInstallments] = useState("1");
 
-  // Address fields
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
-  const [number, setNumber] = useState("");
+  const [number_, setNumber_] = useState("");
   const [complement, setComplement] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [loadingCep, setLoadingCep] = useState(false);
 
-  // Social proof random
   const [socialCount] = useState(Math.floor(Math.random() * 150) + 50);
 
-  // Timer
   const timerMinutes = product?.checkout_timer_minutes ?? 15;
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
   useEffect(() => {
@@ -138,7 +150,32 @@ export default function PublicCheckout() {
       });
   }, [slug]);
 
-  // Set default payment method based on enabled methods
+  // Load order bumps
+  useEffect(() => {
+    if (!product?.id) return;
+    supabase
+      .from("order_bumps")
+      .select("id, bump_product_id")
+      .eq("product_id", product.id)
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(async ({ data: bumps }) => {
+        if (!bumps || bumps.length === 0) return;
+        const bumpIds = bumps.map(b => b.bump_product_id);
+        const { data: products } = await supabase
+          .from("products_public")
+          .select("id, name, description, price, image_url")
+          .in("id", bumpIds);
+        if (!products) return;
+        const enriched: OrderBump[] = bumps.map(b => ({
+          id: b.id,
+          bump_product_id: b.bump_product_id,
+          bump_product: products.find(p => p.id === b.bump_product_id) as any,
+        })).filter(b => b.bump_product);
+        setOrderBumps(enriched);
+      });
+  }, [product?.id]);
+
   useEffect(() => {
     if (!product) return;
     if (product.checkout_credit_card_enabled) setMethod("credit_card");
@@ -146,7 +183,6 @@ export default function PublicCheckout() {
     else if (product.checkout_boleto_enabled) setMethod("boleto");
   }, [product]);
 
-  // Poll transaction status
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
     const interval = setInterval(async () => {
@@ -171,7 +207,6 @@ export default function PublicCheckout() {
   const formatExpiry = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 4); return d.length <= 2 ? d : `${d.slice(0,2)}/${d.slice(2)}`; };
   const formatCep = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 8); return d.length <= 5 ? d : `${d.slice(0,5)}-${d.slice(5)}`; };
 
-  // CEP auto-fill
   const handleCepChange = async (val: string) => {
     const formatted = formatCep(val);
     setCep(formatted);
@@ -192,11 +227,22 @@ export default function PublicCheckout() {
     }
   };
 
+  const toggleBump = (bumpId: string) => {
+    setSelectedBumps(prev => {
+      const next = new Set(prev);
+      if (next.has(bumpId)) next.delete(bumpId); else next.add(bumpId);
+      return next;
+    });
+  };
+
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product || processingRef.current) return;
 
-    // Validate CPF/CNPJ
+    // Validate phone (WhatsApp mandatory)
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) { toast.error("Informe um WhatsApp válido"); return; }
+
     const docDigits = document.replace(/\D/g, "");
     if (docDigits.length === 11 && !isValidCpf(document)) { toast.error("CPF inválido"); return; }
     if (docDigits.length === 14 && !isValidCnpj(document)) { toast.error("CNPJ inválido"); return; }
@@ -210,7 +256,8 @@ export default function PublicCheckout() {
       const sessionId = getCheckoutSessionId(slug || "default");
       const payload: Record<string, unknown> = {
         productId: product.id, paymentMethod: method, customerName: name,
-        customerEmail: email, customerDocument: docDigits, checkoutSessionId: sessionId,
+        customerEmail: email, customerDocument: docDigits, customerPhone: phoneDigits,
+        checkoutSessionId: sessionId,
       };
       if (method === "credit_card") {
         payload.installments = parseInt(installments);
@@ -234,12 +281,14 @@ export default function PublicCheckout() {
 
   const retryPayment = () => { clearCheckoutSession(slug || ""); setCheckoutState("form"); setPixData(null); setBoletoData(null); setTransactionId(null); };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0d0d0d]"><Loader2 className="h-8 w-8 animate-spin text-emerald-500" /></div>;
-  if (!product) return <div className="min-h-screen flex items-center justify-center bg-[#0d0d0d] text-white px-4"><div className="text-center"><Sparkles className="h-12 w-12 text-white/20 mx-auto mb-4" /><h1 className="text-xl font-bold mb-1">Produto não encontrado</h1><p className="text-sm text-white/40">Verifique o link e tente novamente.</p></div></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#08080a]"><Loader2 className="h-8 w-8 animate-spin text-emerald-500" /></div>;
+  if (!product) return <div className="min-h-screen flex items-center justify-center bg-[#08080a] text-white px-4"><div className="text-center"><Sparkles className="h-12 w-12 text-white/20 mx-auto mb-4" /><h1 className="text-xl font-bold mb-1">Produto não encontrado</h1><p className="text-sm text-white/40">Verifique o link e tente novamente.</p></div></div>;
 
   const price = Number(product.price);
+  const bumpsTotal = orderBumps.filter(b => selectedBumps.has(b.id)).reduce((sum, b) => sum + Number(b.bump_product.price), 0);
+  const totalPrice = price + bumpsTotal;
   const btnColor = product.checkout_button_color || "#10b981";
-  const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? price : price * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? price : val * n }; });
+  const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
   const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
   const availableMethods: { id: PaymentMethod; icon: any; label: string; short: string }[] = [];
@@ -247,22 +296,22 @@ export default function PublicCheckout() {
   if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "Pix", short: "Pix" });
   if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", short: "Boleto" });
 
-  // Approved
+  // ---- SCREENS ----
+
   if (checkoutState === "approved") return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#0d0d0d] text-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#08080a] text-white">
       <div className="text-center animate-fade-in max-w-md">
         <div className="relative mx-auto mb-8 w-24 h-24"><div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl animate-pulse" /><div className="relative h-24 w-24 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-2xl"><CheckCircle2 className="h-12 w-12 text-white" /></div></div>
         <h1 className="text-3xl font-bold mb-2">Pagamento Confirmado!</h1>
-        <p className="text-white/50 mb-8">Seu pagamento de <strong className="text-emerald-400">R$ {price.toFixed(2)}</strong> foi aprovado.</p>
+        <p className="text-white/50 mb-8">Seu pagamento de <strong className="text-emerald-400">R$ {totalPrice.toFixed(2)}</strong> foi aprovado.</p>
         <div className="rounded-2xl p-5 bg-white/[0.04] border border-white/10"><p className="text-xs text-white/40 uppercase tracking-widest mb-1">Produto</p><p className="font-semibold text-lg">{product.name}</p></div>
         <p className="text-xs text-white/30 mt-6">Confirmação enviada para {email}</p>
       </div>
     </div>
   );
 
-  // Failed
   if (checkoutState === "failed") return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#0d0d0d] text-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#08080a] text-white">
       <div className="text-center animate-fade-in max-w-md">
         <div className="relative mx-auto mb-8 w-24 h-24"><div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl animate-pulse" /><div className="relative h-24 w-24 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-2xl"><CreditCard className="h-12 w-12 text-white" /></div></div>
         <h1 className="text-3xl font-bold mb-2">Pagamento Recusado</h1>
@@ -272,15 +321,14 @@ export default function PublicCheckout() {
     </div>
   );
 
-  // Pending
   if (checkoutState === "pending") return (
-    <div className="min-h-screen bg-[#0d0d0d] text-white">
+    <div className="min-h-screen bg-[#08080a] text-white">
       <div className="max-w-lg mx-auto px-4 py-10 md:py-16">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-14 w-14 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {product.image_url ? <img src={product.image_url} alt={product.name} className="h-14 w-14 rounded-xl object-cover" /> : <Sparkles className="h-6 w-6 text-white/30" />}
           </div>
-          <div><h2 className="font-bold">{product.name}</h2><p className="font-bold text-lg" style={{ color: btnColor }}>R$ {price.toFixed(2)}</p></div>
+          <div><h2 className="font-bold">{product.name}</h2><p className="font-bold text-lg" style={{ color: btnColor }}>R$ {totalPrice.toFixed(2)}</p></div>
         </div>
         <div className="text-center mb-8"><div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-400 px-4 py-2 rounded-full text-sm font-medium"><Clock className="h-4 w-4" /> Aguardando Pagamento</div></div>
         {pixData && (
@@ -307,25 +355,29 @@ export default function PublicCheckout() {
   );
 
   // ====================================================================
-  // === FORM — Checkout with all customizations ========================
+  // === FORM — Modern Checkout =========================================
   // ====================================================================
-  const inputClass = "mt-1 h-11 rounded-lg bg-[#1a1a1f] border-[#2a2a30] text-white placeholder:text-white/25 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm";
+
+  // Prevent iOS zoom: font-size >= 16px on inputs
+  const inputClass = "mt-1 h-12 rounded-xl bg-[#111114] border-[#222228] text-white placeholder:text-white/20 focus:border-[color:var(--btn-color)]/50 focus:ring-1 focus:ring-[color:var(--btn-color)]/20 transition-all text-[16px] leading-tight";
+
+  const sectionClass = "rounded-2xl border border-white/[0.06] bg-[#0f0f12] p-5 md:p-6 space-y-4";
+  const labelClass = "text-xs text-white/50 font-semibold flex items-center gap-1.5 uppercase tracking-wide";
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-white">
+    <div className="min-h-screen bg-[#08080a] text-white" style={{ "--btn-color": btnColor } as React.CSSProperties}>
       {/* Timer bar */}
       {product.checkout_timer_enabled && (
-        <div className="sticky top-0 z-50 bg-[#111115]/90 backdrop-blur-md border-b border-white/[0.06]">
-          <div className="max-w-[660px] mx-auto px-4 py-2.5 flex items-center justify-center gap-3">
-            <div className="flex items-center gap-1.5 font-mono">
-              <span className="bg-[#1a1a1f] border border-white/10 rounded-md px-2.5 py-1 text-lg font-bold tabular-nums">{mins}</span>
-              <span className="text-white/30 text-lg font-bold">:</span>
-              <span className="bg-[#1a1a1f] border border-white/10 rounded-md px-2.5 py-1 text-lg font-bold tabular-nums">{secs}</span>
+        <div className="sticky top-0 z-50 bg-[#0a0a0d]/95 backdrop-blur-xl border-b border-white/[0.04]">
+          <div className="max-w-[680px] mx-auto px-4 py-2.5 flex items-center justify-center gap-3">
+            <div className="flex items-center gap-1 font-mono">
+              <span className="bg-[#151518] border border-white/10 rounded-lg px-3 py-1.5 text-lg font-bold tabular-nums text-white">{mins}</span>
+              <span className="text-white/20 text-lg font-bold mx-0.5">:</span>
+              <span className="bg-[#151518] border border-white/10 rounded-lg px-3 py-1.5 text-lg font-bold tabular-nums text-white">{secs}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs">
               <Clock className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-white/50 hidden sm:inline">Oferta por tempo limitado.</span>
-              <span className="text-amber-400 font-semibold">Finalize sua compra!</span>
+              <span className="text-amber-400 font-semibold">Oferta expira em breve!</span>
             </div>
           </div>
         </div>
@@ -342,111 +394,177 @@ export default function PublicCheckout() {
 
       {/* Social proof */}
       {product.checkout_social_proof && (
-        <div className="max-w-[660px] mx-auto px-4 pt-4">
-          <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-xs font-medium w-fit">
+        <div className="max-w-[680px] mx-auto px-4 pt-5">
+          <div className="flex items-center gap-2.5 bg-emerald-500/8 border border-emerald-500/15 text-emerald-400 px-4 py-2.5 rounded-xl text-xs font-medium w-fit">
             <span className="flex -space-x-1.5">
-              {[...Array(3)].map((_, i) => <div key={i} className="h-5 w-5 rounded-full bg-emerald-500/30 border border-emerald-500/50" />)}
+              {[...Array(3)].map((_, i) => <div key={i} className="h-5 w-5 rounded-full bg-emerald-500/30 border-2 border-[#08080a]" />)}
             </span>
             🔥 {socialCount} pessoas compraram recentemente
           </div>
         </div>
       )}
 
-      <div className="max-w-[660px] mx-auto px-4 py-6 md:py-10">
+      <div className="max-w-[680px] mx-auto px-4 py-6 md:py-10">
         {/* Product card */}
-        <div className="rounded-2xl border border-white/[0.08] bg-[#131316] p-5 mb-6">
+        <div className={sectionClass + " !space-y-0 mb-5"}>
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {product.image_url ? <img src={product.image_url} alt={product.name} className="h-16 w-16 rounded-xl object-cover" /> : <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center"><Sparkles className="h-7 w-7 text-emerald-400" /></div>}
+            <div className="h-16 w-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {product.image_url ? <img src={product.image_url} alt={product.name} className="h-16 w-16 rounded-2xl object-cover" /> : <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 flex items-center justify-center"><Sparkles className="h-7 w-7 text-emerald-400/60" /></div>}
             </div>
-            <div>
-              <h1 className="font-bold text-base">{product.name}</h1>
-              <p className="font-bold text-lg" style={{ color: btnColor }}>R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="font-bold text-base md:text-lg leading-tight truncate">{product.name}</h1>
+              {product.description && <p className="text-xs text-white/30 mt-0.5 line-clamp-1">{product.description}</p>}
+              <p className="font-extrabold text-xl mt-1" style={{ color: btnColor }}>R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handlePay} className="space-y-5">
-          {/* Personal data */}
-          <section className="rounded-2xl border border-white/[0.08] bg-[#131316] p-5 space-y-4">
-            {/* Email */}
+        <form onSubmit={handlePay} className="space-y-4">
+          {/* ====== DADOS PESSOAIS ====== */}
+          <section className={sectionClass}>
+            <h3 className="text-sm font-bold flex items-center gap-2 !mb-4">
+              <div className="h-6 w-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: btnColor }}>1</div>
+              Seus dados
+            </h3>
+
+            <div>
+              <Label className={labelClass}><User className="h-3 w-3" /> Nome completo</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome completo" required className={inputClass} />
+            </div>
+
             <div className={product.checkout_email_confirm ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : ""}>
               <div>
-                <Label className="text-xs text-white/60 font-medium flex items-center gap-1.5"><Mail className="h-3 w-3" /> Seu e-mail</Label>
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Insira seu e-mail" required type="email" className={inputClass} />
+                <Label className={labelClass}><Mail className="h-3 w-3" /> E-mail</Label>
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required type="email" className={inputClass} />
               </div>
               {product.checkout_email_confirm && (
                 <div>
-                  <Label className="text-xs text-white/60 font-medium">Confirme seu e-mail</Label>
-                  <Input value={emailConfirm} onChange={(e) => setEmailConfirm(e.target.value)} placeholder="Insira novamente" required type="email" className={inputClass} />
+                  <Label className={labelClass}>Confirme o e-mail</Label>
+                  <Input value={emailConfirm} onChange={(e) => setEmailConfirm(e.target.value)} placeholder="Confirme seu e-mail" required type="email" className={inputClass} />
                 </div>
               )}
             </div>
-            {/* Name */}
-            <div>
-              <Label className="text-xs text-white/60 font-medium flex items-center gap-1.5"><User className="h-3 w-3" /> Nome completo</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Insira seu nome completo" required className={inputClass} />
-            </div>
-            {/* CPF + Phone */}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs text-white/60 font-medium flex items-center gap-1.5"><FileDigit className="h-3 w-3" /> CPF/CNPJ</Label>
-                <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="Insira seu CPF ou CNPJ" required className={inputClass} />
+                <Label className={labelClass}><FileDigit className="h-3 w-3" /> CPF / CNPJ</Label>
+                <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} />
               </div>
               <div>
-                <Label className="text-xs text-white/60 font-medium flex items-center gap-1.5"><Phone className="h-3 w-3" /> Seu celular</Label>
-                <Input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" className={inputClass} />
+                <Label className={labelClass}><Phone className="h-3 w-3" /> WhatsApp</Label>
+                <Input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} />
               </div>
             </div>
           </section>
 
-          {/* Address section */}
+          {/* ====== ENDEREÇO ====== */}
           {product.checkout_address_required && (
-            <section className="rounded-2xl border border-white/[0.08] bg-[#131316] p-5 space-y-4">
-              <h3 className="text-sm font-bold flex items-center gap-2"><MapPin className="h-4 w-4" /> Endereço</h3>
+            <section className={sectionClass}>
+              <h3 className="text-sm font-bold flex items-center gap-2 !mb-4">
+                <div className="h-6 w-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: btnColor }}>2</div>
+                Endereço
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs text-white/60 font-medium">CEP</Label>
+                  <Label className={labelClass}>CEP</Label>
                   <div className="relative">
-                    <Input value={cep} onChange={(e) => handleCepChange(e.target.value)} placeholder="00000-000" required className={inputClass} />
+                    <Input value={cep} onChange={(e) => handleCepChange(e.target.value)} placeholder="00000-000" required className={inputClass} inputMode="numeric" />
                     {loadingCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-white/30 mt-0.5" />}
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-white/60 font-medium">Bairro</Label>
+                  <Label className={labelClass}>Bairro</Label>
                   <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} placeholder="Bairro" required className={inputClass} />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-white/60 font-medium">Rua</Label>
+                <Label className={labelClass}>Rua</Label>
                 <Input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Rua / Avenida" required className={inputClass} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div>
-                  <Label className="text-xs text-white/60 font-medium">Número</Label>
-                  <Input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Nº" required className={inputClass} />
+                  <Label className={labelClass}>Número</Label>
+                  <Input value={number_} onChange={(e) => setNumber_(e.target.value)} placeholder="Nº" required className={inputClass} inputMode="numeric" />
                 </div>
                 <div>
-                  <Label className="text-xs text-white/60 font-medium">Complemento</Label>
+                  <Label className={labelClass}>Complemento</Label>
                   <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Apto, sala..." className={inputClass} />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <Label className="text-xs text-white/60 font-medium">Cidade / UF</Label>
-                  <Input value={city && state ? `${city} - ${state}` : ""} readOnly placeholder="Preenchido via CEP" className={inputClass + " bg-[#151518]"} />
+                  <Label className={labelClass}>Cidade / UF</Label>
+                  <Input value={city && state ? `${city} - ${state}` : ""} readOnly placeholder="Via CEP" className={inputClass + " !bg-[#0c0c0f]"} />
                 </div>
               </div>
             </section>
           )}
 
-          {/* Payment methods */}
-          <section className="rounded-2xl border border-white/[0.08] bg-[#131316] p-5">
+          {/* ====== ORDER BUMPS ====== */}
+          {orderBumps.length > 0 && (
+            <section className="space-y-3">
+              {orderBumps.map(bump => {
+                const selected = selectedBumps.has(bump.id);
+                return (
+                  <button
+                    key={bump.id}
+                    type="button"
+                    onClick={() => toggleBump(bump.id)}
+                    className={`w-full rounded-2xl border-2 p-4 text-left transition-all duration-300 ${
+                      selected
+                        ? "border-emerald-500/60 bg-emerald-500/[0.06] shadow-lg shadow-emerald-500/10"
+                        : "border-dashed border-amber-500/40 bg-amber-500/[0.03] hover:border-amber-500/60"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md">
+                        🎁 Oferta especial
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-14 w-14 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {bump.bump_product.image_url ? (
+                          <img src={bump.bump_product.image_url} alt={bump.bump_product.name} className="h-14 w-14 rounded-xl object-cover" />
+                        ) : (
+                          <Package className="h-6 w-6 text-white/20" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm leading-tight">{bump.bump_product.name}</p>
+                        {bump.bump_product.description && (
+                          <p className="text-xs text-white/40 mt-0.5 line-clamp-2">{bump.bump_product.description}</p>
+                        )}
+                        <p className="font-extrabold text-sm mt-1" style={{ color: btnColor }}>
+                          + R$ {Number(bump.bump_product.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div className={`h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+                        selected ? "bg-emerald-500 text-white" : "bg-white/[0.06] border border-white/10 text-white/30"
+                      }`}>
+                        {selected ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </section>
+          )}
+
+          {/* ====== PAGAMENTO ====== */}
+          <section className={sectionClass}>
+            <h3 className="text-sm font-bold flex items-center gap-2 !mb-4">
+              <div className="h-6 w-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: btnColor }}>
+                {product.checkout_address_required ? "3" : "2"}
+              </div>
+              Pagamento
+            </h3>
+
             {availableMethods.length > 1 && (
-              <div className="flex gap-2 sm:gap-3 mb-5">
+              <div className="flex gap-2 mb-5">
                 {availableMethods.map((m) => (
                   <button key={m.id} type="button" onClick={() => { setMethod(m.id); setPixData(null); setBoletoData(null); }}
-                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 rounded-xl border text-xs sm:text-sm font-medium transition-all flex-1 justify-center ${
-                      method === m.id ? "bg-white/[0.06] border-emerald-500/50 text-white shadow-sm shadow-emerald-500/10" : "bg-transparent border-white/10 text-white/40 hover:text-white/60 hover:border-white/20"
-                    }`}>
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex-1 justify-center ${
+                      method === m.id ? "bg-white/[0.06] border-white/20 text-white" : "bg-transparent border-white/[0.06] text-white/30 hover:text-white/50 hover:border-white/15"
+                    }`}
+                    style={method === m.id ? { borderColor: btnColor + "60", boxShadow: `0 0 20px ${btnColor}10` } : undefined}>
                     <m.icon className="h-4 w-4" />
                     <span className="hidden sm:inline">{m.label}</span>
                     <span className="sm:hidden">{m.short}</span>
@@ -457,45 +575,54 @@ export default function PublicCheckout() {
 
             {method === "credit_card" && (
               <div className="space-y-4">
-                <div><Label className="text-xs text-white/60 font-medium">Número do cartão</Label><Input value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" required className={inputClass} /></div>
+                <div><Label className={labelClass}>Número do cartão</Label><Input value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" required className={inputClass} inputMode="numeric" /></div>
                 <div className="grid grid-cols-3 gap-3">
-                  <div><Label className="text-xs text-white/60 font-medium">Validade</Label><Input value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required className={inputClass} /></div>
-                  <div><Label className="text-xs text-white/60 font-medium">CVV</Label><Input value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" required className={inputClass} /></div>
-                  <div><Label className="text-xs text-white/60 font-medium">Parcelas</Label>
+                  <div><Label className={labelClass}>Validade</Label><Input value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required className={inputClass} inputMode="numeric" /></div>
+                  <div><Label className={labelClass}>CVV</Label><Input value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" required className={inputClass} inputMode="numeric" /></div>
+                  <div><Label className={labelClass}>Parcelas</Label>
                     <div className="relative mt-1">
-                      <select value={installments} onChange={(e) => setInstallments(e.target.value)} className="w-full h-11 rounded-lg border bg-[#1a1a1f] border-[#2a2a30] text-white text-sm px-3 pr-8 appearance-none focus:border-emerald-500/60 focus:outline-none focus:ring-1 focus:ring-emerald-500/20 transition-all">
-                        {installmentOptions.map((opt) => <option key={opt.n} value={opt.n} className="bg-[#1a1a1f]">{opt.n}x R$ {opt.val.toFixed(2)}{opt.n > 1 ? "*" : ""}</option>)}
+                      <select value={installments} onChange={(e) => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-[#111114] border-[#222228] text-white text-[16px] px-3 pr-8 appearance-none focus:outline-none transition-all">
+                        {installmentOptions.map((opt) => <option key={opt.n} value={opt.n} className="bg-[#111114]">{opt.n}x R$ {opt.val.toFixed(2)}{opt.n > 1 ? "*" : ""}</option>)}
                       </select>
-                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
                     </div>
                   </div>
                 </div>
-                <div><Label className="text-xs text-white/60 font-medium">Nome do titular</Label><Input value={cardName} onChange={(e) => setCardName(e.target.value.toUpperCase())} placeholder="Nome impresso no cartão" required className={inputClass} /></div>
+                <div><Label className={labelClass}>Nome do titular</Label><Input value={cardName} onChange={(e) => setCardName(e.target.value.toUpperCase())} placeholder="NOME IMPRESSO NO CARTÃO" required className={inputClass} /></div>
               </div>
             )}
             {method === "pix" && (
-              <div className="flex items-center gap-3 py-2">
-                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center"><QrCode className="h-5 w-5 text-emerald-400" /></div>
-                <div><p className="text-sm font-medium">Pagamento instantâneo via PIX</p><p className="text-xs text-white/30">O QR Code será gerado após clicar em "Comprar agora"</p></div>
+              <div className="flex items-center gap-4 py-3 px-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="h-11 w-11 rounded-xl bg-emerald-500/10 flex items-center justify-center"><QrCode className="h-5 w-5 text-emerald-400" /></div>
+                <div><p className="text-sm font-semibold">Pagamento instantâneo via PIX</p><p className="text-xs text-white/25 mt-0.5">QR Code gerado após clicar em finalizar</p></div>
               </div>
             )}
             {method === "boleto" && (
-              <div className="flex items-center gap-3 py-2">
-                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center"><FileText className="h-5 w-5 text-emerald-400" /></div>
-                <div><p className="text-sm font-medium">Boleto Bancário</p><p className="text-xs text-white/30">Compensação em 1-3 dias úteis</p></div>
+              <div className="flex items-center gap-4 py-3 px-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="h-11 w-11 rounded-xl bg-amber-500/10 flex items-center justify-center"><FileText className="h-5 w-5 text-amber-400" /></div>
+                <div><p className="text-sm font-semibold">Boleto Bancário</p><p className="text-xs text-white/25 mt-0.5">Compensação em 1-3 dias úteis</p></div>
               </div>
             )}
           </section>
 
-          {/* Summary */}
-          <section className="rounded-2xl border border-white/[0.08] bg-[#131316] p-5">
-            <h3 className="text-sm font-bold mb-4">Resumo</h3>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between"><span className="text-white/50">{product.name}</span><span className="text-white font-medium">R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
-              <div className="border-t border-white/[0.06] pt-2.5 flex justify-between items-center">
-                <span className="font-bold">Total</span>
-                <span className="font-bold text-lg" style={{ color: btnColor }}>
-                  {method === "credit_card" && installments !== "1" ? `${installments}x R$ ${selectedInstallment.val.toFixed(2)}` : `R$ ${price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+          {/* ====== RESUMO ====== */}
+          <section className={sectionClass + " !space-y-3"}>
+            <h3 className="text-sm font-bold">Resumo do pedido</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-white/40">{product.name}</span>
+                <span className="text-white/70 font-medium">R$ {price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+              {orderBumps.filter(b => selectedBumps.has(b.id)).map(b => (
+                <div key={b.id} className="flex justify-between">
+                  <span className="text-white/40 flex items-center gap-1"><Plus className="h-3 w-3 text-emerald-400" /> {b.bump_product.name}</span>
+                  <span className="text-white/70 font-medium">R$ {Number(b.bump_product.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                </div>
+              ))}
+              <div className="border-t border-white/[0.06] pt-3 flex justify-between items-center">
+                <span className="font-bold text-white">Total</span>
+                <span className="font-extrabold text-xl" style={{ color: btnColor }}>
+                  {method === "credit_card" && installments !== "1" ? `${installments}x R$ ${selectedInstallment.val.toFixed(2)}` : `R$ ${totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
                 </span>
               </div>
             </div>
@@ -503,28 +630,28 @@ export default function PublicCheckout() {
 
           {/* Guarantee seal */}
           {product.checkout_guarantee_enabled && (
-            <div className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
-              <img src={guaranteeSeal} alt="Garantia 7 dias" className="h-16 w-16 object-contain" />
+            <div className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/[0.05] bg-white/[0.015]">
+              <img src={guaranteeSeal} alt="Garantia 7 dias" className="h-14 w-14 object-contain" />
               <div>
                 <p className="text-sm font-bold text-white">Garantia de 7 dias</p>
-                <p className="text-xs text-white/40">Se não gostar, devolvemos 100% do seu dinheiro.</p>
+                <p className="text-xs text-white/35">Não gostou? Devolvemos 100% do valor.</p>
               </div>
             </div>
           )}
 
           {/* CTA */}
           <Button type="submit" disabled={processing} style={{ backgroundColor: btnColor }}
-            className="w-full h-14 text-base font-bold rounded-xl text-white shadow-lg transition-all duration-200 hover:opacity-90 hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100">
-            {processing ? <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Processando...</span> : "Comprar agora"}
+            className="w-full h-14 text-base font-bold rounded-xl text-white shadow-xl transition-all duration-300 hover:opacity-90 hover:scale-[1.01] hover:shadow-2xl disabled:opacity-50 disabled:hover:scale-100">
+            {processing ? <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Processando...</span> : `Finalizar compra • R$ ${totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </Button>
 
           {/* Trust */}
-          <div className="flex items-center justify-center gap-2 pt-2">
-            <ShieldCheck className="h-4 w-4 text-white/20" />
-            <div className="text-center"><p className="text-xs text-white/40 font-medium">Ambiente seguro</p><p className="text-[10px] text-white/20">Seus dados são confidenciais</p></div>
+          <div className="flex items-center justify-center gap-2 pt-2 pb-1">
+            <ShieldCheck className="h-4 w-4 text-white/15" />
+            <div className="text-center"><p className="text-[11px] text-white/30 font-medium">Compra 100% segura</p><p className="text-[10px] text-white/15">Dados protegidos com criptografia SSL</p></div>
           </div>
-          <p className="text-center text-[10px] text-white/15 leading-relaxed px-4 mt-2">
-            Ao clicar em "Comprar agora", declaro que li e concordo com os <span className="underline">Termos de Compra</span> e <span className="underline">Política de Privacidade</span>.
+          <p className="text-center text-[10px] text-white/10 leading-relaxed px-4">
+            Ao clicar em "Finalizar compra", declaro que li e concordo com os <span className="underline">Termos de Compra</span> e <span className="underline">Política de Privacidade</span>.
           </p>
         </form>
       </div>

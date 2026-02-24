@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Settings, Palette, Timer, Image, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload } from "lucide-react";
+import { Settings, Palette, Timer, Image, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,21 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
   const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
   const desktopRef = useRef<HTMLInputElement>(null);
   const mobileRef = useRef<HTMLInputElement>(null);
+
+  // Order bumps
+  const [allProducts, setAllProducts] = useState<Tables<"products">[]>([]);
+  const [orderBumps, setOrderBumps] = useState<{ id: string; bump_product_id: string }[]>([]);
+  const [selectedBumpProduct, setSelectedBumpProduct] = useState("");
+
+  useEffect(() => {
+    if (!user?.id || !open) return;
+    // Load all products except current
+    supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").neq("id", product.id)
+      .then(({ data }) => { if (data) setAllProducts(data); });
+    // Load existing order bumps
+    supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", product.id)
+      .then(({ data }) => { if (data) setOrderBumps(data); });
+  }, [user?.id, open, product.id]);
 
   const uploadBanner = async (file: File, type: string): Promise<string | null> => {
     const ext = file.name.split(".").pop();
@@ -98,6 +113,30 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
     }
   };
 
+  const addBump = async () => {
+    if (!selectedBumpProduct) return;
+    if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) {
+      toast.error("Produto já adicionado"); return;
+    }
+    const { data, error } = await supabase.from("order_bumps").insert({
+      product_id: product.id,
+      bump_product_id: selectedBumpProduct,
+      sort_order: orderBumps.length,
+    }).select("id, bump_product_id").single();
+    if (error) { toast.error("Erro ao adicionar"); return; }
+    if (data) setOrderBumps(prev => [...prev, data]);
+    setSelectedBumpProduct("");
+    toast.success("Order bump adicionado!");
+  };
+
+  const removeBump = async (id: string) => {
+    await supabase.from("order_bumps").delete().eq("id", id);
+    setOrderBumps(prev => prev.filter(b => b.id !== id));
+    toast.success("Order bump removido");
+  };
+
+  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -108,15 +147,15 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
         </DialogHeader>
 
         <Tabs defaultValue="visual" className="mt-2">
-          <TabsList className="grid grid-cols-3 w-full">
+          <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="visual" className="text-xs gap-1"><Palette className="h-3 w-3" /> Visual</TabsTrigger>
             <TabsTrigger value="payment" className="text-xs gap-1"><CreditCard className="h-3 w-3" /> Pagamento</TabsTrigger>
-            <TabsTrigger value="form" className="text-xs gap-1"><Mail className="h-3 w-3" /> Formulário</TabsTrigger>
+            <TabsTrigger value="form" className="text-xs gap-1"><Mail className="h-3 w-3" /> Form</TabsTrigger>
+            <TabsTrigger value="bumps" className="text-xs gap-1"><Package className="h-3 w-3" /> Bumps</TabsTrigger>
           </TabsList>
 
           {/* VISUAL TAB */}
           <TabsContent value="visual" className="space-y-5 mt-4">
-            {/* Button color */}
             <div>
               <Label className="text-xs font-semibold flex items-center gap-1.5 mb-2">
                 <Palette className="h-3.5 w-3.5" /> Cor do botão de compra
@@ -130,7 +169,6 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
               </div>
             </div>
 
-            {/* Timer */}
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
                 <Timer className="h-4 w-4 text-muted-foreground" />
@@ -147,7 +185,6 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
               </div>
             </div>
 
-            {/* Banners */}
             <div>
               <Label className="text-xs font-semibold flex items-center gap-1.5 mb-2">
                 <Image className="h-3.5 w-3.5" /> Banner Desktop
@@ -160,7 +197,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
                 </div>
               ) : (
                 <button type="button" onClick={() => desktopRef.current?.click()} className="w-full h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors">
-                  <Upload className="h-4 w-4" /> Upload banner desktop (1200x300 recomendado)
+                  <Upload className="h-4 w-4" /> Upload banner desktop
                 </button>
               )}
             </div>
@@ -177,12 +214,11 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
                 </div>
               ) : (
                 <button type="button" onClick={() => mobileRef.current?.click()} className="w-full h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors">
-                  <Upload className="h-4 w-4" /> Upload banner mobile (600x300 recomendado)
+                  <Upload className="h-4 w-4" /> Upload banner mobile
                 </button>
               )}
             </div>
 
-            {/* Social proof */}
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
                 <span className="text-sm">👥</span>
@@ -194,7 +230,6 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
               <Switch checked={socialProof} onCheckedChange={setSocialProof} />
             </div>
 
-            {/* Guarantee */}
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -209,58 +244,99 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
 
           {/* PAYMENT TAB */}
           <TabsContent value="payment" className="space-y-4 mt-4">
-            <p className="text-xs text-muted-foreground">Habilite ou desabilite os métodos de pagamento disponíveis no checkout.</p>
-
+            <p className="text-xs text-muted-foreground">Métodos de pagamento disponíveis no checkout.</p>
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
-              <div className="flex items-center gap-2">
-                <QrCode className="h-4 w-4 text-emerald-500" />
-                <p className="text-sm font-medium">PIX</p>
-              </div>
+              <div className="flex items-center gap-2"><QrCode className="h-4 w-4 text-emerald-500" /><p className="text-sm font-medium">PIX</p></div>
               <Switch checked={pixEnabled} onCheckedChange={setPixEnabled} />
             </div>
-
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-amber-500" />
-                <p className="text-sm font-medium">Boleto Bancário</p>
-              </div>
+              <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-amber-500" /><p className="text-sm font-medium">Boleto Bancário</p></div>
               <Switch checked={boletoEnabled} onCheckedChange={setBoletoEnabled} />
             </div>
-
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-blue-500" />
-                <p className="text-sm font-medium">Cartão de Crédito</p>
-              </div>
+              <div className="flex items-center gap-2"><CreditCard className="h-4 w-4 text-blue-500" /><p className="text-sm font-medium">Cartão de Crédito</p></div>
               <Switch checked={creditCardEnabled} onCheckedChange={setCreditCardEnabled} />
             </div>
           </TabsContent>
 
           {/* FORM TAB */}
           <TabsContent value="form" className="space-y-4 mt-4">
-            <p className="text-xs text-muted-foreground">Configure quais campos aparecem no formulário do checkout.</p>
-
+            <p className="text-xs text-muted-foreground">Configure campos do formulário do checkout.</p>
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Solicitar endereço</p>
-                  <p className="text-xs text-muted-foreground">CEP com preenchimento automático</p>
-                </div>
+                <div><p className="text-sm font-medium">Solicitar endereço</p><p className="text-xs text-muted-foreground">CEP com preenchimento automático</p></div>
               </div>
               <Switch checked={addressRequired} onCheckedChange={setAddressRequired} />
             </div>
-
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Confirmação de e-mail</p>
-                  <p className="text-xs text-muted-foreground">Pede para digitar o e-mail 2x</p>
-                </div>
+                <div><p className="text-sm font-medium">Confirmação de e-mail</p><p className="text-xs text-muted-foreground">Pede para digitar o e-mail 2x</p></div>
               </div>
               <Switch checked={emailConfirm} onCheckedChange={setEmailConfirm} />
             </div>
+          </TabsContent>
+
+          {/* ORDER BUMPS TAB */}
+          <TabsContent value="bumps" className="space-y-4 mt-4">
+            <p className="text-xs text-muted-foreground">
+              Adicione outros produtos como ofertas especiais no checkout. O cliente pode adicionar ao pedido com um clique.
+            </p>
+
+            {/* Existing bumps */}
+            {orderBumps.length > 0 && (
+              <div className="space-y-2">
+                {orderBumps.map(bump => {
+                  const prod = allProducts.find(p => p.id === bump.bump_product_id);
+                  return (
+                    <div key={bump.id} className="flex items-center justify-between p-3 rounded-xl border border-border">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {prod?.image_url ? (
+                          <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Package className="h-4 w-4 text-primary" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{prod?.name || "Produto"}</p>
+                          <p className="text-xs text-muted-foreground">R$ {Number(prod?.price || 0).toFixed(2)}</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => removeBump(bump.id)} className="text-destructive hover:text-destructive h-8 w-8 p-0">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Add new bump */}
+            {availableForBump.length > 0 && (
+              <div className="flex gap-2">
+                <select
+                  value={selectedBumpProduct}
+                  onChange={e => setSelectedBumpProduct(e.target.value)}
+                  className="flex-1 h-10 rounded-xl border border-border bg-background text-foreground text-sm px-3 appearance-none"
+                >
+                  <option value="">Selecione um produto...</option>
+                  {availableForBump.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</option>
+                  ))}
+                </select>
+                <Button onClick={addBump} disabled={!selectedBumpProduct} size="sm" className="gap-1 rounded-xl">
+                  <Plus className="h-4 w-4" /> Adicionar
+                </Button>
+              </div>
+            )}
+
+            {allProducts.length === 0 && (
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                Cadastre outros produtos para usar como order bumps
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
