@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Wallet, FileText, Building2, ArrowDownToLine,
   ShoppingCart, Package, ExternalLink, LogOut, CreditCard, UserCircle,
-  Webhook, Ticket, BookOpen, PlayCircle, Layers, User,
+  Webhook, Ticket, BookOpen, PlayCircle, Layers, User, Puzzle,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +31,10 @@ const salesItems = [
   { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
   { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
   { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
+];
+
+const integrationItems = [
+  { title: "Apps", url: "/integracoes/apps", icon: Puzzle },
 ];
 
 const memberItems = [
@@ -111,6 +115,13 @@ export function AppSidebar() {
             Membros
           </SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{renderItems(memberItems)}</SidebarMenu></SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.25em] text-sidebar-foreground/30 font-bold px-3 mb-1">
+            Integrações
+          </SidebarGroupLabel>
+          <SidebarGroupContent><SidebarMenu>{renderItems(integrationItems)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup className="mt-4">

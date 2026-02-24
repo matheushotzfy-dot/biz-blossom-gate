@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Settings } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Settings, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
+import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function Produtos() {
@@ -25,6 +26,7 @@ export default function Produtos() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
+  const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -129,6 +131,10 @@ export default function Produtos() {
                 <Settings className="h-3 w-3" />
                 <span className="hidden sm:inline">Checkout</span>
               </Button>
+              <Button variant="outline" size="sm" className="gap-1 rounded-xl text-[12px]" onClick={() => setPixelProduct(p)}>
+                <Crosshair className="h-3 w-3" />
+                <span className="hidden sm:inline">Pixels</span>
+              </Button>
               <Button variant="outline" size="sm" className="text-destructive hover:text-destructive rounded-xl" onClick={() => handleDelete(p.id)}><Trash2 className="h-3 w-3" /></Button>
             </div>
           </Panel>
@@ -141,6 +147,14 @@ export default function Produtos() {
           open={!!settingsProduct}
           onOpenChange={(v) => { if (!v) setSettingsProduct(null); }}
           onSaved={loadProducts}
+        />
+      )}
+
+      {pixelProduct && (
+        <PixelSettingsDialog
+          product={pixelProduct}
+          open={!!pixelProduct}
+          onOpenChange={(v) => { if (!v) setPixelProduct(null); }}
         />
       )}
     </PageShell>
