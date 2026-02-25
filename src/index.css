@@ -266,3 +266,102 @@
   0% { opacity: 1; transform: translateY(0) scale(1); }
   100% { opacity: 0; transform: translateY(-200px) scale(0); }
 }
+
+/* Realistic green flame on button */
+.flame-btn {
+  position: relative;
+  z-index: 1;
+}
+.flame-btn::before,
+.flame-btn::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 30% 30%;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(6px);
+}
+/* Outer flame */
+.flame-btn::before {
+  width: 110%;
+  height: 70%;
+  background: radial-gradient(ellipse at 50% 90%,
+    hsl(152 70% 50% / 0.7) 0%,
+    hsl(152 80% 40% / 0.4) 40%,
+    hsl(140 60% 30% / 0.1) 70%,
+    transparent 100%);
+  animation: flameDance 0.8s ease-in-out infinite alternate,
+             flameFlicker 0.3s ease-in-out infinite;
+}
+/* Inner flame - brighter */
+.flame-btn::after {
+  width: 60%;
+  height: 55%;
+  background: radial-gradient(ellipse at 50% 85%,
+    hsl(140 80% 70% / 0.9) 0%,
+    hsl(152 70% 55% / 0.6) 40%,
+    hsl(152 60% 45% / 0.2) 70%,
+    transparent 100%);
+  animation: flameDanceInner 0.6s ease-in-out infinite alternate,
+             flameFlicker 0.25s ease-in-out infinite;
+  filter: blur(4px);
+}
+
+/* Flame tip particles */
+.flame-btn .flame-tip {
+  position: absolute;
+  bottom: 50%;
+  border-radius: 50%;
+  background: hsl(152 80% 60% / 0.8);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(2px);
+  animation: flameTip var(--dur) ease-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes flameDance {
+  0% {
+    height: 65%;
+    width: 105%;
+    border-radius: 50% 50% 35% 35%;
+  }
+  50% {
+    height: 80%;
+    width: 115%;
+    border-radius: 45% 55% 30% 30%;
+  }
+  100% {
+    height: 70%;
+    width: 108%;
+    border-radius: 55% 45% 32% 32%;
+  }
+}
+@keyframes flameDanceInner {
+  0% {
+    height: 50%;
+    width: 55%;
+    border-radius: 50% 50% 40% 40%;
+  }
+  50% {
+    height: 60%;
+    width: 65%;
+    border-radius: 40% 60% 35% 35%;
+  }
+  100% {
+    height: 52%;
+    width: 58%;
+    border-radius: 55% 45% 38% 38%;
+  }
+}
+@keyframes flameFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+@keyframes flameTip {
+  0% { opacity: 0.9; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-28px) scale(0.2); }
+}

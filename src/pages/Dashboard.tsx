@@ -320,18 +320,29 @@ export default function Dashboard() {
               {/* Scale Mode Button */}
               <button
                 onClick={activateScaleMode}
-                className={`group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all overflow-hidden ${
+                className={`flame-btn group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all ${
                   scaleMode
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                     : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 hover:shadow-md hover:shadow-primary/15"
                 }`}
               >
+                {/* Flame tip particles */}
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <span
+                    key={i}
+                    className="flame-tip"
+                    style={{
+                      left: `${20 + i * 15}%`,
+                      width: `${3 + Math.random() * 3}px`,
+                      height: `${3 + Math.random() * 3}px`,
+                      ['--dur' as string]: `${0.6 + i * 0.15}s`,
+                      ['--delay' as string]: `${i * 0.12}s`,
+                    }}
+                  />
+                ))}
                 <Flame className={`h-4 w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
                 <span className="hidden sm:inline">{scaleMode ? "Modo Escala 🔥" : "Ativar Modo Escala"}</span>
                 <span className="sm:hidden">{scaleMode ? "🔥" : "Escala"}</span>
-                {!scaleMode && (
-                  <span className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-pulse pointer-events-none" />
-                )}
               </button>
 
               <DropdownMenu>
