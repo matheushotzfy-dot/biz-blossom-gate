@@ -19,6 +19,7 @@ import {
   Rocket,
   Zap,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -33,7 +34,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const sections = [
   {
@@ -72,11 +76,13 @@ const sections = [
       { title: "Meu Perfil", url: "/perfil", icon: User },
     ],
   },
-];
+] as const;
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -84,74 +90,87 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="w-[320px] border-r border-sidebar-border bg-sidebar relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-24 -left-16 h-72 w-72 rounded-full bg-sidebar-primary/12 blur-[90px]" />
-        <div className="absolute bottom-10 right-0 h-52 w-52 rounded-full bg-sidebar-primary/8 blur-[80px]" />
+    <Sidebar className="border-r border-sidebar-border/80 bg-sidebar/95 backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-28 -left-20 h-80 w-80 rounded-full bg-sidebar-primary/12 blur-[90px]" />
+        <div className="absolute bottom-6 -right-10 h-64 w-64 rounded-full bg-sidebar-primary/10 blur-[84px]" />
       </div>
 
-      <div className="relative px-6 pt-6 pb-5 border-b border-sidebar-border/80">
-        <div className="flex items-center gap-3.5">
-          <div className="h-12 w-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-sidebar-primary/30 ring-1 ring-sidebar-primary/25">
-            <Rocket className="h-5 w-5 text-primary-foreground" />
+      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
+          <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0">
+            <Rocket className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="text-[24px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-sidebar-foreground mt-1">Infoprodutos Ecosystem</p>
+
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-sidebar-foreground mt-1">Infoprodutos Ecosystem</p>
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
-          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/45 px-3 py-2.5">
+        <div className="mt-4 grid grid-cols-[1fr_auto] gap-2.5 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/55 px-3.5 py-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/70">Plano</span>
-              <span className="text-[11px] font-bold text-sidebar-primary">Enterprise</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/80">Plano</span>
+              <span className="text-[12px] font-black text-sidebar-primary">Enterprise</span>
             </div>
           </div>
-          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/45 px-3 py-2.5 flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-sidebar-primary animate-pulse" />
-            <span className="text-[11px] font-bold text-sidebar-accent-foreground">Online</span>
+          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/55 px-3.5 py-2.5 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-sidebar-primary animate-pulse" />
+            <span className="text-[12px] font-bold text-sidebar-accent-foreground">Online</span>
           </div>
         </div>
-      </div>
+      </SidebarHeader>
 
-      <SidebarContent className="px-3.5 py-4 overflow-y-auto relative">
+      <SidebarContent className="relative px-2.5 py-4 overflow-y-auto">
         {sections.map((section, idx) => (
-          <SidebarGroup key={section.label} className={idx > 0 ? "mt-5" : ""}>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-sidebar-foreground/70 font-bold px-3 mb-2">
+          <SidebarGroup key={section.label} className={cn("px-0", idx > 0 && "mt-3.5")}>
+            <SidebarGroupLabel className="px-3.5 mb-2 text-[10px] uppercase tracking-[0.22em] font-bold text-sidebar-foreground/75 group-data-[collapsible=icon]:hidden">
               {section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-1.5">
+              <SidebarMenu className="space-y-1.5 px-1">
                 {section.items.map((item) => {
                   const isActive = item.url === "/dashboard" ? location.pathname === "/dashboard" : location.pathname.startsWith(item.url);
 
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton asChild className="h-auto p-0 hover:bg-transparent active:bg-transparent">
                         <NavLink
                           to={item.url}
                           end={item.url === "/dashboard"}
-                          className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] transition-all duration-200 group relative font-medium border ${
-                            isActive
-                              ? "text-sidebar-accent-foreground font-semibold bg-sidebar-accent border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10"
-                              : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60 border-transparent hover:border-sidebar-border"
-                          }`}
                           activeClassName=""
+                          className={cn(
+                            "group/nav relative flex items-center gap-3 rounded-2xl border px-3.5 py-3.5 text-[16px] font-semibold leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            isActive
+                              ? "border-sidebar-primary/35 bg-sidebar-accent text-sidebar-accent-foreground shadow-lg shadow-sidebar-primary/10"
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/65 hover:text-sidebar-accent-foreground",
+                          )}
                         >
-                          {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-sidebar-primary" />}
-                          <div
-                            className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          {isActive && (
+                            <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                          )}
+
+                          <span
+                            className={cn(
+                              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
                               isActive
                                 ? "bg-sidebar-primary/15 text-sidebar-primary"
-                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover:bg-sidebar-accent group-hover:text-sidebar-accent-foreground"
-                            }`}
+                                : "bg-sidebar-accent/45 text-sidebar-foreground group-hover/nav:bg-sidebar-accent group-hover/nav:text-sidebar-accent-foreground",
+                            )}
                           >
                             <item.icon className="h-5 w-5" />
-                          </div>
-                          <span className="flex-1 leading-none">{item.title}</span>
-                          {item.badge && <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-sidebar-primary/15 text-sidebar-primary">{item.badge}</span>}
-                          {isActive && <ChevronRight className="h-4 w-4 text-sidebar-primary/60" />}
+                          </span>
+
+                          <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+
+                          {item.badge && (
+                            <span className="ml-auto rounded-md bg-sidebar-primary/15 px-2 py-0.5 text-[10px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                              {item.badge}
+                            </span>
+                          )}
+
+                          {isActive && <ChevronRight className="h-4 w-4 text-sidebar-primary/65 group-data-[collapsible=icon]:hidden" />}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -163,21 +182,26 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3.5 border-t border-sidebar-border relative">
-        <div className="rounded-xl border border-sidebar-primary/20 bg-sidebar-primary/[0.08] p-3.5 mb-3">
-          <div className="flex items-center gap-2 mb-1.5">
+      <SidebarFooter className="relative p-3 border-t border-sidebar-border/80">
+        <div className="mb-2 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 group-data-[collapsible=icon]:hidden">
+          <div className="mb-1.5 flex items-center gap-2">
             <Zap className="h-4 w-4 text-sidebar-primary" />
-            <span className="text-[12px] font-bold text-sidebar-accent-foreground">Modo Escala Ativo</span>
+            <span className="text-[12px] font-black text-sidebar-accent-foreground">Modo Escala Ativo</span>
           </div>
-          <p className="text-[11px] text-sidebar-foreground/85 leading-relaxed">Analytics avançado, checkout otimizado e automações para crescer sem fricção.</p>
+          <p className="text-[11px] leading-relaxed text-sidebar-foreground/90">
+            Analytics avançado, checkout otimizado e automações para crescer sem fricção.
+          </p>
+          <div className="mt-2.5 inline-flex items-center gap-1 rounded-full border border-sidebar-primary/25 bg-sidebar-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-primary">
+            <Sparkles className="h-3 w-3" /> Enterprise
+          </div>
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground/80 hover:text-destructive hover:bg-destructive/[0.08] transition-all w-full text-[14px] font-medium"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-semibold text-sidebar-foreground/85 transition-all hover:bg-destructive/[0.1] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4" />
-          <span>Sair da conta</span>
+          <LogOut className="h-4.5 w-4.5" />
+          <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
         </button>
       </SidebarFooter>
     </Sidebar>
