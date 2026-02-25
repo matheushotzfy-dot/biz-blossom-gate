@@ -6,7 +6,7 @@ import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID || "sua-api"}.supabase.co/functions/v1`;
 
 const sections = [
-  { id: "intro", title: "Introdução", icon: Globe, content: `A API PayGate permite integrar pagamentos PIX, Cartão e Boleto.\n\n**Base URL:** \`${BASE_URL}\`\n\n**Autenticação:** Header \`Authorization: Bearer SEU_TOKEN\`` },
+  { id: "intro", title: "Introdução", icon: Globe, content: `A API SafraPay permite integrar pagamentos PIX, Cartão e Boleto.\n\n**Base URL:** \`${BASE_URL}\`\n\n**Autenticação:** Header \`Authorization: Bearer SEU_TOKEN\`` },
   { id: "pix-cashin", title: "PIX Cash-In", icon: Terminal, content: `### POST /pix/cashIn\n\n\`\`\`json\n{"amount": 150.00, "customer": {"name": "João", "document": "123...", "email": "j@e.com"}}\n\`\`\`\n\nRetorna QR Code + copiar-cola PIX.` },
   { id: "pix-cashout", title: "PIX Cash-Out", icon: Terminal, content: `### POST /pix/cashOut\n\n\`\`\`json\n{"amount": 100.00, "pix_key": "email@ex.com", "pix_key_type": "email"}\n\`\`\`\n\nTaxa: R$ 5,00 por operação.` },
   { id: "card", title: "Cartão de Crédito", icon: Terminal, content: `### POST /payments/card\n\nSuporta parcelamento em até 12x.\nTaxa: 4,99% + R$ 2,50 por transação.` },
@@ -50,11 +50,11 @@ export default function Documentacao() {
         ].map((item) => (
           <Panel key={item.label}>
             <div className="flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-lg flex items-center justify-center bg-${item.color}/10`}>
-                <item.icon className={`h-5 w-5 text-${item.color}`} />
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center bg-${item.color}/10`}>
+                <item.icon className={`h-4 w-4 text-${item.color}`} />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">{item.label}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">{item.label}</p>
                 <p className="text-sm font-bold text-foreground">{item.value}</p>
               </div>
             </div>
@@ -69,7 +69,7 @@ export default function Documentacao() {
               onClick={() => setOpenSection(openSection === section.id ? null : section.id)}
               className="w-full flex items-center justify-between p-4 hover:bg-muted/20 transition-colors text-left"
             >
-              <span className="font-bold text-sm text-foreground flex items-center gap-3">
+              <span className="font-bold text-sm text-foreground flex items-center gap-2.5">
                 <section.icon className="h-4 w-4 text-primary" />
                 {section.title}
               </span>

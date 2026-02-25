@@ -12,8 +12,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Outfit", "Space Grotesk", "system-ui", "sans-serif"],
-        display: ["Space Grotesk", "Outfit", "system-ui", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
@@ -95,7 +95,7 @@ export default {
           to: { height: "0" },
         },
         "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "scale-in": {

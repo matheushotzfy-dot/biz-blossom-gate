@@ -60,14 +60,14 @@ export default function AdminLogin() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <div className="relative mb-5">
-            <div className="h-20 w-20 rounded-[22px] bg-gradient-to-br from-[hsl(220,70%,50%)] to-[hsl(230,80%,40%)] flex items-center justify-center shadow-[0_20px_60px_rgba(59,130,246,0.25)]">
+            <div className="h-20 w-20 rounded-[22px] gradient-primary flex items-center justify-center shadow-[0_20px_60px_rgba(34,197,94,0.2)]">
               <Shield className="h-10 w-10 text-white" />
             </div>
             <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-emerald-500 flex items-center justify-center border-4 border-[hsl(220,15%,3%)]">
               <Fingerprint className="h-3.5 w-3.5 text-white" />
             </div>
           </div>
-          <h1 className="text-[26px] font-bold text-white tracking-tight">PayGate Admin</h1>
+          <h1 className="text-[26px] font-bold text-white tracking-tight">SAFRAPAY Admin</h1>
           <p className="text-[13px] text-white/30 mt-1 font-medium">Painel de Controle Administrativo</p>
         </div>
 
