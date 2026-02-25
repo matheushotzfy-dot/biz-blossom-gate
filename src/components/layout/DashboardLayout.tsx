@@ -4,6 +4,7 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
 import { Outlet } from "react-router-dom";
 import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command, Sparkles } from "lucide-react";
+import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useEffect, useState } from "react";
