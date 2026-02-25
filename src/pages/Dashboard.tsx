@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   DollarSign, TrendingUp, Wallet, ShoppingCart, Activity,
   BarChart3, ChevronDown, CalendarDays, ArrowUpRight, ArrowDownRight, FileText,
-  AlertCircle, RefreshCw, Eye, Zap, Receipt, Target, Clock, Flame,
+  AlertCircle, RefreshCw, Eye, Zap, Receipt, Target, Clock,
+  Package, Users, CreditCard, Rocket, GraduationCap, Layers,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -33,15 +34,18 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[0]);
+  const [products, setProducts] = useState(0);
 
   useEffect(() => {
     if (!user?.id) return;
     Promise.all([
       supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-    ]).then(([txRes, wdRes]) => {
+      supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    ]).then(([txRes, wdRes, prodRes]) => {
       if (txRes.data) setTransactions(txRes.data);
       if (wdRes.data) setWithdrawals(wdRes.data);
+      if (prodRes.count != null) setProducts(prodRes.count);
     });
   }, [user?.id]);
 
@@ -82,27 +86,24 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 6);
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Flame className="h-5 w-5 text-primary" />
-            <p className="text-sm text-muted-foreground font-medium">Painel do Infoprodutor</p>
-          </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground font-medium mb-0.5">Bem-vindo de volta 👋</p>
+          <h1 className="text-2xl font-display font-extrabold tracking-tight text-foreground">Painel do Infoprodutor</h1>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border border-border bg-card text-foreground hover:border-primary/30 transition-all">
+            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-border bg-card text-foreground hover:border-primary/30 transition-all">
               <CalendarDays className="h-4 w-4 text-primary" />
               {selectedPeriod.label}
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-xl p-1 min-w-[130px]">
+          <DropdownMenuContent align="end" className="rounded-lg p-1 min-w-[130px]">
             {PERIOD_OPTIONS.map((opt) => (
-              <DropdownMenuItem key={opt.label} onClick={() => setSelectedPeriod(opt)} className={`rounded-lg text-sm cursor-pointer ${selectedPeriod.label === opt.label ? "text-primary font-semibold bg-primary/5" : ""}`}>
+              <DropdownMenuItem key={opt.label} onClick={() => setSelectedPeriod(opt)} className={`rounded-md text-sm cursor-pointer ${selectedPeriod.label === opt.label ? "text-primary font-semibold bg-primary/5" : ""}`}>
                 {opt.label}
               </DropdownMenuItem>
             ))}
@@ -110,138 +111,141 @@ export default function Dashboard() {
         </DropdownMenu>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { icon: DollarSign, label: "Receita Líquida", value: fmt(revenue), desc: `${approved.length} vendas aprovadas`, color: "primary" },
-          { icon: Target, label: "Ticket Médio", value: fmt(ticket), desc: approved.length > 0 ? `${approved.length} transações` : "—", color: "info" },
-          { icon: ShoppingCart, label: "Vendas Pagas", value: String(approved.length), desc: `de ${filteredTx.length} gerados`, color: "success" },
-          { icon: Wallet, label: "Saldo Disponível", value: fmt(revenue), desc: "Disponível para saque", color: "primary", link: "/financeiro/saques" },
-        ].map((kpi) => (
-          <div key={kpi.label} className="rounded-xl p-4 bg-card border border-border hover:border-primary/20 transition-all" style={{ boxShadow: "var(--card-shadow)" }}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
-              <div className={`h-8 w-8 rounded-lg flex items-center justify-center bg-${kpi.color}/10`}>
-                <kpi.icon className={`h-4 w-4 text-${kpi.color}`} />
-              </div>
-            </div>
-            <p className="text-xl lg:text-2xl font-extrabold text-foreground tracking-tight">{kpi.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{kpi.desc}</p>
-            {kpi.link && (
-              <Link to={kpi.link} className="text-[11px] font-bold mt-2 inline-flex items-center gap-1 text-primary hover:gap-1.5 transition-all">
-                Solicitar Saque <ArrowUpRight className="h-3 w-3" />
-              </Link>
-            )}
-          </div>
-        ))}
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard icon={<DollarSign className="h-5 w-5" />} label="Receita Líquida" value={fmt(revenue)} sub={`${approved.length} vendas aprovadas`} accent="primary" />
+        <KpiCard icon={<Target className="h-5 w-5" />} label="Ticket Médio" value={fmt(ticket)} sub={approved.length > 0 ? `${approved.length} transações` : "Sem dados"} accent="info" />
+        <KpiCard icon={<ShoppingCart className="h-5 w-5" />} label="Conversão" value={`${conv}%`} sub={`${filteredTx.length} checkouts gerados`} accent="success" />
+        <KpiCard icon={<Wallet className="h-5 w-5" />} label="Saldo Disponível" value={fmt(revenue)} sub="Solicitar saque →" accent="primary" link="/financeiro/saques" />
       </div>
 
-      {/* Chart + Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      {/* Chart + Side panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Chart */}
         <div className="lg:col-span-2 rounded-xl p-5 bg-card border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-bold text-foreground">Performance de Vendas</h3>
+            <div>
+              <h3 className="text-sm font-display font-bold text-foreground">Vendas do Período</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{selectedPeriod.label} — {approved.length} vendas</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-extrabold text-foreground">{fmt(revenue)}</p>
-              <p className="text-[11px] text-primary font-semibold">{approved.length} aprovadas</p>
+              <p className="text-xl font-display font-extrabold text-foreground">{fmt(revenue)}</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
               <defs>
                 <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
                   <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.12)" fontSize={10} tickLine={false} axisLine={false} dy={8} />
-              <YAxis stroke="hsl(var(--muted-foreground) / 0.12)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} width={50} />
-              <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "10px", fontSize: "12px", color: "var(--tooltip-text)", padding: "8px 12px" }} formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Vendas"]} cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.1)" fontSize={10} tickLine={false} axisLine={false} dy={8} />
+              <YAxis stroke="hsl(var(--muted-foreground) / 0.1)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} width={50} />
+              <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "8px", fontSize: "12px", color: "var(--tooltip-text)", padding: "8px 12px" }} formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Vendas"]} cursor={{ stroke: "hsl(var(--primary) / 0.1)", strokeDasharray: "4 4" }} />
               <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grad)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Metrics panel */}
-        <div className="rounded-xl p-5 bg-card border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
-          <div className="flex items-center gap-2 mb-4">
-            <Receipt className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">Métricas</h3>
-          </div>
-          <div className="space-y-2.5">
-            <MetricRow icon={<TrendingUp className="h-3.5 w-3.5" />} label="Conversão" value={`${conv}%`} color="hsl(var(--primary))" />
-            <MetricRow icon={<AlertCircle className="h-3.5 w-3.5" />} label="Pre-CB" value="0" color="hsl(var(--warning))" />
-            <MetricRow icon={<RefreshCw className="h-3.5 w-3.5" />} label="Chargeback" value={`${cbs}`} sub={`${cbRate}%`} color="hsl(var(--destructive))" />
-            <MetricRow icon={<ArrowDownRight className="h-3.5 w-3.5" />} label="Reembolsos" value={`${refs}`} color="hsl(var(--info))" />
+        {/* Right side: Overview + Métricas */}
+        <div className="space-y-4">
+          {/* Meu negócio */}
+          <div className="rounded-xl p-4 bg-card border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
+            <h3 className="text-xs font-display font-bold text-foreground mb-3 uppercase tracking-wider">Meu Negócio</h3>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Package className="h-3.5 w-3.5" />
+                  <span className="text-xs">Produtos ativos</span>
+                </div>
+                <span className="text-sm font-bold text-foreground">{products}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users className="h-3.5 w-3.5" />
+                  <span className="text-xs">Total de clientes</span>
+                </div>
+                <span className="text-sm font-bold text-foreground">{new Set(transactions.map(t => t.customer_email)).size}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  <span className="text-xs">Chargebacks</span>
+                </div>
+                <span className="text-sm font-bold text-foreground">{cbs} ({cbRate}%)</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span className="text-xs">Reembolsos</span>
+                </div>
+                <span className="text-sm font-bold text-foreground">{refs}</span>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border">
-            <div className="flex items-center gap-2 mb-2.5">
-              <Activity className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-bold text-foreground">Sistema</span>
-            </div>
+          {/* Status */}
+          <div className="rounded-xl p-4 bg-card border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
+            <h3 className="text-xs font-display font-bold text-foreground mb-3 uppercase tracking-wider">Status</h3>
             {[
-              { l: "API", v: "Online" },
-              { l: "Webhooks", v: "100%" },
-              { l: "Latência", v: "0ms" },
+              { l: "Gateway", v: "Online", c: "success" },
+              { l: "Webhooks", v: "Ativo", c: "success" },
+              { l: "Checkout", v: "Online", c: "success" },
             ].map((s) => (
               <div key={s.l} className="flex items-center justify-between py-1.5">
-                <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{s.l}</span>
+                <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  <span className="text-[11px] text-muted-foreground">{s.l}</span>
+                  <span className="text-[11px] font-semibold text-foreground">{s.v}</span>
                 </div>
-                <span className="text-[11px] font-bold text-foreground">{s.v}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Quick Access + Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      {/* Quick access + Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Quick access — mais focado em infoprodutos */}
         <div className="rounded-xl p-5 bg-card border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">Acesso Rápido</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
+          <h3 className="text-sm font-display font-bold text-foreground mb-3">Ações Rápidas</h3>
+          <div className="grid grid-cols-2 gap-2.5">
             {[
-              { label: "Vendas", href: "/vendas", icon: ShoppingCart, color: "primary" },
-              { label: "Saques", href: "/financeiro/saques", icon: Wallet, color: "success" },
-              { label: "Produtos", href: "/vendas/produtos", icon: BarChart3, color: "info" },
-              { label: "Gastos", href: "/financeiro/gastos", icon: Receipt, color: "warning" },
-              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, color: "primary" },
-              { label: "Webhooks", href: "/vendas/webhooks", icon: Clock, color: "info" },
+              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
+              { label: "Área de Membros", href: "/membros", icon: GraduationCap, desc: "Gerenciar cursos" },
+              { label: "Ver Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório de vendas" },
+              { label: "Meu Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
+              { label: "Solicitar Saque", href: "/financeiro/saques", icon: Wallet, desc: "Transferir saldo" },
+              { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
             ].map((a) => (
-              <Link key={a.href} to={a.href} className="flex items-center gap-2.5 p-3 rounded-xl border border-border bg-muted/20 hover:bg-primary/[0.04] hover:border-primary/15 transition-all group">
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center bg-${a.color}/10`}>
-                  <a.icon className={`h-3.5 w-3.5 text-${a.color}`} />
+              <Link key={a.href} to={a.href} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20 hover:bg-primary/[0.03] hover:border-primary/15 transition-all group">
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-primary/8 group-hover:bg-primary/12 transition-colors">
+                  <a.icon className="h-4 w-4 text-primary" />
                 </div>
-                <span className="text-[13px] font-semibold text-foreground">{a.label}</span>
-                <ArrowUpRight className="h-3 w-3 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="min-w-0">
+                  <span className="text-[13px] font-semibold text-foreground block">{a.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{a.desc}</span>
+                </div>
               </Link>
             ))}
           </div>
         </div>
 
+        {/* Activity */}
         <div className="rounded-xl p-5 bg-card border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-bold text-foreground">Atividade Recente</h3>
-            </div>
+            <h3 className="text-sm font-display font-bold text-foreground">Atividade Recente</h3>
             <Link to="/financeiro/extrato" className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1">
               Ver tudo <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="space-y-0.5">
             {activity.length === 0 ? (
-              <div className="flex flex-col items-center py-10 text-muted-foreground/25">
-                <Eye className="h-7 w-7 mb-2" />
-                <p className="text-xs">Nenhuma atividade</p>
+              <div className="flex flex-col items-center py-12 text-muted-foreground/25">
+                <Eye className="h-8 w-8 mb-2" />
+                <p className="text-xs">Nenhuma atividade ainda</p>
+                <p className="text-[10px] mt-1">Suas vendas aparecerão aqui</p>
               </div>
             ) : activity.map((item) => {
               const isTx = "payment_method" in item;
@@ -257,7 +261,7 @@ export default function Dashboard() {
               const mins = Math.floor(diff / 60000);
               const timeStr = mins < 1 ? "agora" : mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h`;
               return (
-                <div key={item.id} className="flex items-center gap-3 py-2 px-2.5 rounded-xl hover:bg-muted/30 transition-colors">
+                <div key={item.id} className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-muted/30 transition-colors">
                   <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>
                     {isTx ? <DollarSign className="h-3.5 w-3.5" style={{ color: st.c }} /> : <ArrowDownRight className="h-3.5 w-3.5" style={{ color: st.c }} />}
                   </div>
@@ -266,7 +270,7 @@ export default function Dashboard() {
                       <span className="text-sm font-bold text-foreground">{fmt(Number(item.amount))}</span>
                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: st.c, background: `color-mix(in srgb, ${st.c} 8%, transparent)` }}>{st.l}</span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">{isTx ? "Transação" : "Saque"}</p>
+                    <p className="text-[10px] text-muted-foreground">{isTx ? `Venda • ${(item as any).payment_method || "PIX"}` : "Saque"}</p>
                   </div>
                   <span className="text-[10px] text-muted-foreground">{timeStr}</span>
                 </div>
@@ -279,15 +283,19 @@ export default function Dashboard() {
   );
 }
 
-function MetricRow({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string }) {
-  return (
-    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted/30 border border-border/50">
-      <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${color} 10%, transparent)`, color }}>{icon}</div>
-      <span className="text-[13px] text-muted-foreground font-medium flex-1">{label}</span>
-      <div className="text-right">
-        <span className="text-[13px] font-bold text-foreground">{value}</span>
-        {sub && <p className="text-[9px] font-bold" style={{ color }}>{sub}</p>}
+function KpiCard({ icon, label, value, sub, accent, link }: { icon: React.ReactNode; label: string; value: string; sub: string; accent: string; link?: string }) {
+  const content = (
+    <div className="rounded-xl p-4 bg-card border border-border hover:border-primary/15 transition-all group" style={{ boxShadow: "var(--card-shadow)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
+        <div className={`h-8 w-8 rounded-lg flex items-center justify-center bg-${accent}/10`}>
+          <span className={`text-${accent}`}>{icon}</span>
+        </div>
       </div>
+      <p className="text-xl lg:text-2xl font-display font-extrabold text-foreground tracking-tight">{value}</p>
+      <p className="text-[11px] text-muted-foreground mt-0.5">{sub}</p>
     </div>
   );
+  if (link) return <Link to={link}>{content}</Link>;
+  return content;
 }

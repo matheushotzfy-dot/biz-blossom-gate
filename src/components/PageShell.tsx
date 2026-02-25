@@ -19,7 +19,7 @@ export function Panel({ children, className }: { children: React.ReactNode; clas
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+      <h1 className="text-2xl font-display font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
         <span className="text-primary">{icon}</span>
         {title}
       </h1>
