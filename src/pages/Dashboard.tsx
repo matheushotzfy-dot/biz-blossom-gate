@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   DollarSign, TrendingUp, Wallet, ShoppingCart, Activity,
   BarChart3, ChevronDown, CalendarDays, ArrowUpRight, ArrowDownRight, FileText,
-  AlertCircle, RefreshCw, Eye, Zap, Receipt, Target, Clock,
+  AlertCircle, RefreshCw, Eye, Zap, Receipt, Target, Clock, Flame,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -86,20 +86,23 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <p className="text-sm text-muted-foreground font-medium">Bem-vindo de volta 👋</p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground mt-0.5">Dashboard</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className="h-5 w-5 text-primary" />
+            <p className="text-sm text-muted-foreground font-medium">Painel do Infoprodutor</p>
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Dashboard</h1>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-lg border border-border bg-card text-foreground hover:border-primary/30 transition-all">
+            <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border border-border bg-card text-foreground hover:border-primary/30 transition-all">
               <CalendarDays className="h-4 w-4 text-primary" />
               {selectedPeriod.label}
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-lg p-1 min-w-[130px]">
+          <DropdownMenuContent align="end" className="rounded-xl p-1 min-w-[130px]">
             {PERIOD_OPTIONS.map((opt) => (
-              <DropdownMenuItem key={opt.label} onClick={() => setSelectedPeriod(opt)} className={`rounded-md text-sm cursor-pointer ${selectedPeriod.label === opt.label ? "text-primary font-semibold bg-primary/5" : ""}`}>
+              <DropdownMenuItem key={opt.label} onClick={() => setSelectedPeriod(opt)} className={`rounded-lg text-sm cursor-pointer ${selectedPeriod.label === opt.label ? "text-primary font-semibold bg-primary/5" : ""}`}>
                 {opt.label}
               </DropdownMenuItem>
             ))}
@@ -112,7 +115,7 @@ export default function Dashboard() {
         {[
           { icon: DollarSign, label: "Receita Líquida", value: fmt(revenue), desc: `${approved.length} vendas aprovadas`, color: "primary" },
           { icon: Target, label: "Ticket Médio", value: fmt(ticket), desc: approved.length > 0 ? `${approved.length} transações` : "—", color: "info" },
-          { icon: ShoppingCart, label: "Pedidos Pagos", value: String(approved.length), desc: `de ${filteredTx.length} gerados`, color: "success" },
+          { icon: ShoppingCart, label: "Vendas Pagas", value: String(approved.length), desc: `de ${filteredTx.length} gerados`, color: "success" },
           { icon: Wallet, label: "Saldo Disponível", value: fmt(revenue), desc: "Disponível para saque", color: "primary", link: "/financeiro/saques" },
         ].map((kpi) => (
           <div key={kpi.label} className="rounded-xl p-4 bg-card border border-border hover:border-primary/20 transition-all" style={{ boxShadow: "var(--card-shadow)" }}>
@@ -156,7 +159,7 @@ export default function Dashboard() {
               </defs>
               <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.12)" fontSize={10} tickLine={false} axisLine={false} dy={8} />
               <YAxis stroke="hsl(var(--muted-foreground) / 0.12)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} width={50} />
-              <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "8px", fontSize: "12px", color: "var(--tooltip-text)", padding: "8px 12px" }} formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Vendas"]} cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }} />
+              <Tooltip contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "10px", fontSize: "12px", color: "var(--tooltip-text)", padding: "8px 12px" }} formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Vendas"]} cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }} />
               <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grad)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
@@ -213,7 +216,7 @@ export default function Dashboard() {
               { label: "Extrato", href: "/financeiro/extrato", icon: FileText, color: "primary" },
               { label: "Webhooks", href: "/vendas/webhooks", icon: Clock, color: "info" },
             ].map((a) => (
-              <Link key={a.href} to={a.href} className="flex items-center gap-2.5 p-3 rounded-lg border border-border bg-muted/20 hover:bg-primary/[0.04] hover:border-primary/15 transition-all group">
+              <Link key={a.href} to={a.href} className="flex items-center gap-2.5 p-3 rounded-xl border border-border bg-muted/20 hover:bg-primary/[0.04] hover:border-primary/15 transition-all group">
                 <div className={`h-8 w-8 rounded-lg flex items-center justify-center bg-${a.color}/10`}>
                   <a.icon className={`h-3.5 w-3.5 text-${a.color}`} />
                 </div>
@@ -254,7 +257,7 @@ export default function Dashboard() {
               const mins = Math.floor(diff / 60000);
               const timeStr = mins < 1 ? "agora" : mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h`;
               return (
-                <div key={item.id} className="flex items-center gap-3 py-2 px-2.5 rounded-lg hover:bg-muted/30 transition-colors">
+                <div key={item.id} className="flex items-center gap-3 py-2 px-2.5 rounded-xl hover:bg-muted/30 transition-colors">
                   <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${st.c} 10%, transparent)` }}>
                     {isTx ? <DollarSign className="h-3.5 w-3.5" style={{ color: st.c }} /> : <ArrowDownRight className="h-3.5 w-3.5" style={{ color: st.c }} />}
                   </div>
@@ -278,7 +281,7 @@ export default function Dashboard() {
 
 function MetricRow({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string; sub?: string; color: string }) {
   return (
-    <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/30 border border-border/50">
+    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted/30 border border-border/50">
       <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${color} 10%, transparent)`, color }}>{icon}</div>
       <span className="text-[13px] text-muted-foreground font-medium flex-1">{label}</span>
       <div className="text-right">

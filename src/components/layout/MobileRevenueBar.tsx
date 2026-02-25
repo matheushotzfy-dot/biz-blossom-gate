@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { Sun, Moon, Shield } from "lucide-react";
+import { Sun, Moon, Flame } from "lucide-react";
 
 const MILESTONES = [
   { label: "R$ 0", value: 0 },
@@ -49,15 +49,13 @@ export function MobileRevenueBar() {
   return (
     <div className="md:hidden sticky top-0 z-20 bg-background/95 backdrop-blur-lg border-b border-border px-4 py-2.5">
       <div className="flex items-center gap-3">
-        {/* Brand */}
         <div className="flex items-center gap-2 mr-1">
-          <div className="h-7 w-7 rounded-md gradient-primary flex items-center justify-center">
-            <Shield className="h-3.5 w-3.5 text-primary-foreground" />
+          <div className="h-7 w-7 rounded-lg gradient-primary flex items-center justify-center">
+            <Flame className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <span className="text-sm font-extrabold text-foreground tracking-tight">SAFRAPAY</span>
+          <span className="text-sm font-extrabold text-foreground tracking-tight">HOTZFY</span>
         </div>
 
-        {/* Progress */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-bold text-foreground">{fmtCompact(revenue)}</span>
@@ -73,7 +71,7 @@ export function MobileRevenueBar() {
 
         <button
           onClick={toggleTheme}
-          className="shrink-0 h-7 w-7 rounded-md flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+          className="shrink-0 h-7 w-7 rounded-lg flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
         >
           {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-warning" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
