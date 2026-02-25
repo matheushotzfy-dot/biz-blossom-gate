@@ -260,3 +260,9 @@
 
 /* Safe area for mobile bottom nav */
 .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* Fire particle animation for Modo Escala */
+@keyframes fireParticle {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-200px) scale(0); }
+}

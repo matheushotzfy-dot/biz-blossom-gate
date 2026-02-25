@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -13,10 +13,12 @@ import {
   Clock3,
   CreditCard,
   DollarSign,
+  Flame,
   GraduationCap,
   Layers,
   Package,
   RefreshCw,
+  Rocket,
   ShieldCheck,
   ShoppingCart,
   Sparkles,
@@ -24,6 +26,7 @@ import {
   TrendingUp,
   Users,
   Wallet,
+  X,
   Zap,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -73,6 +76,9 @@ export default function Dashboard() {
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[2]);
   const [products, setProducts] = useState(0);
+  const [scaleMode, setScaleMode] = useState(false);
+  const [showScalePopup, setShowScalePopup] = useState(false);
+  const [fireEffect, setFireEffect] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -174,8 +180,120 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [transactions, withdrawals]);
 
+  const activateScaleMode = useCallback(() => {
+    setFireEffect(true);
+    setTimeout(() => {
+      setShowScalePopup(true);
+      setScaleMode(true);
+    }, 800);
+    setTimeout(() => setFireEffect(false), 3000);
+  }, []);
+
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div className="space-y-5 md:space-y-6 relative">
+      {/* ─── GREEN FIRE BORDER EFFECT ─── */}
+      {fireEffect && (
+        <div className="fixed inset-0 z-[90] pointer-events-none">
+          {/* Top */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          {/* Bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          {/* Left */}
+          <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          {/* Right */}
+          <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          {/* Corner glows */}
+          <div className="absolute top-0 left-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
+          <div className="absolute top-0 right-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
+          <div className="absolute bottom-0 left-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
+          <div className="absolute bottom-0 right-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
+          {/* Particles */}
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-primary/60"
+              style={{
+                width: `${Math.random() * 6 + 2}px`,
+                height: `${Math.random() * 6 + 2}px`,
+                left: `${Math.random() * 100}%`,
+                bottom: `${Math.random() * 30}%`,
+                animation: `fireParticle ${1 + Math.random() * 2}s ease-out ${Math.random() * 0.5}s forwards`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ─── SCALE MODE POPUP ─── */}
+      {showScalePopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" onClick={() => setShowScalePopup(false)} />
+          <div className="relative w-full max-w-md rounded-3xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
+            <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
+            <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
+            
+            <button
+              onClick={() => setShowScalePopup(false)}
+              className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+
+            <div className="relative p-8 md:p-10 text-center">
+              <div className="mx-auto mb-6 h-24 w-24 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10">
+                <Rocket className="h-12 w-12 text-primary" />
+              </div>
+
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-5">
+                <Flame className="h-4 w-4 text-primary" />
+                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Ativado</span>
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight">
+                MODO ESCALA<br />
+                <span className="text-gradient">ATIVADO! 🔥</span>
+              </h2>
+
+              <div className="space-y-4 text-sm text-muted-foreground leading-relaxed mb-6">
+                <p className="font-bold text-foreground text-base">
+                  AGORA É SANGUE NOS OLHOS! 💪
+                </p>
+                <p>
+                  O futuro de luxo já está lá, falta <strong className="text-foreground">VOCÊ</strong> alcançar — e sabemos que irá conseguir!
+                </p>
+                <p>
+                  E estaremos <strong className="text-primary">juntos com você</strong> nessa jornada!
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-foreground mb-1">Suporte Prioritário Ativado</p>
+                    <p className="text-xs text-muted-foreground">
+                      No Modo Escala, o suporte e a fluidez da plataforma estarão 100% disponíveis para você. 
+                      Qualquer ajuda para escalar que precisar, pode nos chamar!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-lg font-display font-black text-primary mb-6">
+                RUMO À LUA! 🚀🌙
+              </p>
+
+              <button
+                onClick={() => setShowScalePopup(false)}
+                className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+              >
+                BORA ESCALAR! 🔥
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
@@ -198,28 +316,47 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25 self-start md:self-auto">
-                  <CalendarDays className="h-4 w-4 text-primary" />
-                  {selectedPeriod.label}
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[150px] rounded-xl p-1.5">
-                {PERIOD_OPTIONS.map((option) => (
-                  <DropdownMenuItem
-                    key={option.label}
-                    onClick={() => setSelectedPeriod(option)}
-                    className={`rounded-lg py-2 text-sm cursor-pointer ${
-                      selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""
-                    }`}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-2 self-start md:self-auto">
+              {/* Scale Mode Button */}
+              <button
+                onClick={activateScaleMode}
+                className={`group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all overflow-hidden ${
+                  scaleMode
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                    : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 hover:shadow-md hover:shadow-primary/15"
+                }`}
+              >
+                <Flame className={`h-4 w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
+                <span className="hidden sm:inline">{scaleMode ? "Modo Escala 🔥" : "Ativar Modo Escala"}</span>
+                <span className="sm:hidden">{scaleMode ? "🔥" : "Escala"}</span>
+                {!scaleMode && (
+                  <span className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-pulse pointer-events-none" />
+                )}
+              </button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    {selectedPeriod.label}
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[150px] rounded-xl p-1.5">
+                  {PERIOD_OPTIONS.map((option) => (
+                    <DropdownMenuItem
+                      key={option.label}
+                      onClick={() => setSelectedPeriod(option)}
+                      className={`rounded-lg py-2 text-sm cursor-pointer ${
+                        selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""
+                      }`}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {/* Hero metrics - mobile: 2 cols, desktop: full row */}
