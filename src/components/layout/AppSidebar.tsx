@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Trophy,
   Headphones,
+  Flame,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
@@ -64,6 +65,13 @@ function getMilestone(revenue: number) {
   const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
   return { current, next, pct, tier: MILESTONES.indexOf(current) };
 }
+
+const fmtCompact = (v: number) => {
+  if (v === 0) return "R$ 0";
+  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
+  if (v >= 1000) return `R$ ${(v / 1000).toFixed(1)}K`;
+  return `R$ ${v.toFixed(0)}`;
+};
 
 const sections = [
   {
@@ -111,20 +119,21 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
+  const [profile, setProfile] = useState<Tables<"profiles"> & { nickname?: string } | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase
-      .from("transactions")
-      .select("net_amount")
-      .eq("user_id", user.id)
-      .eq("status", "completed")
-      .then(({ data }) => {
-        if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0));
-      });
+    Promise.all([
+      supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed"),
+      supabase.from("profiles").select("*").eq("user_id", user.id).single(),
+    ]).then(([txRes, profileRes]) => {
+      if (txRes.data) setRevenue(txRes.data.reduce((s, t) => s + Number(t.net_amount), 0));
+      if (profileRes.data) setProfile(profileRes.data as any);
+    });
   }, [user?.id]);
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
+  const displayName = (profile as any)?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -132,15 +141,15 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border/80 bg-sidebar/95 backdrop-blur-xl">
+    <Sidebar className="border-r-2 border-sidebar-border/80 bg-sidebar/95 backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-28 -left-20 h-80 w-80 rounded-full bg-sidebar-primary/12 blur-[90px]" />
         <div className="absolute bottom-6 -right-10 h-64 w-64 rounded-full bg-sidebar-primary/10 blur-[84px]" />
       </div>
 
-      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
+      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b-2 border-sidebar-border/80">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
-          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0 bg-card">
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/25 ring-2 ring-sidebar-primary/30 shrink-0 bg-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
 
@@ -150,16 +159,29 @@ export function AppSidebar() {
           </div>
         </div>
 
+        {/* Milestone Progress with flame effect */}
         <div className="mt-4 group-data-[collapsible=icon]:hidden">
-          <div className="rounded-xl border border-sidebar-primary/20 bg-sidebar-primary/[0.06] px-3.5 py-3">
-            <div className="flex items-center justify-between mb-2">
+          <div className="rounded-xl border-2 border-sidebar-primary/25 bg-sidebar-primary/[0.08] px-3.5 py-3 relative overflow-hidden">
+            {/* Subtle flame glow behind progress */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-sidebar-primary/10 to-transparent" />
+            </div>
+            
+            <div className="relative flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-1.5">
                 <Trophy className="h-3.5 w-3.5 text-sidebar-primary" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/80">Milestone</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/80">{displayName}</span>
               </div>
+              <span className="text-[10px] font-black text-sidebar-primary">{fmtCompact(revenue)}</span>
+            </div>
+
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] font-bold text-sidebar-foreground/60">{milestone.current.label}</span>
               <span className="text-[11px] font-black text-sidebar-primary">{milestone.next.label}</span>
             </div>
-            <div className="relative h-2.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden">
+            
+            {/* Progress bar with flame */}
+            <div className="relative h-3 w-full rounded-full bg-sidebar-accent/60 overflow-visible">
               <div
                 className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/80 to-sidebar-primary transition-all duration-700"
                 style={{ width: `${milestone.pct}%` }}
@@ -168,10 +190,23 @@ export function AppSidebar() {
                 className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm"
                 style={{ width: `${milestone.pct}%` }}
               />
+              {/* Flame tip on progress edge */}
+              {milestone.pct > 0 && (
+                <div 
+                  className="absolute top-1/2 -translate-y-1/2 w-4 h-6"
+                  style={{ left: `calc(${milestone.pct}% - 8px)` }}
+                >
+                  <div className="w-full h-full relative">
+                    <div className="absolute inset-0 rounded-full bg-sidebar-primary/80 blur-[3px] animate-pulse" />
+                    <Flame className="absolute -top-2 left-0 h-4 w-4 text-sidebar-primary animate-pulse" />
+                  </div>
+                </div>
+              )}
             </div>
+            
             <div className="flex items-center justify-between mt-1.5">
-              <span className="text-[9px] font-bold text-sidebar-foreground/60">{milestone.current.label}</span>
-              <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
+              <span className="text-[9px] font-bold text-sidebar-foreground/60">Progresso</span>
+              <span className="text-[10px] font-black text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
             </div>
           </div>
         </div>
@@ -237,10 +272,10 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative p-3 border-t border-sidebar-border/80">
+      <SidebarFooter className="relative p-3 border-t-2 border-sidebar-border/80">
         <button
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all hover:bg-sidebar-primary/[0.15] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
+          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border-2 border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all hover:bg-sidebar-primary/[0.15] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
         >
           <div className="h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center shrink-0">
             <Headphones className="h-4 w-4 text-sidebar-primary" />
@@ -262,4 +297,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
