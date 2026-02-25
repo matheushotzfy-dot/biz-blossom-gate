@@ -46,7 +46,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex dark">
+    <div className="min-h-screen flex bg-background text-foreground">
       {/* Left — Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background relative overflow-hidden">
         <div className="absolute inset-0">
