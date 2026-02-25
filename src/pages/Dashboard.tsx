@@ -5,13 +5,11 @@ import {
   ArrowUpRight,
   CalendarDays,
   ChevronDown,
-  Clock3,
   DollarSign,
   Flame,
   Lock,
   Rocket,
   ShieldCheck,
-  ShoppingCart,
   Sparkles,
   Target,
   TrendingUp,
@@ -80,7 +78,6 @@ export default function Dashboard() {
     });
   }, [user?.id]);
 
-  // Auto-activate scale mode when daily revenue >= 2000
   const todayRevenue = useMemo(() => {
     const todayStr = brasiliaToday().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
     return transactions
@@ -122,7 +119,6 @@ export default function Dashboard() {
   const ticket = approved.length > 0 ? gross / approved.length : 0;
   const conversion = filteredTx.length > 0 ? (approved.length / filteredTx.length) * 100 : 0;
 
-  // Payment method metrics
   const pixTx = filteredTx.filter((t) => t.payment_method === "pix");
   const cardTx = filteredTx.filter((t) => t.payment_method === "credit_card" || t.payment_method === "cartao");
   const boletoTx = filteredTx.filter((t) => t.payment_method === "boleto");
@@ -148,21 +144,12 @@ export default function Dashboard() {
     });
   }, [transactions, selectedPeriod.days]);
 
-  const activity = useMemo(() => {
-    return transactions.slice(0, 6).map((t) => ({
-      id: t.id,
-      createdAt: t.created_at,
-      amount: Number(t.amount),
-      status: t.status,
-      method: t.payment_method || "—",
-    }));
-  }, [transactions]);
-
-  const displayName = (profile as any)?.nickname || profile?.full_name?.split(" ")[0] || user?.user_metadata?.nickname || "Seller";
+  const recentSales = useMemo(() => transactions.slice(0, 5), [transactions]);
+  const displayName = (profile as any)?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
 
   return (
-    <div className="space-y-5 md:space-y-6 relative">
-      {/* ─── FIRE BORDER EFFECT ─── */}
+    <div className="space-y-6 md:space-y-8 relative">
+      {/* Fire border effect */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
@@ -172,27 +159,27 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ─── SCALE MODE POPUP ─── */}
+      {/* Scale mode popup */}
       {showScalePopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-3xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
+          <div className="relative w-full max-w-md rounded-3xl border border-primary/30 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
             <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
             <div className="relative p-8 md:p-10 text-center">
-              <div className="mx-auto mb-6 h-24 w-24 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10">
-                <Rocket className="h-12 w-12 text-primary" />
+              <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10">
+                <Rocket className="h-10 w-10 text-primary" />
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-5">
                 <Flame className="h-4 w-4 text-primary" />
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Ativado</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4">
+              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3">
                 MODO ESCALA<br /><span className="text-gradient">ATIVADO! 🔥</span>
               </h2>
-              <p className="text-sm text-muted-foreground mb-4">AGORA É SANGUE NOS OLHOS! 💪</p>
+              <p className="text-sm text-muted-foreground mb-2">SANGUE NOS OLHOS! 💪</p>
               <p className="text-sm text-muted-foreground mb-6">Estaremos <strong className="text-primary">juntos com você</strong> nessa jornada!</p>
               <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-6">
                 <div className="flex items-start gap-3">
@@ -211,25 +198,24 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ─── GREETING + PERIOD + SCALE ─── */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between animate-fade-in">
+      {/* ─── HEADER ─── */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between animate-fade-in">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] uppercase text-primary mb-2">
-            <Sparkles className="h-3 w-3" /> Dashboard De Infoprodutor
-          </div>
-          <h1 className="text-2xl md:text-4xl font-display font-black tracking-tight text-foreground">
-            Olá, <span className="text-primary">{displayName}</span> 👋
+          <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight text-foreground">
+            Olá, <span className="text-primary">{displayName}</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Cockpit premium para monitorar vendas, performance e métricas.</p>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            Acompanhe suas vendas, performance e métricas em tempo real.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {/* Scale Mode */}
-          <div className="relative">
+          <div className="relative group">
             {!scaleMode && (
-              <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap z-10">
-                <span className="text-[8px] font-bold text-muted-foreground bg-muted/80 backdrop-blur px-2 py-0.5 rounded-md border border-border">
-                  Ativa ao atingir R$ 2K em 24h
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[9px] font-semibold text-muted-foreground bg-card px-2.5 py-1 rounded-lg border border-border shadow-sm">
+                  Ativa com R$ 2K/dia
                 </span>
               </div>
             )}
@@ -237,8 +223,8 @@ export default function Dashboard() {
               disabled={!scaleMode}
               className={`flame-btn relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all ${
                 scaleMode
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                  : "border border-border bg-muted/40 text-muted-foreground cursor-not-allowed opacity-60"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                  : "border border-border bg-card text-muted-foreground cursor-not-allowed"
               }`}
             >
               {scaleMode && [0,1,2,3,4].map((i) => (
@@ -250,20 +236,20 @@ export default function Dashboard() {
                   ['--delay' as string]: `${i * 0.12}s`,
                 }} />
               ))}
-              {scaleMode ? <Flame className="h-4 w-4 animate-pulse" /> : <Lock className="h-4 w-4" />}
-              <span className="hidden sm:inline">{scaleMode ? "Modo Escala 🔥" : "Modo Escala"}</span>
+              {scaleMode ? <Flame className="h-4 w-4 animate-pulse" /> : <Lock className="h-3.5 w-3.5" />}
+              <span className="hidden sm:inline">{scaleMode ? "Escala 🔥" : "Escala"}</span>
             </button>
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-foreground shadow-sm hover:border-primary/25">
+              <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-foreground hover:border-primary/20 transition-colors">
                 <CalendarDays className="h-4 w-4 text-primary" />
                 {selectedPeriod.label}
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[150px] rounded-xl p-1.5">
+            <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl p-1">
               {PERIOD_OPTIONS.map((option) => (
                 <DropdownMenuItem
                   key={option.label}
@@ -278,37 +264,37 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ─── 4 KPI CARDS ─── */}
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4 animate-fade-in stagger-1">
-        <KpiCard icon={<DollarSign className="h-5 w-5" />} label="Receita Líquida" value={fmt(revenue)} tone="primary" />
-        <KpiCard icon={<Target className="h-5 w-5" />} label="Ticket Médio" value={fmt(ticket)} tone="info" />
-        <KpiCard icon={<TrendingUp className="h-5 w-5" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-        <KpiCard icon={<Wallet className="h-5 w-5" />} label="Saques Pend." value={fmt(withdrawalPending)} tone="warning" />
+      {/* ─── KPI ROW ─── */}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4 animate-fade-in stagger-1">
+        <KpiCard icon={<DollarSign />} label="Receita Líquida" value={fmt(revenue)} accent="primary" />
+        <KpiCard icon={<Target />} label="Ticket Médio" value={fmt(ticket)} accent="info" />
+        <KpiCard icon={<TrendingUp />} label="Conversão" value={`${conversion.toFixed(1)}%`} accent="success" />
+        <KpiCard icon={<Wallet />} label="Saques Pend." value={fmt(withdrawalPending)} accent="warning" />
       </section>
 
-      {/* ─── CHART (prominent) ─── */}
-      <section className="rounded-2xl border border-border bg-card p-4 md:p-6 animate-fade-in stagger-2 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
+      {/* ─── CHART ─── */}
+      <section className="rounded-2xl border border-border bg-card p-5 md:p-6 animate-fade-in stagger-2">
+        <div className="mb-5 flex items-center justify-between">
           <div>
-            <h2 className="text-base md:text-lg font-display font-bold text-foreground">Performance de Receita</h2>
-            <p className="text-[12px] text-muted-foreground">Receita líquida aprovada</p>
+            <h2 className="text-lg font-display font-bold text-foreground">Performance</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Receita líquida aprovada por dia</p>
           </div>
-          <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-1.5 text-right">
-            <p className="text-[10px] uppercase tracking-wider text-primary font-bold">Total</p>
-            <p className="text-lg font-display font-black text-foreground">{fmt(revenue)}</p>
+          <div className="text-right">
+            <p className="text-2xl md:text-3xl font-display font-black text-foreground">{fmt(revenue)}</p>
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Total no período</p>
           </div>
         </div>
 
-        <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={260}>
+          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
             <defs>
-              <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
                 <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} />
-            <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
+            <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} />
+            <YAxis tickLine={false} axisLine={false} width={54} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
             <Tooltip
               contentStyle={{
                 background: "var(--tooltip-bg)",
@@ -320,14 +306,14 @@ export default function Dashboard() {
                 boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
               }}
               formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-              cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
+              cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }}
             />
             <Area
               type="monotone"
               dataKey="vendas"
               stroke="hsl(var(--primary))"
               strokeWidth={2.5}
-              fill="url(#dashboardRevenue)"
+              fill="url(#revGrad)"
               dot={false}
               activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
             />
@@ -335,60 +321,57 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </section>
 
-      {/* ─── PAYMENT METHODS (compact) + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-5 animate-fade-in stagger-3">
-        {/* Payment summary - compact */}
-        <div className="lg:col-span-2 space-y-3">
-          <div className="rounded-2xl border border-border bg-card p-4 md:p-5 shadow-sm">
-            <h3 className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground mb-3">Meios de Pagamento</h3>
-            <div className="space-y-2.5">
-              <PaymentRow label="PIX" emoji="💠" generated={pixTx.length} paid={pixPaid} />
-              <PaymentRow label="Cartão" emoji="💳" generated={cardTx.length} paid={cardPaid} />
-              <PaymentRow label="Boleto" emoji="📄" generated={boletoTx.length} paid={boletoPaid} />
-            </div>
+      {/* ─── BOTTOM: Payment Methods + Recent Sales ─── */}
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12 animate-fade-in stagger-3">
+        {/* Payment methods */}
+        <div className="lg:col-span-4 rounded-2xl border border-border bg-card p-5">
+          <h3 className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground mb-4">Meios de Pagamento</h3>
+          <div className="space-y-4">
+            <PaymentBar label="PIX" paid={pixPaid} total={pixTx.length} color="primary" />
+            <PaymentBar label="Cartão" paid={cardPaid} total={cardTx.length} color="info" />
+            <PaymentBar label="Boleto" paid={boletoPaid} total={boletoTx.length} color="warning" />
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-4 md:p-5 shadow-sm">
-            <h3 className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground mb-3">Status</h3>
-            <div className="flex items-center gap-3">
-              <StatusPill label="Pendentes" value={pending.length} color="warning" />
-              <StatusPill label="Aprovadas" value={approved.length} color="success" />
-            </div>
+          <div className="mt-5 pt-4 border-t border-border flex gap-3">
+            <MiniStat label="Pendentes" value={pending.length} color="warning" />
+            <MiniStat label="Aprovadas" value={approved.length} color="success" />
           </div>
         </div>
 
-        {/* Activity feed */}
-        <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-4 md:p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
+        {/* Recent sales */}
+        <div className="lg:col-span-8 rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">Últimas Vendas</h3>
-            <Link to="/vendas" className="text-[11px] font-semibold text-primary hover:underline inline-flex items-center gap-1">
+            <Link to="/vendas" className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
               Ver tudo <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="space-y-0.5">
-            {activity.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground py-8">Nenhuma venda ainda</p>
-            ) : (
-              activity.map((item) => {
-                const s = statusStyles[item.status] || statusStyles.default;
+
+          {recentSales.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-10">Nenhuma venda ainda</p>
+          ) : (
+            <div className="space-y-1">
+              {recentSales.map((tx) => {
+                const s = statusMap[tx.status] || statusMap.default;
                 return (
-                  <div key={item.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-muted/30 transition-colors">
-                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${s.icon}`}>
-                      <DollarSign className="h-3.5 w-3.5" />
+                  <div key={tx.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-muted/40 transition-colors">
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${s.bg}`}>
+                      <DollarSign className={`h-4 w-4 ${s.text}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-bold text-foreground">{fmt(item.amount)}</span>
-                        <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${s.pill}`}>{s.label}</span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">{item.method}</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{tx.customer_name || "Cliente"}</p>
+                      <p className="text-[11px] text-muted-foreground">{tx.payment_method || "—"}</p>
                     </div>
-                    <span className="text-[11px] text-muted-foreground">{timeAgo(item.createdAt)}</span>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-foreground">{fmt(Number(tx.amount))}</p>
+                      <p className="text-[10px] text-muted-foreground">{timeAgo(tx.created_at)}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-md px-2 py-0.5 text-[9px] font-bold ${s.pill}`}>{s.label}</span>
                   </div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
         </div>
       </section>
     </div>
@@ -397,30 +380,30 @@ export default function Dashboard() {
 
 /* ─── Sub-components ─── */
 
-const statusStyles: Record<string, { label: string; pill: string; icon: string }> = {
-  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "bg-success/12 text-success" },
-  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "bg-warning/12 text-warning" },
-  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
-  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "bg-info/12 text-info" },
-  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
-  default: { label: "—", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground" },
+const statusMap: Record<string, { label: string; pill: string; bg: string; text: string }> = {
+  completed: { label: "Aprovada", pill: "bg-success/15 text-success", bg: "bg-success/10", text: "text-success" },
+  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", bg: "bg-warning/10", text: "text-warning" },
+  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", bg: "bg-destructive/10", text: "text-destructive" },
+  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", bg: "bg-info/10", text: "text-info" },
+  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", bg: "bg-destructive/10", text: "text-destructive" },
+  default: { label: "—", pill: "bg-muted text-foreground", bg: "bg-muted", text: "text-foreground" },
 };
 
-type Tone = "primary" | "info" | "success" | "warning";
-const toneMap: Record<Tone, { bg: string; text: string; border: string }> = {
-  primary: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
-  info: { bg: "bg-info/10", text: "text-info", border: "border-info/20" },
-  success: { bg: "bg-success/10", text: "text-success", border: "border-success/20" },
-  warning: { bg: "bg-warning/10", text: "text-warning", border: "border-warning/20" },
+type Accent = "primary" | "info" | "success" | "warning";
+const accentStyles: Record<Accent, string> = {
+  primary: "text-primary bg-primary/10",
+  info: "text-info bg-info/10",
+  success: "text-success bg-success/10",
+  warning: "text-warning bg-warning/10",
 };
 
-function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
+function KpiCard({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent: Accent }) {
   return (
-    <div className={`rounded-2xl border ${toneMap[tone].border} bg-card p-4 md:p-5 shadow-sm hover:shadow-md transition-shadow`}>
+    <div className="rounded-2xl border border-border bg-card p-4 md:p-5 transition-all hover:border-primary/15 hover:shadow-sm group">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">{label}</span>
-        <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+        <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">{label}</span>
+        <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${accentStyles[accent]} [&>svg]:h-4 [&>svg]:w-4`}>
+          {icon}
         </div>
       </div>
       <p className="text-xl md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
@@ -428,25 +411,32 @@ function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: s
   );
 }
 
-function PaymentRow({ label, emoji, generated, paid }: { label: string; emoji: string; generated: number; paid: number }) {
-  const rate = generated > 0 ? ((paid / generated) * 100).toFixed(0) : "0";
+function PaymentBar({ label, paid, total, color }: { label: string; paid: number; total: number; color: string }) {
+  const pct = total > 0 ? (paid / total) * 100 : 0;
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-lg">{emoji}</span>
-      <span className="text-sm font-semibold text-foreground flex-1">{label}</span>
-      <div className="text-right">
-        <span className="text-sm font-bold text-foreground">{paid}<span className="text-muted-foreground font-normal">/{generated}</span></span>
-        <span className="ml-2 text-[10px] font-bold text-primary">{rate}%</span>
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-sm font-semibold text-foreground">{label}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{paid}/{total}</span>
+          <span className={`text-xs font-bold text-${color}`}>{pct.toFixed(0)}%</span>
+        </div>
+      </div>
+      <div className="h-2 rounded-full bg-muted/60 overflow-hidden">
+        <div
+          className={`h-full rounded-full bg-${color} transition-all duration-700`}
+          style={{ width: `${Math.max(pct, 1)}%` }}
+        />
       </div>
     </div>
   );
 }
 
-function StatusPill({ label, value, color }: { label: string; value: number; color: string }) {
+function MiniStat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className={`flex-1 rounded-xl bg-${color}/10 border border-${color}/20 p-3 text-center`}>
+    <div className={`flex-1 rounded-xl bg-${color}/8 border border-${color}/15 p-3 text-center`}>
       <p className={`text-lg font-display font-black text-${color}`}>{value}</p>
-      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
     </div>
   );
 }
