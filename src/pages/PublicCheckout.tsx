@@ -395,11 +395,18 @@ export default function PublicCheckout() {
       {/* Social proof */}
       {product.checkout_social_proof && (
         <div className="max-w-[680px] mx-auto px-4 pt-5">
-          <div className="flex items-center gap-2.5 bg-emerald-500/8 border border-emerald-500/15 text-emerald-400 px-4 py-2.5 rounded-xl text-xs font-medium w-fit">
-            <span className="flex -space-x-1.5">
-              {[...Array(3)].map((_, i) => <div key={i} className="h-5 w-5 rounded-full bg-emerald-500/30 border-2 border-[#08080a]" />)}
+          <div className="flex items-center gap-3 bg-emerald-500/[0.08] border border-emerald-500/20 px-4 py-3 rounded-2xl text-sm font-medium w-fit animate-pulse-slow">
+            <span className="flex -space-x-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-7 w-7 rounded-full border-2 border-[#08080a] flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: `hsl(${152 + i * 10}, 60%, ${35 + i * 5}%)` }}>
+                  {["A", "M", "L", "R"][i]}
+                </div>
+              ))}
             </span>
-            🔥 {socialCount} pessoas compraram recentemente
+            <div>
+              <p className="text-emerald-400 font-semibold text-[13px]">🔥 {socialCount} pessoas compraram</p>
+              <p className="text-emerald-400/50 text-[10px]">nas últimas 24 horas</p>
+            </div>
           </div>
         </div>
       )}
@@ -630,11 +637,15 @@ export default function PublicCheckout() {
 
           {/* Guarantee seal */}
           {product.checkout_guarantee_enabled && (
-            <div className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/[0.05] bg-white/[0.015]">
-              <img src={guaranteeSeal} alt="Garantia 7 dias" className="h-14 w-14 object-contain" />
+            <div className="flex items-center gap-4 p-5 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03]">
+              <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <ShieldCheck className="h-7 w-7 text-emerald-400" />
+              </div>
               <div>
-                <p className="text-sm font-bold text-white">Garantia de 7 dias</p>
-                <p className="text-xs text-white/35">Não gostou? Devolvemos 100% do valor.</p>
+                <p className="text-sm font-bold text-white flex items-center gap-1.5">
+                  <span className="text-emerald-400">✓</span> Garantia incondicional de 7 dias
+                </p>
+                <p className="text-xs text-white/40 mt-0.5">Não ficou satisfeito? Devolvemos 100% do seu dinheiro sem burocracia.</p>
               </div>
             </div>
           )}
