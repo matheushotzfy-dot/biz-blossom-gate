@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Camera, Trophy, Wallet, Shield, CheckCircle2 } from "lucide-react";
+import { User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -193,9 +193,9 @@ export default function Perfil() {
             </div>
             <span className="text-[10px] font-bold text-muted-foreground">{milestone.next.label}</span>
           </div>
-          <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: "var(--bar-track)" }}>
-            <div className="h-full rounded-full relative transition-all duration-1000 bg-gradient-to-r from-primary to-emerald-400" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 15px hsl(var(--primary) / 0.35)" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent animate-shimmer" style={{ backgroundImage: `linear-gradient(to right, transparent, var(--shimmer-color))` }} />
+          <div className="w-full rounded-full h-3 overflow-hidden bg-muted">
+            <div className="h-full rounded-full relative transition-all duration-1000 gradient-primary" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 15px hsl(var(--primary) / 0.35)" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent" />
             </div>
           </div>
           <div className="flex justify-between mt-3">

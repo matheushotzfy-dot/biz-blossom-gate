@@ -113,8 +113,8 @@ export default function Identidade() {
             <h3 className="text-[13px] font-bold text-foreground">Progresso</h3>
             <span className="text-[13px] font-bold text-primary">{completionPct}%</span>
           </div>
-          <div className="w-full h-2 rounded-full overflow-hidden mb-3" style={{ background: "var(--bar-track)" }}>
-            <div className="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-primary to-emerald-400" style={{ width: `${completionPct}%` }} />
+           <div className="w-full h-2 rounded-full overflow-hidden mb-3 bg-muted">
+            <div className="h-full rounded-full transition-all duration-700 gradient-primary" style={{ width: `${completionPct}%` }} />
           </div>
           <div className="grid grid-cols-2 gap-1">
             {completionSteps.map((step) => (

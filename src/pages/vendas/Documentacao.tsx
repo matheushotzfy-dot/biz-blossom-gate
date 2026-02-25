@@ -6,7 +6,7 @@ import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID || "sua-api"}.supabase.co/functions/v1`;
 
 const sections = [
-  { id: "intro", title: "Introdução", icon: Globe, content: `A API SafraPay permite integrar pagamentos PIX, Cartão e Boleto.\n\n**Base URL:** \`${BASE_URL}\`\n\n**Autenticação:** Header \`Authorization: Bearer SEU_TOKEN\`` },
+  { id: "intro", title: "Introdução", icon: Globe, content: `A API Hotzfy permite integrar pagamentos PIX, Cartão e Boleto para seus infoprodutos.\n\n**Base URL:** \`${BASE_URL}\`\n\n**Autenticação:** Header \`Authorization: Bearer SEU_TOKEN\`` },
   { id: "pix-cashin", title: "PIX Cash-In", icon: Terminal, content: `### POST /pix/cashIn\n\n\`\`\`json\n{"amount": 150.00, "customer": {"name": "João", "document": "123...", "email": "j@e.com"}}\n\`\`\`\n\nRetorna QR Code + copiar-cola PIX.` },
   { id: "pix-cashout", title: "PIX Cash-Out", icon: Terminal, content: `### POST /pix/cashOut\n\n\`\`\`json\n{"amount": 100.00, "pix_key": "email@ex.com", "pix_key_type": "email"}\n\`\`\`\n\nTaxa: R$ 5,00 por operação.` },
   { id: "card", title: "Cartão de Crédito", icon: Terminal, content: `### POST /payments/card\n\nSuporta parcelamento em até 12x.\nTaxa: 4,99% + R$ 2,50 por transação.` },
