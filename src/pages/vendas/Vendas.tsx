@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ShoppingCart, DollarSign, TrendingUp, CreditCard } from "lucide-react";
+import { ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, Filter } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
@@ -9,6 +9,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export default function Vendas() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!user?.id) return;
@@ -20,41 +21,75 @@ export default function Vendas() {
   const totalSales = approved.reduce((a, t) => a + Number(t.net_amount), 0);
   const avgTicket = approved.length > 0 ? totalSales / approved.length : 0;
 
+  const filtered = search
+    ? transactions.filter((t) => t.customer_name?.toLowerCase().includes(search.toLowerCase()) || t.customer_email?.toLowerCase().includes(search.toLowerCase()))
+    : transactions;
+
   return (
     <PageShell>
-      <PageTitle icon={<ShoppingCart className="h-6 w-6" />} title="Vendas" subtitle="Visão geral das suas vendas" />
+      <PageTitle icon={<ShoppingCart className="h-6 w-6" />} title="Vendas" subtitle="Gerencie todas as suas transações" />
 
-      <div className="grid grid-cols-3 gap-2 md:gap-3">
-        <MetricMini icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5" />} label="Total" value={`R$ ${totalSales.toFixed(2)}`} sub={`${approved.length} vendas`} cls="text-primary bg-primary/10" />
-        <MetricMini icon={<TrendingUp className="h-4 w-4 md:h-5 md:w-5" />} label="Ticket Médio" value={`R$ ${avgTicket.toFixed(2)}`} cls="text-blue-500 bg-blue-500/10" />
-        <MetricMini icon={<CreditCard className="h-4 w-4 md:h-5 md:w-5" />} label="Conversão" value={`${transactions.length > 0 ? ((approved.length / transactions.length) * 100).toFixed(0) : 0}%`} cls="text-purple-500 bg-purple-500/10" />
+      <div className="grid grid-cols-3 gap-3">
+        <Panel>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Vendido</span>
+            <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-primary/10"><DollarSign className="h-4 w-4 text-primary" /></div>
+          </div>
+          <p className="text-xl font-extrabold text-foreground">R$ {totalSales.toFixed(2)}</p>
+          <p className="text-xs text-primary mt-1">{approved.length} vendas</p>
+        </Panel>
+        <Panel>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ticket Médio</span>
+            <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-info/10"><TrendingUp className="h-4 w-4 text-info" /></div>
+          </div>
+          <p className="text-xl font-extrabold text-foreground">R$ {avgTicket.toFixed(2)}</p>
+        </Panel>
+        <Panel>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Conversão</span>
+            <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-success/10"><CreditCard className="h-4 w-4 text-success" /></div>
+          </div>
+          <p className="text-xl font-extrabold text-foreground">{transactions.length > 0 ? ((approved.length / transactions.length) * 100).toFixed(0) : 0}%</p>
+        </Panel>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por cliente ou e-mail..."
+          className="w-full h-10 pl-10 pr-4 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+        />
       </div>
 
       {/* Desktop table */}
       <div className="hidden md:block">
-        <Panel>
+        <Panel className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
                   {["ID", "Cliente", "E-mail", "WhatsApp", "Valor", "Método", "Status", "Data"].map((h) => (
-                    <th key={h} className="text-left p-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{h}</th>
+                    <th key={h} className="text-left p-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {transactions.length === 0 ? (
-                  <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>
-                ) : transactions.map((tx) => (
-                  <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                    <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
-                    <td className="p-3.5 text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</td>
-                    <td className="p-3.5 text-muted-foreground text-[13px]">{tx.customer_email || "—"}</td>
-                    <td className="p-3.5 text-muted-foreground text-[13px]">{(tx as any).customer_phone || "—"}</td>
-                    <td className="p-3.5 font-bold text-foreground text-[13px]">R$ {Number(tx.net_amount).toFixed(2)}</td>
-                    <td className="p-3.5 capitalize text-muted-foreground text-[13px]">{tx.payment_method}</td>
-                    <td className="p-3.5"><StatusBadge status={tx.status} /></td>
-                    <td className="p-3.5 text-muted-foreground text-[13px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={8} className="p-10 text-center text-muted-foreground text-sm">Nenhuma venda encontrada</td></tr>
+                ) : filtered.map((tx) => (
+                  <tr key={tx.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                    <td className="p-4 font-mono text-xs text-muted-foreground">{tx.id.slice(0, 8)}</td>
+                    <td className="p-4 text-foreground font-semibold text-sm">{tx.customer_name || "—"}</td>
+                    <td className="p-4 text-muted-foreground text-sm">{tx.customer_email || "—"}</td>
+                    <td className="p-4 text-muted-foreground text-sm">{tx.customer_phone || "—"}</td>
+                    <td className="p-4 font-bold text-foreground">R$ {Number(tx.net_amount).toFixed(2)}</td>
+                    <td className="p-4 capitalize text-muted-foreground text-sm">{tx.payment_method}</td>
+                    <td className="p-4"><StatusBadge status={tx.status} /></td>
+                    <td className="p-4 text-muted-foreground text-sm">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -63,42 +98,23 @@ export default function Vendas() {
         </Panel>
       </div>
 
-      {/* Mobile card list */}
+      {/* Mobile cards */}
       <div className="md:hidden space-y-2">
-        {transactions.length === 0 ? (
-          <Panel><p className="text-center text-muted-foreground text-sm py-4">Nenhuma venda encontrada</p></Panel>
-        ) : transactions.map((tx) => (
+        {filtered.length === 0 ? (
+          <Panel><p className="text-center text-muted-foreground text-sm py-6">Nenhuma venda</p></Panel>
+        ) : filtered.map((tx) => (
           <Panel key={tx.id}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-foreground font-semibold text-sm">{tx.customer_name || "Cliente"}</span>
               <StatusBadge status={tx.status} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-foreground font-bold text-base">R$ {Number(tx.net_amount).toFixed(2)}</span>
+              <span className="text-foreground font-bold text-lg">R$ {Number(tx.net_amount).toFixed(2)}</span>
               <span className="text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</span>
-            </div>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              <span className="text-muted-foreground text-[11px]">{tx.customer_email || "—"}</span>
-              {(tx as any).customer_phone && <><span className="text-muted-foreground text-[11px]">•</span><span className="text-muted-foreground text-[11px]">{(tx as any).customer_phone}</span></>}
-              <span className="text-muted-foreground text-[11px]">•</span>
-              <span className="text-muted-foreground text-[11px] capitalize">{tx.payment_method || "—"}</span>
             </div>
           </Panel>
         ))}
       </div>
     </PageShell>
-  );
-}
-
-function MetricMini({ icon, label, value, sub, cls }: { icon: React.ReactNode; label: string; value: string; sub?: string; cls: string }) {
-  return (
-    <Panel>
-      <div className="flex items-center justify-between mb-2 md:mb-3">
-        <p className="text-[9px] md:text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{label}</p>
-        <div className={`h-6 w-6 md:h-8 md:w-8 rounded-lg md:rounded-xl flex items-center justify-center ${cls}`}>{icon}</div>
-      </div>
-      <p className="text-base md:text-[22px] font-extrabold text-foreground truncate">{value}</p>
-      {sub && <p className="text-[10px] md:text-[11px] mt-1 text-primary">{sub}</p>}
-    </Panel>
   );
 }

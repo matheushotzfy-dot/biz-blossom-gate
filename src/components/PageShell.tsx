@@ -2,7 +2,7 @@ import React from "react";
 
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-5 relative pb-8 min-h-screen animate-fade-in overflow-x-hidden">
+    <div className="space-y-6 relative pb-8 min-h-screen animate-fade-in">
       {children}
     </div>
   );
@@ -10,10 +10,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
 
 export function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={`rounded-2xl p-5 relative overflow-hidden transition-all duration-300 bg-card border border-border/50 hover:border-border ${className || ""}`}
-      style={{ boxShadow: "var(--card-shadow)" }}
-    >
+    <div className={`rounded-xl p-5 bg-card border border-border transition-all duration-200 hover:border-primary/20 ${className || ""}`} style={{ boxShadow: "var(--card-shadow)" }}>
       {children}
     </div>
   );
@@ -39,7 +36,7 @@ export function DataTable({ headers, children }: { headers: string[]; children: 
           <thead>
             <tr className="border-b border-border">
               {headers.map((h) => (
-                <th key={h} className="text-left p-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                <th key={h} className="text-left p-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
               ))}
             </tr>
           </thead>
