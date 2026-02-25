@@ -38,20 +38,26 @@ function renderMarkdown(content: string): string {
 export default function Documentacao() {
   const [openSection, setOpenSection] = useState<string | null>("intro");
 
+  const featureTone: Record<"primary" | "success" | "info", { bg: string; text: string }> = {
+    primary: { bg: "bg-primary/10", text: "text-primary" },
+    success: { bg: "bg-success/10", text: "text-success" },
+    info: { bg: "bg-info/10", text: "text-info" },
+  };
+
   return (
     <PageShell>
       <PageTitle icon={<BookOpen className="h-6 w-6" />} title="API Documentation" subtitle="Integre pagamentos via REST API" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { icon: Shield, label: "Segurança", value: "SSL + Token Auth", color: "primary" },
-          { icon: Zap, label: "Latência", value: "< 200ms", color: "success" },
-          { icon: Code2, label: "Formato", value: "REST / JSON", color: "info" },
+          { icon: Shield, label: "Segurança", value: "SSL + Token Auth", color: "primary" as const },
+          { icon: Zap, label: "Latência", value: "< 200ms", color: "success" as const },
+          { icon: Code2, label: "Formato", value: "REST / JSON", color: "info" as const },
         ].map((item) => (
           <Panel key={item.label}>
             <div className="flex items-center gap-3">
-              <div className={`h-9 w-9 rounded-lg flex items-center justify-center bg-${item.color}/10`}>
-                <item.icon className={`h-4 w-4 text-${item.color}`} />
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${featureTone[item.color].bg}`}>
+                <item.icon className={`h-4 w-4 ${featureTone[item.color].text}`} />
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground font-medium">{item.label}</p>

@@ -214,7 +214,7 @@ export default function Dashboard() {
       </section>
 
       {/* === KPI CARDS === */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard icon={<DollarSign />} label="Receita" value={fmt(revenue)} sub="Valor líquido" tone="primary" delay="stagger-1" />
         <KpiCard icon={<Target />} label="Ticket Médio" value={fmt(ticket)} sub="Média por venda" tone="info" delay="stagger-2" />
         <KpiCard icon={<Users />} label="Clientes" value={String(customers)} sub="Base ativa" tone="success" delay="stagger-3" />
@@ -407,10 +407,30 @@ function KpiCard({ icon, label, value, sub, tone, link, delay = "" }: {
   return link ? <Link to={link}>{card}</Link> : card;
 }
 
-function MetricLine({ icon, label, value, color = "primary" }: { icon: React.ReactNode; label: string; value: string; color?: string }) {
+function MetricLine({
+  icon,
+  label,
+  value,
+  color = "primary",
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  color?: "primary" | "info" | "success" | "warning" | "destructive";
+}) {
+  const tone: Record<"primary" | "info" | "success" | "warning" | "destructive", { bg: string; text: string }> = {
+    primary: { bg: "bg-primary/10", text: "text-primary" },
+    info: { bg: "bg-info/10", text: "text-info" },
+    success: { bg: "bg-success/10", text: "text-success" },
+    warning: { bg: "bg-warning/10", text: "text-warning" },
+    destructive: { bg: "bg-destructive/10", text: "text-destructive" },
+  };
+
+  const current = tone[color] ?? tone.primary;
+
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 px-3.5 py-3 hover:bg-muted/40 transition-colors">
-      <div className={`h-8 w-8 rounded-lg flex items-center justify-center bg-${color}/10 text-${color} shrink-0`}>{icon}</div>
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${current.bg} ${current.text}`}>{icon}</div>
       <span className="text-[13px] text-muted-foreground font-medium flex-1">{label}</span>
       <span className="text-[13px] font-bold text-foreground">{value}</span>
     </div>

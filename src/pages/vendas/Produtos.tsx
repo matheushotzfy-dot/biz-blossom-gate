@@ -141,11 +141,15 @@ export default function Produtos() {
           <p className="text-sm text-muted-foreground max-w-sm">Crie seu primeiro infoproduto para começar a vender. Configure checkout, preço e área de membros.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
           {products.map((p, i) => (
-            <div key={p.id} className={`panel-enterprise overflow-hidden group animate-fade-in stagger-${Math.min(i + 1, 6)}`}>
+            <div
+              key={p.id}
+              className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col min-h-[430px]"
+              style={{ animationDelay: `${Math.min(i, 5) * 80}ms` }}
+            >
               {/* Image */}
-              <div className="relative h-44 bg-muted/30 overflow-hidden">
+              <div className="relative h-52 bg-muted/30 overflow-hidden">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
@@ -160,29 +164,29 @@ export default function Produtos() {
               </div>
 
               {/* Content */}
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-base font-display font-bold text-foreground leading-snug">{p.name}</h3>
-                  <p className="text-xl font-display font-black text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
+              <div className="p-5 flex flex-1 flex-col">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="text-lg font-display font-bold text-foreground leading-snug line-clamp-2">{p.name}</h3>
+                  <p className="text-2xl font-display font-black text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
                 </div>
 
-                {p.description && (
-                  <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
+                {p.description ? (
+                  <p className="text-[13px] text-muted-foreground line-clamp-3 mb-4 leading-relaxed min-h-[56px]">{p.description}</p>
+                ) : (
+                  <p className="text-[13px] text-muted-foreground/70 mb-4 min-h-[56px]">Descrição não informada.</p>
                 )}
 
-                {/* Checkout link */}
                 {p.checkout_url && (
-                  <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2 mb-4">
-                    <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2.5 mb-4">
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <span className="text-[11px] text-muted-foreground font-mono truncate flex-1">{p.checkout_url}</span>
-                    <button onClick={() => copyCheckout(p)} className="text-primary hover:text-primary/80 transition-colors">
+                    <button onClick={() => copyCheckout(p)} className="text-primary hover:text-primary/80 transition-colors" aria-label="Copiar link do checkout">
                       {copiedId === p.id ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     </button>
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-auto pt-2">
                   <Button variant="outline" size="sm" className="flex-1 gap-1.5 rounded-lg text-[12px] h-9 font-semibold hover:border-primary/20 hover:bg-primary/[0.03] transition-all" onClick={() => handleEdit(p)}>
                     <Edit className="h-3.5 w-3.5" /> Editar
                   </Button>
