@@ -176,35 +176,31 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5 md:space-y-6">
-      <section className="relative overflow-hidden panel-enterprise p-5 md:p-8 animate-fade-in">
+      {/* ─── HERO ─── */}
+      <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-16 -top-16 h-72 w-72 rounded-full bg-primary/15 blur-[90px]" />
-          <div className="absolute -right-10 bottom-0 h-72 w-72 rounded-full bg-info/10 blur-[110px]" />
-          <div className="absolute inset-0 ambient-grid opacity-25" />
+          <div className="absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-info/10 blur-[110px]" />
         </div>
 
-        <div className="relative z-10 space-y-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-bold tracking-[0.16em] uppercase text-primary">
-                <Sparkles className="h-3.5 w-3.5" /> Command Center
+        <div className="relative z-10 space-y-5 md:space-y-6">
+          {/* Title row */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] uppercase text-primary">
+                <Sparkles className="h-3 w-3" /> Command Center
               </div>
-
-              <div>
-                <h1 className="text-3xl md:text-5xl font-display font-black tracking-tight leading-[1.05] text-foreground">
-                  Plataforma de Escala
-                  <br />
-                  <span className="text-gradient">para Infoprodutores</span>
-                </h1>
-                <p className="mt-3 max-w-2xl text-sm md:text-[15px] leading-relaxed text-muted-foreground">
-                  Um cockpit premium para monitorar vendas, performance de checkout e saúde da operação em tempo real.
-                </p>
-              </div>
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
+                Centro de <span className="text-gradient">Comando</span>
+              </h1>
+              <p className="hidden md:block max-w-xl text-sm text-muted-foreground leading-relaxed">
+                Cockpit premium para monitorar vendas, performance e saúde da operação.
+              </p>
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="inline-flex h-11 items-center gap-2 rounded-xl border border-border/80 bg-card px-4 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-muted/40">
+                <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25 self-start md:self-auto">
                   <CalendarDays className="h-4 w-4 text-primary" />
                   {selectedPeriod.label}
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
@@ -226,68 +222,43 @@ export default function Dashboard() {
             </DropdownMenu>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <HeroStatCard
-                icon={<DollarSign className="h-4 w-4" />}
-                label="Receita líquida"
-                value={fmt(revenue)}
-                helper={`${approved.length} aprovações no período`}
-                tone="primary"
-              />
-              <HeroStatCard
-                icon={<Target className="h-4 w-4" />}
-                label="Conversão"
-                value={`${conversion.toFixed(1)}%`}
-                helper={`${filteredTx.length} checkouts analisados`}
-                tone="info"
-              />
-              <HeroStatCard
-                icon={<ShieldCheck className="h-4 w-4" />}
-                label="Qualidade"
-                value={`${(100 - riskRate).toFixed(1)}%`}
-                helper={`Risco combinado: ${riskRate.toFixed(2)}%`}
-                tone="success"
-              />
-            </div>
-
-            <div className="lg:col-span-4 space-y-3">
-              <div className="rounded-2xl border border-border/80 bg-card/90 p-4">
-                <p className="kicker">Saldo para saque</p>
-                <p className="mt-2 text-3xl font-display font-black tracking-tight text-foreground">{fmt(revenue)}</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">Operação estável e pronta para escalar.</p>
-              </div>
-              <div className="rounded-2xl border border-border/80 bg-card/90 p-4">
-                <p className="kicker">Saques pendentes</p>
-                <p className="mt-2 text-2xl font-display font-black tracking-tight text-foreground">{fmt(withdrawalPending)}</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">{withdrawals.filter((w) => w.status === "pending").length} solicitações aguardando.</p>
-              </div>
+          {/* Hero metrics - mobile: 2 cols, desktop: full row */}
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-5 md:gap-3">
+            <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita líquida" value={fmt(revenue)} tone="primary" />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Bruto" value={fmt(gross)} tone="info" />
+            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
+            <MiniHeroCard icon={<ShieldCheck className="h-4 w-4" />} label="Qualidade" value={`${(100 - riskRate).toFixed(1)}%`} tone="primary" />
+            <div className="col-span-2 md:col-span-1 rounded-xl border border-border/80 bg-card/80 p-3">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold">Saldo</p>
+              <p className="mt-1 text-xl md:text-2xl font-display font-black tracking-tight text-foreground">{fmt(revenue)}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiTile icon={<TrendingUp className="h-5 w-5" />} label="Faturamento bruto" value={fmt(gross)} helper="Vendas aprovadas" tone="primary" delay="stagger-1" />
-        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(ticket)} helper="Média por transação" tone="info" delay="stagger-2" />
-        <KpiTile icon={<Users className="h-5 w-5" />} label="Clientes únicos" value={String(customers)} helper="No período selecionado" tone="success" delay="stagger-3" />
-        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Pendências" value={String(pending.length)} helper="Pagamentos aguardando" tone="warning" delay="stagger-4" />
+      {/* ─── KPI TILES ─── */}
+      <section className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-4">
+        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(ticket)} helper="Por transação" tone="info" delay="stagger-1" />
+        <KpiTile icon={<Users className="h-5 w-5" />} label="Clientes" value={String(customers)} helper="Únicos no período" tone="success" delay="stagger-2" />
+        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Pendentes" value={String(pending.length)} helper="Aguardando" tone="warning" delay="stagger-3" />
+        <KpiTile icon={<ArrowDownRight className="h-5 w-5" />} label="Saques pend." value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="primary" delay="stagger-4" />
       </section>
 
+      {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 panel-enterprise p-5 md:p-6 animate-fade-in stagger-2">
-          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-2">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-display font-black text-foreground">Performance de Receita</h2>
-              <p className="mt-1 text-xs text-muted-foreground">Série temporal de vendas aprovadas</p>
+              <h2 className="text-base md:text-lg font-display font-black text-foreground">Performance</h2>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">Receita aprovada no período</p>
             </div>
-            <div className="rounded-xl border border-border/80 bg-card px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-bold">Acumulado</p>
-              <p className="text-lg font-display font-black text-foreground">{fmt(revenue)}</p>
+            <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-1.5">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold">Total</p>
+              <p className="text-base md:text-lg font-display font-black text-foreground">{fmt(revenue)}</p>
             </div>
           </div>
 
-          <ResponsiveContainer width="100%" height={320}>
+          <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -314,7 +285,7 @@ export default function Dashboard() {
                 type="monotone"
                 dataKey="vendas"
                 stroke="hsl(var(--primary))"
-                strokeWidth={2.8}
+                strokeWidth={2.5}
                 fill="url(#dashboardRevenue)"
                 dot={false}
                 activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
@@ -323,10 +294,10 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="xl:col-span-4 space-y-4">
-          <div className="panel-enterprise p-5 animate-fade-in stagger-3">
-            <h3 className="text-xs font-display font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Saúde Operacional</h3>
-            <div className="space-y-2.5">
+        <div className="xl:col-span-4 space-y-3">
+          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3">
+            <h3 className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Saúde Operacional</h3>
+            <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
               <QualityLine icon={<AlertTriangle className="h-4 w-4" />} label="Falhas" value={String(failed.length)} tone="destructive" />
@@ -334,9 +305,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="panel-enterprise p-5 animate-fade-in stagger-4">
-            <h3 className="text-xs font-display font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Snapshot de Produto</h3>
-            <div className="grid grid-cols-2 gap-2.5">
+          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-4">
+            <h3 className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Snapshot</h3>
+            <div className="grid grid-cols-2 gap-2">
               <SmallMetric icon={<Package className="h-4 w-4" />} label="Produtos" value={String(products)} />
               <SmallMetric icon={<CreditCard className="h-4 w-4" />} label="Checkouts" value={String(filteredTx.length)} />
               <SmallMetric icon={<GraduationCap className="h-4 w-4" />} label="Cursos" value={String(products)} />
@@ -346,58 +317,62 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {/* ─── ACTIONS + ACTIVITY ─── */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="panel-enterprise p-6 animate-fade-in stagger-3">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
-              <h3 className="text-lg font-display font-black text-foreground">Ações Estratégicas</h3>
-            </div>
+        {/* Quick actions */}
+        <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
+          <div className="mb-4 flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            <h3 className="text-base md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
-              { label: "Gerir Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
+              { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
               { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
-              { label: "Ver Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório completo" },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
               { label: "Extrato", href: "/financeiro/extrato", icon: Activity, desc: "Fluxo financeiro" },
               { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
             ].map((action, i) => (
               <Link
                 key={action.href}
                 to={action.href}
-                className={`panel-enterprise-subtle flex items-center gap-3.5 p-4 group animate-fade-in ${STAGGER_CLASSES[i]}`}
+                className={`group flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 p-3 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i]}`}
               >
-                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 transition-colors group-hover:bg-primary/15">
-                  <action.icon className="h-5 w-5" />
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 hidden md:block">
                   <p className="text-sm font-semibold text-foreground">{action.label}</p>
                   <p className="text-[11px] text-muted-foreground">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 transition-colors group-hover:text-primary/60" />
+                <div className="min-w-0 flex-1 md:hidden">
+                  <p className="text-[12px] font-semibold text-foreground leading-tight">{action.label}</p>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 hidden md:block" />
               </Link>
             ))}
           </div>
         </div>
 
-        <div className="panel-enterprise p-6 animate-fade-in stagger-4">
-          <div className="mb-5 flex items-center justify-between">
+        {/* Activity */}
+        <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
-              <h3 className="text-lg font-display font-black text-foreground">Atividade Recente</h3>
+              <h3 className="text-base md:text-lg font-display font-black text-foreground">Atividade</h3>
             </div>
-            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary transition-all hover:gap-1.5">
+            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
               Ver tudo <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {activity.length === 0 ? (
-              <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-12 text-center">
-                <p className="text-sm font-semibold text-foreground">Nenhuma atividade ainda</p>
-                <p className="mt-1 text-[12px] text-muted-foreground">Suas movimentações aparecerão automaticamente aqui.</p>
+              <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-10 text-center">
+                <p className="text-sm font-semibold text-foreground">Nenhuma atividade</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">Movimentações aparecerão aqui.</p>
               </div>
             ) : (
               activity.map((item, i) => {
@@ -425,23 +400,23 @@ export default function Dashboard() {
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/35 animate-fade-in ${
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30 animate-fade-in ${
                       STAGGER_CLASSES[i + 1] || ""
                     }`}
                   >
-                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${styles.icon}`}>
-                      {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${styles.icon}`}>
+                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <p className="text-sm font-bold text-foreground">{fmt(item.amount)}</p>
-                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${styles.pill}`}>{styles.label}</span>
+                        <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
 
-                    <span className="text-[11px] font-medium text-muted-foreground">{timeAgo(item.createdAt)}</span>
+                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">{timeAgo(item.createdAt)}</span>
                   </div>
                 );
               })
@@ -453,90 +428,48 @@ export default function Dashboard() {
   );
 }
 
+/* ─── Sub-components ─── */
+
 type Tone = "primary" | "info" | "success" | "warning";
 
-function KpiTile({
-  icon,
-  label,
-  value,
-  helper,
-  tone,
-  delay,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  helper: string;
-  tone: Tone;
-  delay?: string;
-}) {
-  const toneStyles: Record<Tone, { bg: string; text: string }> = {
-    primary: { bg: "bg-primary/12", text: "text-primary" },
-    info: { bg: "bg-info/12", text: "text-info" },
-    success: { bg: "bg-success/12", text: "text-success" },
-    warning: { bg: "bg-warning/12", text: "text-warning" },
-  };
+const toneMap: Record<Tone, { bg: string; text: string }> = {
+  primary: { bg: "bg-primary/12", text: "text-primary" },
+  info: { bg: "bg-info/12", text: "text-info" },
+  success: { bg: "bg-success/12", text: "text-success" },
+  warning: { bg: "bg-warning/12", text: "text-warning" },
+};
 
+function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   return (
-    <div className={`panel-enterprise p-5 hover-lift animate-fade-in ${delay || ""}`}>
-      <div className="mb-3 flex items-center justify-between">
-        <span className="kicker">{label}</span>
-        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${toneStyles[tone].bg}`}>
-          <span className={toneStyles[tone].text}>{icon}</span>
+    <div className="rounded-xl border border-border/80 bg-card/80 p-3">
+      <div className="flex items-center gap-1.5 mb-1">
+        <div className={`h-6 w-6 rounded-md flex items-center justify-center ${toneMap[tone].bg}`}>
+          <span className={toneMap[tone].text}>{icon}</span>
         </div>
+        <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">{label}</span>
       </div>
-      <p className="text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-1.5 text-[11px] text-muted-foreground">{helper}</p>
+      <p className="text-lg md:text-xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
 
-function HeroStatCard({
-  icon,
-  label,
-  value,
-  helper,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  helper: string;
-  tone: Tone;
-}) {
-  const toneStyles: Record<Tone, { bg: string; text: string }> = {
-    primary: { bg: "bg-primary/12", text: "text-primary" },
-    info: { bg: "bg-info/12", text: "text-info" },
-    success: { bg: "bg-success/12", text: "text-success" },
-    warning: { bg: "bg-warning/12", text: "text-warning" },
-  };
-
+function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-card/90 p-4 backdrop-blur-xl">
-      <div className="mb-2 flex items-center gap-2">
-        <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${toneStyles[tone].bg}`}>
-          <span className={toneStyles[tone].text}>{icon}</span>
+    <div className={`rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 hover:border-primary/20 transition-all animate-fade-in ${delay || ""}`}>
+      <div className="mb-2 md:mb-3 flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold">{label}</span>
+        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
+          <span className={toneMap[tone].text}>{icon}</span>
         </div>
-        <span className="kicker">{label}</span>
       </div>
-      <p className="text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-1 text-[11px] text-muted-foreground">{helper}</p>
+      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className="mt-1 text-[10px] md:text-[11px] text-muted-foreground">{helper}</p>
     </div>
   );
 }
 
-function QualityLine({
-  icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  tone: "success" | "warning" | "destructive" | "info";
-}) {
-  const styles: Record<"success" | "warning" | "destructive" | "info", { bg: string; text: string }> = {
+function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
+  const styles: Record<string, { bg: string; text: string }> = {
     success: { bg: "bg-success/10", text: "text-success" },
     warning: { bg: "bg-warning/10", text: "text-warning" },
     destructive: { bg: "bg-destructive/10", text: "text-destructive" },
@@ -544,9 +477,9 @@ function QualityLine({
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
-      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text}`}>{icon}</div>
-      <span className="flex-1 text-[13px] font-medium text-muted-foreground">{label}</span>
+    <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5">
+      <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text}`}>{icon}</div>
+      <span className="flex-1 text-[12px] font-medium text-muted-foreground">{label}</span>
       <span className="text-[13px] font-bold text-foreground">{value}</span>
     </div>
   );
@@ -554,13 +487,12 @@ function QualityLine({
 
 function SmallMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-muted/20 p-3">
-      <div className="mb-1.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
+      <div className="mb-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="text-base font-display font-bold text-foreground">{value}</p>
+      <p className="text-sm md:text-base font-display font-bold text-foreground">{value}</p>
     </div>
   );
 }
-

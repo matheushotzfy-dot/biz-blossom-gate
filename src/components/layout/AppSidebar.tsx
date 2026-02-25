@@ -16,12 +16,12 @@ import {
   UserCircle,
   User,
   LogOut,
-  Rocket,
   Zap,
   ChevronRight,
   Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -98,8 +98,8 @@ export function AppSidebar() {
 
       <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
-          <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0">
-            <Rocket className="h-6 w-6 text-primary-foreground" />
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0 bg-card">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
 
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
