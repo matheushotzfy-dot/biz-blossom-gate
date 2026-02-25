@@ -51,7 +51,7 @@ export default function Auth() {
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[150px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-info/5 rounded-full blur-[120px]" />
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(0,10%,10%) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(155,10%,10%) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
         </div>
 
         <div className="w-full max-w-md animate-slide-up relative z-10">
@@ -108,10 +108,10 @@ export default function Auth() {
         </div>
       </div>
 
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 via-background to-red-500/10 items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 via-background to-emerald-500/10 items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px]" />
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(0,60%,45%,0.1) 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(155,60%,35%,0.1) 1px, transparent 0)", backgroundSize: "32px 32px" }} />
         </div>
         <div className="max-w-md relative z-10">
           <h2 className="text-3xl font-bold mb-6 text-foreground">Venda seus infoprodutos com facilidade</h2>

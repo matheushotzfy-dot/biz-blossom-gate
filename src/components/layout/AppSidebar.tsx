@@ -106,7 +106,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground/35 hover:text-red-400 hover:bg-red-500/[0.06] transition-all w-full text-[14px] font-medium"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground/35 hover:text-emerald-400 hover:bg-emerald-500/[0.06] transition-all w-full text-[14px] font-medium"
         >
           <LogOut className="h-[18px] w-[18px]" />
           <span>Sair da conta</span>
