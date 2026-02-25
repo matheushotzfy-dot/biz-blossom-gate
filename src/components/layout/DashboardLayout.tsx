@@ -3,7 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
 import { Outlet } from "react-router-dom";
-import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command, Sparkles } from "lucide-react";
+import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command } from "lucide-react";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -56,9 +56,6 @@ export function DashboardLayout() {
 
             <div className="flex-1" />
 
-            <div className="hidden xl:inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> Modo Titan
-            </div>
 
             <button
               onClick={toggleTheme}

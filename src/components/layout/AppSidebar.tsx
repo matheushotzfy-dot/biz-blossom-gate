@@ -16,14 +16,17 @@ import {
   UserCircle,
   User,
   LogOut,
-  Zap,
   ChevronRight,
-  Sparkles,
+  Trophy,
+  Headphones,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState, useMemo } from "react";
+import type { Tables } from "@/integrations/supabase/types";
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +41,29 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+
+const MILESTONES = [
+  { label: "R$ 0", value: 0 },
+  { label: "R$ 10K", value: 10000 },
+  { label: "R$ 100K", value: 100000 },
+  { label: "R$ 500K", value: 500000 },
+  { label: "R$ 1M", value: 1000000 },
+  { label: "R$ 5M", value: 5000000 },
+];
+
+function getMilestone(revenue: number) {
+  let current = MILESTONES[0];
+  let next = MILESTONES[1];
+  for (let i = 0; i < MILESTONES.length - 1; i++) {
+    if (revenue >= MILESTONES[i].value) {
+      current = MILESTONES[i];
+      next = MILESTONES[i + 1];
+    }
+  }
+  const range = next.value - current.value;
+  const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
+  return { current, next, pct, tier: MILESTONES.indexOf(current) };
+}
 
 const sections = [
   {
@@ -83,6 +109,22 @@ export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { user } = useAuth();
+  const [revenue, setRevenue] = useState(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("transactions")
+      .select("net_amount")
+      .eq("user_id", user.id)
+      .eq("status", "completed")
+      .then(({ data }) => {
+        if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0));
+      });
+  }, [user?.id]);
+
+  const milestone = useMemo(() => getMilestone(revenue), [revenue]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -108,16 +150,29 @@ export function AppSidebar() {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-[1fr_auto] gap-2.5 group-data-[collapsible=icon]:hidden">
-          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/55 px-3.5 py-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/80">Plano</span>
-              <span className="text-[12px] font-black text-sidebar-primary">Enterprise</span>
+        <div className="mt-4 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-xl border border-sidebar-primary/20 bg-sidebar-primary/[0.06] px-3.5 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-sidebar-primary" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/80">Milestone</span>
+              </div>
+              <span className="text-[11px] font-black text-sidebar-primary">{milestone.next.label}</span>
             </div>
-          </div>
-          <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/55 px-3.5 py-2.5 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-sidebar-primary animate-pulse" />
-            <span className="text-[12px] font-bold text-sidebar-accent-foreground">Online</span>
+            <div className="relative h-2.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/80 to-sidebar-primary transition-all duration-700"
+                style={{ width: `${milestone.pct}%` }}
+              />
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm"
+                style={{ width: `${milestone.pct}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-[9px] font-bold text-sidebar-foreground/60">{milestone.current.label}</span>
+              <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
+            </div>
           </div>
         </div>
       </SidebarHeader>
@@ -183,18 +238,18 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="relative p-3 border-t border-sidebar-border/80">
-        <div className="mb-2 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 group-data-[collapsible=icon]:hidden">
-          <div className="mb-1.5 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-sidebar-primary" />
-            <span className="text-[12px] font-black text-sidebar-accent-foreground">Modo Escala Ativo</span>
+        <button
+          onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
+          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all hover:bg-sidebar-primary/[0.15] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
+        >
+          <div className="h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center shrink-0">
+            <Headphones className="h-4 w-4 text-sidebar-primary" />
           </div>
-          <p className="text-[11px] leading-relaxed text-sidebar-foreground/90">
-            Analytics avançado, checkout otimizado e automações para crescer sem fricção.
-          </p>
-          <div className="mt-2.5 inline-flex items-center gap-1 rounded-full border border-sidebar-primary/25 bg-sidebar-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-primary">
-            <Sparkles className="h-3 w-3" /> Enterprise
+          <div>
+            <span className="text-[12px] font-black text-sidebar-accent-foreground block">Solicitar Suporte</span>
+            <span className="text-[10px] text-sidebar-foreground/70">Para escalar seu negócio</span>
           </div>
-        </div>
+        </button>
 
         <button
           onClick={handleLogout}
