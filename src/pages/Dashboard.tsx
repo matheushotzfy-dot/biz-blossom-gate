@@ -223,15 +223,11 @@ export default function Dashboard() {
           </div>
 
           {/* Hero metrics - mobile: 2 cols, desktop: full row */}
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-5 md:gap-3">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
             <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita líquida" value={fmt(revenue)} tone="primary" />
             <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Bruto" value={fmt(gross)} tone="info" />
             <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-            <MiniHeroCard icon={<ShieldCheck className="h-4 w-4" />} label="Qualidade" value={`${(100 - riskRate).toFixed(1)}%`} tone="primary" />
-            <div className="col-span-2 md:col-span-1 rounded-xl border border-border/80 bg-card/80 p-3">
-              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold">Saldo</p>
-              <p className="mt-1 text-xl md:text-2xl font-display font-black tracking-tight text-foreground">{fmt(revenue)}</p>
-            </div>
+            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={fmt(revenue)} tone="primary" />
           </div>
         </div>
       </section>
@@ -301,7 +297,6 @@ export default function Dashboard() {
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
               <QualityLine icon={<AlertTriangle className="h-4 w-4" />} label="Falhas" value={String(failed.length)} tone="destructive" />
-              <QualityLine icon={<RefreshCw className="h-4 w-4" />} label="Risco" value={`${riskRate.toFixed(2)}%`} tone="info" />
             </div>
           </div>
 
@@ -311,7 +306,6 @@ export default function Dashboard() {
               <SmallMetric icon={<Package className="h-4 w-4" />} label="Produtos" value={String(products)} />
               <SmallMetric icon={<CreditCard className="h-4 w-4" />} label="Checkouts" value={String(filteredTx.length)} />
               <SmallMetric icon={<GraduationCap className="h-4 w-4" />} label="Cursos" value={String(products)} />
-              <SmallMetric icon={<Layers className="h-4 w-4" />} label="Funis" value="Ativo" />
             </div>
           </div>
         </div>
