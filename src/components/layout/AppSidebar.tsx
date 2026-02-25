@@ -1,8 +1,8 @@
 import {
   LayoutDashboard, Wallet, FileText, Building2, ArrowDownToLine,
-  ShoppingCart, Package, ExternalLink, LogOut, Zap, UserCircle,
+  ShoppingCart, Package, ExternalLink, LogOut, UserCircle,
   Webhook, Ticket, BookOpen, PlayCircle, Layers, User, Puzzle,
-  PieChart,
+  PieChart, Shield,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +14,7 @@ import {
 
 const sections = [
   {
-    label: "OVERVIEW",
+    label: "PRINCIPAL",
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     ],
@@ -23,16 +23,16 @@ const sections = [
     label: "FINANCEIRO",
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
-      { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
-      { title: "Identidade", url: "/financeiro/identidade", icon: UserCircle },
       { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },
-      { title: "Gastos", url: "/financeiro/gastos", icon: PieChart },
+      { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
+      { title: "Controle de Gastos", url: "/financeiro/gastos", icon: PieChart },
+      { title: "Identidade", url: "/financeiro/identidade", icon: UserCircle },
     ],
   },
   {
-    label: "COMERCIAL",
+    label: "VENDAS",
     items: [
-      { title: "Vendas", url: "/vendas", icon: ShoppingCart },
+      { title: "Minhas Vendas", url: "/vendas", icon: ShoppingCart },
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
       { title: "Checkout", url: "/vendas/checkout", icon: ExternalLink },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
@@ -44,7 +44,7 @@ const sections = [
   {
     label: "PLATAFORMA",
     items: [
-      { title: "Meus Cursos", url: "/membros", icon: PlayCircle },
+      { title: "Área de Membros", url: "/membros", icon: PlayCircle },
       { title: "Apps", url: "/integracoes/apps", icon: Puzzle },
       { title: "Meu Perfil", url: "/perfil", icon: User },
     ],
@@ -60,24 +60,24 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="w-[260px] border-r border-sidebar-border bg-sidebar">
-      {/* Logo */}
-      <div className="px-5 py-6 border-b border-sidebar-border">
+    <Sidebar className="w-[256px] border-r border-sidebar-border bg-sidebar">
+      {/* Brand */}
+      <div className="px-5 py-5 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center neon-glow">
-            <Zap className="h-5 w-5 text-primary-foreground" />
+          <div className="h-9 w-9 rounded-lg gradient-primary flex items-center justify-center">
+            <Shield className="h-4.5 w-4.5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold text-white tracking-tight">PayGate</h1>
-            <p className="text-[11px] text-sidebar-foreground/50 font-medium tracking-wide">PAYMENT GATEWAY</p>
+            <h1 className="text-[17px] font-extrabold text-white tracking-tight leading-none">SAFRAPAY</h1>
+            <p className="text-[9px] text-sidebar-foreground/40 font-semibold tracking-[0.2em] mt-0.5">PAYMENT GATEWAY</p>
           </div>
         </div>
       </div>
 
-      <SidebarContent className="px-3 py-4 overflow-y-auto">
+      <SidebarContent className="px-3 py-3 overflow-y-auto">
         {sections.map((section, idx) => (
-          <SidebarGroup key={section.label} className={idx > 0 ? "mt-6" : ""}>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.25em] text-sidebar-foreground/30 font-bold px-3 mb-2">
+          <SidebarGroup key={section.label} className={idx > 0 ? "mt-5" : ""}>
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.2em] text-sidebar-foreground/25 font-bold px-3 mb-1.5">
               {section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -88,11 +88,11 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/60 hover:text-white hover:bg-white/5 transition-all duration-150 group relative"
-                        activeClassName="text-white font-semibold bg-primary/15 border border-primary/20"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/55 hover:text-white hover:bg-white/[0.04] transition-all duration-150 group relative"
+                        activeClassName="text-white font-semibold bg-sidebar-accent border border-sidebar-primary/20"
                       >
-                        <item.icon className="h-[17px] w-[17px] shrink-0 group-[.active]:text-primary" />
-                        <span className="text-[14px] font-medium">{item.title}</span>
+                        <item.icon className="h-4 w-4 shrink-0 group-[.active]:text-sidebar-primary" />
+                        <span className="text-[13px] font-medium">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -106,9 +106,9 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/40 hover:text-red-400 hover:bg-red-500/5 transition-all w-full text-[14px] font-medium"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/35 hover:text-red-400 hover:bg-red-500/[0.06] transition-all w-full text-[13px] font-medium"
         >
-          <LogOut className="h-[17px] w-[17px]" />
+          <LogOut className="h-4 w-4" />
           <span>Sair da conta</span>
         </button>
       </SidebarFooter>

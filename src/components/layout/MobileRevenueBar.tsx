@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Shield } from "lucide-react";
 
 const MILESTONES = [
   { label: "R$ 0", value: 0 },
@@ -47,33 +47,35 @@ export function MobileRevenueBar() {
   const milestone = getCurrentMilestone(revenue);
 
   return (
-    <div className="md:hidden sticky top-0 z-20 bg-background border-b border-border px-4 py-2.5">
+    <div className="md:hidden sticky top-0 z-20 bg-background/95 backdrop-blur-lg border-b border-border px-4 py-2.5">
       <div className="flex items-center gap-3">
-        {/* Progress section */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-bold text-foreground">{fmtCompact(revenue)}</span>
-            <span className="text-[10px] font-medium text-muted-foreground">Meta: {milestone.next.label}</span>
+        {/* Brand */}
+        <div className="flex items-center gap-2 mr-1">
+          <div className="h-7 w-7 rounded-md gradient-primary flex items-center justify-center">
+            <Shield className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <div className="w-full rounded-full h-2 bg-muted overflow-hidden">
+          <span className="text-sm font-extrabold text-foreground tracking-tight">SAFRAPAY</span>
+        </div>
+
+        {/* Progress */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold text-foreground">{fmtCompact(revenue)}</span>
+            <span className="text-[9px] font-medium text-muted-foreground">{milestone.next.label}</span>
+          </div>
+          <div className="w-full rounded-full h-1.5 bg-muted overflow-hidden">
             <div
-              className="h-full rounded-full bg-primary transition-all duration-1000"
+              className="h-full rounded-full gradient-primary transition-all duration-1000"
               style={{ width: `${Math.max(milestone.pct, 2)}%` }}
             />
           </div>
         </div>
 
-        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
-          aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+          className="shrink-0 h-7 w-7 rounded-md flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
         >
-          {theme === "dark" ? (
-            <Sun className="h-4 w-4 text-yellow-400" />
-          ) : (
-            <Moon className="h-4 w-4 text-muted-foreground" />
-          )}
+          {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-warning" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
       </div>
     </div>
