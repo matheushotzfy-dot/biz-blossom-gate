@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Settings, Crosshair } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Settings, Crosshair, Eye, MoreVertical, Copy, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, PageTitle } from "@/components/PageShell";
 import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
@@ -24,9 +25,9 @@ export default function Produtos() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
   const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -79,67 +80,143 @@ export default function Produtos() {
   const handleDelete = async (id: string) => { const { error } = await supabase.from("products").delete().eq("id", id); if (error) { toast.error("Erro"); return; } toast.success("Removido"); loadProducts(); };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; } setImageFile(file); setImagePreview(URL.createObjectURL(file)); };
 
+  const copyCheckout = (p: Tables<"products">) => {
+    if (p.checkout_url) {
+      navigator.clipboard.writeText(p.checkout_url);
+      setCopiedId(p.id);
+      toast.success("Link copiado!");
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
   return (
     <PageShell>
-      <div className="flex items-center justify-between">
-        <PageTitle icon={<Package className="h-6 w-6" />} title="Produtos" subtitle="Cadastre e gerencie seus produtos" />
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Crie, gerencie e configure seus infoprodutos" />
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> Novo Produto</Button>
+            <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+              <Plus className="h-4 w-4" /> Novo Produto
+            </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{editId ? "Editar Produto" : "Novo Produto"}</DialogTitle></DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <DialogContent className="max-w-lg rounded-2xl">
+            <DialogHeader><DialogTitle className="font-display text-lg">{editId ? "Editar Produto" : "Novo Produto"}</DialogTitle></DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-5 mt-2">
               <div>
-                <Label>Imagem</Label>
+                <Label className="text-sm font-semibold">Imagem do produto</Label>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                 {imagePreview ? (
-                  <div className="relative mt-2 rounded-xl overflow-hidden border border-border">
-                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
-                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center text-white"><X className="h-4 w-4" /></button>
+                  <div className="relative mt-2 rounded-xl overflow-hidden border border-border group">
+                    <img src={imagePreview} alt="Preview" className="w-full h-44 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-10 w-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 w-full h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                    <ImagePlus className="h-8 w-8" /><span className="text-xs font-medium">Adicionar imagem</span>
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 w-full h-36 rounded-xl border-2 border-dashed border-border hover:border-primary/40 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-all hover:bg-primary/[0.02]">
+                    <ImagePlus className="h-8 w-8" /><span className="text-xs font-semibold">Clique para adicionar imagem</span>
                   </button>
                 )}
               </div>
-              <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-              <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
-              <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required /></div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={uploading}>{uploading ? "Enviando..." : editId ? "Salvar" : "Criar"}</Button>
+              <div><Label className="text-sm font-semibold">Nome do produto</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-11" required /></div>
+              <div><Label className="text-sm font-semibold">Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5" /></div>
+              <div><Label className="text-sm font-semibold">Preço (R$)</Label><Input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-11" required /></div>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground h-11 rounded-xl font-bold shadow-md shadow-primary/15" disabled={uploading}>
+                {uploading ? "Enviando..." : editId ? "Salvar alterações" : "Criar produto"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {products.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-muted-foreground"><Package className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhum produto</p></div>
-        ) : products.map((p) => (
-          <Panel key={p.id}>
-            {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-36 object-cover rounded-xl mb-3" />}
-            <div className="flex justify-between items-start mb-2">
-              <div><h3 className="font-bold text-foreground text-[14px]">{p.name}</h3><p className="text-[20px] font-extrabold mt-1 text-primary">R$ {Number(p.price).toFixed(2)}</p></div>
-              <StatusBadge status={p.status} />
+      {/* Products grid */}
+      {products.length === 0 ? (
+        <div className="panel-enterprise p-16 flex flex-col items-center text-center animate-fade-in">
+          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <Package className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-display font-bold text-foreground mb-2">Nenhum produto criado</h3>
+          <p className="text-sm text-muted-foreground max-w-sm">Crie seu primeiro infoproduto para começar a vender. Configure checkout, preço e área de membros.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {products.map((p, i) => (
+            <div key={p.id} className={`panel-enterprise overflow-hidden group animate-fade-in stagger-${Math.min(i + 1, 6)}`}>
+              {/* Image */}
+              <div className="relative h-44 bg-muted/30 overflow-hidden">
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                    <Package className="h-12 w-12 text-muted-foreground/20" />
+                  </div>
+                )}
+                <div className="absolute top-3 right-3">
+                  <StatusBadge status={p.status} />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+              </div>
+
+              {/* Content */}
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h3 className="text-base font-display font-bold text-foreground leading-snug">{p.name}</h3>
+                  <p className="text-xl font-display font-black text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
+                </div>
+
+                {p.description && (
+                  <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
+                )}
+
+                {/* Checkout link */}
+                {p.checkout_url && (
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2 mb-4">
+                    <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="text-[11px] text-muted-foreground font-mono truncate flex-1">{p.checkout_url}</span>
+                    <button onClick={() => copyCheckout(p)} className="text-primary hover:text-primary/80 transition-colors">
+                      {copiedId === p.id ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="flex-1 gap-1.5 rounded-lg text-[12px] h-9 font-semibold hover:border-primary/20 hover:bg-primary/[0.03] transition-all" onClick={() => handleEdit(p)}>
+                    <Edit className="h-3.5 w-3.5" /> Editar
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1.5 rounded-lg text-[12px] h-9 font-semibold hover:border-primary/20 hover:bg-primary/[0.03] transition-all" onClick={() => setSettingsProduct(p)}>
+                    <Settings className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Checkout</span>
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="rounded-lg h-9 w-9 p-0 hover:border-primary/20 hover:bg-primary/[0.03] transition-all">
+                        <MoreVertical className="h-3.5 w-3.5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-xl p-1.5 min-w-[160px]">
+                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 rounded-lg cursor-pointer">
+                        <Crosshair className="h-3.5 w-3.5" /> Pixels
+                      </DropdownMenuItem>
+                      {p.checkout_url && (
+                        <DropdownMenuItem onClick={() => window.open(p.checkout_url!, "_blank")} className="gap-2 rounded-lg cursor-pointer">
+                          <Eye className="h-3.5 w-3.5" /> Ver checkout
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-2 rounded-lg cursor-pointer text-destructive focus:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" /> Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
             </div>
-            {p.description && <p className="text-[12px] text-muted-foreground mb-3 line-clamp-2">{p.description}</p>}
-            {p.checkout_url && <p className="text-[10px] text-muted-foreground/60 mb-3 flex items-center gap-1 font-mono truncate"><ExternalLink className="h-3 w-3 shrink-0" />{p.checkout_url}</p>}
-            <div className="flex gap-2 pt-3 border-t border-border">
-              <Button variant="outline" size="sm" className="flex-1 gap-1 rounded-xl text-[12px]" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
-              <Button variant="outline" size="sm" className="gap-1 rounded-xl text-[12px]" onClick={() => setSettingsProduct(p)}>
-                <Settings className="h-3 w-3" />
-                <span className="hidden sm:inline">Checkout</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-1 rounded-xl text-[12px]" onClick={() => setPixelProduct(p)}>
-                <Crosshair className="h-3 w-3" />
-                <span className="hidden sm:inline">Pixels</span>
-              </Button>
-              <Button variant="outline" size="sm" className="text-destructive hover:text-destructive rounded-xl" onClick={() => handleDelete(p.id)}><Trash2 className="h-3 w-3" /></Button>
-            </div>
-          </Panel>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {settingsProduct && (
         <CheckoutSettingsDialog
@@ -149,7 +226,6 @@ export default function Produtos() {
           onSaved={loadProducts}
         />
       )}
-
       {pixelProduct && (
         <PixelSettingsDialog
           product={pixelProduct}
