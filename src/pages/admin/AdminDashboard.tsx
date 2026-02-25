@@ -8,6 +8,7 @@ import {
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, ChevronLeft, ChevronRight, Bell,
   Moon, Sun, UserCog, RefreshCw, Rocket, Sparkles, Search, Command,
+  Bug, UserX,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -27,8 +28,10 @@ import AdminAcquirersTab from "./tabs/AdminAcquirersTab";
 import AdminEmployeesTab from "./tabs/AdminEmployeesTab";
 import AdminTopSellersTab from "./tabs/AdminTopSellersTab";
 import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
+import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
+import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 
-const EMPLOYEE_ALLOWED_TABS = new Set(["overview", "sellers", "products", "transactions"]);
+const EMPLOYEE_ALLOWED_TABS = new Set(["overview", "sellers", "products", "transactions"] as string[]);
 
 const SIDEBAR_SECTIONS = [
   {
@@ -58,18 +61,25 @@ const SIDEBAR_SECTIONS = [
     ],
   },
   {
+    title: "MONITORAMENTO",
+    items: [
+      { id: "error-logs", label: "Log de Erros", icon: Bug, employeeAccess: false },
+      { id: "inactive-sellers", label: "Sellers Inativos", icon: UserX, employeeAccess: false },
+      { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
+    ],
+  },
+  {
     title: "PLATAFORMA",
     items: [
       { id: "employees", label: "Funcionários", icon: UserCog, employeeAccess: false },
       { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
       { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
-      { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
       { id: "settings", label: "Configurações", icon: Settings, employeeAccess: false },
     ],
   },
 ] as const;
 
-type TabId = "overview" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings";
+type TabId = "overview" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -458,7 +468,13 @@ export default function AdminDashboard() {
               <AdminCoursesTab profiles={profiles} products={products} />
             )}
             {activeTab === "audit" && isAdmin && (
-              <AdminAuditTab />
+              <AdminAuditTab profiles={profiles} />
+            )}
+            {activeTab === "error-logs" && isAdmin && (
+              <AdminErrorLogsTab profiles={profiles} />
+            )}
+            {activeTab === "inactive-sellers" && isAdmin && (
+              <AdminInactiveSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
             )}
             {activeTab === "settings" && isAdmin && (
               <AdminSettingsTab />
