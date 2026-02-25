@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Settings, Crosshair, Eye, MoreVertical, Copy, CheckCircle2 } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,12 +11,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { PageShell, PageTitle } from "@/components/PageShell";
-import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
+import { useNavigate } from "react-router-dom";
 
 export default function Produtos() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -25,7 +26,6 @@ export default function Produtos() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
   const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -145,11 +145,11 @@ export default function Produtos() {
           {products.map((p, i) => (
             <div
               key={p.id}
-              className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col min-h-[430px]"
+              className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col"
               style={{ animationDelay: `${Math.min(i, 5) * 80}ms` }}
             >
               {/* Image */}
-              <div className="relative h-52 bg-muted/30 overflow-hidden">
+              <div className="relative h-48 bg-muted/30 overflow-hidden">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
@@ -164,47 +164,46 @@ export default function Produtos() {
               </div>
 
               {/* Content */}
-              <div className="p-5 flex flex-1 flex-col">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3 className="text-lg font-display font-bold text-foreground leading-snug line-clamp-2">{p.name}</h3>
-                  <p className="text-2xl font-display font-black text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
+              <div className="p-4 flex flex-1 flex-col">
+                <div className="flex items-start justify-between gap-3 mb-1.5">
+                  <h3 className="text-base font-display font-bold text-foreground leading-snug line-clamp-2">{p.name}</h3>
+                  <p className="text-xl font-display font-black text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
                 </div>
 
                 {p.description ? (
-                  <p className="text-[13px] text-muted-foreground line-clamp-3 mb-4 leading-relaxed min-h-[56px]">{p.description}</p>
+                  <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
                 ) : (
-                  <p className="text-[13px] text-muted-foreground/70 mb-4 min-h-[56px]">Descrição não informada.</p>
+                  <p className="text-[12px] text-muted-foreground/70 mb-3">Sem descrição.</p>
                 )}
 
                 {p.checkout_url && (
-                  <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2.5 mb-4">
-                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className="text-[11px] text-muted-foreground font-mono truncate flex-1">{p.checkout_url}</span>
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2 mb-3">
+                    <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="text-[10px] text-muted-foreground font-mono truncate flex-1">{p.checkout_url}</span>
                     <button onClick={() => copyCheckout(p)} className="text-primary hover:text-primary/80 transition-colors" aria-label="Copiar link do checkout">
                       {copiedId === p.id ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     </button>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 mt-auto pt-2">
-                  <Button variant="outline" size="sm" className="flex-1 gap-1.5 rounded-lg text-[12px] h-9 font-semibold hover:border-primary/20 hover:bg-primary/[0.03] transition-all" onClick={() => handleEdit(p)}>
-                    <Edit className="h-3.5 w-3.5" /> Editar
+                <div className="flex items-center gap-1.5 mt-auto pt-2">
+                  <Button variant="outline" size="sm" className="gap-1 rounded-lg text-[11px] h-8 font-semibold hover:border-primary/20 hover:bg-primary/[0.03]" onClick={() => handleEdit(p)}>
+                    <Edit className="h-3 w-3" /> Editar
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-1.5 rounded-lg text-[12px] h-9 font-semibold hover:border-primary/20 hover:bg-primary/[0.03] transition-all" onClick={() => setSettingsProduct(p)}>
-                    <Settings className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Checkout</span>
+                  <Button variant="outline" size="sm" className="gap-1 rounded-lg text-[11px] h-8 font-semibold hover:border-primary/20 hover:bg-primary/[0.03]" onClick={() => setPixelProduct(p)}>
+                    <Crosshair className="h-3 w-3" /> Pixels
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1 rounded-lg text-[11px] h-8 font-semibold hover:border-primary/20 hover:bg-primary/[0.03]" onClick={() => navigate("/vendas/checkout")}>
+                    <ExternalLink className="h-3 w-3" /> Checkout
                   </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="rounded-lg h-9 w-9 p-0 hover:border-primary/20 hover:bg-primary/[0.03] transition-all">
+                      <Button variant="outline" size="sm" className="rounded-lg h-8 w-8 p-0 hover:border-primary/20 hover:bg-primary/[0.03] ml-auto">
                         <MoreVertical className="h-3.5 w-3.5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="rounded-xl p-1.5 min-w-[160px]">
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 rounded-lg cursor-pointer">
-                        <Crosshair className="h-3.5 w-3.5" /> Pixels
-                      </DropdownMenuItem>
                       {p.checkout_url && (
                         <DropdownMenuItem onClick={() => window.open(p.checkout_url!, "_blank")} className="gap-2 rounded-lg cursor-pointer">
                           <Eye className="h-3.5 w-3.5" /> Ver checkout
@@ -222,14 +221,6 @@ export default function Produtos() {
         </div>
       )}
 
-      {settingsProduct && (
-        <CheckoutSettingsDialog
-          product={settingsProduct}
-          open={!!settingsProduct}
-          onOpenChange={(v) => { if (!v) setSettingsProduct(null); }}
-          onSaved={loadProducts}
-        />
-      )}
       {pixelProduct && (
         <PixelSettingsDialog
           product={pixelProduct}

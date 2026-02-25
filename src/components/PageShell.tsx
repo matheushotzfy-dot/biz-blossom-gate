@@ -5,8 +5,8 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   return <div className="relative space-y-6 pb-10 animate-fade-in">{children}</div>;
 }
 
-export function Panel({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
-  return <div className={cn("panel-enterprise p-5", className)} onClick={onClick}>{children}</div>;
+export function Panel({ children, className, onClick, style }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
+  return <div className={cn("panel-enterprise p-5", className)} onClick={onClick} style={style}>{children}</div>;
 }
 
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
