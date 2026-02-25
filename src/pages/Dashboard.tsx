@@ -333,8 +333,11 @@ export default function Dashboard() {
           </div>
 
           <div className="mt-5 pt-4 border-t border-border flex gap-3">
-            <MiniStat label="Pendentes" value={pending.length} color="warning" />
             <MiniStat label="Aprovadas" value={approved.length} color="success" />
+            <div className="flex-1 rounded-xl bg-primary/8 border border-primary/15 p-3 text-center">
+              <p className="text-lg font-display font-black text-primary">{pixTx.length > 0 ? `${((pixPaid / pixTx.length) * 100).toFixed(0)}%` : "0%"}</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Conv. PIX</p>
+            </div>
           </div>
         </div>
 

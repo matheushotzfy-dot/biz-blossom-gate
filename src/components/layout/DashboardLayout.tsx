@@ -30,7 +30,7 @@ export function DashboardLayout() {
 
   return (
     <SidebarProvider
-      style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "3.5rem" } as { [key: string]: string }}
+      style={{ "--sidebar-width": "20rem", "--sidebar-width-icon": "3.5rem" } as { [key: string]: string }}
     >
       <div className="flex h-svh w-full overflow-hidden bg-background">
         <AppSidebar />

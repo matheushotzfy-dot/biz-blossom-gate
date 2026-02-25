@@ -190,7 +190,7 @@ export function AppSidebar() {
 
               {/* Progress bar with flame */}
               <div className="relative">
-                <div className="relative h-3 w-full rounded-full bg-sidebar-border/60 overflow-visible">
+                <div className="relative h-[10px] w-full rounded-full bg-sidebar-border/40 overflow-visible">
                   {/* Track glow */}
                   <div
                     className="absolute inset-y-0 left-0 rounded-full sidebar-progress-bar"
