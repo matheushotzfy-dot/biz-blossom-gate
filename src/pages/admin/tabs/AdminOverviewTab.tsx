@@ -184,8 +184,8 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
   const SellerTypeBadge = ({ type }: { type: string | null }) => {
     if (type === "black") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700">B</span>;
-    if (type === "white") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-slate-200/10 text-slate-400 border border-slate-500/20">W</span>;
-    return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">?</span>;
+    if (type === "white") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-muted text-muted-foreground border border-border">W</span>;
+    return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">?</span>;
   };
 
   // Chart data key based on filter
@@ -219,43 +219,39 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ═══ Row 2: Black vs White + Disputes (admin only) ═══ */}
       {!isEmployee && (<div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-        <div className="rounded-2xl bg-gradient-to-br from-zinc-900/60 to-zinc-800/20 border border-zinc-700/30 p-5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-500/20 to-transparent" />
+        <AdminPanel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><Shield className="h-4 w-4 text-zinc-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">Black</span></div>
-            <span className="text-[10px] text-zinc-500">{blackSellers.size} sellers • Conv: {blackConversion}%</span>
+            <div className="flex items-center gap-2"><Shield className="h-4 w-4 text-zinc-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Black</span></div>
+            <span className="text-[10px] text-muted-foreground">{blackSellers.size} sellers • Conv: {blackConversion}%</span>
           </div>
-          <p className="text-2xl font-black text-white">{fmtCurrency(blackVolume)}</p>
-          <p className="text-xs text-zinc-500 mt-1">Lucro: <span className="text-amber-400 font-bold">{fmtCurrency(blackFees)}</span> • {blackTx.length} vendas</p>
-        </div>
-        <div className="rounded-2xl bg-gradient-to-br from-slate-100/[0.03] to-slate-200/[0.01] border border-slate-500/15 p-5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400/15 to-transparent" />
+          <p className="text-2xl font-black text-foreground">{fmtCurrency(blackVolume)}</p>
+          <p className="text-xs text-muted-foreground mt-1">Lucro: <span className="text-warning font-bold">{fmtCurrency(blackFees)}</span> • {blackTx.length} vendas</p>
+        </AdminPanel>
+        <AdminPanel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-slate-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">White</span></div>
-            <span className="text-[10px] text-slate-500">{whiteSellers.size} sellers • Conv: {whiteConversion}%</span>
+            <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-blue-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">White</span></div>
+            <span className="text-[10px] text-muted-foreground">{whiteSellers.size} sellers • Conv: {whiteConversion}%</span>
           </div>
-          <p className="text-2xl font-black text-white">{fmtCurrency(whiteVolume)}</p>
-          <p className="text-xs text-slate-500 mt-1">Lucro: <span className="text-amber-400 font-bold">{fmtCurrency(whiteFees)}</span> • {whiteTx.length} vendas</p>
-        </div>
-        <div className="rounded-2xl bg-gradient-to-br from-amber-500/[0.04] to-amber-500/[0.01] border border-amber-500/10 p-5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />
+          <p className="text-2xl font-black text-foreground">{fmtCurrency(whiteVolume)}</p>
+          <p className="text-xs text-muted-foreground mt-1">Lucro: <span className="text-warning font-bold">{fmtCurrency(whiteFees)}</span> • {whiteTx.length} vendas</p>
+        </AdminPanel>
+        <AdminPanel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-500" /><span className="text-[10px] uppercase tracking-wider font-bold text-amber-500">Não Classificados</span></div>
-            <span className="text-[10px] text-amber-600">{unsetSellers.size} sellers</span>
+            <div className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" /><span className="text-[10px] uppercase tracking-wider font-bold text-warning">Não Classificados</span></div>
+            <span className="text-[10px] text-muted-foreground">{unsetSellers.size} sellers</span>
           </div>
-          <p className="text-2xl font-black text-white">{fmtCurrency(unsetVolume)}</p>
-          <p className="text-xs text-amber-600 mt-1">Lucro: <span className="text-amber-400 font-bold">{fmtCurrency(unsetFees)}</span> • {unsetTx.length} vendas</p>
-        </div>
+          <p className="text-2xl font-black text-foreground">{fmtCurrency(unsetVolume)}</p>
+          <p className="text-xs text-muted-foreground mt-1">Lucro: <span className="text-warning font-bold">{fmtCurrency(unsetFees)}</span> • {unsetTx.length} vendas</p>
+        </AdminPanel>
         {/* Disputes summary */}
-        <div className="rounded-2xl bg-gradient-to-br from-red-500/[0.04] to-orange-500/[0.02] border border-red-500/10 p-5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/15 to-transparent" />
-          <div className="flex items-center gap-2 mb-3"><ShieldAlert className="h-4 w-4 text-red-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-red-400">Disputas</span></div>
+        <AdminPanel>
+          <div className="flex items-center gap-2 mb-3"><ShieldAlert className="h-4 w-4 text-destructive" /><span className="text-[10px] uppercase tracking-wider font-bold text-destructive">Disputas</span></div>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div><p className="text-lg font-black text-amber-400">{medpixCount}</p><p className="text-[9px] text-white/25">MedPix</p></div>
-            <div><p className="text-lg font-black text-orange-400">{premedCount}</p><p className="text-[9px] text-white/25">Pre-Med</p></div>
-            <div><p className="text-lg font-black text-red-400">{refundCount}</p><p className="text-[9px] text-white/25">Reembolso</p></div>
+            <div><p className="text-lg font-black text-warning">{medpixCount}</p><p className="text-[9px] text-muted-foreground">MedPix</p></div>
+            <div><p className="text-lg font-black text-orange-500">{premedCount}</p><p className="text-[9px] text-muted-foreground">Pre-Med</p></div>
+            <div><p className="text-lg font-black text-destructive">{refundCount}</p><p className="text-[9px] text-muted-foreground">Reembolso</p></div>
           </div>
-        </div>
+        </AdminPanel>
       </div>)}
 
       {/* ═══ Row 3: Chart with filter + Pie + Methods (admin only) ═══ */}
@@ -264,14 +260,14 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           <AdminPanel>
             <div className="flex items-center justify-between mb-5">
               <PanelTitle color="emerald">Volume 7 dias</PanelTitle>
-              <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-0.5">
+              <div className="flex items-center gap-1 bg-muted/30 border border-border rounded-xl p-0.5">
                 {([
                   { id: "total" as const, label: "Total" },
                   { id: "black" as const, label: "Black" },
                   { id: "white" as const, label: "White" },
                 ] as const).map(f => (
                   <button key={f.id} onClick={() => setChartFilter(f.id)}
-                    className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${chartFilter === f.id ? "bg-white/[0.08] text-white" : "text-white/30 hover:text-white/60"}`}>
+                    className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${chartFilter === f.id ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
                     {f.label}
                   </button>
                 ))}
@@ -303,10 +299,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                   <PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={3} strokeWidth={0}>{pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie><Tooltip contentStyle={{ backgroundColor: "hsl(228,20%,6%)", border: "1px solid hsl(228,15%,12%)", borderRadius: "12px", fontSize: "11px", color: "white" }} /></PieChart>
                 </ResponsiveContainer>
                 <div className="flex flex-wrap gap-x-3 gap-y-1.5 justify-center mt-1">
-                  {pieData.map((d, i) => (<div key={d.name} className="flex items-center gap-1 text-[9px]"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} /><span className="capitalize text-white/40">{d.name}</span><span className="font-bold text-white">{d.value}</span></div>))}
+                  {pieData.map((d, i) => (<div key={d.name} className="flex items-center gap-1 text-[9px]"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} /><span className="capitalize text-muted-foreground">{d.name}</span><span className="font-bold text-foreground">{d.value}</span></div>))}
                 </div>
               </>
-            ) : (<div className="flex items-center justify-center h-[160px] text-sm text-white/20">Sem dados</div>)}
+            ) : (<div className="flex items-center justify-center h-[160px] text-sm text-muted-foreground">Sem dados</div>)}
           </AdminPanel>
           <AdminPanel>
             <PanelTitle color="violet">Métodos de Pagamento</PanelTitle>
@@ -314,15 +310,15 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
               {Object.entries(methodStats).sort((a, b) => b[1].volume - a[1].volume).map(([method, stats]) => {
                 const pct = totalVolume > 0 ? (stats.volume / totalVolume) * 100 : 0;
                 const labels: Record<string, string> = { pix: "PIX", credit_card: "Cartão", boleto: "Boleto", other: "Outro" };
-                const colors: Record<string, string> = { pix: "bg-emerald-500", credit_card: "bg-blue-500", boleto: "bg-amber-500", other: "bg-white/20" };
+                const colors: Record<string, string> = { pix: "bg-emerald-500", credit_card: "bg-blue-500", boleto: "bg-amber-500", other: "bg-muted" };
                 return (
                   <div key={method}>
                     <div className="flex justify-between text-[10px] mb-1">
-                      <span className="text-white/50 font-medium">{labels[method] || method}</span>
-                      <span className="text-white/70 font-bold">{fmtCurrency(stats.volume)} ({pct.toFixed(1)}%) • {stats.count} vendas</span>
+                      <span className="text-muted-foreground font-medium">{labels[method] || method}</span>
+                      <span className="text-foreground/70 font-bold">{fmtCurrency(stats.volume)} ({pct.toFixed(1)}%) • {stats.count} vendas</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
-                      <div className={`h-full rounded-full ${colors[method] || "bg-white/20"} transition-all`} style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                      <div className={`h-full rounded-full ${colors[method] || "bg-muted"} transition-all`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -337,13 +333,13 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         <AdminPanel>
           <PanelTitle color="blue" icon={<CreditCard className="h-4 w-4" />}>Detalhes por Adquirente</PanelTitle>
           <div className="space-y-4 mt-4">
-            {acquirerStats.map(acq => (
-              <div key={acq.name} className={`rounded-xl border p-5 ${acq.type === "black" ? "border-zinc-700/30 bg-zinc-900/30" : "border-slate-500/15 bg-slate-100/[0.02]"}`}>
+             {acquirerStats.map(acq => (
+              <div key={acq.name} className={`rounded-xl border p-5 ${acq.type === "black" ? "border-zinc-700/30 bg-muted/30" : "border-border bg-muted/10"}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${acq.type === "black" ? "bg-zinc-800 text-zinc-400" : "bg-slate-200/10 text-slate-400"}`}>{acq.type}</span>
-                    <span className="text-sm font-bold">{acq.name}</span>
-                    <span className="text-[10px] text-white/20">{acq.sellers} sellers</span>
+                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${acq.type === "black" ? "bg-zinc-800 text-zinc-400" : "bg-muted text-muted-foreground"}`}>{acq.type}</span>
+                    <span className="text-sm font-bold text-foreground">{acq.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{acq.sellers} sellers</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
@@ -368,40 +364,40 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           <PanelTitle color="amber" icon={<AlertTriangle className="h-4 w-4" />}>Saques Pendentes</PanelTitle>
           <div className="flex gap-3 text-[10px]">
             <span className="text-zinc-400">Black: <strong>{blackWdPending.length}</strong> ({fmtCurrency(blackWdPending.reduce((a, w) => a + Number(w.amount), 0))})</span>
-            <span className="text-slate-400">White: <strong>{whiteWdPending.length}</strong> ({fmtCurrency(whiteWdPending.reduce((a, w) => a + Number(w.amount), 0))})</span>
-            <span className="text-amber-400">N/C: <strong>{unsetWdPending.length}</strong> ({fmtCurrency(unsetWdPending.reduce((a, w) => a + Number(w.amount), 0))})</span>
-            {pendingWd.length > 0 && <span className="bg-red-500/10 text-red-400 px-3 py-1 rounded-full font-extrabold border border-red-500/20 animate-pulse">{pendingWd.length}</span>}
+            <span className="text-blue-400">White: <strong>{whiteWdPending.length}</strong> ({fmtCurrency(whiteWdPending.reduce((a, w) => a + Number(w.amount), 0))})</span>
+            <span className="text-warning">N/C: <strong>{unsetWdPending.length}</strong> ({fmtCurrency(unsetWdPending.reduce((a, w) => a + Number(w.amount), 0))})</span>
+            {pendingWd.length > 0 && <span className="bg-destructive/10 text-destructive px-3 py-1 rounded-full font-extrabold border border-destructive/20 animate-pulse">{pendingWd.length}</span>}
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/[0.04]">{["ID","Vendedor","Tipo","Valor","Taxa","Líquido","Status","Data","Ações"].map(h=>(<th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>))}</tr></thead>
+            <thead><tr className="border-b border-border">{["ID","Vendedor","Tipo","Valor","Taxa","Líquido","Status","Data","Ações"].map(h=>(<th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>))}</tr></thead>
             <tbody>
               {withdrawals.slice(0, 15).map(w => {
                 const sellerProfile = profiles.find(p => p.user_id === w.user_id);
                 const sellerType = sellerProfile?.seller_type || null;
-                return (
-                  <tr key={w.id} className={`border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors ${w.status === "pending" ? "bg-amber-500/[0.02]" : ""}`}>
-                    <td className="p-3 font-mono text-[11px] text-white/30">{w.id.slice(0,8)}</td>
-                    <td className="p-3 text-xs font-medium">{sellerProfile?.full_name || "—"}</td>
-                    <td className="p-3"><SellerTypeBadge type={sellerType} /></td>
-                    <td className="p-3 text-xs font-extrabold">R$ {Number(w.amount).toFixed(2)}</td>
-                    <td className="p-3 text-xs text-amber-400">R$ {Number(w.fee_amount).toFixed(2)}</td>
-                    <td className="p-3 text-xs text-emerald-400">R$ {Number(w.net_amount).toFixed(2)}</td>
-                    <td className="p-3"><StatusBadge status={w.status} /></td>
-                    <td className="p-3 text-[11px] text-white/30">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
-                    <td className="p-3">
-                      {w.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button size="sm" className="h-7 text-[11px] bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}><CheckCircle2 className="h-3 w-3" /> Aprovar</Button>
-                          <Button size="sm" className="h-7 text-[11px] bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "rejected")}><XCircle className="h-3 w-3" /> Recusar</Button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
+                  return (
+                    <tr key={w.id} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${w.status === "pending" ? "bg-warning/[0.03]" : ""}`}>
+                      <td className="p-3 font-mono text-[11px] text-muted-foreground">{w.id.slice(0,8)}</td>
+                      <td className="p-3 text-xs font-medium text-foreground">{sellerProfile?.full_name || "—"}</td>
+                      <td className="p-3"><SellerTypeBadge type={sellerType} /></td>
+                      <td className="p-3 text-xs font-extrabold text-foreground">R$ {Number(w.amount).toFixed(2)}</td>
+                      <td className="p-3 text-xs text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
+                      <td className="p-3 text-xs text-primary">R$ {Number(w.net_amount).toFixed(2)}</td>
+                      <td className="p-3"><StatusBadge status={w.status} /></td>
+                      <td className="p-3 text-[11px] text-muted-foreground">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                      <td className="p-3">
+                        {w.status === "pending" && (
+                          <div className="flex gap-2">
+                            <Button size="sm" className="h-7 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}><CheckCircle2 className="h-3 w-3" /> Aprovar</Button>
+                            <Button size="sm" className="h-7 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "rejected")}><XCircle className="h-3 w-3" /> Recusar</Button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
                 );
               })}
-              {withdrawals.length === 0 && <tr><td colSpan={9} className="p-10 text-center text-white/20 text-xs">Sem saques</td></tr>}
+              {withdrawals.length === 0 && <tr><td colSpan={9} className="p-10 text-center text-muted-foreground text-xs">Sem saques</td></tr>}
             </tbody>
           </table>
         </div>
@@ -412,24 +408,24 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         <PanelTitle color="emerald" icon={<TrendingUp className="h-4 w-4" />}>Ranking de Vendedores</PanelTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/[0.04]">
+            <thead><tr className="border-b border-border">
               {["#", "Vendedor", "Tipo", "Tx", "Volume", "Taxa", "Líquido"].map((h, i) => (
-                <th key={h} className={`${i >= 3 ? "text-right" : "text-left"} p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider`}>{h}</th>
+                <th key={h} className={`${i >= 3 ? "text-right" : "text-left"} p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider`}>{h}</th>
               ))}
             </tr></thead>
             <tbody>
               {clientBreakdown.slice(0, 15).map((c, idx) => (
-                <tr key={c.userId} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="p-3 text-xs text-white/20 font-bold">{idx + 1}</td>
-                  <td className="p-3"><div className="flex items-center gap-2"><div className={`h-8 w-8 rounded-xl flex items-center justify-center text-xs font-bold ${idx === 0 ? "bg-gradient-to-br from-amber-500/30 to-amber-500/10 text-amber-400" : "bg-gradient-to-br from-white/[0.06] to-white/[0.02] text-white/50"}`}>{(c.name || "?")[0].toUpperCase()}</div><div><p className="text-xs font-bold text-white">{c.name}</p><p className="text-[10px] text-white/25">{c.email}</p></div></div></td>
+                <tr key={c.userId} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                  <td className="p-3 text-xs text-muted-foreground font-bold">{idx + 1}</td>
+                  <td className="p-3"><div className="flex items-center gap-2"><div className={`h-8 w-8 rounded-xl flex items-center justify-center text-xs font-bold ${idx === 0 ? "bg-gradient-to-br from-amber-500/30 to-amber-500/10 text-amber-500" : "bg-muted text-muted-foreground"}`}>{(c.name || "?")[0].toUpperCase()}</div><div><p className="text-xs font-bold text-foreground">{c.name}</p><p className="text-[10px] text-muted-foreground">{c.email}</p></div></div></td>
                   <td className="p-3"><SellerTypeBadge type={c.type} /></td>
-                  <td className="p-3 text-right"><span className="text-xs font-bold bg-white/[0.04] px-2 py-1 rounded-lg">{c.txCount}</span></td>
-                  <td className="p-3 text-xs font-extrabold text-right">{fmtCurrency(c.volume)}</td>
-                  <td className="p-3 text-xs font-bold text-right text-amber-400">{fmtCurrency(c.fees)}</td>
-                  <td className="p-3 text-xs font-bold text-right text-emerald-400">{fmtCurrency(c.net)}</td>
+                  <td className="p-3 text-right"><span className="text-xs font-bold bg-muted/50 px-2 py-1 rounded-lg text-foreground">{c.txCount}</span></td>
+                  <td className="p-3 text-xs font-extrabold text-right text-foreground">{fmtCurrency(c.volume)}</td>
+                  <td className="p-3 text-xs font-bold text-right text-warning">{fmtCurrency(c.fees)}</td>
+                  <td className="p-3 text-xs font-bold text-right text-primary">{fmtCurrency(c.net)}</td>
                 </tr>
               ))}
-              {clientBreakdown.length === 0 && <tr><td colSpan={7} className="p-10 text-center text-white/20 text-xs">Sem vendas</td></tr>}
+              {clientBreakdown.length === 0 && <tr><td colSpan={7} className="p-10 text-center text-muted-foreground text-xs">Sem vendas</td></tr>}
             </tbody>
           </table>
         </div>
@@ -438,24 +434,24 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       {/* ═══ Row 7: Quick Stats ═══ */}
       {!isEmployee && (<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminPanel>
-          <div className="flex items-center gap-2 mb-2"><Package className="h-4 w-4 text-violet-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-white/30">Produtos</span></div>
-          <p className="text-xl font-black">{products.length}</p>
-          <p className="text-[10px] text-white/20 mt-1">{products.filter(p => p.status === "active").length} ativos • {products.filter(p => p.status === "blocked").length} bloqueados</p>
+          <div className="flex items-center gap-2 mb-2"><Package className="h-4 w-4 text-violet-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Produtos</span></div>
+          <p className="text-xl font-black text-foreground">{products.length}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">{products.filter(p => p.status === "active").length} ativos • {products.filter(p => p.status === "blocked").length} bloqueados</p>
         </AdminPanel>
         <AdminPanel>
-          <div className="flex items-center gap-2 mb-2"><Activity className="h-4 w-4 text-cyan-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-white/30">Conversão</span></div>
-          <p className="text-xl font-black text-emerald-400">{conversionRate}%</p>
-          <p className="text-[10px] text-white/20 mt-1">{approved.length} de {allTx.length} transações</p>
+          <div className="flex items-center gap-2 mb-2"><Activity className="h-4 w-4 text-cyan-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Conversão</span></div>
+          <p className="text-xl font-black text-primary">{conversionRate}%</p>
+          <p className="text-[10px] text-muted-foreground mt-1">{approved.length} de {allTx.length} transações</p>
         </AdminPanel>
         <AdminPanel>
-          <div className="flex items-center gap-2 mb-2"><BarChart3 className="h-4 w-4 text-amber-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-white/30">Ticket Médio</span></div>
-          <p className="text-xl font-black">{fmtCurrency(approved.length > 0 ? totalVolume / approved.length : 0)}</p>
-          <p className="text-[10px] text-white/20 mt-1">Por transação aprovada</p>
+          <div className="flex items-center gap-2 mb-2"><BarChart3 className="h-4 w-4 text-amber-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Ticket Médio</span></div>
+          <p className="text-xl font-black text-foreground">{fmtCurrency(approved.length > 0 ? totalVolume / approved.length : 0)}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">Por transação aprovada</p>
         </AdminPanel>
         <AdminPanel>
-          <div className="flex items-center gap-2 mb-2"><Users className="h-4 w-4 text-blue-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-white/30">Sellers</span></div>
-          <p className="text-xl font-black">{profiles.length}</p>
-          <p className="text-[10px] text-white/20 mt-1">{blackSellers.size}B / {whiteSellers.size}W / {unsetSellers.size}?</p>
+          <div className="flex items-center gap-2 mb-2"><Users className="h-4 w-4 text-blue-400" /><span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Sellers</span></div>
+          <p className="text-xl font-black text-foreground">{profiles.length}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">{blackSellers.size}B / {whiteSellers.size}W / {unsetSellers.size}?</p>
         </AdminPanel>
       </div>)}
     </div>

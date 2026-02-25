@@ -379,6 +379,39 @@ export type Database = {
           },
         ]
       }
+      error_logs: {
+        Row: {
+          created_at: string
+          error_type: string
+          id: string
+          message: string
+          metadata: Json | null
+          resolved: boolean
+          stack_trace: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_type?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          resolved?: boolean
+          stack_trace?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_type?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          resolved?: boolean
+          stack_trace?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
@@ -598,6 +631,30 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       product_pixels: {
         Row: {
           api_token: string | null
@@ -755,6 +812,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_ip: string | null
+          last_login_at: string | null
           phone: string | null
           pix_key: string | null
           pix_key_type: string | null
@@ -774,6 +832,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_ip?: string | null
+          last_login_at?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
@@ -793,6 +852,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_ip?: string | null
+          last_login_at?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
@@ -853,6 +913,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seller_auto_withdraw: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          max_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          max_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          max_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
