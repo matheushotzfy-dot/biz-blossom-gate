@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Flame, Eye, EyeOff, Zap, Shield, TrendingUp } from "lucide-react";
+import { Rocket, Eye, EyeOff, Zap, Shield, GraduationCap, BarChart2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Auth() {
@@ -47,87 +47,96 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex dark">
+      {/* Left — Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-info/5 rounded-full blur-[120px]" />
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(155,10%,10%) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+          <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[150px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-info/[0.03] rounded-full blur-[120px]" />
         </div>
 
         <div className="w-full max-w-md animate-slide-up relative z-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-12 w-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
-              <Flame className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-center gap-3 mb-10">
+            <div className="h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/25">
+              <Rocket className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">HOTZFY</h1>
-              <p className="text-sm text-muted-foreground">Plataforma de Infoprodutos</p>
+              <h1 className="text-2xl font-display font-extrabold tracking-tight text-foreground">HOTZFY</h1>
+              <p className="text-xs text-muted-foreground">Plataforma de Infoprodutos</p>
             </div>
           </div>
 
-          <div className="bg-card/60 backdrop-blur-2xl rounded-2xl border border-border/30 p-8 shadow-2xl shadow-black/10">
-            <h2 className="text-xl font-bold mb-1 text-foreground">
+          <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 p-8 shadow-xl">
+            <h2 className="text-xl font-display font-bold mb-1 text-foreground">
               {isLogin ? "Entrar na sua conta" : "Criar nova conta"}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
-              {isLogin ? "Acesse seu painel de infoprodutor" : "Preencha os dados para começar a vender"}
+              {isLogin ? "Acesse seu painel de infoprodutor" : "Comece a vender seus infoprodutos"}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div>
                   <Label htmlFor="name" className="text-sm font-medium text-foreground">Nome completo</Label>
-                  <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome" className="mt-1.5 bg-muted/30 border-border/30 text-foreground placeholder:text-muted-foreground" required={!isLogin} />
+                  <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome" className="mt-1.5 bg-muted/30 border-border/40 text-foreground placeholder:text-muted-foreground" required={!isLogin} />
                 </div>
               )}
               <div>
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">E-mail</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1.5 bg-muted/30 border-border/30 text-foreground placeholder:text-muted-foreground" required />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1.5 bg-muted/30 border-border/40 text-foreground placeholder:text-muted-foreground" required />
               </div>
               <div>
                 <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha</Label>
                 <div className="relative mt-1.5">
-                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted/30 border-border/30 text-foreground placeholder:text-muted-foreground" required minLength={6} />
+                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted/30 border-border/40 text-foreground placeholder:text-muted-foreground" required minLength={6} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-semibold h-12 rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" disabled={loading}>
-                {loading ? "Processando..." : isLogin ? "Entrar" : "Criar conta"}
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-semibold h-11 rounded-lg shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/25 transition-all" disabled={loading}>
+                {loading ? "Processando..." : isLogin ? "Entrar" : "Criar conta grátis"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline font-medium">
-                {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar"}
+                {isLogin ? "Não tem conta? Cadastre-se grátis" : "Já tem conta? Entrar"}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 via-background to-emerald-500/10 items-center justify-center p-12 relative overflow-hidden">
+      {/* Right — Features */}
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(220 18% 7%), hsl(220 20% 5%))" }}>
         <div className="absolute inset-0">
-          <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px]" />
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(155,60%,35%,0.1) 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+          <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-primary/[0.06] rounded-full blur-[120px]" />
         </div>
-        <div className="max-w-md relative z-10">
-          <h2 className="text-3xl font-bold mb-6 text-foreground">Venda seus infoprodutos com facilidade</h2>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 bg-card/40 backdrop-blur-xl rounded-xl p-4 border border-border/20">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"><Zap className="h-5 w-5 text-primary" /></div>
-              <div><p className="text-sm font-semibold text-foreground">Checkout otimizado</p><p className="text-xs text-muted-foreground">PIX, Cartão e Boleto</p></div>
-            </div>
-            <div className="flex items-center gap-3 bg-card/40 backdrop-blur-xl rounded-xl p-4 border border-border/20">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"><Shield className="h-5 w-5 text-primary" /></div>
-              <div><p className="text-sm font-semibold text-foreground">Anti-fraude integrado</p><p className="text-xs text-muted-foreground">Proteção total de vendas</p></div>
-            </div>
-            <div className="flex items-center gap-3 bg-card/40 backdrop-blur-xl rounded-xl p-4 border border-border/20">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"><TrendingUp className="h-5 w-5 text-primary" /></div>
-              <div><p className="text-sm font-semibold text-foreground">Área de membros</p><p className="text-xs text-muted-foreground">Entregue cursos e conteúdos</p></div>
-            </div>
+        <div className="max-w-sm relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/15 text-primary text-xs font-semibold mb-6">
+            <Zap className="h-3 w-3" /> Plataforma #1 de Infoprodutos
+          </div>
+          <h2 className="text-3xl font-display font-extrabold mb-3 text-white leading-tight">Tudo que você precisa para vender online</h2>
+          <p className="text-sm text-white/50 mb-8">Checkout otimizado, área de membros, processamento de pagamentos e muito mais.</p>
+          
+          <div className="space-y-3">
+            {[
+              { icon: CreditCard, title: "Checkout de Alta Conversão", desc: "PIX, Cartão e Boleto com 1-click" },
+              { icon: GraduationCap, title: "Área de Membros", desc: "Entregue cursos e conteúdos premium" },
+              { icon: BarChart2, title: "Analytics Completo", desc: "Métricas em tempo real das suas vendas" },
+              { icon: Shield, title: "Anti-fraude Integrado", desc: "Proteja seu negócio automaticamente" },
+            ].map((f) => (
+              <div key={f.title} className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
+                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <f.icon className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{f.title}</p>
+                  <p className="text-[11px] text-white/40">{f.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
