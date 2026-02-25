@@ -466,8 +466,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
 export function AdminPanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative overflow-hidden bg-[hsl(228,18%,6%)] rounded-2xl border border-white/[0.04] p-6 hover:border-white/[0.06] transition-colors duration-500">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+    <div className="panel-enterprise p-6">
       {children}
     </div>
   );
@@ -475,7 +474,7 @@ export function AdminPanel({ children }: { children: React.ReactNode }) {
 
 export function PanelTitle({ children, color, icon }: { children: React.ReactNode; color: string; icon?: React.ReactNode }) {
   const colorMap: Record<string, string> = { emerald: "from-emerald-400 to-emerald-600", amber: "from-amber-400 to-amber-600", blue: "from-blue-400 to-blue-600", red: "from-red-400 to-red-600", violet: "from-violet-400 to-violet-600", zinc: "from-zinc-400 to-zinc-600", cyan: "from-cyan-400 to-cyan-600" };
-  return (<h3 className="text-sm font-bold flex items-center gap-2.5 text-white"><span className={`w-1 h-5 bg-gradient-to-b ${colorMap[color] || colorMap.emerald} rounded-full`} />{icon}{children}</h3>);
+  return (<h3 className="text-sm font-bold flex items-center gap-2.5 text-foreground"><span className={`w-1 h-5 bg-gradient-to-b ${colorMap[color] || colorMap.emerald} rounded-full`} />{icon}{children}</h3>);
 }
 
 export function AdminKpi({ icon, label, value, sub, gradient, glowColor, alert, highlight }: {
@@ -483,16 +482,15 @@ export function AdminKpi({ icon, label, value, sub, gradient, glowColor, alert, 
   gradient: string; glowColor: string; alert?: boolean; highlight?: boolean;
 }) {
   return (
-    <div className={`relative overflow-hidden bg-[hsl(228,18%,6%)] rounded-2xl border p-5 group transition-all duration-500 hover:translate-y-[-2px] ${alert ? "border-red-500/20 hover:border-red-500/30" : "border-white/[0.04] hover:border-white/[0.08]"}`}>
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+    <div className={`panel-enterprise-subtle p-5 group hover-lift ${alert ? "!border-destructive/20 hover:!border-destructive/30" : ""}`}>
       <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `radial-gradient(circle, ${glowColor}, transparent)` }} />
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[9px] uppercase tracking-widest text-white/30 font-semibold">{label}</span>
+          <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold">{label}</span>
           <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-500`} style={{ boxShadow: `0 8px 25px ${glowColor}` }}>{icon}</div>
         </div>
-        <p className={`text-xl font-extrabold tracking-tight ${highlight ? "text-amber-400" : "text-white"}`}>{value}</p>
-        {sub && <p className="text-[10px] text-white/25 mt-1.5">{sub}</p>}
+        <p className={`text-xl font-extrabold tracking-tight ${highlight ? "text-warning" : "text-foreground"}`}>{value}</p>
+        {sub && <p className="text-[10px] text-muted-foreground mt-1.5">{sub}</p>}
       </div>
     </div>
   );
@@ -501,8 +499,8 @@ export function AdminKpi({ icon, label, value, sub, gradient, glowColor, alert, 
 function MiniStat({ label, value, highlight, alert }: { label: string; value: string; highlight?: boolean; alert?: boolean }) {
   return (
     <div className="text-center">
-      <p className="text-[9px] text-white/25 uppercase tracking-wider mb-1">{label}</p>
-      <p className={`text-xs font-bold ${highlight ? "text-amber-400" : alert ? "text-red-400" : "text-white/80"}`}>{value}</p>
+      <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+      <p className={`text-xs font-bold ${highlight ? "text-warning" : alert ? "text-destructive" : "text-foreground/80"}`}>{value}</p>
     </div>
   );
 }
