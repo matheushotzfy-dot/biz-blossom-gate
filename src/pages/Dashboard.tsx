@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   CalendarDays,
   ChevronDown,
+  CreditCard,
   DollarSign,
   Flame,
   Lock,
@@ -13,8 +14,13 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Users,
   Wallet,
   X,
+  Zap,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -113,22 +119,36 @@ export default function Dashboard() {
 
   const approved = filteredTx.filter((t) => t.status === "completed");
   const pending = filteredTx.filter((t) => t.status === "pending");
+  const refunded = filteredTx.filter((t) => t.status === "refunded");
+  const chargebacks = filteredTx.filter((t) => t.status === "chargeback");
 
   const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
   const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
   const ticket = approved.length > 0 ? gross / approved.length : 0;
   const conversion = filteredTx.length > 0 ? (approved.length / filteredTx.length) * 100 : 0;
 
-  const pixTx = filteredTx.filter((t) => t.payment_method === "pix");
-  const cardTx = filteredTx.filter((t) => t.payment_method === "credit_card" || t.payment_method === "cartao");
-  const boletoTx = filteredTx.filter((t) => t.payment_method === "boleto");
-  const pixPaid = pixTx.filter((t) => t.status === "completed").length;
-  const cardPaid = cardTx.filter((t) => t.status === "completed").length;
-  const boletoPaid = boletoTx.filter((t) => t.status === "completed").length;
+  // Quality: risk = (refunded + chargebacks) / approved — inverted to show quality %
+  const riskCount = refunded.length + chargebacks.length;
+  const quality = approved.length > 0 ? Math.max(0, 100 - (riskCount / approved.length) * 100) : 100;
+  const riskCombined = approved.length > 0 ? ((riskCount / approved.length) * 100).toFixed(3) : "000";
 
-  const withdrawalPending = withdrawals
-    .filter((w) => w.status === "pending")
+  // Unique customers
+  const uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
+
+  const withdrawalBalance = withdrawals
+    .filter((w) => w.status === "approved" || w.status === "completed")
     .reduce((acc, w) => acc + Number(w.net_amount), 0);
+  const withdrawalPending = withdrawals.filter((w) => w.status === "pending");
+  const withdrawalPendingAmount = withdrawalPending.reduce((acc, w) => acc + Number(w.net_amount), 0);
+
+  // Balance for withdrawal = net revenue - already withdrawn
+  const totalNetEarned = transactions
+    .filter(t => t.status === "completed")
+    .reduce((acc, t) => acc + Number(t.net_amount), 0);
+  const totalWithdrawn = withdrawals
+    .filter(w => w.status === "approved" || w.status === "completed")
+    .reduce((acc, w) => acc + Number(w.amount), 0);
+  const availableBalance = Math.max(0, totalNetEarned - totalWithdrawn - withdrawalPendingAmount);
 
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
@@ -144,11 +164,10 @@ export default function Dashboard() {
     });
   }, [transactions, selectedPeriod.days]);
 
-  const recentSales = useMemo(() => transactions.slice(0, 5), [transactions]);
   const displayName = (profile as any)?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
 
   return (
-    <div className="space-y-6 md:space-y-8 relative">
+    <div className="space-y-5 md:space-y-6 relative">
       {/* Fire border effect */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -198,183 +217,187 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ─── HEADER ─── */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between animate-fade-in">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight text-foreground">
-            Olá, <span className="text-primary">{displayName}</span>
+      {/* ═══ HERO: COMMAND CENTER ═══ */}
+      <section className="rounded-2xl border border-border bg-card overflow-hidden animate-fade-in">
+        <div className="p-6 md:p-8">
+          {/* Top row: badge + period */}
+          <div className="flex items-start justify-between mb-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1.5">
+              <Zap className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[10px] font-bold text-primary uppercase tracking-[0.15em]">Command Center</span>
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="inline-flex h-9 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground hover:border-primary/20 transition-colors">
+                  <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                  {selectedPeriod.label}
+                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl p-1">
+                {PERIOD_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.label}
+                    onClick={() => setSelectedPeriod(option)}
+                    className={`rounded-lg py-2 text-sm cursor-pointer ${selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""}`}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-foreground leading-[1.1] mb-2">
+            Plataforma de Escala{" "}
+            <br className="hidden md:block" />
+            <span className="text-primary">para Infoprodutores</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-1.5">
-            Acompanhe suas vendas, performance e métricas em tempo real.
+          <p className="text-sm text-muted-foreground max-w-xl">
+            Um cockpit premium para monitorar vendas, performance de checkout e saúde da operação em tempo real.
           </p>
-        </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Scale Mode */}
-          <div className="relative group">
-            {!scaleMode && (
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-[9px] font-semibold text-muted-foreground bg-card px-2.5 py-1 rounded-lg border border-border shadow-sm">
-                  Ativa com R$ 2K/dia
-                </span>
+          {/* Main KPIs row */}
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Left: 3 main cards */}
+            <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Receita Líquida */}
+              <div className="rounded-xl border border-border bg-background p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Receita Líquida</span>
+                </div>
+                <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight">{fmt(revenue)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{approved.length} aprovações no período</p>
               </div>
-            )}
-            <button
-              disabled={!scaleMode}
-              className={`flame-btn relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all ${
-                scaleMode
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                  : "border border-border bg-card text-muted-foreground cursor-not-allowed"
-              }`}
-            >
-              {scaleMode && [0,1,2,3,4].map((i) => (
-                <span key={i} className="flame-tip" style={{
-                  left: `${20 + i * 15}%`,
-                  width: `${3 + Math.random() * 3}px`,
-                  height: `${3 + Math.random() * 3}px`,
-                  ['--dur' as string]: `${0.6 + i * 0.15}s`,
-                  ['--delay' as string]: `${i * 0.12}s`,
-                }} />
-              ))}
-              {scaleMode ? <Flame className="h-4 w-4 animate-pulse" /> : <Lock className="h-3.5 w-3.5" />}
-              <span className="hidden sm:inline">{scaleMode ? "Escala 🔥" : "Escala"}</span>
-            </button>
-          </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-foreground hover:border-primary/20 transition-colors">
-                <CalendarDays className="h-4 w-4 text-primary" />
-                {selectedPeriod.label}
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl p-1">
-              {PERIOD_OPTIONS.map((option) => (
-                <DropdownMenuItem
-                  key={option.label}
-                  onClick={() => setSelectedPeriod(option)}
-                  className={`rounded-lg py-2 text-sm cursor-pointer ${selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""}`}
-                >
-                  {option.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+              {/* Conversão */}
+              <div className="rounded-xl border border-border bg-background p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Conversão</span>
+                </div>
+                <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight">{conversion.toFixed(1)}%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{filteredTx.length} checkouts analisados</p>
+              </div>
 
-      {/* ─── KPI ROW ─── */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4 animate-fade-in stagger-1">
-        <KpiCard icon={<DollarSign />} label="Receita Líquida" value={fmt(revenue)} accent="primary" />
-        <KpiCard icon={<Target />} label="Ticket Médio" value={fmt(ticket)} accent="info" />
-        <KpiCard icon={<TrendingUp />} label="Conversão" value={`${conversion.toFixed(1)}%`} accent="success" />
-        <KpiCard icon={<Wallet />} label="Saques Pend." value={fmt(withdrawalPending)} accent="warning" />
-      </section>
+              {/* Qualidade */}
+              <div className="rounded-xl border border-border bg-background p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="h-4 w-4 text-warning" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Qualidade</span>
+                </div>
+                <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight">{quality.toFixed(1)}%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Risco combinado: {riskCombined}%</p>
+              </div>
+            </div>
 
-      {/* ─── CHART ─── */}
-      <section className="rounded-2xl border border-border bg-card p-5 md:p-6 animate-fade-in stagger-2">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-display font-bold text-foreground">Performance</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Receita líquida aprovada por dia</p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl md:text-3xl font-display font-black text-foreground">{fmt(revenue)}</p>
-            <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Total no período</p>
+            {/* Right: Saldo + Saques */}
+            <div className="lg:col-span-4 space-y-3">
+              <div className="rounded-xl border border-border bg-background p-4 md:p-5">
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Saldo para Saque</span>
+                <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight mt-2">{fmt(availableBalance)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Operação estável e pronta para escalar.</p>
+              </div>
+              <div className="rounded-xl border border-border bg-background p-4 md:p-5">
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Saques Pendentes</span>
+                <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight mt-2">{fmt(withdrawalPendingAmount)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{withdrawalPending.length} solicitações aguardando.</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} />
-            <YAxis tickLine={false} axisLine={false} width={54} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
-            <Tooltip
-              contentStyle={{
-                background: "var(--tooltip-bg)",
-                border: "1px solid var(--tooltip-border)",
-                borderRadius: "12px",
-                fontSize: "13px",
-                color: "var(--tooltip-text)",
-                padding: "10px 14px",
-                boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-              }}
-              formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-              cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }}
-            />
-            <Area
-              type="monotone"
-              dataKey="vendas"
-              stroke="hsl(var(--primary))"
-              strokeWidth={2.5}
-              fill="url(#revGrad)"
-              dot={false}
-              activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
       </section>
 
-      {/* ─── BOTTOM: Payment Methods + Recent Sales ─── */}
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12 animate-fade-in stagger-3">
-        {/* Payment methods */}
-        <div className="lg:col-span-4 rounded-2xl border border-border bg-card p-5">
-          <h3 className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground mb-4">Meios de Pagamento</h3>
+      {/* ═══ SECONDARY KPIs ═══ */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in stagger-1">
+        <SecondaryKpi icon={<TrendingUp />} label="Faturamento Bruto" value={fmt(gross)} sub="Vendas aprovadas" />
+        <SecondaryKpi icon={<CreditCard />} label="Ticket Médio" value={fmt(ticket)} sub="Média por transação" />
+        <SecondaryKpi icon={<Users />} label="Clientes Únicos" value={String(uniqueCustomers)} sub="No período selecionado" />
+        <SecondaryKpi icon={<Clock />} label="Pendências" value={String(pending.length)} sub="Pagamentos aguardando" />
+      </section>
+
+      {/* ═══ CHART + SAÚDE OPERACIONAL ═══ */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-in stagger-2">
+        {/* Performance chart */}
+        <div className="lg:col-span-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-display font-bold text-foreground">Performance de Receita</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Série temporal de vendas aprovadas.</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Acumulado</p>
+              <p className="text-xl md:text-2xl font-display font-black text-foreground">{fmt(revenue)}</p>
+            </div>
+          </div>
+
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} />
+              <YAxis tickLine={false} axisLine={false} width={54} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--tooltip-bg)",
+                  border: "1px solid var(--tooltip-border)",
+                  borderRadius: "12px",
+                  fontSize: "13px",
+                  color: "var(--tooltip-text)",
+                  padding: "10px 14px",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                }}
+                formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
+                cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }}
+              />
+              <Area
+                type="monotone"
+                dataKey="vendas"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2.5}
+                fill="url(#revGrad)"
+                dot={false}
+                activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Saúde Operacional */}
+        <div className="lg:col-span-4 rounded-2xl border border-border bg-card p-5 md:p-6">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-5">Saúde Operacional</h3>
           <div className="space-y-4">
-            <PaymentBar label="PIX" paid={pixPaid} total={pixTx.length} color="primary" />
-            <PaymentBar label="Cartão" paid={cardPaid} total={cardTx.length} color="info" />
-            <PaymentBar label="Boleto" paid={boletoPaid} total={boletoTx.length} color="warning" />
+            <HealthRow icon={<CheckCircle2 />} label="Aprovadas" value={approved.length} color="success" />
+            <HealthRow icon={<AlertCircle />} label="Pendentes" value={pending.length} color="warning" />
+            <HealthRow icon={<ArrowUpRight />} label="Reembolsos" value={refunded.length} color="info" />
+            <HealthRow icon={<ShieldCheck />} label="Chargebacks" value={chargebacks.length} color="destructive" />
           </div>
 
-          <div className="mt-5 pt-4 border-t border-border flex gap-3">
-            <MiniStat label="Aprovadas" value={approved.length} color="success" />
-            <div className="flex-1 rounded-xl bg-primary/8 border border-primary/15 p-3 text-center">
-              <p className="text-lg font-display font-black text-primary">{pixTx.length > 0 ? `${((pixPaid / pixTx.length) * 100).toFixed(0)}%` : "0%"}</p>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Conv. PIX</p>
+          <div className="mt-5 pt-4 border-t border-border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-muted-foreground">Conv. PIX</span>
+              <span className="text-xs font-bold text-primary">
+                {filteredTx.filter(t => t.payment_method === "pix").length > 0
+                  ? `${((filteredTx.filter(t => t.payment_method === "pix" && t.status === "completed").length / filteredTx.filter(t => t.payment_method === "pix").length) * 100).toFixed(0)}%`
+                  : "0%"}
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-muted/60 overflow-hidden">
+              {(() => {
+                const pixAll = filteredTx.filter(t => t.payment_method === "pix");
+                const pixOk = pixAll.filter(t => t.status === "completed").length;
+                const pct = pixAll.length > 0 ? (pixOk / pixAll.length) * 100 : 0;
+                return <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${Math.max(pct, 1)}%` }} />;
+              })()}
             </div>
           </div>
-        </div>
-
-        {/* Recent sales */}
-        <div className="lg:col-span-8 rounded-2xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">Últimas Vendas</h3>
-            <Link to="/vendas" className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
-              Ver tudo <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          {recentSales.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-10">Nenhuma venda ainda</p>
-          ) : (
-            <div className="space-y-1">
-              {recentSales.map((tx) => {
-                const s = statusMap[tx.status] || statusMap.default;
-                return (
-                  <div key={tx.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-muted/40 transition-colors">
-                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${s.bg}`}>
-                      <DollarSign className={`h-4 w-4 ${s.text}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{tx.customer_name || "Cliente"}</p>
-                      <p className="text-[11px] text-muted-foreground">{tx.payment_method || "—"}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-foreground">{fmt(Number(tx.amount))}</p>
-                      <p className="text-[10px] text-muted-foreground">{timeAgo(tx.created_at)}</p>
-                    </div>
-                    <span className={`shrink-0 rounded-md px-2 py-0.5 text-[9px] font-bold ${s.pill}`}>{s.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </section>
     </div>
@@ -383,63 +406,29 @@ export default function Dashboard() {
 
 /* ─── Sub-components ─── */
 
-const statusMap: Record<string, { label: string; pill: string; bg: string; text: string }> = {
-  completed: { label: "Aprovada", pill: "bg-success/15 text-success", bg: "bg-success/10", text: "text-success" },
-  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", bg: "bg-warning/10", text: "text-warning" },
-  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", bg: "bg-destructive/10", text: "text-destructive" },
-  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", bg: "bg-info/10", text: "text-info" },
-  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", bg: "bg-destructive/10", text: "text-destructive" },
-  default: { label: "—", pill: "bg-muted text-foreground", bg: "bg-muted", text: "text-foreground" },
-};
-
-type Accent = "primary" | "info" | "success" | "warning";
-const accentStyles: Record<Accent, string> = {
-  primary: "text-primary bg-primary/10",
-  info: "text-info bg-info/10",
-  success: "text-success bg-success/10",
-  warning: "text-warning bg-warning/10",
-};
-
-function KpiCard({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent: Accent }) {
+function SecondaryKpi({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 md:p-5 transition-all hover:border-primary/15 hover:shadow-sm group">
+    <div className="rounded-2xl border border-border bg-card p-4 md:p-5 transition-all hover:border-primary/15 hover:shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">{label}</span>
-        <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${accentStyles[accent]} [&>svg]:h-4 [&>svg]:w-4`}>
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
+        <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-muted/50 [&>svg]:h-4 [&>svg]:w-4 text-muted-foreground">
           {icon}
         </div>
       </div>
       <p className="text-xl md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className="text-[11px] text-muted-foreground mt-0.5">{sub}</p>
     </div>
   );
 }
 
-function PaymentBar({ label, paid, total, color }: { label: string; paid: number; total: number; color: string }) {
-  const pct = total > 0 ? (paid / total) * 100 : 0;
+function HealthRow({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm font-semibold text-foreground">{label}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{paid}/{total}</span>
-          <span className={`text-xs font-bold text-${color}`}>{pct.toFixed(0)}%</span>
-        </div>
+    <div className="flex items-center gap-3">
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center bg-${color}/10 [&>svg]:h-4 [&>svg]:w-4 text-${color}`}>
+        {icon}
       </div>
-      <div className="h-2 rounded-full bg-muted/60 overflow-hidden">
-        <div
-          className={`h-full rounded-full bg-${color} transition-all duration-700`}
-          style={{ width: `${Math.max(pct, 1)}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function MiniStat({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className={`flex-1 rounded-xl bg-${color}/8 border border-${color}/15 p-3 text-center`}>
-      <p className={`text-lg font-display font-black text-${color}`}>{value}</p>
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+      <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
+      <span className="text-sm font-bold text-foreground">{value}</span>
     </div>
   );
 }
