@@ -17,10 +17,8 @@ import {
   User,
   LogOut,
   ChevronRight,
+  Trophy,
   Headphones,
-  TrendingUp,
-  Zap,
-  Crown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
@@ -44,14 +42,13 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
-/* ─── Milestone tiers ─── */
 const MILESTONES = [
-  { label: "R$ 0", value: 0, rank: "Iniciante" },
-  { label: "R$ 10K", value: 10000, rank: "Bronze" },
-  { label: "R$ 100K", value: 100000, rank: "Prata" },
-  { label: "R$ 500K", value: 500000, rank: "Ouro" },
-  { label: "R$ 1M", value: 1000000, rank: "Diamante" },
-  { label: "R$ 5M", value: 5000000, rank: "Lenda" },
+  { label: "R$ 0", value: 0 },
+  { label: "R$ 10K", value: 10000 },
+  { label: "R$ 100K", value: 100000 },
+  { label: "R$ 500K", value: 500000 },
+  { label: "R$ 1M", value: 1000000 },
+  { label: "R$ 5M", value: 5000000 },
 ];
 
 function getMilestone(revenue: number) {
@@ -65,15 +62,8 @@ function getMilestone(revenue: number) {
   }
   const range = next.value - current.value;
   const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
-  return { current, next, pct };
+  return { current, next, pct, tier: MILESTONES.indexOf(current) };
 }
-
-const fmtCompact = (v: number) => {
-  if (v === 0) return "R$ 0";
-  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
-  if (v >= 1000) return `R$ ${(v / 1000).toFixed(1)}K`;
-  return `R$ ${v.toFixed(0)}`;
-};
 
 const sections = [
   {
@@ -121,21 +111,20 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
-  const [profile, setProfile] = useState<Tables<"profiles"> & { nickname?: string } | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
-    Promise.all([
-      supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed"),
-      supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-    ]).then(([txRes, profileRes]) => {
-      if (txRes.data) setRevenue(txRes.data.reduce((s, t) => s + Number(t.net_amount), 0));
-      if (profileRes.data) setProfile(profileRes.data as any);
-    });
+    supabase
+      .from("transactions")
+      .select("net_amount")
+      .eq("user_id", user.id)
+      .eq("status", "completed")
+      .then(({ data }) => {
+        if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0));
+      });
   }, [user?.id]);
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
-  const displayName = (profile as any)?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -143,100 +132,62 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border sidebar-premium">
-      {/* ─── HEADER ─── */}
-      <SidebarHeader className="relative px-5 pt-6 pb-5 border-b border-sidebar-border/60">
-        {/* Ambient glow */}
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-sidebar-primary/[0.04] to-transparent pointer-events-none" />
+    <Sidebar className="border-r border-sidebar-border/80 bg-sidebar/95 backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-28 -left-20 h-80 w-80 rounded-full bg-sidebar-primary/12 blur-[90px]" />
+        <div className="absolute bottom-6 -right-10 h-64 w-64 rounded-full bg-sidebar-primary/10 blur-[84px]" />
+      </div>
 
-        <div className={cn("relative flex items-center gap-3.5", collapsed && "justify-center")}>
-          <div className="h-11 w-11 rounded-2xl overflow-hidden shadow-xl shadow-sidebar-primary/25 ring-2 ring-sidebar-primary/20 shrink-0 sidebar-logo-glow">
+      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0 bg-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
+
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[22px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
-              HOTZ<span className="text-sidebar-primary">FY</span>
-            </h1>
-            <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-sidebar-primary/60 mt-1">Plataforma de Infoprodutos</p>
+            <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-sidebar-foreground mt-1">Infoprodutos Ecosystem</p>
           </div>
         </div>
 
-        {/* ─── Milestone Progress Card ─── */}
-        <div className="mt-5 group-data-[collapsible=icon]:hidden">
-          <div className="relative rounded-2xl overflow-hidden">
-            {/* Card background with gradient border effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-sidebar-primary/20 via-sidebar-primary/5 to-transparent p-[1px]">
-              <div className="h-full w-full rounded-2xl bg-sidebar-accent/80 backdrop-blur-sm" />
+        <div className="mt-4 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-xl border border-sidebar-primary/20 bg-sidebar-primary/[0.06] px-3.5 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-sidebar-primary" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/80">Milestone</span>
+              </div>
+              <span className="text-[11px] font-black text-sidebar-primary">{milestone.next.label}</span>
             </div>
-
-            <div className="relative p-4">
-              {/* Name + Revenue */}
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-lg bg-sidebar-primary/15 flex items-center justify-center">
-                    <Crown className="h-3 w-3 text-sidebar-primary" />
-                  </div>
-                  <span className="text-[11px] font-bold text-sidebar-accent-foreground">{displayName}</span>
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sidebar-primary/60">
-                  {milestone.current.rank}
-                </span>
-              </div>
-
-              {/* Revenue amount */}
-              <p className="text-xl font-display font-black text-sidebar-primary mb-3 tracking-tight">
-                {fmtCompact(revenue)}
-              </p>
-
-              {/* Progress bar with flame */}
-              <div className="relative">
-                <div className="relative h-[10px] w-full rounded-full bg-sidebar-border/40 overflow-visible">
-                  {/* Track glow */}
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full sidebar-progress-bar"
-                    style={{ width: `${Math.max(milestone.pct, 4)}%` }}
-                  />
-
-                  {/* Flame at tip */}
-                  {milestone.pct > 0 && (
-                    <div
-                      className="absolute top-1/2 -translate-y-1/2 sidebar-flame-container"
-                      style={{ left: `${Math.max(milestone.pct, 4)}%` }}
-                    >
-                      <div className="sidebar-flame" />
-                      <div className="sidebar-flame-inner" />
-                      <div className="sidebar-flame-spark sidebar-flame-spark-1" />
-                      <div className="sidebar-flame-spark sidebar-flame-spark-2" />
-                      <div className="sidebar-flame-spark sidebar-flame-spark-3" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Labels */}
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-[9px] font-medium text-sidebar-foreground/40">{milestone.current.label}</span>
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-2.5 w-2.5 text-sidebar-primary/60" />
-                    <span className="text-[9px] font-bold text-sidebar-primary/70">{milestone.next.label}</span>
-                  </div>
-                </div>
-              </div>
+            <div className="relative h-2.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/80 to-sidebar-primary transition-all duration-700"
+                style={{ width: `${milestone.pct}%` }}
+              />
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm"
+                style={{ width: `${milestone.pct}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-[9px] font-bold text-sidebar-foreground/60">{milestone.current.label}</span>
+              <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
             </div>
           </div>
         </div>
       </SidebarHeader>
 
-      {/* ─── NAVIGATION ─── */}
-      <SidebarContent className="relative px-3 py-4 overflow-y-auto sidebar-nav-scroll">
+      <SidebarContent className="relative px-2.5 py-4 overflow-y-auto">
         {sections.map((section, idx) => (
-          <SidebarGroup key={section.label} className={cn("px-0", idx > 0 && "mt-3")}>
-            <SidebarGroupLabel className="px-3 mb-1.5 text-[9px] uppercase tracking-[0.25em] font-bold text-sidebar-foreground/30 group-data-[collapsible=icon]:hidden">
+          <SidebarGroup key={section.label} className={cn("px-0", idx > 0 && "mt-3.5")}>
+            <SidebarGroupLabel className="px-3.5 mb-2 text-[10px] uppercase tracking-[0.22em] font-bold text-sidebar-foreground/75 group-data-[collapsible=icon]:hidden">
               {section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-0.5 px-0.5">
+              <SidebarMenu className="space-y-1.5 px-1">
                 {section.items.map((item) => {
                   const isActive = item.url === "/dashboard" ? location.pathname === "/dashboard" : location.pathname.startsWith(item.url);
+
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild className="h-auto p-0 hover:bg-transparent active:bg-transparent">
@@ -245,35 +196,36 @@ export function AppSidebar() {
                           end={item.url === "/dashboard"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-2xl border px-3.5 py-3.5 text-[16px] font-semibold leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "sidebar-nav-active text-sidebar-accent-foreground"
-                              : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40",
+                              ? "border-sidebar-primary/35 bg-sidebar-accent text-sidebar-accent-foreground shadow-lg shadow-sidebar-primary/10"
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/65 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_hsl(152_58%_48%/0.5)] group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                           )}
-                          <div className={cn(
-                            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200",
-                            isActive
-                              ? "bg-sidebar-primary/15 shadow-sm shadow-sidebar-primary/10"
-                              : "bg-sidebar-accent/50 group-hover/nav:bg-sidebar-accent",
-                          )}>
-                            <item.icon className={cn(
-                              "h-4 w-4 transition-colors",
-                              isActive ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover/nav:text-sidebar-foreground/80",
-                            )} />
-                          </div>
+
+                          <span
+                            className={cn(
+                              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                              isActive
+                                ? "bg-sidebar-primary/15 text-sidebar-primary"
+                                : "bg-sidebar-accent/45 text-sidebar-foreground group-hover/nav:bg-sidebar-accent group-hover/nav:text-sidebar-accent-foreground",
+                            )}
+                          >
+                            <item.icon className="h-5 w-5" />
+                          </span>
+
                           <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+
                           {item.badge && (
-                            <span className="ml-auto rounded-full bg-sidebar-primary/20 px-2 py-0.5 text-[8px] font-black text-sidebar-primary tracking-wider group-data-[collapsible=icon]:hidden sidebar-badge-pulse">
+                            <span className="ml-auto rounded-md bg-sidebar-primary/15 px-2 py-0.5 text-[10px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden">
                               {item.badge}
                             </span>
                           )}
-                          {isActive && !item.badge && (
-                            <ChevronRight className="ml-auto h-3.5 w-3.5 text-sidebar-primary/40 group-data-[collapsible=icon]:hidden" />
-                          )}
+
+                          {isActive && <ChevronRight className="h-4 w-4 text-sidebar-primary/65 group-data-[collapsible=icon]:hidden" />}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -285,31 +237,29 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      {/* ─── FOOTER ─── */}
-      <SidebarFooter className="relative p-4 border-t border-sidebar-border/60">
-        {/* Support CTA */}
+      <SidebarFooter className="relative p-3 border-t border-sidebar-border/80">
         <button
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-3 w-full flex items-center gap-3 rounded-xl border border-sidebar-primary/20 bg-gradient-to-r from-sidebar-primary/[0.08] to-sidebar-primary/[0.03] p-3 text-left transition-all hover:border-sidebar-primary/30 hover:from-sidebar-primary/[0.12] hover:to-sidebar-primary/[0.06] group-data-[collapsible=icon]:hidden group/support"
+          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all hover:bg-sidebar-primary/[0.15] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
         >
-          <div className="h-8 w-8 rounded-lg bg-sidebar-primary/15 flex items-center justify-center shrink-0 group-hover/support:bg-sidebar-primary/20 transition-colors">
+          <div className="h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center shrink-0">
             <Headphones className="h-4 w-4 text-sidebar-primary" />
           </div>
-          <div className="min-w-0">
-            <span className="text-[11px] font-bold text-sidebar-accent-foreground block leading-tight">Suporte para Escalar</span>
-            <span className="text-[9px] text-sidebar-foreground/50">Fale com nosso time</span>
+          <div>
+            <span className="text-[12px] font-black text-sidebar-accent-foreground block">Solicitar Suporte</span>
+            <span className="text-[10px] text-sidebar-foreground/70">Para escalar seu negócio</span>
           </div>
         </button>
 
-        {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-sidebar-foreground/50 transition-all hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-semibold text-sidebar-foreground/85 transition-all hover:bg-destructive/[0.1] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4.5 w-4.5" />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
         </button>
       </SidebarFooter>
     </Sidebar>
   );
 }
+

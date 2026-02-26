@@ -813,7 +813,6 @@ export type Database = {
           id: string
           last_ip: string | null
           last_login_at: string | null
-          nickname: string | null
           phone: string | null
           pix_key: string | null
           pix_key_type: string | null
@@ -834,7 +833,6 @@ export type Database = {
           id?: string
           last_ip?: string | null
           last_login_at?: string | null
-          nickname?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
@@ -855,7 +853,6 @@ export type Database = {
           id?: string
           last_ip?: string | null
           last_login_at?: string | null
-          nickname?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null

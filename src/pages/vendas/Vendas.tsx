@@ -22,7 +22,7 @@ const fmtTime = (d: string) =>
 
 const fmtFull = (d: string) => `${fmtDate(d)} às ${fmtTime(d)}`;
 
-type StatusFilter = "all" | "completed" | "pending" | "refunded" | "chargeback";
+type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
 
 export default function Vendas() {
   const { user } = useAuth();
@@ -94,6 +94,7 @@ export default function Vendas() {
     { label: "Todas", value: "all", count: transactions.length },
     { label: "Aprovadas", value: "completed", count: approved.length },
     { label: "Pendentes", value: "pending", count: transactions.filter((t) => t.status === "pending").length },
+    { label: "Falhas", value: "failed", count: transactions.filter((t) => t.status === "failed").length },
     { label: "Reembolsos", value: "refunded", count: transactions.filter((t) => t.status === "refunded").length },
     { label: "Chargebacks", value: "chargeback", count: transactions.filter((t) => t.status === "chargeback").length },
   ];
@@ -105,14 +106,14 @@ export default function Vendas() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Receita Líquida", value: fmt(totalSales), sub: `${approved.length} aprovadas`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-          { label: "Ticket Médio", value: fmt(avgTicket), sub: "por venda aprovada", icon: TrendingUp, color: "text-info", bg: "bg-info/10", border: "border-info/20" },
-          { label: "Conversão", value: `${conversion.toFixed(1)}%`, sub: "aprovadas/total", icon: CreditCard, color: "text-success", bg: "bg-success/10", border: "border-success/20" },
-          { label: "Total Vendas", value: String(transactions.length), sub: "transações", icon: Users, color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
+          { label: "Receita Líquida", value: fmt(totalSales), sub: `${approved.length} aprovadas`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Ticket Médio", value: fmt(avgTicket), sub: "por venda", icon: TrendingUp, color: "text-info", bg: "bg-info/10" },
+          { label: "Conversão", value: `${conversion.toFixed(1)}%`, sub: "aprovadas/total", icon: CreditCard, color: "text-success", bg: "bg-success/10" },
+          { label: "Total Vendas", value: String(transactions.length), sub: "transações", icon: Users, color: "text-warning", bg: "bg-warning/10" },
         ].map((kpi) => (
-          <Panel key={kpi.label} className={`relative overflow-hidden border-2 ${kpi.border}`}>
+          <Panel key={kpi.label} className="relative overflow-hidden">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-bold text-foreground/70 uppercase tracking-wider">{kpi.label}</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
               <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${kpi.bg}`}>
                 <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
               </div>
@@ -131,7 +132,7 @@ export default function Vendas() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, e-mail, WhatsApp ou ID..."
-            className="w-full h-11 pl-11 pr-4 rounded-xl bg-card border-2 border-border text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+            className="w-full h-11 pl-11 pr-4 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -144,10 +145,10 @@ export default function Vendas() {
             <button
               key={f.value}
               onClick={() => setStatusFilter(f.value)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-[11px] font-bold transition-all border-2 ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-[11px] font-bold transition-all border ${
                 statusFilter === f.value
                   ? "bg-primary/10 text-primary border-primary/25 shadow-sm shadow-primary/10"
-                  : "bg-card text-muted-foreground border-border hover:bg-muted/40 hover:border-primary/15"
+                  : "bg-card text-muted-foreground border-border hover:bg-muted/40"
               }`}
             >
               {f.label}
@@ -161,13 +162,13 @@ export default function Vendas() {
 
       {/* Desktop table */}
       <div className="hidden md:block">
-        <Panel className="p-0 overflow-hidden border-2">
+        <Panel className="p-0 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-border bg-muted/30">
+                <tr className="border-b border-border bg-muted/20">
                   {["Cliente", "WhatsApp", "Produto", "Valor Líquido", "Método", "Status", "Data", ""].map((h) => (
-                    <th key={h} className="text-left p-4 text-[11px] font-bold text-foreground/70 uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -208,9 +209,9 @@ export default function Vendas() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 text-primary text-[12px] font-semibold hover:underline bg-primary/8 border border-primary/20 px-2.5 py-1.5 rounded-lg"
+                          className="inline-flex items-center gap-1.5 text-primary text-[12px] font-semibold hover:underline bg-primary/5 px-2.5 py-1 rounded-lg"
                         >
-                          <Phone className="h-3.5 w-3.5" />
+                          <Phone className="h-3 w-3" />
                           {tx.customer_phone}
                         </a>
                       ) : (
@@ -224,10 +225,10 @@ export default function Vendas() {
                       <span className="font-bold text-foreground text-[14px]">{fmt(Number(tx.net_amount))}</span>
                     </td>
                     <td className="p-4">
-                      <span className="capitalize text-foreground/80 text-[12px] bg-muted/50 border border-border px-2 py-1 rounded-lg font-medium">{tx.payment_method || "—"}</span>
+                      <span className="capitalize text-muted-foreground text-[12px] bg-muted/40 px-2 py-1 rounded-lg">{tx.payment_method || "—"}</span>
                     </td>
                     <td className="p-4"><StatusBadge status={tx.status} /></td>
-                    <td className="p-4 text-foreground/70 text-[12px] font-medium">{fmtDate(tx.created_at)}</td>
+                    <td className="p-4 text-muted-foreground text-[12px]">{fmtDate(tx.created_at)}</td>
                     <td className="p-4">
                       <Eye className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                     </td>
@@ -249,7 +250,7 @@ export default function Vendas() {
             <p className="text-sm font-medium text-muted-foreground">Nenhuma venda</p>
           </div>
         ) : filtered.map((tx) => (
-          <Panel key={tx.id} className="cursor-pointer active:scale-[0.99] transition-transform border-2" onClick={() => setSelectedTx(tx)}>
+          <Panel key={tx.id} className="cursor-pointer active:scale-[0.99] transition-transform" onClick={() => setSelectedTx(tx)}>
             <div className="flex items-start justify-between gap-3 mb-2">
               <div className="flex items-center gap-2.5">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -266,19 +267,19 @@ export default function Vendas() {
               <div>
                 <p className="text-foreground font-display font-black text-xl">{fmt(Number(tx.net_amount))}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-foreground/70 text-[10px] bg-muted/50 border border-border px-2 py-0.5 rounded-md font-medium">{tx.payment_method || "—"}</span>
+                  <span className="text-muted-foreground text-[10px] bg-muted/40 px-2 py-0.5 rounded-md">{tx.payment_method || "—"}</span>
                   <span className="text-muted-foreground text-[10px]">{tx.product_id ? products[tx.product_id] || "Produto" : "—"}</span>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-foreground/70 text-[11px] font-medium">{fmtDate(tx.created_at)}</p>
+                <p className="text-muted-foreground text-[11px]">{fmtDate(tx.created_at)}</p>
                 {tx.customer_phone && (
                   <a
                     href={`https://wa.me/${tx.customer_phone.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-primary text-[10px] font-semibold mt-0.5 bg-primary/8 border border-primary/20 px-1.5 py-0.5 rounded"
+                    className="inline-flex items-center gap-1 text-primary text-[10px] font-semibold mt-0.5"
                   >
                     <Phone className="h-2.5 w-2.5" /> WhatsApp
                   </a>
@@ -291,14 +292,11 @@ export default function Vendas() {
 
       {/* ─── DETAIL MODAL ─── */}
       {selectedTx && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" onClick={() => setSelectedTx(null)}>
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-md" />
-          <div 
-            className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border-2 border-border bg-card shadow-2xl animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setSelectedTx(null)} />
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-scale-in">
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b-2 border-border bg-card rounded-t-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border bg-card/95 backdrop-blur-sm rounded-t-2xl">
               <div>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Detalhes da Venda</p>
                 <div className="flex items-center gap-3">
@@ -306,15 +304,15 @@ export default function Vendas() {
                   <span className="text-2xl font-display font-black text-foreground">{fmt(Number(selectedTx.amount))}</span>
                 </div>
               </div>
-              <button onClick={() => setSelectedTx(null)} className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/60 border-2 border-border hover:bg-muted transition-colors">
+              <button onClick={() => setSelectedTx(null)} className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/60 border border-border/80 hover:bg-muted transition-colors">
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
 
             <div className="p-5 space-y-5">
               {/* Financial summary */}
-              <div className="rounded-xl border-2 border-primary/15 bg-primary/5 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3">Resumo Financeiro</p>
+              <div className="rounded-xl border border-border bg-muted/20 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Resumo Financeiro</p>
                 <div className="space-y-2">
                   <DetailRow label="Valor bruto" value={fmt(Number(selectedTx.amount))} />
                   <DetailRow label="Taxa da plataforma" value={`- ${fmt(Number(selectedTx.fee_amount))}`} className="text-destructive" />
@@ -326,7 +324,7 @@ export default function Vendas() {
 
               {/* Sale info */}
               <div className="space-y-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">Informações da Venda</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Informações da Venda</p>
                 <DetailRow label="ID da venda" value={
                   <button onClick={() => handleCopyId(selectedTx.id)} className="inline-flex items-center gap-1.5 font-mono text-[12px] text-foreground hover:text-primary transition-colors">
                     {selectedTx.id.slice(0, 16)}...
@@ -343,8 +341,8 @@ export default function Vendas() {
               </div>
 
               {/* Customer */}
-              <div className="rounded-xl border-2 border-border bg-muted/10 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/70 mb-3">Dados do Cliente</p>
+              <div className="rounded-xl border border-border bg-muted/10 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Dados do Cliente</p>
                 <div className="space-y-2.5">
                   <DetailRow label="Nome" value={selectedTx.customer_name || "—"} />
                   {selectedTx.customer_email && (
@@ -358,7 +356,7 @@ export default function Vendas() {
                         href={`https://wa.me/${selectedTx.customer_phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-primary font-semibold text-[13px] hover:underline bg-primary/8 border border-primary/20 px-2 py-0.5 rounded-lg"
+                        className="inline-flex items-center gap-1.5 text-primary font-semibold text-[13px] hover:underline bg-primary/5 px-2 py-0.5 rounded-lg"
                       >
                         {selectedTx.customer_phone}
                         <ArrowUpRight className="h-3 w-3" />
@@ -374,7 +372,7 @@ export default function Vendas() {
               {/* Tracking */}
               {selectedTx.podpay_event_id && (
                 <div className="space-y-2.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">Rastreamento</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Rastreamento</p>
                   <DetailRow label="Event ID" value={selectedTx.podpay_event_id} mono />
                   {selectedTx.podpay_payment_id && (
                     <DetailRow label="Payment ID" value={selectedTx.podpay_payment_id} mono />
@@ -384,7 +382,7 @@ export default function Vendas() {
 
               {/* Actions */}
               {selectedTx.status === "completed" && (
-                <div className="pt-3 border-t-2 border-border">
+                <div className="pt-3 border-t border-border">
                   <button
                     onClick={() => handleRefund(selectedTx)}
                     className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all shadow-lg shadow-primary/15"
@@ -422,7 +420,7 @@ function DetailRow({
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
-        <span className="text-[12px] font-semibold">{label}</span>
+        <span className="text-[12px] font-medium">{label}</span>
       </div>
       <span className={`text-[13px] text-foreground text-right ${mono ? "font-mono" : ""} ${bold ? "font-black" : "font-semibold"} ${className || ""}`}>
         {value}

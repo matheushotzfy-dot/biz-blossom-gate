@@ -6,7 +6,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
 }
 
 export function Panel({ children, className, onClick, style }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
-  return <div className={cn("rounded-2xl border border-border bg-card p-5", className)} onClick={onClick} style={style}>{children}</div>;
+  return <div className={cn("panel-enterprise p-5", className)} onClick={onClick} style={style}>{children}</div>;
 }
 
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
@@ -16,7 +16,7 @@ export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; ti
         <span className="text-primary shrink-0">{icon}</span>
         <span>{title}</span>
       </h1>
-      <p className="text-sm text-muted-foreground">{subtitle}</p>
+      <p className="text-sm md:text-[15px] text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
@@ -27,7 +27,7 @@ export function DataTable({ headers, children }: { headers: string[]; children: 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/30">
+            <tr className="border-b border-border/80 bg-muted/30">
               {headers.map((h) => (
                 <th key={h} className="text-left p-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                   {h}
