@@ -35,7 +35,7 @@ export function DashboardLayout() {
       <div className="flex h-svh w-full overflow-hidden bg-background">
         <AppSidebar />
 
-        <SidebarInset className="relative min-w-0 bg-background">
+        <SidebarInset className="relative min-w-0">
           {/* Top bar - desktop */}
           <header className="relative z-20 hidden h-16 md:flex items-center gap-3 border-b border-border bg-card/80 backdrop-blur-lg px-5 lg:px-8 sticky top-0">
             <SidebarTrigger className="h-9 w-9 rounded-lg border border-border bg-card hover:bg-muted/60 transition-colors">

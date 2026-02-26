@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  ArrowUpRight,
   CalendarDays,
   ChevronDown,
   CreditCard,
@@ -18,6 +17,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
+  Lock,
+  Target,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -42,9 +43,27 @@ const fmt = (v: number) =>
 function toBrasiliaDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
-
 function brasiliaToday() {
   return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+}
+
+/* ─── Milestones ─── */
+const MILESTONES = [
+  { label: "R$ 0", value: 0, rank: "Iniciante" },
+  { label: "R$ 10K", value: 10000, rank: "Bronze" },
+  { label: "R$ 100K", value: 100000, rank: "Prata" },
+  { label: "R$ 500K", value: 500000, rank: "Ouro" },
+  { label: "R$ 1M", value: 1000000, rank: "Diamante" },
+  { label: "R$ 5M", value: 5000000, rank: "Lenda" },
+];
+function getMilestone(revenue: number) {
+  let current = MILESTONES[0], next = MILESTONES[1];
+  for (let i = 0; i < MILESTONES.length - 1; i++) {
+    if (revenue >= MILESTONES[i].value) { current = MILESTONES[i]; next = MILESTONES[i + 1]; }
+  }
+  const range = next.value - current.value;
+  const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
+  return { current, next, pct };
 }
 
 export default function Dashboard() {
@@ -122,6 +141,8 @@ export default function Dashboard() {
   const totalWithdrawn = withdrawals.filter(w => w.status === "approved" || w.status === "completed").reduce((acc, w) => acc + Number(w.amount), 0);
   const availableBalance = Math.max(0, totalNetEarned - totalWithdrawn - withdrawalPendingAmount);
 
+  const milestone = useMemo(() => getMilestone(totalNetEarned), [totalNetEarned]);
+
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
     return Array.from({ length: days }, (_, i) => {
@@ -143,12 +164,14 @@ export default function Dashboard() {
   const pixConv = pixAll.length > 0 ? (pixOk / pixAll.length) * 100 : 0;
 
   return (
-    <div className="space-y-4 relative animate-fade-in">
+    <div className="space-y-5 relative animate-fade-in">
       {/* Fire border effect */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
         </div>
       )}
 
@@ -182,41 +205,117 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ═══ HEADER ═══ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-primary font-display font-bold text-sm">Olá, {displayName}</span>
-            <Sparkles className="h-3.5 w-3.5 text-primary/60" />
-          </div>
-          <h1 className="text-xl md:text-2xl font-display font-black tracking-tight text-foreground">
-            Command Center
-          </h1>
-        </div>
+      {/* ═══ HERO — Olá + Modo Escala ═══ */}
+      <div className="relative rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.06] via-card to-card overflow-hidden p-5 md:p-7">
+        {/* Ambient glow */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-primary/[0.04] rounded-full blur-3xl pointer-events-none" />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="inline-flex h-9 items-center gap-2 rounded-xl border border-border bg-card px-3.5 text-xs font-semibold text-foreground hover:border-primary/20 transition-colors">
-              <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-              {selectedPeriod.label}
-              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight text-foreground leading-none">
+              Olá, <span className="text-primary">{displayName}</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">
+              Plataforma de escala para infoprodutores — monitore tudo em tempo real.
+            </p>
+
+            {/* ─── Progress bar com fogo verde ─── */}
+            <div className="mt-4 max-w-sm">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {milestone.current.rank}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Zap className="h-3 w-3 text-primary/70" />
+                  <span className="text-[10px] font-bold text-primary/80">{milestone.next.label}</span>
+                </div>
+              </div>
+              <div className="relative h-3 w-full rounded-full bg-muted/40 overflow-visible">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full sidebar-progress-bar"
+                  style={{ width: `${Math.max(milestone.pct, 4)}%` }}
+                />
+                {/* Flame at tip */}
+                {milestone.pct > 0 && (
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 sidebar-flame-container"
+                    style={{ left: `${Math.max(milestone.pct, 4)}%` }}
+                  >
+                    <div className="sidebar-flame" />
+                    <div className="sidebar-flame-inner" />
+                    <div className="sidebar-flame-spark sidebar-flame-spark-1" />
+                    <div className="sidebar-flame-spark sidebar-flame-spark-2" />
+                    <div className="sidebar-flame-spark sidebar-flame-spark-3" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Modo Escala button */}
+            <button
+              onClick={() => {
+                if (!scaleMode) {
+                  setFireEffect(true);
+                  setTimeout(() => { setShowScalePopup(true); setScaleMode(true); }, 400);
+                  setTimeout(() => setFireEffect(false), 3000);
+                } else {
+                  setShowScalePopup(true);
+                }
+              }}
+              className={`flame-btn relative h-11 rounded-xl px-5 flex items-center gap-2.5 font-bold text-sm transition-all ${
+                scaleMode
+                  ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/25"
+                  : "border border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              {scaleMode ? (
+                <>
+                  <Flame className="h-4 w-4" />
+                  Modo Escala
+                  {scaleMode && (
+                    <>
+                      <span className="flame-tip" style={{ left: "20%", width: 4, height: 4, "--dur": "0.6s", "--delay": "0s" } as any} />
+                      <span className="flame-tip" style={{ left: "50%", width: 3, height: 3, "--dur": "0.8s", "--delay": "0.2s" } as any} />
+                      <span className="flame-tip" style={{ left: "80%", width: 4, height: 4, "--dur": "0.5s", "--delay": "0.4s" } as any} />
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  Modo Escala
+                </>
+              )}
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl p-1">
-            {PERIOD_OPTIONS.map((option) => (
-              <DropdownMenuItem
-                key={option.label}
-                onClick={() => setSelectedPeriod(option)}
-                className={`rounded-lg py-2 text-sm cursor-pointer ${selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""}`}
-              >
-                {option.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+            {/* Period selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="h-11 inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-foreground hover:border-primary/20 transition-colors">
+                  <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                  {selectedPeriod.label}
+                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl p-1">
+                {PERIOD_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.label}
+                    onClick={() => setSelectedPeriod(option)}
+                    className={`rounded-lg py-2 text-sm cursor-pointer ${selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""}`}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
 
-      {/* ═══ CHART (PRIORITY — TOP) ═══ */}
+      {/* ═══ CHART — TOP PRIORITY ═══ */}
       <div className="rounded-2xl border border-border bg-card p-4 md:p-5">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -270,7 +369,7 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* ═══ KPI GRID — 3 cols clean ═══ */}
+      {/* ═══ KPI GRID ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <KpiCard icon={<DollarSign className="h-4 w-4" />} label="Receita Líquida" value={fmt(revenue)} accent />
         <KpiCard icon={<TrendingUp className="h-4 w-4" />} label="Faturamento Bruto" value={fmt(gross)} />
@@ -280,9 +379,9 @@ export default function Dashboard() {
         <KpiCard icon={<Users className="h-4 w-4" />} label="Clientes" value={String(uniqueCustomers)} />
       </div>
 
-      {/* ═══ BOTTOM ROW — Saldo + Saúde ═══ */}
+      {/* ═══ BOTTOM — Financeiro + Saúde ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Saldo */}
+        {/* Financeiro */}
         <div className="rounded-2xl border border-border bg-card p-4 md:p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -311,14 +410,12 @@ export default function Dashboard() {
             </div>
             <span className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Saúde Operacional</span>
           </div>
-
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <MiniStat label="Aprovadas" value={approved.length} color="text-primary" />
             <MiniStat label="Pendentes" value={pending.length} color="text-warning" />
             <MiniStat label="Reembolsos" value={refunded.length} color="text-info" />
             <MiniStat label="Chargebacks" value={chargebacks.length} color="text-destructive" />
           </div>
-
           <div className="mt-4 pt-3 border-t border-border">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Conv. PIX</span>
