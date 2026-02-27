@@ -461,17 +461,21 @@ export default function PublicCheckout() {
       {/* Social proof */}
       {product.checkout_social_proof && (
         <div className="max-w-[680px] mx-auto px-4 pt-5">
-          <div className="flex items-center gap-3 bg-emerald-500/[0.08] border border-emerald-500/20 px-4 py-3 rounded-2xl text-sm font-medium w-fit animate-pulse-slow">
-            <span className="flex -space-x-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-7 w-7 rounded-full border-2 border-[#08080a] flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: `hsl(${152 + i * 10}, 60%, ${35 + i * 5}%)` }}>
-                  {["A", "M", "L", "R"][i]}
+          <div className="flex items-center gap-4 bg-gradient-to-r from-emerald-500/[0.08] to-emerald-600/[0.04] border border-emerald-500/20 px-5 py-4 rounded-2xl w-full">
+            <span className="flex -space-x-2.5">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-8 w-8 rounded-full border-2 border-[#08080a] flex items-center justify-center text-[10px] font-bold shadow-lg" style={{ backgroundColor: `hsl(${148 + i * 8}, 65%, ${30 + i * 6}%)`, zIndex: 5 - i }}>
+                  {["A", "M", "L", "R", "S"][i]}
                 </div>
               ))}
             </span>
-            <div>
-              <p className="text-emerald-400 font-semibold text-[13px]">🔥 {socialCount} pessoas compraram</p>
-              <p className="text-emerald-400/50 text-[10px]">nas últimas 24 horas</p>
+            <div className="flex-1">
+              <p className="text-emerald-400 font-bold text-[14px]">🔥 {socialCount} vendas realizadas</p>
+              <p className="text-emerald-400/40 text-[11px]">nas últimas 24 horas • Produto verificado</p>
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-xl">
+              <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-emerald-400 text-[10px] font-bold">AO VIVO</span>
             </div>
           </div>
         </div>
@@ -574,6 +578,10 @@ export default function PublicCheckout() {
           {/* ====== ORDER BUMPS ====== */}
           {orderBumps.length > 0 && (
             <section className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">🎁 Ofertas especiais para você</span>
+                <div className="flex-1 h-px bg-amber-400/10" />
+              </div>
               {orderBumps.map(bump => {
                 const selected = selectedBumps.has(bump.id);
                 return (
@@ -581,38 +589,35 @@ export default function PublicCheckout() {
                     key={bump.id}
                     type="button"
                     onClick={() => toggleBump(bump.id)}
-                    className={`w-full rounded-2xl border-2 p-4 text-left transition-all duration-300 ${
+                    className={`w-full rounded-2xl border-2 p-5 text-left transition-all duration-300 relative overflow-hidden ${
                       selected
-                        ? "border-emerald-500/60 bg-emerald-500/[0.06] shadow-lg shadow-emerald-500/10"
-                        : "border-dashed border-amber-500/40 bg-amber-500/[0.03] hover:border-amber-500/60"
+                        ? "border-emerald-500/60 bg-emerald-500/[0.06] shadow-xl shadow-emerald-500/10"
+                        : "border-dashed border-amber-500/30 bg-gradient-to-r from-amber-500/[0.04] to-amber-600/[0.02] hover:border-amber-500/60 hover:bg-amber-500/[0.06]"
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 mb-3">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md">
-                        🎁 Oferta especial
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="h-14 w-14 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {selected && <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[8px] font-bold px-3 py-1 rounded-bl-xl">ADICIONADO ✓</div>}
+                    {!selected && <div className="absolute top-0 right-0 bg-amber-500/80 text-white text-[8px] font-bold px-3 py-1 rounded-bl-xl animate-pulse">ADICIONE AGORA</div>}
+                    <div className="flex items-center gap-4">
+                      <div className="h-16 w-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {bump.bump_product.image_url ? (
-                          <img src={bump.bump_product.image_url} alt={bump.bump_product.name} className="h-14 w-14 rounded-xl object-cover" />
+                          <img src={bump.bump_product.image_url} alt={bump.bump_product.name} className="h-16 w-16 rounded-2xl object-cover" />
                         ) : (
-                          <Package className="h-6 w-6 text-white/20" />
+                          <Package className="h-7 w-7 text-white/20" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm leading-tight">{bump.bump_product.name}</p>
+                        <p className="font-bold text-[15px] leading-tight">{bump.bump_product.name}</p>
                         {bump.bump_product.description && (
-                          <p className="text-xs text-white/40 mt-0.5 line-clamp-2">{bump.bump_product.description}</p>
+                          <p className="text-xs text-white/40 mt-1 line-clamp-2 leading-relaxed">{bump.bump_product.description}</p>
                         )}
-                        <p className="font-extrabold text-sm mt-1" style={{ color: btnColor }}>
+                        <p className="font-extrabold text-base mt-1.5" style={{ color: selected ? '#10b981' : btnColor }}>
                           + R$ {Number(bump.bump_product.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </p>
                       </div>
-                      <div className={`h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
-                        selected ? "bg-emerald-500 text-white" : "bg-white/[0.06] border border-white/10 text-white/30"
+                      <div className={`h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
+                        selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-white/[0.06] border border-white/10 text-white/30"
                       }`}>
-                        {selected ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                        {selected ? <CheckCircle2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                       </div>
                     </div>
                   </button>

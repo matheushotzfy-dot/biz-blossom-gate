@@ -77,7 +77,6 @@ const sections = [
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
       { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
-      { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
     ],
   },
@@ -98,6 +97,12 @@ const sections = [
       { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
       { title: "Identidade", url: "/financeiro/identidade", icon: UserCircle },
       { title: "Meu Perfil", url: "/perfil", icon: User },
+    ],
+  },
+  {
+    label: "COMPRAS",
+    items: [
+      { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
     ],
   },
 ] as const;
