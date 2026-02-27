@@ -17,7 +17,6 @@ import {
   User,
   LogOut,
   ChevronRight,
-  Trophy,
   Headphones,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -150,27 +149,42 @@ export function AppSidebar() {
         </div>
 
         <div className="mt-4 group-data-[collapsible=icon]:hidden">
-          <div className="rounded-xl border border-sidebar-primary/20 bg-sidebar-primary/[0.06] px-3.5 py-3">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <Trophy className="h-3.5 w-3.5 text-sidebar-primary" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/80">Milestone</span>
+          <div className="relative rounded-xl border border-sidebar-primary/30 bg-sidebar-primary/[0.06] px-3.5 py-3 overflow-hidden">
+            {/* Green fire glow behind bar */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 h-16 w-3/4 rounded-full bg-sidebar-primary/20 blur-[20px] animate-pulse" />
+            </div>
+            <div className="relative">
+              <div className="relative h-3.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden ring-1 ring-sidebar-primary/20">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
+                  style={{
+                    width: `${milestone.pct}%`,
+                    background: 'linear-gradient(90deg, hsl(152 70% 35%), hsl(152 80% 45%), hsl(140 80% 55%))',
+                    boxShadow: '0 0 12px hsl(152 80% 50% / 0.6), 0 0 24px hsl(152 80% 50% / 0.3)',
+                  }}
+                />
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm animate-pulse"
+                  style={{ width: `${milestone.pct}%` }}
+                />
+                {/* Fire tip at the end of progress */}
+                {milestone.pct > 5 && (
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full"
+                    style={{
+                      left: `calc(${milestone.pct}% - 10px)`,
+                      background: 'radial-gradient(circle, hsl(140 80% 60% / 0.9), hsl(152 70% 50% / 0.4), transparent)',
+                      filter: 'blur(2px)',
+                      animation: 'pulse-glow 1.5s ease-in-out infinite',
+                    }}
+                  />
+                )}
               </div>
-              <span className="text-[11px] font-black text-sidebar-primary">{milestone.next.label}</span>
-            </div>
-            <div className="relative h-2.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden">
-              <div
-                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/80 to-sidebar-primary transition-all duration-700"
-                style={{ width: `${milestone.pct}%` }}
-              />
-              <div
-                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm"
-                style={{ width: `${milestone.pct}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between mt-1.5">
-              <span className="text-[9px] font-bold text-sidebar-foreground/60">{milestone.current.label}</span>
-              <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
+              <div className="flex items-center justify-between mt-1.5">
+                <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
+                <span className="text-[9px] font-bold text-sidebar-primary">{milestone.next.label}</span>
+              </div>
             </div>
           </div>
         </div>

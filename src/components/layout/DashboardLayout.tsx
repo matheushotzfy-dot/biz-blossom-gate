@@ -2,6 +2,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
+import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command, AlertTriangle, ArrowRight, X as XIcon, CheckCircle2 } from "lucide-react";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
@@ -17,6 +18,7 @@ export function DashboardLayout() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [showApproved, setShowApproved] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -40,6 +42,18 @@ export function DashboardLayout() {
     }
   }, [profile?.account_status, user?.id]);
 
+  // Cmd+K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   return (
     <SidebarProvider
       style={{ "--sidebar-width": "22rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
@@ -58,13 +72,16 @@ export function DashboardLayout() {
               <Menu className="h-5 w-5 text-foreground" />
             </SidebarTrigger>
 
-            <div className="flex h-11 w-full max-w-[520px] items-center gap-2.5 rounded-xl border border-border/75 bg-muted/35 px-4 text-muted-foreground transition-colors hover:border-primary/25 hover:bg-muted/55">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex h-11 w-full max-w-[520px] items-center gap-2.5 rounded-xl border border-border/75 bg-muted/35 px-4 text-muted-foreground transition-colors hover:border-primary/25 hover:bg-muted/55"
+            >
               <Search className="h-4 w-4" />
-              <span className="flex-1 text-[13px] md:text-sm">Buscar produtos, checkouts, clientes e transações…</span>
+              <span className="flex-1 text-[13px] md:text-sm text-left">Buscar produtos, checkouts, clientes e transações…</span>
               <div className="inline-flex items-center gap-1 rounded-md border border-border/80 bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 <Command className="h-3 w-3" /> K
               </div>
-            </div>
+            </button>
 
             <div className="flex-1" />
 
@@ -123,6 +140,8 @@ export function DashboardLayout() {
 
         <MobileBottomNav />
       </div>
+
+      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* ─── ACCOUNT APPROVED POPUP ─── */}
       {showApproved && (
