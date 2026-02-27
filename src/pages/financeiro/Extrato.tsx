@@ -41,7 +41,7 @@ export default function Extrato() {
 
   const total = filtered.reduce((acc, t) => acc + Number(t.net_amount), 0);
   const totalGross = filtered.reduce((acc, t) => acc + Number(t.amount), 0);
-  const totalFees = filtered.reduce((acc, t) => acc + Number(t.fee_amount), 0);
+  
   const getProductName = (id: string | null) => products.find(p => p.id === id)?.name || "—";
 
   return (
@@ -64,8 +64,8 @@ export default function Extrato() {
           <p className="text-lg md:text-xl font-extrabold mt-1 text-foreground truncate">{fmt(totalGross)}</p>
         </Panel>
         <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Taxas</p>
-          <p className="text-lg md:text-xl font-extrabold mt-1 text-warning truncate">{fmt(totalFees)}</p>
+          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Aprovadas</p>
+          <p className="text-lg md:text-xl font-extrabold mt-1 text-primary truncate">{filtered.filter(t => t.status === "completed").length}</p>
         </Panel>
         <Panel>
           <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Transações</p>
@@ -123,14 +123,14 @@ export default function Extrato() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/20">
-                  {["ID", "Cliente", "Produto", "Bruto", "Taxa", "Líquido", "Método", "Status", "Data"].map((h) => (
+                  {["ID", "Cliente", "Produto", "Valor", "Líquido", "Método", "Status", "Data"].map((h) => (
                     <th key={h} className="text-left p-3.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={9} className="p-12 text-center text-muted-foreground">Nenhuma transação encontrada</td></tr>
+                  <tr><td colSpan={8} className="p-12 text-center text-muted-foreground">Nenhuma transação encontrada</td></tr>
                 ) : filtered.map((tx) => (
                   <tr key={tx.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
                     <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
@@ -140,7 +140,6 @@ export default function Extrato() {
                     </td>
                     <td className="p-3.5 text-[12px] text-muted-foreground max-w-[140px] truncate">{getProductName(tx.product_id)}</td>
                     <td className="p-3.5 text-foreground text-[13px]">{fmt(Number(tx.amount))}</td>
-                    <td className="p-3.5 text-warning text-[12px]">-{fmt(Number(tx.fee_amount))}</td>
                     <td className="p-3.5 font-bold text-primary text-[13px]">{fmt(Number(tx.net_amount))}</td>
                     <td className="p-3.5">
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground uppercase">
