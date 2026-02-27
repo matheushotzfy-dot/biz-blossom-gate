@@ -16,6 +16,7 @@ import {
   Flame,
   GraduationCap,
   Layers,
+  Lock,
   Package,
   RefreshCw,
   Rocket,
@@ -77,6 +78,7 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[2]);
   const [products, setProducts] = useState(0);
   const [scaleMode, setScaleMode] = useState(false);
+  const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
 
@@ -180,14 +182,47 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [transactions, withdrawals]);
 
+  // Check if scale mode was already unlocked (persisted)
+  useEffect(() => {
+    if (!user?.id) return;
+    const key = `scale_mode_unlocked_${user.id}`;
+    if (localStorage.getItem(key) === "true") {
+      setScaleModeUnlocked(true);
+      setScaleMode(true);
+    }
+  }, [user?.id]);
+
+  // Auto-unlock scale mode when seller hits R$2k in last 24h
+  useEffect(() => {
+    if (!user?.id || scaleModeUnlocked) return;
+    const now = new Date();
+    const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const revenue24h = transactions
+      .filter(tx => tx.status === "completed" && new Date(tx.created_at) >= last24h)
+      .reduce((acc, tx) => acc + Number(tx.net_amount), 0);
+
+    if (revenue24h >= 2000) {
+      localStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
+      setScaleModeUnlocked(true);
+      // Auto-activate with effect
+      setFireEffect(true);
+      setTimeout(() => {
+        setShowScalePopup(true);
+        setScaleMode(true);
+      }, 800);
+      setTimeout(() => setFireEffect(false), 3000);
+    }
+  }, [user?.id, transactions, scaleModeUnlocked]);
+
   const activateScaleMode = useCallback(() => {
+    if (!scaleModeUnlocked) return;
     setFireEffect(true);
     setTimeout(() => {
       setShowScalePopup(true);
       setScaleMode(true);
     }, 800);
     setTimeout(() => setFireEffect(false), 3000);
-  }, []);
+  }, [scaleModeUnlocked]);
 
   return (
     <div className="space-y-5 md:space-y-6 relative">
@@ -318,32 +353,44 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-2 self-start md:self-auto">
               {/* Scale Mode Button */}
-              <button
-                onClick={activateScaleMode}
-                className={`flame-btn group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all ${
-                  scaleMode
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                    : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 hover:shadow-md hover:shadow-primary/15"
-                }`}
-              >
-                {/* Flame tip particles */}
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <span
-                    key={i}
-                    className="flame-tip"
-                    style={{
-                      left: `${20 + i * 15}%`,
-                      width: `${3 + Math.random() * 3}px`,
-                      height: `${3 + Math.random() * 3}px`,
-                      ['--dur' as string]: `${0.6 + i * 0.15}s`,
-                      ['--delay' as string]: `${i * 0.12}s`,
-                    }}
-                  />
-                ))}
-                <Flame className={`h-4 w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                <span className="hidden sm:inline">{scaleMode ? "Modo Escala 🔥" : "Ativar Modo Escala"}</span>
-                <span className="sm:hidden">{scaleMode ? "🔥" : "Escala"}</span>
-              </button>
+              {scaleModeUnlocked ? (
+                <button
+                  onClick={activateScaleMode}
+                  className={`flame-btn group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all ${
+                    scaleMode
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                      : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 hover:shadow-md hover:shadow-primary/15"
+                  }`}
+                >
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <span
+                      key={i}
+                      className="flame-tip"
+                      style={{
+                        left: `${20 + i * 15}%`,
+                        width: `${3 + Math.random() * 3}px`,
+                        height: `${3 + Math.random() * 3}px`,
+                        ['--dur' as string]: `${0.6 + i * 0.15}s`,
+                        ['--delay' as string]: `${i * 0.12}s`,
+                      }}
+                    />
+                  ))}
+                  <Flame className={`h-4 w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
+                  <span className="hidden sm:inline">{scaleMode ? "Modo Escala 🔥" : "Ativar Modo Escala"}</span>
+                  <span className="sm:hidden">{scaleMode ? "🔥" : "Escala"}</span>
+                </button>
+              ) : (
+                <div className="group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold border border-border/60 bg-muted/40 text-muted-foreground cursor-not-allowed opacity-70">
+                  <Lock className="h-4 w-4" />
+                  <span className="hidden sm:inline">Modo Escala</span>
+                  <span className="sm:hidden">Escala</span>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                    <p className="text-[11px] font-bold text-foreground mb-1">🔒 Modo Escala Bloqueado</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 faturados em 24 horas. Funcionalidades e bônus exclusivos!</p>
+                  </div>
+                </div>
+              )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
