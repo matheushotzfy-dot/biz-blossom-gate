@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import guaranteeSeal from "@/assets/guarantee-seal.png";
+import { initPixels, firePixelEvent, type PixelConfig } from "@/lib/pixelTracking";
 
 type Product = {
   id: string;
@@ -100,6 +101,10 @@ export default function PublicCheckout() {
   // Order bumps
   const [orderBumps, setOrderBumps] = useState<OrderBump[]>([]);
   const [selectedBumps, setSelectedBumps] = useState<Set<string>>(new Set());
+  
+  // Pixel tracking
+  const [productPixels, setProductPixels] = useState<PixelConfig[]>([]);
+  const pixelsInitialized = useRef(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -150,6 +155,41 @@ export default function PublicCheckout() {
       });
   }, [slug]);
 
+  // Load pixels for this product & init tracking
+  useEffect(() => {
+    if (!product?.id) return;
+    supabase
+      .from("product_pixels")
+      .select("*")
+      .eq("product_id", product.id)
+      .eq("is_active", true)
+      .then(({ data }) => {
+        if (!data || data.length === 0) return;
+        const configs: PixelConfig[] = data.map((d: any) => ({
+          ...d,
+          events: Array.isArray(d.events) ? d.events : [],
+        }));
+        setProductPixels(configs);
+        if (!pixelsInitialized.current) {
+          initPixels(configs);
+          pixelsInitialized.current = true;
+          // Fire PageView
+          setTimeout(() => {
+            firePixelEvent(configs, "PageView", {
+              content_name: product.name,
+              content_id: product.id,
+              value: Number(product.price),
+            });
+            firePixelEvent(configs, "ViewContent", {
+              content_name: product.name,
+              content_id: product.id,
+              value: Number(product.price),
+            });
+          }, 500);
+        }
+      });
+  }, [product?.id]);
+
   // Load order bumps
   useEffect(() => {
     if (!product?.id) return;
@@ -187,7 +227,10 @@ export default function PublicCheckout() {
     if (checkoutState !== "pending" || !transactionId) return;
     const interval = setInterval(async () => {
       const { data } = await supabase.from("transactions").select("status").eq("id", transactionId).single();
-      if (data?.status === "completed") { setCheckoutState("approved"); clearCheckoutSession(slug || ""); clearInterval(interval); }
+      if (data?.status === "completed") {
+        setCheckoutState("approved"); clearCheckoutSession(slug || ""); clearInterval(interval);
+        if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price) });
+      }
       else if (data?.status === "failed" || data?.status === "cancelled") { setCheckoutState("failed"); clearCheckoutSession(slug || ""); clearInterval(interval); }
     }, 5000);
     return () => clearInterval(interval);
@@ -250,6 +293,14 @@ export default function PublicCheckout() {
 
     if (product.checkout_email_confirm && email !== emailConfirm) { toast.error("Os e-mails não coincidem"); return; }
 
+    // Fire InitiateCheckout pixel
+    firePixelEvent(productPixels, "InitiateCheckout", {
+      content_name: product.name, content_id: product.id, value: totalPrice,
+    });
+    firePixelEvent(productPixels, "AddPaymentInfo", {
+      content_name: product.name, content_id: product.id, value: totalPrice,
+    });
+
     processingRef.current = true;
     setProcessing(true);
     try {
@@ -268,13 +319,28 @@ export default function PublicCheckout() {
       const result = data.data;
       setTransactionId(result.transactionId);
       if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); toast.info("Retomando pagamento pendente..."); return; }
-      if (method === "pix" && result.pix) { setPixData(result.pix); setCheckoutState("pending"); toast.success("QR Code PIX gerado!"); }
-      else if (method === "boleto" && result.boleto) { setBoletoData(result.boleto); setCheckoutState("pending"); toast.success("Boleto gerado!"); }
+      if (method === "pix" && result.pix) {
+        setPixData(result.pix); setCheckoutState("pending"); toast.success("QR Code PIX gerado!");
+        firePixelEvent(productPixels, "PixGenerated", { content_name: product.name, content_id: product.id, value: totalPrice });
+      }
+      else if (method === "boleto" && result.boleto) {
+        setBoletoData(result.boleto); setCheckoutState("pending"); toast.success("Boleto gerado!");
+        firePixelEvent(productPixels, "BoletoGenerated", { content_name: product.name, content_id: product.id, value: totalPrice });
+      }
       else if (method === "credit_card") {
-        if (result.status === "paid" || result.status === "approved") { setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento aprovado!"); }
+        if (result.status === "paid" || result.status === "approved") {
+          setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento aprovado!");
+          firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
+        }
         else if (result.secureUrl) { window.location.href = result.secureUrl; }
-        else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento processado!"); }
-      } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento processado!"); }
+        else {
+          setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento processado!");
+          firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
+        }
+      } else {
+        setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento processado!");
+        firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
+      }
     } catch (err) { console.error(err); toast.error("Erro inesperado"); setCheckoutState("failed"); }
     finally { setProcessing(false); processingRef.current = false; }
   };
