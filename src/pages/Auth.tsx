@@ -63,6 +63,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [document, setDocument] = useState("");
   const [documentError, setDocumentError] = useState("");
   const [referralSource, setReferralSource] = useState("");
@@ -126,6 +127,7 @@ export default function Auth() {
           options: {
             data: {
               full_name: fullName,
+              nickname: nickname,
               document_number: digits,
               document_type: digits.length === 11 ? "cpf" : "cnpj",
               referral_source: referralSource,
@@ -172,7 +174,11 @@ export default function Auth() {
                 <>
                   <div>
                     <Label htmlFor="name" className="text-sm font-medium">Nome completo</Label>
-                    <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome" className="mt-1" required={!isLogin} />
+                    <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className="mt-1" required={!isLogin} />
+                  </div>
+                  <div>
+                    <Label htmlFor="nickname" className="text-sm font-medium">Como quer ser chamado?</Label>
+                    <Input id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="Ex: João, Mari..." className="mt-1" required={!isLogin} />
                   </div>
                   <div>
                     <Label htmlFor="document" className="text-sm font-medium">CPF ou CNPJ</Label>

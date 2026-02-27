@@ -29,6 +29,11 @@ import {
   Wallet,
   X,
   Zap,
+  Percent,
+  FileText,
+  Webhook,
+  User,
+  BookOpen,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -75,13 +80,15 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[2]);
+  const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
   const [products, setProducts] = useState(0);
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
+  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
 
+  // Fetch initial data
   useEffect(() => {
     if (!user?.id) return;
 
@@ -89,11 +96,45 @@ export default function Dashboard() {
       supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
       supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    ]).then(([txRes, wdRes, prodRes]) => {
+      supabase.from("profiles").select("*").eq("user_id", user.id).single(),
+    ]).then(([txRes, wdRes, prodRes, profRes]) => {
       if (txRes.data) setTransactions(txRes.data);
       if (wdRes.data) setWithdrawals(wdRes.data);
       if (prodRes.count != null) setProducts(prodRes.count);
+      if (profRes.data) setProfile(profRes.data);
     });
+  }, [user?.id]);
+
+  // Realtime subscription for transactions
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel('dashboard-transactions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setTransactions(prev => [payload.new as Tables<"transactions">, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setTransactions(prev => prev.map(t => t.id === (payload.new as any).id ? payload.new as Tables<"transactions"> : t));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setWithdrawals(prev => [payload.new as Tables<"withdrawals">, ...prev].slice(0, 10));
+          } else if (payload.eventType === 'UPDATE') {
+            setWithdrawals(prev => prev.map(w => w.id === (payload.new as any).id ? payload.new as Tables<"withdrawals"> : w));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
   const filteredTx = useMemo(() => {
@@ -120,20 +161,35 @@ export default function Dashboard() {
 
   const approved = filteredTx.filter((t) => t.status === "completed");
   const pending = filteredTx.filter((t) => t.status === "pending");
-  const failed = filteredTx.filter((t) => t.status === "failed");
   const refunded = filteredTx.filter((t) => t.status === "refunded");
   const chargebacks = filteredTx.filter((t) => t.status === "chargeback");
 
   const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
-  const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
-  const ticket = approved.length > 0 ? gross / approved.length : 0;
   const conversion = filteredTx.length > 0 ? (approved.length / filteredTx.length) * 100 : 0;
-  const riskRate = filteredTx.length > 0 ? ((chargebacks.length + refunded.length) / filteredTx.length) * 100 : 0;
 
-  const customers = new Set(filteredTx.map((t) => t.customer_email || t.customer_name || t.id)).size;
+  // Conversion by payment method
+  const pixTx = filteredTx.filter(t => t.payment_method === "pix");
+  const pixApproved = pixTx.filter(t => t.status === "completed");
+  const pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
+
+  const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
+  const cardApproved = cardTx.filter(t => t.status === "completed");
+  const cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
+
+  const chargebackRate = filteredTx.length > 0 ? (chargebacks.length / filteredTx.length) * 100 : 0;
+
   const withdrawalPending = withdrawals
     .filter((w) => w.status === "pending")
     .reduce((acc, w) => acc + Number(w.net_amount), 0);
+
+  // Balance = completed revenue - approved withdrawals
+  const totalRevenue = transactions
+    .filter(t => t.status === "completed")
+    .reduce((acc, t) => acc + Number(t.net_amount), 0);
+  const totalWithdrawn = withdrawals
+    .filter(w => w.status === "approved")
+    .reduce((acc, w) => acc + Number(w.net_amount), 0);
+  const balance = totalRevenue - totalWithdrawn;
 
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
@@ -204,7 +260,6 @@ export default function Dashboard() {
     if (revenue24h >= 2000) {
       localStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
       setScaleModeUnlocked(true);
-      // Auto-activate with effect
       setFireEffect(true);
       setTimeout(() => {
         setShowScalePopup(true);
@@ -224,25 +279,21 @@ export default function Dashboard() {
     setTimeout(() => setFireEffect(false), 3000);
   }, [scaleModeUnlocked]);
 
+  const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
+
   return (
     <div className="space-y-5 md:space-y-6 relative">
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
-          {/* Top */}
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          {/* Bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          {/* Left */}
           <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          {/* Right */}
           <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          {/* Corner glows */}
           <div className="absolute top-0 left-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
           <div className="absolute top-0 right-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
           <div className="absolute bottom-0 left-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
           <div className="absolute bottom-0 right-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
-          {/* Particles */}
           {Array.from({ length: 20 }).map((_, i) => (
             <div
               key={i}
@@ -329,6 +380,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
@@ -341,14 +393,11 @@ export default function Dashboard() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] uppercase text-primary">
-                <Sparkles className="h-3 w-3" /> Command Center
+                <Sparkles className="h-3 w-3" /> Dashboard
               </div>
               <h1 className="text-2xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
-                Centro de <span className="text-gradient">Comando</span>
+                Bem Vindo, <span className="text-gradient">{nickname}</span>
               </h1>
-              <p className="hidden md:block max-w-xl text-sm text-muted-foreground leading-relaxed">
-                Cockpit premium para monitorar vendas, performance e saúde da operação.
-              </p>
             </div>
 
             <div className="flex items-center gap-2 self-start md:self-auto">
@@ -385,7 +434,7 @@ export default function Dashboard() {
                   <span className="hidden sm:inline">Modo Escala</span>
                   <span className="sm:hidden">Escala</span>
                   {/* Tooltip */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     <p className="text-[11px] font-bold text-foreground mb-1">🔒 Modo Escala Bloqueado</p>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 faturados em 24 horas. Funcionalidades e bônus exclusivos!</p>
                   </div>
@@ -417,12 +466,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Hero metrics - mobile: 2 cols, desktop: full row */}
+          {/* Hero metrics */}
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita líquida" value={fmt(revenue)} tone="primary" />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Bruto" value={fmt(gross)} tone="info" />
+            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" />
             <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={fmt(revenue)} tone="primary" />
+            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={fmt(balance)} tone="primary" />
           </div>
         </div>
       </section>
@@ -430,15 +479,8 @@ export default function Dashboard() {
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1">
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="text-base md:text-lg font-display font-black text-foreground">Performance</h2>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Receita aprovada no período</p>
-            </div>
-            <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-1.5">
-              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold">Total</p>
-              <p className="text-base md:text-lg font-display font-black text-foreground">{fmt(revenue)}</p>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-base md:text-lg font-display font-black text-foreground">Performance</h2>
           </div>
 
           <ResponsiveContainer width="100%" height={260}>
@@ -478,21 +520,20 @@ export default function Dashboard() {
         </div>
 
         <div className="xl:col-span-4 space-y-3">
+          {/* Health - icons only */}
           <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
-            <h3 className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Saúde Operacional</h3>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
-              <QualityLine icon={<AlertTriangle className="h-4 w-4" />} label="Falhas" value={String(failed.length)} tone="destructive" />
             </div>
           </div>
 
+          {/* Snapshot → Conversions */}
           <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3">
-            <h3 className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Snapshot</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <SmallMetric icon={<Package className="h-4 w-4" />} label="Produtos" value={String(products)} />
-              <SmallMetric icon={<CreditCard className="h-4 w-4" />} label="Checkouts" value={String(filteredTx.length)} />
-              <SmallMetric icon={<GraduationCap className="h-4 w-4" />} label="Cursos" value={String(products)} />
+            <div className="grid grid-cols-1 gap-2">
+              <SmallMetric icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} />
+              <SmallMetric icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} />
+              <SmallMetric icon={<AlertTriangle className="h-4 w-4" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} />
             </div>
           </div>
         </div>
@@ -500,10 +541,10 @@ export default function Dashboard() {
 
       {/* ─── KPI TILES ─── */}
       <section className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(ticket)} helper="Por transação" tone="info" delay="stagger-3" />
-        <KpiTile icon={<Users className="h-5 w-5" />} label="Clientes" value={String(customers)} helper="Únicos no período" tone="success" delay="stagger-4" />
-        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Pendentes" value={String(pending.length)} helper="Aguardando" tone="warning" delay="stagger-5" />
-        <KpiTile icon={<ArrowDownRight className="h-5 w-5" />} label="Saques pend." value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="primary" delay="stagger-6" />
+        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
+        <KpiTile icon={<DollarSign className="h-5 w-5" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
+        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
+        <KpiTile icon={<ArrowDownRight className="h-5 w-5" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone="primary" delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
@@ -521,13 +562,17 @@ export default function Dashboard() {
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
               { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
               { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
-              { label: "Extrato", href: "/financeiro/extrato", icon: Activity, desc: "Fluxo financeiro" },
+              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
               { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
+              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações" },
+              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta" },
+              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação" },
+              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
             ].map((action, i) => (
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 p-3 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i]}`}
+                className={`group flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 p-3 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
                 <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <action.icon className="h-4 w-4 md:h-5 md:w-5" />
@@ -551,6 +596,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
               <h3 className="text-base md:text-lg font-display font-black text-foreground">Atividade</h3>
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" title="Tempo real" />
             </div>
             <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
               Ver tudo <ArrowUpRight className="h-3.5 w-3.5" />
@@ -561,7 +607,7 @@ export default function Dashboard() {
             {activity.length === 0 ? (
               <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-10 text-center">
                 <p className="text-sm font-semibold text-foreground">Nenhuma atividade</p>
-                <p className="mt-1 text-[12px] text-muted-foreground">Movimentações aparecerão aqui.</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">Movimentações aparecerão aqui em tempo real.</p>
               </div>
             ) : (
               activity.map((item, i) => {
