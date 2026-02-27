@@ -94,9 +94,9 @@ export default function MemberArea() {
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-card to-muted/30 border border-border p-6 md:p-8">
         <div className="relative z-10">
           <h1 className="text-2xl md:text-3xl font-display font-extrabold tracking-tight text-foreground">
-            Área de Membros
+            Minhas Compras
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">Seus cursos e conteúdos exclusivos</p>
+          <p className="text-muted-foreground text-sm mt-1">Cursos e conteúdos que você adquiriu</p>
 
           {courses.length > 0 && (
             <div className="mt-4 max-w-md">

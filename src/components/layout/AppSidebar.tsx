@@ -5,7 +5,7 @@ import {
   CreditCard,
   GraduationCap,
   Layers,
-  Ticket,
+  
   FileText,
   ArrowDownToLine,
   Building2,
@@ -78,9 +78,8 @@ const sections = [
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
       { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
-      { title: "Área de Membros", url: "/membros", icon: GraduationCap },
+      { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
-      { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
     ],
   },
   {

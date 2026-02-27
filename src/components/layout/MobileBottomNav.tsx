@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
-  CreditCard, Layers, Ticket, Webhook, BookOpen,
+  CreditCard, Layers, Webhook, BookOpen,
   Building2, UserCircle, ArrowDownToLine, GraduationCap, User, LogOut, X, PieChart, Puzzle, FileText,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -21,9 +21,8 @@ const moreGroups = [
     label: "Infoprodutos",
     items: [
       { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
-      { title: "Membros", url: "/membros", icon: GraduationCap },
+      { title: "Compras", url: "/membros", icon: GraduationCap },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
-      { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
     ],
   },
   {
