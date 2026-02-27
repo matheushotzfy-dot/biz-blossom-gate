@@ -380,17 +380,9 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── KPI TILES ─── */}
-      <section className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(ticket)} helper="Por transação" tone="info" delay="stagger-1" />
-        <KpiTile icon={<Users className="h-5 w-5" />} label="Clientes" value={String(customers)} helper="Únicos no período" tone="success" delay="stagger-2" />
-        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Pendentes" value={String(pending.length)} helper="Aguardando" tone="warning" delay="stagger-3" />
-        <KpiTile icon={<ArrowDownRight className="h-5 w-5" />} label="Saques pend." value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="primary" delay="stagger-4" />
-      </section>
-
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-2">
+        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-base md:text-lg font-display font-black text-foreground">Performance</h2>
@@ -439,7 +431,7 @@ export default function Dashboard() {
         </div>
 
         <div className="xl:col-span-4 space-y-3">
-          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3">
+          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
             <h3 className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Saúde Operacional</h3>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
@@ -448,7 +440,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-4">
+          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3">
             <h3 className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Snapshot</h3>
             <div className="grid grid-cols-2 gap-2">
               <SmallMetric icon={<Package className="h-4 w-4" />} label="Produtos" value={String(products)} />
@@ -457,6 +449,14 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ─── KPI TILES ─── */}
+      <section className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-4">
+        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(ticket)} helper="Por transação" tone="info" delay="stagger-3" />
+        <KpiTile icon={<Users className="h-5 w-5" />} label="Clientes" value={String(customers)} helper="Únicos no período" tone="success" delay="stagger-4" />
+        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Pendentes" value={String(pending.length)} helper="Aguardando" tone="warning" delay="stagger-5" />
+        <KpiTile icon={<ArrowDownRight className="h-5 w-5" />} label="Saques pend." value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="primary" delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
