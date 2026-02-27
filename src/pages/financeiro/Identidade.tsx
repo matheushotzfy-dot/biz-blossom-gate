@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Save, Shield, FileCheck, Key, Phone, Mail, CheckCircle2, Clock, AlertTriangle, XCircle, Upload, Camera, Image, Loader2 } from "lucide-react";
+import { UserCircle, Save, Shield, FileCheck, Key, CheckCircle2, Upload, Camera, Image, Loader2, Lock, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,11 @@ import { toast } from "sonner";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
-const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  approved: { label: "Conta Aprovada", cls: "text-primary bg-primary/10 border-primary/15" },
-  pending_review: { label: "Em Análise", cls: "text-warning bg-warning/10 border-warning/15" },
-  rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10 border-destructive/15" },
-  blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15" },
+const STATUS_MAP: Record<string, { label: string; cls: string; icon: string }> = {
+  approved: { label: "Conta Aprovada", cls: "text-primary bg-primary/10 border-primary/15", icon: "✅" },
+  pending_review: { label: "Em Análise", cls: "text-warning bg-warning/10 border-warning/15", icon: "⏳" },
+  rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "❌" },
+  blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "🚫" },
 };
 
 export default function Identidade() {
@@ -27,6 +27,9 @@ export default function Identidade() {
   const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null });
   const [uploading, setUploading] = useState<string | null>(null);
 
+  // Track which fields were already set in DB (locked after first save)
+  const [lockedFields, setLockedFields] = useState({ email: false, phone: false, document_number: false, document_type: false });
+
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
@@ -34,6 +37,12 @@ export default function Identidade() {
         setProfile(data);
         setForm({ full_name: data.full_name || "", email: data.email || "", phone: data.phone || "", document_type: data.document_type || "cpf", document_number: data.document_number || "" });
         setPixForm({ pix_key_type: data.pix_key_type || "cpf", pix_key: data.pix_key || "" });
+        setLockedFields({
+          email: !!data.email,
+          phone: !!data.phone,
+          document_number: !!data.document_number,
+          document_type: !!data.document_number,
+        });
       }
     });
     loadKycDocs();
@@ -67,8 +76,26 @@ export default function Identidade() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
-    const { error } = await supabase.from("profiles").update(form).eq("user_id", user.id);
-    if (error) toast.error("Erro ao salvar"); else toast.success("Dados atualizados!");
+    // Only send unlocked fields
+    const updateData: Record<string, string> = { full_name: form.full_name };
+    if (!lockedFields.email) updateData.email = form.email;
+    if (!lockedFields.phone) updateData.phone = form.phone;
+    if (!lockedFields.document_number) {
+      updateData.document_number = form.document_number;
+      updateData.document_type = form.document_type;
+    }
+    const { error } = await supabase.from("profiles").update(updateData).eq("user_id", user.id);
+    if (error) toast.error("Erro ao salvar");
+    else {
+      toast.success("Dados atualizados!");
+      // Lock the fields that now have values
+      setLockedFields({
+        email: !!form.email || lockedFields.email,
+        phone: !!form.phone || lockedFields.phone,
+        document_number: !!form.document_number || lockedFields.document_number,
+        document_type: !!form.document_number || lockedFields.document_type,
+      });
+    }
     setLoading(false);
   };
 
@@ -92,10 +119,24 @@ export default function Identidade() {
     { label: "Selfie com doc", done: !!kycDocs.selfie },
   ];
   const completionPct = Math.round((completionSteps.filter((s) => s.done).length / completionSteps.length) * 100);
+  const isApproved = profile?.account_status === "approved";
 
   return (
     <PageShell>
       <PageTitle icon={<UserCircle className="h-6 w-6" />} title="Identidade & KYC" subtitle="Dados pessoais, documentos e verificação" />
+
+      {/* Status Banner */}
+      {isApproved && (
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex items-center gap-3 animate-fade-in">
+          <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-foreground">Conta Verificada ✅</p>
+            <p className="text-[11px] text-muted-foreground">Sua identidade foi aprovada. Você pode realizar saques normalmente.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Panel>
@@ -103,8 +144,8 @@ export default function Identidade() {
           <div className={`flex items-center gap-3 p-3 rounded-xl border ${status.cls}`}>
             <Shield className="h-5 w-5" />
             <div>
-              <p className="font-semibold text-[13px]">{status.label}</p>
-              <p className="text-[10px] text-muted-foreground">{profile?.account_status === "approved" ? "Conta verificada" : "Complete seus dados"}</p>
+              <p className="font-semibold text-[13px]">{status.icon} {status.label}</p>
+              <p className="text-[10px] text-muted-foreground">{isApproved ? "Conta verificada" : "Complete seus dados"}</p>
             </div>
           </div>
         </Panel>
@@ -113,7 +154,7 @@ export default function Identidade() {
             <h3 className="text-[13px] font-bold text-foreground">Progresso</h3>
             <span className="text-[13px] font-bold text-primary">{completionPct}%</span>
           </div>
-           <div className="w-full h-2 rounded-full overflow-hidden mb-3 bg-muted">
+          <div className="w-full h-2 rounded-full overflow-hidden mb-3 bg-muted">
             <div className="h-full rounded-full transition-all duration-700 gradient-primary" style={{ width: `${completionPct}%` }} />
           </div>
           <div className="grid grid-cols-2 gap-1">
@@ -141,17 +182,51 @@ export default function Identidade() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <Panel>
           <h3 className="text-[13px] font-bold text-foreground mb-4">Dados Pessoais</h3>
+          {lockedFields.document_number && (
+            <div className="flex items-center gap-2 mb-4 p-2.5 rounded-xl bg-info/5 border border-info/15 text-info">
+              <Info className="h-3.5 w-3.5 shrink-0" />
+              <p className="text-[11px] font-medium">Campos sensíveis não podem ser alterados após o envio. Contate o suporte para correções.</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Nome</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1 h-10" /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">E-mail</Label><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 h-10" type="email" /></div>
-              <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 h-10" /></div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Nome</Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1 h-10" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Tipo Doc.</Label><Select value={form.document_type} onValueChange={(v) => setForm({ ...form, document_type: v })}><SelectTrigger className="mt-1 h-10"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem></SelectContent></Select></div>
-              <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Nº Documento</Label><Input value={form.document_number} onChange={(e) => setForm({ ...form, document_number: e.target.value })} className="mt-1 h-10" /></div>
+              <div className="relative">
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                  E-mail {lockedFields.email && <Lock className="h-2.5 w-2.5" />}
+                </Label>
+                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 h-10" type="email" disabled={lockedFields.email} />
+              </div>
+              <div className="relative">
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                  Telefone {lockedFields.phone && <Lock className="h-2.5 w-2.5" />}
+                </Label>
+                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 h-10" disabled={lockedFields.phone} />
+              </div>
             </div>
-            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground" disabled={loading}><Save className="h-4 w-4 mr-2" />{loading ? "Salvando..." : "Salvar"}</Button>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                  Tipo Doc. {lockedFields.document_type && <Lock className="h-2.5 w-2.5" />}
+                </Label>
+                <Select value={form.document_type} onValueChange={(v) => setForm({ ...form, document_type: v })} disabled={lockedFields.document_type}>
+                  <SelectTrigger className="mt-1 h-10"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem></SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                  Nº Documento {lockedFields.document_number && <Lock className="h-2.5 w-2.5" />}
+                </Label>
+                <Input value={form.document_number} onChange={(e) => setForm({ ...form, document_number: e.target.value })} className="mt-1 h-10" disabled={lockedFields.document_number} />
+              </div>
+            </div>
+            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground" disabled={loading}>
+              <Save className="h-4 w-4 mr-2" />{loading ? "Salvando..." : "Salvar"}
+            </Button>
           </form>
         </Panel>
 
@@ -162,9 +237,20 @@ export default function Identidade() {
               {pixForm.pix_key && <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-primary bg-primary/10">Configurada</span>}
             </div>
             <form onSubmit={handlePixSubmit} className="space-y-3">
-              <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Tipo</Label><Select value={pixForm.pix_key_type} onValueChange={(v) => setPixForm({ ...pixForm, pix_key_type: v })}><SelectTrigger className="mt-1 h-10"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="email">E-mail</SelectItem><SelectItem value="phone">Telefone</SelectItem><SelectItem value="random">Aleatória</SelectItem></SelectContent></Select></div>
-              <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Chave</Label><Input value={pixForm.pix_key} onChange={(e) => setPixForm({ ...pixForm, pix_key: e.target.value })} className="mt-1 h-10" /></div>
-              <Button type="submit" variant="outline" className="w-full h-10 rounded-xl text-[13px]" disabled={pixLoading}><Save className="h-4 w-4 mr-2" />{pixLoading ? "Salvando..." : "Salvar PIX"}</Button>
+              <div>
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Tipo</Label>
+                <Select value={pixForm.pix_key_type} onValueChange={(v) => setPixForm({ ...pixForm, pix_key_type: v })}>
+                  <SelectTrigger className="mt-1 h-10"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="email">E-mail</SelectItem><SelectItem value="phone">Telefone</SelectItem><SelectItem value="random">Aleatória</SelectItem></SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Chave</Label>
+                <Input value={pixForm.pix_key} onChange={(e) => setPixForm({ ...pixForm, pix_key: e.target.value })} className="mt-1 h-10" />
+              </div>
+              <Button type="submit" variant="outline" className="w-full h-10 rounded-xl text-[13px]" disabled={pixLoading}>
+                <Save className="h-4 w-4 mr-2" />{pixLoading ? "Salvando..." : "Salvar PIX"}
+              </Button>
             </form>
           </Panel>
 
@@ -172,10 +258,16 @@ export default function Identidade() {
             <h3 className="text-[13px] font-bold text-foreground mb-3">Verificação KYC</h3>
             <p className="text-[11px] text-muted-foreground mb-3">Envie fotos do documento e selfie para verificação.</p>
             <div className="space-y-2">
-              <DocSlot type="front" label="Documento (Frente)" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} />
-              <DocSlot type="back" label="Documento (Verso)" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} />
-              <DocSlot type="selfie" label="Selfie com Documento" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} />
+              <DocSlot type="front" label="Documento (Frente)" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} locked={!!kycDocs.front} />
+              <DocSlot type="back" label="Documento (Verso)" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} locked={!!kycDocs.back} />
+              <DocSlot type="selfie" label="Selfie com Documento" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} locked={!!kycDocs.selfie} />
             </div>
+            {kycDocs.front && kycDocs.back && kycDocs.selfie && (
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-info">
+                <Info className="h-3.5 w-3.5" />
+                <span>Documentos enviados. Não podem ser alterados — contate o suporte para correções.</span>
+              </div>
+            )}
           </Panel>
         </div>
       </div>
@@ -183,16 +275,31 @@ export default function Identidade() {
   );
 }
 
-function DocSlot({ type, label, icon, preview, uploading, onUpload }: { type: string; label: string; icon: React.ReactNode; preview: string | null; uploading: boolean; onUpload: (file: File) => void }) {
+function DocSlot({ type, label, icon, preview, uploading, onUpload, locked }: { type: string; label: string; icon: React.ReactNode; preview: string | null; uploading: boolean; onUpload: (file: File) => void; locked: boolean }) {
   const ref = useRef<HTMLInputElement>(null);
+  const canUpload = !locked && !uploading;
   return (
-    <div onClick={() => !uploading && ref.current?.click()} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer group transition-all border ${preview ? "border-primary/20 bg-primary/5" : "border-border bg-muted/30"}`}>
+    <div
+      onClick={() => canUpload && ref.current?.click()}
+      className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
+        locked
+          ? "border-primary/20 bg-primary/5 cursor-default"
+          : preview
+          ? "border-primary/20 bg-primary/5 cursor-pointer"
+          : "border-border bg-muted/30 cursor-pointer"
+      }`}
+    >
       <input ref={ref} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
       <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${preview ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
         {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : preview ? <CheckCircle2 className="h-5 w-5" /> : icon}
       </div>
-      <div className="flex-1"><p className="text-[13px] font-medium text-foreground/70">{label}</p><p className="text-[10px] text-muted-foreground">{preview ? "Enviado ✓" : "Clique para enviar"}</p></div>
-      <Upload className={`h-4 w-4 shrink-0 ${preview ? "text-primary" : "text-muted-foreground/30"}`} />
+      <div className="flex-1">
+        <p className="text-[13px] font-medium text-foreground/70">{label}</p>
+        <p className="text-[10px] text-muted-foreground">
+          {locked ? "Enviado ✓ — bloqueado para alteração" : preview ? "Enviado ✓" : "Clique para enviar"}
+        </p>
+      </div>
+      {locked ? <Lock className="h-4 w-4 shrink-0 text-muted-foreground/40" /> : <Upload className={`h-4 w-4 shrink-0 ${preview ? "text-primary" : "text-muted-foreground/30"}`} />}
     </div>
   );
 }

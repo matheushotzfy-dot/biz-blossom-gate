@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ExternalLink, Copy, Eye, Settings, Package, CheckCircle, Palette, Link2 } from "lucide-react";
+import { ExternalLink, Copy, Eye, Settings, Package, CheckCircle, Palette, Link2, Plus, Trash2, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
 import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
@@ -14,10 +19,19 @@ export default function Checkout() {
   const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Coupons state
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [couponForm, setCouponForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "" });
+
   const load = async () => {
     if (!user?.id) return;
-    const { data } = await supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: false });
-    if (data) setProducts(data);
+    const [prodRes, coupRes] = await Promise.all([
+      supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: false }),
+      supabase.from("coupons").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (prodRes.data) setProducts(prodRes.data);
+    if (coupRes.data) setCoupons(coupRes.data);
   };
 
   useEffect(() => { load(); }, [user?.id]);
@@ -39,9 +53,36 @@ export default function Checkout() {
     return methods;
   };
 
+  // Coupon handlers
+  const handleCreateCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    const { error } = await supabase.from("coupons").insert({
+      user_id: user.id,
+      code: couponForm.code.toUpperCase(),
+      discount_type: couponForm.discount_type,
+      discount_value: parseFloat(couponForm.discount_value) || 0,
+      max_uses: couponForm.max_uses ? parseInt(couponForm.max_uses) : null,
+    });
+    if (error) { toast.error("Erro ao criar cupom"); return; }
+    toast.success("Cupom criado!");
+    setCouponOpen(false);
+    setCouponForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "" });
+    load();
+  };
+  const toggleCouponActive = async (id: string, current: boolean) => {
+    await supabase.from("coupons").update({ is_active: !current }).eq("id", id);
+    load();
+  };
+  const deleteCoupon = async (id: string) => {
+    await supabase.from("coupons").delete().eq("id", id);
+    toast.success("Cupom removido");
+    load();
+  };
+
   return (
     <PageShell>
-      <PageTitle icon={<Palette className="h-6 w-6" />} title="Checkout" subtitle="Personalize e gerencie os checkouts dos seus produtos" />
+      <PageTitle icon={<Palette className="h-6 w-6" />} title="Checkout" subtitle="Personalize checkouts e gerencie cupons promocionais" />
 
       {/* Products list */}
       {products.length === 0 ? (
@@ -61,7 +102,6 @@ export default function Checkout() {
               style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}
             >
               <div className="flex flex-col md:flex-row md:items-center gap-4">
-                {/* Product info */}
                 <div className="flex items-center gap-3.5 flex-1 min-w-0">
                   {p.image_url ? (
                     <img src={p.image_url} alt={p.name} className="h-14 w-14 rounded-xl object-cover shrink-0" />
@@ -89,7 +129,6 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                {/* Checkout URL */}
                 {p.checkout_url && (
                   <div className="hidden lg:flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2 max-w-xs">
                     <Link2 className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -97,7 +136,6 @@ export default function Checkout() {
                   </div>
                 )}
 
-                {/* Actions */}
                 <div className="flex items-center gap-2">
                   <Button
                     variant="default"
@@ -127,6 +165,87 @@ export default function Checkout() {
                     </>
                   )}
                 </div>
+              </div>
+            </Panel>
+          ))}
+        </div>
+      )}
+
+      {/* ─── CUPONS SECTION ─── */}
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center gap-2">
+          <Ticket className="h-5 w-5 text-primary" />
+          <h2 className="text-base font-display font-bold text-foreground">Cupons Promocionais</h2>
+        </div>
+        <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground">
+              <Plus className="h-4 w-4" /> Novo Cupom
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md rounded-2xl">
+            <DialogHeader><DialogTitle className="font-display">Novo Cupom</DialogTitle></DialogHeader>
+            <form onSubmit={handleCreateCoupon} className="space-y-4 mt-2">
+              <div>
+                <Label className="text-sm font-semibold">Código</Label>
+                <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="uppercase mt-1.5" />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold">Tipo de Desconto</Label>
+                <Select value={couponForm.discount_type} onValueChange={(v) => setCouponForm({ ...couponForm, discount_type: v })}>
+                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Porcentagem (%)</SelectItem>
+                    <SelectItem value="fixed">Valor fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm font-semibold">Valor</Label>
+                  <Input type="number" step="0.01" value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} required className="mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold">Max. usos</Label>
+                  <Input type="number" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="Ilimitado" className="mt-1.5" />
+                </div>
+              </div>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-11 rounded-xl">Criar Cupom</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {coupons.length === 0 ? (
+        <Panel>
+          <div className="text-center py-8">
+            <Ticket className="h-10 w-10 mx-auto mb-3 text-muted-foreground/20" />
+            <p className="text-sm text-muted-foreground">Nenhum cupom criado</p>
+            <p className="text-[11px] text-muted-foreground/60 mt-1">Crie cupons para oferecer descontos nos seus checkouts</p>
+          </div>
+        </Panel>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {coupons.map((c) => (
+            <Panel key={c.id}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-mono text-lg font-bold text-primary">{c.code}</span>
+                <Switch checked={c.is_active} onCheckedChange={() => toggleCouponActive(c.id, c.is_active)} />
+              </div>
+              <div className="space-y-1.5 text-[13px]">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Desconto</span>
+                  <span className="font-bold text-foreground">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : `R$ ${Number(c.discount_value).toFixed(2)}`}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Usos</span>
+                  <span className="font-bold text-foreground">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : ""}</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-border">
+                <Button variant="ghost" size="sm" className="text-destructive w-full gap-1 hover:text-destructive hover:bg-destructive/5" onClick={() => deleteCoupon(c.id)}>
+                  <Trash2 className="h-3 w-3" /> Remover
+                </Button>
               </div>
             </Panel>
           ))}

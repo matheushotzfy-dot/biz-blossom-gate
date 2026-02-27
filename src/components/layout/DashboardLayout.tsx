@@ -2,8 +2,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
-import { Outlet } from "react-router-dom";
-import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command } from "lucide-react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command, AlertTriangle, ArrowRight, X as XIcon, CheckCircle2 } from "lucide-react";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -14,7 +14,9 @@ import type { Tables } from "@/integrations/supabase/types";
 export function DashboardLayout() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const [showApproved, setShowApproved] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -27,6 +29,16 @@ export function DashboardLayout() {
         if (data) setProfile(data);
       });
   }, [user]);
+
+  useEffect(() => {
+    if (profile?.account_status === "approved" && user?.id) {
+      const key = `hotzfy_account_approved_${user.id}`;
+      if (!localStorage.getItem(key)) {
+        setShowApproved(true);
+        localStorage.setItem(key, "1");
+      }
+    }
+  }, [profile?.account_status, user?.id]);
 
   return (
     <SidebarProvider
@@ -56,7 +68,6 @@ export function DashboardLayout() {
 
             <div className="flex-1" />
 
-
             <button
               onClick={toggleTheme}
               className="h-10 w-10 rounded-xl flex items-center justify-center border border-border/80 bg-card hover:bg-muted/60 hover:border-primary/20 transition-all"
@@ -81,6 +92,26 @@ export function DashboardLayout() {
             </div>
           </header>
 
+          {/* ─── VERIFICATION BANNER ─── */}
+          {profile && profile.account_status !== "approved" && (
+            <button
+              onClick={() => navigate("/financeiro/identidade")}
+              className={`relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b transition-colors cursor-pointer ${
+                profile.document_number
+                  ? "bg-info/8 border-info/20 text-info hover:bg-info/12"
+                  : "bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
+              }`}
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <p className="text-[13px] font-semibold flex-1 text-left">
+                {profile.document_number
+                  ? "Conta em análise — será aprovada o quanto antes!"
+                  : "Complete sua verificação para realizar saques na plataforma"}
+              </p>
+              <ArrowRight className="h-4 w-4 shrink-0" />
+            </button>
+          )}
+
           <MobileRevenueBar />
 
           <div className="relative z-10 flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 pb-24 md:pb-10">
@@ -92,6 +123,37 @@ export function DashboardLayout() {
 
         <MobileBottomNav />
       </div>
+
+      {/* ─── ACCOUNT APPROVED POPUP ─── */}
+      {showApproved && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setShowApproved(false)} />
+          <div className="relative w-full max-w-sm rounded-2xl border border-primary/30 bg-card shadow-2xl animate-scale-in overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+            <button
+              onClick={() => setShowApproved(false)}
+              className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"
+            >
+              <XIcon className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <div className="relative p-8 text-center">
+              <div className="mx-auto mb-5 h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-primary" />
+              </div>
+              <h2 className="text-2xl font-display font-black text-foreground mb-2">CONTA APROVADA! ✅</h2>
+              <p className="text-muted-foreground text-sm mb-6">
+                Sua conta foi verificada com sucesso. Agora você pode realizar saques e utilizar todas as funcionalidades da plataforma!
+              </p>
+              <button
+                onClick={() => setShowApproved(false)}
+                className="w-full h-11 rounded-xl gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/15"
+              >
+                Concluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </SidebarProvider>
   );
 }
