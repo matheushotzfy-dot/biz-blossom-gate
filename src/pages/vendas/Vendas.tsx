@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X,
   Phone, Mail, Calendar, Clock, Hash, Package, ArrowUpRight,
-  RefreshCw, Copy, Check, Users, Eye,
+  RefreshCw, Copy, Check, Users, Eye, MessageCircle,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
@@ -111,15 +111,18 @@ export default function Vendas() {
           { label: "Conversão", value: `${conversion.toFixed(1)}%`, sub: "aprovadas/total", icon: CreditCard, color: "text-success", bg: "bg-success/10" },
           { label: "Total Vendas", value: String(transactions.length), sub: "transações", icon: Users, color: "text-warning", bg: "bg-warning/10" },
         ].map((kpi) => (
-          <Panel key={kpi.label} className="relative overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
-              <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-                <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+          <Panel key={kpi.label} className="relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
+                <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${kpi.bg}`}>
+                  <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+                </div>
               </div>
+              <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">{kpi.sub}</p>
             </div>
-            <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">{kpi.sub}</p>
           </Panel>
         ))}
       </div>
@@ -167,7 +170,7 @@ export default function Vendas() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/20">
-                  {["Cliente", "WhatsApp", "Produto", "Valor Líquido", "Método", "Status", "Data", ""].map((h) => (
+                  {["Cliente", "Contato", "Produto", "Valor Líquido", "Método", "Status", "Data", ""].map((h) => (
                     <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -203,20 +206,24 @@ export default function Vendas() {
                       </div>
                     </td>
                     <td className="p-4">
-                      {tx.customer_phone ? (
-                        <a
-                          href={`https://wa.me/${tx.customer_phone.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 text-primary text-[12px] font-semibold hover:underline bg-primary/5 px-2.5 py-1 rounded-lg"
-                        >
-                          <Phone className="h-3 w-3" />
-                          {tx.customer_phone}
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground/40 text-[12px]">—</span>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {tx.customer_phone ? (
+                          <a
+                            href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-all"
+                            title="Abrir WhatsApp"
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            <span className="hidden xl:inline">{tx.customer_phone}</span>
+                            <span className="xl:hidden">WhatsApp</span>
+                          </a>
+                        ) : (
+                          <span className="text-muted-foreground/40 text-[12px]">—</span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4">
                       <span className="text-foreground text-[13px] font-medium">{tx.product_id ? (products[tx.product_id] || tx.product_id.slice(0, 8)) : "—"}</span>
@@ -271,17 +278,17 @@ export default function Vendas() {
                   <span className="text-muted-foreground text-[10px]">{tx.product_id ? products[tx.product_id] || "Produto" : "—"}</span>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex items-center gap-2">
                 <p className="text-muted-foreground text-[11px]">{fmtDate(tx.created_at)}</p>
                 {tx.customer_phone && (
                   <a
-                    href={`https://wa.me/${tx.customer_phone.replace(/\D/g, "")}`}
+                    href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-primary text-[10px] font-semibold mt-0.5"
+                    className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
                   >
-                    <Phone className="h-2.5 w-2.5" /> WhatsApp
+                    <MessageCircle className="h-3.5 w-3.5" />
                   </a>
                 )}
               </div>
@@ -290,11 +297,11 @@ export default function Vendas() {
         ))}
       </div>
 
-      {/* ─── DETAIL MODAL ─── */}
+      {/* ─── DETAIL MODAL — CENTERED ─── */}
       {selectedTx && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setSelectedTx(null)} />
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-scale-in">
+          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-scale-in">
             {/* Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border bg-card/95 backdrop-blur-sm rounded-t-2xl">
               <div>
@@ -341,7 +348,7 @@ export default function Vendas() {
               </div>
 
               {/* Customer */}
-              <div className="rounded-xl border border-border bg-muted/10 p-4">
+              <div className="rounded-xl border border-primary/15 bg-primary/[0.02] p-4">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Dados do Cliente</p>
                 <div className="space-y-2.5">
                   <DetailRow label="Nome" value={selectedTx.customer_name || "—"} />
@@ -351,13 +358,14 @@ export default function Vendas() {
                     } />
                   )}
                   {selectedTx.customer_phone && (
-                    <DetailRow icon={<Phone className="h-3.5 w-3.5" />} label="WhatsApp" value={
+                    <DetailRow icon={<MessageCircle className="h-3.5 w-3.5" />} label="WhatsApp" value={
                       <a
-                        href={`https://wa.me/${selectedTx.customer_phone.replace(/\D/g, "")}`}
+                        href={`https://wa.me/55${selectedTx.customer_phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-primary font-semibold text-[13px] hover:underline bg-primary/5 px-2 py-0.5 rounded-lg"
+                        className="inline-flex items-center gap-2 text-primary font-semibold text-[13px] hover:underline bg-primary/5 px-3 py-1.5 rounded-xl transition-all hover:bg-primary/10"
                       >
+                        <MessageCircle className="h-4 w-4" />
                         {selectedTx.customer_phone}
                         <ArrowUpRight className="h-3 w-3" />
                       </a>
