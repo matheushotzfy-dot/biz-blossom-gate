@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, EmptyState } from "@/components/PageShell";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 
@@ -371,37 +371,35 @@ export default function AdminConteudo() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <PageTitle icon={<BookOpen className="h-6 w-6" />} title="Conteúdo" subtitle="Gerencie cursos, módulos e aulas da sua área de membros" />
-        <Button onClick={openWizardNew} className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground px-5 h-10 shadow-lg shadow-primary/20">
+        <Button onClick={openWizardNew} className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground px-5 h-10 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
           <Sparkles className="h-4 w-4" /> Novo Conteúdo
         </Button>
       </div>
 
       {/* ── Search Bar ── */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
         <Input
           placeholder="Buscar por nome do curso..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="pl-10 h-11 rounded-xl bg-muted/30 border-border/50 text-[13px] focus:bg-background"
+          className="pl-10 h-11 rounded-xl bg-card/80 backdrop-blur-sm border-border/50 text-[13px] focus:bg-background focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
         />
       </div>
 
       {/* ── Course List ── */}
       {filtered.length === 0 ? (
-        <Panel className="py-16">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-muted/40 flex items-center justify-center">
-              <BookOpen className="h-8 w-8 text-muted-foreground/30" />
-            </div>
-            <div>
-              <p className="text-[15px] font-semibold text-foreground/80">Nenhum curso criado</p>
-              <p className="text-[13px] text-muted-foreground mt-1">Crie seu primeiro curso para começar a entregar conteúdo</p>
-            </div>
-            <Button onClick={openWizardNew} className="gap-2 rounded-xl gradient-primary text-primary-foreground mt-2">
-              <Plus className="h-4 w-4" /> Criar Primeiro Curso
-            </Button>
-          </div>
+        <Panel>
+          <EmptyState
+            icon={<BookOpen className="h-8 w-8" />}
+            title="Nenhum curso criado"
+            subtitle="Crie seu primeiro curso para começar a entregar conteúdo"
+            action={
+              <Button onClick={openWizardNew} className="gap-2 rounded-xl gradient-primary text-primary-foreground shadow-lg shadow-primary/15">
+                <Plus className="h-4 w-4" /> Criar Primeiro Curso
+              </Button>
+            }
+          />
         </Panel>
       ) : (
         <div className="space-y-3">
@@ -636,20 +634,19 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
   const product = products.find(p => p.id === course.product_id);
 
   return (
-    <Panel className="p-0 overflow-hidden group hover:border-primary/20 transition-all duration-300">
+    <GlowPanel className="p-0 overflow-hidden">
       <div className="flex flex-col sm:flex-row">
         {/* Thumbnail */}
-        <div className="sm:w-[200px] h-[140px] sm:h-auto bg-muted/30 relative overflow-hidden shrink-0">
+        <div className="sm:w-[200px] h-[140px] sm:h-auto bg-gradient-to-br from-muted/20 to-muted/5 relative overflow-hidden shrink-0">
           {course.thumbnail_url ? (
             <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <BookOpen className="h-10 w-10 text-muted-foreground/20" />
+              <BookOpen className="h-10 w-10 text-muted-foreground/15" />
             </div>
           )}
-          {/* Status overlay */}
-          <div className="absolute top-2 left-2">
-            <Badge variant={course.is_published ? "default" : "secondary"} className="text-[10px] font-bold rounded-lg px-2 py-0.5">
+          <div className="absolute top-2.5 left-2.5">
+            <Badge variant={course.is_published ? "default" : "secondary"} className="text-[10px] font-bold rounded-lg px-2.5 py-1 backdrop-blur-sm">
               {course.is_published ? "Publicado" : "Rascunho"}
             </Badge>
           </div>
@@ -658,14 +655,14 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
         {/* Info */}
         <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0">
           <div>
-            <h3 className="text-[16px] font-bold text-foreground truncate">{course.title}</h3>
-            <p className="text-[12px] text-muted-foreground mt-0.5">{course.category || "Geral"}</p>
-            <div className="flex items-center gap-4 mt-2 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1"><Layers className="h-3 w-3" />{stats.modules} módulos</span>
-              <span className="flex items-center gap-1"><PlayCircle className="h-3 w-3" />{stats.lessons} aulas</span>
+            <h3 className="text-[16px] font-display font-bold text-foreground truncate">{course.title}</h3>
+            <p className="text-[12px] text-muted-foreground/50 mt-0.5">{course.category || "Geral"}</p>
+            <div className="flex items-center gap-4 mt-2.5 text-[11px] text-muted-foreground/60">
+              <span className="flex items-center gap-1.5 bg-muted/20 border border-border/20 px-2 py-0.5 rounded-md"><Layers className="h-3 w-3" />{stats.modules} módulos</span>
+              <span className="flex items-center gap-1.5 bg-muted/20 border border-border/20 px-2 py-0.5 rounded-md"><PlayCircle className="h-3 w-3" />{stats.lessons} aulas</span>
             </div>
             {course.product_id && (
-              <div className="flex items-center gap-1.5 mt-2">
+              <div className="flex items-center gap-1.5 mt-2.5">
                 <LinkIcon className={`h-3 w-3 ${product ? "text-primary" : "text-destructive"}`} />
                 <span className={`text-[11px] font-semibold ${product ? "text-primary" : "text-destructive"}`}>
                   {product ? `Produto: ${product.name}` : "Produto removido"}
@@ -676,23 +673,23 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
 
           {/* Actions */}
           <div className="flex flex-wrap items-center gap-2 mt-4">
-            <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8" onClick={onTogglePublish}>
+            <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8 border-border/40 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={onTogglePublish}>
               {course.is_published ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               {course.is_published ? "Despublicar" : "Publicar"}
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8" onClick={onEdit}>
+            <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8 border-border/40 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={onEdit}>
               <Edit className="h-3 w-3" /> Editar
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8" onClick={onManage}>
+            <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8 border-border/40 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={onManage}>
               <Layers className="h-3 w-3" /> Gerenciar Conteúdo
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/5 rounded-xl" onClick={onDelete}>
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
       </div>
-    </Panel>
+    </GlowPanel>
   );
 }
 

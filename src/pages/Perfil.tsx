@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, SectionHeader } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const MILESTONES = [
@@ -36,7 +36,6 @@ const fmtCurrency = (v: number) =>
 export default function Perfil() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
-  
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
   const [saving, setSaving] = useState(false);
@@ -99,135 +98,124 @@ export default function Perfil() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Avatar + Info Card */}
-        <Panel className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
+        <GlowPanel className="relative">
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-4">
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
-              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer bg-primary/10" onClick={() => fileRef.current?.click()}>
+              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/20 shadow-xl shadow-primary/10" onClick={() => fileRef.current?.click()}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-primary">
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-3xl font-display font-black text-primary">
                     {(profile?.full_name || "U").charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Camera className="h-5 w-5 text-white" />
                 </div>
               </div>
-              {uploading && <div className="absolute inset-0 flex items-center justify-center"><div className="h-6 w-6 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" /></div>}
+              {uploading && <div className="absolute inset-0 flex items-center justify-center"><div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}
             </div>
-            <h2 className="text-lg font-bold text-foreground">{profile?.full_name || "Usuário"}</h2>
-            <p className="text-[12px] text-muted-foreground mt-0.5">{profile?.email || ""}</p>
-            <div className={`flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-[11px] font-bold border ${accStatus.cls}`}>
+            <h2 className="text-lg font-display font-black text-foreground">{profile?.full_name || "Usuário"}</h2>
+            <p className="text-[12px] text-muted-foreground/50 mt-0.5">{profile?.email || ""}</p>
+            <div className={`flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-[11px] font-bold border ${accStatus.cls}`}>
               <Shield className="h-3 w-3" /> {accStatus.label}
             </div>
           </div>
-        </Panel>
+        </GlowPanel>
 
         {/* Edit Profile */}
-        <Panel>
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
-            </div>
-            <h3 className="text-[15px] font-display font-bold text-foreground">Dados Pessoais</h3>
-          </div>
-          <form onSubmit={handleSave} className="space-y-3">
+        <GlowPanel>
+          <SectionHeader icon={<User className="h-4.5 w-4.5" />} title="Dados Pessoais" />
+          <form onSubmit={handleSave} className="space-y-3.5 mt-5">
             <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Nome completo</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1 h-10" />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Nome completo</Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">E-mail</Label>
-              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 h-10" type="email" />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">E-mail</Label>
+              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" type="email" />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Telefone</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1 h-10" placeholder="(11) 99999-9999" />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Telefone</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" placeholder="(11) 99999-9999" />
             </div>
-            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground" disabled={saving}>
+            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all" disabled={saving}>
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
           </form>
-        </Panel>
+        </GlowPanel>
 
         {/* Limites */}
-        <Panel>
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-10 w-10 rounded-xl bg-info/10 flex items-center justify-center">
-              <Wallet className="h-5 w-5 text-info" />
-            </div>
-            <h3 className="text-[15px] font-display font-bold text-foreground">Limites</h3>
-          </div>
-          <div className="space-y-3">
+        <GlowPanel glow="info">
+          <SectionHeader icon={<Wallet className="h-4.5 w-4.5" />} title="Limites" />
+          <div className="space-y-3.5 mt-5">
             <InfoRow label="Limite diário PIX" value="R$ 50.000,00" cls="text-primary" />
             <InfoRow label="Limite diário Saque" value="R$ 30.000,00" cls="text-info" />
             <InfoRow label="Saques por dia" value="5 operações" cls="text-foreground" />
           </div>
-        </Panel>
+        </GlowPanel>
       </div>
 
       {/* Progress */}
-      <Panel>
-        <div className="flex items-center gap-3 mb-5">
-          <div className="h-10 w-10 rounded-2xl flex items-center justify-center bg-primary/10">
-            <Trophy className="h-5 w-5 text-primary" />
+      <GlowPanel>
+        <div className="flex items-center gap-3.5 mb-6">
+          <div className="relative h-11 w-11 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
+            <Trophy className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h3 className="text-[14px] font-bold text-foreground">Progresso de Faturamento</h3>
-            <p className="text-[11px] text-muted-foreground">Acompanhe sua evolução</p>
+            <h3 className="text-[15px] font-display font-bold text-foreground">Progresso de Faturamento</h3>
+            <p className="text-[11px] text-muted-foreground/60">Acompanhe sua evolução</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-5">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Total faturado</p>
-            <p className="text-[22px] font-extrabold text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
+            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Total faturado</p>
+            <p className="text-[22px] font-display font-black text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Meta atual</p>
-            <p className="text-[22px] font-extrabold mt-1 text-primary">{milestone.next.label}</p>
+            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Meta atual</p>
+            <p className="text-[22px] font-display font-black mt-1 text-primary">{milestone.next.label}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Falta</p>
-            <p className="text-[22px] font-extrabold text-foreground/60 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
+            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Falta</p>
+            <p className="text-[22px] font-display font-black text-foreground/50 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
           </div>
         </div>
 
         <div>
-          <div className="flex justify-between mb-2">
+          <div className="flex justify-between mb-2.5">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-              <span className="text-[10px] font-bold text-muted-foreground">{milestone.pct.toFixed(0)}%</span>
+              <span className="text-[10px] font-bold text-muted-foreground/60">{milestone.pct.toFixed(0)}%</span>
             </div>
-            <span className="text-[10px] font-bold text-muted-foreground">{milestone.next.label}</span>
+            <span className="text-[10px] font-bold text-muted-foreground/60">{milestone.next.label}</span>
           </div>
-          <div className="w-full rounded-full h-3 overflow-hidden bg-muted">
-            <div className="h-full rounded-full relative transition-all duration-1000 gradient-primary" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 15px hsl(var(--primary) / 0.35)" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent" />
+          <div className="w-full rounded-full h-3.5 overflow-hidden bg-muted/30 border border-border/20">
+            <div className="h-full rounded-full relative transition-all duration-1000 gradient-primary" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </div>
           </div>
-          <div className="flex justify-between mt-3">
+          <div className="flex justify-between mt-4">
             {MILESTONES.slice(1).map((m) => (
               <div key={m.label} className="text-center">
-                <div className="h-2 w-2 rounded-full mx-auto mb-1" style={{ background: allTimeRevenue >= m.value ? "hsl(var(--primary))" : "var(--bar-track)", boxShadow: allTimeRevenue >= m.value ? "0 0 8px hsl(var(--primary) / 0.4)" : "none" }} />
-                <span className="text-[9px] text-muted-foreground font-bold">{m.label}</span>
+                <div className="h-2.5 w-2.5 rounded-full mx-auto mb-1.5 border border-border/30" style={{ background: allTimeRevenue >= m.value ? "hsl(var(--primary))" : "hsl(var(--muted))", boxShadow: allTimeRevenue >= m.value ? "0 0 10px hsl(var(--primary) / 0.5)" : "none" }} />
+                <span className="text-[9px] text-muted-foreground/50 font-bold">{m.label}</span>
               </div>
             ))}
           </div>
         </div>
-      </Panel>
+      </GlowPanel>
     </PageShell>
   );
 }
 
 function InfoRow({ label, value, cls }: { label: string; value: string; cls: string }) {
   return (
-    <div className="flex items-center justify-between py-1.5">
-      <span className="text-[12px] text-muted-foreground">{label}</span>
-      <span className={`text-[12px] font-bold ${cls}`}>{value}</span>
+    <div className="flex items-center justify-between py-2 border-b border-border/15 last:border-0">
+      <span className="text-[12px] text-muted-foreground/60">{label}</span>
+      <span className={`text-[13px] font-display font-bold ${cls}`}>{value}</span>
     </div>
   );
 }

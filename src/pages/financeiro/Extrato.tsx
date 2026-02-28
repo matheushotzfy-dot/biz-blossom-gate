@@ -4,9 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Search, Download, Filter, CreditCard, Package } from "lucide-react";
+import { FileText, Search, Download, CreditCard, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, KpiCard, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -41,79 +41,48 @@ export default function Extrato() {
 
   const total = filtered.reduce((acc, t) => acc + Number(t.net_amount), 0);
   const totalGross = filtered.reduce((acc, t) => acc + Number(t.amount), 0);
-  
   const getProductName = (id: string | null) => products.find(p => p.id === id)?.name || "—";
 
   return (
     <PageShell>
       <div className="flex items-center justify-between">
         <PageTitle icon={<FileText className="h-6 w-6" />} title="Extrato" subtitle="Histórico completo de transações" />
-        <Button variant="outline" size="sm" className="gap-2 rounded-xl hidden md:flex">
+        <Button variant="outline" size="sm" className="gap-2 rounded-xl hidden md:flex border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]">
           <Download className="h-4 w-4" /> Exportar
         </Button>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Líquido", value: fmt(total), icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Bruto", value: fmt(totalGross), icon: Package, color: "text-foreground", bg: "bg-muted/50" },
-          { label: "Aprovadas", value: String(filtered.filter(t => t.status === "completed").length), icon: Filter, color: "text-success", bg: "bg-success/10" },
-          { label: "Transações", value: String(filtered.length), icon: FileText, color: "text-info", bg: "bg-info/10" },
-        ].map((kpi) => (
-          <Panel key={kpi.label} className="relative overflow-hidden group hover:border-primary/20 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">{kpi.label}</span>
-                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-                  <kpi.icon className={`h-4.5 w-4.5 ${kpi.color}`} />
-                </div>
-              </div>
-              <p className="text-2xl font-display font-black text-foreground truncate">{kpi.value}</p>
-            </div>
-          </Panel>
-        ))}
+        <KpiCard label="Líquido" value={fmt(total)} icon={CreditCard} color="text-primary" bg="bg-primary/10" />
+        <KpiCard label="Bruto" value={fmt(totalGross)} icon={Package} color="text-foreground" bg="bg-muted/40" />
+        <KpiCard label="Aprovadas" value={String(filtered.filter(t => t.status === "completed").length)} icon={CreditCard} color="text-success" bg="bg-success/10" />
+        <KpiCard label="Transações" value={String(filtered.length)} icon={FileText} color="text-info" bg="bg-info/10" />
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar nome, email ou ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 rounded-xl text-sm" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+          <Input placeholder="Buscar nome, email ou ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 rounded-xl text-sm bg-card/80 backdrop-blur-sm border-border/50 focus:border-primary/30" />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[130px] rounded-xl text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="completed">Aprovado</SelectItem>
-            <SelectItem value="pending">Pendente</SelectItem>
-            <SelectItem value="failed">Falhou</SelectItem>
-            <SelectItem value="refunded">Reembolso</SelectItem>
-            <SelectItem value="chargeback">Chargeback</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={methodFilter} onValueChange={setMethodFilter}>
-          <SelectTrigger className="w-[130px] rounded-xl text-sm">
-            <SelectValue placeholder="Método" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="pix">PIX</SelectItem>
-            <SelectItem value="credit_card">Cartão</SelectItem>
-            <SelectItem value="boleto">Boleto</SelectItem>
-          </SelectContent>
-        </Select>
+        {[
+          { value: statusFilter, onChange: setStatusFilter, items: [["all","Todos"],["completed","Aprovado"],["pending","Pendente"],["failed","Falhou"],["refunded","Reembolso"],["chargeback","Chargeback"]], w: "w-[130px]" },
+          { value: methodFilter, onChange: setMethodFilter, items: [["all","Todos"],["pix","PIX"],["credit_card","Cartão"],["boleto","Boleto"]], w: "w-[130px]" },
+        ].map((f, i) => (
+          <Select key={i} value={f.value} onValueChange={f.onChange}>
+            <SelectTrigger className={`${f.w} rounded-xl text-sm border-border/50 bg-card/80 backdrop-blur-sm`}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {f.items.map(([val, label]) => <SelectItem key={val} value={val}>{label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        ))}
         {products.length > 0 && (
           <Select value={productFilter} onValueChange={setProductFilter}>
-            <SelectTrigger className="w-[160px] rounded-xl text-sm">
-              <SelectValue placeholder="Produto" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[160px] rounded-xl text-sm border-border/50 bg-card/80 backdrop-blur-sm"><SelectValue placeholder="Produto" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              {products.map(p => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-              ))}
+              {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
         )}
@@ -125,40 +94,34 @@ export default function Extrato() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/20">
+                <tr className="border-b border-border/40 bg-gradient-to-r from-muted/30 via-muted/10 to-muted/30">
                   {["ID", "Cliente", "Produto", "Valor", "Líquido", "Método", "Status", "Data"].map((h) => (
-                    <th key={h} className="text-left p-3.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em]">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                 {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="p-16 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-muted-foreground/30" />
-                      </div>
-                      <p className="text-muted-foreground text-sm font-medium">Nenhuma transação encontrada</p>
-                      <p className="text-muted-foreground/60 text-xs">Tente ajustar os filtros</p>
-                    </div>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={8}>
+                    <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação encontrada" subtitle="Tente ajustar os filtros" />
                   </td></tr>
-                ) : filtered.map((tx) => (
-                  <tr key={tx.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
-                    <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
-                    <td className="p-3.5">
-                      <p className="text-foreground font-medium text-[13px]">{tx.customer_name || "—"}</p>
-                      {tx.customer_email && <p className="text-[10px] text-muted-foreground">{tx.customer_email}</p>}
+                ) : filtered.map((tx, i) => (
+                  <tr key={tx.id} className="border-b border-border/25 hover:bg-primary/[0.02] transition-all animate-fade-in" style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}>
+                    <td className="p-4 font-mono text-[11px] text-muted-foreground/50">{tx.id.slice(0, 8)}</td>
+                    <td className="p-4">
+                      <p className="text-foreground font-semibold text-[13px]">{tx.customer_name || "—"}</p>
+                      {tx.customer_email && <p className="text-[10px] text-muted-foreground/40">{tx.customer_email}</p>}
                     </td>
-                    <td className="p-3.5 text-[12px] text-muted-foreground max-w-[140px] truncate">{getProductName(tx.product_id)}</td>
-                    <td className="p-3.5 text-foreground text-[13px]">{fmt(Number(tx.amount))}</td>
-                    <td className="p-3.5 font-bold text-primary text-[13px]">{fmt(Number(tx.net_amount))}</td>
-                    <td className="p-3.5">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground uppercase">
+                    <td className="p-4 text-[12px] text-muted-foreground/60 max-w-[140px] truncate">{getProductName(tx.product_id)}</td>
+                    <td className="p-4 text-foreground/80 text-[13px] font-medium">{fmt(Number(tx.amount))}</td>
+                    <td className="p-4 font-display font-black text-primary text-[14px]">{fmt(Number(tx.net_amount))}</td>
+                    <td className="p-4">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-muted/30 border border-border/30 text-muted-foreground/60 uppercase tracking-wider">
                         {tx.payment_method === "credit_card" ? "Cartão" : tx.payment_method || "—"}
                       </span>
                     </td>
-                    <td className="p-3.5"><StatusBadge status={tx.status} /></td>
-                    <td className="p-3.5 text-muted-foreground text-[12px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className="p-4"><StatusBadge status={tx.status} /></td>
+                    <td className="p-4 text-muted-foreground/50 text-[12px] font-medium">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -168,35 +131,30 @@ export default function Extrato() {
       </div>
 
       {/* Mobile card list */}
-      <div className="md:hidden space-y-2.5">
+      <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="mx-auto h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-              <FileText className="h-6 w-6 text-muted-foreground/30" />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">Nenhuma transação</p>
-          </div>
-        ) : filtered.map((tx) => (
-          <Panel key={tx.id}>
-            <div className="flex items-center justify-between mb-1.5">
+          <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação" />
+        ) : filtered.map((tx, i) => (
+          <GlowPanel key={tx.id} className="p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` } as React.CSSProperties}>
+            <div className="flex items-center justify-between mb-2">
               <span className="text-foreground font-semibold text-sm">{tx.customer_name || "Cliente"}</span>
               <StatusBadge status={tx.status} />
             </div>
-            <p className="text-[11px] text-muted-foreground mb-1 truncate">{getProductName(tx.product_id)}</p>
+            <p className="text-[11px] text-muted-foreground/50 mb-1.5 truncate">{getProductName(tx.product_id)}</p>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-foreground font-bold text-base">{fmt(Number(tx.net_amount))}</span>
-                <span className="text-[10px] text-muted-foreground ml-2">de {fmt(Number(tx.amount))}</span>
+                <span className="text-foreground font-display font-black text-lg">{fmt(Number(tx.net_amount))}</span>
+                <span className="text-[10px] text-muted-foreground/40 ml-2">de {fmt(Number(tx.amount))}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase">
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/20">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-muted/30 border border-border/20 text-muted-foreground/50 uppercase tracking-wider">
                 {tx.payment_method === "credit_card" ? "Cartão" : tx.payment_method || "—"}
               </span>
-              <span className="text-muted-foreground text-[11px]">•</span>
-              <span className="text-muted-foreground text-[11px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</span>
+              <span className="text-muted-foreground/30 text-[11px]">•</span>
+              <span className="text-muted-foreground/50 text-[11px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
-          </Panel>
+          </GlowPanel>
         ))}
       </div>
     </PageShell>

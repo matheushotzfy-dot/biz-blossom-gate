@@ -1,14 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Building2, Plus, Trash2, Key } from "lucide-react";
+import { Building2, Plus, Trash2, Key, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, SectionHeader, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const pixKeyTypes = [
@@ -81,7 +81,7 @@ function validatePixKey(type: string, value: string): string | null {
   switch (type) {
     case "cpf": return validateCPF(v) ? null : "CPF inválido";
     case "cnpj": return validateCNPJ(v) ? null : "CNPJ inválido";
-    case "email": return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : "E-mail inválido (precisa conter @)";
+    case "email": return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v) ? null : "E-mail inválido (precisa conter @)";
     case "telefone": {
       const nums = v.replace(/\D/g, "");
       return nums.length >= 10 && nums.length <= 11 ? null : "Telefone inválido (DDD + número)";
@@ -203,29 +203,32 @@ export default function DadosBancarios() {
       <PageTitle icon={<Building2 className="h-6 w-6" />} title="Dados Bancários" subtitle="Gerencie suas chaves PIX e contas bancárias" />
 
       {/* PIX Section */}
-      <Panel>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center gradient-primary shrink-0">
-              <Key className="h-4 w-4 text-primary-foreground" />
+      <GlowPanel>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3.5">
+            <div className="relative h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+              <Key className="h-4.5 w-4.5 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground text-[14px] md:text-[15px]">Chaves PIX</h3>
-              <p className="text-[10px] md:text-[11px] text-muted-foreground">Até 3 chaves • Utilizadas para saques</p>
+              <h3 className="font-display font-bold text-foreground text-[15px]">Chaves PIX</h3>
+              <p className="text-[11px] text-muted-foreground/60">Até 3 chaves • Utilizadas para saques</p>
             </div>
           </div>
-          <span className="text-[12px] font-mono text-muted-foreground">{pixKeys.length}/3</span>
+          <div className="flex items-center gap-2">
+            <Shield className="h-3.5 w-3.5 text-primary/50" />
+            <span className="text-[12px] font-mono text-muted-foreground/50 font-bold">{pixKeys.length}/3</span>
+          </div>
         </div>
 
         {pixKeys.length > 0 && (
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2.5 mb-5">
             {pixKeys.map((pk) => (
-              <div key={pk.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+              <div key={pk.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/40 bg-gradient-to-r from-muted/20 to-transparent backdrop-blur-sm hover:border-primary/15 transition-all">
                 <div className="min-w-0">
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">{pixTypeLabel(pk.key_type)}</p>
-                  <p className="font-mono text-foreground text-[13px] md:text-[14px] mt-0.5 truncate">{pk.key_value}</p>
+                  <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">{pixTypeLabel(pk.key_type)}</p>
+                  <p className="font-mono text-foreground text-[14px] mt-0.5 truncate font-medium">{pk.key_value}</p>
                 </div>
-                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={() => handleDeletePix(pk.id)}>
+                <Button variant="ghost" size="icon" className="text-destructive/50 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl" onClick={() => handleDeletePix(pk.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -234,96 +237,89 @@ export default function DadosBancarios() {
         )}
 
         {pixKeys.length < 3 && (
-          <div className="space-y-3 pt-2 border-t border-border">
+          <div className="space-y-3 pt-4 border-t border-border/30">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-muted-foreground text-[12px]">Tipo da Chave</Label>
+                <Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Tipo da Chave</Label>
                 <Select value={newPixType} onValueChange={(v) => { setNewPixType(v); setNewPixValue(""); setPixError(null); }}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="mt-1.5 rounded-xl border-border/50"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {pixKeyTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-muted-foreground text-[12px]">Chave PIX</Label>
+                <Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Chave PIX</Label>
                 <Input
                   value={newPixValue}
                   onChange={e => { setNewPixValue(formatPixInput(newPixType, e.target.value)); setPixError(null); }}
                   placeholder={getPlaceholder(newPixType)}
-                  className="font-mono"
+                  className="font-mono mt-1.5 rounded-xl border-border/50"
                 />
               </div>
             </div>
-            {pixError && <p className="text-[12px] text-destructive">{pixError}</p>}
-            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2 gradient-primary text-primary-foreground w-full sm:w-auto">
+            {pixError && <p className="text-[12px] text-destructive font-medium">{pixError}</p>}
+            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2 gradient-primary text-primary-foreground w-full sm:w-auto shadow-lg shadow-primary/15">
               <Plus className="h-4 w-4" /> Adicionar Chave
             </Button>
           </div>
         )}
-      </Panel>
+      </GlowPanel>
 
       {/* Bank Accounts Section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
-            <Building2 className="h-4 w-4 text-info" />
-          </div>
-          <div>
-            <h3 className="text-[15px] font-display font-bold text-foreground">Contas Bancárias</h3>
-            <p className="text-[11px] text-muted-foreground">Cadastre suas contas para recebimento</p>
-          </div>
-        </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nova</span> Conta</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md rounded-2xl">
-            <DialogHeader><DialogTitle className="font-display">Cadastrar Conta Bancária</DialogTitle></DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Banco</Label><Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required /></div>
-                <div><Label>Código</Label><Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="001" /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Agência</Label><Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required /></div>
-                <div><Label>Conta</Label><Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required /></div>
-              </div>
-              <div><Label>Tipo</Label><Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="corrente">Corrente</SelectItem><SelectItem value="poupanca">Poupança</SelectItem></SelectContent></Select></div>
-              <div><Label>Titular</Label><Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required /></div>
-              <div><Label>CPF/CNPJ</Label><Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required /></div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold rounded-xl h-11">Cadastrar</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <SectionHeader
+        icon={<Building2 className="h-4.5 w-4.5" />}
+        title="Contas Bancárias"
+        subtitle="Cadastre suas contas para recebimento"
+        action={
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl transition-all">
+                <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nova</span> Conta
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent rounded-2xl pointer-events-none" />
+              <DialogHeader><DialogTitle className="font-display relative">Cadastrar Conta Bancária</DialogTitle></DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4 relative">
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Banco</Label><Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required className="mt-1.5 rounded-xl" /></div>
+                  <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Código</Label><Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="001" className="mt-1.5 rounded-xl" /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Agência</Label><Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
+                  <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Conta</Label><Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
+                </div>
+                <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Tipo</Label><Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}><SelectTrigger className="mt-1.5 rounded-xl"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="corrente">Corrente</SelectItem><SelectItem value="poupanca">Poupança</SelectItem></SelectContent></Select></div>
+                <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">Titular</Label><Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
+                <div><Label className="text-[11px] text-muted-foreground/50 uppercase tracking-widest font-bold">CPF/CNPJ</Label><Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
+                <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold rounded-xl h-11 shadow-lg shadow-primary/15">Cadastrar</Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accounts.length === 0 ? (
-          <Panel className="col-span-full py-12">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="h-14 w-14 rounded-2xl bg-muted/40 flex items-center justify-center">
-                <Building2 className="h-7 w-7 text-muted-foreground/20" />
-              </div>
-              <p className="text-[14px] font-semibold text-muted-foreground">Nenhuma conta cadastrada</p>
-              <p className="text-[12px] text-muted-foreground/60">Cadastre uma conta bancária para recebimentos</p>
-            </div>
+          <Panel className="col-span-full">
+            <EmptyState icon={<Building2 className="h-7 w-7" />} title="Nenhuma conta cadastrada" subtitle="Cadastre uma conta bancária para recebimentos" />
           </Panel>
         ) : accounts.map((acc) => (
-          <Panel key={acc.id}>
+          <GlowPanel key={acc.id} glow="info">
             <div className="flex justify-between items-start">
               <div className="min-w-0">
-                <h3 className="font-display font-bold text-foreground text-[15px]">{acc.bank_name}</h3>
-                {acc.bank_code && <p className="text-[11px] text-muted-foreground">Cód: {acc.bank_code}</p>}
+                <h3 className="font-display font-bold text-foreground text-[16px]">{acc.bank_name}</h3>
+                {acc.bank_code && <p className="text-[11px] text-muted-foreground/50 font-mono mt-0.5">Cód: {acc.bank_code}</p>}
               </div>
-              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" className="text-destructive/50 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
-            <div className="mt-3 space-y-1.5 text-[13px] text-muted-foreground">
-              <p>Ag: <span className="font-mono text-foreground/70">{acc.agency}</span> | Conta: <span className="font-mono text-foreground/70">{acc.account_number}</span></p>
-              <p className="capitalize">{acc.account_type === "corrente" ? "Conta Corrente" : "Poupança"}</p>
-              <p className="text-muted-foreground/60 truncate">{acc.holder_name} — {acc.holder_document}</p>
+            <div className="mt-3 pt-3 border-t border-border/20 space-y-2 text-[13px] text-muted-foreground/60">
+              <p>Ag: <span className="font-mono text-foreground/70 font-medium">{acc.agency}</span> | Conta: <span className="font-mono text-foreground/70 font-medium">{acc.account_number}</span></p>
+              <p className="capitalize font-medium">{acc.account_type === "corrente" ? "Conta Corrente" : "Poupança"}</p>
+              <p className="text-muted-foreground/40 truncate text-[12px]">{acc.holder_name} — {acc.holder_document}</p>
             </div>
-          </Panel>
+          </GlowPanel>
         ))}
       </div>
     </PageShell>

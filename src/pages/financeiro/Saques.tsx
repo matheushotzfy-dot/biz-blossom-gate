@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, KpiCard, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const pixKeyTypeLabels: Record<string, string> = {
@@ -36,7 +36,6 @@ export default function Saques() {
       supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at") as any,
     ]);
     if (wRes.data) {
-      // Check for newly approved withdrawals
       const oldIds = new Set(withdrawals.filter(w => w.status === "approved").map(w => w.id));
       const newApproved = (wRes.data as Tables<"withdrawals">[]).find(
         w => w.status === "approved" && !oldIds.has(w.id) && withdrawals.length > 0
@@ -48,8 +47,6 @@ export default function Saques() {
   };
 
   useEffect(() => { loadData(); }, [user?.id]);
-
-  // Poll for status changes
   useEffect(() => {
     if (!user?.id) return;
     const interval = setInterval(loadData, 30000);
@@ -83,45 +80,37 @@ export default function Saques() {
         <PageTitle icon={<ArrowDownToLine className="h-6 w-6" />} title="Saques" subtitle="Solicite e acompanhe seus saques via PIX" />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+            <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
               <Plus className="h-4 w-4" /> Novo Saque
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-2xl">
+          <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent rounded-2xl pointer-events-none" />
             <DialogHeader>
-              <DialogTitle className="font-display text-lg">Solicitar Saque</DialogTitle>
+              <DialogTitle className="font-display text-lg relative">Solicitar Saque</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+            <form onSubmit={handleSubmit} className="space-y-5 mt-2 relative">
               <div>
-                <Label className="text-sm font-semibold">Valor do saque (R$)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="1"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0,00"
-                  required
-                  className="mt-1.5 h-12 text-lg font-bold"
-                />
+                <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Valor do saque (R$)</Label>
+                <Input type="number" step="0.01" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required className="mt-1.5 h-12 text-lg font-bold rounded-xl" />
                 <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs text-muted-foreground">Taxa fixa de saque</p>
+                  <p className="text-xs text-muted-foreground/50">Taxa fixa de saque</p>
                   <p className="text-xs font-bold text-warning">R$ 5,00</p>
                 </div>
                 {amount && parseFloat(amount) > 5 && (
                   <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/15">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Você receberá</span>
-                      <span className="text-sm font-black text-primary">{fmt(parseFloat(amount) - 5)}</span>
+                      <span className="text-xs text-muted-foreground/60">Você receberá</span>
+                      <span className="text-sm font-display font-black text-primary">{fmt(parseFloat(amount) - 5)}</span>
                     </div>
                   </div>
                 )}
               </div>
               <div>
-                <Label className="text-sm font-semibold">Chave PIX</Label>
+                <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Chave PIX</Label>
                 {pixKeys.length > 0 ? (
                   <Select value={selectedPixKeyId || pixKeys[0]?.id} onValueChange={setSelectedPixKeyId}>
-                    <SelectTrigger className="mt-1.5 h-12"><SelectValue placeholder="Selecione a chave PIX" /></SelectTrigger>
+                    <SelectTrigger className="mt-1.5 h-12 rounded-xl"><SelectValue placeholder="Selecione a chave PIX" /></SelectTrigger>
                     <SelectContent>
                       {pixKeys.map((pk) => (
                         <SelectItem key={pk.id} value={pk.id}>
@@ -135,18 +124,13 @@ export default function Saques() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <div className="mt-1.5 p-3 rounded-xl border border-destructive/30 bg-destructive/5">
+                  <div className="mt-1.5 p-3 rounded-xl border border-destructive/20 bg-destructive/5">
                     <p className="text-xs text-destructive font-semibold">⚠️ Cadastre uma chave PIX em Dados Bancários</p>
                   </div>
                 )}
               </div>
-              <Button
-                type="submit"
-                className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-lg shadow-primary/15 text-sm"
-                disabled={pixKeys.length === 0}
-              >
-                <ArrowDownToLine className="h-4 w-4 mr-2" />
-                Solicitar Saque
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-xl shadow-primary/15 text-sm" disabled={pixKeys.length === 0}>
+                <ArrowDownToLine className="h-4 w-4 mr-2" /> Solicitar Saque
               </Button>
             </form>
           </DialogContent>
@@ -155,26 +139,10 @@ export default function Saques() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Pendente", value: fmt(totalPending), sub: `${pending.length} saques`, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
-          { label: "Sacado", value: fmt(totalApproved), sub: `${approved.length} aprovados`, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
-          { label: "Recusados", value: String(rejected.length), sub: "saques", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
-          { label: "Total", value: String(withdrawals.length), sub: "solicitações", icon: ArrowDownToLine, color: "text-primary", bg: "bg-primary/10" },
-        ].map((kpi) => (
-          <Panel key={kpi.label} className="relative overflow-hidden group hover:border-primary/20 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">{kpi.label}</span>
-                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-                  <kpi.icon className={`h-4.5 w-4.5 ${kpi.color}`} />
-                </div>
-              </div>
-              <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">{kpi.sub}</p>
-            </div>
-          </Panel>
-        ))}
+        <KpiCard label="Pendente" value={fmt(totalPending)} sub={`${pending.length} saques`} icon={Clock} color="text-warning" bg="bg-warning/10" />
+        <KpiCard label="Sacado" value={fmt(totalApproved)} sub={`${approved.length} aprovados`} icon={CheckCircle2} color="text-success" bg="bg-success/10" />
+        <KpiCard label="Recusados" value={String(rejected.length)} sub="saques" icon={XCircle} color="text-destructive" bg="bg-destructive/10" />
+        <KpiCard label="Total" value={String(withdrawals.length)} sub="solicitações" icon={ArrowDownToLine} color="text-primary" bg="bg-primary/10" />
       </div>
 
       {/* Desktop table */}
@@ -183,33 +151,25 @@ export default function Saques() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/20">
+                <tr className="border-b border-border/40 bg-gradient-to-r from-muted/30 via-muted/10 to-muted/30">
                   {["ID", "Valor", "Taxa", "Líquido", "Status", "Data"].map((h) => (
-                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em]">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {withdrawals.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-16 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center">
-                          <ArrowDownToLine className="h-5 w-5 text-muted-foreground/30" />
-                        </div>
-                        <p className="text-muted-foreground text-sm font-medium">Nenhum saque realizado</p>
-                        <p className="text-muted-foreground/60 text-xs">Solicite seu primeiro saque</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : withdrawals.map((w) => (
-                  <tr key={w.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
-                    <td className="p-4 font-mono text-[11px] text-muted-foreground">{w.id.slice(0, 8)}</td>
-                    <td className="p-4 font-bold text-foreground text-[14px]">{fmt(Number(w.amount))}</td>
+                  <tr><td colSpan={6}>
+                    <EmptyState icon={<ArrowDownToLine className="h-7 w-7" />} title="Nenhum saque realizado" subtitle="Solicite seu primeiro saque" />
+                  </td></tr>
+                ) : withdrawals.map((w, i) => (
+                  <tr key={w.id} className="border-b border-border/25 hover:bg-primary/[0.02] transition-all animate-fade-in" style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}>
+                    <td className="p-4 font-mono text-[11px] text-muted-foreground/50">{w.id.slice(0, 8)}</td>
+                    <td className="p-4 font-display font-black text-foreground text-[15px]">{fmt(Number(w.amount))}</td>
                     <td className="p-4 text-warning font-semibold text-[13px]">- {fmt(Number(w.fee_amount))}</td>
-                    <td className="p-4 text-primary font-bold text-[14px]">{fmt(Number(w.net_amount))}</td>
+                    <td className="p-4 text-primary font-display font-black text-[15px]">{fmt(Number(w.net_amount))}</td>
                     <td className="p-4"><StatusBadge status={w.status} /></td>
-                    <td className="p-4 text-muted-foreground text-[12px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className="p-4 text-muted-foreground/50 text-[12px] font-medium">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -219,38 +179,32 @@ export default function Saques() {
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-2.5">
+      <div className="md:hidden space-y-3">
         {withdrawals.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="mx-auto h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-              <ArrowDownToLine className="h-6 w-6 text-muted-foreground/30" />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">Nenhum saque</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Solicite seu primeiro saque</p>
-          </div>
-        ) : withdrawals.map((w) => (
-          <Panel key={w.id} className="relative overflow-hidden">
-            <div className="flex items-start justify-between mb-2">
+          <EmptyState icon={<ArrowDownToLine className="h-7 w-7" />} title="Nenhum saque" subtitle="Solicite seu primeiro saque" />
+        ) : withdrawals.map((w, i) => (
+          <GlowPanel key={w.id} className="p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` } as React.CSSProperties}>
+            <div className="flex items-start justify-between mb-2.5">
               <div>
                 <p className="text-foreground font-display font-black text-xl">{fmt(Number(w.amount))}</p>
-                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{w.id.slice(0, 12)}</p>
+                <p className="text-[11px] text-muted-foreground/40 font-mono mt-0.5">{w.id.slice(0, 12)}</p>
               </div>
               <StatusBadge status={w.status} />
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-border/40">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between pt-2.5 border-t border-border/20">
+              <div className="flex items-center gap-4">
                 <div>
-                  <p className="text-[10px] text-muted-foreground">Taxa</p>
+                  <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider font-semibold">Taxa</p>
                   <p className="text-warning font-semibold text-[12px]">- {fmt(Number(w.fee_amount))}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground">Líquido</p>
-                  <p className="text-primary font-bold text-[13px]">{fmt(Number(w.net_amount))}</p>
+                  <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider font-semibold">Líquido</p>
+                  <p className="text-primary font-display font-bold text-[14px]">{fmt(Number(w.net_amount))}</p>
                 </div>
               </div>
-              <span className="text-muted-foreground text-[11px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</span>
+              <span className="text-muted-foreground/40 text-[11px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
-          </Panel>
+          </GlowPanel>
         ))}
       </div>
 
@@ -258,32 +212,26 @@ export default function Saques() {
       {approvedPopup && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setApprovedPopup(null)} />
-          <div className="relative w-full max-w-sm rounded-2xl border border-primary/30 bg-card shadow-2xl animate-scale-in overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-            <button
-              onClick={() => setApprovedPopup(null)}
-              className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"
-            >
+          <div className="relative w-full max-w-sm rounded-2xl border border-primary/20 bg-card/95 backdrop-blur-xl shadow-2xl animate-scale-in overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
+            <button onClick={() => setApprovedPopup(null)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/40 flex items-center justify-center hover:bg-muted/60 z-10 border border-border/40">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
             <div className="relative p-8 text-center">
-              <div className="mx-auto mb-5 h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="mx-auto mb-5 h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center">
                 <PartyPopper className="h-10 w-10 text-primary" />
               </div>
               <h2 className="text-2xl font-display font-black text-foreground mb-2">PARABÉNS! 🎉</h2>
-              <p className="text-muted-foreground text-sm mb-4">
-                Seu saque de <strong className="text-primary font-black text-lg">{fmt(Number(approvedPopup.net_amount))}</strong> foi aprovado!
+              <p className="text-muted-foreground/70 text-sm mb-4">
+                Seu saque de <strong className="text-primary font-display font-black text-lg">{fmt(Number(approvedPopup.net_amount))}</strong> foi aprovado!
               </p>
-              <div className="rounded-xl bg-primary/5 border border-primary/15 p-4 mb-5">
+              <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 mb-5">
                 <div className="flex items-center gap-2 justify-center">
                   <Rocket className="h-5 w-5 text-primary" />
                   <p className="text-sm font-bold text-foreground">Bora para o próximo! Você está voando! 🚀</p>
                 </div>
               </div>
-              <Button
-                onClick={() => setApprovedPopup(null)}
-                className="w-full gradient-primary text-primary-foreground font-bold h-11 rounded-xl shadow-lg shadow-primary/15"
-              >
+              <Button onClick={() => setApprovedPopup(null)} className="w-full gradient-primary text-primary-foreground font-bold h-11 rounded-xl shadow-xl shadow-primary/15">
                 Fechar
               </Button>
             </div>
