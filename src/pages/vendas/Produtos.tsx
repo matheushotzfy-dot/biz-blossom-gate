@@ -231,7 +231,9 @@ export default function Produtos() {
 
                 {p.checkout_url && (
                   <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2 mb-3">
-                    <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <a href={p.checkout_url!} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors shrink-0" title="Abrir checkout" onClick={(e) => e.stopPropagation()}>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                     <span className="text-[10px] text-muted-foreground font-mono truncate flex-1">{p.checkout_url}</span>
                     <button onClick={() => copyCheckout(p)} className="text-primary hover:text-primary/80 transition-colors" aria-label="Copiar link do checkout">
                       {copiedId === p.id ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}

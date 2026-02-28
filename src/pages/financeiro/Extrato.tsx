@@ -54,23 +54,23 @@ export default function Extrato() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Líquido</p>
-          <p className="text-lg md:text-xl font-extrabold mt-1 text-primary truncate">{fmt(total)}</p>
-        </Panel>
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Bruto</p>
-          <p className="text-lg md:text-xl font-extrabold mt-1 text-foreground truncate">{fmt(totalGross)}</p>
-        </Panel>
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Aprovadas</p>
-          <p className="text-lg md:text-xl font-extrabold mt-1 text-primary truncate">{filtered.filter(t => t.status === "completed").length}</p>
-        </Panel>
-        <Panel>
-          <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Transações</p>
-          <p className="text-lg md:text-xl font-extrabold mt-1 text-foreground">{filtered.length}</p>
-        </Panel>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Líquido", value: fmt(total), icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Bruto", value: fmt(totalGross), icon: Package, color: "text-foreground", bg: "bg-muted/50" },
+          { label: "Aprovadas", value: String(filtered.filter(t => t.status === "completed").length), icon: Filter, color: "text-success", bg: "bg-success/10" },
+          { label: "Transações", value: String(filtered.length), icon: FileText, color: "text-info", bg: "bg-info/10" },
+        ].map((kpi) => (
+          <Panel key={kpi.label} className="relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
+              <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${kpi.bg}`}>
+                <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+              </div>
+            </div>
+            <p className="text-2xl font-display font-black text-foreground truncate">{kpi.value}</p>
+          </Panel>
+        ))}
       </div>
 
       {/* Filters */}
@@ -129,8 +129,16 @@ export default function Extrato() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="p-12 text-center text-muted-foreground">Nenhuma transação encontrada</td></tr>
+                 {filtered.length === 0 ? (
+                  <tr><td colSpan={8} className="p-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center">
+                        <FileText className="h-5 w-5 text-muted-foreground/30" />
+                      </div>
+                      <p className="text-muted-foreground text-sm font-medium">Nenhuma transação encontrada</p>
+                      <p className="text-muted-foreground/60 text-xs">Tente ajustar os filtros</p>
+                    </div>
+                  </td></tr>
                 ) : filtered.map((tx) => (
                   <tr key={tx.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
                     <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{tx.id.slice(0, 8)}</td>
@@ -157,9 +165,14 @@ export default function Extrato() {
       </div>
 
       {/* Mobile card list */}
-      <div className="md:hidden space-y-2">
+      <div className="md:hidden space-y-2.5">
         {filtered.length === 0 ? (
-          <Panel><p className="text-center text-muted-foreground text-sm py-4">Nenhuma transação encontrada</p></Panel>
+          <div className="py-16 text-center">
+            <div className="mx-auto h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+              <FileText className="h-6 w-6 text-muted-foreground/30" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">Nenhuma transação</p>
+          </div>
         ) : filtered.map((tx) => (
           <Panel key={tx.id}>
             <div className="flex items-center justify-between mb-1.5">
