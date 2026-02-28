@@ -194,7 +194,7 @@ export default function Produtos() {
           <p className="text-sm text-muted-foreground max-w-sm">Crie seu primeiro infoproduto para começar a vender. Configure checkout, preço e área de membros.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 mt-1">
           {products.map((p, i) => (
             <div
               key={p.id}

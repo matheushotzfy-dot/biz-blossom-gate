@@ -6,17 +6,36 @@ export function PageShell({ children }: { children: React.ReactNode }) {
 }
 
 export function Panel({ children, className, onClick, style }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
-  return <div className={cn("panel-enterprise p-5", className)} onClick={onClick} style={style}>{children}</div>;
+  return <div className={cn("panel-enterprise p-5 rounded-2xl", className)} onClick={onClick} style={style}>{children}</div>;
+}
+
+export function SectionHeader({ icon, title, subtitle, action }: { icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-[15px] font-display font-bold text-foreground leading-tight">{title}</h3>
+          {subtitle && <p className="text-[11px] text-muted-foreground">{subtitle}</p>}
+        </div>
+      </div>
+      {action}
+    </div>
+  );
 }
 
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
-    <div className="space-y-1">
-      <h1 className="text-2xl md:text-3xl font-display font-extrabold tracking-tight text-foreground flex items-center gap-3">
-        <span className="text-primary shrink-0">{icon}</span>
-        <span>{title}</span>
-      </h1>
-      <p className="text-sm md:text-[15px] text-muted-foreground">{subtitle}</p>
+    <div className="flex items-center gap-4">
+      <div className="h-12 w-12 rounded-2xl gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+        <span className="text-primary-foreground">{icon}</span>
+      </div>
+      <div className="space-y-0.5">
+        <h1 className="text-xl md:text-2xl font-display font-extrabold tracking-tight text-foreground leading-none">{title}</h1>
+        <p className="text-[13px] text-muted-foreground">{subtitle}</p>
+      </div>
     </div>
   );
 }

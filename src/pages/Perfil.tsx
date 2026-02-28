@@ -97,7 +97,7 @@ export default function Perfil() {
     <PageShell>
       <PageTitle icon={<User className="h-6 w-6" />} title="Meu Perfil" subtitle="Gerencie suas informações pessoais" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Avatar + Info Card */}
         <Panel className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
@@ -128,11 +128,11 @@ export default function Perfil() {
 
         {/* Edit Profile */}
         <Panel>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-              <User className="h-4 w-4 text-primary" />
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <User className="h-5 w-5 text-primary" />
             </div>
-            <h3 className="text-[14px] font-bold text-foreground">Dados Pessoais</h3>
+            <h3 className="text-[15px] font-display font-bold text-foreground">Dados Pessoais</h3>
           </div>
           <form onSubmit={handleSave} className="space-y-3">
             <div>
@@ -155,11 +155,11 @@ export default function Perfil() {
 
         {/* Limites */}
         <Panel>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="h-8 w-8 rounded-xl bg-info/10 flex items-center justify-center">
-              <Wallet className="h-4 w-4 text-info" />
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-10 w-10 rounded-xl bg-info/10 flex items-center justify-center">
+              <Wallet className="h-5 w-5 text-info" />
             </div>
-            <h3 className="text-[14px] font-bold text-foreground">Limites</h3>
+            <h3 className="text-[15px] font-display font-bold text-foreground">Limites</h3>
           </div>
           <div className="space-y-3">
             <InfoRow label="Limite diário PIX" value="R$ 50.000,00" cls="text-primary" />

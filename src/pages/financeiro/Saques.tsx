@@ -154,22 +154,25 @@ export default function Saques() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Pendente", value: fmt(totalPending), sub: `${pending.length} saques`, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
           { label: "Sacado", value: fmt(totalApproved), sub: `${approved.length} aprovados`, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
           { label: "Recusados", value: String(rejected.length), sub: "saques", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
           { label: "Total", value: String(withdrawals.length), sub: "solicitações", icon: ArrowDownToLine, color: "text-primary", bg: "bg-primary/10" },
         ].map((kpi) => (
-          <Panel key={kpi.label} className="relative overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
-              <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-                <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+          <Panel key={kpi.label} className="relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">{kpi.label}</span>
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
+                  <kpi.icon className={`h-4.5 w-4.5 ${kpi.color}`} />
+                </div>
               </div>
+              <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{kpi.sub}</p>
             </div>
-            <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">{kpi.sub}</p>
           </Panel>
         ))}
       </div>
