@@ -7,9 +7,10 @@ import {
   RefreshCw, Copy, Check, Users, Eye, MessageCircle,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, KpiCard, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -105,26 +106,10 @@ export default function Vendas() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Receita Líquida", value: fmt(totalSales), sub: `${approved.length} aprovadas`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Ticket Médio", value: fmt(avgTicket), sub: "por venda", icon: TrendingUp, color: "text-info", bg: "bg-info/10" },
-          { label: "Conversão", value: `${conversion.toFixed(1)}%`, sub: "aprovadas/total", icon: CreditCard, color: "text-success", bg: "bg-success/10" },
-          { label: "Total Vendas", value: String(transactions.length), sub: "transações", icon: Users, color: "text-warning", bg: "bg-warning/10" },
-        ].map((kpi) => (
-          <Panel key={kpi.label} className="relative overflow-hidden group hover:border-primary/20 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">{kpi.label}</span>
-                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-                  <kpi.icon className={`h-4.5 w-4.5 ${kpi.color}`} />
-                </div>
-              </div>
-              <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">{kpi.sub}</p>
-            </div>
-          </Panel>
-        ))}
+        <KpiCard label="Receita Líquida" value={fmt(totalSales)} sub={`${approved.length} aprovadas`} icon={DollarSign} color="text-primary" bg="bg-primary/10" />
+        <KpiCard label="Ticket Médio" value={fmt(avgTicket)} sub="por venda" icon={TrendingUp} color="text-info" bg="bg-info/10" />
+        <KpiCard label="Conversão" value={`${conversion.toFixed(1)}%`} sub="aprovadas/total" icon={CreditCard} color="text-success" bg="bg-success/10" />
+        <KpiCard label="Total Vendas" value={String(transactions.length)} sub="transações" icon={Users} color="text-warning" bg="bg-warning/10" />
       </div>
 
       {/* Filters */}
@@ -135,7 +120,7 @@ export default function Vendas() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, e-mail, WhatsApp ou ID..."
-            className="w-full h-11 pl-11 pr-4 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            className="w-full h-11 pl-11 pr-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border/60 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
           />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -148,15 +133,15 @@ export default function Vendas() {
             <button
               key={f.value}
               onClick={() => setStatusFilter(f.value)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all border ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all border backdrop-blur-sm ${
                 statusFilter === f.value
-                  ? "bg-primary/10 text-primary border-primary/25 shadow-sm shadow-primary/10"
-                  : "bg-card text-muted-foreground border-border hover:bg-muted/40 hover:border-primary/15"
+                  ? "bg-primary/10 text-primary border-primary/25 shadow-md shadow-primary/10"
+                  : "bg-card/60 text-muted-foreground border-border/50 hover:bg-card/80 hover:border-primary/15"
               }`}
             >
               {f.label}
               <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold ${
-                statusFilter === f.value ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                statusFilter === f.value ? "bg-primary/15 text-primary" : "bg-muted/60 text-muted-foreground/60"
               }`}>{f.count}</span>
             </button>
           ))}
@@ -169,75 +154,71 @@ export default function Vendas() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/20">
+                <tr className="border-b border-border/50 bg-gradient-to-r from-muted/30 via-muted/10 to-muted/30">
                   {["Cliente", "Contato", "Produto", "Valor Líquido", "Método", "Status", "Data", ""].map((h) => (
-                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em]">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-16 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center">
-                          <ShoppingCart className="h-5 w-5 text-muted-foreground/30" />
-                        </div>
-                        <p className="text-muted-foreground text-sm font-medium">Nenhuma venda encontrada</p>
-                        <p className="text-muted-foreground/60 text-xs">Tente ajustar os filtros</p>
-                      </div>
+                    <td colSpan={8}>
+                      <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda encontrada" subtitle="Tente ajustar os filtros" />
                     </td>
                   </tr>
-                ) : filtered.map((tx) => (
+                ) : filtered.map((tx, i) => (
                   <tr
                     key={tx.id}
                     onClick={() => setSelectedTx(tx)}
-                    className="border-b border-border/40 hover:bg-muted/30 transition-colors cursor-pointer group"
+                    className="border-b border-border/30 hover:bg-primary/[0.02] transition-all cursor-pointer group animate-fade-in"
+                    style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }}
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
                           <span className="text-primary font-bold text-xs">{(tx.customer_name || "?")[0].toUpperCase()}</span>
                         </div>
                         <div>
                           <p className="text-foreground font-semibold text-[13px]">{tx.customer_name || "—"}</p>
-                          <p className="text-muted-foreground text-[11px]">{tx.customer_email || ""}</p>
+                          <p className="text-muted-foreground/50 text-[11px]">{tx.customer_email || ""}</p>
                         </div>
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="flex items-center gap-1.5">
-                        {tx.customer_phone ? (
-                          <a
-                            href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-all"
-                            title="Abrir WhatsApp"
-                          >
-                            <MessageCircle className="h-3.5 w-3.5" />
-                            <span className="hidden xl:inline">{tx.customer_phone}</span>
-                            <span className="xl:hidden">WhatsApp</span>
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground/40 text-[12px]">—</span>
-                        )}
-                      </div>
+                      {tx.customer_phone ? (
+                        <a
+                          href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-all border border-primary/10"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          <span className="hidden xl:inline">{tx.customer_phone}</span>
+                          <span className="xl:hidden">WhatsApp</span>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground/30 text-[12px]">—</span>
+                      )}
                     </td>
                     <td className="p-4">
-                      <span className="text-foreground text-[13px] font-medium">{tx.product_id ? (products[tx.product_id] || tx.product_id.slice(0, 8)) : "—"}</span>
+                      <span className="text-foreground/80 text-[13px] font-medium">{tx.product_id ? (products[tx.product_id] || tx.product_id.slice(0, 8)) : "—"}</span>
                     </td>
                     <td className="p-4">
-                      <span className="font-bold text-foreground text-[14px]">{fmt(Number(tx.net_amount))}</span>
+                      <span className="font-display font-black text-foreground text-[15px]">{fmt(Number(tx.net_amount))}</span>
                     </td>
                     <td className="p-4">
-                      <span className="capitalize text-muted-foreground text-[12px] bg-muted/40 px-2 py-1 rounded-lg">{tx.payment_method || "—"}</span>
+                      <span className="text-muted-foreground text-[11px] bg-muted/30 border border-border/40 px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider">
+                        {tx.payment_method === "credit_card" ? "Cartão" : tx.payment_method || "—"}
+                      </span>
                     </td>
                     <td className="p-4"><StatusBadge status={tx.status} /></td>
-                    <td className="p-4 text-muted-foreground text-[12px]">{fmtDate(tx.created_at)}</td>
+                    <td className="p-4 text-muted-foreground/50 text-[12px] font-medium">{fmtDate(tx.created_at)}</td>
                     <td className="p-4">
-                      <Eye className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                      <div className="h-8 w-8 rounded-lg bg-muted/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:bg-primary/5">
+                        <Eye className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -248,24 +229,24 @@ export default function Vendas() {
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-2.5">
+      <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="mx-auto h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-              <ShoppingCart className="h-6 w-6 text-muted-foreground/30" />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">Nenhuma venda</p>
-          </div>
-        ) : filtered.map((tx) => (
-          <Panel key={tx.id} className="cursor-pointer active:scale-[0.99] transition-transform" onClick={() => setSelectedTx(tx)}>
-            <div className="flex items-start justify-between gap-3 mb-2">
+          <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda" />
+        ) : filtered.map((tx, i) => (
+          <GlowPanel
+            key={tx.id}
+            className="cursor-pointer active:scale-[0.98] transition-transform p-4"
+            onClick={() => setSelectedTx(tx)}
+            style={{ animationDelay: `${Math.min(i, 8) * 40}ms` } as React.CSSProperties}
+          >
+            <div className="flex items-start justify-between gap-3 mb-2.5">
               <div className="flex items-center gap-2.5">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-primary font-bold text-sm">{(tx.customer_name || "?")[0].toUpperCase()}</span>
                 </div>
                 <div>
                   <p className="text-foreground font-semibold text-[13px]">{tx.customer_name || "Cliente"}</p>
-                  <p className="text-muted-foreground text-[11px]">{tx.customer_email || ""}</p>
+                  <p className="text-muted-foreground/50 text-[11px]">{tx.customer_email || ""}</p>
                 </div>
               </div>
               <StatusBadge status={tx.status} />
@@ -274,56 +255,57 @@ export default function Vendas() {
               <div>
                 <p className="text-foreground font-display font-black text-xl">{fmt(Number(tx.net_amount))}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-muted-foreground text-[10px] bg-muted/40 px-2 py-0.5 rounded-md">{tx.payment_method || "—"}</span>
-                  <span className="text-muted-foreground text-[10px]">{tx.product_id ? products[tx.product_id] || "Produto" : "—"}</span>
+                  <span className="text-muted-foreground/60 text-[10px] bg-muted/30 border border-border/30 px-2 py-0.5 rounded-md font-semibold uppercase">{tx.payment_method === "credit_card" ? "Cartão" : tx.payment_method || "—"}</span>
+                  <span className="text-muted-foreground/40 text-[10px]">{tx.product_id ? products[tx.product_id] || "Produto" : "—"}</span>
                 </div>
               </div>
               <div className="text-right flex items-center gap-2">
-                <p className="text-muted-foreground text-[11px]">{fmtDate(tx.created_at)}</p>
+                <p className="text-muted-foreground/50 text-[11px]">{fmtDate(tx.created_at)}</p>
                 {tx.customer_phone && (
                   <a
                     href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
+                    className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
                   >
                     <MessageCircle className="h-3.5 w-3.5" />
                   </a>
                 )}
               </div>
             </div>
-          </Panel>
+          </GlowPanel>
         ))}
       </div>
 
-      {/* ─── DETAIL MODAL — CENTERED ─── */}
+      {/* ─── DETAIL MODAL ─── */}
       {selectedTx && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setSelectedTx(null)} />
-          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-scale-in">
+          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border/60 bg-card/95 backdrop-blur-xl shadow-2xl animate-scale-in">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent rounded-2xl pointer-events-none" />
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border bg-card/95 backdrop-blur-sm rounded-t-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border/40 bg-card/90 backdrop-blur-xl rounded-t-2xl">
               <div>
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Detalhes da Venda</p>
+                <p className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-[0.18em] mb-1">Detalhes da Venda</p>
                 <div className="flex items-center gap-3">
                   <StatusBadge status={selectedTx.status} />
                   <span className="text-2xl font-display font-black text-foreground">{fmt(Number(selectedTx.amount))}</span>
                 </div>
               </div>
-              <button onClick={() => setSelectedTx(null)} className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/60 border border-border/80 hover:bg-muted transition-colors">
+              <button onClick={() => setSelectedTx(null)} className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/40 border border-border/60 hover:bg-muted/60 transition-colors">
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
 
-            <div className="p-5 space-y-5">
+            <div className="relative p-5 space-y-5">
               {/* Financial summary */}
-              <div className="rounded-xl border border-border bg-muted/20 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Resumo Financeiro</p>
+              <div className="rounded-xl border border-border/40 bg-gradient-to-br from-muted/20 to-muted/5 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60 mb-3">Resumo Financeiro</p>
                 <div className="space-y-2">
                   <DetailRow label="Valor bruto" value={fmt(Number(selectedTx.amount))} />
                   <DetailRow label="Taxa da plataforma" value={`- ${fmt(Number(selectedTx.fee_amount))}`} className="text-destructive" />
-                  <div className="border-t border-border pt-2.5 mt-2.5">
+                  <div className="border-t border-border/30 pt-2.5 mt-2.5">
                     <DetailRow label="Valor líquido (seu)" value={fmt(Number(selectedTx.net_amount))} className="text-primary font-black text-base" bold />
                   </div>
                 </div>
@@ -331,75 +313,51 @@ export default function Vendas() {
 
               {/* Sale info */}
               <div className="space-y-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Informações da Venda</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Informações da Venda</p>
                 <DetailRow label="ID da venda" value={
                   <button onClick={() => handleCopyId(selectedTx.id)} className="inline-flex items-center gap-1.5 font-mono text-[12px] text-foreground hover:text-primary transition-colors">
                     {selectedTx.id.slice(0, 16)}...
                     {copiedId ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                   </button>
                 } />
-                <DetailRow icon={<Package className="h-3.5 w-3.5" />} label="Produto" value={selectedTx.product_id ? (products[selectedTx.product_id] || selectedTx.product_id.slice(0, 12)) : "—"} />
-                <DetailRow icon={<CreditCard className="h-3.5 w-3.5" />} label="Método" value={selectedTx.payment_method || "—"} />
-                <DetailRow icon={<Calendar className="h-3.5 w-3.5" />} label="Pedido criado" value={fmtFull(selectedTx.created_at)} />
-                <DetailRow icon={<Clock className="h-3.5 w-3.5" />} label="Última atualização" value={fmtFull(selectedTx.updated_at)} />
-                {selectedTx.checkout_session_id && (
-                  <DetailRow icon={<Hash className="h-3.5 w-3.5" />} label="Session ID" value={selectedTx.checkout_session_id.slice(0, 20)} mono />
+                <DetailRow label="Método" value={selectedTx.payment_method === "credit_card" ? "Cartão de crédito" : selectedTx.payment_method || "—"} />
+                <DetailRow label="Data" value={fmtFull(selectedTx.created_at)} />
+                {selectedTx.product_id && (
+                  <DetailRow label="Produto" value={products[selectedTx.product_id] || selectedTx.product_id.slice(0, 12)} />
                 )}
               </div>
 
               {/* Customer */}
-              <div className="rounded-xl border border-primary/15 bg-primary/[0.02] p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Dados do Cliente</p>
-                <div className="space-y-2.5">
-                  <DetailRow label="Nome" value={selectedTx.customer_name || "—"} />
-                  {selectedTx.customer_email && (
-                    <DetailRow icon={<Mail className="h-3.5 w-3.5" />} label="E-mail" value={
-                      <a href={`mailto:${selectedTx.customer_email}`} className="text-primary hover:underline text-[13px]">{selectedTx.customer_email}</a>
-                    } />
-                  )}
-                  {selectedTx.customer_phone && (
-                    <DetailRow icon={<MessageCircle className="h-3.5 w-3.5" />} label="WhatsApp" value={
-                      <a
-                        href={`https://wa.me/55${selectedTx.customer_phone.replace(/\D/g, "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-primary font-semibold text-[13px] hover:underline bg-primary/5 px-3 py-1.5 rounded-xl transition-all hover:bg-primary/10"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        {selectedTx.customer_phone}
-                        <ArrowUpRight className="h-3 w-3" />
-                      </a>
-                    } />
-                  )}
-                  {selectedTx.customer_document && (
-                    <DetailRow label="CPF/CNPJ" value={selectedTx.customer_document} mono />
-                  )}
-                </div>
+              <div className="space-y-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Cliente</p>
+                <DetailRow label="Nome" value={selectedTx.customer_name || "—"} icon={<Users className="h-3 w-3" />} />
+                <DetailRow label="Email" value={selectedTx.customer_email || "—"} icon={<Mail className="h-3 w-3" />} />
+                <DetailRow label="Telefone" value={selectedTx.customer_phone || "—"} icon={<Phone className="h-3 w-3" />} />
+                {selectedTx.customer_document && (
+                  <DetailRow label="CPF/CNPJ" value={selectedTx.customer_document} icon={<Hash className="h-3 w-3" />} />
+                )}
               </div>
 
-              {/* Tracking */}
-              {selectedTx.podpay_event_id && (
-                <div className="space-y-2.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Rastreamento</p>
-                  <DetailRow label="Event ID" value={selectedTx.podpay_event_id} mono />
-                  {selectedTx.podpay_payment_id && (
-                    <DetailRow label="Payment ID" value={selectedTx.podpay_payment_id} mono />
-                  )}
-                </div>
-              )}
-
               {/* Actions */}
-              {selectedTx.status === "completed" && (
-                <div className="pt-3 border-t border-border">
-                  <button
-                    onClick={() => handleRefund(selectedTx)}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all shadow-lg shadow-primary/15"
+              <div className="flex gap-2 pt-2">
+                {selectedTx.customer_phone && (
+                  <a
+                    href={`https://wa.me/55${selectedTx.customer_phone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1"
                   >
-                    <RefreshCw className="h-4 w-4" />
-                    Emitir Reembolso
-                  </button>
-                </div>
-              )}
+                    <Button variant="outline" className="w-full gap-2 rounded-xl h-10 border-primary/20 text-primary hover:bg-primary/5">
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </Button>
+                  </a>
+                )}
+                {selectedTx.status === "completed" && (
+                  <Button variant="outline" className="flex-1 gap-2 rounded-xl h-10 border-destructive/20 text-destructive hover:bg-destructive/5" onClick={() => handleRefund(selectedTx)}>
+                    <RefreshCw className="h-4 w-4" /> Reembolsar
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -408,31 +366,14 @@ export default function Vendas() {
   );
 }
 
-/* ─── Detail row helper ─── */
-function DetailRow({
-  icon,
-  label,
-  value,
-  mono,
-  bold,
-  className,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-  mono?: boolean;
-  bold?: boolean;
-  className?: string;
-}) {
+function DetailRow({ label, value, icon, className = "", bold = false }: { label: string; value: React.ReactNode; icon?: React.ReactNode; className?: string; bold?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 text-muted-foreground">
+    <div className="flex items-center justify-between py-1">
+      <div className="flex items-center gap-2 text-muted-foreground/60 text-[12px]">
         {icon}
-        <span className="text-[12px] font-medium">{label}</span>
+        <span>{label}</span>
       </div>
-      <span className={`text-[13px] text-foreground text-right ${mono ? "font-mono" : ""} ${bold ? "font-black" : "font-semibold"} ${className || ""}`}>
-        {value}
-      </span>
+      <span className={`text-[13px] ${bold ? "font-black" : "font-semibold"} ${className || "text-foreground"}`}>{value}</span>
     </div>
   );
 }
