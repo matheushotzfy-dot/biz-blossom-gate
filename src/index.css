@@ -112,6 +112,7 @@
     font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
     height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
   }
 
   #root {
