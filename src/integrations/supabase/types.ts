@@ -551,6 +551,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_read?: boolean
+          message: string
+          title: string
+          type?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       order_bumps: {
         Row: {
           bump_product_id: string
@@ -873,6 +906,39 @@ export type Database = {
           },
         ]
       }
+      retention_settings: {
+        Row: {
+          card_retention_pct: number
+          created_at: string
+          id: string
+          pix_retention_pct: number
+          retention_days: number
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          card_retention_pct?: number
+          created_at?: string
+          id?: string
+          pix_retention_pct?: number
+          retention_days?: number
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          card_retention_pct?: number
+          created_at?: string
+          id?: string
+          pix_retention_pct?: number
+          retention_days?: number
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       seller_acquirer_config: {
         Row: {
           acquirer_id: string
@@ -963,6 +1029,9 @@ export type Database = {
           podpay_event_id: string | null
           podpay_payment_id: string | null
           product_id: string | null
+          retained_amount: number
+          retained_until: string | null
+          retention_released: boolean
           status: string
           updated_at: string
           user_id: string
@@ -982,6 +1051,9 @@ export type Database = {
           podpay_event_id?: string | null
           podpay_payment_id?: string | null
           product_id?: string | null
+          retained_amount?: number
+          retained_until?: string | null
+          retention_released?: boolean
           status?: string
           updated_at?: string
           user_id: string
@@ -1001,6 +1073,9 @@ export type Database = {
           podpay_event_id?: string | null
           podpay_payment_id?: string | null
           product_id?: string | null
+          retained_amount?: number
+          retained_until?: string | null
+          retention_released?: boolean
           status?: string
           updated_at?: string
           user_id?: string

@@ -19,6 +19,9 @@ export function DashboardLayout() {
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [showApproved, setShowApproved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -29,6 +32,23 @@ export function DashboardLayout() {
       .single()
       .then(({ data }) => {
         if (data) setProfile(data);
+      });
+  }, [user]);
+
+  // Load notifications
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("notifications")
+      .select("*")
+      .or(`user_id.eq.${user.id},user_id.is.null`)
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) {
+          setNotifications(data);
+          setUnreadCount(data.filter((n: any) => !n.is_read).length);
+        }
       });
   }, [user]);
 
@@ -92,9 +112,14 @@ export function DashboardLayout() {
               {theme === "dark" ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
             </button>
 
-            <button className="relative h-10 w-10 rounded-xl flex items-center justify-center border border-border/80 bg-card hover:bg-muted/60 hover:border-primary/20 transition-all">
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="relative h-10 w-10 rounded-xl flex items-center justify-center border border-border/80 bg-card hover:bg-muted/60 hover:border-primary/20 transition-all"
+            >
               <Bell className="h-4 w-4 text-muted-foreground" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-card" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-card flex items-center justify-center text-[9px] font-bold text-primary-foreground">{unreadCount}</span>
+              )}
             </button>
 
             <div className="flex items-center gap-3 ml-1 pl-4 border-l border-border/80 cursor-pointer hover:opacity-90 transition-opacity">
