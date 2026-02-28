@@ -147,9 +147,9 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    <div className="min-h-[100dvh] flex bg-background text-foreground">
       {/* Left — Form */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-8 relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
         <div className="w-full max-w-md relative z-10">
           <div className="flex items-center gap-3 mb-8">
             <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center">
