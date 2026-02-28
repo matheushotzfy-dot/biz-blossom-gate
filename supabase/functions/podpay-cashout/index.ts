@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
     const podpayData = await response.json();
 
     if (!response.ok) {
-      console.error('PodPay cashout error:', JSON.stringify(podpayData));
+      console.error('PodPay cashout error:', JSON.stringify({ status: response.status, message: podpayData?.message || 'unknown' }));
       return new Response(
         JSON.stringify({ success: false, error: podpayData.message || 'Cash-out failed' }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

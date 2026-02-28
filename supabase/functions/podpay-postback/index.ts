@@ -36,35 +36,57 @@ Deno.serve(async (req) => {
     const signature = req.headers.get('x-podpay-signature') || req.headers.get('x-signature');
     const webhookSecret = Deno.env.get('PODPAY_SECRET_KEY');
 
-    if (webhookSecret) {
-      if (!signature) {
-        safeLog('Missing webhook signature');
-        return new Response(
-          JSON.stringify({ success: false, error: 'Missing signature' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const encoder = new TextEncoder();
-      const key = await crypto.subtle.importKey(
-        'raw',
-        encoder.encode(webhookSecret),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign']
+    // SECURITY: Signature verification is MANDATORY — reject if secret is missing
+    if (!webhookSecret) {
+      safeLog('CRITICAL: PODPAY_SECRET_KEY not configured — rejecting webhook');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Server misconfiguration' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-      const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
-      const computed = Array.from(new Uint8Array(mac))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+    }
 
-      if (signature !== computed) {
-        safeLog('Invalid webhook signature');
-        return new Response(
-          JSON.stringify({ success: false, error: 'Invalid signature' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    if (!signature) {
+      safeLog('Missing webhook signature');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(webhookSecret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    );
+    const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+    
+    // Constant-time comparison to prevent timing attacks
+    const signatureBytes = new Uint8Array(signature.match(/.{1,2}/g)!.map(b => parseInt(b, 16)));
+    const computedBytes = new Uint8Array(mac);
+    
+    if (signatureBytes.length !== computedBytes.length) {
+      safeLog('Invalid webhook signature (length mismatch)');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Constant-time compare
+    let mismatch = 0;
+    for (let i = 0; i < signatureBytes.length; i++) {
+      mismatch |= signatureBytes[i] ^ computedBytes[i];
+    }
+    
+    if (mismatch !== 0) {
+      safeLog('Invalid webhook signature');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const eventId = payload.event_id ? String(payload.event_id) : null;
