@@ -182,14 +182,18 @@ export default function Dashboard() {
     .filter((w) => w.status === "pending")
     .reduce((acc, w) => acc + Number(w.net_amount), 0);
 
-  // Balance = completed revenue - approved withdrawals
+  // Balance = completed revenue - approved withdrawals - chargebacks/refunds
   const totalRevenue = transactions
     .filter(t => t.status === "completed")
     .reduce((acc, t) => acc + Number(t.net_amount), 0);
   const totalWithdrawn = withdrawals
     .filter(w => w.status === "approved")
     .reduce((acc, w) => acc + Number(w.net_amount), 0);
-  const balance = totalRevenue - totalWithdrawn;
+  // Subtract chargebacks and refunds from balance (negative balance support)
+  const totalChargebacksRefunds = transactions
+    .filter(t => t.status === "chargeback" || t.status === "refunded")
+    .reduce((acc, t) => acc + Number(t.net_amount), 0);
+  const balance = totalRevenue - totalWithdrawn - totalChargebacksRefunds;
 
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
@@ -425,15 +429,28 @@ export default function Dashboard() {
                     />
                   ))}
                   <Flame className={`h-3.5 w-3.5 md:h-4 md:w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span>{scaleMode ? "Modo Escala 🔥" : "Escala"}</span>
+                  <span className="leading-tight">{scaleMode ? "Modo Escala 🔥" : "Modo Escala"}</span>
                 </button>
               ) : (
-                <div className="group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold border border-border/60 bg-muted/40 text-muted-foreground cursor-not-allowed opacity-70">
+                <div className="flame-btn group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold border border-primary/30 bg-primary/10 text-primary cursor-not-allowed">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <span
+                      key={i}
+                      className="flame-tip"
+                      style={{
+                        left: `${20 + i * 15}%`,
+                        width: `${3 + Math.random() * 3}px`,
+                        height: `${3 + Math.random() * 3}px`,
+                        ['--dur' as string]: `${0.6 + i * 0.15}s`,
+                        ['--delay' as string]: `${i * 0.12}s`,
+                      }}
+                    />
+                  ))}
                   <Lock className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                  <span>Escala</span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                  <span className="leading-tight">Modo Escala</span>
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     <p className="text-[11px] font-bold text-foreground mb-1">🔒 Modo Escala Bloqueado</p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 faturados em 24 horas.</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado automaticamente ao atingir R$ 2.000 faturados em 24 horas. Continue vendendo!</p>
                   </div>
                 </div>
               )}
@@ -468,7 +485,7 @@ export default function Dashboard() {
             <MiniHeroCard icon={<ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" />
             <MiniHeroCard icon={<TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" />
             <MiniHeroCard icon={<Target className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-            <MiniHeroCard icon={<Wallet className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Saldo" value={fmt(balance)} tone="primary" />
+            <MiniHeroCard icon={<Wallet className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Saldo" value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} />
           </div>
         </div>
       </section>
@@ -476,11 +493,7 @@ export default function Dashboard() {
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
         <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1">
-          <div className="mb-3 md:mb-4">
-            <h2 className="text-sm md:text-lg font-display font-black text-foreground">Performance</h2>
-          </div>
-
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
