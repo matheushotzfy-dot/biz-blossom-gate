@@ -282,7 +282,7 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
 
   return (
-    <div className="space-y-5 md:space-y-6 relative">
+    <div className="space-y-4 md:space-y-6 relative">
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -382,30 +382,30 @@ export default function Dashboard() {
       )}
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-8 animate-fade-in">
+      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-16 -top-16 h-72 w-72 rounded-full bg-primary/15 blur-[90px]" />
-          <div className="absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-info/10 blur-[110px]" />
+          <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
+          <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
         </div>
 
-        <div className="relative z-10 space-y-5 md:space-y-6">
+        <div className="relative z-10 space-y-4 md:space-y-6">
           {/* Title row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
+            <div className="space-y-1.5 md:space-y-2">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] uppercase text-primary">
                 <Sparkles className="h-3 w-3" /> Dashboard
               </div>
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
+              <h1 className="text-xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
                 Bem Vindo, <span className="text-gradient">{nickname}</span>
               </h1>
             </div>
 
-            <div className="flex items-center gap-2 self-start md:self-auto">
+            <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
               {/* Scale Mode Button */}
               {scaleModeUnlocked ? (
                 <button
                   onClick={activateScaleMode}
-                  className={`flame-btn group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold transition-all ${
+                  className={`flame-btn group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold transition-all ${
                     scaleMode
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                       : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 hover:shadow-md hover:shadow-primary/15"
@@ -424,29 +424,26 @@ export default function Dashboard() {
                       }}
                     />
                   ))}
-                  <Flame className={`h-4 w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span className="hidden sm:inline">{scaleMode ? "Modo Escala 🔥" : "Ativar Modo Escala"}</span>
-                  <span className="sm:hidden">{scaleMode ? "🔥" : "Escala"}</span>
+                  <Flame className={`h-3.5 w-3.5 md:h-4 md:w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
+                  <span>{scaleMode ? "Modo Escala 🔥" : "Escala"}</span>
                 </button>
               ) : (
-                <div className="group relative inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold border border-border/60 bg-muted/40 text-muted-foreground cursor-not-allowed opacity-70">
-                  <Lock className="h-4 w-4" />
-                  <span className="hidden sm:inline">Modo Escala</span>
-                  <span className="sm:hidden">Escala</span>
-                  {/* Tooltip */}
+                <div className="group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold border border-border/60 bg-muted/40 text-muted-foreground cursor-not-allowed opacity-70">
+                  <Lock className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>Escala</span>
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     <p className="text-[11px] font-bold text-foreground mb-1">🔒 Modo Escala Bloqueado</p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 faturados em 24 horas. Funcionalidades e bônus exclusivos!</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 faturados em 24 horas.</p>
                   </div>
                 </div>
               )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/80 bg-card px-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
-                    <CalendarDays className="h-4 w-4 text-primary" />
+                  <button className="inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl border border-border/80 bg-card px-3 md:px-3.5 text-xs md:text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
+                    <CalendarDays className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
                     {selectedPeriod.label}
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    <ChevronDown className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-[150px] rounded-xl p-1.5">
@@ -467,24 +464,24 @@ export default function Dashboard() {
           </div>
 
           {/* Hero metrics */}
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" />
-            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={fmt(balance)} tone="primary" />
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+            <MiniHeroCard icon={<ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" />
+            <MiniHeroCard icon={<TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" />
+            <MiniHeroCard icon={<Target className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
+            <MiniHeroCard icon={<Wallet className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Saldo" value={fmt(balance)} tone="primary" />
           </div>
         </div>
       </section>
 
       {/* ─── CHART + HEALTH ─── */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
         <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1">
-          <div className="mb-4">
-            <h2 className="text-base md:text-lg font-display font-black text-foreground">Performance</h2>
+          <div className="mb-3 md:mb-4">
+            <h2 className="text-sm md:text-lg font-display font-black text-foreground">Performance</h2>
           </div>
 
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -540,23 +537,23 @@ export default function Dashboard() {
       </section>
 
       {/* ─── KPI TILES ─── */}
-      <section className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-5 w-5" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
-        <KpiTile icon={<DollarSign className="h-5 w-5" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
-        <KpiTile icon={<RefreshCw className="h-5 w-5" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
-        <KpiTile icon={<ArrowDownRight className="h-5 w-5" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone="primary" delay="stagger-6" />
+      <section className="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
+        <KpiTile icon={<Wallet className="h-4 w-4 md:h-5 md:w-5" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
+        <KpiTile icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
+        <KpiTile icon={<RefreshCw className="h-4 w-4 md:h-5 md:w-5" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
+        <KpiTile icon={<ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone="primary" delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
         {/* Quick actions */}
         <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-3 md:mb-4 flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
-            <h3 className="text-base md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
+            <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:gap-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-3">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -572,19 +569,16 @@ export default function Dashboard() {
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 p-3 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
+                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/70 bg-muted/20 p-2.5 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <action.icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
                 </div>
-                <div className="min-w-0 flex-1 hidden md:block">
-                  <p className="text-sm font-semibold text-foreground">{action.label}</p>
-                  <p className="text-[11px] text-muted-foreground">{action.desc}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] md:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[10px] md:text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
                 </div>
-                <div className="min-w-0 flex-1 md:hidden">
-                  <p className="text-[12px] font-semibold text-foreground leading-tight">{action.label}</p>
-                </div>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 hidden md:block" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/40 hidden md:block" />
               </Link>
             ))}
           </div>
@@ -592,14 +586,14 @@ export default function Dashboard() {
 
         {/* Activity */}
         <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3 md:mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
-              <h3 className="text-base md:text-lg font-display font-black text-foreground">Atividade</h3>
+              <h3 className="text-sm md:text-lg font-display font-black text-foreground">Atividade</h3>
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" title="Tempo real" />
             </div>
-            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
-              Ver tudo <ArrowUpRight className="h-3.5 w-3.5" />
+            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] md:text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
+              Ver tudo <ArrowUpRight className="h-3 w-3 md:h-3.5 md:w-3.5" />
             </Link>
           </div>
 
@@ -676,29 +670,29 @@ const toneMap: Record<Tone, { bg: string; text: string }> = {
 
 function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   return (
-    <div className="rounded-xl border border-border/80 bg-card/80 p-3">
-      <div className="flex items-center gap-1.5 mb-1">
-        <div className={`h-6 w-6 rounded-md flex items-center justify-center ${toneMap[tone].bg}`}>
+    <div className="rounded-xl border border-border/80 bg-card/80 p-2.5 md:p-3">
+      <div className="flex items-center gap-1 md:gap-1.5 mb-1">
+        <div className={`h-5 w-5 md:h-6 md:w-6 rounded-md flex items-center justify-center ${toneMap[tone].bg}`}>
           <span className={toneMap[tone].text}>{icon}</span>
         </div>
-        <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">{label}</span>
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.12em] md:tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
       </div>
-      <p className="text-lg md:text-xl font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className="text-base md:text-xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
 
 function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
   return (
-    <div className={`rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 hover:border-primary/20 transition-all animate-fade-in ${delay || ""}`}>
-      <div className="mb-2 md:mb-3 flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold">{label}</span>
-        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
+    <div className={`rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-3 md:p-5 hover:border-primary/20 transition-all animate-fade-in ${delay || ""}`}>
+      <div className="mb-1.5 md:mb-3 flex items-center justify-between">
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] md:tracking-[0.16em] text-muted-foreground font-bold truncate">{label}</span>
+        <div className={`h-7 w-7 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
           <span className={toneMap[tone].text}>{icon}</span>
         </div>
       </div>
-      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-1 text-[10px] md:text-[11px] text-muted-foreground">{helper}</p>
+      <p className="text-base md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className="mt-0.5 md:mt-1 text-[9px] md:text-[11px] text-muted-foreground truncate">{helper}</p>
     </div>
   );
 }
