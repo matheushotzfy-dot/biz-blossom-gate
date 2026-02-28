@@ -78,11 +78,11 @@ export function DashboardLayout() {
     <SidebarProvider
       style={{ "--sidebar-width": "22rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
     >
-      <div className="flex min-h-[100dvh] w-full bg-background md:h-[100dvh] md:overflow-hidden">
+      <div className="flex h-[100dvh] w-full bg-background overflow-hidden">
         <AppSidebar />
 
-        <SidebarInset className="relative min-w-0 bg-background">
-          <div className="pointer-events-none absolute inset-0">
+        <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 z-0">
             <div className="absolute -top-24 right-0 h-80 w-80 rounded-full bg-primary/10 blur-[120px]" />
             <div className="absolute bottom-0 left-1/4 h-72 w-72 rounded-full bg-info/10 blur-[130px]" />
           </div>
@@ -156,7 +156,7 @@ export function DashboardLayout() {
 
           <MobileRevenueBar />
 
-          <div className="relative z-10 flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 pb-24 md:pb-10">
+          <div className="relative z-10 flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 pb-24 md:pb-10 min-h-0">
             <div className="mx-auto w-full max-w-[1800px] py-5 md:py-7">
               <Outlet />
             </div>
