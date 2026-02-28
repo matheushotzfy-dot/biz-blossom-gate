@@ -1277,6 +1277,65 @@ export type Database = {
       }
     }
     Views: {
+      disputes_seller: {
+        Row: {
+          admin_notes: string | null
+          amount: number | null
+          buyer_email_masked: string | null
+          buyer_name_masked: string | null
+          buyer_phone: string | null
+          created_at: string | null
+          id: string | null
+          reason: string | null
+          resolved_at: string | null
+          seller_user_id: string | null
+          status: string | null
+          transaction_id: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount?: number | null
+          buyer_email_masked?: never
+          buyer_name_masked?: never
+          buyer_phone?: never
+          created_at?: string | null
+          id?: string | null
+          reason?: string | null
+          resolved_at?: string | null
+          seller_user_id?: string | null
+          status?: string | null
+          transaction_id?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number | null
+          buyer_email_masked?: never
+          buyer_name_masked?: never
+          buyer_phone?: never
+          created_at?: string | null
+          id?: string | null
+          reason?: string | null
+          resolved_at?: string | null
+          seller_user_id?: string | null
+          status?: string | null
+          transaction_id?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_pixels_public: {
         Row: {
           boleto_conversion_value: number | null
@@ -1403,6 +1462,39 @@ export type Database = {
           name?: string | null
           price?: number | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      webhook_configs_safe: {
+        Row: {
+          created_at: string | null
+          events: string[] | null
+          id: string | null
+          is_active: boolean | null
+          secret_masked: string | null
+          updated_at: string | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          events?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          secret_masked?: never
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          events?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          secret_masked?: never
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

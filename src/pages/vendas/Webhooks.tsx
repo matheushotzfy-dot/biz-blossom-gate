@@ -19,7 +19,7 @@ export default function Webhooks() {
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
 
-  const load = async () => { if (!user) return; const { data } = await supabase.from("webhook_configs").select("*").order("created_at", { ascending: false }); if (data) setWebhooks(data); };
+  const load = async () => { if (!user) return; const { data } = await supabase.from("webhook_configs_safe" as any).select("*").order("created_at", { ascending: false }); if (data) setWebhooks(data); };
   useEffect(() => { load(); }, [user]);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -65,7 +65,7 @@ export default function Webhooks() {
               </div>
             </div>
             <div className="flex flex-wrap gap-1">{(wh.events || []).map((ev: string) => (<span key={ev} className="text-[10px] font-mono px-2 py-0.5 rounded-lg text-muted-foreground bg-muted/50">{ev}</span>))}</div>
-            {wh.secret && <p className="text-[11px] text-muted-foreground/50 mt-2">Secret: <span className="font-mono">••••{wh.secret.slice(-4)}</span></p>}
+            {wh.secret_masked && <p className="text-[11px] text-muted-foreground/50 mt-2">Secret: <span className="font-mono">{wh.secret_masked}</span></p>}
           </Panel>
         ))}
       </div>
