@@ -103,16 +103,19 @@
     @apply border-border;
   }
 
-  html, body, #root {
+  html {
     height: 100%;
-    height: 100dvh;
-    height: -webkit-fill-available;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+    height: 100%;
     overflow: hidden;
+  }
+
+  #root {
+    height: 100%;
   }
 }
 
