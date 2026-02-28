@@ -198,6 +198,19 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
 
+    // MOCK DATA for preview — remove later
+    const mockToday = 45 * 35; // 45 vendas de R$35
+    const mockYesterday = 30 * 35; // 30 vendas de R$35
+    const mockValues: Record<number, number> = {
+      0: mockToday,
+      1: mockYesterday,
+      2: 18 * 35,
+      3: 22 * 35,
+      4: 12 * 35,
+      5: 8 * 35,
+      6: 5 * 35,
+    };
+
     return Array.from({ length: days }, (_, i) => {
       const d = new Date(brasiliaToday());
       d.setDate(d.getDate() - (days - 1 - i));
@@ -210,11 +223,14 @@ export default function Dashboard() {
 
       const compare = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
-      const amount = transactions
+      const realAmount = transactions
         .filter((t) => toBrasiliaDate(t.created_at) === compare && t.status === "completed")
         .reduce((acc, t) => acc + Number(t.net_amount), 0);
 
-      return { name: label, vendas: amount };
+      const daysFromEnd = days - 1 - i;
+      const mockAmount = mockValues[daysFromEnd] ?? 0;
+
+      return { name: label, vendas: realAmount + mockAmount };
     });
   }, [transactions, selectedPeriod.days]);
 
