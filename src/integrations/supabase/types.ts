@@ -1277,6 +1277,66 @@ export type Database = {
       }
     }
     Views: {
+      product_pixels_public: {
+        Row: {
+          boleto_conversion_value: number | null
+          disable_bump_events: boolean | null
+          domain: string | null
+          events: Json | null
+          fire_on_boleto: boolean | null
+          fire_on_pix_qr: boolean | null
+          id: string | null
+          is_active: boolean | null
+          pix_conversion_value: number | null
+          pixel_id: string | null
+          platform: string | null
+          product_id: string | null
+        }
+        Insert: {
+          boleto_conversion_value?: number | null
+          disable_bump_events?: boolean | null
+          domain?: string | null
+          events?: Json | null
+          fire_on_boleto?: boolean | null
+          fire_on_pix_qr?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          pix_conversion_value?: number | null
+          pixel_id?: string | null
+          platform?: string | null
+          product_id?: string | null
+        }
+        Update: {
+          boleto_conversion_value?: number | null
+          disable_bump_events?: boolean | null
+          domain?: string | null
+          events?: Json | null
+          fire_on_boleto?: boolean | null
+          fire_on_pix_qr?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          pix_conversion_value?: number | null
+          pixel_id?: string | null
+          platform?: string | null
+          product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_pixels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_pixels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products_public: {
         Row: {
           checkout_address_required: boolean | null

@@ -159,7 +159,7 @@ export default function PublicCheckout() {
   useEffect(() => {
     if (!product?.id) return;
     supabase
-      .from("product_pixels")
+      .from("product_pixels_public" as any)
       .select("*")
       .eq("product_id", product.id)
       .eq("is_active", true)
@@ -312,7 +312,9 @@ export default function PublicCheckout() {
       };
       if (method === "credit_card") {
         payload.installments = parseInt(installments);
-        payload.cardData = { number: cardNumber.replace(/\s/g, ""), holderName: cardName, expMonth: parseInt(cardExpiry.split("/")[0]), expYear: 2000 + parseInt(cardExpiry.split("/")[1] || "0"), cvv: cardCvv };
+        // NOTE: Card data should be tokenized client-side via PodPay SDK before sending.
+        // Never send raw card numbers to our backend. cardToken is the secure approach.
+        payload.cardToken = null; // TODO: Implement PodPay client-side tokenization
       }
       const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
       if (error || !data?.success) { toast.error(data?.error || error?.message || "Erro ao processar"); setCheckoutState("failed"); return; }
