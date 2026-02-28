@@ -213,7 +213,7 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild className="h-auto p-0 hover:bg-transparent active:bg-transparent">
                         <NavLink
                           to={item.url}
-                          end={item.url === "/dashboard"}
+                          end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
                             "group/nav relative flex items-center gap-3 rounded-2xl border px-3.5 py-3.5 text-[16px] font-semibold leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
