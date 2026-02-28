@@ -372,7 +372,7 @@ export default function AdminConteudo() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <PageTitle icon={<BookOpen className="h-6 w-6" />} title="Conteúdo" subtitle="Gerencie cursos, módulos e aulas da sua área de membros" />
         <Button onClick={openWizardNew} className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground px-5 h-10 shadow-lg shadow-primary/20">
-          <Sparkles className="h-4 w-4" /> Novo Curso
+          <Sparkles className="h-4 w-4" /> Novo Conteúdo
         </Button>
       </div>
 

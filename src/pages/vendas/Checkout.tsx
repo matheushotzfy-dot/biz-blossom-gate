@@ -131,7 +131,9 @@ export default function Checkout() {
 
                 {p.checkout_url && (
                   <div className="hidden lg:flex items-center gap-2 rounded-lg bg-muted/30 border border-border/60 px-3 py-2 max-w-xs">
-                    <Link2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-muted-foreground hover:text-primary transition-colors shrink-0" title="Copiar link">
+                      <Link2 className="h-3 w-3" />
+                    </button>
                     <span className="text-[10px] text-muted-foreground font-mono truncate">{p.checkout_url}</span>
                   </div>
                 )}
@@ -148,7 +150,7 @@ export default function Checkout() {
                   {p.checkout_url && (
                     <>
                       <Button variant="outline" size="sm" className="gap-1.5 rounded-xl text-[12px] h-9" onClick={() => openCheckout(p.checkout_url!)}>
-                        <Eye className="h-3.5 w-3.5" /> Ver
+                        <Eye className="h-3.5 w-3.5" /> Abrir
                       </Button>
                       <Button
                         variant="outline"

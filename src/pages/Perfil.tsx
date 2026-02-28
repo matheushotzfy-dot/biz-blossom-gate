@@ -99,7 +99,8 @@ export default function Perfil() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Avatar + Info Card */}
-        <Panel>
+        <Panel className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-4">
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
@@ -127,7 +128,12 @@ export default function Perfil() {
 
         {/* Edit Profile */}
         <Panel>
-          <h3 className="text-[14px] font-bold text-foreground mb-4">Dados Pessoais</h3>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+              <User className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="text-[14px] font-bold text-foreground">Dados Pessoais</h3>
+          </div>
           <form onSubmit={handleSave} className="space-y-3">
             <div>
               <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Nome completo</Label>
@@ -149,7 +155,12 @@ export default function Perfil() {
 
         {/* Limites */}
         <Panel>
-          <h3 className="text-[14px] font-bold text-foreground mb-4">Limites</h3>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="h-8 w-8 rounded-xl bg-info/10 flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-info" />
+            </div>
+            <h3 className="text-[14px] font-bold text-foreground">Limites</h3>
+          </div>
           <div className="space-y-3">
             <InfoRow label="Limite diário PIX" value="R$ 50.000,00" cls="text-primary" />
             <InfoRow label="Limite diário Saque" value="R$ 30.000,00" cls="text-info" />
