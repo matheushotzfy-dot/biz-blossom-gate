@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,56 +37,58 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/pay/:slug" element={<PublicCheckout />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            
-            {/* Admin Master — server-side role verification */}
-            <Route path="/admin-matheus" element={<AdminLogin />} />
-            <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-            <Route path="/admin-matheus/auditoria" element={<RequireAdmin><AdminAuditoria /></RequireAdmin>} />
-            <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/pay/:slug" element={<PublicCheckout />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              
+              {/* Admin Master — server-side role verification */}
+              <Route path="/admin-matheus" element={<AdminLogin />} />
+              <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+              <Route path="/admin-matheus/auditoria" element={<RequireAdmin><AdminAuditoria /></RequireAdmin>} />
+              <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
 
-            {/* User Dashboard */}
-            <Route
-              element={
-                <RequireAuth>
-                  <DashboardLayout />
-                </RequireAuth>
-              }
-            >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/perfil" element={<Perfil />} />
-              <Route path="/financeiro/extrato" element={<Extrato />} />
-              
-              <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
-              <Route path="/financeiro/identidade" element={<Identidade />} />
-              <Route path="/financeiro/saques" element={<Saques />} />
-              <Route path="/financeiro/gastos" element={<ControleGastos />} />
-              <Route path="/vendas" element={<Vendas />} />
-              <Route path="/vendas/produtos" element={<Produtos />} />
-              <Route path="/vendas/checkout" element={<Checkout />} />
-              
-              <Route path="/vendas/webhooks" element={<Webhooks />} />
-              <Route path="/vendas/documentacao" element={<Documentacao />} />
-              <Route path="/vendas/conteudo" element={<Conteudo />} />
-              <Route path="/integracoes/apps" element={<Apps />} />
-              <Route path="/membros" element={<MemberArea />} />
-              <Route path="/membros/curso/:courseId" element={<CoursePage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+              {/* User Dashboard */}
+              <Route
+                element={
+                  <RequireAuth>
+                    <DashboardLayout />
+                  </RequireAuth>
+                }
+              >
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/perfil" element={<Perfil />} />
+                <Route path="/financeiro/extrato" element={<Extrato />} />
+                
+                <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
+                <Route path="/financeiro/identidade" element={<Identidade />} />
+                <Route path="/financeiro/saques" element={<Saques />} />
+                <Route path="/financeiro/gastos" element={<ControleGastos />} />
+                <Route path="/vendas" element={<Vendas />} />
+                <Route path="/vendas/produtos" element={<Produtos />} />
+                <Route path="/vendas/checkout" element={<Checkout />} />
+                
+                <Route path="/vendas/webhooks" element={<Webhooks />} />
+                <Route path="/vendas/documentacao" element={<Documentacao />} />
+                <Route path="/vendas/conteudo" element={<Conteudo />} />
+                <Route path="/integracoes/apps" element={<Apps />} />
+                <Route path="/membros" element={<MemberArea />} />
+                <Route path="/membros/curso/:courseId" element={<CoursePage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
