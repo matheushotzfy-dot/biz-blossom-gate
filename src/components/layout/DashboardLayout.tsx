@@ -78,7 +78,7 @@ export function DashboardLayout() {
     <SidebarProvider
       style={{ "--sidebar-width": "22rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
     >
-      <div className="flex min-h-[100dvh] h-[100dvh] w-full overflow-hidden bg-background">
+      <div className="flex min-h-[100dvh] w-full bg-background md:h-[100dvh] md:overflow-hidden">
         <AppSidebar />
 
         <SidebarInset className="relative min-w-0 bg-background">
