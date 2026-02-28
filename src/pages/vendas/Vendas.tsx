@@ -104,7 +104,7 @@ export default function Vendas() {
       <PageTitle icon={<ShoppingCart className="h-6 w-6" />} title="Minhas Vendas" subtitle="Gerencie todas as suas transações e clientes" />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Receita Líquida", value: fmt(totalSales), sub: `${approved.length} aprovadas`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
           { label: "Ticket Médio", value: fmt(avgTicket), sub: "por venda", icon: TrendingUp, color: "text-info", bg: "bg-info/10" },
@@ -115,13 +115,13 @@ export default function Vendas() {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
-                <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${kpi.bg}`}>
-                  <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">{kpi.label}</span>
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
+                  <kpi.icon className={`h-4.5 w-4.5 ${kpi.color}`} />
                 </div>
               </div>
               <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">{kpi.sub}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{kpi.sub}</p>
             </div>
           </Panel>
         ))}
@@ -143,19 +143,19 @@ export default function Vendas() {
             </button>
           )}
         </div>
-        <div className="flex gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+        <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {statusFilters.map((f) => (
             <button
               key={f.value}
               onClick={() => setStatusFilter(f.value)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-[11px] font-bold transition-all border ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all border ${
                 statusFilter === f.value
                   ? "bg-primary/10 text-primary border-primary/25 shadow-sm shadow-primary/10"
-                  : "bg-card text-muted-foreground border-border hover:bg-muted/40"
+                  : "bg-card text-muted-foreground border-border hover:bg-muted/40 hover:border-primary/15"
               }`}
             >
               {f.label}
-              <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${
+              <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold ${
                 statusFilter === f.value ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
               }`}>{f.count}</span>
             </button>

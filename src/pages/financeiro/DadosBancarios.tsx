@@ -265,13 +265,21 @@ export default function DadosBancarios() {
 
       {/* Bank Accounts Section */}
       <div className="flex items-center justify-between">
-        <h3 className="text-muted-foreground text-[12px] uppercase tracking-widest font-semibold">Contas Bancárias</h3>
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
+            <Building2 className="h-4 w-4 text-info" />
+          </div>
+          <div>
+            <h3 className="text-[15px] font-display font-bold text-foreground">Contas Bancárias</h3>
+            <p className="text-[11px] text-muted-foreground">Cadastre suas contas para recebimento</p>
+          </div>
+        </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nova</span> Conta</Button>
+            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nova</span> Conta</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>Cadastrar Conta Bancária</DialogTitle></DialogHeader>
+          <DialogContent className="max-w-md rounded-2xl">
+            <DialogHeader><DialogTitle className="font-display">Cadastrar Conta Bancária</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Banco</Label><Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required /></div>
@@ -284,25 +292,33 @@ export default function DadosBancarios() {
               <div><Label>Tipo</Label><Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="corrente">Corrente</SelectItem><SelectItem value="poupanca">Poupança</SelectItem></SelectContent></Select></div>
               <div><Label>Titular</Label><Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required /></div>
               <div><Label>CPF/CNPJ</Label><Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required /></div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground">Cadastrar</Button>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold rounded-xl h-11">Cadastrar</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accounts.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-muted-foreground"><Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-[13px]">Nenhuma conta cadastrada</p></div>
+          <Panel className="col-span-full py-12">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="h-14 w-14 rounded-2xl bg-muted/40 flex items-center justify-center">
+                <Building2 className="h-7 w-7 text-muted-foreground/20" />
+              </div>
+              <p className="text-[14px] font-semibold text-muted-foreground">Nenhuma conta cadastrada</p>
+              <p className="text-[12px] text-muted-foreground/60">Cadastre uma conta bancária para recebimentos</p>
+            </div>
+          </Panel>
         ) : accounts.map((acc) => (
           <Panel key={acc.id}>
             <div className="flex justify-between items-start">
               <div className="min-w-0">
-                <h3 className="font-bold text-foreground text-[14px]">{acc.bank_name}</h3>
+                <h3 className="font-display font-bold text-foreground text-[15px]">{acc.bank_name}</h3>
                 {acc.bank_code && <p className="text-[11px] text-muted-foreground">Cód: {acc.bank_code}</p>}
               </div>
               <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={() => handleDelete(acc.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
-            <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
+            <div className="mt-3 space-y-1.5 text-[13px] text-muted-foreground">
               <p>Ag: <span className="font-mono text-foreground/70">{acc.agency}</span> | Conta: <span className="font-mono text-foreground/70">{acc.account_number}</span></p>
               <p className="capitalize">{acc.account_type === "corrente" ? "Conta Corrente" : "Poupança"}</p>
               <p className="text-muted-foreground/60 truncate">{acc.holder_name} — {acc.holder_document}</p>

@@ -94,7 +94,7 @@ export default function Checkout() {
           <p className="text-xs text-muted-foreground/60 mt-1">Crie um produto para configurar seu checkout</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {products.map((p, i) => (
             <Panel
               key={p.id}
@@ -175,9 +175,14 @@ export default function Checkout() {
 
       {/* ─── CUPONS SECTION ─── */}
       <div className="flex items-center justify-between mt-2">
-        <div className="flex items-center gap-2">
-          <Ticket className="h-5 w-5 text-primary" />
-          <h2 className="text-base font-display font-bold text-foreground">Cupons Promocionais</h2>
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+            <Ticket className="h-4 w-4 text-warning" />
+          </div>
+          <div>
+            <h2 className="text-[15px] font-display font-bold text-foreground">Cupons Promocionais</h2>
+            <p className="text-[11px] text-muted-foreground">Ofereça descontos nos seus checkouts</p>
+          </div>
         </div>
         <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
           <DialogTrigger asChild>
