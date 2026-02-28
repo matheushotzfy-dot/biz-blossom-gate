@@ -78,10 +78,10 @@ export function DashboardLayout() {
     <SidebarProvider
       style={{ "--sidebar-width": "22rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
     >
-      <div className="flex w-full bg-background overflow-hidden" style={{ height: "100dvh", minHeight: "-webkit-fill-available" }}>
+      <div className="flex w-full h-full bg-background overflow-hidden">
         <AppSidebar />
 
-        <SidebarInset className="relative min-w-0 bg-background flex flex-col overflow-hidden" style={{ height: "100%" }}>
+        <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full overflow-hidden">
           <div className="pointer-events-none absolute inset-0 z-0">
             <div className="absolute -top-24 right-0 h-80 w-80 rounded-full bg-primary/10 blur-[120px]" />
             <div className="absolute bottom-0 left-1/4 h-72 w-72 rounded-full bg-info/10 blur-[130px]" />
