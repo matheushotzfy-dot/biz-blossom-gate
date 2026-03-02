@@ -299,23 +299,8 @@ export default function Vendas() {
     );
   });
 
-  const handleRefund = async (tx: Tables<"transactions">) => {
-    if (tx.status !== "completed") {
-      toast.error("Só é possível reembolsar vendas aprovadas.");
-      return;
-    }
-    const { error } = await supabase
-      .from("transactions")
-      .update({ status: "refunded", updated_at: new Date().toISOString() })
-      .eq("id", tx.id);
-
-    if (error) {
-      toast.error("Erro ao emitir reembolso.");
-    } else {
-      toast.success("Reembolso emitido com sucesso!");
-      setTransactions((prev) => prev.map((t) => (t.id === tx.id ? { ...t, status: "refunded" } : t)));
-      setSelectedTx((prev) => (prev?.id === tx.id ? { ...prev, status: "refunded" } : prev));
-    }
+  const handleRefund = async (_tx: Tables<"transactions">) => {
+    toast.info("Para solicitar reembolso, entre em contato com o suporte.");
   };
 
   const statusFilters: { label: string; value: StatusFilter; count: number }[] = [
