@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowDownToLine, Plus, Key, Clock, CheckCircle2, XCircle, Rocket, PartyPopper, X } from "lucide-react";
+import {
+  ArrowDownToLine, Plus, Key, Clock, CheckCircle2, XCircle,
+  Rocket, PartyPopper, X, Wallet, TrendingUp, Shield,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
-import { PageShell, Panel, GlowPanel, PageTitle, KpiCard, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 
 const pixKeyTypeLabels: Record<string, string> = {
   cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Aleatória",
@@ -19,6 +23,24 @@ const pixKeyTypeLabels: Record<string, string> = {
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+/* ─── KPI ─── */
+function SaqueKpi({ label, value, sub, icon: Icon, color, bg }: {
+  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string;
+}) {
+  return (
+    <div className="panel-enterprise p-5 group">
+      <div className="flex items-center justify-between mb-3">
+        <span className="kicker">{label}</span>
+        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border border-border/30", bg)}>
+          <Icon className={cn("h-[18px] w-[18px]", color)} />
+        </div>
+      </div>
+      <p className="text-[22px] md:text-2xl font-display font-black text-foreground leading-none">{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
+    </div>
+  );
+}
 
 export default function Saques() {
   const { user } = useAuth();
@@ -77,7 +99,7 @@ export default function Saques() {
   return (
     <PageShell>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <PageTitle icon={<ArrowDownToLine className="h-6 w-6" />} title="Saques" subtitle="Solicite e acompanhe seus saques via PIX" />
+        <PageTitle icon={<Wallet className="h-6 w-6" />} title="Saques" subtitle="Solicite e acompanhe seus saques via PIX" />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
@@ -91,7 +113,7 @@ export default function Saques() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-5 mt-2 relative">
               <div>
-                <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Valor do saque (R$)</Label>
+                <Label className="kicker">Valor do saque (R$)</Label>
                 <Input type="number" step="0.01" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required className="mt-1.5 h-12 text-lg font-bold rounded-xl" />
                 <div className="flex items-center justify-between mt-2">
                   <p className="text-xs text-muted-foreground/50">Taxa fixa de saque</p>
@@ -107,7 +129,7 @@ export default function Saques() {
                 )}
               </div>
               <div>
-                <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Chave PIX</Label>
+                <Label className="kicker">Chave PIX</Label>
                 {pixKeys.length > 0 ? (
                   <Select value={selectedPixKeyId || pixKeys[0]?.id} onValueChange={setSelectedPixKeyId}>
                     <SelectTrigger className="mt-1.5 h-12 rounded-xl"><SelectValue placeholder="Selecione a chave PIX" /></SelectTrigger>
@@ -139,28 +161,28 @@ export default function Saques() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Pendente" value={fmt(totalPending)} sub={`${pending.length} saques`} icon={Clock} color="text-warning" bg="bg-warning/10" />
-        <KpiCard label="Sacado" value={fmt(totalApproved)} sub={`${approved.length} aprovados`} icon={CheckCircle2} color="text-success" bg="bg-success/10" />
-        <KpiCard label="Recusados" value={String(rejected.length)} sub="saques" icon={XCircle} color="text-destructive" bg="bg-destructive/10" />
-        <KpiCard label="Total" value={String(withdrawals.length)} sub="solicitações" icon={ArrowDownToLine} color="text-primary" bg="bg-primary/10" />
+        <SaqueKpi label="Pendente" value={fmt(totalPending)} sub={`${pending.length} saques`} icon={Clock} color="text-warning" bg="bg-warning/10" />
+        <SaqueKpi label="Sacado" value={fmt(totalApproved)} sub={`${approved.length} aprovados`} icon={CheckCircle2} color="text-success" bg="bg-success/10" />
+        <SaqueKpi label="Recusados" value={String(rejected.length)} sub="saques" icon={XCircle} color="text-destructive" bg="bg-destructive/10" />
+        <SaqueKpi label="Total" value={String(withdrawals.length)} sub="solicitações" icon={TrendingUp} color="text-primary" bg="bg-primary/10" />
       </div>
 
       {/* Desktop table */}
       <div className="hidden md:block">
-        <Panel className="p-0 overflow-hidden">
+        <div className="panel-enterprise p-0 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/40 bg-gradient-to-r from-muted/30 via-muted/10 to-muted/30">
                   {["ID", "Valor", "Taxa", "Líquido", "Status", "Data"].map((h) => (
-                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em]">{h}</th>
+                    <th key={h} className="text-left p-4 kicker">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {withdrawals.length === 0 ? (
                   <tr><td colSpan={6}>
-                    <EmptyState icon={<ArrowDownToLine className="h-7 w-7" />} title="Nenhum saque realizado" subtitle="Solicite seu primeiro saque" />
+                    <EmptyState icon={<Wallet className="h-7 w-7" />} title="Nenhum saque realizado" subtitle="Solicite seu primeiro saque" />
                   </td></tr>
                 ) : withdrawals.map((w, i) => (
                   <tr key={w.id} className="border-b border-border/25 hover:bg-primary/[0.02] transition-all animate-fade-in" style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}>
@@ -175,15 +197,15 @@ export default function Saques() {
               </tbody>
             </table>
           </div>
-        </Panel>
+        </div>
       </div>
 
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {withdrawals.length === 0 ? (
-          <EmptyState icon={<ArrowDownToLine className="h-7 w-7" />} title="Nenhum saque" subtitle="Solicite seu primeiro saque" />
+          <EmptyState icon={<Wallet className="h-7 w-7" />} title="Nenhum saque" subtitle="Solicite seu primeiro saque" />
         ) : withdrawals.map((w, i) => (
-          <GlowPanel key={w.id} className="p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` } as React.CSSProperties}>
+          <div key={w.id} className="panel-enterprise-subtle p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
             <div className="flex items-start justify-between mb-2.5">
               <div>
                 <p className="text-foreground font-display font-black text-xl">{fmt(Number(w.amount))}</p>
@@ -194,18 +216,28 @@ export default function Saques() {
             <div className="flex items-center justify-between pt-2.5 border-t border-border/20">
               <div className="flex items-center gap-4">
                 <div>
-                  <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider font-semibold">Taxa</p>
+                  <p className="kicker">Taxa</p>
                   <p className="text-warning font-semibold text-[12px]">- {fmt(Number(w.fee_amount))}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider font-semibold">Líquido</p>
+                  <p className="kicker">Líquido</p>
                   <p className="text-primary font-display font-bold text-[14px]">{fmt(Number(w.net_amount))}</p>
                 </div>
               </div>
               <span className="text-muted-foreground/40 text-[11px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
-          </GlowPanel>
+          </div>
         ))}
+      </div>
+
+      {/* Security info */}
+      <div className="panel-enterprise-subtle p-4">
+        <div className="flex items-center gap-3">
+          <Shield className="h-4 w-4 text-primary/50 shrink-0" />
+          <p className="text-[11px] text-muted-foreground/50">
+            Saques são processados via PIX com verificação de saldo em tempo real. Taxa fixa de R$ 5,00 por operação.
+          </p>
+        </div>
       </div>
 
       {/* ─── APPROVED CELEBRATION POPUP ─── */}
