@@ -5,7 +5,7 @@ import {
   Plus, BookOpen, Layers, PlayCircle, Trash2, Edit, Eye, EyeOff,
   Link as LinkIcon, Search, Users, ChevronDown, ChevronUp, Upload,
   Image as ImageIcon, Video, GripVertical, X, Clock, ArrowLeft,
-  Sparkles, Package, FileText, Check
+  Sparkles, Package, FileText, Check, TrendingUp, ShoppingCart, DollarSign, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,6 +149,7 @@ export default function AdminConteudo() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
+  const [transactions, setTransactions] = useState<{ product_id: string | null; status: string; amount: number }[]>([]);
 
   // ── Wizard state ──
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -176,7 +177,7 @@ export default function AdminConteudo() {
   });
 
   // ── Load data ──
-  useEffect(() => { if (user) { loadCourses(); loadProducts(); } }, [user]);
+  useEffect(() => { if (user) { loadCourses(); loadProducts(); loadTransactions(); } }, [user]);
 
   const loadCourses = async () => {
     const { data } = await supabase.from("courses").select("*").order("sort_order");
@@ -186,6 +187,12 @@ export default function AdminConteudo() {
   const loadProducts = async () => {
     const { data } = await supabase.from("products").select("id, name");
     if (data) setProducts(data);
+  };
+
+  const loadTransactions = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("transactions").select("product_id, status, amount").eq("user_id", user.id);
+    if (data) setTransactions(data);
   };
 
   const loadModules = useCallback(async (courseId: string) => {
@@ -395,6 +402,73 @@ export default function AdminConteudo() {
           className="pl-10 h-11 rounded-xl bg-card/80 backdrop-blur-sm border-border/50 text-[13px] focus:bg-background focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
         />
       </div>
+
+      {/* ── Top Products Table ── */}
+      {products.length > 0 && (
+        <div className="panel-enterprise p-5 animate-fade-in">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-sm font-display font-bold text-foreground">Produtos Mais Vendidos</h3>
+              <p className="text-[11px] text-muted-foreground">Pedidos gerados, pagos e taxa de conversão</p>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/40">
+                  {["#", "Produto", "Pedidos Gerados", "Pagos", "Conversão", "Faturamento"].map(h => (
+                    <th key={h} className="text-left p-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const productStats = products.map(p => {
+                    const allTx = transactions.filter(t => t.product_id === p.id);
+                    const paidTx = allTx.filter(t => t.status === "completed" || t.status === "approved");
+                    const gross = paidTx.reduce((a, t) => a + Number(t.amount), 0);
+                    return { ...p, total: allTx.length, paid: paidTx.length, conversion: allTx.length > 0 ? (paidTx.length / allTx.length) * 100 : 0, gross };
+                  }).sort((a, b) => b.paid - a.paid);
+
+                  if (productStats.every(p => p.total === 0)) {
+                    return (
+                      <tr><td colSpan={6} className="p-8 text-center text-muted-foreground/50 text-xs">Nenhum pedido registrado ainda</td></tr>
+                    );
+                  }
+
+                  return productStats.filter(p => p.total > 0).map((p, i) => (
+                    <tr key={p.id} className="border-b border-border/20 hover:bg-muted/30 transition-colors">
+                      <td className="p-2.5">
+                        <span className={`text-xs font-black ${i === 0 ? "text-primary" : i === 1 ? "text-blue-400" : i === 2 ? "text-violet-400" : "text-muted-foreground/40"}`}>#{i + 1}</span>
+                      </td>
+                      <td className="p-2.5">
+                        <p className="text-xs font-bold text-foreground truncate max-w-[200px]">{p.name}</p>
+                      </td>
+                      <td className="p-2.5">
+                        <span className="text-xs font-bold bg-muted/50 px-2 py-0.5 rounded text-muted-foreground">{p.total}</span>
+                      </td>
+                      <td className="p-2.5">
+                        <span className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded">{p.paid}</span>
+                      </td>
+                      <td className="p-2.5">
+                        <span className={`text-xs font-bold ${p.conversion >= 50 ? "text-primary" : p.conversion >= 20 ? "text-amber-500" : "text-destructive"}`}>
+                          {p.conversion.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="p-2.5">
+                        <span className="text-xs font-black text-primary">R$ {p.gross.toFixed(2)}</span>
+                      </td>
+                    </tr>
+                  ));
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* ── Course List ── */}
       {filtered.length === 0 ? (
