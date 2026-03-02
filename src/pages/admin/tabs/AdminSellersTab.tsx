@@ -375,11 +375,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   {[
                     { v: "info", l: "Info & KYC", i: FileText },
                     { v: "notes", l: "Observações", i: MessageSquareText },
+                    { v: "compliance", l: "Compliance", i: Shield },
                     { v: "disputes", l: `Disputas (${userMedTotal})`, i: AlertTriangle },
                     { v: "pix", l: "Chaves PIX", i: Key },
                     { v: "acquirer", l: "Adquirente", i: Landmark },
                     { v: "financial", l: "Financeiro", i: Wallet },
-                    { v: "products", l: "Produtos", i: Package },
                     { v: "buyers", l: "Clientes", i: ShoppingCart },
                     { v: "logs", l: "Logs", i: Activity },
                     { v: "fees", l: "Taxas", i: CreditCard },
@@ -633,33 +633,189 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   </div>
                 </TabsContent>
 
-                {/* ── Produtos ── */}
-                <TabsContent value="products" className="mt-4 space-y-4">
-                  <p className="text-xs font-bold text-white/60 mb-2">Produtos Ativos ({userProducts.length})</p>
-                  {userProducts.length === 0 ? <p className="text-xs text-white/20">Nenhum produto</p> : (
-                    <div className="space-y-2">
-                      {userProducts.map(p => (
-                        <div key={p.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 flex items-center gap-3">
-                          {p.image_url && <img src={p.image_url} alt="" className="h-12 w-12 rounded-lg object-cover shrink-0" />}
-                          <div className="flex-1"><p className="text-xs font-bold">{p.name}</p><p className="text-[10px] text-white/30">{p.description?.slice(0,60)||"—"}</p></div>
-                          <div className="text-right"><p className="text-sm font-bold text-emerald-400">R$ {Number(p.price).toFixed(2)}</p><StatusBadge status={p.status} /></div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {deletedProducts.length > 0 && (
-                    <>
-                      <p className="text-xs font-bold text-red-400/60 mt-4 mb-2 flex items-center gap-1"><Trash2 className="h-3 w-3" /> Produtos Excluídos ({deletedProducts.length})</p>
-                      <div className="space-y-2">
-                        {deletedProducts.map((dp, i) => (
-                          <div key={i} className="rounded-xl border border-red-500/10 bg-red-500/[0.03] p-3">
-                            <p className="text-xs font-bold text-red-400">{dp.name}</p>
-                            <p className="text-[10px] text-white/30">Preço: R$ {Number(dp.price).toFixed(2)} • Excluído em {new Date(dp.deletedAt).toLocaleString("pt-BR")}</p>
+                {/* ── Compliance: Produtos, Vendas por Produto, Compradores, Estornos ── */}
+                <TabsContent value="compliance" className="mt-4 space-y-5">
+                  {/* ── Produtos Ativos ── */}
+                  <AdminPanel>
+                    <PanelTitle color="emerald" icon={<Package className="h-4 w-4" />}>Produtos Ativos ({userProducts.length})</PanelTitle>
+                    <div className="space-y-3 mt-4">
+                      {userProducts.length === 0 && <p className="text-xs text-white/20 text-center py-6">Nenhum produto ativo</p>}
+                      {userProducts.map(p => {
+                        const prodTxs = userTransactions.filter(t => t.product_id === p.id);
+                        const prodApproved = prodTxs.filter(t => t.status === "completed" || t.status === "approved");
+                        const prodRefunds = prodTxs.filter(t => t.status === "refunded");
+                        const prodChargebacks = prodTxs.filter(t => t.status === "chargeback");
+                        const prodPending = prodTxs.filter(t => t.status === "pending");
+                        const prodGross = prodApproved.reduce((a, t) => a + Number(t.amount), 0);
+                        const prodNet = prodApproved.reduce((a, t) => a + Number(t.net_amount), 0);
+                        const prodFees = prodApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
+                        const uniqueBuyers = new Set(prodTxs.map(t => t.customer_email).filter(Boolean));
+                        const prodDisputes = userDisputes.filter((d: any) => {
+                          const disputeTx = userTransactions.find(t => t.id === d.transaction_id);
+                          return disputeTx?.product_id === p.id;
+                        });
+                        return (
+                          <div key={p.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
+                            {/* Product Header */}
+                            <div className="flex items-center gap-3">
+                              {p.image_url && <img src={p.image_url} alt="" className="h-14 w-14 rounded-lg object-cover shrink-0" />}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-bold">{p.name}</p>
+                                  <StatusBadge status={p.status} />
+                                </div>
+                                <p className="text-[10px] text-white/30 mt-0.5">{p.description?.slice(0, 80) || "—"}</p>
+                                <p className="text-[10px] text-white/15 font-mono mt-0.5">ID: {p.id}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-black text-emerald-400">R$ {Number(p.price).toFixed(2)}</p>
+                                <p className="text-[10px] text-white/20">Criado em {new Date(p.created_at).toLocaleDateString("pt-BR")}</p>
+                              </div>
+                            </div>
+                            {/* Product KPIs */}
+                            <div className="grid grid-cols-3 lg:grid-cols-7 gap-2">
+                              {[
+                                { l: "Vendas", v: String(prodApproved.length), c: "text-emerald-400" },
+                                { l: "Faturamento", v: fmtCurrency(prodGross), c: "text-blue-400" },
+                                { l: "Líquido", v: fmtCurrency(prodNet), c: "text-emerald-400" },
+                                { l: "Taxas", v: fmtCurrency(prodFees), c: "text-amber-400" },
+                                { l: "Pendentes", v: String(prodPending.length), c: "text-yellow-400" },
+                                { l: "Estornos", v: String(prodRefunds.length), c: "text-red-400" },
+                                { l: "Chargebacks", v: String(prodChargebacks.length), c: "text-red-500" },
+                              ].map(k => (
+                                <div key={k.l} className="bg-white/[0.03] rounded-lg p-2 text-center">
+                                  <p className="text-[9px] text-white/25 uppercase tracking-wider">{k.l}</p>
+                                  <p className={`text-xs font-black mt-0.5 ${k.c}`}>{k.v}</p>
+                                </div>
+                              ))}
+                            </div>
+                            {/* Buyers of this product */}
+                            <div className="bg-white/[0.02] rounded-lg border border-white/[0.04] p-3">
+                              <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider mb-2">
+                                Compradores ({uniqueBuyers.size}) — Últimas transações
+                              </p>
+                              <div className="max-h-[200px] overflow-y-auto">
+                                <table className="w-full text-[11px]">
+                                  <thead><tr className="border-b border-white/[0.04]">
+                                    {["Cliente", "E-mail", "Telefone", "Valor", "Status", "Data"].map(h => (
+                                      <th key={h} className="text-left p-1.5 text-[9px] font-semibold text-white/20 uppercase">{h}</th>
+                                    ))}
+                                  </tr></thead>
+                                  <tbody>
+                                    {prodTxs.slice(0, 50).map(tx => (
+                                      <tr key={tx.id} className="border-b border-white/[0.02] hover:bg-white/[0.02]">
+                                        <td className="p-1.5 font-medium">{tx.customer_name || "—"}</td>
+                                        <td className="p-1.5 text-white/40">{tx.customer_email || "—"}</td>
+                                        <td className="p-1.5 text-white/40">{tx.customer_phone || "—"}</td>
+                                        <td className="p-1.5 font-bold text-emerald-400">R$ {Number(tx.amount).toFixed(2)}</td>
+                                        <td className="p-1.5"><StatusBadge status={tx.status} /></td>
+                                        <td className="p-1.5 text-white/20">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
+                                      </tr>
+                                    ))}
+                                    {prodTxs.length === 0 && <tr><td colSpan={6} className="p-4 text-center text-white/15">Sem transações</td></tr>}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                            {/* Disputes for this product */}
+                            {prodDisputes.length > 0 && (
+                              <div className="bg-red-500/[0.03] rounded-lg border border-red-500/10 p-3">
+                                <p className="text-[10px] text-red-400 font-bold uppercase tracking-wider mb-2">
+                                  Disputas deste produto ({prodDisputes.length})
+                                </p>
+                                {prodDisputes.map((d: any) => (
+                                  <div key={d.id} className="flex items-center justify-between text-[11px] py-1.5 border-b border-red-500/5 last:border-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-bold uppercase text-[9px] text-red-400/60">{d.type}</span>
+                                      <span className="font-bold text-red-400">{fmtCurrency(Number(d.amount))}</span>
+                                      <StatusBadge status={d.status} />
+                                    </div>
+                                    <span className="text-white/20">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        ))}
+                        );
+                      })}
+                    </div>
+                  </AdminPanel>
+
+                  {/* ── Produtos Excluídos (from audit logs) ── */}
+                  {deletedProducts.length > 0 && (
+                    <AdminPanel>
+                      <PanelTitle color="red" icon={<Trash2 className="h-4 w-4" />}>Produtos Excluídos ({deletedProducts.length})</PanelTitle>
+                      <div className="space-y-2 mt-4">
+                        {deletedProducts.map((dp, i) => {
+                          const dpTxs = userTransactions.filter(t => t.product_id === dp.id);
+                          const dpApproved = dpTxs.filter(t => t.status === "completed" || t.status === "approved");
+                          const dpRefunds = dpTxs.filter(t => t.status === "refunded");
+                          const dpChargebacks = dpTxs.filter(t => t.status === "chargeback");
+                          const dpGross = dpApproved.reduce((a, t) => a + Number(t.amount), 0);
+                          return (
+                            <div key={i} className="rounded-xl border border-red-500/10 bg-red-500/[0.02] p-4 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-bold text-red-400">{dp.name}</p>
+                                  <p className="text-[10px] text-white/25">Preço: R$ {Number(dp.price).toFixed(2)} • Excluído em {new Date(dp.deletedAt).toLocaleString("pt-BR")}</p>
+                                  <p className="text-[10px] text-white/15 font-mono">ID: {dp.id}</p>
+                                </div>
+                              </div>
+                              {dpTxs.length > 0 && (
+                                <div className="grid grid-cols-4 gap-2">
+                                  {[
+                                    { l: "Vendas", v: String(dpApproved.length), c: "text-emerald-400" },
+                                    { l: "Faturamento", v: fmtCurrency(dpGross), c: "text-blue-400" },
+                                    { l: "Estornos", v: String(dpRefunds.length), c: "text-red-400" },
+                                    { l: "Chargebacks", v: String(dpChargebacks.length), c: "text-red-500" },
+                                  ].map(k => (
+                                    <div key={k.l} className="bg-white/[0.03] rounded-lg p-2 text-center">
+                                      <p className="text-[9px] text-white/20 uppercase">{k.l}</p>
+                                      <p className={`text-xs font-black mt-0.5 ${k.c}`}>{k.v}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {/* Buyers of deleted product */}
+                              {dpTxs.length > 0 && (
+                                <div className="bg-white/[0.02] rounded-lg border border-white/[0.04] p-2">
+                                  <p className="text-[9px] text-white/30 font-bold uppercase mb-1">Compradores</p>
+                                  <div className="max-h-[120px] overflow-y-auto space-y-1">
+                                    {dpTxs.slice(0, 20).map(tx => (
+                                      <div key={tx.id} className="flex items-center justify-between text-[10px] py-1 border-b border-white/[0.02]">
+                                        <span className="text-white/60">{tx.customer_name || tx.customer_email || "—"}</span>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-bold">R$ {Number(tx.amount).toFixed(2)}</span>
+                                          <StatusBadge status={tx.status} />
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    </>
+                    </AdminPanel>
                   )}
+
+                  {/* ── Resumo Compliance ── */}
+                  <AdminPanel>
+                    <PanelTitle color="blue" icon={<BarChart3 className="h-4 w-4" />}>Resumo de Compliance</PanelTitle>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+                      <MiniKpi label="Total Produtos (ativos)" value={String(userProducts.length)} color="emerald" />
+                      <MiniKpi label="Produtos Excluídos" value={String(deletedProducts.length)} color="amber" />
+                      <MiniKpi label="Transações Totais" value={String(userTransactions.length)} color="blue" />
+                      <MiniKpi label="Taxa Estorno" value={`${userTransactions.length > 0 ? ((userTransactions.filter(t => t.status === "refunded" || t.status === "chargeback").length / userTransactions.length) * 100).toFixed(2) : "0.00"}%`} color="amber" />
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+                      <MiniKpi label="Estornos" value={String(userTransactions.filter(t => t.status === "refunded").length)} color="amber" />
+                      <MiniKpi label="Chargebacks" value={String(userTransactions.filter(t => t.status === "chargeback").length)} color="amber" />
+                      <MiniKpi label="Disputas" value={String(userMedTotal)} color="amber" />
+                      <MiniKpi label="Clientes Únicos" value={String(buyers.length)} color="violet" />
+                    </div>
+                  </AdminPanel>
                 </TabsContent>
 
                 {/* ── Clientes ── */}
