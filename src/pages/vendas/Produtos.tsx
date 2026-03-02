@@ -22,7 +22,7 @@ export default function Produtos() {
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", status: "active" });
+  const [form, setForm] = useState({ name: "", description: "", price: "", status: "active", page_url: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -60,7 +60,7 @@ export default function Produtos() {
     if (imageFile) imageUrl = await uploadImage(imageFile);
     try {
       if (editId) {
-        const updateData: Record<string, unknown> = { name: form.name, description: form.description, price, status: form.status };
+        const updateData: Record<string, unknown> = { name: form.name, description: form.description, price, status: form.status, page_url: form.page_url || null };
         if (imageUrl) updateData.image_url = imageUrl;
         const { error } = await supabase.from("products").update(updateData).eq("id", editId);
         if (error) { toast.error("Erro ao atualizar"); return; }
@@ -68,7 +68,7 @@ export default function Produtos() {
       } else {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl, image_url: imageUrl, status: form.status });
+        const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl, image_url: imageUrl, status: form.status, page_url: form.page_url || null });
         if (error) { toast.error("Erro ao criar produto"); return; }
         toast.success("Produto criado!");
       }
@@ -76,8 +76,8 @@ export default function Produtos() {
     } finally { setUploading(false); }
   };
 
-  const resetForm = () => { setOpen(false); setEditId(null); setForm({ name: "", description: "", price: "", status: "active" }); setImageFile(null); setImagePreview(null); };
-  const handleEdit = (p: Tables<"products">) => { setEditId(p.id); setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status }); setImagePreview(p.image_url || null); setImageFile(null); setOpen(true); };
+  const resetForm = () => { setOpen(false); setEditId(null); setForm({ name: "", description: "", price: "", status: "active", page_url: "" }); setImageFile(null); setImagePreview(null); };
+  const handleEdit = (p: Tables<"products">) => { setEditId(p.id); setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status, page_url: (p as any).page_url || "" }); setImagePreview(p.image_url || null); setImageFile(null); setOpen(true); };
   const handleDelete = async (id: string) => { const { error } = await supabase.from("products").delete().eq("id", id); if (error) { toast.error("Erro"); return; } toast.success("Removido"); loadProducts(); };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; } setImageFile(file); setImagePreview(URL.createObjectURL(file)); };
 
@@ -149,6 +149,15 @@ export default function Produtos() {
               <div>
                 <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Descrição</Label>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto de forma atraente..." className="mt-1.5 rounded-xl" />
+              </div>
+
+              {/* Page URL - Compliance */}
+              <div>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <ExternalLink className="h-3 w-3" /> URL da Página de Vendas
+                </Label>
+                <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-11 rounded-xl" type="url" />
+                <p className="text-[10px] text-muted-foreground/60 mt-1">Link da página onde o produto é divulgado (compliance)</p>
               </div>
 
               {/* Price + Status row */}
