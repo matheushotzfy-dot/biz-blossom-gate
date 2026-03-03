@@ -39,6 +39,7 @@ function renderMarkdown(content: string): string {
 
 export default function Documentacao() {
   const [openSection, setOpenSection] = useState<string | null>("intro");
+  const navigate = useNavigate();
 
   const featureTone: Record<"primary" | "success" | "info", { bg: string; text: string }> = {
     primary: { bg: "bg-primary/10", text: "text-primary" },
