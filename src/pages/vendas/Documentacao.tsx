@@ -1,7 +1,9 @@
 import { useState } from "react";
 import DOMPurify from "dompurify";
-import { BookOpen, ChevronDown, ChevronRight, Shield, Zap, Code2, Terminal, Globe, Lock } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, Shield, Zap, Code2, Terminal, Globe, Lock, ExternalLink } from "lucide-react";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID || "sua-api"}.supabase.co/functions/v1`;
 
