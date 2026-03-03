@@ -1,7 +1,9 @@
 import { useState } from "react";
 import DOMPurify from "dompurify";
-import { BookOpen, ChevronDown, ChevronRight, Shield, Zap, Code2, Terminal, Globe, Lock } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, Shield, Zap, Code2, Terminal, Globe, Lock, ExternalLink } from "lucide-react";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID || "sua-api"}.supabase.co/functions/v1`;
 
@@ -37,6 +39,7 @@ function renderMarkdown(content: string): string {
 
 export default function Documentacao() {
   const [openSection, setOpenSection] = useState<string | null>("intro");
+  const navigate = useNavigate();
 
   const featureTone: Record<"primary" | "success" | "info", { bg: string; text: string }> = {
     primary: { bg: "bg-primary/10", text: "text-primary" },
@@ -89,6 +92,20 @@ export default function Documentacao() {
           </Panel>
         ))}
       </div>
+
+      {/* Link para documentação completa */}
+      <Panel className="p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <p className="font-bold text-sm text-foreground">Precisa integrar PIX no seu site ou cassino?</p>
+            <p className="text-xs text-muted-foreground mt-1">Documentação completa com exemplos em Node.js, Python e PHP, validação de webhooks e guia passo-a-passo.</p>
+          </div>
+          <Button onClick={() => navigate("/vendas/documentacao/completa")} className="gap-2 shrink-0">
+            <ExternalLink className="h-4 w-4" />
+            Ver Documentação Completa
+          </Button>
+        </div>
+      </Panel>
     </PageShell>
   );
 }

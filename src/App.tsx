@@ -23,6 +23,7 @@ import Checkout from "./pages/vendas/Checkout";
 
 import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
+import ApiDocsComplete from "./pages/vendas/ApiDocsComplete";
 import Conteudo from "./pages/vendas/Conteudo";
 import Apps from "./pages/vendas/Apps";
 import MemberArea from "./pages/membros/MemberArea";
@@ -77,6 +78,7 @@ const App = () => (
                 
                 <Route path="/vendas/webhooks" element={<Webhooks />} />
                 <Route path="/vendas/documentacao" element={<Documentacao />} />
+                <Route path="/vendas/documentacao/completa" element={<ApiDocsComplete />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes/apps" element={<Apps />} />
                 <Route path="/membros" element={<MemberArea />} />
