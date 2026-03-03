@@ -78,6 +78,7 @@ const App = () => (
                 
                 <Route path="/vendas/webhooks" element={<Webhooks />} />
                 <Route path="/vendas/documentacao" element={<Documentacao />} />
+                <Route path="/vendas/documentacao/completa" element={<ApiDocsComplete />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes/apps" element={<Apps />} />
                 <Route path="/membros" element={<MemberArea />} />

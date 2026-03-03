@@ -92,6 +92,20 @@ export default function Documentacao() {
           </Panel>
         ))}
       </div>
+
+      {/* Link para documentação completa */}
+      <Panel className="p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <p className="font-bold text-sm text-foreground">Precisa integrar PIX no seu site ou cassino?</p>
+            <p className="text-xs text-muted-foreground mt-1">Documentação completa com exemplos em Node.js, Python e PHP, validação de webhooks e guia passo-a-passo.</p>
+          </div>
+          <Button onClick={() => navigate("/vendas/documentacao/completa")} className="gap-2 shrink-0">
+            <ExternalLink className="h-4 w-4" />
+            Ver Documentação Completa
+          </Button>
+        </div>
+      </Panel>
     </PageShell>
   );
 }
