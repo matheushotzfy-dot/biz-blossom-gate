@@ -23,6 +23,7 @@ import Checkout from "./pages/vendas/Checkout";
 
 import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
+import ApiDocsComplete from "./pages/vendas/ApiDocsComplete";
 import Conteudo from "./pages/vendas/Conteudo";
 import Apps from "./pages/vendas/Apps";
 import MemberArea from "./pages/membros/MemberArea";
