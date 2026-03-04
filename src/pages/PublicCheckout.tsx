@@ -434,11 +434,11 @@ export default function PublicCheckout() {
 
   // msDev's — Override body overflow:hidden for public checkout scroll
   useEffect(() => {
-    document.body.style.overflow = "auto";
-    document.body.style.overscrollBehavior = "auto";
+    window.document.body.style.overflow = "auto";
+    window.document.body.style.overscrollBehavior = "auto";
     return () => {
-      document.body.style.overflow = "hidden";
-      document.body.style.overscrollBehavior = "none";
+      window.document.body.style.overflow = "hidden";
+      window.document.body.style.overscrollBehavior = "none";
     };
   }, []);
 
