@@ -48,6 +48,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
+              <Route path="/checkout/:slug" element={<PublicCheckout />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
               {/* Admin Master — server-side role verification */}
