@@ -332,9 +332,12 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
               </div>
             )}
 
-            {allProducts.length === 0 && (
-              <div className="text-center py-6 text-muted-foreground text-sm">
-                Cadastre outros produtos para usar como order bumps
+            {allProducts.length <= 1 && orderBumps.length === 0 && (
+              <div className="text-center py-6 space-y-3">
+                <p className="text-muted-foreground text-sm">Cadastre outros produtos para usar como order bumps</p>
+                <a href="/vendas/produtos" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+                  <Plus className="h-4 w-4" /> Cadastrar Produto
+                </a>
               </div>
             )}
           </TabsContent>
