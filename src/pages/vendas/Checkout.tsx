@@ -1,7 +1,19 @@
+/**
+ * Checkout — Configuração e personalização de checkouts + Cupons
+ * @module Checkout
+ * @version 3.1.0
+ * @author msDev's — Engenharia de Software
+ * @description Gerenciamento centralizado de checkout com cupons vinculados a produtos,
+ *   exibição de valor total de descontos e toggle de ativação por produto.
+ */
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ExternalLink, Copy, Eye, Settings, Package, CheckCircle, Palette, Link2, Plus, Trash2, Ticket } from "lucide-react";
+import {
+  ExternalLink, Copy, Eye, Settings, Package, CheckCircle, Palette,
+  Link2, Plus, Trash2, Ticket, DollarSign, TrendingDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +24,10 @@ import { toast } from "sonner";
 import { PageShell, Panel, GlowPanel, PageTitle, SectionHeader, EmptyState } from "@/components/PageShell";
 import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
+
+/* ─── Helpers — msDev's ─── */
+const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 export default function Checkout() {
   const { user } = useAuth();
@@ -20,8 +36,11 @@ export default function Checkout() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [coupons, setCoupons] = useState<any[]>([]);
   const [couponOpen, setCouponOpen] = useState(false);
-  const [couponForm, setCouponForm] = useState({ code: "", discount_type: "percentage", discount_value: "", max_uses: "" });
+  const [couponForm, setCouponForm] = useState({
+    code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "",
+  });
 
+  /* ─── Data loader — msDev's ─── */
   const load = async () => {
     if (!user?.id) return;
     const [prodRes, coupRes] = await Promise.all([
@@ -53,30 +72,48 @@ export default function Checkout() {
     return methods;
   };
 
+  /* ─── Cupons CRUD — msDev's ─── */
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    const { error } = await supabase.from("coupons").insert({
+    const insertData: any = {
       user_id: user.id,
       code: couponForm.code.toUpperCase(),
       discount_type: couponForm.discount_type,
       discount_value: parseFloat(couponForm.discount_value) || 0,
       max_uses: couponForm.max_uses ? parseInt(couponForm.max_uses) : null,
-    });
+    };
+    if (couponForm.product_id && couponForm.product_id !== "all") {
+      insertData.product_id = couponForm.product_id;
+    }
+    const { error } = await supabase.from("coupons").insert(insertData);
     if (error) { toast.error("Erro ao criar cupom"); return; }
     toast.success("Cupom criado!");
     setCouponOpen(false);
-    setCouponForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "" });
+    setCouponForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "" });
     load();
   };
+
   const toggleCouponActive = async (id: string, current: boolean) => {
     await supabase.from("coupons").update({ is_active: !current }).eq("id", id);
     load();
   };
+
   const deleteCoupon = async (id: string) => {
     await supabase.from("coupons").delete().eq("id", id);
     toast.success("Cupom removido");
     load();
+  };
+
+  /* ─── Helpers de nome de produto — msDev's ─── */
+  const getProductName = (productId: string | null) => {
+    if (!productId) return "Todos os produtos";
+    const p = products.find((prod) => prod.id === productId);
+    return p?.name || "Produto removido";
+  };
+
+  const getProductCouponCount = (productId: string) => {
+    return coupons.filter((c) => c.product_id === productId && c.is_active).length;
   };
 
   return (
@@ -87,84 +124,92 @@ export default function Checkout() {
         <EmptyState icon={<Package className="h-7 w-7" />} title="Nenhum produto ativo" subtitle="Crie um produto para configurar seu checkout" />
       ) : (
         <div className="space-y-3">
-          {products.map((p, i) => (
-            <GlowPanel
-              key={p.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}
-            >
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                  {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="h-14 w-14 rounded-xl object-cover shrink-0 border border-border/30" />
-                  ) : (
-                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
-                      <Package className="h-6 w-6 text-primary" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-display font-bold text-[14px] text-foreground truncate">{p.name}</h4>
-                    <p className="text-primary font-display font-black text-[17px]">
-                      R$ {Number(p.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      {getPaymentMethods(p).map((m) => (
-                        <span key={m} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-muted/40 border border-border/30 text-muted-foreground/70 uppercase tracking-wider">{m}</span>
-                      ))}
-                      {p.checkout_timer_enabled && (
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/10 border border-warning/15 text-warning">Timer</span>
-                      )}
-                      {p.checkout_guarantee_enabled && (
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-success/10 border border-success/15 text-success">Garantia</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {p.checkout_url && (
-                  <div className="hidden lg:flex items-center gap-2 rounded-xl bg-muted/20 border border-border/40 px-3 py-2 max-w-xs backdrop-blur-sm">
-                    <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-muted-foreground/60 hover:text-primary transition-colors shrink-0" title="Copiar link">
-                      <Link2 className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{getLocalLink(p.checkout_url!)}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    className="gap-1.5 rounded-xl text-[12px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-9 hover:shadow-xl hover:shadow-primary/25 transition-all"
-                    onClick={() => setSettingsProduct(p)}
-                  >
-                    <Settings className="h-3.5 w-3.5" /> Personalizar
-                  </Button>
-                  {p.checkout_url && (
-                    <>
-                      <Button variant="outline" size="sm" className="gap-1.5 rounded-xl text-[12px] h-9 border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={() => openCheckout(p.checkout_url!)}>
-                        <Eye className="h-3.5 w-3.5" /> Abrir
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1.5 rounded-xl text-[12px] h-9 border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]"
-                        onClick={() => copyLink(p.id, p.checkout_url!)}
-                      >
-                        {copiedId === p.id ? (
-                          <><CheckCircle className="h-3.5 w-3.5 text-success" /> Copiado</>
-                        ) : (
-                          <><Copy className="h-3.5 w-3.5" /> Copiar</>
+          {products.map((p, i) => {
+            const productCoupons = getProductCouponCount(p.id);
+            return (
+              <GlowPanel
+                key={p.id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}
+              >
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="h-14 w-14 rounded-xl object-cover shrink-0 border border-border/30" />
+                    ) : (
+                      <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
+                        <Package className="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-display font-bold text-[14px] text-foreground truncate">{p.name}</h4>
+                      <p className="text-primary font-display font-black text-[17px]">
+                        R$ {Number(p.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        {getPaymentMethods(p).map((m) => (
+                          <span key={m} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-muted/40 border border-border/30 text-muted-foreground/70 uppercase tracking-wider">{m}</span>
+                        ))}
+                        {p.checkout_timer_enabled && (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/10 border border-warning/15 text-warning">Timer</span>
                         )}
-                      </Button>
-                    </>
+                        {p.checkout_guarantee_enabled && (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-success/10 border border-success/15 text-success">Garantia</span>
+                        )}
+                        {productCoupons > 0 && (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/10 border border-warning/15 text-warning">
+                            <Ticket className="h-2.5 w-2.5 inline mr-0.5" />{productCoupons} cupom{productCoupons > 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {p.checkout_url && (
+                    <div className="hidden lg:flex items-center gap-2 rounded-xl bg-muted/20 border border-border/40 px-3 py-2 max-w-xs backdrop-blur-sm">
+                      <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-muted-foreground/60 hover:text-primary transition-colors shrink-0" title="Copiar link">
+                        <Link2 className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{getLocalLink(p.checkout_url!)}</span>
+                    </div>
                   )}
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      className="gap-1.5 rounded-xl text-[12px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-9 hover:shadow-xl hover:shadow-primary/25 transition-all"
+                      onClick={() => setSettingsProduct(p)}
+                    >
+                      <Settings className="h-3.5 w-3.5" /> Personalizar
+                    </Button>
+                    {p.checkout_url && (
+                      <>
+                        <Button variant="outline" size="sm" className="gap-1.5 rounded-xl text-[12px] h-9 border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={() => openCheckout(p.checkout_url!)}>
+                          <Eye className="h-3.5 w-3.5" /> Abrir
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 rounded-xl text-[12px] h-9 border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]"
+                          onClick={() => copyLink(p.id, p.checkout_url!)}
+                        >
+                          {copiedId === p.id ? (
+                            <><CheckCircle className="h-3.5 w-3.5 text-success" /> Copiado</>
+                          ) : (
+                            <><Copy className="h-3.5 w-3.5" /> Copiar</>
+                          )}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </GlowPanel>
-          ))}
+              </GlowPanel>
+            );
+          })}
         </div>
       )}
 
-      {/* ─── CUPONS SECTION ─── */}
+      {/* ─── CUPONS SECTION — msDev's ─── */}
       <div className="pt-2">
         <SectionHeader
           icon={<Ticket className="h-4.5 w-4.5" />}
@@ -177,17 +222,39 @@ export default function Checkout() {
                   <Plus className="h-4 w-4" /> Novo Cupom
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl">
-                <DialogHeader><DialogTitle className="font-display">Novo Cupom</DialogTitle></DialogHeader>
-                <form onSubmit={handleCreateCoupon} className="space-y-4 mt-2">
+              <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent rounded-2xl pointer-events-none" />
+                <div className="relative px-6 pt-6 pb-4 border-b border-border/20">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-lg flex items-center gap-2.5">
+                      <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                        <Ticket className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                      Novo Cupom
+                    </DialogTitle>
+                  </DialogHeader>
+                </div>
+                <form onSubmit={handleCreateCoupon} className="space-y-4 p-6 relative">
                   <div>
-                    <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Código</Label>
-                    <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="uppercase mt-1.5 rounded-xl" />
+                    <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Código</Label>
+                    <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="uppercase mt-1.5 rounded-xl h-11" />
                   </div>
                   <div>
-                    <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Tipo de Desconto</Label>
+                    <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Produto</Label>
+                    <Select value={couponForm.product_id || "all"} onValueChange={(v) => setCouponForm({ ...couponForm, product_id: v })}>
+                      <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os produtos</SelectItem>
+                        {products.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Tipo de Desconto</Label>
                     <Select value={couponForm.discount_type} onValueChange={(v) => setCouponForm({ ...couponForm, discount_type: v })}>
-                      <SelectTrigger className="mt-1.5 rounded-xl"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="percentage">Porcentagem (%)</SelectItem>
                         <SelectItem value="fixed">Valor fixo (R$)</SelectItem>
@@ -196,15 +263,17 @@ export default function Checkout() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Valor</Label>
-                      <Input type="number" step="0.01" value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} required className="mt-1.5 rounded-xl" />
+                      <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Valor</Label>
+                      <Input type="number" step="0.01" value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
                     </div>
                     <div>
-                      <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">Max. usos</Label>
-                      <Input type="number" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="∞" className="mt-1.5 rounded-xl" />
+                      <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Max. usos</Label>
+                      <Input type="number" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="∞" className="mt-1.5 rounded-xl h-11" />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-11 rounded-xl shadow-lg shadow-primary/15">Criar Cupom</Button>
+                  <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-xl shadow-primary/15 text-sm">
+                    <Ticket className="h-4 w-4 mr-2" /> Criar Cupom
+                  </Button>
                 </form>
               </DialogContent>
             </Dialog>
@@ -218,20 +287,33 @@ export default function Checkout() {
         </Panel>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {coupons.map((c) => (
-            <GlowPanel key={c.id} glow="warning" className="p-4">
+          {coupons.map((c, i) => (
+            <GlowPanel key={c.id} glow="warning" className="p-4 animate-fade-in" style={{ animationDelay: `${i * 40}ms` } as React.CSSProperties}>
               <div className="flex items-center justify-between mb-3">
                 <span className="font-mono text-lg font-black text-primary tracking-wider">{c.code}</span>
                 <Switch checked={c.is_active} onCheckedChange={() => toggleCouponActive(c.id, c.is_active)} />
               </div>
+              {/* Produto vinculado — msDev's */}
+              <div className="mb-3 p-2.5 rounded-lg bg-muted/20 border border-border/20">
+                <div className="flex items-center gap-2">
+                  <Package className="h-3 w-3 text-muted-foreground/50" />
+                  <span className="text-[11px] text-muted-foreground/70 font-medium truncate">{getProductName(c.product_id)}</span>
+                </div>
+              </div>
               <div className="space-y-2 text-[13px]">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground/60">Desconto</span>
-                  <span className="font-display font-bold text-foreground">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : `R$ ${Number(c.discount_value).toFixed(2)}`}</span>
+                  <span className="font-display font-bold text-foreground">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : fmt(Number(c.discount_value))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground/60">Usos</span>
                   <span className="font-bold text-foreground">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : " / ∞"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground/60 flex items-center gap-1">
+                    <TrendingDown className="h-3 w-3" /> Total descontos
+                  </span>
+                  <span className="font-display font-bold text-warning">{fmt(Number(c.total_discount_amount || 0))}</span>
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-border/30">
@@ -244,7 +326,7 @@ export default function Checkout() {
         </div>
       )}
 
-      {/* How to use */}
+      {/* How to use — msDev's */}
       <Panel className="border-primary/10 bg-gradient-to-br from-primary/[0.02] to-transparent">
         <h3 className="font-display font-bold mb-4 text-foreground text-[14px]">Como usar</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px] text-muted-foreground/70">
