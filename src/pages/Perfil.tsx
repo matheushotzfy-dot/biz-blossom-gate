@@ -147,12 +147,12 @@ export default function Perfil() {
         </GlowPanel>
 
         {/* Limites */}
-        <GlowPanel glow="info">
+        <GlowPanel glow="success">
           <SectionHeader icon={<Wallet className="h-4.5 w-4.5" />} title="Limites" />
           <div className="space-y-3.5 mt-5">
-            <InfoRow label="Limite diário PIX" value="R$ 50.000,00" cls="text-primary" />
-            <InfoRow label="Limite diário Saque" value="R$ 30.000,00" cls="text-info" />
-            <InfoRow label="Saques por dia" value="5 operações" cls="text-foreground" />
+            <InfoRow label="Limite diário PIX" value="Ilimitado" cls="text-success" />
+            <InfoRow label="Limite diário Saque" value="Ilimitado" cls="text-success" />
+            <InfoRow label="Saques por dia" value="Ilimitado" cls="text-success" />
           </div>
         </GlowPanel>
       </div>

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowDownToLine, Plus, Key, Clock, CheckCircle2, XCircle,
-  Rocket, PartyPopper, X, Wallet, TrendingUp, Shield,
+  Rocket, PartyPopper, X, Wallet, TrendingUp, Shield, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlowPanel } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
@@ -29,16 +29,16 @@ function SaqueKpi({ label, value, sub, icon: Icon, color, bg }: {
   label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string;
 }) {
   return (
-    <div className="panel-enterprise p-5 group">
+    <GlowPanel className="p-5">
       <div className="flex items-center justify-between mb-3">
-        <span className="kicker">{label}</span>
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border border-border/30", bg)}>
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/50">{label}</span>
+        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border border-border/20", bg)}>
           <Icon className={cn("h-[18px] w-[18px]", color)} />
         </div>
       </div>
       <p className="text-[22px] md:text-2xl font-display font-black text-foreground leading-none">{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
-    </div>
+      {sub && <p className="text-[11px] text-muted-foreground/50 mt-1.5 font-medium">{sub}</p>}
+    </GlowPanel>
   );
 }
 
@@ -106,52 +106,85 @@ export default function Saques() {
               <Plus className="h-4 w-4" /> Novo Saque
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent rounded-2xl pointer-events-none" />
-            <DialogHeader>
-              <DialogTitle className="font-display text-lg relative">Solicitar Saque</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-5 mt-2 relative">
+          <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent rounded-2xl pointer-events-none" />
+            {/* Header */}
+            <div className="relative px-6 pt-6 pb-4 border-b border-border/20">
+              <DialogHeader>
+                <DialogTitle className="font-display text-lg flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <ArrowDownToLine className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                  Solicitar Saque
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5 p-6 relative">
+              {/* Amount */}
               <div>
-                <Label className="kicker">Valor do saque (R$)</Label>
-                <Input type="number" step="0.01" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required className="mt-1.5 h-12 text-lg font-bold rounded-xl" />
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs text-muted-foreground/50">Taxa fixa de saque</p>
-                  <p className="text-xs font-bold text-warning">R$ 5,00</p>
+                <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Valor do saque (R$)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0,00"
+                  required
+                  className="mt-1.5 h-14 text-xl font-display font-black rounded-xl border-border/40"
+                />
+                <div className="flex items-center justify-between mt-2.5">
+                  <p className="text-[11px] text-muted-foreground/40">Taxa fixa de saque</p>
+                  <p className="text-[12px] font-bold text-warning">- R$ 5,00</p>
                 </div>
                 {amount && parseFloat(amount) > 5 && (
-                  <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/15">
+                  <div className="mt-3 p-4 rounded-xl bg-primary/5 border border-primary/15">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground/60">Você receberá</span>
-                      <span className="text-sm font-display font-black text-primary">{fmt(parseFloat(amount) - 5)}</span>
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-[12px] text-muted-foreground/60">Você receberá</span>
+                      </div>
+                      <span className="text-lg font-display font-black text-primary">{fmt(parseFloat(amount) - 5)}</span>
                     </div>
                   </div>
                 )}
               </div>
+
+              {/* PIX Key selector */}
               <div>
-                <Label className="kicker">Chave PIX</Label>
+                <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Chave PIX</Label>
                 {pixKeys.length > 0 ? (
                   <Select value={selectedPixKeyId || pixKeys[0]?.id} onValueChange={setSelectedPixKeyId}>
-                    <SelectTrigger className="mt-1.5 h-12 rounded-xl"><SelectValue placeholder="Selecione a chave PIX" /></SelectTrigger>
+                    <SelectTrigger className="mt-1.5 h-12 rounded-xl border-border/40">
+                      <SelectValue placeholder="Selecione a chave PIX" />
+                    </SelectTrigger>
                     <SelectContent>
                       {pixKeys.map((pk) => (
                         <SelectItem key={pk.id} value={pk.id}>
                           <span className="flex items-center gap-2">
                             <Key className="h-3 w-3 text-primary" />
-                            <span className="text-xs text-muted-foreground">{pixKeyTypeLabels[pk.key_type]}:</span>
-                            <span className="font-mono text-sm">{pk.key_value}</span>
+                            <span className="text-[11px] text-muted-foreground/60">{pixKeyTypeLabels[pk.key_type]}:</span>
+                            <span className="font-mono text-sm font-medium">{pk.key_value}</span>
                           </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <div className="mt-1.5 p-3 rounded-xl border border-destructive/20 bg-destructive/5">
-                    <p className="text-xs text-destructive font-semibold">⚠️ Cadastre uma chave PIX em Dados Bancários</p>
+                  <div className="mt-1.5 p-4 rounded-xl border border-destructive/20 bg-destructive/5">
+                    <p className="text-[12px] text-destructive font-semibold flex items-center gap-2">
+                      <XCircle className="h-3.5 w-3.5" /> Cadastre uma chave PIX em Dados Bancários
+                    </p>
                   </div>
                 )}
               </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-xl shadow-primary/15 text-sm" disabled={pixKeys.length === 0}>
+
+              <Button
+                type="submit"
+                className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-xl shadow-primary/15 text-sm"
+                disabled={pixKeys.length === 0}
+              >
                 <ArrowDownToLine className="h-4 w-4 mr-2" /> Solicitar Saque
               </Button>
             </form>
@@ -173,25 +206,29 @@ export default function Saques() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/40 bg-gradient-to-r from-muted/30 via-muted/10 to-muted/30">
+                <tr className="border-b border-border/30 bg-muted/20">
                   {["ID", "Valor", "Taxa", "Líquido", "Status", "Data"].map((h) => (
-                    <th key={h} className="text-left p-4 kicker">{h}</th>
+                    <th key={h} className="text-left p-4 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/50">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {withdrawals.length === 0 ? (
                   <tr><td colSpan={6}>
-                    <EmptyState icon={<Wallet className="h-7 w-7" />} title="Nenhum saque realizado" subtitle="Solicite seu primeiro saque" />
+                    <EmptyState icon={<Wallet className="h-8 w-8" />} title="Nenhum saque realizado" subtitle="Solicite seu primeiro saque" />
                   </td></tr>
                 ) : withdrawals.map((w, i) => (
-                  <tr key={w.id} className="border-b border-border/25 hover:bg-primary/[0.02] transition-all animate-fade-in" style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}>
-                    <td className="p-4 font-mono text-[11px] text-muted-foreground/50">{w.id.slice(0, 8)}</td>
+                  <tr
+                    key={w.id}
+                    className="border-b border-border/15 hover:bg-primary/[0.02] transition-all animate-fade-in"
+                    style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}
+                  >
+                    <td className="p-4 font-mono text-[11px] text-muted-foreground/40">{w.id.slice(0, 8)}</td>
                     <td className="p-4 font-display font-black text-foreground text-[15px]">{fmt(Number(w.amount))}</td>
                     <td className="p-4 text-warning font-semibold text-[13px]">- {fmt(Number(w.fee_amount))}</td>
                     <td className="p-4 text-primary font-display font-black text-[15px]">{fmt(Number(w.net_amount))}</td>
                     <td className="p-4"><StatusBadge status={w.status} /></td>
-                    <td className="p-4 text-muted-foreground/50 text-[12px] font-medium">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className="p-4 text-muted-foreground/40 text-[12px] font-medium">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -203,34 +240,36 @@ export default function Saques() {
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {withdrawals.length === 0 ? (
-          <EmptyState icon={<Wallet className="h-7 w-7" />} title="Nenhum saque" subtitle="Solicite seu primeiro saque" />
+          <div className="panel-enterprise">
+            <EmptyState icon={<Wallet className="h-8 w-8" />} title="Nenhum saque" subtitle="Solicite seu primeiro saque" />
+          </div>
         ) : withdrawals.map((w, i) => (
-          <div key={w.id} className="panel-enterprise-subtle p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
-            <div className="flex items-start justify-between mb-2.5">
+          <div key={w.id} className="panel-enterprise p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
+            <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-foreground font-display font-black text-xl">{fmt(Number(w.amount))}</p>
-                <p className="text-[11px] text-muted-foreground/40 font-mono mt-0.5">{w.id.slice(0, 12)}</p>
+                <p className="text-[11px] text-muted-foreground/30 font-mono mt-0.5">{w.id.slice(0, 12)}</p>
               </div>
               <StatusBadge status={w.status} />
             </div>
-            <div className="flex items-center justify-between pt-2.5 border-t border-border/20">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between pt-3 border-t border-border/15">
+              <div className="flex items-center gap-5">
                 <div>
-                  <p className="kicker">Taxa</p>
-                  <p className="text-warning font-semibold text-[12px]">- {fmt(Number(w.fee_amount))}</p>
+                  <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-bold">Taxa</p>
+                  <p className="text-warning font-semibold text-[12px] mt-0.5">- {fmt(Number(w.fee_amount))}</p>
                 </div>
                 <div>
-                  <p className="kicker">Líquido</p>
-                  <p className="text-primary font-display font-bold text-[14px]">{fmt(Number(w.net_amount))}</p>
+                  <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-bold">Líquido</p>
+                  <p className="text-primary font-display font-bold text-[14px] mt-0.5">{fmt(Number(w.net_amount))}</p>
                 </div>
               </div>
-              <span className="text-muted-foreground/40 text-[11px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</span>
+              <span className="text-muted-foreground/30 text-[11px]">{new Date(w.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Security info */}
+      {/* Security footer */}
       <div className="panel-enterprise-subtle p-4">
         <div className="flex items-center gap-3">
           <Shield className="h-4 w-4 text-primary/50 shrink-0" />
