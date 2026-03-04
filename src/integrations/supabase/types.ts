@@ -259,6 +259,8 @@ export type Database = {
           id: string
           is_active: boolean
           max_uses: number | null
+          product_id: string | null
+          total_discount_amount: number
           user_id: string
         }
         Insert: {
@@ -271,6 +273,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_uses?: number | null
+          product_id?: string | null
+          total_discount_amount?: number
           user_id: string
         }
         Update: {
@@ -283,9 +287,26 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_uses?: number | null
+          product_id?: string | null
+          total_discount_amount?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coupons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       courses: {
         Row: {

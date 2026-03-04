@@ -1,7 +1,19 @@
-import { useEffect, useState } from "react";
+/**
+ * Dados Bancários — Gestão de chaves PIX e contas bancárias
+ * @module DadosBancarios
+ * @version 3.2.0
+ * @author msDev's — Engenharia de Software
+ * @description Sistema de gestão financeira com validação rigorosa de chaves PIX,
+ *   autocomplete de bancos brasileiros e interface enterprise premium.
+ */
+
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Building2, Plus, Trash2, Key, Shield, Fingerprint, CreditCard, Landmark, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Building2, Plus, Trash2, Key, Shield, Fingerprint,
+  CreditCard, Landmark, CheckCircle2, AlertCircle, Search,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +23,9 @@ import { toast } from "sonner";
 import { PageShell, PageTitle, EmptyState, GlowPanel, SectionHeader } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import { searchBanks, type BrazilianBank } from "@/lib/brazilianBanks";
 
+/* ─── PIX Key types — msDev's ─── */
 const pixKeyTypes = [
   { value: "cpf", label: "CPF" },
   { value: "cnpj", label: "CNPJ" },
@@ -20,6 +34,7 @@ const pixKeyTypes = [
   { value: "aleatoria", label: "Chave Aleatória" },
 ];
 
+/* ─── Validation utils — msDev's ─── */
 function validateCPF(cpf: string): boolean {
   const nums = cpf.replace(/\D/g, "");
   if (nums.length !== 11 || /^(\d)\1+$/.test(nums)) return false;
@@ -117,8 +132,6 @@ function getPixIcon(type: string) {
     case "cpf":
     case "cnpj":
       return Fingerprint;
-    case "email":
-      return Key;
     default:
       return Key;
   }
@@ -126,11 +139,64 @@ function getPixIcon(type: string) {
 
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
 
+/* ─── BankAutocomplete Component — msDev's ─── */
+function BankAutocomplete({ value, onChange }: { value: { name: string; code: string }; onChange: (bank: { name: string; code: string }) => void }) {
+  const [query, setQuery] = useState(value.name ? `${value.code} - ${value.name}` : "");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const results = useMemo(() => searchBanks(query), [query]);
+
+  const handleSelect = (bank: BrazilianBank) => {
+    onChange({ name: bank.name, code: bank.code });
+    setQuery(`${bank.code} - ${bank.name}`);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <Label className="kicker">Banco</Label>
+      <div className="relative mt-1.5">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+        <Input
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setIsOpen(true); onChange({ name: "", code: "" }); }}
+          onFocus={() => setIsOpen(true)}
+          placeholder="Busque por nome ou código..."
+          className="pl-9 rounded-xl h-11"
+          autoComplete="off"
+        />
+      </div>
+      {isOpen && results.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-border/60 bg-card/95 backdrop-blur-xl shadow-xl">
+          {results.map((bank) => (
+            <button
+              key={bank.code}
+              type="button"
+              className="w-full text-left px-4 py-2.5 hover:bg-primary/5 transition-colors flex items-center gap-3 border-b border-border/10 last:border-0"
+              onClick={() => handleSelect(bank)}
+            >
+              <span className="text-[11px] font-mono text-primary font-bold w-8 shrink-0">{bank.code}</span>
+              <span className="text-[13px] text-foreground/80 font-medium truncate">{bank.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {isOpen && query && results.length === 0 && (
+        <div className="absolute z-50 w-full mt-1 rounded-xl border border-border/60 bg-card/95 backdrop-blur-xl shadow-xl p-4 text-center text-[12px] text-muted-foreground/50">
+          Nenhum banco encontrado
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Main Component — msDev's ─── */
 export default function DadosBancarios() {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState<Tables<"bank_accounts">[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
+  const [selectedBank, setSelectedBank] = useState({ name: "", code: "" });
+  const [form, setForm] = useState({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
   const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
   const [newPixType, setNewPixType] = useState("");
   const [newPixValue, setNewPixValue] = useState("");
@@ -151,14 +217,22 @@ export default function DadosBancarios() {
 
   useEffect(() => { loadAccounts(); loadPixKeys(); }, [user]);
 
+  /* ─── Bank Account CRUD — msDev's ─── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    const { error } = await supabase.from("bank_accounts").insert({ ...form, user_id: user.id });
+    if (!selectedBank.name) { toast.error("Selecione um banco"); return; }
+    const { error } = await supabase.from("bank_accounts").insert({
+      ...form,
+      bank_name: selectedBank.name,
+      bank_code: selectedBank.code,
+      user_id: user.id,
+    });
     if (error) { toast.error("Erro ao cadastrar"); return; }
     toast.success("Conta cadastrada!");
     setOpen(false);
-    setForm({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
+    setSelectedBank({ name: "", code: "" });
+    setForm({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
     loadAccounts();
   };
 
@@ -168,6 +242,7 @@ export default function DadosBancarios() {
     loadAccounts();
   };
 
+  /* ─── PIX Key CRUD — msDev's ─── */
   const handleAddPix = async () => {
     if (!user) return;
     if (!newPixType) { setPixError("Selecione o tipo da chave"); return; }
@@ -213,7 +288,7 @@ export default function DadosBancarios() {
     <PageShell>
       <PageTitle icon={<Landmark className="h-6 w-6" />} title="Dados Bancários" subtitle="Gerencie suas chaves PIX e contas bancárias" />
 
-      {/* ─── PIX KEYS SECTION ─── */}
+      {/* ─── PIX KEYS SECTION — msDev's ─── */}
       <GlowPanel>
         <div className="flex items-center justify-between mb-6">
           <SectionHeader icon={<Key className="h-4.5 w-4.5" />} title="Chaves PIX" subtitle="Até 3 chaves • Utilizadas para saques" />
@@ -223,17 +298,12 @@ export default function DadosBancarios() {
           </div>
         </div>
 
-        {/* Existing keys */}
         {pixKeys.length > 0 && (
           <div className="space-y-2.5 mb-6">
             {pixKeys.map((pk, i) => {
               const IconComp = getPixIcon(pk.key_type);
               return (
-                <div
-                  key={pk.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 bg-gradient-to-r from-muted/15 to-transparent hover:border-primary/20 transition-all animate-fade-in group"
-                  style={{ animationDelay: `${i * 50}ms` }}
-                >
+                <div key={pk.id} className="flex items-center justify-between p-4 rounded-xl border border-border/30 bg-gradient-to-r from-muted/15 to-transparent hover:border-primary/20 transition-all animate-fade-in group" style={{ animationDelay: `${i * 50}ms` }}>
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
                       <IconComp className="h-4.5 w-4.5 text-primary" />
@@ -246,12 +316,7 @@ export default function DadosBancarios() {
                       <p className="font-mono text-foreground text-[14px] mt-0.5 truncate font-medium">{pk.key_value}</p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive/30 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDeletePix(pk.id)}
-                  >
+                  <Button variant="ghost" size="icon" className="text-destructive/30 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDeletePix(pk.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -260,37 +325,22 @@ export default function DadosBancarios() {
           </div>
         )}
 
-        {/* Add new PIX key */}
         {pixKeys.length < 3 && (
           <div className="pt-5 border-t border-border/20">
             <p className="text-[11px] text-muted-foreground/50 font-medium mb-3">Adicionar nova chave</p>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-3">
               <div>
                 <Select value={newPixType} onValueChange={(v) => { setNewPixType(v); setNewPixValue(""); setPixError(null); }}>
-                  <SelectTrigger className="rounded-xl border-border/40 h-12">
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
+                  <SelectTrigger className="rounded-xl border-border/40 h-12"><SelectValue placeholder="Tipo" /></SelectTrigger>
                   <SelectContent>
-                    {pixKeyTypes.map(t => (
-                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                    ))}
+                    {pixKeyTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Input
-                  value={newPixValue}
-                  onChange={e => { setNewPixValue(formatPixInput(newPixType, e.target.value)); setPixError(null); }}
-                  placeholder={getPlaceholder(newPixType)}
-                  className="font-mono rounded-xl border-border/40 h-12 flex-1"
-                />
-                <Button
-                  onClick={handleAddPix}
-                  disabled={pixLoading}
-                  className="rounded-xl font-bold gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/15 h-12 px-5 shrink-0"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Adicionar</span>
+                <Input value={newPixValue} onChange={e => { setNewPixValue(formatPixInput(newPixType, e.target.value)); setPixError(null); }} placeholder={getPlaceholder(newPixType)} className="font-mono rounded-xl border-border/40 h-12 flex-1" />
+                <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl font-bold gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/15 h-12 px-5 shrink-0">
+                  <Plus className="h-4 w-4" /><span className="hidden sm:inline">Adicionar</span>
                 </Button>
               </div>
             </div>
@@ -304,10 +354,10 @@ export default function DadosBancarios() {
         )}
       </GlowPanel>
 
-      {/* ─── BANK ACCOUNTS SECTION ─── */}
+      {/* ─── BANK ACCOUNTS SECTION — msDev's ─── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <SectionHeader icon={<Building2 className="h-4.5 w-4.5" />} title="Contas Bancárias" subtitle="Cadastre suas contas para recebimento" />
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setSelectedBank({ name: "", code: "" }); setForm({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" }); } }}>
           <DialogTrigger asChild>
             <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
               <Plus className="h-4 w-4" /> Nova Conta
@@ -326,24 +376,17 @@ export default function DadosBancarios() {
               </DialogHeader>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4 relative p-6">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="kicker">Banco</Label>
-                  <Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required className="mt-1.5 rounded-xl h-11" />
-                </div>
-                <div>
-                  <Label className="kicker">Código</Label>
-                  <Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="001" className="mt-1.5 rounded-xl h-11" />
-                </div>
-              </div>
+              {/* Bank Autocomplete — msDev's */}
+              <BankAutocomplete value={selectedBank} onChange={setSelectedBank} />
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="kicker">Agência</Label>
-                  <Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+                  <Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required className="mt-1.5 rounded-xl h-11" placeholder="0001" />
                 </div>
                 <div>
                   <Label className="kicker">Conta</Label>
-                  <Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+                  <Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required className="mt-1.5 rounded-xl h-11" placeholder="12345-6" />
                 </div>
               </div>
               <div>
@@ -372,7 +415,6 @@ export default function DadosBancarios() {
         </Dialog>
       </div>
 
-      {/* Bank account cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accounts.length === 0 ? (
           <div className="panel-enterprise col-span-full">
@@ -390,16 +432,10 @@ export default function DadosBancarios() {
                   {acc.bank_code && <p className="text-[11px] text-muted-foreground/40 font-mono">Código {acc.bank_code}</p>}
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive/30 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleDelete(acc.id)}
-              >
+              <Button variant="ghost" size="icon" className="text-destructive/30 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDelete(acc.id)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border/15">
               <div>
                 <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-bold">Agência</p>
@@ -414,7 +450,6 @@ export default function DadosBancarios() {
                 <p className="text-foreground/80 text-[13px] font-bold capitalize mt-1">{acc.account_type === "corrente" ? "Corrente" : "Poupança"}</p>
               </div>
             </div>
-
             <div className="mt-3 pt-3 border-t border-border/10">
               <p className="text-muted-foreground/40 text-[12px]">{acc.holder_name} — <span className="font-mono">{acc.holder_document}</span></p>
             </div>
@@ -422,7 +457,7 @@ export default function DadosBancarios() {
         ))}
       </div>
 
-      {/* Security footer */}
+      {/* Security footer — msDev's */}
       <div className="panel-enterprise-subtle p-4">
         <div className="flex items-center gap-3">
           <Shield className="h-4 w-4 text-primary/50 shrink-0" />

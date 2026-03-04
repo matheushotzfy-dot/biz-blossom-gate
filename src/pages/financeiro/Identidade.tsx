@@ -1,15 +1,30 @@
+/**
+ * Identidade & KYC — Verificação de conta e dados pessoais
+ * @module Identidade
+ * @version 2.4.0
+ * @author msDev's — Engenharia de Software
+ * @description Gerenciamento de identidade com campos sensíveis bloqueados após cadastro,
+ *   exibição de chaves PIX e contas bancárias cadastradas em Dados Bancários,
+ *   e upload de documentos KYC com validação rigorosa de CPF/CNPJ.
+ */
+
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserCircle, Save, Shield, FileCheck, Key, CheckCircle2, Upload, Camera, Image, Loader2, Lock, Info, Fingerprint, Wallet, BadgeCheck } from "lucide-react";
+import {
+  UserCircle, Save, Shield, FileCheck, Key, CheckCircle2,
+  Upload, Camera, Image, Loader2, Lock, Info, Fingerprint,
+  Wallet, BadgeCheck, Building2, CreditCard, Edit3,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { PageShell, Panel, PageTitle } from "@/components/PageShell";
+import { PageShell, Panel, GlowPanel, PageTitle, SectionHeader } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 
+/* ─── Status Map ─── msDev's */
 const STATUS_MAP: Record<string, { label: string; cls: string; icon: string }> = {
   approved: { label: "Conta Aprovada", cls: "text-primary bg-primary/10 border-primary/15", icon: "✅" },
   pending_review: { label: "Em Análise", cls: "text-warning bg-warning/10 border-warning/15", icon: "⏳" },
@@ -17,7 +32,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; icon: string }> =
   blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "🚫" },
 };
 
-/* ─── CPF/CNPJ Utils ─── */
+/* ─── CPF/CNPJ formatting — msDev's ─── */
 function formatCPF(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 3) return digits;
@@ -35,71 +50,41 @@ function formatCNPJ(value: string): string {
   return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
 }
 
-function validateCPF(cpf: string): boolean {
-  const digits = cpf.replace(/\D/g, "");
-  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
-  let rest = (sum * 10) % 11;
-  if (rest === 10) rest = 0;
-  if (rest !== parseInt(digits[9])) return false;
-  sum = 0;
-  for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
-  rest = (sum * 10) % 11;
-  if (rest === 10) rest = 0;
-  return rest === parseInt(digits[10]);
-}
-
-function validateCNPJ(cnpj: string): boolean {
-  const digits = cnpj.replace(/\D/g, "");
-  if (digits.length !== 14 || /^(\d)\1{13}$/.test(digits)) return false;
-  const weights1 = [5,4,3,2,9,8,7,6,5,4,3,2];
-  const weights2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
-  let sum = 0;
-  for (let i = 0; i < 12; i++) sum += parseInt(digits[i]) * weights1[i];
-  let rest = sum % 11;
-  const d1 = rest < 2 ? 0 : 11 - rest;
-  if (parseInt(digits[12]) !== d1) return false;
-  sum = 0;
-  for (let i = 0; i < 13; i++) sum += parseInt(digits[i]) * weights2[i];
-  rest = sum % 11;
-  const d2 = rest < 2 ? 0 : 11 - rest;
-  return parseInt(digits[13]) === d2;
-}
-
 function formatDocument(value: string, type: string): string {
   return type === "cnpj" ? formatCNPJ(value) : formatCPF(value);
 }
 
+type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
+
+const pixKeyTypeLabels: Record<string, string> = {
+  cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Aleatória",
+};
+
 export default function Identidade() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
-  const [form, setForm] = useState({ full_name: "", email: "", phone: "", document_type: "cpf", document_number: "" });
-  const [pixForm, setPixForm] = useState({ pix_key_type: "cpf", pix_key: "" });
-  const [loading, setLoading] = useState(false);
-  const [pixLoading, setPixLoading] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const [saving, setSaving] = useState(false);
   const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null });
   const [uploading, setUploading] = useState<string | null>(null);
-  const [lockedFields, setLockedFields] = useState({ email: false, phone: false, document_number: false, document_type: false });
-  const [docError, setDocError] = useState<string | null>(null);
+  const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<Tables<"bank_accounts">[]>([]);
 
+  /* ─── Carregar dados — msDev's ─── */
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) {
-        setProfile(data);
-        const formattedDoc = data.document_number
-          ? formatDocument(data.document_number, data.document_type || "cpf")
-          : "";
-        setForm({ full_name: data.full_name || "", email: data.email || "", phone: data.phone || "", document_type: data.document_type || "cpf", document_number: formattedDoc });
-        setPixForm({ pix_key_type: data.pix_key_type || "cpf", pix_key: data.pix_key || "" });
-        setLockedFields({
-          email: !!data.email,
-          phone: !!data.phone,
-          document_number: !!data.document_number,
-          document_type: !!data.document_number,
-        });
+    const uid = user.id;
+    Promise.all([
+      supabase.from("profiles").select("*").eq("user_id", uid).single(),
+      supabase.from("pix_keys").select("*").eq("user_id", uid).order("created_at") as any,
+      supabase.from("bank_accounts").select("*").eq("user_id", uid).order("created_at"),
+    ]).then(([pRes, pkRes, baRes]) => {
+      if (pRes.data) {
+        setProfile(pRes.data);
+        setNickname(pRes.data.nickname || "");
       }
+      if (pkRes.data) setPixKeys(pkRes.data as PixKey[]);
+      if (baRes.data) setBankAccounts(baRes.data);
     });
     loadKycDocs();
   }, [user]);
@@ -128,84 +113,30 @@ export default function Identidade() {
     setUploading(null);
   };
 
-  const handleDocumentChange = (rawValue: string) => {
-    const formatted = formatDocument(rawValue, form.document_type);
-    setForm({ ...form, document_number: formatted });
-    
-    const digits = rawValue.replace(/\D/g, "");
-    if (form.document_type === "cpf" && digits.length === 11) {
-      setDocError(validateCPF(digits) ? null : "CPF inválido");
-    } else if (form.document_type === "cnpj" && digits.length === 14) {
-      setDocError(validateCNPJ(digits) ? null : "CNPJ inválido");
-    } else {
-      setDocError(null);
-    }
-  };
-
-  const handleDocTypeChange = (type: string) => {
-    setForm({ ...form, document_type: type, document_number: "" });
-    setDocError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveNickname = async () => {
     if (!user) return;
-
-    // Validate document before save
-    const digits = form.document_number.replace(/\D/g, "");
-    if (digits.length > 0) {
-      if (form.document_type === "cpf") {
-        if (digits.length !== 11) { toast.error("CPF deve ter 11 dígitos"); return; }
-        if (!validateCPF(digits)) { toast.error("CPF inválido. Verifique os números."); return; }
-      } else {
-        if (digits.length !== 14) { toast.error("CNPJ deve ter 14 dígitos"); return; }
-        if (!validateCNPJ(digits)) { toast.error("CNPJ inválido. Verifique os números."); return; }
-      }
-    }
-
-    setLoading(true);
-    const updateData: Record<string, string> = { full_name: form.full_name };
-    if (!lockedFields.email) updateData.email = form.email;
-    if (!lockedFields.phone) updateData.phone = form.phone;
-    if (!lockedFields.document_number) {
-      updateData.document_number = digits;
-      updateData.document_type = form.document_type;
-    }
-    const { error } = await supabase.from("profiles").update(updateData).eq("user_id", user.id);
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({ nickname }).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar");
-    else {
-      toast.success("Dados atualizados!");
-      setLockedFields({
-        email: !!form.email || lockedFields.email,
-        phone: !!form.phone || lockedFields.phone,
-        document_number: !!form.document_number || lockedFields.document_number,
-        document_type: !!form.document_number || lockedFields.document_type,
-      });
-    }
-    setLoading(false);
-  };
-
-  const handlePixSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setPixLoading(true);
-    const { error } = await supabase.from("profiles").update(pixForm).eq("user_id", user.id);
-    if (error) toast.error("Erro ao salvar chave PIX"); else toast.success("Chave PIX atualizada!");
-    setPixLoading(false);
+    else toast.success("Apelido atualizado!");
+    setSaving(false);
   };
 
   const status = STATUS_MAP[profile?.account_status || "pending_review"] || STATUS_MAP.pending_review;
   const completionSteps = [
-    { label: "Dados pessoais", done: !!(form.full_name && form.email) },
-    { label: "Documento", done: !!form.document_number },
-    { label: "Telefone", done: !!form.phone },
-    { label: "Chave PIX", done: !!pixForm.pix_key },
+    { label: "Dados pessoais", done: !!(profile?.full_name && profile?.email) },
+    { label: "Documento", done: !!profile?.document_number },
+    { label: "Telefone", done: !!profile?.phone },
+    { label: "Chave PIX", done: pixKeys.length > 0 },
     { label: "Doc. frente", done: !!kycDocs.front },
     { label: "Doc. verso", done: !!kycDocs.back },
     { label: "Selfie com doc", done: !!kycDocs.selfie },
   ];
   const completionPct = Math.round((completionSteps.filter((s) => s.done).length / completionSteps.length) * 100);
   const isApproved = profile?.account_status === "approved";
+  const formattedDoc = profile?.document_number
+    ? formatDocument(profile.document_number, profile.document_type || "cpf")
+    : "Não informado";
 
   return (
     <PageShell>
@@ -227,7 +158,7 @@ export default function Identidade() {
         </div>
       )}
 
-      {/* Top cards */}
+      {/* Top cards — msDev's */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Status */}
         <Panel>
@@ -308,105 +239,120 @@ export default function Identidade() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Personal Data */}
+        {/* ─── DADOS PESSOAIS (SOMENTE LEITURA + NICKNAME EDITÁVEL) ─── msDev's */}
         <Panel>
           <div className="flex items-center gap-2 mb-5">
             <UserCircle className="h-4 w-4 text-primary" />
             <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Dados Pessoais</h3>
           </div>
-          {lockedFields.document_number && (
-            <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-info/5 border border-info/15 text-info">
-              <Info className="h-3.5 w-3.5 shrink-0" />
-              <p className="text-[11px] font-medium">Campos sensíveis bloqueados após envio. Contate o suporte para correções.</p>
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Nome completo</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-11 rounded-xl" />
+
+          <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-info/5 border border-info/15 text-info">
+            <Lock className="h-3.5 w-3.5 shrink-0" />
+            <p className="text-[11px] font-medium">Dados cadastrados no registro. Apenas o apelido pode ser alterado. Contate o suporte para correções.</p>
+          </div>
+
+          <div className="space-y-4">
+            {/* Locked fields */}
+            <LockedField label="Nome completo" value={profile?.full_name || "—"} />
+            <div className="grid grid-cols-2 gap-3">
+              <LockedField label="E-mail" value={profile?.email || "—"} />
+              <LockedField label="Telefone" value={profile?.phone || "—"} />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-1">
-                  E-mail {lockedFields.email && <Lock className="h-2.5 w-2.5" />}
-                </Label>
-                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-11 rounded-xl" type="email" disabled={lockedFields.email} />
-              </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-1">
-                  Telefone {lockedFields.phone && <Lock className="h-2.5 w-2.5" />}
-                </Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-11 rounded-xl" disabled={lockedFields.phone} />
-              </div>
+              <LockedField label={profile?.document_type === "cnpj" ? "CNPJ" : "CPF"} value={formattedDoc} />
+              <LockedField label="Tipo Doc." value={(profile?.document_type || "cpf").toUpperCase()} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-1">
-                  Tipo Doc. {lockedFields.document_type && <Lock className="h-2.5 w-2.5" />}
-                </Label>
-                <Select value={form.document_type} onValueChange={handleDocTypeChange} disabled={lockedFields.document_type}>
-                  <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-1">
-                  {form.document_type === "cpf" ? "CPF" : "CNPJ"} {lockedFields.document_number && <Lock className="h-2.5 w-2.5" />}
-                </Label>
+
+            {/* Editable nickname */}
+            <div className="pt-4 border-t border-border/20">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-1">
+                <Edit3 className="h-2.5 w-2.5" /> Apelido (editável)
+              </Label>
+              <div className="flex gap-2 mt-1.5">
                 <Input
-                  value={form.document_number}
-                  onChange={(e) => handleDocumentChange(e.target.value)}
-                  className={`mt-1.5 h-11 rounded-xl ${docError ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                  disabled={lockedFields.document_number}
-                  placeholder={form.document_type === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
-                  maxLength={form.document_type === "cpf" ? 14 : 18}
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="h-11 rounded-xl flex-1"
+                  placeholder="Como quer ser chamado?"
                 />
-                {docError && (
-                  <p className="text-[10px] text-destructive mt-1 font-medium">{docError}</p>
-                )}
+                <Button
+                  onClick={handleSaveNickname}
+                  className="rounded-xl font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15 h-11 px-5 shrink-0"
+                  disabled={saving}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-            <Button type="submit" className="w-full h-11 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15" disabled={loading || !!docError}>
-              <Save className="h-4 w-4 mr-2" />{loading ? "Salvando..." : "Salvar dados"}
-            </Button>
-          </form>
+          </div>
         </Panel>
 
         <div className="space-y-3">
-          {/* PIX Key */}
+          {/* ─── CHAVES PIX CADASTRADAS (vindas de Dados Bancários) ─── msDev's */}
           <Panel>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Wallet className="h-4 w-4 text-primary" />
-                <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Chave PIX</h3>
+                <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Chaves PIX</h3>
               </div>
-              {pixForm.pix_key && <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-primary bg-primary/10">Configurada</span>}
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-primary bg-primary/10">{pixKeys.length} cadastrada{pixKeys.length !== 1 ? "s" : ""}</span>
             </div>
-            <form onSubmit={handlePixSubmit} className="space-y-3">
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Tipo da chave</Label>
-                <Select value={pixForm.pix_key_type} onValueChange={(v) => setPixForm({ ...pixForm, pix_key_type: v })}>
-                  <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cpf">CPF</SelectItem>
-                    <SelectItem value="cnpj">CNPJ</SelectItem>
-                    <SelectItem value="email">E-mail</SelectItem>
-                    <SelectItem value="phone">Telefone</SelectItem>
-                    <SelectItem value="random">Aleatória</SelectItem>
-                  </SelectContent>
-                </Select>
+            {pixKeys.length === 0 ? (
+              <div className="text-center py-6">
+                <Wallet className="h-8 w-8 mx-auto mb-2 text-muted-foreground/20" />
+                <p className="text-[12px] text-muted-foreground/50">Nenhuma chave cadastrada</p>
+                <p className="text-[10px] text-muted-foreground/30 mt-1">Cadastre em Financeiro → Dados Bancários</p>
               </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Chave PIX</Label>
-                <Input value={pixForm.pix_key} onChange={(e) => setPixForm({ ...pixForm, pix_key: e.target.value })} className="mt-1.5 h-11 rounded-xl" placeholder="Insira sua chave PIX" />
+            ) : (
+              <div className="space-y-2">
+                {pixKeys.map((pk) => (
+                  <div key={pk.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/30 bg-muted/10">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                      <Fingerprint className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-primary/60 font-bold uppercase tracking-wider">{pixKeyTypeLabels[pk.key_type] || pk.key_type}</p>
+                      <p className="font-mono text-[13px] text-foreground/80 truncate font-medium">{pk.key_value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <Button type="submit" variant="outline" className="w-full h-11 rounded-xl text-[13px] font-bold border-primary/20 hover:bg-primary/5" disabled={pixLoading}>
-                <Save className="h-4 w-4 mr-2" />{pixLoading ? "Salvando..." : "Salvar PIX"}
-              </Button>
-            </form>
+            )}
           </Panel>
 
-          {/* KYC Documents */}
+          {/* ─── CONTAS BANCÁRIAS CADASTRADAS ─── msDev's */}
+          <Panel>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-info" />
+                <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Contas Bancárias</h3>
+              </div>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-info bg-info/10">{bankAccounts.length} cadastrada{bankAccounts.length !== 1 ? "s" : ""}</span>
+            </div>
+            {bankAccounts.length === 0 ? (
+              <div className="text-center py-6">
+                <Building2 className="h-8 w-8 mx-auto mb-2 text-muted-foreground/20" />
+                <p className="text-[12px] text-muted-foreground/50">Nenhuma conta cadastrada</p>
+                <p className="text-[10px] text-muted-foreground/30 mt-1">Cadastre em Financeiro → Dados Bancários</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {bankAccounts.map((acc) => (
+                  <div key={acc.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/30 bg-muted/10">
+                    <div className="h-8 w-8 rounded-lg bg-info/10 border border-info/15 flex items-center justify-center shrink-0">
+                      <CreditCard className="h-3.5 w-3.5 text-info" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-foreground/80">{acc.bank_name}</p>
+                      <p className="text-[10px] text-muted-foreground/50 font-mono">Ag. {acc.agency} • Cc. {acc.account_number}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Panel>
+
+          {/* ─── KYC Documents ─── msDev's */}
           <Panel>
             <div className="flex items-center gap-2 mb-4">
               <FileCheck className="h-4 w-4 text-primary" />
@@ -431,22 +377,41 @@ export default function Identidade() {
   );
 }
 
-function DocSlot({ type, label, icon, preview, uploading, onUpload, locked }: { type: string; label: string; icon: React.ReactNode; preview: string | null; uploading: boolean; onUpload: (file: File) => void; locked: boolean }) {
+/* ─── Componentes auxiliares — msDev's ─── */
+
+function LockedField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-1">
+        <Lock className="h-2.5 w-2.5" /> {label}
+      </Label>
+      <div className="mt-1.5 h-11 rounded-xl border border-border/40 bg-muted/20 flex items-center px-3 text-[14px] text-foreground/70 font-medium">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function DocSlot({ type, label, icon, preview, uploading, onUpload, locked }: {
+  type: string; label: string; icon: React.ReactNode; preview: string | null;
+  uploading: boolean; onUpload: (file: File) => void; locked: boolean;
+}) {
   const ref = useRef<HTMLInputElement>(null);
   const canUpload = !locked && !uploading;
   return (
     <div
       onClick={() => canUpload && ref.current?.click()}
-      className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all border ${
+      className={cn(
+        "flex items-center gap-3 p-3.5 rounded-2xl transition-all border",
         locked
           ? "border-primary/20 bg-primary/[0.03] cursor-default"
           : preview
           ? "border-primary/20 bg-primary/[0.03] cursor-pointer hover:bg-primary/[0.06]"
           : "border-border bg-muted/20 cursor-pointer hover:border-primary/20 hover:bg-muted/30"
-      }`}
+      )}
     >
       <input ref={ref} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
-      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${preview ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground"}`}>
+      <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", preview ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground")}>
         {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : preview ? <CheckCircle2 className="h-5 w-5" /> : icon}
       </div>
       <div className="flex-1">
@@ -455,7 +420,7 @@ function DocSlot({ type, label, icon, preview, uploading, onUpload, locked }: { 
           {locked ? "Enviado ✓ — bloqueado" : preview ? "Enviado ✓" : "Clique para enviar"}
         </p>
       </div>
-      {locked ? <Lock className="h-4 w-4 shrink-0 text-muted-foreground/40" /> : <Upload className={`h-4 w-4 shrink-0 ${preview ? "text-primary" : "text-muted-foreground/30"}`} />}
+      {locked ? <Lock className="h-4 w-4 shrink-0 text-muted-foreground/40" /> : <Upload className={cn("h-4 w-4 shrink-0", preview ? "text-primary" : "text-muted-foreground/30")} />}
     </div>
   );
 }
