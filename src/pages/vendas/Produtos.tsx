@@ -274,8 +274,10 @@ export default function Produtos() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" side="top" className="rounded-xl p-1.5 min-w-[160px]">
                       {p.checkout_url && (
-                        <DropdownMenuItem onClick={() => window.open(p.checkout_url!, "_blank")} className="gap-2 rounded-lg cursor-pointer">
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 rounded-lg cursor-pointer">
                           <Eye className="h-3.5 w-3.5" /> Ver checkout
+                        </DropdownMenuItem>
+                      )}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-2 rounded-lg cursor-pointer text-destructive focus:text-destructive">
