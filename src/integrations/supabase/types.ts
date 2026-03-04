@@ -83,6 +83,66 @@ export type Database = {
         }
         Relationships: []
       }
+      app_integrations: {
+        Row: {
+          api_key: string | null
+          api_url: string | null
+          app_name: string
+          config: Json
+          created_at: string
+          events: Json
+          id: string
+          is_active: boolean
+          product_id: string | null
+          updated_at: string
+          user_id: string
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          api_url?: string | null
+          app_name: string
+          config?: Json
+          created_at?: string
+          events?: Json
+          id?: string
+          is_active?: boolean
+          product_id?: string | null
+          updated_at?: string
+          user_id: string
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          api_url?: string | null
+          app_name?: string
+          config?: Json
+          created_at?: string
+          events?: Json
+          id?: string
+          is_active?: boolean
+          product_id?: string | null
+          updated_at?: string
+          user_id?: string
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_integrations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_integrations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
