@@ -277,7 +277,7 @@ export default function Produtos() {
                         <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 rounded-lg cursor-pointer">
                           <Eye className="h-3.5 w-3.5" /> Ver checkout
                         </DropdownMenuItem>
-                      )
+                      )}
                       <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-2 rounded-lg cursor-pointer text-destructive focus:text-destructive">
                         <Trash2 className="h-3.5 w-3.5" /> Excluir
                       </DropdownMenuItem>
