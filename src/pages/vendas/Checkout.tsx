@@ -34,14 +34,16 @@ export default function Checkout() {
 
   useEffect(() => { load(); }, [user?.id]);
 
+  const getSlug = (url: string) => url.split("/").pop()!;
+  const getLocalLink = (url: string) => `${window.location.origin}/pay/${getSlug(url)}`;
+
   const copyLink = (id: string, url: string) => {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(getLocalLink(url));
     toast.success("Link copiado!");
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
-  const getSlug = (url: string) => url.split("/").pop()!;
-  const openCheckout = (url: string) => window.open(`/pay/${getSlug(url)}`, "_blank");
+  const openCheckout = (url: string) => window.open(getLocalLink(url), "_blank");
 
   const getPaymentMethods = (p: Tables<"products">) => {
     const methods: string[] = [];
