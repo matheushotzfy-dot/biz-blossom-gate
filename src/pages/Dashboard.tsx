@@ -283,7 +283,7 @@ export default function Dashboard() {
     setTimeout(() => setFireEffect(false), 3000);
   }, [scaleModeUnlocked]);
 
-  const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Seller";
+  const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
     <div className="space-y-4 md:space-y-6 relative">
