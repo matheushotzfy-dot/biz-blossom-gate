@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Puzzle, Check, Trash2, Plus, Power, PowerOff, Settings2, Link2 } from "lucide-react";
+import { Puzzle, Settings2, Trash2 } from "lucide-react";
 import { PageShell, PageTitle, GlowPanel, SectionHeader } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,18 @@ import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 
+// Logo imports
+import utmifyLogo from "@/assets/apps/utmify.png";
+import notazzLogo from "@/assets/apps/notazz.svg";
+import themembersLogo from "@/assets/apps/themembers.png";
+import spedyLogo from "@/assets/apps/spedy.png";
+import astronLogo from "@/assets/apps/astron_members.png";
+import memberkitLogo from "@/assets/apps/memberkit.png";
+import smsfunnelLogo from "@/assets/apps/smsfunnel.png";
+import voxuyLogo from "@/assets/apps/voxuy.png";
+import cademiLogo from "@/assets/apps/cademi.png";
+import webhooksLogo from "@/assets/apps/webhooks.png";
+
 /* ─── App Definitions ─── */
 interface AppDef {
   id: string;
@@ -22,9 +34,9 @@ interface AppDef {
   color: string;
   bg: string;
   icon: string;
+  logo?: string;
   fields: AppField[];
   events: string[];
-  helpUrl?: string;
   helpText?: string;
 }
 
@@ -37,23 +49,19 @@ interface AppField {
   help?: string;
 }
 
-const COMMON_EVENTS = [
-  "Purchase", "InitiateCheckout", "PageView", "Lead",
-  "PixGenerated", "BoletoGenerated", "Refund", "Chargeback",
-];
-
 const APPS: AppDef[] = [
   {
     id: "utmify", name: "UTMify", desc: "Rastreamento UTM avançado",
-    color: "text-blue-500", bg: "from-blue-600/15 to-blue-600/5", icon: "U",
+    color: "text-blue-500", bg: "from-blue-600/15 to-blue-600/5", icon: "U", logo: utmifyLogo,
     fields: [
       { key: "api_key", label: "Token da UTMify", placeholder: "Cole seu token aqui", type: "api_key", required: true, help: "UTMify → Configurações → API → Token" },
     ],
     events: ["Purchase", "InitiateCheckout", "PageView", "AddToCart", "ViewContent", "Lead", "CompleteRegistration", "AddPaymentInfo", "GenerateLead", "BoletoGenerated", "PixGenerated", "Refund", "Chargeback"],
+    helpText: "A UTMify rastreia automaticamente a origem das suas conversões via parâmetros UTM.",
   },
   {
     id: "notazz", name: "Notazz", desc: "Emissão automática de notas fiscais",
-    color: "text-cyan-400", bg: "from-cyan-500/15 to-cyan-500/5", icon: "N",
+    color: "text-cyan-400", bg: "from-cyan-500/15 to-cyan-500/5", icon: "N", logo: notazzLogo,
     fields: [
       { key: "api_key", label: "API Key da Notazz", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Notazz → Configurações → Integrações → API Key" },
     ],
@@ -62,7 +70,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "themembers", name: "TheMembers", desc: "Plataforma de área de membros",
-    color: "text-white", bg: "from-white/10 to-white/5", icon: "T",
+    color: "text-white", bg: "from-white/10 to-white/5", icon: "T", logo: themembersLogo,
     fields: [
       { key: "api_key", label: "API Key TheMembers", placeholder: "Cole sua API key", type: "api_key", required: true, help: "TheMembers → Integrações → API → Chave de API" },
       { key: "api_url", label: "URL da API (opcional)", placeholder: "https://api.themembers.com.br", type: "api_url", required: false },
@@ -82,7 +90,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "spedy", name: "Spedy", desc: "Logística e envios automatizados",
-    color: "text-pink-400", bg: "from-pink-500/15 to-pink-500/5", icon: "S",
+    color: "text-pink-400", bg: "from-pink-500/15 to-pink-500/5", icon: "S", logo: spedyLogo,
     fields: [
       { key: "api_key", label: "Token da Spedy", placeholder: "Cole seu token", type: "api_key", required: true, help: "Spedy → Configurações → API → Token de Integração" },
     ],
@@ -91,7 +99,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "astron", name: "Astron Members", desc: "Área de membros premium",
-    color: "text-red-400", bg: "from-red-500/15 to-red-500/5", icon: "★",
+    color: "text-red-400", bg: "from-red-500/15 to-red-500/5", icon: "★", logo: astronLogo,
     fields: [
       { key: "api_key", label: "API Key Astron", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Astron → Configurações → Integrações → API Key" },
     ],
@@ -100,7 +108,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "memberkit", name: "MemberKit", desc: "Gestão completa de membros",
-    color: "text-emerald-400", bg: "from-emerald-500/15 to-emerald-500/5", icon: "M",
+    color: "text-violet-400", bg: "from-violet-500/15 to-violet-500/5", icon: "M", logo: memberkitLogo,
     fields: [
       { key: "api_key", label: "API Key MemberKit", placeholder: "Cole sua API key", type: "api_key", required: true, help: "MemberKit → Configurações → API → Chave da API" },
     ],
@@ -109,7 +117,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "smsfunnel", name: "SMSFunnel", desc: "Automação de SMS marketing",
-    color: "text-violet-400", bg: "from-violet-500/15 to-violet-500/5", icon: "✉",
+    color: "text-violet-400", bg: "from-violet-500/15 to-violet-500/5", icon: "✉", logo: smsfunnelLogo,
     fields: [
       { key: "api_key", label: "Token SMSFunnel", placeholder: "Cole seu token", type: "api_key", required: true, help: "SMSFunnel → Configurações → API → Token" },
     ],
@@ -118,7 +126,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "voxuy", name: "Voxuy", desc: "Chatbot e automação WhatsApp",
-    color: "text-sky-400", bg: "from-sky-500/15 to-sky-500/5", icon: "V",
+    color: "text-sky-400", bg: "from-sky-500/15 to-sky-500/5", icon: "V", logo: voxuyLogo,
     fields: [
       { key: "api_key", label: "API Key Voxuy", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Voxuy → Configurações → API → Chave de Integração" },
     ],
@@ -127,7 +135,7 @@ const APPS: AppDef[] = [
   },
   {
     id: "cademi", name: "Cademi", desc: "Plataforma de cursos online",
-    color: "text-rose-400", bg: "from-rose-500/15 to-rose-500/5", icon: "C",
+    color: "text-rose-400", bg: "from-rose-500/15 to-rose-500/5", icon: "C", logo: cademiLogo,
     fields: [
       { key: "api_key", label: "API Key Cademi", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Cademi → Integrações → API → Chave de API" },
     ],
@@ -135,8 +143,19 @@ const APPS: AppDef[] = [
     helpText: "Libera/revoga acesso dos alunos automaticamente na plataforma Cademi.",
   },
   {
+    id: "zapi", name: "Z-API", desc: "WhatsApp Business via API REST",
+    color: "text-green-400", bg: "from-green-500/15 to-green-500/5", icon: "Z",
+    fields: [
+      { key: "api_key", label: "Instance Token", placeholder: "Cole o token da instância", type: "api_key", required: true, help: "Z-API → Painel → Sua Instância → Token" },
+      { key: "api_url", label: "Instance ID", placeholder: "Cole o ID da instância", type: "api_url", required: true, help: "Z-API → Painel → Sua Instância → ID" },
+      { key: "webhook_url", label: "Client-Token (Segurança)", placeholder: "Cole seu Client-Token", type: "webhook_url", required: false, help: "Z-API → Segurança → Token da conta (opcional)" },
+    ],
+    events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "BoletoGenerated", "Refund", "Chargeback"],
+    helpText: "Envia mensagens automáticas pelo WhatsApp via Z-API. API REST: https://api.z-api.io/instances/{ID}/token/{TOKEN}/send-text",
+  },
+  {
     id: "webhooks", name: "Webhooks", desc: "Integre com qualquer sistema",
-    color: "text-slate-400", bg: "from-slate-500/15 to-slate-500/5", icon: "⚡",
+    color: "text-slate-400", bg: "from-slate-500/15 to-slate-500/5", icon: "⚡", logo: webhooksLogo,
     fields: [],
     events: [],
     helpText: "Gerencie webhooks customizados na aba dedicada.",
@@ -176,7 +195,6 @@ export default function Apps() {
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Form state
   const [formProductId, setFormProductId] = useState("");
   const [formFields, setFormFields] = useState<Record<string, string>>({});
   const [formEventMode, setFormEventMode] = useState<"all" | "custom">("all");
@@ -198,10 +216,7 @@ export default function Apps() {
   };
 
   const openDialog = (app: AppDef, existing?: AppIntegration) => {
-    if (app.id === "webhooks") {
-      navigate("/vendas/webhooks");
-      return;
-    }
+    if (app.id === "webhooks") { navigate("/vendas/webhooks"); return; }
     setDialogApp(app);
     if (existing) {
       setEditId(existing.id);
@@ -227,24 +242,14 @@ export default function Apps() {
     }
   };
 
-  const closeDialog = () => {
-    setDialogApp(null);
-    setEditId(null);
-  };
+  const closeDialog = () => { setDialogApp(null); setEditId(null); };
 
   const handleSave = async () => {
     if (!user?.id || !dialogApp) return;
-    const requiredFields = dialogApp.fields.filter(f => f.required);
-    for (const f of requiredFields) {
-      if (!formFields[f.key]?.trim()) {
-        toast.error(`Preencha: ${f.label}`);
-        return;
-      }
+    for (const f of dialogApp.fields.filter(f => f.required)) {
+      if (!formFields[f.key]?.trim()) { toast.error(`Preencha: ${f.label}`); return; }
     }
-    if (!formProductId && dialogApp.events.length > 0) {
-      toast.error("Selecione um produto");
-      return;
-    }
+    if (!formProductId && dialogApp.events.length > 0) { toast.error("Selecione um produto"); return; }
 
     setSaving(true);
     const events = formEventMode === "all" ? dialogApp.events : formSelectedEvents;
@@ -265,16 +270,10 @@ export default function Apps() {
       const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId);
       error = e;
     } else {
-      // Also save to product_pixels for UTMify (backward compat)
       if (dialogApp.id === "utmify" && formFields["api_key"]) {
         await supabase.from("product_pixels").insert({
-          user_id: user.id,
-          product_id: formProductId,
-          platform: "utmify",
-          pixel_id: formFields["api_key"],
-          api_token: formFields["api_key"],
-          events,
-          is_active: true,
+          user_id: user.id, product_id: formProductId, platform: "utmify",
+          pixel_id: formFields["api_key"], api_token: formFields["api_key"], events, is_active: true,
         });
       }
       const { error: e } = await supabase.from("app_integrations").insert(payload);
@@ -282,13 +281,8 @@ export default function Apps() {
     }
 
     setSaving(false);
-    if (error) {
-      toast.error("Erro ao salvar integração");
-    } else {
-      toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`);
-      closeDialog();
-      loadData();
-    }
+    if (error) { toast.error("Erro ao salvar integração"); }
+    else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`); closeDialog(); loadData(); }
   };
 
   const toggleActive = async (int_: AppIntegration) => {
@@ -303,20 +297,31 @@ export default function Apps() {
   };
 
   const toggleEvent = (event: string) => {
-    setFormSelectedEvents((prev) =>
-      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]
-    );
+    setFormSelectedEvents(prev => prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event]);
   };
 
-  const getAppIntegrations = (appId: string) => integrations.filter(i => i.app_name === appId);
   const hasIntegration = (appId: string) => integrations.some(i => i.app_name === appId);
   const getProductName = (id: string | null) => products.find(p => p.id === id)?.name || "—";
+
+  const AppLogo = ({ app, size = "h-10 w-10" }: { app: AppDef; size?: string }) => {
+    if (app.logo) {
+      return (
+        <div className={`${size} rounded-xl bg-gradient-to-br ${app.bg} border border-border/20 flex items-center justify-center overflow-hidden p-1.5`}>
+          <img src={app.logo} alt={app.name} className="w-full h-full object-contain" />
+        </div>
+      );
+    }
+    return (
+      <div className={`${size} rounded-xl bg-gradient-to-br ${app.bg} border border-border/20 flex items-center justify-center`}>
+        <span className={`text-base font-black ${app.color}`}>{app.icon}</span>
+      </div>
+    );
+  };
 
   return (
     <PageShell>
       <PageTitle icon={<Puzzle className="h-6 w-6" />} title="Apps" subtitle="Integre aplicativos ao seu ecossistema" />
 
-      {/* ─── App Grid ─── */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {APPS.map(app => {
           const active = hasIntegration(app.id);
@@ -329,14 +334,11 @@ export default function Apps() {
               {active && (
                 <div className="absolute top-3 left-3">
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/25 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-primary">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    Integrado
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Integrado
                   </span>
                 </div>
               )}
-              <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${app.bg} border border-border/20 flex items-center justify-center ${active ? "mt-4" : ""}`}>
-                <span className={`text-base font-black ${app.color}`}>{app.icon}</span>
-              </div>
+              <AppLogo app={app} size={active ? "h-10 w-10 mt-4" : "h-10 w-10"} />
               <h3 className={`text-sm font-black ${app.color} mt-3`}>{app.name}</h3>
               <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">{app.desc}</p>
               <div className="mt-3 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">
@@ -350,11 +352,7 @@ export default function Apps() {
       {/* ─── Active Integrations ─── */}
       {integrations.length > 0 && (
         <div className="pt-2">
-          <SectionHeader
-            icon={<Settings2 className="h-4.5 w-4.5" />}
-            title="Integrações Ativas"
-            subtitle="Gerencie suas integrações configuradas"
-          />
+          <SectionHeader icon={<Settings2 className="h-4.5 w-4.5" />} title="Integrações Ativas" subtitle="Gerencie suas integrações configuradas" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
             {integrations.map(int_ => {
               const appDef = APPS.find(a => a.id === int_.app_name);
@@ -363,9 +361,7 @@ export default function Apps() {
                 <GlowPanel key={int_.id} className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${appDef.bg} flex items-center justify-center`}>
-                        <span className={`text-xs font-black ${appDef.color}`}>{appDef.icon}</span>
-                      </div>
+                      <AppLogo app={appDef} size="h-8 w-8" />
                       <div>
                         <span className="font-display font-bold text-[13px] text-foreground">{appDef.name}</span>
                         <p className="text-[10px] text-muted-foreground">{getProductName(int_.product_id)}</p>
@@ -396,15 +392,13 @@ export default function Apps() {
         </div>
       )}
 
-      {/* ─── Generic Integration Dialog ─── */}
+      {/* ─── Dialog ─── */}
       {dialogApp && dialogApp.id !== "webhooks" && (
         <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
           <DialogContent className="max-w-lg rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3 text-xl font-display font-black">
-                <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${dialogApp.bg} flex items-center justify-center`}>
-                  <span className={`text-lg font-black ${dialogApp.color}`}>{dialogApp.icon}</span>
-                </div>
+                <AppLogo app={dialogApp} />
                 {editId ? `Editar ${dialogApp.name}` : `Integrar ${dialogApp.name}`}
               </DialogTitle>
             </DialogHeader>
@@ -416,22 +410,18 @@ export default function Apps() {
                 </div>
               )}
 
-              {/* Product selection */}
               {dialogApp.events.length > 0 && (
                 <div className="space-y-2">
                   <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Produto *</Label>
                   <Select value={formProductId} onValueChange={setFormProductId}>
                     <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
                     <SelectContent>
-                      {products.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
+                      {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               )}
 
-              {/* Dynamic fields */}
               {dialogApp.fields.map(field => (
                 <div key={field.key} className="space-y-2">
                   <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">
@@ -443,50 +433,26 @@ export default function Apps() {
                     onChange={(e) => setFormFields({ ...formFields, [field.key]: e.target.value })}
                     className="rounded-xl font-mono text-xs"
                   />
-                  {field.help && (
-                    <p className="text-[10px] text-muted-foreground/60">{field.help}</p>
-                  )}
+                  {field.help && <p className="text-[10px] text-muted-foreground/60">{field.help}</p>}
                 </div>
               ))}
 
-              {/* Events */}
               {dialogApp.events.length > 0 && (
                 <div className="space-y-3">
                   <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Eventos</Label>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => setFormEventMode("all")}
-                      className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
-                        formEventMode === "all"
-                          ? "border-primary/40 bg-primary/10 text-primary"
-                          : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                      }`}
-                    >
+                    <button onClick={() => setFormEventMode("all")} className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${formEventMode === "all" ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"}`}>
                       Todos os eventos
                     </button>
-                    <button
-                      onClick={() => setFormEventMode("custom")}
-                      className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
-                        formEventMode === "custom"
-                          ? "border-primary/40 bg-primary/10 text-primary"
-                          : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                      }`}
-                    >
+                    <button onClick={() => setFormEventMode("custom")} className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${formEventMode === "custom" ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"}`}>
                       Personalizado
                     </button>
                   </div>
-
                   {formEventMode === "custom" && (
                     <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto rounded-xl border border-border/60 p-3 bg-muted/20">
-                      {dialogApp.events.map((event) => (
-                        <label
-                          key={event}
-                          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs cursor-pointer hover:bg-muted/40 transition-colors"
-                        >
-                          <Checkbox
-                            checked={formSelectedEvents.includes(event)}
-                            onCheckedChange={() => toggleEvent(event)}
-                          />
+                      {dialogApp.events.map(event => (
+                        <label key={event} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs cursor-pointer hover:bg-muted/40 transition-colors">
+                          <Checkbox checked={formSelectedEvents.includes(event)} onCheckedChange={() => toggleEvent(event)} />
                           <span className="font-medium text-foreground">{event}</span>
                         </label>
                       ))}
@@ -495,11 +461,7 @@ export default function Apps() {
                 </div>
               )}
 
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full h-11 rounded-xl font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15"
-              >
+              <Button onClick={handleSave} disabled={saving} className="w-full h-11 rounded-xl font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15">
                 {saving ? "Salvando..." : editId ? "Salvar Alterações" : "Ativar Integração"}
               </Button>
             </div>
