@@ -134,83 +134,78 @@ export default function Checkout() {
           {products.map((p, i) => {
             const productCoupons = getProductCouponCount(p.id);
             return (
-              <GlowPanel
+              <div
                 key={p.id}
-                className="animate-fade-in"
+                className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col"
                 style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}
               >
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="h-14 w-14 rounded-xl object-cover shrink-0 border border-border/30" />
-                    ) : (
-                      <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
-                        <Package className="h-6 w-6 text-primary" />
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-display font-bold text-[14px] text-foreground truncate">{p.name}</h4>
-                      <p className="text-primary font-display font-black text-[17px]">
-                        R$ {Number(p.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        {getPaymentMethods(p).map((m) => (
-                          <span key={m} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-muted/40 border border-border/30 text-muted-foreground/70 uppercase tracking-wider">{m}</span>
-                        ))}
-                        {p.checkout_timer_enabled && (
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/10 border border-warning/15 text-warning">Timer</span>
-                        )}
-                        {p.checkout_guarantee_enabled && (
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-success/10 border border-success/15 text-success">Garantia</span>
-                        )}
-                        {productCoupons > 0 && (
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/10 border border-warning/15 text-warning">
-                            <Ticket className="h-2.5 w-2.5 inline mr-0.5" />{productCoupons} cupom{productCoupons > 1 ? "s" : ""}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {p.checkout_url && (
-                    <div className="hidden lg:flex items-center gap-2 rounded-xl bg-muted/20 border border-border/40 px-3 py-2 max-w-xs backdrop-blur-sm">
-                      <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-muted-foreground/60 hover:text-primary transition-colors shrink-0" title="Copiar link">
-                        <Link2 className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{getLocalLink(p.checkout_url!)}</span>
+                {/* Image */}
+                <div className="relative h-44 bg-muted/30 overflow-hidden">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                      <Package className="h-12 w-12 text-muted-foreground/20" />
                     </div>
                   )}
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      className="gap-1.5 rounded-xl text-[12px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-9 hover:shadow-xl hover:shadow-primary/25 transition-all"
-                      onClick={() => setSettingsProduct(p)}
-                    >
-                      <Settings className="h-3.5 w-3.5" /> Personalizar
-                    </Button>
-                    {p.checkout_url && (
-                      <>
-                        <Button variant="outline" size="sm" className="gap-1.5 rounded-xl text-[12px] h-9 border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={() => openCheckout(p.checkout_url!)}>
-                          <Eye className="h-3.5 w-3.5" /> Abrir
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5 rounded-xl text-[12px] h-9 border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]"
-                          onClick={() => copyLink(p.id, p.checkout_url!)}
-                        >
-                          {copiedId === p.id ? (
-                            <><CheckCircle className="h-3.5 w-3.5 text-success" /> Copiado</>
-                          ) : (
-                            <><Copy className="h-3.5 w-3.5" /> Copiar</>
-                          )}
-                        </Button>
-                      </>
+                  <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 flex-wrap">
+                    {getPaymentMethods(p).map((m) => (
+                      <span key={m} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-card/80 backdrop-blur-sm border border-border/30 text-muted-foreground/80 uppercase tracking-wider">{m}</span>
+                    ))}
+                    {p.checkout_timer_enabled && (
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/20 backdrop-blur-sm border border-warning/20 text-warning">Timer</span>
                     )}
                   </div>
                 </div>
-              </GlowPanel>
+
+                {/* Content */}
+                <div className="p-4 flex flex-1 flex-col">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h4 className="font-display font-bold text-[14px] text-foreground leading-snug line-clamp-2">{p.name}</h4>
+                    <p className="text-lg font-display font-black text-primary whitespace-nowrap">
+                      R$ {Number(p.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+
+                  {p.description && (
+                    <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
+                  )}
+
+                  {p.checkout_url && (
+                    <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/40 px-3 py-2 mb-3">
+                      <Link2 className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                      <span className="text-[10px] text-muted-foreground/50 font-mono truncate flex-1">{getLocalLink(p.checkout_url!)}</span>
+                      <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-primary hover:text-primary/80 transition-colors shrink-0">
+                        {copiedId === p.id ? <CheckCircle className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
+                  )}
+
+                  {productCoupons > 0 && (
+                    <div className="mb-3">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-warning/10 border border-warning/15 text-warning">
+                        <Ticket className="h-3 w-3 inline mr-1" />{productCoupons} cupom{productCoupons > 1 ? "s" : ""} ativo{productCoupons > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1.5 mt-auto pt-2">
+                    <Button
+                      size="sm"
+                      className="gap-1.5 rounded-lg text-[11px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 hover:shadow-xl transition-all"
+                      onClick={() => setSettingsProduct(p)}
+                    >
+                      <Settings className="h-3 w-3" /> Personalizar
+                    </Button>
+                    {p.checkout_url && (
+                      <Button variant="outline" size="sm" className="gap-1 rounded-lg text-[11px] h-8 font-semibold hover:border-primary/20 hover:bg-primary/[0.03]" onClick={() => openCheckout(p.checkout_url!)}>
+                        <Eye className="h-3 w-3" /> Abrir
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>
