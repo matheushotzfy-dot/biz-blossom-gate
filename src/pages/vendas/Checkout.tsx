@@ -32,6 +32,7 @@ const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigi
 
 export default function Checkout() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
