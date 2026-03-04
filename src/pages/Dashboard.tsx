@@ -400,7 +400,11 @@ export default function Dashboard() {
                 <Sparkles className="h-3 w-3" /> Dashboard
               </div>
               <h1 className="text-xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
-                Bem Vindo, <span className="text-gradient">{nickname}</span>
+                {nickname ? (
+                  <>Bem Vindo, <span className="text-gradient">{nickname}</span></>
+                ) : (
+                  <span className="inline-block w-48 h-8 md:h-12 rounded-xl bg-muted/30 animate-pulse" />
+                )}
               </h1>
             </div>
 
