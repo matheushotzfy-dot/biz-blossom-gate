@@ -81,9 +81,14 @@ export default function Produtos() {
   const handleDelete = async (id: string) => { const { error } = await supabase.from("products").delete().eq("id", id); if (error) { toast.error("Erro"); return; } toast.success("Removido"); loadProducts(); };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; } setImageFile(file); setImagePreview(URL.createObjectURL(file)); };
 
+  const getCheckoutLink = (url: string) => {
+    const slug = url.split("/").pop()!;
+    return `${window.location.origin}/pay/${slug}`;
+  };
+
   const copyCheckout = (p: Tables<"products">) => {
     if (p.checkout_url) {
-      navigator.clipboard.writeText(p.checkout_url);
+      navigator.clipboard.writeText(getCheckoutLink(p.checkout_url));
       setCopiedId(p.id);
       toast.success("Link copiado!");
       setTimeout(() => setCopiedId(null), 2000);

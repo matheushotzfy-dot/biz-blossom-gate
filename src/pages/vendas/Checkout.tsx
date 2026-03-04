@@ -34,14 +34,16 @@ export default function Checkout() {
 
   useEffect(() => { load(); }, [user?.id]);
 
+  const getSlug = (url: string) => url.split("/").pop()!;
+  const getLocalLink = (url: string) => `${window.location.origin}/pay/${getSlug(url)}`;
+
   const copyLink = (id: string, url: string) => {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(getLocalLink(url));
     toast.success("Link copiado!");
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
-  const getSlug = (url: string) => url.split("/").pop()!;
-  const openCheckout = (url: string) => window.open(`/pay/${getSlug(url)}`, "_blank");
+  const openCheckout = (url: string) => window.open(getLocalLink(url), "_blank");
 
   const getPaymentMethods = (p: Tables<"products">) => {
     const methods: string[] = [];
@@ -124,7 +126,7 @@ export default function Checkout() {
                     <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-muted-foreground/60 hover:text-primary transition-colors shrink-0" title="Copiar link">
                       <Link2 className="h-3.5 w-3.5" />
                     </button>
-                    <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{p.checkout_url}</span>
+                    <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{getLocalLink(p.checkout_url!)}</span>
                   </div>
                 )}
 
