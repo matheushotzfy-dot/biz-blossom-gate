@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Building2, Plus, Trash2, Key, Shield, Fingerprint, CreditCard, Landmark } from "lucide-react";
+import { Building2, Plus, Trash2, Key, Shield, Fingerprint, CreditCard, Landmark, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlowPanel, SectionHeader } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
@@ -82,7 +82,7 @@ function validatePixKey(type: string, value: string): string | null {
   switch (type) {
     case "cpf": return validateCPF(v) ? null : "CPF inválido";
     case "cnpj": return validateCNPJ(v) ? null : "CNPJ inválido";
-    case "email": return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v) ? null : "E-mail inválido";
+    case "email": return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : "E-mail inválido";
     case "telefone": {
       const nums = v.replace(/\D/g, "");
       return nums.length >= 10 && nums.length <= 11 ? null : "Telefone inválido (DDD + número)";
@@ -112,6 +112,18 @@ function getPlaceholder(type: string): string {
   }
 }
 
+function getPixIcon(type: string) {
+  switch (type) {
+    case "cpf":
+    case "cnpj":
+      return Fingerprint;
+    case "email":
+      return Key;
+    default:
+      return Key;
+  }
+}
+
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
 
 export default function DadosBancarios() {
@@ -119,7 +131,6 @@ export default function DadosBancarios() {
   const [accounts, setAccounts] = useState<Tables<"bank_accounts">[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
-
   const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
   const [newPixType, setNewPixType] = useState("");
   const [newPixValue, setNewPixValue] = useState("");
@@ -163,7 +174,6 @@ export default function DadosBancarios() {
     const err = validatePixKey(newPixType, newPixValue);
     if (err) { setPixError(err); return; }
     if (pixKeys.length >= 3) { toast.error("Máximo de 3 chaves PIX"); return; }
-
     setPixLoading(true);
     setPixError(null);
     const cleanValue = newPixValue.trim();
@@ -203,150 +213,210 @@ export default function DadosBancarios() {
     <PageShell>
       <PageTitle icon={<Landmark className="h-6 w-6" />} title="Dados Bancários" subtitle="Gerencie suas chaves PIX e contas bancárias" />
 
-      {/* PIX Section */}
-      <div className="panel-enterprise p-6">
+      {/* ─── PIX KEYS SECTION ─── */}
+      <GlowPanel>
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3.5">
-            <div className="relative h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-              <Key className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h3 className="font-display font-bold text-foreground text-[16px]">Chaves PIX</h3>
-              <p className="text-[11px] text-muted-foreground/60">Até 3 chaves • Utilizadas para saques</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/30">
-            <Shield className="h-3.5 w-3.5 text-primary/50" />
-            <span className="text-[12px] font-mono text-muted-foreground/60 font-bold">{pixKeys.length}/3</span>
+          <SectionHeader icon={<Key className="h-4.5 w-4.5" />} title="Chaves PIX" subtitle="Até 3 chaves • Utilizadas para saques" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/15">
+            <Shield className="h-3.5 w-3.5 text-primary/60" />
+            <span className="text-[13px] font-display font-black text-primary">{pixKeys.length}<span className="text-muted-foreground/40 font-normal">/3</span></span>
           </div>
         </div>
 
+        {/* Existing keys */}
         {pixKeys.length > 0 && (
           <div className="space-y-2.5 mb-6">
-            {pixKeys.map((pk, i) => (
-              <div key={pk.id} className="flex items-center justify-between p-4 rounded-xl border border-border/30 bg-gradient-to-r from-muted/15 to-transparent hover:border-primary/20 transition-all animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-                    <Fingerprint className="h-4 w-4 text-primary" />
+            {pixKeys.map((pk, i) => {
+              const IconComp = getPixIcon(pk.key_type);
+              return (
+                <div
+                  key={pk.id}
+                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 bg-gradient-to-r from-muted/15 to-transparent hover:border-primary/20 transition-all animate-fade-in group"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                      <IconComp className="h-4.5 w-4.5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary/60">{pixTypeLabel(pk.key_type)}</span>
+                        <CheckCircle2 className="h-3 w-3 text-success" />
+                      </div>
+                      <p className="font-mono text-foreground text-[14px] mt-0.5 truncate font-medium">{pk.key_value}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="kicker">{pixTypeLabel(pk.key_type)}</p>
-                    <p className="font-mono text-foreground text-[14px] mt-0.5 truncate font-medium">{pk.key_value}</p>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive/30 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleDeletePix(pk.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="icon" className="text-destructive/40 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl" onClick={() => handleDeletePix(pk.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
+        {/* Add new PIX key */}
         {pixKeys.length < 3 && (
-          <div className="space-y-3 pt-5 border-t border-border/20">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="pt-5 border-t border-border/20">
+            <p className="text-[11px] text-muted-foreground/50 font-medium mb-3">Adicionar nova chave</p>
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-3">
               <div>
-                <Label className="kicker">Tipo da Chave</Label>
                 <Select value={newPixType} onValueChange={(v) => { setNewPixType(v); setNewPixValue(""); setPixError(null); }}>
-                  <SelectTrigger className="mt-1.5 rounded-xl border-border/40 h-11"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="rounded-xl border-border/40 h-12">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {pixKeyTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                    {pixKeyTypes.map(t => (
+                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label className="kicker">Chave PIX</Label>
+              <div className="flex gap-2">
                 <Input
                   value={newPixValue}
                   onChange={e => { setNewPixValue(formatPixInput(newPixType, e.target.value)); setPixError(null); }}
                   placeholder={getPlaceholder(newPixType)}
-                  className="font-mono mt-1.5 rounded-xl border-border/40 h-11"
+                  className="font-mono rounded-xl border-border/40 h-12 flex-1"
                 />
+                <Button
+                  onClick={handleAddPix}
+                  disabled={pixLoading}
+                  className="rounded-xl font-bold gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/15 h-12 px-5 shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Adicionar</span>
+                </Button>
               </div>
             </div>
-            {pixError && <p className="text-[12px] text-destructive font-medium">{pixError}</p>}
-            <Button onClick={handleAddPix} disabled={pixLoading} className="rounded-xl text-[13px] font-bold gap-2 gradient-primary text-primary-foreground w-full sm:w-auto shadow-lg shadow-primary/15 h-11">
-              <Plus className="h-4 w-4" /> Adicionar Chave
-            </Button>
+            {pixError && (
+              <div className="flex items-center gap-2 mt-2.5 text-destructive">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <p className="text-[12px] font-medium">{pixError}</p>
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </GlowPanel>
 
-      {/* Bank Accounts Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3.5">
-          <div className="relative h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h3 className="text-[16px] font-display font-bold text-foreground leading-tight">Contas Bancárias</h3>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5">Cadastre suas contas para recebimento</p>
-          </div>
-        </div>
+      {/* ─── BANK ACCOUNTS SECTION ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <SectionHeader icon={<Building2 className="h-4.5 w-4.5" />} title="Contas Bancárias" subtitle="Cadastre suas contas para recebimento" />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl transition-all h-11">
-              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nova</span> Conta
+            <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
+              <Plus className="h-4 w-4" /> Nova Conta
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent rounded-2xl pointer-events-none" />
-            <DialogHeader><DialogTitle className="font-display relative">Cadastrar Conta Bancária</DialogTitle></DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 relative">
+          <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent rounded-2xl pointer-events-none" />
+            <div className="relative px-6 pt-6 pb-4 border-b border-border/20">
+              <DialogHeader>
+                <DialogTitle className="font-display text-lg flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <Building2 className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                  Cadastrar Conta Bancária
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4 relative p-6">
               <div className="grid grid-cols-2 gap-3">
-                <div><Label className="kicker">Banco</Label><Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required className="mt-1.5 rounded-xl" /></div>
-                <div><Label className="kicker">Código</Label><Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="001" className="mt-1.5 rounded-xl" /></div>
+                <div>
+                  <Label className="kicker">Banco</Label>
+                  <Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Nome do banco" required className="mt-1.5 rounded-xl h-11" />
+                </div>
+                <div>
+                  <Label className="kicker">Código</Label>
+                  <Input value={form.bank_code} onChange={(e) => setForm({ ...form, bank_code: e.target.value })} placeholder="001" className="mt-1.5 rounded-xl h-11" />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label className="kicker">Agência</Label><Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
-                <div><Label className="kicker">Conta</Label><Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
+                <div>
+                  <Label className="kicker">Agência</Label>
+                  <Input value={form.agency} onChange={(e) => setForm({ ...form, agency: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+                </div>
+                <div>
+                  <Label className="kicker">Conta</Label>
+                  <Input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+                </div>
               </div>
-              <div><Label className="kicker">Tipo</Label><Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}><SelectTrigger className="mt-1.5 rounded-xl"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="corrente">Corrente</SelectItem><SelectItem value="poupanca">Poupança</SelectItem></SelectContent></Select></div>
-              <div><Label className="kicker">Titular</Label><Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
-              <div><Label className="kicker">CPF/CNPJ</Label><Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required className="mt-1.5 rounded-xl" /></div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold rounded-xl h-11 shadow-lg shadow-primary/15">Cadastrar</Button>
+              <div>
+                <Label className="kicker">Tipo</Label>
+                <Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v })}>
+                  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="corrente">Corrente</SelectItem>
+                    <SelectItem value="poupanca">Poupança</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="kicker">Titular</Label>
+                <Input value={form.holder_name} onChange={(e) => setForm({ ...form, holder_name: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+              </div>
+              <div>
+                <Label className="kicker">CPF/CNPJ</Label>
+                <Input value={form.holder_document} onChange={(e) => setForm({ ...form, holder_document: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+              </div>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold rounded-xl h-12 shadow-xl shadow-primary/15 text-sm">
+                Cadastrar Conta
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
+      {/* Bank account cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accounts.length === 0 ? (
           <div className="panel-enterprise col-span-full">
-            <EmptyState icon={<Building2 className="h-7 w-7" />} title="Nenhuma conta cadastrada" subtitle="Cadastre uma conta bancária para recebimentos" />
+            <EmptyState icon={<Building2 className="h-8 w-8" />} title="Nenhuma conta cadastrada" subtitle="Cadastre uma conta bancária para recebimentos" />
           </div>
         ) : accounts.map((acc, i) => (
-          <div key={acc.id} className="panel-enterprise-subtle p-5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-            <div className="flex justify-between items-start">
+          <div key={acc.id} className="panel-enterprise p-5 animate-fade-in group" style={{ animationDelay: `${i * 60}ms` }}>
+            <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-10 w-10 rounded-xl bg-info/10 border border-info/15 flex items-center justify-center shrink-0">
-                  <CreditCard className="h-4.5 w-4.5 text-info" />
+                <div className="h-11 w-11 rounded-xl bg-info/10 border border-info/15 flex items-center justify-center shrink-0 group-hover:bg-info/15 transition-colors">
+                  <CreditCard className="h-5 w-5 text-info" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-display font-bold text-foreground text-[15px]">{acc.bank_name}</h3>
-                  {acc.bank_code && <p className="text-[11px] text-muted-foreground/40 font-mono">Cód: {acc.bank_code}</p>}
+                  {acc.bank_code && <p className="text-[11px] text-muted-foreground/40 font-mono">Código {acc.bank_code}</p>}
                 </div>
               </div>
-              <Button variant="ghost" size="icon" className="text-destructive/40 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl" onClick={() => handleDelete(acc.id)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive/30 hover:text-destructive hover:bg-destructive/5 shrink-0 rounded-xl h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleDelete(acc.id)}
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <div className="mt-4 pt-3.5 border-t border-border/15 space-y-2">
-              <div className="flex items-center gap-6">
-                <div>
-                  <p className="kicker">Agência</p>
-                  <p className="font-mono text-foreground/80 text-[14px] font-medium">{acc.agency}</p>
-                </div>
-                <div>
-                  <p className="kicker">Conta</p>
-                  <p className="font-mono text-foreground/80 text-[14px] font-medium">{acc.account_number}</p>
-                </div>
-                <div>
-                  <p className="kicker">Tipo</p>
-                  <p className="text-foreground/80 text-[13px] font-medium capitalize">{acc.account_type === "corrente" ? "Corrente" : "Poupança"}</p>
-                </div>
+
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border/15">
+              <div>
+                <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-bold">Agência</p>
+                <p className="font-mono text-foreground/80 text-[14px] font-bold mt-1">{acc.agency}</p>
               </div>
-              <p className="text-muted-foreground/40 truncate text-[12px] mt-2">{acc.holder_name} — {acc.holder_document}</p>
+              <div>
+                <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-bold">Conta</p>
+                <p className="font-mono text-foreground/80 text-[14px] font-bold mt-1">{acc.account_number}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-bold">Tipo</p>
+                <p className="text-foreground/80 text-[13px] font-bold capitalize mt-1">{acc.account_type === "corrente" ? "Corrente" : "Poupança"}</p>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-border/10">
+              <p className="text-muted-foreground/40 text-[12px]">{acc.holder_name} — <span className="font-mono">{acc.holder_document}</span></p>
             </div>
           </div>
         ))}
