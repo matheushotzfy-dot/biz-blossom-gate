@@ -126,7 +126,7 @@ export default function Checkout() {
                     <button onClick={() => copyLink(p.id, p.checkout_url!)} className="text-muted-foreground/60 hover:text-primary transition-colors shrink-0" title="Copiar link">
                       <Link2 className="h-3.5 w-3.5" />
                     </button>
-                    <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{p.checkout_url}</span>
+                    <span className="text-[10px] text-muted-foreground/50 font-mono truncate">{getLocalLink(p.checkout_url!)}</span>
                   </div>
                 )}
 
