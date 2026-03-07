@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, Download, Filter, ArrowUpDown, CreditCard, Smartphone, FileText } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { Search, Download, Filter, ArrowUpDown, CreditCard, Smartphone, FileText, ChevronDown } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,15 +13,40 @@ interface Props {
   fmtCurrency: (v: number) => string;
 }
 
+const PAGE_SIZE = 80;
+
+const _dateFmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
+const _dateCache = new Map<string, string>();
+const fmtDateCached = (d: string) => {
+  let v = _dateCache.get(d);
+  if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); }
+  return v;
+};
+
 export default function AdminTransactionsTab({ transactions, profiles, products, fmtCurrency }: Props) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [sortField, setSortField] = useState<"date" | "amount">("date");
   const [sortAsc, setSortAsc] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const getSellerName = (userId: string) => profiles.find(p => p.user_id === userId)?.full_name || "—";
-  const getProductName = (productId: string | null) => products.find(p => p.id === productId)?.name || "—";
+  // Pre-index profiles and products for O(1) lookups
+  const profileMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of profiles) m.set(p.user_id, p.full_name || "—");
+    return m;
+  }, [profiles]);
+
+  const productMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of products) m.set(p.id, p.name);
+    return m;
+  }, [products]);
+
+  const getSellerName = (userId: string) => profileMap.get(userId) || "—";
+  const getProductName = (productId: string | null) => (productId && productMap.get(productId)) || "—";
+
   const methodIcon = (m: string | null) => {
     if (m === "pix") return <Smartphone className="h-3 w-3 text-emerald-400" />;
     if (m === "credit_card") return <CreditCard className="h-3 w-3 text-blue-400" />;
@@ -29,34 +54,48 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     return null;
   };
 
-  const filtered = transactions
-    .filter(t => {
+  const filtered = useMemo(() => {
+    const s = search.toLowerCase();
+    const result = transactions.filter(t => {
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (methodFilter !== "all" && t.payment_method !== methodFilter) return false;
       if (!search) return true;
-      const s = search.toLowerCase();
       return t.customer_name?.toLowerCase().includes(s) || t.customer_email?.toLowerCase().includes(s) || t.id.includes(s) || getSellerName(t.user_id).toLowerCase().includes(s);
-    })
-    .sort((a, b) => {
+    });
+    result.sort((a, b) => {
       if (sortField === "date") return sortAsc ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime() : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       return sortAsc ? Number(a.amount) - Number(b.amount) : Number(b.amount) - Number(a.amount);
     });
+    return result;
+  }, [transactions, search, statusFilter, methodFilter, sortField, sortAsc, profileMap]);
 
-  const completed = transactions.filter(t => t.status === "completed" || t.status === "approved");
-  const pending = transactions.filter(t => t.status === "pending");
-  const failed = transactions.filter(t => t.status === "failed" || t.status === "expired");
-  const today = transactions.filter(t => new Date(t.created_at).toDateString() === new Date().toDateString());
-  const todayVolume = today.filter(t => t.status === "completed" || t.status === "approved").reduce((a, t) => a + Number(t.amount), 0);
+  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const loadMore = useCallback(() => setVisibleCount(c => c + PAGE_SIZE), []);
+
+  const { completedCount, pendingCount, failedCount, todayCount, todayVolume } = useMemo(() => {
+    const todayStr = new Date().toDateString();
+    let completed = 0, pending = 0, failed = 0, todayN = 0, todayV = 0;
+    for (const t of transactions) {
+      if (t.status === "completed" || t.status === "approved") completed++;
+      else if (t.status === "pending") pending++;
+      else if (t.status === "failed" || t.status === "expired") failed++;
+      if (new Date(t.created_at).toDateString() === todayStr) {
+        todayN++;
+        if (t.status === "completed" || t.status === "approved") todayV += Number(t.amount);
+      }
+    }
+    return { completedCount: completed, pendingCount: pending, failedCount: failed, todayCount: todayN, todayVolume: todayV };
+  }, [transactions]);
 
   return (
     <div className="space-y-5 animate-fade-in">
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Total Transações" value={String(transactions.length)} sub="Todas" gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
-        <AdminKpi icon={<Smartphone className="h-5 w-5" />} label="Aprovadas" value={String(completed.length)} sub={`${((completed.length / Math.max(transactions.length, 1)) * 100).toFixed(1)}% taxa`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
-        <AdminKpi icon={<Filter className="h-5 w-5" />} label="Pendentes" value={String(pending.length)} sub="Aguardando" gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" alert={pending.length > 5} />
-        <AdminKpi icon={<FileText className="h-5 w-5" />} label="Falhas/Expiradas" value={String(failed.length)} sub="Não concluídas" gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" />
-        <AdminKpi icon={<Download className="h-5 w-5" />} label="Volume Hoje" value={fmtCurrency(todayVolume)} sub={`${today.length} transações`} gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" highlight />
+        <AdminKpi icon={<Smartphone className="h-5 w-5" />} label="Aprovadas" value={String(completedCount)} sub={`${((completedCount / Math.max(transactions.length, 1)) * 100).toFixed(1)}% taxa`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
+        <AdminKpi icon={<Filter className="h-5 w-5" />} label="Pendentes" value={String(pendingCount)} sub="Aguardando" gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" alert={pendingCount > 5} />
+        <AdminKpi icon={<FileText className="h-5 w-5" />} label="Falhas/Expiradas" value={String(failedCount)} sub="Não concluídas" gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" />
+        <AdminKpi icon={<Download className="h-5 w-5" />} label="Volume Hoje" value={fmtCurrency(todayVolume)} sub={`${todayCount} transações`} gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" highlight />
       </div>
 
       {/* Filters */}
@@ -103,7 +142,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
               ))}
             </tr></thead>
             <tbody>
-              {filtered.slice(0, 100).map(t => (
+              {visibleItems.map(t => (
                 <tr key={t.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                   <td className="p-3 font-mono text-[10px] text-white/25">{t.id.slice(0, 8)}</td>
                   <td className="p-3"><div><p className="text-xs font-medium">{t.customer_name || "—"}</p><p className="text-[10px] text-white/25">{t.customer_email}</p></div></td>
@@ -114,13 +153,19 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   <td className="p-3 text-xs text-amber-400">{fmtCurrency(Number(t.fee_amount))}</td>
                   <td className="p-3 text-xs text-emerald-400 font-bold">{fmtCurrency(Number(t.net_amount))}</td>
                   <td className="p-3"><StatusBadge status={t.status} /></td>
-                  <td className="p-3 text-[10px] text-white/25">{new Date(t.created_at).toLocaleString("pt-BR")}</td>
+                  <td className="p-3 text-[10px] text-white/25">{fmtDateCached(t.created_at)}</td>
                 </tr>
               ))}
               {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-white/20 text-xs">Nenhuma transação</td></tr>}
             </tbody>
           </table>
-          {filtered.length > 100 && <p className="text-center text-[10px] text-white/20 py-3">Exibindo 100 de {filtered.length}</p>}
+          {visibleCount < filtered.length && (
+            <div className="p-4 text-center">
+              <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-white/30 hover:text-white/60">
+                <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+              </Button>
+            </div>
+          )}
         </div>
       </AdminPanel>
     </div>

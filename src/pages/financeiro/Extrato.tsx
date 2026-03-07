@@ -1,15 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Search, Download, CreditCard, Package } from "lucide-react";
+import { FileText, Search, Download, CreditCard, Package, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageShell, Panel, GlowPanel, PageTitle, KpiCard, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+const _dateFmt = new Intl.DateTimeFormat("pt-BR");
+const _dateCache = new Map<string, string>();
+const fmtDateCached = (d: string) => {
+  let v = _dateCache.get(d);
+  if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); }
+  return v;
+};
+
+const PAGE_SIZE = 50;
 
 export default function Extrato() {
   const { user } = useAuth();
@@ -19,29 +29,52 @@ export default function Extrato() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [productFilter, setProductFilter] = useState("all");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!user?.id) return;
     Promise.all([
-      supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("transactions").select("id,amount,net_amount,fee_amount,status,payment_method,customer_name,customer_email,product_id,created_at,user_id").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("products").select("id, name").eq("user_id", user.id),
     ]).then(([txRes, prodRes]) => {
-      if (txRes.data) setTransactions(txRes.data);
+      if (txRes.data) setTransactions(txRes.data as Tables<"transactions">[]);
       if (prodRes.data) setProducts(prodRes.data);
     });
   }, [user?.id]);
 
-  const filtered = transactions.filter((tx) => {
-    const matchSearch = !search || tx.customer_name?.toLowerCase().includes(search.toLowerCase()) || tx.customer_email?.toLowerCase().includes(search.toLowerCase()) || tx.id.includes(search);
-    const matchStatus = statusFilter === "all" || tx.status === statusFilter;
-    const matchMethod = methodFilter === "all" || tx.payment_method === methodFilter;
-    const matchProduct = productFilter === "all" || tx.product_id === productFilter;
-    return matchSearch && matchStatus && matchMethod && matchProduct;
-  });
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, methodFilter, productFilter]);
 
-  const total = filtered.reduce((acc, t) => acc + Number(t.net_amount), 0);
-  const totalGross = filtered.reduce((acc, t) => acc + Number(t.amount), 0);
-  const getProductName = (id: string | null) => products.find(p => p.id === id)?.name || "—";
+  const productMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const p of products) map[p.id] = p.name;
+    return map;
+  }, [products]);
+
+  const getProductName = (id: string | null) => (id && productMap[id]) || "—";
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return transactions.filter((tx) => {
+      if (statusFilter !== "all" && tx.status !== statusFilter) return false;
+      if (methodFilter !== "all" && tx.payment_method !== methodFilter) return false;
+      if (productFilter !== "all" && tx.product_id !== productFilter) return false;
+      if (!search) return true;
+      return tx.customer_name?.toLowerCase().includes(q) || tx.customer_email?.toLowerCase().includes(q) || tx.id.includes(search);
+    });
+  }, [transactions, search, statusFilter, methodFilter, productFilter]);
+
+  const { total, totalGross, completedCount } = useMemo(() => {
+    let total = 0, totalGross = 0, completedCount = 0;
+    for (const t of filtered) {
+      total += Number(t.net_amount);
+      totalGross += Number(t.amount);
+      if (t.status === "completed") completedCount++;
+    }
+    return { total, totalGross, completedCount };
+  }, [filtered]);
+
+  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const loadMore = useCallback(() => setVisibleCount((c) => c + PAGE_SIZE), []);
 
   return (
     <PageShell>
@@ -52,15 +85,13 @@ export default function Extrato() {
         </Button>
       </div>
 
-      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard label="Líquido" value={fmt(total)} icon={CreditCard} color="text-primary" bg="bg-primary/10" />
         <KpiCard label="Bruto" value={fmt(totalGross)} icon={Package} color="text-foreground" bg="bg-muted/40" />
-        <KpiCard label="Aprovadas" value={String(filtered.filter(t => t.status === "completed").length)} icon={CreditCard} color="text-success" bg="bg-success/10" />
+        <KpiCard label="Aprovadas" value={String(completedCount)} icon={CreditCard} color="text-success" bg="bg-success/10" />
         <KpiCard label="Transações" value={String(filtered.length)} icon={FileText} color="text-info" bg="bg-info/10" />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-2">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
@@ -101,12 +132,12 @@ export default function Extrato() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {visibleItems.length === 0 ? (
                   <tr><td colSpan={8}>
                     <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação encontrada" subtitle="Tente ajustar os filtros" />
                   </td></tr>
-                ) : filtered.map((tx, i) => (
-                  <tr key={tx.id} className="border-b border-border/25 hover:bg-primary/[0.02] transition-all animate-fade-in" style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}>
+                ) : visibleItems.map((tx) => (
+                  <tr key={tx.id} className="border-b border-border/25 hover:bg-primary/[0.02] transition-all">
                     <td className="p-4 font-mono text-[11px] text-muted-foreground/50">{tx.id.slice(0, 8)}</td>
                     <td className="p-4">
                       <p className="text-foreground font-semibold text-[13px]">{tx.customer_name || "—"}</p>
@@ -121,21 +152,28 @@ export default function Extrato() {
                       </span>
                     </td>
                     <td className="p-4"><StatusBadge status={tx.status} /></td>
-                    <td className="p-4 text-muted-foreground/50 text-[12px] font-medium">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className="p-4 text-muted-foreground/50 text-[12px] font-medium">{fmtDateCached(tx.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {visibleCount < filtered.length && (
+            <div className="p-4 border-t border-border/20 text-center">
+              <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground">
+                <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+              </Button>
+            </div>
+          )}
         </Panel>
       </div>
 
-      {/* Mobile card list */}
+      {/* Mobile */}
       <div className="md:hidden space-y-3">
-        {filtered.length === 0 ? (
+        {visibleItems.length === 0 ? (
           <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação" />
-        ) : filtered.map((tx, i) => (
-          <GlowPanel key={tx.id} className="p-4 animate-fade-in" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` } as React.CSSProperties}>
+        ) : visibleItems.map((tx) => (
+          <GlowPanel key={tx.id} className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-foreground font-semibold text-sm">{tx.customer_name || "Cliente"}</span>
               <StatusBadge status={tx.status} />
@@ -152,10 +190,15 @@ export default function Extrato() {
                 {tx.payment_method === "credit_card" ? "Cartão" : tx.payment_method || "—"}
               </span>
               <span className="text-muted-foreground/30 text-[11px]">•</span>
-              <span className="text-muted-foreground/50 text-[11px]">{new Date(tx.created_at).toLocaleDateString("pt-BR")}</span>
+              <span className="text-muted-foreground/50 text-[11px]">{fmtDateCached(tx.created_at)}</span>
             </div>
           </GlowPanel>
         ))}
+        {visibleCount < filtered.length && (
+          <Button variant="ghost" size="sm" onClick={loadMore} className="w-full gap-2 text-xs text-muted-foreground">
+            <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+          </Button>
+        )}
       </div>
     </PageShell>
   );
