@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X,
   Phone, Mail, Calendar, Clock, Hash, Package, ArrowUpRight,
-  RefreshCw, Copy, Check, Users, Eye, MessageCircle,
+  RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
@@ -16,15 +16,27 @@ import { cn } from "@/lib/utils";
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+// Cached date formatters — avoid creating Intl objects per cell
+const _dateFmt = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo" });
+const _timeFmt = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
+const _dateCache = new Map<string, string>();
+const _timeCache = new Map<string, string>();
 
-const fmtTime = (d: string) =>
-  new Date(d).toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
-
+const fmtDate = (d: string) => {
+  let v = _dateCache.get(d);
+  if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); }
+  return v;
+};
+const fmtTime = (d: string) => {
+  let v = _timeCache.get(d);
+  if (!v) { v = _timeFmt.format(new Date(d)); _timeCache.set(d, v); }
+  return v;
+};
 const fmtFull = (d: string) => `${fmtDate(d)} às ${fmtTime(d)}`;
 
 type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
+
+const PAGE_SIZE = 50;
 
 /* ─── KPI Card ─── */
 function VendasKpi({ label, value, sub, icon: Icon, color, bg }: {
@@ -45,14 +57,13 @@ function VendasKpi({ label, value, sub, icon: Icon, color, bg }: {
 }
 
 /* ─── Transaction Row (Desktop) ─── */
-function TxRow({ tx, products, onClick, index }: {
-  tx: Tables<"transactions">; products: Record<string, string>; onClick: () => void; index: number;
+function TxRow({ tx, products, onClick }: {
+  tx: Tables<"transactions">; products: Record<string, string>; onClick: () => void;
 }) {
   return (
     <tr
       onClick={onClick}
-      className="border-b border-border/20 hover:bg-primary/[0.03] transition-all cursor-pointer group animate-fade-in"
-      style={{ animationDelay: `${Math.min(index, 10) * 30}ms` }}
+      className="border-b border-border/20 hover:bg-primary/[0.03] transition-all cursor-pointer group"
     >
       <td className="p-4">
         <div className="flex items-center gap-3">
@@ -105,14 +116,13 @@ function TxRow({ tx, products, onClick, index }: {
 }
 
 /* ─── Transaction Card (Mobile) ─── */
-function TxCard({ tx, products, onClick, index }: {
-  tx: Tables<"transactions">; products: Record<string, string>; onClick: () => void; index: number;
+function TxCard({ tx, products, onClick }: {
+  tx: Tables<"transactions">; products: Record<string, string>; onClick: () => void;
 }) {
   return (
     <div
-      className="panel-enterprise-subtle cursor-pointer active:scale-[0.98] transition-transform p-4 animate-fade-in"
+      className="panel-enterprise-subtle cursor-pointer active:scale-[0.98] transition-transform p-4"
       onClick={onClick}
-      style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
     >
       <div className="flex items-start justify-between gap-3 mb-2.5">
         <div className="flex items-center gap-2.5">
@@ -170,7 +180,6 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
       <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={onClose} />
       <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border/60 bg-card/95 backdrop-blur-xl shadow-2xl animate-scale-in">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent rounded-2xl pointer-events-none" />
-        {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border/40 bg-card/90 backdrop-blur-xl rounded-t-2xl">
           <div>
             <p className="kicker mb-1">Detalhes da Venda</p>
@@ -185,7 +194,6 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
         </div>
 
         <div className="relative p-5 space-y-5">
-          {/* Financial summary */}
           <div className="rounded-xl border border-border/40 bg-gradient-to-br from-muted/20 to-muted/5 p-4">
             <p className="kicker mb-3">Resumo Financeiro</p>
             <div className="space-y-2">
@@ -197,7 +205,6 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
             </div>
           </div>
 
-          {/* Sale info */}
           <div className="space-y-2.5">
             <p className="kicker">Informações da Venda</p>
             <DetailRow label="ID da venda" value={
@@ -213,7 +220,6 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
             )}
           </div>
 
-          {/* Customer */}
           <div className="space-y-2.5">
             <p className="kicker">Cliente</p>
             <DetailRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3 w-3" />} />
@@ -224,7 +230,6 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex gap-2 pt-2">
             {tx.customer_phone && (
               <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
@@ -266,14 +271,15 @@ export default function Vendas() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!user?.id) return;
     Promise.all([
-      supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("transactions").select("id,user_id,amount,net_amount,fee_amount,status,payment_method,customer_name,customer_email,customer_phone,customer_document,product_id,created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("products").select("id, name").eq("user_id", user.id),
     ]).then(([txRes, prodRes]) => {
-      if (txRes.data) setTransactions(txRes.data);
+      if (txRes.data) setTransactions(txRes.data as Tables<"transactions">[]);
       if (prodRes.data) {
         const map: Record<string, string> = {};
         prodRes.data.forEach((p) => { map[p.id] = p.name; });
@@ -282,35 +288,51 @@ export default function Vendas() {
     });
   }, [user?.id]);
 
-  const approved = transactions.filter((t) => t.status === "completed");
-  const totalSales = approved.reduce((a, t) => a + Number(t.net_amount), 0);
-  const avgTicket = approved.length > 0 ? totalSales / approved.length : 0;
-  const conversion = transactions.length > 0 ? (approved.length / transactions.length) * 100 : 0;
+  // Reset visible count when filters change
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter]);
 
-  const filtered = transactions.filter((t) => {
-    if (statusFilter !== "all" && t.status !== statusFilter) return false;
-    if (!search) return true;
+  const approved = useMemo(() => transactions.filter((t) => t.status === "completed"), [transactions]);
+  const totalSales = useMemo(() => approved.reduce((a, t) => a + Number(t.net_amount), 0), [approved]);
+  const avgTicket = useMemo(() => approved.length > 0 ? totalSales / approved.length : 0, [approved, totalSales]);
+  const conversion = useMemo(() => transactions.length > 0 ? (approved.length / transactions.length) * 100 : 0, [approved, transactions]);
+
+  const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return (
-      t.customer_name?.toLowerCase().includes(q) ||
-      t.customer_email?.toLowerCase().includes(q) ||
-      t.customer_phone?.includes(q) ||
-      t.id.toLowerCase().includes(q)
-    );
-  });
+    return transactions.filter((t) => {
+      if (statusFilter !== "all" && t.status !== statusFilter) return false;
+      if (!search) return true;
+      return (
+        t.customer_name?.toLowerCase().includes(q) ||
+        t.customer_email?.toLowerCase().includes(q) ||
+        t.customer_phone?.includes(q) ||
+        t.id.toLowerCase().includes(q)
+      );
+    });
+  }, [transactions, search, statusFilter]);
+
+  // Only render a slice for DOM performance
+  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
   const handleRefund = async (_tx: Tables<"transactions">) => {
     toast.info("Para solicitar reembolso, entre em contato com o suporte.");
   };
 
-  const statusFilters: { label: string; value: StatusFilter; count: number }[] = [
-    { label: "Todas", value: "all", count: transactions.length },
-    { label: "Aprovadas", value: "completed", count: approved.length },
-    { label: "Pendentes", value: "pending", count: transactions.filter((t) => t.status === "pending").length },
-    { label: "Falhas", value: "failed", count: transactions.filter((t) => t.status === "failed").length },
-    { label: "Reembolsos", value: "refunded", count: transactions.filter((t) => t.status === "refunded").length },
-    { label: "Chargebacks", value: "chargeback", count: transactions.filter((t) => t.status === "chargeback").length },
-  ];
+  const statusFilters = useMemo(() => {
+    const counts: Record<string, number> = { all: transactions.length, completed: 0, pending: 0, failed: 0, refunded: 0, chargeback: 0 };
+    for (const t of transactions) {
+      if (t.status in counts) counts[t.status]++;
+    }
+    return [
+      { label: "Todas", value: "all" as StatusFilter, count: counts.all },
+      { label: "Aprovadas", value: "completed" as StatusFilter, count: counts.completed },
+      { label: "Pendentes", value: "pending" as StatusFilter, count: counts.pending },
+      { label: "Falhas", value: "failed" as StatusFilter, count: counts.failed },
+      { label: "Reembolsos", value: "refunded" as StatusFilter, count: counts.refunded },
+      { label: "Chargebacks", value: "chargeback" as StatusFilter, count: counts.chargeback },
+    ];
+  }, [transactions]);
+
+  const loadMore = useCallback(() => setVisibleCount((c) => c + PAGE_SIZE), []);
 
   return (
     <PageShell>
@@ -350,13 +372,13 @@ export default function Vendas() {
                   "shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all border backdrop-blur-sm",
                   statusFilter === f.value
                     ? "bg-primary/10 text-primary border-primary/25 shadow-md shadow-primary/10"
-                    : "bg-card/60 text-muted-foreground border-border/40 hover:bg-card/80 hover:border-primary/15"
+                    : "bg-card/50 text-muted-foreground border-border/40 hover:border-border/60 hover:bg-card/80"
                 )}
               >
                 {f.label}
                 <span className={cn(
-                  "rounded-lg px-2 py-0.5 text-[10px] font-bold",
-                  statusFilter === f.value ? "bg-primary/15 text-primary" : "bg-muted/60 text-muted-foreground/60"
+                  "ml-0.5 text-[10px] px-1.5 py-0.5 rounded-md font-bold",
+                  statusFilter === f.value ? "bg-primary/20 text-primary" : "bg-muted/50 text-muted-foreground/60"
                 )}>{f.count}</span>
               </button>
             ))}
@@ -365,43 +387,51 @@ export default function Vendas() {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block">
-        <div className="panel-enterprise p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/30 bg-gradient-to-r from-muted/20 via-transparent to-muted/20">
-                  {["Cliente", "Contato", "Produto", "Valor Líquido", "Método", "Status", "Data", ""].map((h) => (
-                    <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em]">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={8}>
-                      <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda encontrada" subtitle="Tente ajustar os filtros" />
-                    </td>
-                  </tr>
-                ) : filtered.map((tx, i) => (
-                  <TxRow key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
+      <div className="hidden md:block panel-enterprise p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/40 bg-gradient-to-r from-muted/30 via-muted/10 to-muted/30">
+                {["Cliente", "WhatsApp", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
+                  <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em]">{h}</th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleItems.length === 0 ? (
+                <tr><td colSpan={8}>
+                  <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda encontrada" subtitle="Tente ajustar os filtros" />
+                </td></tr>
+              ) : visibleItems.map((tx) => (
+                <TxRow key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} />
+              ))}
+            </tbody>
+          </table>
         </div>
+        {visibleCount < filtered.length && (
+          <div className="p-4 border-t border-border/20 text-center">
+            <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground">
+              <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
-        {filtered.length === 0 ? (
-          <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda" />
-        ) : filtered.map((tx, i) => (
-          <TxCard key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
+        {visibleItems.length === 0 ? (
+          <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda" subtitle="Tente ajustar os filtros" />
+        ) : visibleItems.map((tx) => (
+          <TxCard key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} />
         ))}
+        {visibleCount < filtered.length && (
+          <Button variant="ghost" size="sm" onClick={loadMore} className="w-full gap-2 text-xs text-muted-foreground">
+            <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+          </Button>
+        )}
       </div>
 
-      {/* Detail Modal */}
+      {/* Detail modal */}
       {selectedTx && (
         <TxDetailModal tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={handleRefund} />
       )}
