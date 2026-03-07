@@ -58,8 +58,20 @@ const STAGGER_CLASSES = ["", "stagger-1", "stagger-2", "stagger-3", "stagger-4",
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
+// msDev's — cache date string conversion to avoid repeated Intl calls
+const _brasiliaDateCache = new Map<string, string>();
 function toBrasiliaDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  let cached = _brasiliaDateCache.get(dateStr);
+  if (!cached) {
+    cached = new Date(dateStr).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    _brasiliaDateCache.set(dateStr, cached);
+    // Keep cache bounded
+    if (_brasiliaDateCache.size > 2000) {
+      const first = _brasiliaDateCache.keys().next().value;
+      if (first) _brasiliaDateCache.delete(first);
+    }
+  }
+  return cached;
 }
 
 function brasiliaToday() {
