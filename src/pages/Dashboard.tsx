@@ -171,62 +171,71 @@ export default function Dashboard() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod]);
 
-  const approved = filteredTx.filter((t) => t.status === "completed");
-  const pending = filteredTx.filter((t) => t.status === "pending");
-  const refunded = filteredTx.filter((t) => t.status === "refunded");
-  const chargebacks = filteredTx.filter((t) => t.status === "chargeback");
+  // msDev's — memoize all derived metrics to avoid recomputing on every render
+  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
+    const _approved = filteredTx.filter((t) => t.status === "completed");
+    const _pending = filteredTx.filter((t) => t.status === "pending");
+    const _refunded = filteredTx.filter((t) => t.status === "refunded");
+    const _chargebacks = filteredTx.filter((t) => t.status === "chargeback");
 
-  const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
-  const conversion = filteredTx.length > 0 ? (approved.length / filteredTx.length) * 100 : 0;
+    const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
+    const _conversion = filteredTx.length > 0 ? (_approved.length / filteredTx.length) * 100 : 0;
 
-  // Conversion by payment method
-  const pixTx = filteredTx.filter(t => t.payment_method === "pix");
-  const pixApproved = pixTx.filter(t => t.status === "completed");
-  const pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
+    const pixTx = filteredTx.filter(t => t.payment_method === "pix");
+    const pixApproved = pixTx.filter(t => t.status === "completed");
+    const _pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
 
-  const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
-  const cardApproved = cardTx.filter(t => t.status === "completed");
-  const cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
+    const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
+    const cardApproved = cardTx.filter(t => t.status === "completed");
+    const _cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
 
-  const chargebackRate = filteredTx.length > 0 ? (chargebacks.length / filteredTx.length) * 100 : 0;
+    const _chargebackRate = filteredTx.length > 0 ? (_chargebacks.length / filteredTx.length) * 100 : 0;
 
-  const withdrawalPending = withdrawals
-    .filter((w) => w.status === "pending")
-    .reduce((acc, w) => acc + Number(w.net_amount), 0);
+    return {
+      approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
+      revenue: _revenue, conversion: _conversion,
+      pixConversion: _pixConversion, cardConversion: _cardConversion, chargebackRate: _chargebackRate,
+    };
+  }, [filteredTx]);
 
-  // Balance = completed revenue - approved withdrawals - chargebacks/refunds
-  const totalRevenue = transactions
-    .filter(t => t.status === "completed")
-    .reduce((acc, t) => acc + Number(t.net_amount), 0);
-  const totalWithdrawn = withdrawals
-    .filter(w => w.status === "approved")
-    .reduce((acc, w) => acc + Number(w.net_amount), 0);
-  // Subtract chargebacks and refunds from balance (negative balance support)
-  const totalChargebacksRefunds = transactions
-    .filter(t => t.status === "chargeback" || t.status === "refunded")
-    .reduce((acc, t) => acc + Number(t.net_amount), 0);
-  const balance = totalRevenue - totalWithdrawn - totalChargebacksRefunds;
+  const { withdrawalPending, balance } = useMemo(() => {
+    const _withdrawalPending = withdrawals
+      .filter((w) => w.status === "pending")
+      .reduce((acc, w) => acc + Number(w.net_amount), 0);
 
+    const totalRevenue = transactions
+      .filter(t => t.status === "completed")
+      .reduce((acc, t) => acc + Number(t.net_amount), 0);
+    const totalWithdrawn = withdrawals
+      .filter(w => w.status === "approved")
+      .reduce((acc, w) => acc + Number(w.net_amount), 0);
+    const totalChargebacksRefunds = transactions
+      .filter(t => t.status === "chargeback" || t.status === "refunded")
+      .reduce((acc, t) => acc + Number(t.net_amount), 0);
+
+    return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds };
+  }, [transactions, withdrawals]);
+
+  // msDev's — optimized chart: pre-index transactions by date to avoid O(N*M)
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
+
+    // Pre-index completed transactions by date string
+    const revenueByDate = new Map<string, number>();
+    for (const t of transactions) {
+      if (t.status !== "completed") continue;
+      const dateKey = toBrasiliaDate(t.created_at);
+      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
+    }
 
     return Array.from({ length: days }, (_, i) => {
       const d = new Date(brasiliaToday());
       d.setDate(d.getDate() - (days - 1 - i));
 
-      const label = d.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        timeZone: "America/Sao_Paulo",
-      });
-
+      const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
       const compare = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
-      const vendas = transactions
-        .filter((t) => toBrasiliaDate(t.created_at) === compare && t.status === "completed")
-        .reduce((acc, t) => acc + Number(t.net_amount), 0);
-
-      return { name: label, vendas };
+      return { name: label, vendas: revenueByDate.get(compare) || 0 };
     });
   }, [transactions, selectedPeriod.days]);
 
