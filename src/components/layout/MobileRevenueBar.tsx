@@ -18,7 +18,8 @@ export function MobileRevenueBar() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed")
+    // msDev's — only fetch the column we need, not entire rows
+    supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed").limit(1000)
       .then(({ data }) => {
         if (data) setRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
       });
