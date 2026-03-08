@@ -317,7 +317,7 @@ export default function PublicCheckout() {
         payload.cardToken = null; // TODO: Implement PodPay client-side tokenization
       }
       const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
-      if (error || !data?.success) { toast.error(data?.error || error?.message || "Erro ao processar"); setCheckoutState("failed"); return; }
+      if (error || !data?.success) { toast.error("Não foi possível processar seu pagamento. Tente novamente."); setCheckoutState("failed"); return; }
       const result = data.data;
       setTransactionId(result.transactionId);
       if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); toast.info("Retomando pagamento pendente..."); return; }
