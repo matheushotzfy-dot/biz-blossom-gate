@@ -232,10 +232,11 @@ export default function PublicCheckout() {
 
     async function loadCheckoutData() {
       // Step 1: Load product first (required for step 2)
+      // Match slug against full URLs: /pay/SLUG or /checkout/SLUG
       const { data: prod } = await supabase
         .from("products_public")
         .select("*")
-        .or(`checkout_url.eq.${slug},checkout_url.eq./${slug}`)
+        .or(`checkout_url.like.%/pay/${slug},checkout_url.like.%/checkout/${slug},checkout_url.eq.${slug},checkout_url.eq./${slug}`)
         .limit(1)
         .maybeSingle();
 
@@ -302,18 +303,28 @@ export default function PublicCheckout() {
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
     let pollCount = 0;
-    const interval = setInterval(async () => {
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
       pollCount++;
-      const { data } = await supabase.from("transactions").select("status").eq("id", transactionId).single();
-      if (data?.status === "completed") {
-        setCheckoutState("approved"); clearCheckoutSession(slug || ""); clearInterval(interval);
-        if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
-      } else if (data?.status === "failed" || data?.status === "cancelled") {
-        setCheckoutState("failed"); clearCheckoutSession(slug || ""); clearInterval(interval);
-      }
-      // After 60 polls (5min), slow down to 15s
-    }, pollCount > 60 ? 15000 : 5000);
-    return () => clearInterval(interval);
+      try {
+        const { data } = await supabase.from("transactions").select("status").eq("id", transactionId).single();
+        if (data?.status === "completed") {
+          setCheckoutState("approved"); clearCheckoutSession(slug || "");
+          if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
+          return; // Stop polling
+        } else if (data?.status === "failed" || data?.status === "cancelled") {
+          setCheckoutState("failed"); clearCheckoutSession(slug || "");
+          return; // Stop polling
+        }
+      } catch { /* network error, retry */ }
+      // Adaptive: 5s for first 5min, then 15s
+      const delay = pollCount > 60 ? 15000 : 5000;
+      timer = setTimeout(poll, delay);
+    };
+
+    timer = setTimeout(poll, 3000); // First poll after 3s
+    return () => clearTimeout(timer);
   }, [checkoutState, transactionId, slug]);
 
   // CEP handler
