@@ -34,27 +34,16 @@ const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigi
 export default function Checkout() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Tables<"products">[]>([]);
+  const { data: products = [], refetch: refetchProducts } = useProducts();
+  const activeProducts = products.filter(p => p.status === "active");
+  const { data: coupons = [], refetch: refetchCoupons } = useCoupons();
+  const invalidateAll = useInvalidateAll();
   const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [coupons, setCoupons] = useState<any[]>([]);
   const [couponOpen, setCouponOpen] = useState(false);
   const [couponForm, setCouponForm] = useState({
     code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "",
   });
-
-  /* ─── Data loader — msDev's ─── */
-  const load = async () => {
-    if (!user?.id) return;
-    const [prodRes, coupRes] = await Promise.all([
-      supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: false }),
-      supabase.from("coupons").select("*").order("created_at", { ascending: false }),
-    ]);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (coupRes.data) setCoupons(coupRes.data);
-  };
-
-  useEffect(() => { load(); }, [user?.id]);
 
   const getSlug = (url: string) => url.split("/").pop()!;
   const getLocalLink = (url: string) => `${window.location.origin}/pay/${getSlug(url)}`;
