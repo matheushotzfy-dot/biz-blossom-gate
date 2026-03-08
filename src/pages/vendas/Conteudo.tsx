@@ -147,12 +147,32 @@ const DURATION_OPTIONS = [
 export default function AdminConteudo() {
   const { user } = useAuth();
 
-  // ── Data state ──
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const { data: coursesRaw = [] } = useCoursesQuery();
+  const { data: productsRaw = [] } = useProductsQuery();
+  const { data: transactionsRaw = [] } = useTransactionsQuery();
+  const invalidateAll = useInvalidateAll();
+
+  const courses = useMemo(() => {
+    return coursesRaw.map((c: any) => {
+      const { modules: _, ...rest } = c;
+      return rest;
+    }) as Course[];
+  }, [coursesRaw]);
+
+  const products = useMemo(() => productsRaw.map(p => ({ id: p.id, name: p.name })) as Product[], [productsRaw]);
+  const transactions = useMemo(() => transactionsRaw.map(t => ({ product_id: t.product_id, status: t.status, amount: t.amount })), [transactionsRaw]);
+
+  const courseStats = useMemo(() => {
+    const stats: Record<string, { modules: number; lessons: number }> = {};
+    coursesRaw.forEach((c: any) => {
+      const mods = c.modules || [];
+      const totalLessons = mods.reduce((a: number, m: any) => a + (m.lessons?.length || 0), 0);
+      stats[c.id] = { modules: mods.length, lessons: totalLessons };
+    });
+    return stats;
+  }, [coursesRaw]);
+
   const [search, setSearch] = useState("");
-  const [transactions, setTransactions] = useState<{ product_id: string | null; status: string; amount: number }[]>([]);
-  const [courseStats, setCourseStats] = useState<Record<string, { modules: number; lessons: number }>>({});
 
   // ── Wizard state ──
   const [wizardOpen, setWizardOpen] = useState(false);
