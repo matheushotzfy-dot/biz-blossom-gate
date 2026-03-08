@@ -79,7 +79,7 @@ export default function Webhooks() {
   const deleteWebhook = async (id: string) => {
     await supabase.from("webhook_configs").delete().eq("id", id);
     toast.success("Webhook removido");
-    load();
+    invalidateAll(["webhooks"]);
   };
 
   const toggleAll = () => {
