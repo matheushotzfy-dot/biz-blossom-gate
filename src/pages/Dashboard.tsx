@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useTransactions, useWithdrawals, useProducts as useProductsQuery } from "@/hooks/useQueryData";
 import {
   Activity,
   AlertTriangle,
