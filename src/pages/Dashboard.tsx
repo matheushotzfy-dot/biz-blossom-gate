@@ -194,7 +194,7 @@ export default function Dashboard() {
     return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds - totalRetained };
   }, [transactions, withdrawals]);
 
-  // msDev's — optimized chart: pre-index transactions by date to avoid O(N*M)
+  // Optimized chart: pre-index transactions by date to avoid O(N*M)
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
 
