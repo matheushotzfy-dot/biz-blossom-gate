@@ -12,26 +12,31 @@ import { ProfileProvider, useProfile } from "@/hooks/useProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export function DashboardLayout() {
+function DashboardLayoutInner() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { profile } = useProfile();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [showApproved, setShowApproved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Load notifications
   useEffect(() => {
     if (!user) return;
     supabase
-      .from("profiles")
+      .from("notifications")
       .select("*")
-      .eq("user_id", user.id)
-      .single()
+      .or(`user_id.eq.${user.id},user_id.is.null`)
+      .order("created_at", { ascending: false })
+      .limit(20)
       .then(({ data }) => {
-        if (data) setProfile(data);
+        if (data) {
+          setNotifications(data);
+          setUnreadCount(data.filter((n: any) => !n.is_read).length);
+        }
       });
   }, [user]);
 
