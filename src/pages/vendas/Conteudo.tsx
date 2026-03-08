@@ -287,7 +287,7 @@ export default function AdminConteudo() {
     const { error } = await supabase.from("courses").delete().eq("id", id);
     if (error) { toast.error("Erro ao excluir curso"); return; }
     if (selectedCourse === id) { setSelectedCourse(null); setModules([]); }
-    loadCourses();
+    reloadCourses();
     toast.success("Curso excluído com sucesso!");
   };
 
