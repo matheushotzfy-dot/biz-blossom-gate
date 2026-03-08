@@ -223,6 +223,16 @@ export default function PublicCheckout() {
     else if (product.checkout_boleto_enabled) setMethod("boleto");
   }, [product]);
 
+  // Override body overflow for public checkout scroll
+  useEffect(() => {
+    window.document.body.style.overflow = "auto";
+    window.document.body.style.overscrollBehavior = "auto";
+    return () => {
+      window.document.body.style.overflow = "hidden";
+      window.document.body.style.overscrollBehavior = "none";
+    };
+  }, []);
+
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
     const interval = setInterval(async () => {
