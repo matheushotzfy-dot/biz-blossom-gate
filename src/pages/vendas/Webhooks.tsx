@@ -55,18 +55,12 @@ function getEventCategory(ev: string) {
 
 export default function Webhooks() {
   const { user } = useAuth();
-  const [webhooks, setWebhooks] = useState<any[]>([]);
+  const { data: webhooks = [], refetch: load } = useWebhooks();
+  const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const load = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("webhook_configs_safe" as any).select("*").order("created_at", { ascending: false });
-    if (data) setWebhooks(data);
-  };
-  useEffect(() => { load(); }, [user]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
