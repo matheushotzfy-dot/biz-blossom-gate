@@ -219,7 +219,7 @@ export default function Apps() {
 
   const toggleActive = async (int_: AppIntegration) => {
     await supabase.from("app_integrations").update({ is_active: !int_.is_active }).eq("id", int_.id);
-    loadData();
+    invalidateAll(["app_integrations"]);
   };
 
   const deleteIntegration = async (id: string) => {
