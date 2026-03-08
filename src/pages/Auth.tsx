@@ -140,7 +140,10 @@ export default function Auth() {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      toast.error(error.message || "Erro ao processar");
+      const msg = error?.message || "";
+      if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
+      else if (msg.includes("already registered")) toast.error("Este e-mail já está cadastrado.");
+      else toast.error("Instabilidade na rede. Tente novamente em instantes.");
     } finally {
       setLoading(false);
     }
