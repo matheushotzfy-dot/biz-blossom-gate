@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import {
   ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X,
   Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
@@ -388,8 +389,13 @@ function DateRangePicker({ datePreset, setDatePreset, customFrom, setCustomFrom,
 
 export default function Vendas() {
   const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
-  const [products, setProducts] = useState<Record<string, string>>({});
+  const { data: transactions = [], isLoading: loading } = useTransactions();
+  const { data: productsRaw = [] } = useProducts();
+  const products = useMemo(() => {
+    const map: Record<string, string> = {};
+    productsRaw.forEach((p: any) => { map[p.id] = p.name; });
+    return map;
+  }, [productsRaw]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
@@ -397,24 +403,6 @@ export default function Vendas() {
   const [datePreset, setDatePreset] = useState<DatePreset>("30d");
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    setLoading(true);
-    Promise.all([
-      supabase.from("transactions").select("id,user_id,amount,net_amount,fee_amount,status,payment_method,customer_name,customer_email,customer_phone,customer_document,product_id,created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("products").select("id, name").eq("user_id", user.id),
-    ]).then(([txRes, prodRes]) => {
-      if (txRes.data) setTransactions(txRes.data as Tables<"transactions">[]);
-      if (prodRes.data) {
-        const map: Record<string, string> = {};
-        prodRes.data.forEach((p) => { map[p.id] = p.name; });
-        setProducts(map);
-      }
-      setLoading(false);
-    });
-  }, [user?.id]);
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, datePreset]);
 

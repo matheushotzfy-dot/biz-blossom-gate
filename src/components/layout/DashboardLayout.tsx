@@ -9,6 +9,7 @@ import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
+import { usePrefetchDashboardData } from "@/hooks/useQueryData";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,6 +17,7 @@ function DashboardLayoutInner() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { profile } = useProfile();
+  usePrefetchDashboardData();
   const navigate = useNavigate();
   const [showApproved, setShowApproved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);

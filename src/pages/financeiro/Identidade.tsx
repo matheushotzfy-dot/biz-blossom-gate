@@ -11,6 +11,8 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   UserCircle, Save, Shield, FileCheck, Key, CheckCircle2,
   Upload, Camera, Image, Loader2, Lock, Info, Fingerprint,
@@ -62,32 +64,23 @@ const pixKeyTypeLabels: Record<string, string> = {
 
 export default function Identidade() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const { profile } = useProfile();
+  const { data: pixKeys = [] } = usePixKeys();
+  const { data: bankAccounts = [] } = useBankAccounts();
   const [nickname, setNickname] = useState("");
   const [saving, setSaving] = useState(false);
   const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null });
   const [uploading, setUploading] = useState<string | null>(null);
-  const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
-  const [bankAccounts, setBankAccounts] = useState<Tables<"bank_accounts">[]>([]);
+  const [nicknameInit, setNicknameInit] = useState(false);
 
-  /* ─── Carregar dados — msDev's ─── */
   useEffect(() => {
-    if (!user) return;
-    const uid = user.id;
-    Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", uid).single(),
-      supabase.from("pix_keys").select("*").eq("user_id", uid).order("created_at") as any,
-      supabase.from("bank_accounts").select("*").eq("user_id", uid).order("created_at"),
-    ]).then(([pRes, pkRes, baRes]) => {
-      if (pRes.data) {
-        setProfile(pRes.data);
-        setNickname(pRes.data.nickname || "");
-      }
-      if (pkRes.data) setPixKeys(pkRes.data as PixKey[]);
-      if (baRes.data) setBankAccounts(baRes.data);
-    });
-    loadKycDocs();
-  }, [user]);
+    if (profile && !nicknameInit) {
+      setNickname(profile.nickname || "");
+      setNicknameInit(true);
+    }
+  }, [profile, nicknameInit]);
+
+  useEffect(() => { loadKycDocs(); }, [user]);
 
   const loadKycDocs = async () => {
     if (!user) return;

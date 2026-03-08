@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useTransactions, useWithdrawals, useProducts as useProductsQuery } from "@/hooks/useQueryData";
 import {
   Activity,
   AlertTriangle,
@@ -92,29 +93,15 @@ function timeAgo(dateStr: string) {
 export default function Dashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
+  const { data: transactions = [], refetch: refetchTx } = useTransactions();
+  const { data: withdrawals = [] } = useWithdrawals(10);
+  const { data: productsData } = useProductsQuery();
+  const products = productsData?.length ?? 0;
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
-  const [products, setProducts] = useState(0);
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
-
-  // Fetch initial data
-  useEffect(() => {
-    if (!user?.id) return;
-
-    Promise.all([
-      supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-      supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    ]).then(([txRes, wdRes, prodRes]) => {
-      if (txRes.data) setTransactions(txRes.data);
-      if (wdRes.data) setWithdrawals(wdRes.data);
-      if (prodRes.count != null) setProducts(prodRes.count);
-    });
-  }, [user?.id]);
 
   // Realtime subscription for transactions
   useEffect(() => {
@@ -124,29 +111,17 @@ export default function Dashboard() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setTransactions(prev => [payload.new as Tables<"transactions">, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setTransactions(prev => prev.map(t => t.id === (payload.new as any).id ? payload.new as Tables<"transactions"> : t));
-          }
-        }
+        () => { refetchTx(); }
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setWithdrawals(prev => [payload.new as Tables<"withdrawals">, ...prev].slice(0, 10));
-          } else if (payload.eventType === 'UPDATE') {
-            setWithdrawals(prev => prev.map(w => w.id === (payload.new as any).id ? payload.new as Tables<"withdrawals"> : w));
-          }
-        }
+        () => { refetchTx(); }
       )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user?.id]);
+  }, [user?.id, refetchTx]);
 
   const filteredTx = useMemo(() => {
     const today = brasiliaToday();

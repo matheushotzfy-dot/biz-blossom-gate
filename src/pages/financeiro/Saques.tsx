@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWithdrawals, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   ArrowDownToLine, Plus, Key, Clock, CheckCircle2, XCircle,
   Rocket, PartyPopper, X, Wallet, TrendingUp, Shield, Zap,
@@ -44,36 +45,20 @@ function SaqueKpi({ label, value, sub, icon: Icon, color, bg }: {
 
 export default function Saques() {
   const { user } = useAuth();
-  const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
-  const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
+  const { data: withdrawals = [], refetch: refetchWithdrawals } = useWithdrawals();
+  const { data: pixKeys = [] } = usePixKeys();
+  const invalidateAll = useInvalidateAll();
   const [selectedPixKeyId, setSelectedPixKeyId] = useState("");
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [approvedPopup, setApprovedPopup] = useState<Tables<"withdrawals"> | null>(null);
 
-  const loadData = async () => {
-    if (!user?.id) return;
-    const [wRes, pkRes] = await Promise.all([
-      supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at") as any,
-    ]);
-    if (wRes.data) {
-      const oldIds = new Set(withdrawals.filter(w => w.status === "approved").map(w => w.id));
-      const newApproved = (wRes.data as Tables<"withdrawals">[]).find(
-        w => w.status === "approved" && !oldIds.has(w.id) && withdrawals.length > 0
-      );
-      if (newApproved) setApprovedPopup(newApproved);
-      setWithdrawals(wRes.data);
-    }
-    if (pkRes.data) setPixKeys(pkRes.data as PixKey[]);
-  };
-
-  useEffect(() => { loadData(); }, [user?.id]);
+  // Poll for withdrawal status changes
   useEffect(() => {
     if (!user?.id) return;
-    const interval = setInterval(loadData, 30000);
+    const interval = setInterval(() => refetchWithdrawals(), 30000);
     return () => clearInterval(interval);
-  }, [user?.id, withdrawals]);
+  }, [user?.id, refetchWithdrawals]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +72,7 @@ export default function Saques() {
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
     if (error) { toast.error("Erro ao solicitar saque"); return; }
     toast.success("Saque solicitado com sucesso!");
-    setOpen(false); setAmount(""); setSelectedPixKeyId(""); loadData();
+    setOpen(false); setAmount(""); setSelectedPixKeyId(""); invalidateAll(["withdrawals"]);
   };
 
   const pending = withdrawals.filter((w) => w.status === "pending");

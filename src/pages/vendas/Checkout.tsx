@@ -8,9 +8,10 @@
  */
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useProducts, useCoupons, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   ExternalLink, Copy, Eye, Settings, Package, CheckCircle, Palette,
   Link2, Plus, Trash2, Ticket, DollarSign, TrendingDown,
@@ -33,27 +34,16 @@ const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigi
 export default function Checkout() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Tables<"products">[]>([]);
+  const { data: products = [], refetch: refetchProducts } = useProducts();
+  const activeProducts = products.filter(p => p.status === "active");
+  const { data: coupons = [], refetch: refetchCoupons } = useCoupons();
+  const invalidateAll = useInvalidateAll();
   const [settingsProduct, setSettingsProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [coupons, setCoupons] = useState<any[]>([]);
   const [couponOpen, setCouponOpen] = useState(false);
   const [couponForm, setCouponForm] = useState({
     code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "",
   });
-
-  /* ─── Data loader — msDev's ─── */
-  const load = async () => {
-    if (!user?.id) return;
-    const [prodRes, coupRes] = await Promise.all([
-      supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: false }),
-      supabase.from("coupons").select("*").order("created_at", { ascending: false }),
-    ]);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (coupRes.data) setCoupons(coupRes.data);
-  };
-
-  useEffect(() => { load(); }, [user?.id]);
 
   const getSlug = (url: string) => url.split("/").pop()!;
   const getLocalLink = (url: string) => `${window.location.origin}/pay/${getSlug(url)}`;
@@ -93,18 +83,18 @@ export default function Checkout() {
     toast.success("Cupom criado!");
     setCouponOpen(false);
     setCouponForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "" });
-    load();
+    invalidateAll(["products", "coupons"]);
   };
 
   const toggleCouponActive = async (id: string, current: boolean) => {
     await supabase.from("coupons").update({ is_active: !current }).eq("id", id);
-    load();
+    invalidateAll(["coupons"]);
   };
 
   const deleteCoupon = async (id: string) => {
     await supabase.from("coupons").delete().eq("id", id);
     toast.success("Cupom removido");
-    load();
+    invalidateAll(["coupons"]);
   };
 
   /* ─── Helpers de nome de produto — msDev's ─── */
@@ -122,7 +112,7 @@ export default function Checkout() {
     <PageShell>
       <PageTitle icon={<Palette className="h-6 w-6" />} title="Checkout" subtitle="Personalize checkouts e gerencie cupons promocionais" />
 
-      {products.length === 0 ? (
+      {activeProducts.length === 0 ? (
         <Panel className="p-10 flex flex-col items-center text-center">
           <EmptyState icon={<Package className="h-7 w-7" />} title="Nenhum produto ativo" subtitle="Crie um produto para configurar seu checkout" />
           <Button className="mt-4 gap-2 rounded-xl gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/20" onClick={() => navigate("/vendas/produtos")}>
@@ -131,7 +121,7 @@ export default function Checkout() {
         </Panel>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {products.map((p, i) => {
+          {activeProducts.map((p, i) => {
             const productCoupons = getProductCouponCount(p.id);
             return (
               <div
@@ -351,7 +341,7 @@ export default function Checkout() {
           product={settingsProduct}
           open={!!settingsProduct}
           onOpenChange={(v) => { if (!v) setSettingsProduct(null); }}
-          onSaved={load}
+          onSaved={() => invalidateAll(["products"])}
         />
       )}
     </PageShell>

@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,24 +23,15 @@ const PAGE_SIZE = 50;
 
 export default function Extrato() {
   const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
-  const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
+  const { data: transactions = [] } = useTransactions();
+  const { data: productsRaw = [] } = useProducts();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [productFilter, setProductFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  useEffect(() => {
-    if (!user?.id) return;
-    Promise.all([
-      supabase.from("transactions").select("id,amount,net_amount,fee_amount,status,payment_method,customer_name,customer_email,product_id,created_at,user_id").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("products").select("id, name").eq("user_id", user.id),
-    ]).then(([txRes, prodRes]) => {
-      if (txRes.data) setTransactions(txRes.data as Tables<"transactions">[]);
-      if (prodRes.data) setProducts(prodRes.data);
-    });
-  }, [user?.id]);
+  const products = useMemo(() => productsRaw.map(p => ({ id: p.id, name: p.name })), [productsRaw]);
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, methodFilter, productFilter]);
 

@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProducts, useInvalidateAll } from "@/hooks/useQueryData";
 import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,8 @@ import { useNavigate } from "react-router-dom";
 export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Tables<"products">[]>([]);
+  const { data: products = [], refetch: loadProducts } = useProducts();
+  const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", description: "", price: "", status: "active", page_url: "" });
@@ -29,17 +31,6 @@ export default function Produtos() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    loadProducts();
-  }, [user?.id]);
-
-  const loadProducts = async () => {
-    if (!user?.id) return;
-    const { data } = await supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (data) setProducts(data);
-  };
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop();
