@@ -223,6 +223,16 @@ export default function PublicCheckout() {
     else if (product.checkout_boleto_enabled) setMethod("boleto");
   }, [product]);
 
+  // Override body overflow for public checkout scroll
+  useEffect(() => {
+    window.document.body.style.overflow = "auto";
+    window.document.body.style.overscrollBehavior = "auto";
+    return () => {
+      window.document.body.style.overflow = "hidden";
+      window.document.body.style.overscrollBehavior = "none";
+    };
+  }, []);
+
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
     const interval = setInterval(async () => {
@@ -432,15 +442,6 @@ export default function PublicCheckout() {
   const sectionClass = "rounded-2xl border border-white/[0.06] bg-[#0f0f12] p-5 md:p-6 space-y-4";
   const labelClass = "text-xs text-white/50 font-semibold flex items-center gap-1.5 uppercase tracking-wide";
 
-  // msDev's — Override body overflow:hidden for public checkout scroll
-  useEffect(() => {
-    window.document.body.style.overflow = "auto";
-    window.document.body.style.overscrollBehavior = "auto";
-    return () => {
-      window.document.body.style.overflow = "hidden";
-      window.document.body.style.overscrollBehavior = "none";
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#08080a] text-white" style={{ "--btn-color": btnColor } as React.CSSProperties}>
