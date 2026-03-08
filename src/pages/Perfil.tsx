@@ -68,7 +68,10 @@ export default function Perfil() {
     setSaving(true);
     const { error } = await supabase.from("profiles").update(form).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar");
-    else toast.success("Perfil atualizado!");
+    else {
+      updateProfile(form);
+      toast.success("Perfil atualizado!");
+    }
     setSaving(false);
   };
 
