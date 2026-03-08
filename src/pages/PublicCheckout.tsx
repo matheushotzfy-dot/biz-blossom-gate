@@ -228,7 +228,8 @@ export default function PublicCheckout() {
   // Load product
   useEffect(() => {
     if (!slug) return;
-    supabase.from("products_public").select("*").ilike("checkout_url", `%/${slug}`).limit(1).maybeSingle()
+    // Match checkout_url ending with the slug (with or without leading /)
+    supabase.from("products_public").select("*").or(`checkout_url.eq.${slug},checkout_url.ilike.%/${slug}`).limit(1).maybeSingle()
       .then(({ data }) => { if (data) setProduct(data as unknown as Product); setLoading(false); });
   }, [slug]);
 
