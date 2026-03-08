@@ -1,15 +1,7 @@
-/**
- * Dados Bancários — Gestão de chaves PIX e contas bancárias
- * @module DadosBancarios
- * @version 3.2.0
- * @author msDev's — Engenharia de Software
- * @description Sistema de gestão financeira com validação rigorosa de chaves PIX,
- *   autocomplete de bancos brasileiros e interface enterprise premium.
- */
-
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useBankAccounts, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Building2, Plus, Trash2, Key, Shield, Fingerprint,
   CreditCard, Landmark, CheckCircle2, AlertCircle, Search,
