@@ -10,7 +10,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useProducts, useCoupons, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   ExternalLink, Copy, Eye, Settings, Package, CheckCircle, Palette,
   Link2, Plus, Trash2, Ticket, DollarSign, TrendingDown,
