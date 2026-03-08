@@ -348,8 +348,9 @@ export default function PublicCheckout() {
     if (docDigits.length !== 11 && docDigits.length !== 14) { toast.error("CPF/CNPJ inválido"); return; }
     if (product.checkout_email_confirm && email !== emailConfirm) { toast.error("Os e-mails não coincidem"); return; }
 
-    firePixelEvent(productPixels, "InitiateCheckout", { content_name: product.name, content_id: product.id, value: totalPrice });
-    firePixelEvent(productPixels, "AddPaymentInfo", { content_name: product.name, content_id: product.id, value: totalPrice });
+    const sessionKey = slug || "default";
+    firePixelEvent(productPixels, "InitiateCheckout", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
+    firePixelEvent(productPixels, "AddPaymentInfo", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
 
     processingRef.current = true; setProcessing(true);
     try {
