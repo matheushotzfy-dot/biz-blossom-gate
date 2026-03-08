@@ -265,7 +265,7 @@ export default function AdminConteudo() {
       }
       toast.success("Curso criado!");
     }
-    loadCourses();
+    reloadCourses();
     setWizardStep("structure");
   };
 
