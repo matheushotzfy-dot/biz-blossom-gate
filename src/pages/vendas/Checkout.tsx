@@ -112,7 +112,7 @@ export default function Checkout() {
     <PageShell>
       <PageTitle icon={<Palette className="h-6 w-6" />} title="Checkout" subtitle="Personalize checkouts e gerencie cupons promocionais" />
 
-      {products.length === 0 ? (
+      {activeProducts.length === 0 ? (
         <Panel className="p-10 flex flex-col items-center text-center">
           <EmptyState icon={<Package className="h-7 w-7" />} title="Nenhum produto ativo" subtitle="Crie um produto para configurar seu checkout" />
           <Button className="mt-4 gap-2 rounded-xl gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/20" onClick={() => navigate("/vendas/produtos")}>
@@ -121,7 +121,7 @@ export default function Checkout() {
         </Panel>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {products.map((p, i) => {
+          {activeProducts.map((p, i) => {
             const productCoupons = getProductCouponCount(p.id);
             return (
               <div
