@@ -35,6 +35,12 @@ import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 import NotFound from "./pages/NotFound";
 
+// Member Area (standalone, Netflix-style)
+import MemberAuth from "./pages/membros/MemberAuth";
+import MemberLayout from "./pages/membros/MemberLayout";
+import MemberHome from "./pages/membros/MemberHome";
+import MemberCourse from "./pages/membros/MemberCourse";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -51,6 +57,13 @@ const App = () => (
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
+              {/* Public Member Area (standalone, Netflix-style) */}
+              <Route path="/membros-area/login" element={<MemberAuth />} />
+              <Route path="/membros-area" element={<MemberLayout />}>
+                <Route index element={<MemberHome />} />
+                <Route path="curso/:courseId" element={<MemberCourse />} />
+              </Route>
+
               {/* Admin Master — server-side role verification */}
               <Route path="/admin-matheus" element={<AdminLogin />} />
               <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
