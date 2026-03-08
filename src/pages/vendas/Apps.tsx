@@ -214,7 +214,7 @@ export default function Apps() {
     }
     setSaving(false);
     if (error) toast.error("Erro ao salvar integração");
-    else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`); closeDialog(); loadData(); }
+    else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`); closeDialog(); invalidateAll(["app_integrations"]); }
   };
 
   const toggleActive = async (int_: AppIntegration) => {
