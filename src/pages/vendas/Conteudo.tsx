@@ -180,12 +180,14 @@ export default function AdminConteudo() {
   useEffect(() => { if (user) { loadCourses(); loadProducts(); loadTransactions(); } }, [user]);
 
   const loadCourses = async () => {
-    const { data } = await supabase.from("courses").select("*").order("sort_order");
+    if (!user) return;
+    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id).order("sort_order");
     if (data) setCourses(data as Course[]);
   };
 
   const loadProducts = async () => {
-    const { data } = await supabase.from("products").select("id, name");
+    if (!user) return;
+    const { data } = await supabase.from("products").select("id, name").eq("user_id", user.id);
     if (data) setProducts(data);
   };
 
