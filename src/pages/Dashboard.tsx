@@ -60,7 +60,7 @@ const STAGGER_CLASSES = ["", "stagger-1", "stagger-2", "stagger-3", "stagger-4",
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-// msDev's — cache date string conversion to avoid repeated Intl calls
+// Cache date string conversion to avoid repeated Intl calls
 const _brasiliaDateCache = new Map<string, string>();
 function toBrasiliaDate(dateStr: string) {
   let cached = _brasiliaDateCache.get(dateStr);
