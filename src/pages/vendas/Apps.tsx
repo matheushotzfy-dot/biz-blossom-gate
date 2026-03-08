@@ -3,6 +3,7 @@ import { Puzzle, Settings2, Trash2, Power, Zap, Check, ChevronRight, Shield, Spa
 import { PageShell, PageTitle, GlowPanel, SectionHeader } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProducts, useAppIntegrations, useInvalidateAll } from "@/hooks/useQueryData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
