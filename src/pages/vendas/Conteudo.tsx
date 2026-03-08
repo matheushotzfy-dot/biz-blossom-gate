@@ -149,35 +149,33 @@ export default function AdminConteudo() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
+  const [transactions, setTransactions] = useState<{ product_id: string | null; status: string; amount: number }[]>([]);
   const [courseStats, setCourseStats] = useState<Record<string, { modules: number; lessons: number }>>({});
 
-  // ── Load data ──
-  useEffect(() => { if (user) { loadCourses(); loadProducts(); } }, [user]);
+  // ── Wizard state ──
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState<WizardStep>("info");
+  const [editCourseId, setEditCourseId] = useState<string | null>(null);
+  const [courseForm, setCourseForm] = useState({
+    title: "", description: "", category: "geral", product_id: "", thumbnail_url: ""
+  });
 
-  const loadCourses = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("courses")
-      .select("*, modules ( id, lessons ( id ) )")
-      .eq("user_id", user.id).order("sort_order");
-    if (data) {
-      const stats: Record<string, { modules: number; lessons: number }> = {};
-      const cleaned = data.map((c: any) => {
-        const mods = c.modules || [];
-        const totalLessons = mods.reduce((a: number, m: any) => a + (m.lessons?.length || 0), 0);
-        stats[c.id] = { modules: mods.length, lessons: totalLessons };
-        const { modules: _, ...rest } = c;
-        return rest;
-      });
-      setCourses(cleaned as Course[]);
-      setCourseStats(stats);
-    }
-  };
+  // ── Course editor state ──
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
 
-  const loadProducts = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("products").select("id, name").eq("user_id", user.id);
-    if (data) setProducts(data);
-  };
+  // ── Module dialog ──
+  const [moduleDialog, setModuleDialog] = useState(false);
+  const [moduleForm, setModuleForm] = useState({ title: "", banner_url: "" });
+
+  // ── Lesson sheet ──
+  const [lessonSheet, setLessonSheet] = useState(false);
+  const [lessonModuleId, setLessonModuleId] = useState<string | null>(null);
+  const [editLessonId, setEditLessonId] = useState<string | null>(null);
+  const [lessonForm, setLessonForm] = useState({
+    title: "", description: "", video_url: "", duration_minutes: "0", is_free: false
+  });
 
   const loadModules = useCallback(async (courseId: string) => {
     const { data: mods } = await supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order");
