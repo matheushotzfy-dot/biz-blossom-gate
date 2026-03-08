@@ -317,7 +317,7 @@ export default function PublicCheckout() {
         payload.cardToken = null; // TODO: Implement PodPay client-side tokenization
       }
       const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
-      if (error || !data?.success) { toast.error(data?.error || error?.message || "Erro ao processar"); setCheckoutState("failed"); return; }
+      if (error || !data?.success) { toast.error("Não foi possível processar seu pagamento. Tente novamente."); setCheckoutState("failed"); return; }
       const result = data.data;
       setTransactionId(result.transactionId);
       if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); toast.info("Retomando pagamento pendente..."); return; }
@@ -343,7 +343,7 @@ export default function PublicCheckout() {
         setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento processado!");
         firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
       }
-    } catch (err) { console.error(err); toast.error("Erro inesperado"); setCheckoutState("failed"); }
+    } catch (_) { toast.error("Instabilidade na rede. Tente novamente em instantes."); setCheckoutState("failed"); }
     finally { setProcessing(false); processingRef.current = false; }
   };
 
@@ -537,11 +537,11 @@ export default function PublicCheckout() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className={labelClass}><FileDigit className="h-3 w-3" /> CPF / CNPJ</Label>
-                <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} />
+                <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} inputMode="numeric" autoComplete="off" />
               </div>
               <div>
                 <Label className={labelClass}><Phone className="h-3 w-3" /> WhatsApp</Label>
-                <Input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} />
+                <Input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} inputMode="tel" autoComplete="tel" />
               </div>
             </div>
           </section>
