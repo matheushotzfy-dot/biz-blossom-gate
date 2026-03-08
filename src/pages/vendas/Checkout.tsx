@@ -88,7 +88,7 @@ export default function Checkout() {
 
   const toggleCouponActive = async (id: string, current: boolean) => {
     await supabase.from("coupons").update({ is_active: !current }).eq("id", id);
-    load();
+    invalidateAll(["coupons"]);
   };
 
   const deleteCoupon = async (id: string) => {
