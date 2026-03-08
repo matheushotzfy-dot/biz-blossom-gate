@@ -180,12 +180,14 @@ export default function AdminConteudo() {
   useEffect(() => { if (user) { loadCourses(); loadProducts(); loadTransactions(); } }, [user]);
 
   const loadCourses = async () => {
-    const { data } = await supabase.from("courses").select("*").order("sort_order");
+    if (!user) return;
+    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id).order("sort_order");
     if (data) setCourses(data as Course[]);
   };
 
   const loadProducts = async () => {
-    const { data } = await supabase.from("products").select("id, name");
+    if (!user) return;
+    const { data } = await supabase.from("products").select("id, name").eq("user_id", user.id);
     if (data) setProducts(data);
   };
 
@@ -715,6 +717,19 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
   products: Product[];
 }) {
   const product = products.find(p => p.id === course.product_id);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const getMemberLink = () => {
+    const base = window.location.origin;
+    return `${base}/membros/curso/${course.id}`;
+  };
+
+  const copyMemberLink = () => {
+    navigator.clipboard.writeText(getMemberLink());
+    setCopiedLink(true);
+    toast.success("Link da área de membros copiado!");
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   return (
     <GlowPanel className="p-0 overflow-hidden">
@@ -752,6 +767,18 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
                 </span>
               </div>
             )}
+
+            {/* Member area link */}
+            {course.is_published && (
+              <div className="flex items-center gap-2 mt-2.5 p-2 rounded-lg bg-primary/[0.04] border border-primary/10">
+                <LinkIcon className="h-3 w-3 text-primary shrink-0" />
+                <span className="text-[10px] text-muted-foreground truncate flex-1 font-mono">{getMemberLink()}</span>
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] gap-1 rounded-md text-primary hover:bg-primary/10 shrink-0" onClick={copyMemberLink}>
+                  {copiedLink ? <Check className="h-3 w-3" /> : <LinkIcon className="h-3 w-3" />}
+                  {copiedLink ? "Copiado" : "Copiar"}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -766,6 +793,11 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
             <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8 border-border/40 hover:border-primary/20 hover:bg-primary/[0.02]" onClick={onManage}>
               <Layers className="h-3 w-3" /> Gerenciar Conteúdo
             </Button>
+            {course.is_published && (
+              <Button variant="outline" size="sm" className="rounded-xl text-[11px] gap-1.5 h-8 border-primary/30 text-primary hover:bg-primary/5" onClick={() => window.open(getMemberLink(), "_blank")}>
+                <Eye className="h-3 w-3" /> Visualizar
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/5 rounded-xl" onClick={onDelete}>
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
