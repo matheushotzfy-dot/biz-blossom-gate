@@ -537,7 +537,7 @@ export default function PublicCheckout() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className={labelClass}><FileDigit className="h-3 w-3" /> CPF / CNPJ</Label>
-                <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} />
+                <Input value={document} onChange={(e) => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} inputMode="numeric" autoComplete="off" />
               </div>
               <div>
                 <Label className={labelClass}><Phone className="h-3 w-3" /> WhatsApp</Label>
