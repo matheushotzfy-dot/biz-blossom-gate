@@ -541,7 +541,7 @@ export default function PublicCheckout() {
               </div>
               <div>
                 <Label className={labelClass}><Phone className="h-3 w-3" /> WhatsApp</Label>
-                <Input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} />
+                <Input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} inputMode="tel" autoComplete="tel" />
               </div>
             </div>
           </section>
