@@ -94,7 +94,7 @@ export default function Checkout() {
   const deleteCoupon = async (id: string) => {
     await supabase.from("coupons").delete().eq("id", id);
     toast.success("Cupom removido");
-    load();
+    invalidateAll(["coupons"]);
   };
 
   /* ─── Helpers de nome de produto — msDev's ─── */
