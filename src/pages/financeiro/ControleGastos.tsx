@@ -98,7 +98,7 @@ export default function ControleGastos() {
   const handleDelete = async (id: string) => {
     await supabase.from("expenses").delete().eq("id", id);
     toast.success("Gasto removido");
-    loadData();
+    invalidateAll(["expenses"]);
   };
 
   const getCatInfo = (cat: string) => CATEGORIES.find((c) => c.value === cat) || CATEGORIES[5];
