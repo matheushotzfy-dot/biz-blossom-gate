@@ -239,11 +239,32 @@ function fireKwaiEvent(pixelId: string, eventName: string, params?: Record<strin
   }
 }
 
+// ============ EVENT ID (FB Dedup) ============
+
+let _eventIdCounter = 0;
+function generateEventId(eventName: string): string {
+  _eventIdCounter++;
+  return `${eventName}_${Date.now()}_${_eventIdCounter}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// Store eventId per checkout session for InitiateCheckout→Purchase dedup
+const _sessionEventIds = new Map<string, string>();
+
+export function getOrCreateEventId(eventName: string, sessionKey?: string): string {
+  if (sessionKey) {
+    const key = `${sessionKey}_${eventName}`;
+    let eid = _sessionEventIds.get(key);
+    if (!eid) {
+      eid = generateEventId(eventName);
+      _sessionEventIds.set(key, eid);
+    }
+    return eid;
+  }
+  return generateEventId(eventName);
+}
+
 // ============ PUBLIC API ============
 
-/**
- * Initialize all pixel scripts for the given configs
- */
 export function initPixels(pixels: PixelConfig[]) {
   const active = pixels.filter(p => p.is_active);
   for (const px of active) {
