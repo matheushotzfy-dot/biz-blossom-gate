@@ -232,10 +232,11 @@ export default function PublicCheckout() {
 
     async function loadCheckoutData() {
       // Step 1: Load product first (required for step 2)
+      // Match slug against full URLs: /pay/SLUG or /checkout/SLUG
       const { data: prod } = await supabase
         .from("products_public")
         .select("*")
-        .or(`checkout_url.eq.${slug},checkout_url.eq./${slug}`)
+        .or(`checkout_url.like.%/pay/${slug},checkout_url.like.%/checkout/${slug},checkout_url.eq.${slug},checkout_url.eq./${slug}`)
         .limit(1)
         .maybeSingle();
 
