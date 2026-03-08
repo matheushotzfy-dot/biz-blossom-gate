@@ -150,6 +150,7 @@ export default function AdminConteudo() {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [transactions, setTransactions] = useState<{ product_id: string | null; status: string; amount: number }[]>([]);
+  const [courseStats, setCourseStats] = useState<Record<string, { modules: number; lessons: number }>>({});
 
   // ── Wizard state ──
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -181,8 +182,21 @@ export default function AdminConteudo() {
 
   const loadCourses = async () => {
     if (!user) return;
-    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id).order("sort_order");
-    if (data) setCourses(data as Course[]);
+    const { data } = await supabase.from("courses")
+      .select("*, modules ( id, lessons ( id ) )")
+      .eq("user_id", user.id).order("sort_order");
+    if (data) {
+      const stats: Record<string, { modules: number; lessons: number }> = {};
+      const cleaned = data.map((c: any) => {
+        const mods = c.modules || [];
+        const totalLessons = mods.reduce((a: number, m: any) => a + (m.lessons?.length || 0), 0);
+        stats[c.id] = { modules: mods.length, lessons: totalLessons };
+        const { modules: _, ...rest } = c;
+        return rest;
+      });
+      setCourses(cleaned as Course[]);
+      setCourseStats(stats);
+    }
   };
 
   const loadProducts = async () => {
@@ -213,11 +227,7 @@ export default function AdminConteudo() {
 
   // ── Course stats ──
   const getCourseStats = (courseId: string) => {
-    if (selectedCourse === courseId && modules.length > 0) {
-      const totalLessons = modules.reduce((a, m) => a + m.lessons.length, 0);
-      return { modules: modules.length, lessons: totalLessons };
-    }
-    return { modules: 0, lessons: 0 };
+    return courseStats[courseId] || { modules: 0, lessons: 0 };
   };
 
   // ── Course CRUD ──
