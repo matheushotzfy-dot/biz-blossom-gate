@@ -271,7 +271,7 @@ export default function AdminConteudo() {
 
   const togglePublish = async (id: string, cur: boolean) => {
     await supabase.from("courses").update({ is_published: !cur }).eq("id", id);
-    loadCourses();
+    reloadCourses();
     toast.success(cur ? "Despublicado" : "Publicado!");
   };
 
