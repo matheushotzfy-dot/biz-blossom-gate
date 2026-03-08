@@ -206,3 +206,11 @@ function DashboardLayoutInner() {
     </SidebarProvider>
   );
 }
+
+export function DashboardLayout() {
+  return (
+    <ProfileProvider>
+      <DashboardLayoutInner />
+    </ProfileProvider>
+  );
+}
