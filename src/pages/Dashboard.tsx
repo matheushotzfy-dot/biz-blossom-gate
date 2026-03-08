@@ -109,12 +109,10 @@ export default function Dashboard() {
       supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
       supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-    ]).then(([txRes, wdRes, prodRes, profRes]) => {
+    ]).then(([txRes, wdRes, prodRes]) => {
       if (txRes.data) setTransactions(txRes.data);
       if (wdRes.data) setWithdrawals(wdRes.data);
       if (prodRes.count != null) setProducts(prodRes.count);
-      if (profRes.data) setProfile(profRes.data);
     });
   }, [user?.id]);
 
