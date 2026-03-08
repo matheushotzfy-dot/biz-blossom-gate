@@ -187,6 +187,8 @@ export default function Auth() {
                       value={document}
                       onChange={(e) => handleDocumentChange(e.target.value)}
                       placeholder="000.000.000-00"
+                      inputMode="numeric"
+                      autoComplete="off"
                       className={`mt-1 ${documentError ? "border-destructive" : ""}`}
                       required={!isLogin}
                     />
