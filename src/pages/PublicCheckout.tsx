@@ -225,43 +225,63 @@ export default function PublicCheckout() {
   const mins = String(Math.floor(timeLeft / 60)).padStart(2, "0");
   const secs = String(timeLeft % 60).padStart(2, "0");
 
-  // Load product
+  // Load product, pixels, and bumps in parallel for minimal latency
   useEffect(() => {
     if (!slug) return;
-    // Match checkout_url ending with the slug (with or without leading /)
-    supabase.from("products_public").select("*").or(`checkout_url.eq.${slug},checkout_url.ilike.%/${slug}`).limit(1).maybeSingle()
-      .then(({ data }) => { if (data) setProduct(data as unknown as Product); setLoading(false); });
-  }, [slug]);
+    let cancelled = false;
 
-  // Load pixels
-  useEffect(() => {
-    if (!product?.id) return;
-    supabase.from("product_pixels_public" as any).select("*").eq("product_id", product.id).eq("is_active", true)
-      .then(({ data }) => {
-        if (!data || data.length === 0) return;
-        const configs: PixelConfig[] = data.map((d: any) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] }));
+    async function loadCheckoutData() {
+      // Step 1: Load product first (required for step 2)
+      const { data: prod } = await supabase
+        .from("products_public")
+        .select("*")
+        .or(`checkout_url.eq.${slug},checkout_url.eq./${slug}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (cancelled) return;
+      if (!prod) { setLoading(false); return; }
+      setProduct(prod as unknown as Product);
+
+      // Step 2: Load pixels + bumps in parallel (both need product.id)
+      const [pixelsRes, bumpsRes] = await Promise.all([
+        supabase.from("product_pixels_public" as any).select("*").eq("product_id", prod.id).eq("is_active", true),
+        supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", prod.id).eq("is_active", true).order("sort_order"),
+      ]);
+
+      if (cancelled) return;
+
+      // Process pixels
+      if (pixelsRes.data && pixelsRes.data.length > 0) {
+        const configs: PixelConfig[] = pixelsRes.data.map((d: any) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] }));
         setProductPixels(configs);
         if (!pixelsInitialized.current) {
           initPixels(configs); pixelsInitialized.current = true;
           setTimeout(() => {
-            firePixelEvent(configs, "PageView", { content_name: product.name, content_id: product.id, value: Number(product.price) });
-            firePixelEvent(configs, "ViewContent", { content_name: product.name, content_id: product.id, value: Number(product.price) });
-          }, 500);
+            firePixelEvent(configs, "PageView", { content_name: prod.name!, content_id: prod.id!, value: Number(prod.price) });
+            firePixelEvent(configs, "ViewContent", { content_name: prod.name!, content_id: prod.id!, value: Number(prod.price) });
+          }, 300);
         }
-      });
-  }, [product?.id]);
+      }
 
-  // Load order bumps
-  useEffect(() => {
-    if (!product?.id) return;
-    supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", product.id).eq("is_active", true).order("sort_order")
-      .then(async ({ data: bumps }) => {
-        if (!bumps || bumps.length === 0) return;
-        const { data: products } = await supabase.from("products_public").select("id, name, description, price, image_url").in("id", bumps.map(b => b.bump_product_id));
-        if (!products) return;
-        setOrderBumps(bumps.map(b => ({ id: b.id, bump_product_id: b.bump_product_id, bump_product: products.find(p => p.id === b.bump_product_id) as any })).filter(b => b.bump_product));
-      });
-  }, [product?.id]);
+      // Process bumps
+      if (bumpsRes.data && bumpsRes.data.length > 0) {
+        const bumpIds = bumpsRes.data.map(b => b.bump_product_id);
+        const { data: bumpProducts } = await supabase.from("products_public").select("id, name, description, price, image_url").in("id", bumpIds);
+        if (!cancelled && bumpProducts) {
+          setOrderBumps(bumpsRes.data.map(b => ({
+            id: b.id, bump_product_id: b.bump_product_id,
+            bump_product: bumpProducts.find(p => p.id === b.bump_product_id) as any,
+          })).filter(b => b.bump_product));
+        }
+      }
+
+      setLoading(false);
+    }
+
+    loadCheckoutData();
+    return () => { cancelled = true; };
+  }, [slug]);
 
   // Set default method
   useEffect(() => {
@@ -278,18 +298,21 @@ export default function PublicCheckout() {
     return () => { window.document.body.style.overflow = "hidden"; window.document.body.style.overscrollBehavior = "none"; };
   }, []);
 
-  // Poll transaction status
+  // Poll transaction status with adaptive interval
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
+    let pollCount = 0;
     const interval = setInterval(async () => {
+      pollCount++;
       const { data } = await supabase.from("transactions").select("status").eq("id", transactionId).single();
       if (data?.status === "completed") {
         setCheckoutState("approved"); clearCheckoutSession(slug || ""); clearInterval(interval);
-        if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price) });
+        if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
       } else if (data?.status === "failed" || data?.status === "cancelled") {
         setCheckoutState("failed"); clearCheckoutSession(slug || ""); clearInterval(interval);
       }
-    }, 5000);
+      // After 60 polls (5min), slow down to 15s
+    }, pollCount > 60 ? 15000 : 5000);
     return () => clearInterval(interval);
   }, [checkoutState, transactionId, slug]);
 
@@ -325,8 +348,9 @@ export default function PublicCheckout() {
     if (docDigits.length !== 11 && docDigits.length !== 14) { toast.error("CPF/CNPJ inválido"); return; }
     if (product.checkout_email_confirm && email !== emailConfirm) { toast.error("Os e-mails não coincidem"); return; }
 
-    firePixelEvent(productPixels, "InitiateCheckout", { content_name: product.name, content_id: product.id, value: totalPrice });
-    firePixelEvent(productPixels, "AddPaymentInfo", { content_name: product.name, content_id: product.id, value: totalPrice });
+    const sessionKey = slug || "default";
+    firePixelEvent(productPixels, "InitiateCheckout", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
+    firePixelEvent(productPixels, "AddPaymentInfo", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
 
     processingRef.current = true; setProcessing(true);
     try {
@@ -344,17 +368,17 @@ export default function PublicCheckout() {
       if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); return; }
       if (method === "pix" && result.pix) {
         setPixData(result.pix); setCheckoutState("pending");
-        firePixelEvent(productPixels, "PixGenerated", { content_name: product.name, content_id: product.id, value: totalPrice });
+        firePixelEvent(productPixels, "PixGenerated", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
       } else if (method === "boleto" && result.boleto) {
         setBoletoData(result.boleto); setCheckoutState("pending");
-        firePixelEvent(productPixels, "BoletoGenerated", { content_name: product.name, content_id: product.id, value: totalPrice });
+        firePixelEvent(productPixels, "BoletoGenerated", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
       } else if (method === "credit_card") {
         if (result.status === "paid" || result.status === "approved") {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
-          firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
+          firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
         } else if (result.secureUrl) { window.location.href = result.secureUrl; }
-        else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice }); }
-      } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice }); }
+        else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
+      } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
     } catch { toast.error("Instabilidade na rede. Tente novamente."); setCheckoutState("failed"); }
     finally { setProcessing(false); processingRef.current = false; }
   };

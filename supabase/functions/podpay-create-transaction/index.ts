@@ -163,15 +163,34 @@ Deno.serve(async (req) => {
 
     safeLog('Creating PodPay transaction', { productId: product.id, paymentMethod, amount: amountInCents });
 
-    const response = await fetch('https://api.podpay.co/v1/transactions', {
-      method: 'POST',
-      headers: {
-        'Authorization': auth,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(podpayPayload),
-    });
+    const controller = new AbortController();
+    const podpayTimeout = setTimeout(() => controller.abort(), 15000);
+
+    let response: Response;
+    try {
+      response = await fetch('https://api.podpay.co/v1/transactions', {
+        method: 'POST',
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(podpayPayload),
+        signal: controller.signal,
+      });
+    } catch (fetchError) {
+      clearTimeout(podpayTimeout);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        safeLog('PodPay timeout after 15s', { productId: product.id });
+        return new Response(
+          JSON.stringify({ success: false, error: 'Processando pagamento. Aguarde e tente novamente.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw fetchError;
+    } finally {
+      clearTimeout(podpayTimeout);
+    }
 
     const podpayData = await response.json();
 

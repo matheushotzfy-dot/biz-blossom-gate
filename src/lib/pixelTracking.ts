@@ -191,7 +191,11 @@ function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<s
   const w = window as any;
   if (!w.fbq) return;
   const fbEvent = FB_EVENT_MAP[eventName] || eventName;
-  w.fbq('trackSingle', pixelId, fbEvent, params || {});
+  const eventId = params?.event_id;
+  const fbParams = { ...params };
+  delete fbParams.event_id;
+  // Pass eventID for dedup between browser pixel and server CAPI
+  w.fbq('trackSingle', pixelId, fbEvent, fbParams, eventId ? { eventID: eventId } : undefined);
 }
 
 function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Record<string, any>) {
@@ -239,11 +243,32 @@ function fireKwaiEvent(pixelId: string, eventName: string, params?: Record<strin
   }
 }
 
+// ============ EVENT ID (FB Dedup) ============
+
+let _eventIdCounter = 0;
+function generateEventId(eventName: string): string {
+  _eventIdCounter++;
+  return `${eventName}_${Date.now()}_${_eventIdCounter}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// Store eventId per checkout session for InitiateCheckout→Purchase dedup
+const _sessionEventIds = new Map<string, string>();
+
+export function getOrCreateEventId(eventName: string, sessionKey?: string): string {
+  if (sessionKey) {
+    const key = `${sessionKey}_${eventName}`;
+    let eid = _sessionEventIds.get(key);
+    if (!eid) {
+      eid = generateEventId(eventName);
+      _sessionEventIds.set(key, eid);
+    }
+    return eid;
+  }
+  return generateEventId(eventName);
+}
+
 // ============ PUBLIC API ============
 
-/**
- * Initialize all pixel scripts for the given configs
- */
 export function initPixels(pixels: PixelConfig[]) {
   const active = pixels.filter(p => p.is_active);
   for (const px of active) {
@@ -263,25 +288,28 @@ export function initPixels(pixels: PixelConfig[]) {
 export function firePixelEvent(
   pixels: PixelConfig[],
   eventName: string,
-  params?: { value?: number; currency?: string; content_name?: string; content_id?: string }
+  params?: { value?: number; currency?: string; content_name?: string; content_id?: string; event_id?: string; session_key?: string }
 ) {
   const active = pixels.filter(p => p.is_active);
+  // Generate a shared eventId for FB dedup across browser+server
+  const eventId = params?.event_id || getOrCreateEventId(eventName, params?.session_key);
 
   for (const px of active) {
-    // Check if this event is in the pixel's configured events
     const events = Array.isArray(px.events) ? px.events : [];
     if (!events.includes(eventName)) continue;
 
-    // Adjust value for PIX/Boleto conversion
-    let eventParams = { ...params, currency: params?.currency || 'BRL' };
+    let eventParams: Record<string, any> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
+    // Remove internal keys
+    delete eventParams.session_key;
+
     if (eventName === 'PixGenerated' && px.fire_on_pix_qr) {
       eventParams.value = ((params?.value || 0) * px.pix_conversion_value) / 100;
     } else if (eventName === 'BoletoGenerated' && px.fire_on_boleto) {
       eventParams.value = ((params?.value || 0) * px.boleto_conversion_value) / 100;
     } else if (eventName === 'PixGenerated' && !px.fire_on_pix_qr) {
-      continue; // Skip if not configured to fire on PIX
+      continue;
     } else if (eventName === 'BoletoGenerated' && !px.fire_on_boleto) {
-      continue; // Skip if not configured to fire on boleto
+      continue;
     }
 
     switch (px.platform) {

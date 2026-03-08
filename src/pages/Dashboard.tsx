@@ -60,7 +60,7 @@ const STAGGER_CLASSES = ["", "stagger-1", "stagger-2", "stagger-3", "stagger-4",
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-// msDev's — cache date string conversion to avoid repeated Intl calls
+// Cache date string conversion to avoid repeated Intl calls
 const _brasiliaDateCache = new Map<string, string>();
 function toBrasiliaDate(dateStr: string) {
   let cached = _brasiliaDateCache.get(dateStr);
@@ -145,7 +145,7 @@ export default function Dashboard() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod]);
 
-  // msDev's — memoize all derived metrics to avoid recomputing on every render
+  // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _pending = filteredTx.filter((t) => t.status === "pending");
@@ -186,11 +186,15 @@ export default function Dashboard() {
     const totalChargebacksRefunds = transactions
       .filter(t => t.status === "chargeback" || t.status === "refunded")
       .reduce((acc, t) => acc + Number(t.net_amount), 0);
+    // Subtract retained amounts that haven't been released yet
+    const totalRetained = transactions
+      .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
+      .reduce((acc, t) => acc + Number(t.retained_amount), 0);
 
-    return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds };
+    return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds - totalRetained };
   }, [transactions, withdrawals]);
 
-  // msDev's — optimized chart: pre-index transactions by date to avoid O(N*M)
+  // Optimized chart: pre-index transactions by date to avoid O(N*M)
   const chartData = useMemo(() => {
     const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
 

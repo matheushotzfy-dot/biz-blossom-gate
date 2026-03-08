@@ -211,13 +211,16 @@ Deno.serve(async (req) => {
           .eq('is_active', true);
 
         if (webhooks) {
-          for (const webhook of webhooks) {
+          const dispatches = webhooks.map(async (webhook) => {
             const eventType = `payment.${ourStatus}`;
             if (webhook.events.length === 0 || webhook.events.includes(eventType)) {
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 5000);
               try {
                 await fetch(webhook.url, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
+                  signal: controller.signal,
                   body: JSON.stringify({
                     event: eventType,
                     data: {
@@ -231,9 +234,12 @@ Deno.serve(async (req) => {
                 });
               } catch (e) {
                 safeLog('Webhook dispatch error', { error: e instanceof Error ? e.message : 'unknown' });
+              } finally {
+                clearTimeout(timeout);
               }
             }
-          }
+          });
+          await Promise.allSettled(dispatches);
         }
       }
     }
