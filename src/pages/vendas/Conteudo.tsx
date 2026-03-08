@@ -229,7 +229,6 @@ export default function AdminConteudo() {
   const getCourseStats = (courseId: string) => {
     return courseStats[courseId] || { modules: 0, lessons: 0 };
   };
-  };
 
   // ── Course CRUD ──
   const openWizardNew = () => {
