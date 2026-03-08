@@ -11,6 +11,8 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   UserCircle, Save, Shield, FileCheck, Key, CheckCircle2,
   Upload, Camera, Image, Loader2, Lock, Info, Fingerprint,
