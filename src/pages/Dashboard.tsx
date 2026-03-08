@@ -186,8 +186,12 @@ export default function Dashboard() {
     const totalChargebacksRefunds = transactions
       .filter(t => t.status === "chargeback" || t.status === "refunded")
       .reduce((acc, t) => acc + Number(t.net_amount), 0);
+    // Subtract retained amounts that haven't been released yet
+    const totalRetained = transactions
+      .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
+      .reduce((acc, t) => acc + Number(t.retained_amount), 0);
 
-    return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds };
+    return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds - totalRetained };
   }, [transactions, withdrawals]);
 
   // msDev's — optimized chart: pre-index transactions by date to avoid O(N*M)
