@@ -85,7 +85,7 @@ export default function Perfil() {
     if (error) { toast.error("Erro no upload"); setUploading(false); return; }
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
     await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("user_id", user.id);
-    setProfile((p) => p ? { ...p, avatar_url: data.publicUrl } : p);
+    updateProfile({ avatar_url: data.publicUrl });
     toast.success("Foto atualizada!");
     setUploading(false);
   };
