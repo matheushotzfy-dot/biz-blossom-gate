@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import {
   ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X,
   Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
