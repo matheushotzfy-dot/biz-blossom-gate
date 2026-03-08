@@ -26,8 +26,8 @@ export function useAdminGuard() {
 
     // Check admin role first, then employee
     Promise.all([
-      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
-      supabase.rpc("has_role", { _user_id: user.id, _role: "employee" as any }),
+      supabase.rpc("current_user_has_role", { _role: "admin" }),
+      supabase.rpc("current_user_has_role", { _role: "employee" as any }),
     ]).then(([adminRes, employeeRes]) => {
       const hasAdmin = adminRes.data === true;
       const hasEmployee = employeeRes.data === true;

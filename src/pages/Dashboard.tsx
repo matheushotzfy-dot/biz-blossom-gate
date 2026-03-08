@@ -172,6 +172,18 @@ export default function Dashboard() {
     };
   }, [filteredTx]);
 
+  const [balanceAdjustments, setBalanceAdjustments] = useState(0);
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("balance_adjustments").select("amount, type").eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) {
+          const adj = data.reduce((acc, a) => acc + (a.type === "credit" ? Number(a.amount) : -Number(a.amount)), 0);
+          setBalanceAdjustments(adj);
+        }
+      });
+  }, [user?.id]);
+
   const { withdrawalPending, balance } = useMemo(() => {
     const _withdrawalPending = withdrawals
       .filter((w) => w.status === "pending")
@@ -186,13 +198,12 @@ export default function Dashboard() {
     const totalChargebacksRefunds = transactions
       .filter(t => t.status === "chargeback" || t.status === "refunded")
       .reduce((acc, t) => acc + Number(t.net_amount), 0);
-    // Subtract retained amounts that haven't been released yet
     const totalRetained = transactions
       .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
       .reduce((acc, t) => acc + Number(t.retained_amount), 0);
 
-    return { withdrawalPending: _withdrawalPending, balance: totalRevenue - totalWithdrawn - totalChargebacksRefunds - totalRetained };
-  }, [transactions, withdrawals]);
+    return { withdrawalPending: _withdrawalPending, balance: totalRevenue + balanceAdjustments - totalWithdrawn - totalChargebacksRefunds - totalRetained };
+  }, [transactions, withdrawals, balanceAdjustments]);
 
   // Optimized chart: pre-index transactions by date to avoid O(N*M)
   const chartData = useMemo(() => {
