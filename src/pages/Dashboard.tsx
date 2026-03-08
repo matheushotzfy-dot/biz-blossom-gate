@@ -91,6 +91,7 @@ function timeAgo(dateStr: string) {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
@@ -99,7 +100,6 @@ export default function Dashboard() {
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
 
   // Fetch initial data
   useEffect(() => {
