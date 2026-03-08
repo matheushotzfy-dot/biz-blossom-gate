@@ -213,7 +213,7 @@ export default function DadosBancarios() {
     setOpen(false);
     setSelectedBank({ name: "", code: "" });
     setForm({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
-    loadAccounts();
+    invalidateAll(["bank_accounts"]);
   };
 
   const handleDelete = async (id: string) => {
