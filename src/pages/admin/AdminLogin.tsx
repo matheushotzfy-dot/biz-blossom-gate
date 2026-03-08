@@ -24,14 +24,16 @@ export default function AdminLogin() {
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw authError;
 
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authData.user.id)
-        .in("role", ["admin", "employee"])
-        .maybeSingle();
+      // Server-side role verification via SECURITY DEFINER function
+      const [adminRes, employeeRes] = await Promise.all([
+        supabase.rpc("current_user_has_role", { _role: "admin" }),
+        supabase.rpc("current_user_has_role", { _role: "employee" as any }),
+      ]);
 
-      if (roleError || !roleData) {
+      const hasAdmin = adminRes.data === true;
+      const hasEmployee = employeeRes.data === true;
+
+      if (!hasAdmin && !hasEmployee) {
         await supabase.auth.signOut();
         setError("Acesso negado. Você não tem permissão de administrador.");
         return;
