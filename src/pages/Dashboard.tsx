@@ -93,29 +93,35 @@ function timeAgo(dateStr: string) {
 export default function Dashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
+  const { data: transactions = [], refetch: refetchTx } = useTransactions();
+  const { data: withdrawals = [] } = useWithdrawals(10);
+  const { data: productsData } = useProductsQuery();
+  const products = productsData?.length ?? 0;
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
-  const [products, setProducts] = useState(0);
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
 
-  // Fetch initial data
+  // Realtime subscription for transactions
   useEffect(() => {
     if (!user?.id) return;
+    const channel = supabase
+      .channel('dashboard-transactions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` },
+        () => { refetchTx(); }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` },
+        () => { refetchTx(); }
+      )
+      .subscribe();
 
-    Promise.all([
-      supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-      supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    ]).then(([txRes, wdRes, prodRes]) => {
-      if (txRes.data) setTransactions(txRes.data);
-      if (wdRes.data) setWithdrawals(wdRes.data);
-      if (prodRes.count != null) setProducts(prodRes.count);
-    });
-  }, [user?.id]);
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, refetchTx]);
 
   // Realtime subscription for transactions
   useEffect(() => {
