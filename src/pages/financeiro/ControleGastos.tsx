@@ -49,8 +49,11 @@ function GastoKpi({ label, value, sub, icon: Icon, color, bg }: {
 
 export default function ControleGastos() {
   const { user } = useAuth();
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [revenue, setRevenue] = useState(0);
+  const { data: expensesData = [] } = useExpenses();
+  const expenses = expensesData as Expense[];
+  const { data: txData = [] } = useTransactions();
+  const revenue = useMemo(() => txData.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0), [txData]);
+  const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ category: "anuncios", description: "", amount: "", expense_date: new Date().toISOString().split("T")[0] });
   const [filterCat, setFilterCat] = useState("all");
@@ -58,18 +61,6 @@ export default function ControleGastos() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
-
-  const loadData = async () => {
-    if (!user?.id) return;
-    const [expRes, txRes] = await Promise.all([
-      supabase.from("expenses").select("*").eq("user_id", user.id).order("expense_date", { ascending: false }),
-      supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed"),
-    ]);
-    if (expRes.data) setExpenses(expRes.data as Expense[]);
-    if (txRes.data) setRevenue(txRes.data.reduce((a, t) => a + Number(t.net_amount), 0));
-  };
-
-  useEffect(() => { loadData(); }, [user?.id]);
 
   const filtered = useMemo(() => {
     return expenses.filter((e) => {
