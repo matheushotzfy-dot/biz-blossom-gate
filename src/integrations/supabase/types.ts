@@ -1367,7 +1367,7 @@ export type Database = {
           amount: number | null
           buyer_email_masked: string | null
           buyer_name_masked: string | null
-          buyer_phone: string | null
+          buyer_phone_masked: string | null
           created_at: string | null
           id: string | null
           reason: string | null
@@ -1383,7 +1383,7 @@ export type Database = {
           amount?: number | null
           buyer_email_masked?: never
           buyer_name_masked?: never
-          buyer_phone?: string | null
+          buyer_phone_masked?: never
           created_at?: string | null
           id?: string | null
           reason?: string | null
@@ -1399,7 +1399,7 @@ export type Database = {
           amount?: number | null
           buyer_email_masked?: never
           buyer_name_masked?: never
-          buyer_phone?: string | null
+          buyer_phone_masked?: never
           created_at?: string | null
           id?: string | null
           reason?: string | null
