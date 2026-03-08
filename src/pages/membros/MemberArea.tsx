@@ -38,15 +38,25 @@ export default function MemberArea() {
 
   const loadCourses = async () => {
     if (!user) return;
+    
+    // Get courses the user has purchased access to
     const { data: access } = await supabase
       .from("user_access").select("course_id").eq("user_id", user.id).eq("status", "active");
-    if (!access || access.length === 0) { setLoading(false); return; }
+    const accessCourseIds = access?.map(a => a.course_id) || [];
 
-    const courseIds = access.map(a => a.course_id);
+    // Get courses the user OWNS (seller = automatic full access)
+    const { data: ownedCourses } = await supabase
+      .from("courses").select("id").eq("user_id", user.id);
+    const ownedCourseIds = ownedCourses?.map(c => c.id) || [];
+
+    // Merge unique course IDs
+    const allCourseIds = [...new Set([...accessCourseIds, ...ownedCourseIds])];
+    if (allCourseIds.length === 0) { setLoading(false); return; }
+
     const { data: coursesData } = await supabase
       .from("courses")
-      .select(`id, title, description, thumbnail_url, category, modules ( id, title, banner_url, sort_order, lessons ( id ) )`)
-      .in("id", courseIds).eq("is_published", true).order("sort_order");
+      .select(`id, title, description, thumbnail_url, category, user_id, modules ( id, title, banner_url, sort_order, lessons ( id ) )`)
+      .in("id", allCourseIds).order("sort_order");
     if (!coursesData) { setLoading(false); return; }
 
     const { data: progress } = await supabase

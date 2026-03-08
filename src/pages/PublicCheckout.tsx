@@ -1,10 +1,3 @@
-/**
- * PublicCheckout — Ultra High-Conversion Checkout
- * @version 5.0.0
- * @description Checkout otimizado para máxima conversão com psicologia de persuasão,
- *   design premium, social proof avançado, urgência inteligente e UX impecável.
- */
-
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";

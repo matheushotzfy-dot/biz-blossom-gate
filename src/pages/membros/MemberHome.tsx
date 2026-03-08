@@ -20,12 +20,21 @@ export default function MemberHome() {
 
   const loadCourses = async () => {
     if (!user) return;
+    
+    // Get purchased course access
     const { data: access } = await supabase.from("user_access").select("course_id").eq("user_id", user.id).eq("status", "active");
-    if (!access || access.length === 0) { setLoading(false); return; }
-    const courseIds = access.map(a => a.course_id);
+    const accessIds = access?.map(a => a.course_id) || [];
+    
+    // Get owned courses (seller auto-access)
+    const { data: owned } = await supabase.from("courses").select("id").eq("user_id", user.id);
+    const ownedIds = owned?.map(c => c.id) || [];
+    
+    const allIds = [...new Set([...accessIds, ...ownedIds])];
+    if (allIds.length === 0) { setLoading(false); return; }
+    
     const { data: coursesData } = await supabase.from("courses")
       .select("id, title, description, thumbnail_url, category, modules ( id, title, banner_url, sort_order, lessons ( id ) )")
-      .in("id", courseIds).eq("is_published", true).order("sort_order");
+      .in("id", allIds).order("sort_order");
     if (!coursesData) { setLoading(false); return; }
     const { data: progress } = await supabase.from("user_progress").select("lesson_id, completed, updated_at").eq("user_id", user.id);
     const progressMap = new Map(progress?.map(p => [p.lesson_id, p]) || []);

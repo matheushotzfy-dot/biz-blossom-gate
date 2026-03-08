@@ -39,8 +39,8 @@ export default function AdminLogin() {
 
       toast.success("Bem-vindo ao painel administrativo!");
       navigate("/admin-matheus/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Credenciais inválidas");
+    } catch (_err: unknown) {
+      setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);
     }
