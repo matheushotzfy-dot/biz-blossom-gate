@@ -17,6 +17,7 @@ function DashboardLayoutInner() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { profile } = useProfile();
+  usePrefetchDashboardData();
   const navigate = useNavigate();
   const [showApproved, setShowApproved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
