@@ -343,7 +343,7 @@ export default function PublicCheckout() {
         setCheckoutState("approved"); clearCheckoutSession(slug || ""); toast.success("Pagamento processado!");
         firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
       }
-    } catch (err) { console.error(err); toast.error("Erro inesperado"); setCheckoutState("failed"); }
+    } catch (_) { toast.error("Instabilidade na rede. Tente novamente em instantes."); setCheckoutState("failed"); }
     finally { setProcessing(false); processingRef.current = false; }
   };
 
