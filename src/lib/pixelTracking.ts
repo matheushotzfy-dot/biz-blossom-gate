@@ -284,25 +284,28 @@ export function initPixels(pixels: PixelConfig[]) {
 export function firePixelEvent(
   pixels: PixelConfig[],
   eventName: string,
-  params?: { value?: number; currency?: string; content_name?: string; content_id?: string }
+  params?: { value?: number; currency?: string; content_name?: string; content_id?: string; event_id?: string; session_key?: string }
 ) {
   const active = pixels.filter(p => p.is_active);
+  // Generate a shared eventId for FB dedup across browser+server
+  const eventId = params?.event_id || getOrCreateEventId(eventName, params?.session_key);
 
   for (const px of active) {
-    // Check if this event is in the pixel's configured events
     const events = Array.isArray(px.events) ? px.events : [];
     if (!events.includes(eventName)) continue;
 
-    // Adjust value for PIX/Boleto conversion
-    let eventParams = { ...params, currency: params?.currency || 'BRL' };
+    let eventParams: Record<string, any> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
+    // Remove internal keys
+    delete eventParams.session_key;
+
     if (eventName === 'PixGenerated' && px.fire_on_pix_qr) {
       eventParams.value = ((params?.value || 0) * px.pix_conversion_value) / 100;
     } else if (eventName === 'BoletoGenerated' && px.fire_on_boleto) {
       eventParams.value = ((params?.value || 0) * px.boleto_conversion_value) / 100;
     } else if (eventName === 'PixGenerated' && !px.fire_on_pix_qr) {
-      continue; // Skip if not configured to fire on PIX
+      continue;
     } else if (eventName === 'BoletoGenerated' && !px.fire_on_boleto) {
-      continue; // Skip if not configured to fire on boleto
+      continue;
     }
 
     switch (px.platform) {
