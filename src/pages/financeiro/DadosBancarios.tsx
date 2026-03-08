@@ -1,15 +1,7 @@
-/**
- * Dados Bancários — Gestão de chaves PIX e contas bancárias
- * @module DadosBancarios
- * @version 3.2.0
- * @author msDev's — Engenharia de Software
- * @description Sistema de gestão financeira com validação rigorosa de chaves PIX,
- *   autocomplete de bancos brasileiros e interface enterprise premium.
- */
-
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useBankAccounts, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Building2, Plus, Trash2, Key, Shield, Fingerprint,
   CreditCard, Landmark, CheckCircle2, AlertCircle, Search,
@@ -193,29 +185,17 @@ function BankAutocomplete({ value, onChange }: { value: { name: string; code: st
 /* ─── Main Component — msDev's ─── */
 export default function DadosBancarios() {
   const { user } = useAuth();
-  const [accounts, setAccounts] = useState<Tables<"bank_accounts">[]>([]);
+  const { data: accounts = [], refetch: refetchAccounts } = useBankAccounts();
+  const { data: pixKeysData = [], refetch: refetchPixKeys } = usePixKeys();
+  const pixKeys = pixKeysData as PixKey[];
+  const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState({ name: "", code: "" });
   const [form, setForm] = useState({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
-  const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
   const [newPixType, setNewPixType] = useState("");
   const [newPixValue, setNewPixValue] = useState("");
   const [pixError, setPixError] = useState<string | null>(null);
   const [pixLoading, setPixLoading] = useState(false);
-
-  const loadAccounts = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("bank_accounts").select("*").order("created_at");
-    if (data) setAccounts(data);
-  };
-
-  const loadPixKeys = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at") as { data: PixKey[] | null };
-    if (data) setPixKeys(data);
-  };
-
-  useEffect(() => { loadAccounts(); loadPixKeys(); }, [user]);
 
   /* ─── Bank Account CRUD — msDev's ─── */
   const handleSubmit = async (e: React.FormEvent) => {
@@ -233,13 +213,13 @@ export default function DadosBancarios() {
     setOpen(false);
     setSelectedBank({ name: "", code: "" });
     setForm({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
-    loadAccounts();
+    invalidateAll(["bank_accounts"]);
   };
 
   const handleDelete = async (id: string) => {
     await supabase.from("bank_accounts").delete().eq("id", id);
     toast.success("Conta removida");
-    loadAccounts();
+    invalidateAll(["bank_accounts"]);
   };
 
   /* ─── PIX Key CRUD — msDev's ─── */
@@ -262,7 +242,7 @@ export default function DadosBancarios() {
     toast.success("Chave PIX cadastrada!");
     setNewPixType("");
     setNewPixValue("");
-    loadPixKeys();
+    invalidateAll(["pix_keys"]);
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };
     if (keys && keys.length > 0) {
       await supabase.from("profiles").update({ pix_key: keys[0].key_value, pix_key_type: keys[0].key_type }).eq("user_id", user.id);
@@ -273,7 +253,7 @@ export default function DadosBancarios() {
     if (!user) return;
     await supabase.from("pix_keys").delete().eq("id", id);
     toast.success("Chave removida");
-    loadPixKeys();
+    invalidateAll(["pix_keys"]);
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };
     if (keys && keys.length > 0) {
       await supabase.from("profiles").update({ pix_key: keys[0].key_value, pix_key_type: keys[0].key_type }).eq("user_id", user.id);

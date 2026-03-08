@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
 import { Webhook, Plus, Trash2, ToggleLeft, ToggleRight, Zap, Globe, Shield, Copy, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,18 +55,12 @@ function getEventCategory(ev: string) {
 
 export default function Webhooks() {
   const { user } = useAuth();
-  const [webhooks, setWebhooks] = useState<any[]>([]);
+  const { data: webhooks = [], refetch: load } = useWebhooks();
+  const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const load = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("webhook_configs_safe" as any).select("*").order("created_at", { ascending: false });
-    if (data) setWebhooks(data);
-  };
-  useEffect(() => { load(); }, [user]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,18 +68,18 @@ export default function Webhooks() {
     if (selectedEvents.length === 0) { toast.error("Selecione pelo menos um evento"); return; }
     const { error } = await supabase.from("webhook_configs").insert({ user_id: user.id, url, events: selectedEvents, secret: crypto.randomUUID().slice(0, 16) });
     if (error) { toast.error("Erro ao criar webhook"); return; }
-    toast.success("Webhook criado!"); setOpen(false); setUrl(""); setSelectedEvents([]); load();
+    toast.success("Webhook criado!"); setOpen(false); setUrl(""); setSelectedEvents([]); invalidateAll(["webhooks"]);
   };
 
   const toggleActive = async (id: string, current: boolean) => {
     await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
-    load();
+    invalidateAll(["webhooks"]);
   };
 
   const deleteWebhook = async (id: string) => {
     await supabase.from("webhook_configs").delete().eq("id", id);
     toast.success("Webhook removido");
-    load();
+    invalidateAll(["webhooks"]);
   };
 
   const toggleAll = () => {

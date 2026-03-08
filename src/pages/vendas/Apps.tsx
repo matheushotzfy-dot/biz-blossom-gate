@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Puzzle, Settings2, Trash2, Power, Zap, Check, ChevronRight, Shield, Sparkles } from "lucide-react";
 import { PageShell, PageTitle, GlowPanel, SectionHeader } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProducts, useAppIntegrations, useInvalidateAll } from "@/hooks/useQueryData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -152,8 +153,10 @@ const eventColor = (e: string) => {
 export default function Apps() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [integrations, setIntegrations] = useState<AppIntegration[]>([]);
+  const { data: products = [] } = useProducts();
+  const { data: integrationsRaw = [] } = useAppIntegrations();
+  const integrations = integrationsRaw as unknown as AppIntegration[];
+  const invalidateAll = useInvalidateAll();
   const [dialogApp, setDialogApp] = useState<AppDef | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -161,18 +164,6 @@ export default function Apps() {
   const [formFields, setFormFields] = useState<Record<string, string>>({});
   const [formEventMode, setFormEventMode] = useState<"all" | "custom">("all");
   const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
-
-  useEffect(() => { if (user?.id) loadData(); }, [user?.id]);
-
-  const loadData = async () => {
-    if (!user?.id) return;
-    const [prodRes, intRes] = await Promise.all([
-      supabase.from("products").select("*").eq("user_id", user.id),
-      supabase.from("app_integrations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-    ]);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (intRes.data) setIntegrations(intRes.data as unknown as AppIntegration[]);
-  };
 
   const openDialog = (app: AppDef, existing?: AppIntegration) => {
     if (app.id === "webhooks") { navigate("/vendas/webhooks"); return; }
@@ -223,17 +214,17 @@ export default function Apps() {
     }
     setSaving(false);
     if (error) toast.error("Erro ao salvar integração");
-    else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`); closeDialog(); loadData(); }
+    else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`); closeDialog(); invalidateAll(["app_integrations"]); }
   };
 
   const toggleActive = async (int_: AppIntegration) => {
     await supabase.from("app_integrations").update({ is_active: !int_.is_active }).eq("id", int_.id);
-    loadData();
+    invalidateAll(["app_integrations"]);
   };
 
   const deleteIntegration = async (id: string) => {
     await supabase.from("app_integrations").delete().eq("id", id);
-    toast.success("Integração removida"); loadData();
+    toast.success("Integração removida"); invalidateAll(["app_integrations"]);
   };
 
   const toggleEvent = (event: string) => {

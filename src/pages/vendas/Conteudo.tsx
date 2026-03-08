@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProducts as useProductsQuery, useTransactions as useTransactionsQuery, useCourses as useCoursesQuery, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, BookOpen, Layers, PlayCircle, Trash2, Edit, Eye, EyeOff,
   Link as LinkIcon, Search, Users, ChevronDown, ChevronUp, Upload,
@@ -145,12 +146,32 @@ const DURATION_OPTIONS = [
 export default function AdminConteudo() {
   const { user } = useAuth();
 
-  // ── Data state ──
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const { data: coursesRaw = [] } = useCoursesQuery();
+  const { data: productsRaw = [] } = useProductsQuery();
+  const { data: transactionsRaw = [] } = useTransactionsQuery();
+  const invalidateAll = useInvalidateAll();
+
+  const courses = useMemo(() => {
+    return coursesRaw.map((c: any) => {
+      const { modules: _, ...rest } = c;
+      return rest;
+    }) as Course[];
+  }, [coursesRaw]);
+
+  const products = useMemo(() => productsRaw.map(p => ({ id: p.id, name: p.name })) as Product[], [productsRaw]);
+  const transactions = useMemo(() => transactionsRaw.map(t => ({ product_id: t.product_id, status: t.status, amount: t.amount })), [transactionsRaw]);
+
+  const courseStats = useMemo(() => {
+    const stats: Record<string, { modules: number; lessons: number }> = {};
+    coursesRaw.forEach((c: any) => {
+      const mods = c.modules || [];
+      const totalLessons = mods.reduce((a: number, m: any) => a + (m.lessons?.length || 0), 0);
+      stats[c.id] = { modules: mods.length, lessons: totalLessons };
+    });
+    return stats;
+  }, [coursesRaw]);
+
   const [search, setSearch] = useState("");
-  const [transactions, setTransactions] = useState<{ product_id: string | null; status: string; amount: number }[]>([]);
-  const [courseStats, setCourseStats] = useState<Record<string, { modules: number; lessons: number }>>({});
 
   // ── Wizard state ──
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -177,39 +198,9 @@ export default function AdminConteudo() {
     title: "", description: "", video_url: "", duration_minutes: "0", is_free: false
   });
 
-  // ── Load data ──
-  useEffect(() => { if (user) { loadCourses(); loadProducts(); loadTransactions(); } }, [user]);
+  // Data is now loaded via cached hooks above — no manual load needed
 
-  const loadCourses = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("courses")
-      .select("*, modules ( id, lessons ( id ) )")
-      .eq("user_id", user.id).order("sort_order");
-    if (data) {
-      const stats: Record<string, { modules: number; lessons: number }> = {};
-      const cleaned = data.map((c: any) => {
-        const mods = c.modules || [];
-        const totalLessons = mods.reduce((a: number, m: any) => a + (m.lessons?.length || 0), 0);
-        stats[c.id] = { modules: mods.length, lessons: totalLessons };
-        const { modules: _, ...rest } = c;
-        return rest;
-      });
-      setCourses(cleaned as Course[]);
-      setCourseStats(stats);
-    }
-  };
-
-  const loadProducts = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("products").select("id, name").eq("user_id", user.id);
-    if (data) setProducts(data);
-  };
-
-  const loadTransactions = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("transactions").select("product_id, status, amount").eq("user_id", user.id);
-    if (data) setTransactions(data);
-  };
+  const reloadCourses = () => invalidateAll(["courses", "products", "transactions"]);
 
   const loadModules = useCallback(async (courseId: string) => {
     const { data: mods } = await supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order");
@@ -274,13 +265,13 @@ export default function AdminConteudo() {
       }
       toast.success("Curso criado!");
     }
-    loadCourses();
+    reloadCourses();
     setWizardStep("structure");
   };
 
   const togglePublish = async (id: string, cur: boolean) => {
     await supabase.from("courses").update({ is_published: !cur }).eq("id", id);
-    loadCourses();
+    reloadCourses();
     toast.success(cur ? "Despublicado" : "Publicado!");
   };
 
@@ -296,7 +287,7 @@ export default function AdminConteudo() {
     const { error } = await supabase.from("courses").delete().eq("id", id);
     if (error) { toast.error("Erro ao excluir curso"); return; }
     if (selectedCourse === id) { setSelectedCourse(null); setModules([]); }
-    loadCourses();
+    reloadCourses();
     toast.success("Curso excluído com sucesso!");
   };
 
@@ -566,7 +557,7 @@ export default function AdminConteudo() {
                 onAddLesson={openLessonNew}
                 onEditLesson={openLessonEdit}
                 onDeleteLesson={deleteLesson}
-                onFinish={() => { setWizardOpen(false); setEditCourseId(null); loadCourses(); }}
+                onFinish={() => { setWizardOpen(false); setEditCourseId(null); reloadCourses(); }}
               />
             )}
           </div>
