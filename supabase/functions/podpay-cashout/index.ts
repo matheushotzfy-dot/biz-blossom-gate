@@ -65,6 +65,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    // IDEMPOTENCY: Only process pending withdrawals
+    if (withdrawal.status !== 'pending') {
+      return new Response(
+        JSON.stringify({ success: true, message: `Already ${withdrawal.status}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Get user's PIX key from profile
     const { data: profile } = await supabase
       .from('profiles')
@@ -97,23 +105,43 @@ Deno.serve(async (req) => {
       'random': 'random',
     };
 
-    const response = await fetch('https://api.podpay.co/v1/transfers', {
-      method: 'POST',
-      headers: {
-        'Authorization': auth,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'x-withdraw-key': withdrawKey,
-      },
-      body: JSON.stringify({
-        method: 'pix',
-        amount: amountInCents,
-        netPayout: false,
-        pixKey: profile.pix_key,
-        pixKeyType: pixKeyTypeMap[profile.pix_key_type.toLowerCase()] || 'cpf',
-        postbackUrl: `${supabaseUrl}/functions/v1/podpay-postback`,
-      }),
-    });
+    // Add timeout to PodPay API call
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    let response: Response;
+    try {
+      response = await fetch('https://api.podpay.co/v1/transfers', {
+        method: 'POST',
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'x-withdraw-key': withdrawKey,
+        },
+        body: JSON.stringify({
+          method: 'pix',
+          amount: amountInCents,
+          netPayout: false,
+          pixKey: profile.pix_key,
+          pixKeyType: pixKeyTypeMap[profile.pix_key_type.toLowerCase()] || 'cpf',
+          postbackUrl: `${supabaseUrl}/functions/v1/podpay-postback`,
+        }),
+        signal: controller.signal,
+      });
+    } catch (fetchError) {
+      clearTimeout(timeout);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('PodPay cashout timeout after 15s');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Timeout ao processar saque. Tente novamente.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw fetchError;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const podpayData = await response.json();
 
@@ -129,7 +157,8 @@ Deno.serve(async (req) => {
     await supabase
       .from('withdrawals')
       .update({ status: 'approved', processed_at: new Date().toISOString() })
-      .eq('id', withdrawalId);
+      .eq('id', withdrawalId)
+      .eq('status', 'pending'); // Extra safety: only update if still pending
 
     return new Response(
       JSON.stringify({ success: true, data: podpayData }),
