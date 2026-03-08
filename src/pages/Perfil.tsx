@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,26 +36,28 @@ const fmtCurrency = (v: number) =>
 
 export default function Perfil() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const { profile, updateProfile } = useProfile();
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [formInit, setFormInit] = useState(false);
+
+  // Sync form with profile (only once or when profile loads)
+  useEffect(() => {
+    if (profile && !formInit) {
+      setForm({ full_name: profile.full_name || "", email: profile.email || "", phone: profile.phone || "" });
+      setFormInit(true);
+    }
+  }, [profile, formInit]);
 
   useEffect(() => {
     if (!user) return;
-    const uid = user.id;
-    Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", uid).single(),
-      supabase.from("transactions").select("net_amount").eq("user_id", uid).eq("status", "completed"),
-    ]).then(([pRes, tRes]) => {
-      if (pRes.data) {
-        setProfile(pRes.data);
-        setForm({ full_name: pRes.data.full_name || "", email: pRes.data.email || "", phone: pRes.data.phone || "" });
-      }
-      if (tRes.data) setAllTimeRevenue(tRes.data.reduce((a, t) => a + Number(t.net_amount), 0));
-    });
+    supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed")
+      .then(({ data }) => {
+        if (data) setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
+      });
   }, [user]);
 
   const milestone = getCurrentMilestone(allTimeRevenue);
@@ -65,7 +68,10 @@ export default function Perfil() {
     setSaving(true);
     const { error } = await supabase.from("profiles").update(form).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar");
-    else toast.success("Perfil atualizado!");
+    else {
+      updateProfile(form);
+      toast.success("Perfil atualizado!");
+    }
     setSaving(false);
   };
 
@@ -79,7 +85,7 @@ export default function Perfil() {
     if (error) { toast.error("Erro no upload"); setUploading(false); return; }
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
     await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("user_id", user.id);
-    setProfile((p) => p ? { ...p, avatar_url: data.publicUrl } : p);
+    updateProfile({ avatar_url: data.publicUrl });
     toast.success("Foto atualizada!");
     setUploading(false);
   };

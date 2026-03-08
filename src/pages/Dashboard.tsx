@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import {
   Activity,
   AlertTriangle,
@@ -90,6 +91,7 @@ function timeAgo(dateStr: string) {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
@@ -98,7 +100,6 @@ export default function Dashboard() {
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
 
   // Fetch initial data
   useEffect(() => {
@@ -108,12 +109,10 @@ export default function Dashboard() {
       supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
       supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-    ]).then(([txRes, wdRes, prodRes, profRes]) => {
+    ]).then(([txRes, wdRes, prodRes]) => {
       if (txRes.data) setTransactions(txRes.data);
       if (wdRes.data) setWithdrawals(wdRes.data);
       if (prodRes.count != null) setProducts(prodRes.count);
-      if (profRes.data) setProfile(profRes.data);
     });
   }, [user?.id]);
 
@@ -526,7 +525,7 @@ export default function Dashboard() {
                   <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} />
+              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
               <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
               <Tooltip
                 contentStyle={{
