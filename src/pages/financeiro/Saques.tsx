@@ -72,7 +72,7 @@ export default function Saques() {
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
     if (error) { toast.error("Erro ao solicitar saque"); return; }
     toast.success("Saque solicitado com sucesso!");
-    setOpen(false); setAmount(""); setSelectedPixKeyId(""); loadData();
+    setOpen(false); setAmount(""); setSelectedPixKeyId(""); invalidateAll(["withdrawals"]);
   };
 
   const pending = withdrawals.filter((w) => w.status === "pending");
