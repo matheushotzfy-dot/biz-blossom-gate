@@ -557,7 +557,7 @@ export default function AdminConteudo() {
                 onAddLesson={openLessonNew}
                 onEditLesson={openLessonEdit}
                 onDeleteLesson={deleteLesson}
-                onFinish={() => { setWizardOpen(false); setEditCourseId(null); loadCourses(); }}
+                onFinish={() => { setWizardOpen(false); setEditCourseId(null); reloadCourses(); }}
               />
             )}
           </div>
