@@ -377,8 +377,8 @@ export default function PublicCheckout() {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
           firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
         } else if (result.secureUrl) { window.location.href = result.secureUrl; }
-        else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice }); }
-      } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice }); }
+        else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
+      } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
     } catch { toast.error("Instabilidade na rede. Tente novamente."); setCheckoutState("failed"); }
     finally { setProcessing(false); processingRef.current = false; }
   };
