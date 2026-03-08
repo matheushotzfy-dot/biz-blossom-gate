@@ -145,7 +145,7 @@ export default function Dashboard() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod]);
 
-  // msDev's — memoize all derived metrics to avoid recomputing on every render
+  // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _pending = filteredTx.filter((t) => t.status === "pending");
