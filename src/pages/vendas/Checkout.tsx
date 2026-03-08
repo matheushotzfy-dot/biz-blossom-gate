@@ -83,7 +83,7 @@ export default function Checkout() {
     toast.success("Cupom criado!");
     setCouponOpen(false);
     setCouponForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "" });
-    load();
+    invalidateAll(["products", "coupons"]);
   };
 
   const toggleCouponActive = async (id: string, current: boolean) => {
