@@ -1,5 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProducts as useProductsQuery, useTransactions as useTransactionsQuery, useCourses as useCoursesQuery, useInvalidateAll } from "@/hooks/useQueryData";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Plus, BookOpen, Layers, PlayCircle, Trash2, Edit, Eye, EyeOff,
