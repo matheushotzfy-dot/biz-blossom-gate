@@ -368,10 +368,10 @@ export default function PublicCheckout() {
       if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); return; }
       if (method === "pix" && result.pix) {
         setPixData(result.pix); setCheckoutState("pending");
-        firePixelEvent(productPixels, "PixGenerated", { content_name: product.name, content_id: product.id, value: totalPrice });
+        firePixelEvent(productPixels, "PixGenerated", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
       } else if (method === "boleto" && result.boleto) {
         setBoletoData(result.boleto); setCheckoutState("pending");
-        firePixelEvent(productPixels, "BoletoGenerated", { content_name: product.name, content_id: product.id, value: totalPrice });
+        firePixelEvent(productPixels, "BoletoGenerated", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
       } else if (method === "credit_card") {
         if (result.status === "paid" || result.status === "approved") {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
