@@ -8,9 +8,9 @@ import { Menu, Bell, Sun, Moon, ChevronDown, Search, Command, AlertTriangle, Arr
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { ProfileProvider, useProfile } from "@/hooks/useProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
 
 export function DashboardLayout() {
   const { user } = useAuth();
