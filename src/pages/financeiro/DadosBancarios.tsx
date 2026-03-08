@@ -253,7 +253,7 @@ export default function DadosBancarios() {
     if (!user) return;
     await supabase.from("pix_keys").delete().eq("id", id);
     toast.success("Chave removida");
-    loadPixKeys();
+    invalidateAll(["pix_keys"]);
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };
     if (keys && keys.length > 0) {
       await supabase.from("profiles").update({ pix_key: keys[0].key_value, pix_key_type: keys[0].key_type }).eq("user_id", user.id);
