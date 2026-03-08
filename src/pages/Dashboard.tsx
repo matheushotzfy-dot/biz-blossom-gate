@@ -123,38 +123,6 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, refetchTx]);
 
-  // Realtime subscription for transactions
-  useEffect(() => {
-    if (!user?.id) return;
-    const channel = supabase
-      .channel('dashboard-transactions')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setTransactions(prev => [payload.new as Tables<"transactions">, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setTransactions(prev => prev.map(t => t.id === (payload.new as any).id ? payload.new as Tables<"transactions"> : t));
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setWithdrawals(prev => [payload.new as Tables<"withdrawals">, ...prev].slice(0, 10));
-          } else if (payload.eventType === 'UPDATE') {
-            setWithdrawals(prev => prev.map(w => w.id === (payload.new as any).id ? payload.new as Tables<"withdrawals"> : w));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [user?.id]);
-
   const filteredTx = useMemo(() => {
     const today = brasiliaToday();
 
