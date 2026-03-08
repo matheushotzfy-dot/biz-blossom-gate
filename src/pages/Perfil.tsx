@@ -36,26 +36,28 @@ const fmtCurrency = (v: number) =>
 
 export default function Perfil() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const { profile, updateProfile } = useProfile();
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [formInit, setFormInit] = useState(false);
+
+  // Sync form with profile (only once or when profile loads)
+  useEffect(() => {
+    if (profile && !formInit) {
+      setForm({ full_name: profile.full_name || "", email: profile.email || "", phone: profile.phone || "" });
+      setFormInit(true);
+    }
+  }, [profile, formInit]);
 
   useEffect(() => {
     if (!user) return;
-    const uid = user.id;
-    Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", uid).single(),
-      supabase.from("transactions").select("net_amount").eq("user_id", uid).eq("status", "completed"),
-    ]).then(([pRes, tRes]) => {
-      if (pRes.data) {
-        setProfile(pRes.data);
-        setForm({ full_name: pRes.data.full_name || "", email: pRes.data.email || "", phone: pRes.data.phone || "" });
-      }
-      if (tRes.data) setAllTimeRevenue(tRes.data.reduce((a, t) => a + Number(t.net_amount), 0));
-    });
+    supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed")
+      .then(({ data }) => {
+        if (data) setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
+      });
   }, [user]);
 
   const milestone = getCurrentMilestone(allTimeRevenue);
