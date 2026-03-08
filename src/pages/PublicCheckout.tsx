@@ -375,7 +375,7 @@ export default function PublicCheckout() {
       } else if (method === "credit_card") {
         if (result.status === "paid" || result.status === "approved") {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
-          firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice });
+          firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
         } else if (result.secureUrl) { window.location.href = result.secureUrl; }
         else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice }); }
       } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice }); }
