@@ -73,7 +73,7 @@ export default function Webhooks() {
 
   const toggleActive = async (id: string, current: boolean) => {
     await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
-    load();
+    invalidateAll(["webhooks"]);
   };
 
   const deleteWebhook = async (id: string) => {
