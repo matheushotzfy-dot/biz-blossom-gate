@@ -191,7 +191,11 @@ function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<s
   const w = window as any;
   if (!w.fbq) return;
   const fbEvent = FB_EVENT_MAP[eventName] || eventName;
-  w.fbq('trackSingle', pixelId, fbEvent, params || {});
+  const eventId = params?.event_id;
+  const fbParams = { ...params };
+  delete fbParams.event_id;
+  // Pass eventID for dedup between browser pixel and server CAPI
+  w.fbq('trackSingle', pixelId, fbEvent, fbParams, eventId ? { eventID: eventId } : undefined);
 }
 
 function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Record<string, any>) {
