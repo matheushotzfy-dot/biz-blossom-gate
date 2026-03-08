@@ -341,7 +341,7 @@ export default function Checkout() {
           product={settingsProduct}
           open={!!settingsProduct}
           onOpenChange={(v) => { if (!v) setSettingsProduct(null); }}
-          onSaved={load}
+          onSaved={() => invalidateAll(["products"])}
         />
       )}
     </PageShell>
