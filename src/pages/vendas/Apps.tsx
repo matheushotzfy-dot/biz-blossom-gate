@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Puzzle, Settings2, Trash2, Power, Zap, Check, ChevronRight, Shield, Sparkles } from "lucide-react";
 import { PageShell, PageTitle, GlowPanel, SectionHeader } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";

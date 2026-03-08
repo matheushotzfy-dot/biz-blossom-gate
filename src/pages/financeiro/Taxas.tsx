@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useFees } from "@/hooks/useQueryData";
 import { Percent, Zap } from "lucide-react";
 import { PageShell, Panel, PageTitle } from "@/components/PageShell";
-import type { Tables } from "@/integrations/supabase/types";
 
 export default function Taxas() {
-  const [fees, setFees] = useState<Tables<"fees">[]>([]);
-
-  useEffect(() => {
-    supabase.from("fees").select("*").order("created_at").then(({ data }) => { if (data) setFees(data); });
-  }, []);
+  const { data: fees = [] } = useFees();
 
   return (
     <PageShell>

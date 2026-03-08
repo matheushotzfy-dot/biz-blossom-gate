@@ -185,29 +185,17 @@ function BankAutocomplete({ value, onChange }: { value: { name: string; code: st
 /* ─── Main Component — msDev's ─── */
 export default function DadosBancarios() {
   const { user } = useAuth();
-  const [accounts, setAccounts] = useState<Tables<"bank_accounts">[]>([]);
+  const { data: accounts = [], refetch: refetchAccounts } = useBankAccounts();
+  const { data: pixKeysData = [], refetch: refetchPixKeys } = usePixKeys();
+  const pixKeys = pixKeysData as PixKey[];
+  const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState({ name: "", code: "" });
   const [form, setForm] = useState({ agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
-  const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
   const [newPixType, setNewPixType] = useState("");
   const [newPixValue, setNewPixValue] = useState("");
   const [pixError, setPixError] = useState<string | null>(null);
   const [pixLoading, setPixLoading] = useState(false);
-
-  const loadAccounts = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("bank_accounts").select("*").order("created_at");
-    if (data) setAccounts(data);
-  };
-
-  const loadPixKeys = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at") as { data: PixKey[] | null };
-    if (data) setPixKeys(data);
-  };
-
-  useEffect(() => { loadAccounts(); loadPixKeys(); }, [user]);
 
   /* ─── Bank Account CRUD — msDev's ─── */
   const handleSubmit = async (e: React.FormEvent) => {
