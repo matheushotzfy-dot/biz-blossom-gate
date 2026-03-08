@@ -721,7 +721,7 @@ function CourseCard({ course, onEdit, onTogglePublish, onDelete, onManage, stats
 
   const getMemberLink = () => {
     const base = window.location.origin;
-    return `${base}/membros/curso/${course.id}`;
+    return `${base}/membros-area/curso/${course.id}`;
   };
 
   const copyMemberLink = () => {
