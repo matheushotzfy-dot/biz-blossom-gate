@@ -153,8 +153,10 @@ const eventColor = (e: string) => {
 export default function Apps() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [integrations, setIntegrations] = useState<AppIntegration[]>([]);
+  const { data: products = [] } = useProducts();
+  const { data: integrationsRaw = [] } = useAppIntegrations();
+  const integrations = integrationsRaw as unknown as AppIntegration[];
+  const invalidateAll = useInvalidateAll();
   const [dialogApp, setDialogApp] = useState<AppDef | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -162,18 +164,6 @@ export default function Apps() {
   const [formFields, setFormFields] = useState<Record<string, string>>({});
   const [formEventMode, setFormEventMode] = useState<"all" | "custom">("all");
   const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
-
-  useEffect(() => { if (user?.id) loadData(); }, [user?.id]);
-
-  const loadData = async () => {
-    if (!user?.id) return;
-    const [prodRes, intRes] = await Promise.all([
-      supabase.from("products").select("*").eq("user_id", user.id),
-      supabase.from("app_integrations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-    ]);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (intRes.data) setIntegrations(intRes.data as unknown as AppIntegration[]);
-  };
 
   const openDialog = (app: AppDef, existing?: AppIntegration) => {
     if (app.id === "webhooks") { navigate("/vendas/webhooks"); return; }
