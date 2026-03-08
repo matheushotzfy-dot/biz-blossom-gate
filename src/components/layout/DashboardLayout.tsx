@@ -25,24 +25,6 @@ function DashboardLayoutInner() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Load notifications
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("notifications")
-      .select("*")
-      .or(`user_id.eq.${user.id},user_id.is.null`)
-      .order("created_at", { ascending: false })
-      .limit(20)
-      .then(({ data }) => {
-        if (data) {
-          setNotifications(data);
-          setUnreadCount(data.filter((n: any) => !n.is_read).length);
-        }
-      });
-  }, [user]);
-
-  // Load notifications
   useEffect(() => {
     if (!user) return;
     supabase

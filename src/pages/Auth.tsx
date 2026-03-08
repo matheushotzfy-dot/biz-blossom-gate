@@ -139,10 +139,11 @@ export default function Auth() {
         toast.success("Conta criada com sucesso! Verifique seu e-mail.");
         navigate("/dashboard");
       }
-    } catch (error: any) {
-      const msg = error?.message || "";
+    } catch (error: unknown) {
+      const msg = (error as any)?.message || "";
       if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
       else if (msg.includes("already registered")) toast.error("Este e-mail já está cadastrado.");
+      else if (msg.includes("Email not confirmed")) toast.error("Confirme seu e-mail antes de acessar.");
       else toast.error("Instabilidade na rede. Tente novamente em instantes.");
     } finally {
       setLoading(false);
