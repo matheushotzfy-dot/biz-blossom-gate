@@ -92,7 +92,7 @@ export default function ControleGastos() {
     toast.success("Gasto registrado!");
     setOpen(false);
     setForm({ category: "anuncios", description: "", amount: "", expense_date: new Date().toISOString().split("T")[0] });
-    loadData();
+    invalidateAll(["expenses"]);
   };
 
   const handleDelete = async (id: string) => {
