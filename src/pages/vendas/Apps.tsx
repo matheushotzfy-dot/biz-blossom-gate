@@ -224,7 +224,7 @@ export default function Apps() {
 
   const deleteIntegration = async (id: string) => {
     await supabase.from("app_integrations").delete().eq("id", id);
-    toast.success("Integração removida"); loadData();
+    toast.success("Integração removida"); invalidateAll(["app_integrations"]);
   };
 
   const toggleEvent = (event: string) => {
