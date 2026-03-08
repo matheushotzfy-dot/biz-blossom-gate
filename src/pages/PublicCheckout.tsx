@@ -298,18 +298,21 @@ export default function PublicCheckout() {
     return () => { window.document.body.style.overflow = "hidden"; window.document.body.style.overscrollBehavior = "none"; };
   }, []);
 
-  // Poll transaction status
+  // Poll transaction status with adaptive interval
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
+    let pollCount = 0;
     const interval = setInterval(async () => {
+      pollCount++;
       const { data } = await supabase.from("transactions").select("status").eq("id", transactionId).single();
       if (data?.status === "completed") {
         setCheckoutState("approved"); clearCheckoutSession(slug || ""); clearInterval(interval);
-        if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price) });
+        if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
       } else if (data?.status === "failed" || data?.status === "cancelled") {
         setCheckoutState("failed"); clearCheckoutSession(slug || ""); clearInterval(interval);
       }
-    }, 5000);
+      // After 60 polls (5min), slow down to 15s
+    }, pollCount > 60 ? 15000 : 5000);
     return () => clearInterval(interval);
   }, [checkoutState, transactionId, slug]);
 
