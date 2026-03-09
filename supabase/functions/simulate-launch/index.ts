@@ -1,6 +1,6 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -35,26 +35,74 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    // ============================================================
+    // FIX #1: REQUIRE ADMIN AUTHENTICATION
+    // ============================================================
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const PRODUCT_ID = "53bc5dd0-6be0-4250-828c-39d75830d63a";
-    const USER_ID = "823af613-c733-4962-96a4-2cca03ef56ed";
-    const AMOUNT = 147.99;
+    // Verify the caller is an admin
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+    if (!isAdmin) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ============================================================
+    // FIX #2: Read config from request body instead of hardcoding
+    // ============================================================
+    const body = await req.json().catch(() => ({}));
+    const PRODUCT_ID = body.productId;
+    const USER_ID = body.userId;
+
+    if (!PRODUCT_ID || !USER_ID) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'productId and userId are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify the product exists
+    const { data: product } = await supabase.from('products').select('id, price, name').eq('id', PRODUCT_ID).single();
+    if (!product) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Product not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const AMOUNT = Number(product.price);
     const FEE_PCT = 4.99;
     const FEE_FIXED = 2.50;
     const FEE_AMOUNT = Number(((AMOUNT * FEE_PCT / 100) + FEE_FIXED).toFixed(2));
     const NET_AMOUNT = Number((AMOUNT - FEE_AMOUNT).toFixed(2));
-    const PUSHCUT_URL = "https://api.pushcut.io/r6g7W1YTIq9uPzgx4OtiC/notifications/Venda%20realizada%F0%9F%92%B8";
-    const TOTAL = 500;
+    const TOTAL = Math.min(body.total || 100, 500); // Cap at 500
 
-    // Generate timestamps spread over last 3 hours to simulate a real launch
+    // Generate timestamps spread over last 3 hours
     const now = Date.now();
     const threeHoursMs = 3 * 60 * 60 * 1000;
     const launchStart = now - threeHoursMs;
 
-    // Build all 500 transactions
     const transactions = [];
     const completedIndices: number[] = [];
 
@@ -65,13 +113,10 @@ Deno.serve(async (req) => {
       const emailName = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random()*999)}`;
       const email = `${emailName}@${randomFrom(DOMAINS)}`;
       
-      // Spread timestamps: more dense at start (launch rush), then thinning out
       const progress = i / TOTAL;
-      // Use exponential curve — more sales early in the launch
       const timeOffset = Math.pow(progress, 0.6) * threeHoursMs;
       const createdAt = new Date(launchStart + timeOffset + Math.random() * 30000).toISOString();
 
-      // Status distribution: ~65% completed, ~20% pending, ~8% failed, ~5% expired, ~2% refunded
       const roll = Math.random();
       let status: string;
       if (roll < 0.65) { status = "completed"; completedIndices.push(i); }
@@ -109,28 +154,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send pushcut notifications for completed transactions (batch — max 50 to avoid timeout)
-    let notifSent = 0;
-    const completedToNotify = completedIndices.slice(0, 80); // limit to avoid timeout
-    
-    const notifPromises = completedToNotify.map(async (idx) => {
-      try {
-        const tx = transactions[idx];
-        await fetch(PUSHCUT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: `💰 R$ ${AMOUNT.toFixed(2)} — ${tx.customer_name} via PIX`,
-          }),
-        });
-        notifSent++;
-      } catch (_) { /* silent */ }
-    });
-
-    // Run notifications in chunks of 10 to avoid overwhelming
-    for (let c = 0; c < notifPromises.length; c += 10) {
-      await Promise.all(notifPromises.slice(c, c + 10));
-    }
+    // FIX #2: Removed hardcoded Pushcut notification URL
+    // Push notifications should be configured via platform_settings if needed
 
     return new Response(
       JSON.stringify({
@@ -141,7 +166,6 @@ Deno.serve(async (req) => {
         failed: transactions.filter(t => t.status === "failed").length,
         expired: transactions.filter(t => t.status === "expired").length,
         refunded: transactions.filter(t => t.status === "refunded").length,
-        notifications_sent: notifSent,
         volume: `R$ ${(completedIndices.length * NET_AMOUNT).toFixed(2)}`,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -149,7 +173,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Simulation error:", error);
     return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : "Unknown" }),
+      JSON.stringify({ success: false, error: 'Internal error' }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

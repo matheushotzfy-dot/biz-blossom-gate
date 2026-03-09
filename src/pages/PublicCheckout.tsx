@@ -308,12 +308,15 @@ export default function PublicCheckout() {
     const poll = async () => {
       pollCount++;
       try {
-        const { data } = await supabase.from("transactions").select("status").eq("id", transactionId).single();
-        if (data?.status === "completed") {
+        // FIX #10: Use secure RPC instead of direct table query
+        // Anon users can't SELECT on transactions (RLS blocks it)
+        // The get_checkout_status RPC is SECURITY DEFINER and returns only the status string
+        const { data: status } = await supabase.rpc("get_checkout_status", { _transaction_id: transactionId });
+        if (status === "completed") {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
           if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
           return; // Stop polling
-        } else if (data?.status === "failed" || data?.status === "cancelled") {
+        } else if (status === "failed" || status === "cancelled") {
           setCheckoutState("failed"); clearCheckoutSession(slug || "");
           return; // Stop polling
         }
