@@ -217,20 +217,35 @@ Deno.serve(async (req) => {
               const controller = new AbortController();
               const timeout = setTimeout(() => controller.abort(), 5000);
               try {
+                const webhookBody = JSON.stringify({
+                  event: eventType,
+                  data: {
+                    transaction_id: transactionId,
+                    podpay_payment_id: podpayPaymentId,
+                    status: ourStatus,
+                    product_id: productId,
+                  },
+                  timestamp: new Date().toISOString(),
+                });
+
+                // FIX #5: Sign webhook payload with HMAC-SHA256
+                const webhookHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+                if (webhook.secret) {
+                  const enc = new TextEncoder();
+                  const hmacKey = await crypto.subtle.importKey(
+                    'raw', enc.encode(webhook.secret),
+                    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+                  );
+                  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode(webhookBody));
+                  const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+                  webhookHeaders['x-hotzfy-signature'] = sigHex;
+                }
+
                 await fetch(webhook.url, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: webhookHeaders,
                   signal: controller.signal,
-                  body: JSON.stringify({
-                    event: eventType,
-                    data: {
-                      transaction_id: transactionId,
-                      podpay_payment_id: podpayPaymentId,
-                      status: ourStatus,
-                      product_id: productId,
-                    },
-                    timestamp: new Date().toISOString(),
-                  }),
+                  body: webhookBody,
                 });
               } catch (e) {
                 safeLog('Webhook dispatch error', { error: e instanceof Error ? e.message : 'unknown' });

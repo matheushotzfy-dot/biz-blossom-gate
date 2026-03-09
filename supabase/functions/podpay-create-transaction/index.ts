@@ -196,9 +196,10 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       safeLog('PodPay error', { status: response.status, error: podpayData.message || 'Payment failed' });
+      // FIX #3: Never leak raw PodPay response to client
       return new Response(
-        JSON.stringify({ success: false, error: podpayData.message || 'Payment failed', details: podpayData }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Não foi possível processar o pagamento. Tente novamente.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 

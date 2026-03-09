@@ -160,8 +160,9 @@ Deno.serve(async (req) => {
       .eq('id', withdrawalId)
       .eq('status', 'pending'); // Extra safety: only update if still pending
 
+    // FIX #4: Never leak raw PodPay response to admin client
     return new Response(
-      JSON.stringify({ success: true, data: podpayData }),
+      JSON.stringify({ success: true, message: 'Cash-out processed successfully', withdrawalId }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
