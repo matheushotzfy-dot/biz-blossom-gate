@@ -250,7 +250,7 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["webhooks", user.id],
       queryFn: async () => {
-        const { data } = await supabase.from("webhook_configs_safe" as any).select("*").order("created_at", { ascending: false });
+        const { data } = await supabase.from("webhook_configs_safe" as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false });
         return (data || []) as any[];
       },
       staleTime: STALE_TIME,
