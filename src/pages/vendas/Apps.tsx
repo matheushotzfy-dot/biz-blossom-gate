@@ -200,7 +200,7 @@ export default function Apps() {
     };
     let error;
     if (editId) {
-      const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId);
+      const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId).eq("user_id", user.id);
       error = e;
     } else {
       if (dialogApp.id === "utmify" && formFields["api_key"]) {

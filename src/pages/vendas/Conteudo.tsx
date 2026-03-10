@@ -277,6 +277,7 @@ export default function AdminConteudo() {
   };
 
   const deleteCourse = async (id: string) => {
+    if (!user) return;
     // Must cascade: lessons → modules → user_access → course (FK constraints)
     const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", id);
     if (courseModules && courseModules.length > 0) {
@@ -285,7 +286,7 @@ export default function AdminConteudo() {
       await supabase.from("modules").delete().eq("course_id", id);
     }
     await supabase.from("user_access").delete().eq("course_id", id);
-    const { error } = await supabase.from("courses").delete().eq("id", id);
+    const { error } = await supabase.from("courses").delete().eq("id", id).eq("user_id", user.id);
     if (error) { toast.error("Erro ao excluir curso"); return; }
     if (selectedCourse === id) { setSelectedCourse(null); setModules([]); }
     reloadCourses();

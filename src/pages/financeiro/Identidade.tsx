@@ -98,6 +98,9 @@ export default function Identidade() {
 
   const handleUpload = async (type: string, file: File) => {
     if (!user) return;
+    const ALLOWED_KYC_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
+    if (!ALLOWED_KYC_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou HEIC"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
     setUploading(type);
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${type}.${ext}`;

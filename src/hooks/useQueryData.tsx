@@ -282,7 +282,7 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["coupons", user.id],
       queryFn: async () => {
-        const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+        const { data } = await supabase.from("coupons").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
         return (data || []) as Tables<"coupons">[];
       },
       staleTime: STALE_TIME,
