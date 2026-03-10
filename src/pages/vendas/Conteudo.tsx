@@ -255,7 +255,7 @@ export default function AdminConteudo() {
     };
     if (editCourseId) {
       const { user_id, is_published, ...updatePayload } = payload;
-      await supabase.from("courses").update(updatePayload).eq("id", editCourseId);
+      await supabase.from("courses").update(updatePayload).eq("id", editCourseId).eq("user_id", user.id);
       toast.success("Curso atualizado!");
     } else {
       const { data } = await supabase.from("courses").insert(payload).select().single();
