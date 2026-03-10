@@ -68,8 +68,8 @@ export default function Saques() {
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
     const selected = pixKeys.find(k => k.id === selectedPixKeyId) || pixKeys[0];
     await supabase.from("profiles").update({ pix_key: selected.key_value, pix_key_type: selected.key_type }).eq("user_id", user.id);
-    const feeAmount = 5.00;
-    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount, fee_amount: feeAmount, net_amount: numAmount - feeAmount });
+    // FIX: Don't send client-side fee/net values — server trigger enforces them
+    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
     if (error) { toast.error("Erro ao solicitar saque"); return; }
     toast.success("Saque solicitado com sucesso!");
     setOpen(false); setAmount(""); setSelectedPixKeyId(""); invalidateAll(["withdrawals"]);

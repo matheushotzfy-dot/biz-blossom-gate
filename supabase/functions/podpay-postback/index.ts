@@ -176,21 +176,33 @@ Deno.serve(async (req) => {
     }
 
     // Fallback: update by product_id if no podpay_payment_id match
+    // FIX: Use .order + .limit(1) to avoid updating multiple pending transactions
     if (!transactionId && externalRef) {
-      const updateData: Record<string, unknown> = { status: ourStatus };
-      if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
-      if (podpayEventId) updateData.podpay_event_id = podpayEventId;
-
-      const { error } = await supabase
+      const { data: pendingTx } = await supabase
         .from('transactions')
-        .update(updateData)
+        .select('id')
         .eq('product_id', externalRef)
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      if (error) {
-        safeLog('Error updating transaction by product_id', { productId: externalRef, error: error.message });
-      } else {
-        safeLog('Transaction updated via product_id fallback', { productId: externalRef, status: ourStatus });
+      if (pendingTx) {
+        const updateData: Record<string, unknown> = { status: ourStatus };
+        if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
+        if (podpayEventId) updateData.podpay_event_id = podpayEventId;
+
+        const { error } = await supabase
+          .from('transactions')
+          .update(updateData)
+          .eq('id', pendingTx.id);
+
+        if (error) {
+          safeLog('Error updating transaction by product_id', { productId: externalRef, error: error.message });
+        } else {
+          transactionId = pendingTx.id;
+          safeLog('Transaction updated via product_id fallback', { transactionId: pendingTx.id, status: ourStatus });
+        }
       }
     }
 

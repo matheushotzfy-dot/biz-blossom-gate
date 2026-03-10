@@ -78,9 +78,9 @@ export default function Extrato() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard label="Líquido" value={fmt(total)} icon={CreditCard} color="text-primary" bg="bg-primary/10" />
-        <KpiCard label="Bruto" value={fmt(totalGross)} icon={Package} color="text-foreground" bg="bg-muted/40" />
         <KpiCard label="Aprovadas" value={String(completedCount)} icon={CreditCard} color="text-success" bg="bg-success/10" />
         <KpiCard label="Transações" value={String(filtered.length)} icon={FileText} color="text-info" bg="bg-info/10" />
+        <KpiCard label="Média/venda" value={completedCount > 0 ? fmt(total / completedCount) : "R$ 0,00"} icon={Package} color="text-foreground" bg="bg-muted/40" />
       </div>
 
       <div className="flex flex-wrap gap-2">

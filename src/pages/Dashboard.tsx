@@ -193,8 +193,8 @@ export default function Dashboard() {
       .filter(t => t.status === "completed")
       .reduce((acc, t) => acc + Number(t.net_amount), 0);
     const totalWithdrawn = withdrawals
-      .filter(w => w.status === "approved")
-      .reduce((acc, w) => acc + Number(w.net_amount), 0);
+      .filter(w => w.status === "approved" || w.status === "pending")
+      .reduce((acc, w) => acc + Number(w.amount), 0);
     const totalChargebacksRefunds = transactions
       .filter(t => t.status === "chargeback" || t.status === "refunded")
       .reduce((acc, t) => acc + Number(t.net_amount), 0);

@@ -250,7 +250,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     safeLog('Internal error', { error: error instanceof Error ? error.message : 'Unknown error' });
     return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Internal error' }),
+      JSON.stringify({ success: false, error: 'Erro interno ao processar pagamento. Tente novamente.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

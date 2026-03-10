@@ -136,8 +136,8 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        toast.success("Conta criada com sucesso! Verifique seu e-mail.");
-        navigate("/dashboard");
+        toast.success("Conta criada com sucesso! Verifique seu e-mail para ativar a conta.");
+        setIsLogin(true);
       }
     } catch (error: unknown) {
       const msg = (error as any)?.message || "";

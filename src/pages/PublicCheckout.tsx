@@ -390,7 +390,17 @@ export default function PublicCheckout() {
         if (result.status === "paid" || result.status === "approved") {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
           firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
-        } else if (result.secureUrl) { window.location.href = result.secureUrl; }
+        } else if (result.secureUrl) {
+          // Validate redirect URL to prevent open redirect attacks
+          try {
+            const url = new URL(result.secureUrl);
+            if (url.protocol === 'https:' && (url.hostname.endsWith('.podpay.co') || url.hostname.endsWith('.pagar.me'))) {
+              window.location.href = result.secureUrl;
+            } else {
+              toast.error("URL de pagamento inválida"); setCheckoutState("failed");
+            }
+          } catch { toast.error("URL de pagamento inválida"); setCheckoutState("failed"); }
+        }
         else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
       } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
     } catch { toast.error("Instabilidade na rede. Tente novamente."); setCheckoutState("failed"); }
