@@ -217,13 +217,17 @@ export default function Apps() {
     else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso! 🎯`); closeDialog(); invalidateAll(["app_integrations"]); }
   };
 
+  // FIX #54: Add user_id filter to integration toggle
   const toggleActive = async (int_: AppIntegration) => {
-    await supabase.from("app_integrations").update({ is_active: !int_.is_active }).eq("id", int_.id);
+    if (!user) return;
+    await supabase.from("app_integrations").update({ is_active: !int_.is_active }).eq("id", int_.id).eq("user_id", user.id);
     invalidateAll(["app_integrations"]);
   };
 
+  // FIX #55: Add user_id filter to integration deletion
   const deleteIntegration = async (id: string) => {
-    await supabase.from("app_integrations").delete().eq("id", id);
+    if (!user) return;
+    await supabase.from("app_integrations").delete().eq("id", id).eq("user_id", user.id);
     toast.success("Integração removida"); invalidateAll(["app_integrations"]);
   };
 

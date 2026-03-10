@@ -146,10 +146,11 @@ Deno.serve(async (req) => {
     const podpayData = await response.json();
 
     if (!response.ok) {
-      console.error('PodPay cashout error:', JSON.stringify({ status: response.status, message: podpayData?.message || 'unknown' }));
+      console.error('PodPay cashout error:', JSON.stringify({ status: response.status }));
+      // FIX #52: Never leak raw PodPay error messages
       return new Response(
-        JSON.stringify({ success: false, error: podpayData.message || 'Cash-out failed' }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Erro ao processar saque. Tente novamente.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -166,9 +167,10 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Cashout error:', error);
+    console.error('Cashout error:', error instanceof Error ? error.message : 'unknown');
+    // FIX #53: Never leak internal error details
     return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Internal error' }),
+      JSON.stringify({ success: false, error: 'Erro interno ao processar saque' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

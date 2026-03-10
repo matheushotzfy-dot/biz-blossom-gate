@@ -96,17 +96,21 @@ export default function AdminDashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
+  // FIX #51: Use RPC instead of direct table query for role check
   useEffect(() => {
     if (!user) return;
-    supabase.from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "employee"])
-      .then(({ data }) => {
-        if (!data || data.length === 0) { navigate("/admin-matheus"); return; }
-        const roles = data.map(r => r.role);
-        if (roles.includes("admin")) setIsAdmin(true);
-        else if (roles.includes("employee")) setIsEmployee(true);
-        setLoading(false);
-        loadData();
-      });
+    Promise.all([
+      supabase.rpc("current_user_has_role", { _role: "admin" }),
+      supabase.rpc("current_user_has_role", { _role: "employee" as any }),
+    ]).then(([adminRes, employeeRes]) => {
+      const hasAdmin = adminRes.data === true;
+      const hasEmployee = employeeRes.data === true;
+      if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
+      if (hasAdmin) setIsAdmin(true);
+      else if (hasEmployee) setIsEmployee(true);
+      setLoading(false);
+      loadData();
+    });
   }, [user]);
 
   const loadData = async () => {

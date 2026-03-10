@@ -1,10 +1,7 @@
 /**
  * Checkout — Configuração e personalização de checkouts + Cupons
  * @module Checkout
- * @version 3.1.0
- * @author msDev's — Engenharia de Software
- * @description Gerenciamento centralizado de checkout com cupons vinculados a produtos,
- *   exibição de valor total de descontos e toggle de ativação por produto.
+ * @version 3.2.0 — Security hardened
  */
 
 import { useEffect, useState } from "react";
@@ -28,7 +25,6 @@ import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
-/* ─── Helpers — msDev's ─── */
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 export default function Checkout() {
@@ -64,40 +60,55 @@ export default function Checkout() {
     return methods;
   };
 
-  /* ─── Cupons CRUD — msDev's ─── */
+  /* ─── Cupons CRUD ─── */
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    const insertData: any = {
+
+    // FIX #36: Validate discount values client-side too
+    const discountValue = parseFloat(couponForm.discount_value) || 0;
+    if (discountValue <= 0) { toast.error("Valor do desconto deve ser positivo"); return; }
+    if (couponForm.discount_type === "percentage" && discountValue > 100) {
+      toast.error("Porcentagem máxima é 100%"); return;
+    }
+
+    const insertData: Record<string, unknown> = {
       user_id: user.id,
-      code: couponForm.code.toUpperCase(),
+      code: couponForm.code.toUpperCase().trim(),
       discount_type: couponForm.discount_type,
-      discount_value: parseFloat(couponForm.discount_value) || 0,
+      discount_value: discountValue,
       max_uses: couponForm.max_uses ? parseInt(couponForm.max_uses) : null,
     };
     if (couponForm.product_id && couponForm.product_id !== "all") {
       insertData.product_id = couponForm.product_id;
     }
-    const { error } = await supabase.from("coupons").insert(insertData);
-    if (error) { toast.error("Erro ao criar cupom"); return; }
+    const { error } = await supabase.from("coupons").insert(insertData as any);
+    if (error) {
+      if (error.code === '23505') { toast.error("Cupom com este código já existe"); }
+      else { toast.error("Erro ao criar cupom"); }
+      return;
+    }
     toast.success("Cupom criado!");
     setCouponOpen(false);
     setCouponForm({ code: "", discount_type: "percentage", discount_value: "", max_uses: "", product_id: "" });
     invalidateAll(["products", "coupons"]);
   };
 
+  // FIX #37: Add user_id filter to coupon mutations
   const toggleCouponActive = async (id: string, current: boolean) => {
-    await supabase.from("coupons").update({ is_active: !current }).eq("id", id);
+    if (!user) return;
+    await supabase.from("coupons").update({ is_active: !current }).eq("id", id).eq("user_id", user.id);
     invalidateAll(["coupons"]);
   };
 
+  // FIX #38: Add user_id filter to coupon deletion
   const deleteCoupon = async (id: string) => {
-    await supabase.from("coupons").delete().eq("id", id);
+    if (!user) return;
+    await supabase.from("coupons").delete().eq("id", id).eq("user_id", user.id);
     toast.success("Cupom removido");
     invalidateAll(["coupons"]);
   };
 
-  /* ─── Helpers de nome de produto — msDev's ─── */
   const getProductName = (productId: string | null) => {
     if (!productId) return "Todos os produtos";
     const p = products.find((prod) => prod.id === productId);
@@ -124,12 +135,7 @@ export default function Checkout() {
           {activeProducts.map((p, i) => {
             const productCoupons = getProductCouponCount(p.id);
             return (
-              <div
-                key={p.id}
-                className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col"
-                style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}
-              >
-                {/* Image */}
+              <div key={p.id} className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col" style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}>
                 <div className="relative h-44 bg-muted/30 overflow-hidden">
                   {p.image_url ? (
                     <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -148,20 +154,12 @@ export default function Checkout() {
                     )}
                   </div>
                 </div>
-
-                {/* Content */}
                 <div className="p-4 flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <h4 className="font-display font-bold text-[14px] text-foreground leading-snug line-clamp-2">{p.name}</h4>
-                    <p className="text-lg font-display font-black text-primary whitespace-nowrap">
-                      R$ {Number(p.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
+                    <p className="text-lg font-display font-black text-primary whitespace-nowrap">{fmt(Number(p.price))}</p>
                   </div>
-
-                  {p.description && (
-                    <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
-                  )}
-
+                  {p.description && <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>}
                   {p.checkout_url && (
                     <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/40 px-3 py-2 mb-3">
                       <Link2 className="h-3 w-3 text-muted-foreground/50 shrink-0" />
@@ -171,7 +169,6 @@ export default function Checkout() {
                       </button>
                     </div>
                   )}
-
                   {productCoupons > 0 && (
                     <div className="mb-3">
                       <span className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-warning/10 border border-warning/15 text-warning">
@@ -179,13 +176,8 @@ export default function Checkout() {
                       </span>
                     </div>
                   )}
-
                   <div className="flex items-center gap-1.5 mt-auto pt-2">
-                    <Button
-                      size="sm"
-                      className="gap-1.5 rounded-lg text-[11px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 hover:shadow-xl transition-all"
-                      onClick={() => setSettingsProduct(p)}
-                    >
+                    <Button size="sm" className="gap-1.5 rounded-lg text-[11px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 hover:shadow-xl transition-all" onClick={() => setSettingsProduct(p)}>
                       <Settings className="h-3 w-3" /> Personalizar
                     </Button>
                     {p.checkout_url && (
@@ -201,12 +193,9 @@ export default function Checkout() {
         </div>
       )}
 
-      {/* ─── CUPONS SECTION — msDev's ─── */}
+      {/* CUPONS SECTION */}
       <div className="pt-2">
-        <SectionHeader
-          icon={<Ticket className="h-4.5 w-4.5" />}
-          title="Cupons Promocionais"
-          subtitle="Ofereça descontos nos seus checkouts"
+        <SectionHeader icon={<Ticket className="h-4.5 w-4.5" />} title="Cupons Promocionais" subtitle="Ofereça descontos nos seus checkouts"
           action={
             <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
               <DialogTrigger asChild>
@@ -229,7 +218,7 @@ export default function Checkout() {
                 <form onSubmit={handleCreateCoupon} className="space-y-4 p-6 relative">
                   <div>
                     <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Código</Label>
-                    <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="uppercase mt-1.5 rounded-xl h-11" />
+                    <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="uppercase mt-1.5 rounded-xl h-11" maxLength={30} />
                   </div>
                   <div>
                     <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Produto</Label>
@@ -237,9 +226,7 @@ export default function Checkout() {
                       <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos os produtos</SelectItem>
-                        {products.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                        ))}
+                        {products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -256,11 +243,11 @@ export default function Checkout() {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Valor</Label>
-                      <Input type="number" step="0.01" value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
+                      <Input type="number" step="0.01" min="0.01" max={couponForm.discount_type === "percentage" ? "100" : "99999"} value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
                     </div>
                     <div>
                       <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Max. usos</Label>
-                      <Input type="number" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="∞" className="mt-1.5 rounded-xl h-11" />
+                      <Input type="number" min="1" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="∞" className="mt-1.5 rounded-xl h-11" />
                     </div>
                   </div>
                   <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-xl shadow-primary/15 text-sm">
@@ -285,7 +272,6 @@ export default function Checkout() {
                 <span className="font-mono text-lg font-black text-primary tracking-wider">{c.code}</span>
                 <Switch checked={c.is_active} onCheckedChange={() => toggleCouponActive(c.id, c.is_active)} />
               </div>
-              {/* Produto vinculado — msDev's */}
               <div className="mb-3 p-2.5 rounded-lg bg-muted/20 border border-border/20">
                 <div className="flex items-center gap-2">
                   <Package className="h-3 w-3 text-muted-foreground/50" />
@@ -302,9 +288,7 @@ export default function Checkout() {
                   <span className="font-bold text-foreground">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : " / ∞"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground/60 flex items-center gap-1">
-                    <TrendingDown className="h-3 w-3" /> Total descontos
-                  </span>
+                  <span className="text-muted-foreground/60 flex items-center gap-1"><TrendingDown className="h-3 w-3" /> Total descontos</span>
                   <span className="font-display font-bold text-warning">{fmt(Number(c.total_discount_amount || 0))}</span>
                 </div>
               </div>
@@ -318,31 +302,25 @@ export default function Checkout() {
         </div>
       )}
 
-      {/* How to use — msDev's */}
       <Panel className="border-primary/10 bg-gradient-to-br from-primary/[0.02] to-transparent">
         <h3 className="font-display font-bold mb-4 text-foreground text-[14px]">Como usar</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px] text-muted-foreground/70">
           {[
             { n: "1", text: <>Cadastre um produto em <strong className="text-foreground/70">Produtos</strong>.</> },
             { n: "2", text: <>Clique em <strong className="text-foreground/70">Personalizar</strong> para configurar cores, timer, banners e meios de pagamento.</> },
-            { n: "3", text: "Compartilhe o link do checkout com seus clientes." },
-            { n: "4", text: <>Acompanhe vendas no <strong className="text-foreground/70">Dashboard</strong>.</> },
+            { n: "3", text: <>Copie o link do checkout e compartilhe com seus clientes.</> },
+            { n: "4", text: <>Crie cupons promocionais e vincule a produtos específicos.</> },
           ].map((step) => (
-            <div key={step.n} className="flex items-start gap-3">
-              <span className="h-7 w-7 rounded-lg gradient-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-sm shadow-primary/20">{step.n}</span>
-              <p className="pt-1">{step.text}</p>
+            <div key={step.n} className="flex gap-3">
+              <span className="h-6 w-6 rounded-lg gradient-primary text-primary-foreground text-[11px] font-black flex items-center justify-center shrink-0 shadow-sm">{step.n}</span>
+              <p className="leading-relaxed">{step.text}</p>
             </div>
           ))}
         </div>
       </Panel>
 
       {settingsProduct && (
-        <CheckoutSettingsDialog
-          product={settingsProduct}
-          open={!!settingsProduct}
-          onOpenChange={(v) => { if (!v) setSettingsProduct(null); }}
-          onSaved={() => invalidateAll(["products"])}
-        />
+        <CheckoutSettingsDialog product={settingsProduct} open={!!settingsProduct} onOpenChange={(v) => { if (!v) setSettingsProduct(null); }} onSaved={() => refetchProducts()} />
       )}
     </PageShell>
   );
