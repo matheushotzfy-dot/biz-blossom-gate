@@ -102,6 +102,7 @@ export function useCoupons() {
       const { data } = await supabase
         .from("coupons")
         .select("*")
+        .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       return (data || []) as Tables<"coupons">[];
     },
