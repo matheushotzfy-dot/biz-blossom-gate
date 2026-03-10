@@ -66,18 +66,28 @@ export default function Webhooks() {
     e.preventDefault();
     if (!user) return;
     if (selectedEvents.length === 0) { toast.error("Selecione pelo menos um evento"); return; }
+    
+    if (!url.startsWith("https://")) {
+      toast.error("URL deve usar HTTPS"); return;
+    }
+    if (/https:\/\/(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(url)) {
+      toast.error("URL não pode apontar para endereços internos"); return;
+    }
+
     const { error } = await supabase.from("webhook_configs").insert({ user_id: user.id, url, events: selectedEvents, secret: crypto.randomUUID().slice(0, 16) });
     if (error) { toast.error("Erro ao criar webhook"); return; }
     toast.success("Webhook criado!"); setOpen(false); setUrl(""); setSelectedEvents([]); invalidateAll(["webhooks"]);
   };
 
   const toggleActive = async (id: string, current: boolean) => {
-    await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
+    if (!user) return;
+    await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id).eq("user_id", user.id);
     invalidateAll(["webhooks"]);
   };
 
   const deleteWebhook = async (id: string) => {
-    await supabase.from("webhook_configs").delete().eq("id", id);
+    if (!user) return;
+    await supabase.from("webhook_configs").delete().eq("id", id).eq("user_id", user.id);
     toast.success("Webhook removido");
     invalidateAll(["webhooks"]);
   };
@@ -105,7 +115,6 @@ export default function Webhooks() {
           </DialogTrigger>
           <DialogContent className="max-w-lg rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent pointer-events-none rounded-2xl" />
-            {/* Header */}
             <div className="relative px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -116,12 +125,10 @@ export default function Webhooks() {
                 </DialogTitle>
               </DialogHeader>
             </div>
-
             <form onSubmit={handleCreate} className="relative p-6 space-y-6">
-              {/* URL */}
               <div>
                 <Label className="kicker flex items-center gap-1.5 mb-2">
-                  <Globe className="h-3 w-3" /> URL do Endpoint
+                  <Globe className="h-3 w-3" /> URL do Endpoint (HTTPS)
                 </Label>
                 <Input
                   value={url}
@@ -130,10 +137,11 @@ export default function Webhooks() {
                   type="url"
                   required
                   className="h-12 rounded-xl border-border/40 font-mono text-sm"
+                  pattern="https://.*"
+                  title="URL deve começar com https://"
                 />
               </div>
 
-              {/* Events */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <Label className="kicker flex items-center gap-1.5">
@@ -195,7 +203,6 @@ export default function Webhooks() {
         </Dialog>
       </div>
 
-      {/* Webhook List */}
       <div className="space-y-3">
         {webhooks.length === 0 ? (
           <div className="panel-enterprise p-0">
@@ -212,7 +219,6 @@ export default function Webhooks() {
               className="panel-enterprise p-5 animate-fade-in"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              {/* Top row */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={cn(
@@ -263,7 +269,6 @@ export default function Webhooks() {
                 </div>
               </div>
 
-              {/* Events */}
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {(wh.events || []).map((ev: string) => {
                   const cat = getEventCategory(ev);
@@ -282,7 +287,6 @@ export default function Webhooks() {
                 })}
               </div>
 
-              {/* Secret */}
               {wh.secret_masked && (
                 <div className="flex items-center gap-2 pt-3 border-t border-border/15">
                   <Shield className="h-3 w-3 text-muted-foreground/30 shrink-0" />
@@ -305,7 +309,6 @@ export default function Webhooks() {
         )}
       </div>
 
-      {/* Security footer */}
       <div className="panel-enterprise-subtle p-4">
         <div className="flex items-center gap-3">
           <Shield className="h-4 w-4 text-primary/50 shrink-0" />
