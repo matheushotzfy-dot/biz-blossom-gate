@@ -135,16 +135,16 @@ export default function Perfil() {
           <SectionHeader icon={<User className="h-4.5 w-4.5" />} title="Dados Pessoais" />
           <form onSubmit={handleSave} className="space-y-3.5 mt-5">
             <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Nome completo</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Nome completo {profile?.full_name && <span className="text-primary/50 normal-case tracking-normal">(KYC bloqueado)</span>}</Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" disabled={!!profile?.full_name} />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">E-mail</Label>
-              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" type="email" />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">E-mail {profile?.email && <span className="text-primary/50 normal-case tracking-normal">(KYC bloqueado)</span>}</Label>
+              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" type="email" disabled={!!profile?.email} />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Telefone</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" placeholder="(11) 99999-9999" />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Telefone {profile?.phone && <span className="text-primary/50 normal-case tracking-normal">(KYC bloqueado)</span>}</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
             </div>
             <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all" disabled={saving}>
               {saving ? "Salvando..." : "Salvar alterações"}
