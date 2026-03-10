@@ -224,8 +224,10 @@ export default function Apps() {
     invalidateAll(["app_integrations"]);
   };
 
+  // FIX #55: Add user_id filter to integration deletion
   const deleteIntegration = async (id: string) => {
-    await supabase.from("app_integrations").delete().eq("id", id);
+    if (!user) return;
+    await supabase.from("app_integrations").delete().eq("id", id).eq("user_id", user.id);
     toast.success("Integração removida"); invalidateAll(["app_integrations"]);
   };
 
