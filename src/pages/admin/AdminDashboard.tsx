@@ -144,7 +144,7 @@ export default function AdminDashboard() {
     if (action === "approved") {
       toast.info("Processando saque via PIX...");
       const { data, error } = await supabase.functions.invoke("podpay-cashout", { body: { withdrawalId: id } });
-      if (error || !data?.success) { toast.error(data?.error || error?.message || "Erro ao processar"); return; }
+      if (error || !data?.success) { toast.error("Erro ao processar saque"); return; }
       toast.success("Saque aprovado e enviado!");
       await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {

@@ -252,7 +252,7 @@ export default function DadosBancarios() {
 
   const handleDeletePix = async (id: string) => {
     if (!user) return;
-    await supabase.from("pix_keys").delete().eq("id", id);
+    await supabase.from("pix_keys").delete().eq("id", id).eq("user_id", user.id);
     toast.success("Chave removida");
     invalidateAll(["pix_keys"]);
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };

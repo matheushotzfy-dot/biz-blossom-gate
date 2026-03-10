@@ -99,6 +99,13 @@ export default function Auth() {
           setLoading(false);
           return;
         }
+        // Strong password validation
+        const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!PASSWORD_REGEX.test(password)) {
+          toast.error("Senha deve ter no mínimo 8 caracteres, incluindo maiúscula, minúscula e número");
+          setLoading(false);
+          return;
+        }
         const digits = document.replace(/\D/g, "");
         if (digits.length === 11 && !validateCPF(digits)) {
           toast.error("CPF inválido");

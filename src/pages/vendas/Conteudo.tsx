@@ -255,7 +255,7 @@ export default function AdminConteudo() {
     };
     if (editCourseId) {
       const { user_id, is_published, ...updatePayload } = payload;
-      await supabase.from("courses").update(updatePayload).eq("id", editCourseId);
+      await supabase.from("courses").update(updatePayload).eq("id", editCourseId).eq("user_id", user.id);
       toast.success("Curso atualizado!");
     } else {
       const { data } = await supabase.from("courses").insert(payload).select().single();
@@ -270,12 +270,14 @@ export default function AdminConteudo() {
   };
 
   const togglePublish = async (id: string, cur: boolean) => {
-    await supabase.from("courses").update({ is_published: !cur }).eq("id", id);
+    if (!user) return;
+    await supabase.from("courses").update({ is_published: !cur }).eq("id", id).eq("user_id", user.id);
     reloadCourses();
     toast.success(cur ? "Despublicado" : "Publicado!");
   };
 
   const deleteCourse = async (id: string) => {
+    if (!user) return;
     // Must cascade: lessons → modules → user_access → course (FK constraints)
     const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", id);
     if (courseModules && courseModules.length > 0) {
@@ -284,7 +286,7 @@ export default function AdminConteudo() {
       await supabase.from("modules").delete().eq("course_id", id);
     }
     await supabase.from("user_access").delete().eq("course_id", id);
-    const { error } = await supabase.from("courses").delete().eq("id", id);
+    const { error } = await supabase.from("courses").delete().eq("id", id).eq("user_id", user.id);
     if (error) { toast.error("Erro ao excluir curso"); return; }
     if (selectedCourse === id) { setSelectedCourse(null); setModules([]); }
     reloadCourses();

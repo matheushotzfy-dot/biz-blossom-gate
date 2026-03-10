@@ -77,6 +77,8 @@ export default function Perfil() {
 
   const handleAvatarUpload = async (file: File) => {
     if (!user) return;
+    const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG ou WebP"); return; }
     if (file.size > 2 * 1024 * 1024) { toast.error("Máximo 2MB"); return; }
     setUploading(true);
     const ext = file.name.split(".").pop();
