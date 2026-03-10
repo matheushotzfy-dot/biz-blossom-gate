@@ -136,6 +136,7 @@ export function useWebhooks() {
       const { data } = await supabase
         .from("webhook_configs_safe" as any)
         .select("*")
+        .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       return (data || []) as any[];
     },
