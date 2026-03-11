@@ -91,7 +91,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
   };
 
   const handleRemoveBlacklist = async (id: string, value: string) => {
-    const { error } = await supabase.from("global_blacklist" as any).update({ is_active: false } as any).eq("id", id);
+    const { error } = await supabase.from("global_blacklist").update({ is_active: false }).eq("id", id);
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Removido da Blacklist");
     await logAdminAction("remove_blacklist", "global_blacklist", value);
