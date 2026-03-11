@@ -156,7 +156,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   <td className="p-3 text-[10px] text-white/25">{fmtDateCached(t.created_at)}</td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-white/20 text-xs">Nenhuma transação</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-muted-foreground text-xs">Nenhuma transação</td></tr>}
             </tbody>
           </table>
           {visibleCount < filtered.length && (
