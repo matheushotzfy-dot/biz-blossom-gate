@@ -526,12 +526,12 @@ export default function Dashboard() {
 
         {/* Operational Snapshot */}
         <div className="xl:col-span-4 space-y-4">
-          <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-black/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Operacional</h4>
+          <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-primary/5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-primary/60 mb-3">Operacional</h4>
             <div className="space-y-2.5">
-              <OperationalRow icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
-              <OperationalRow icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
-              <OperationalRow icon={<AlertTriangle className="h-4 w-4" />} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
+              <OperationalRow icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="primary" />
+              <OperationalRow icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="primary" />
+              <OperationalRow icon={<AlertTriangle className="h-4 w-4" />} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "primary"} />
             </div>
           </div>
 
