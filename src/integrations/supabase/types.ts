@@ -922,12 +922,14 @@ export type Database = {
           acquirer_id: string | null
           admin_notes: string | null
           avatar_url: string | null
+          balance_frozen: boolean
           created_at: string
           document_number: string | null
           document_type: string | null
           email: string | null
           full_name: string | null
           id: string
+          kyc_rejection_reason: string | null
           last_ip: string | null
           last_login_at: string | null
           nickname: string | null
@@ -943,12 +945,14 @@ export type Database = {
           acquirer_id?: string | null
           admin_notes?: string | null
           avatar_url?: string | null
+          balance_frozen?: boolean
           created_at?: string
           document_number?: string | null
           document_type?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          kyc_rejection_reason?: string | null
           last_ip?: string | null
           last_login_at?: string | null
           nickname?: string | null
@@ -964,12 +968,14 @@ export type Database = {
           acquirer_id?: string | null
           admin_notes?: string | null
           avatar_url?: string | null
+          balance_frozen?: boolean
           created_at?: string
           document_number?: string | null
           document_type?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          kyc_rejection_reason?: string | null
           last_ip?: string | null
           last_login_at?: string | null
           nickname?: string | null
