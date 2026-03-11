@@ -85,6 +85,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
   const [adjustReason, setAdjustReason] = useState("");
   const [subTab, setSubTab] = useState<SubTab>("queue");
+  const [rejectDialog, setRejectDialog] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     Promise.all([
