@@ -193,11 +193,10 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-foreground flex">
-      {/* ═══ Ambient glow background ═══ */}
+    <div className="min-h-screen bg-[#0A0A0A] text-foreground flex">
+      {/* ═══ Subtle ambient glow ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.04] rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-info/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[150px]" />
       </div>
 
       {/* ═══ SIDEBAR ═══ */}
