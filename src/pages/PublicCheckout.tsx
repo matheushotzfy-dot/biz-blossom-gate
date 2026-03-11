@@ -299,7 +299,6 @@ export default function PublicCheckout() {
     window.document.body.style.overscrollBehavior = "auto";
     return () => { window.document.body.style.overflow = prev || ""; window.document.body.style.overscrollBehavior = ""; };
   }, []);
-  }, []);
 
   // Poll transaction status with adaptive interval
   useEffect(() => {
