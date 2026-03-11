@@ -689,17 +689,17 @@ function FintechKpiCard({ icon, label, value, trend, trendUp, tone }: {
 }) {
   const colors = toneColors[tone];
   return (
-    <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-black/10 transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:border-primary/15 group">
+    <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-primary/5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 group">
       <div className="flex items-center justify-between mb-2 md:mb-3">
         <span className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-bold">{label}</span>
-        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-lg flex items-center justify-center ${colors.iconBg} transition-colors`}>
-          <span className={colors.iconText}>{icon}</span>
+        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-lg flex items-center justify-center bg-primary/15 transition-colors group-hover:bg-primary/25`}>
+          <span className="text-primary">{icon}</span>
         </div>
       </div>
       <p className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-foreground leading-none mb-1.5">{value}</p>
       <div className="flex items-center gap-1">
-        {trendUp ? <ArrowUpRight className={`h-3 w-3 ${colors.trendText}`} /> : <ArrowDownRight className="h-3 w-3 text-muted-foreground" />}
-        <span className={`text-[10px] md:text-[11px] font-semibold ${trendUp ? colors.trendText : "text-muted-foreground"}`}>{trend}</span>
+        {trendUp ? <ArrowUpRight className="h-3 w-3 text-primary" /> : <ArrowDownRight className="h-3 w-3 text-muted-foreground" />}
+        <span className={`text-[10px] md:text-[11px] font-bold ${trendUp ? "text-primary" : "text-muted-foreground"}`}>{trend}</span>
       </div>
     </div>
   );
