@@ -717,15 +717,21 @@ function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; lab
 
 function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
   return (
-    <div className={`rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-3 md:p-5 hover:border-primary/20 transition-all animate-fade-in ${delay || ""}`}>
-      <div className="mb-1.5 md:mb-3 flex items-center justify-between">
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] md:tracking-[0.16em] text-muted-foreground font-bold truncate">{label}</span>
-        <div className={`h-7 w-7 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+    <div className={`group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] overflow-hidden animate-fade-in ${delay || ""}`}>
+      {/* Subtle corner glow on hover */}
+      <div className={`absolute -bottom-6 -right-6 h-16 w-16 rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+        tone === "primary" ? "bg-primary/15" : tone === "info" ? "bg-info/15" : tone === "success" ? "bg-success/15" : "bg-warning/15"
+      }`} />
+      <div className="relative z-10">
+        <div className="mb-2 md:mb-3 flex items-center justify-between">
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground/60 font-semibold truncate">{label}</span>
+          <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-white/[0.06]`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
         </div>
+        <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 md:mt-1.5 text-[9px] md:text-[11px] text-muted-foreground/60 font-medium truncate">{helper}</p>
       </div>
-      <p className="text-base md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-0.5 md:mt-1 text-[9px] md:text-[11px] text-muted-foreground truncate">{helper}</p>
     </div>
   );
 }
