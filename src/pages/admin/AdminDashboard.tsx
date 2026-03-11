@@ -328,8 +328,8 @@ export default function AdminDashboard() {
 
             <span className="hidden lg:block text-[10px] text-zinc-600 font-medium">{profiles.length} sellers</span>
 
-            <button className="relative h-7 w-7 rounded-lg flex items-center justify-center border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] transition-all">
-              <Bell className="h-3 w-3 text-white/30" />
+            <button className="relative h-7 w-7 rounded-lg flex items-center justify-center border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-800/50 transition-all">
+              <Bell className="h-3 w-3 text-zinc-500" />
               {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-destructive rounded-full shadow-[0_0_6px_hsl(var(--destructive)/0.5)]" />}
             </button>
 
