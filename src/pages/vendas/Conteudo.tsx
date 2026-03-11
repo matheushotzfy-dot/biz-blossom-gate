@@ -271,12 +271,12 @@ export default function AdminConteudo() {
 
       {/* Search */}
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+        <input
           placeholder="Buscar cursos..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="pl-10 h-9 rounded-lg"
+          className="w-full h-9 pl-10 pr-4 rounded-lg bg-muted/30 dark:bg-foreground/[0.03] border border-border/40 dark:border-foreground/[0.05] text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
         />
       </div>
 
