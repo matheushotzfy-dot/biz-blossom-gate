@@ -358,12 +358,12 @@ export default function Dashboard() {
 
               <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight">
                 MODO ESCALA<br />
-                <span className="text-gradient">ATIVADO! 🔥</span>
+                <span className="text-gradient">ATIVADO!</span>
               </h2>
 
               <div className="space-y-4 text-sm text-muted-foreground leading-relaxed mb-6">
                 <p className="font-bold text-foreground text-base">
-                  AGORA É SANGUE NOS OLHOS! 💪
+                  AGORA É SANGUE NOS OLHOS!
                 </p>
                 <p>
                   O futuro de luxo já está lá, falta <strong className="text-foreground">VOCÊ</strong> alcançar — e sabemos que irá conseguir!
@@ -387,14 +387,14 @@ export default function Dashboard() {
               </div>
 
               <p className="text-lg font-display font-black text-primary mb-6">
-                RUMO À LUA! 🚀🌙
+                RUMO À LUA!
               </p>
 
               <button
                 onClick={() => setShowScalePopup(false)}
                 className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
               >
-                BORA ESCALAR! 🔥
+                BORA ESCALAR!
               </button>
             </div>
           </div>
@@ -449,7 +449,7 @@ export default function Dashboard() {
                     />
                   ))}
                   <Flame className={`h-3.5 w-3.5 md:h-4 md:w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span className="leading-tight">{scaleMode ? "Modo Escala 🔥" : "Modo Escala"}</span>
+                  <span className="leading-tight">Modo Escala</span>
                 </button>
               ) : (
                 <div className="flame-btn group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold border border-primary/30 bg-primary/10 text-primary cursor-not-allowed">

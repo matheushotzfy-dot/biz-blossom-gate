@@ -471,13 +471,13 @@ export default function CheckoutBuilder() {
                     </div>
                   )}
                   
-                  <ToggleRow icon={Users} iconColor="orange-500" title="Compradores ao vivo" desc='"🔥 14 pessoas comprando agora"' checked={fakeViewersEnabled} onChange={setFakeViewersEnabled} />
+                  <ToggleRow icon={Users} iconColor="orange-500" title="Compradores ao vivo" desc='"14 pessoas comprando agora"' checked={fakeViewersEnabled} onChange={setFakeViewersEnabled} />
                   <ToggleRow icon={ExitIcon} iconColor="red-500" title="Exit Intent Popup" desc="Oferecer desconto ao sair da página" checked={exitIntentEnabled} onChange={setExitIntentEnabled} badge="CRO" />
                   <ToggleRow icon={BarChart3} iconColor="blue-500" title="Barra de Progresso" desc='"Você está a 1 passo de garantir..."' checked={progressBarEnabled} onChange={setProgressBarEnabled} />
                   
                   {/* NEW OPTIONS */}
                   <div className="border-t border-border/20 dark:border-foreground/[0.04] pt-3 mt-1">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/60 mb-3">✨ Novas opções</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/60 mb-3">Novas opções</p>
                   </div>
                   
                   <ToggleRow icon={Star} iconColor="amber-500" title="Depoimentos" desc="Exibir depoimentos de clientes no checkout" checked={testimonialEnabled} onChange={setTestimonialEnabled} badge="Novo" />
@@ -585,7 +585,7 @@ export default function CheckoutBuilder() {
               <div className="px-4 pt-3">
                 <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full bg-orange-500/10 text-orange-400 px-3 py-1.5 border border-orange-500/15">
                   <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" /></span>
-                  🔥 14 pessoas estão comprando agora
+                  14 pessoas estão comprando agora
                 </div>
               </div>
             )}
@@ -595,7 +595,7 @@ export default function CheckoutBuilder() {
               <div className="px-4 pt-3">
                 <div className="flex items-center gap-2 text-[11px] font-bold text-red-400 bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/15">
                   <Clock className="h-3.5 w-3.5" />
-                  ⚠️ Apenas {scarcityUnits} vagas restantes
+                  Apenas {scarcityUnits} vagas restantes
                 </div>
               </div>
             )}
@@ -752,7 +752,7 @@ export default function CheckoutBuilder() {
             {/* Exit intent preview */}
             {exitIntentEnabled && (
               <div className="border-t border-border/20 p-3 bg-muted/5 text-center">
-                <p className="text-[10px] text-muted-foreground/30 font-medium">⚡ Exit Intent ativo — popup ao sair da página</p>
+                <p className="text-[10px] text-muted-foreground/30 font-medium">Exit Intent ativo — popup ao sair da página</p>
               </div>
             )}
           </motion.div>

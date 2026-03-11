@@ -274,7 +274,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                         <span className={`text-xs font-black ${isHighRisk ? "text-destructive" : s.rate > 0.5 ? "text-warning" : "text-emerald-500"}`}>
                           {s.rate.toFixed(2)}%
                         </span>
-                        {isHighRisk && <span className="ml-1 text-[8px]">🚨</span>}
+                        {isHighRisk && <AlertTriangle className="ml-1 h-3 w-3 text-destructive" />}
                       </td>
                       <td className="p-3">
                         {s.frozen ? (
@@ -282,7 +282,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                             <Snowflake className="h-2.5 w-2.5" /> Congelado
                           </span>
                         ) : isHighRisk ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20">⚠️ Risco</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1 w-fit"><AlertTriangle className="h-2.5 w-2.5" /> Risco</span>
                         ) : (
                           <span className="text-[10px] text-muted-foreground">OK</span>
                         )}
@@ -344,7 +344,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                     rule.action === "flag" ? "bg-warning/10 text-warning border border-warning/20" :
                     "bg-blue-500/10 text-blue-500 border border-blue-500/20"
                   }`}>
-                    Ação: {rule.action === "block" ? "🛑 Bloquear" : rule.action === "flag" ? "🚩 Sinalizar" : "🔔 Notificar"}
+                    Ação: {rule.action === "block" ? "Bloquear" : rule.action === "flag" ? "Sinalizar" : "Notificar"}
                   </span>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         f.block_type === "blacklist" ? "bg-destructive/10 text-destructive border border-destructive/20" :
                         "bg-warning/10 text-warning border border-warning/20"
-                      }`}>{f.block_type === "blacklist" ? "🛑 Blacklist" : "⚡ Velocity"}</span>
+                      }`}>{f.block_type === "blacklist" ? "Blacklist" : "Velocity"}</span>
                     </td>
                     <td className="p-3 text-xs text-foreground max-w-[200px] truncate">{f.block_reason}</td>
                     <td className="p-3 text-[10px] text-muted-foreground font-mono">{f.customer_email || "—"}</td>
@@ -427,7 +427,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
               <Textarea value={newReason} onChange={e => setNewReason(e.target.value)} placeholder="Ex: Chargeback recorrente, fraude confirmada..." className="min-h-[60px]" />
             </div>
             <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/20">
-              <p className="text-[10px] text-destructive font-medium">⚠️ Qualquer compra na plataforma com este dado será <strong>bloqueada automaticamente</strong> antes de atingir a adquirente.</p>
+              <p className="text-[10px] text-destructive font-medium">Qualquer compra na plataforma com este dado será <strong>bloqueada automaticamente</strong> antes de atingir a adquirente.</p>
             </div>
             <Button onClick={handleAddBlacklist} disabled={!newValue.trim() || !newReason.trim()} className="w-full gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
               <Ban className="h-4 w-4" /> Bloquear
