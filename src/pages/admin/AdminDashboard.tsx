@@ -191,9 +191,10 @@ export default function AdminDashboard() {
     }
     setActiveTab(tabId);
     setMoreOpen(false);
-    // Scroll main content to top
-    const main = document.querySelector("main");
-    if (main) main.scrollTop = 0;
+    // Scroll main content to top — target the actual scrollable container
+    const scrollable = document.querySelector("[data-admin-content]");
+    if (scrollable) scrollable.scrollTop = 0;
+    else window.scrollTo(0, 0);
   };
 
   // Visible nav items (first 8 for top bar, rest in "more")
