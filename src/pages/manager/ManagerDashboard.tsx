@@ -145,7 +145,7 @@ export default function ManagerDashboard() {
       .from("seller_notes" as any)
       .select("*")
       .eq("seller_user_id", sellerId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false }) as any;
     setSellerNotes(prev => ({ ...prev, [sellerId]: (data || []) as SellerNote[] }));
   };
 
