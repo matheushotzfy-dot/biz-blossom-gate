@@ -26,19 +26,24 @@ export class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: 32, fontFamily: "sans-serif", background: "#fff", color: "#111", minHeight: "100vh" }}>
-          <h1 style={{ fontSize: 20, marginBottom: 12 }}>⚠️ Erro na aplicação</h1>
-          <pre style={{ fontSize: 13, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#f5f5f5", padding: 16, borderRadius: 8 }}>
-            {this.state.error?.message}
-            {"\n\n"}
-            {this.state.error?.stack}
-          </pre>
-          <button
-            onClick={() => window.location.reload()}
-            style={{ marginTop: 16, padding: "10px 20px", background: "#22c55e", color: "#fff", border: "none", borderRadius: 8, fontSize: 14 }}
-          >
-            Recarregar
-          </button>
+        <div style={{ padding: 32, fontFamily: "sans-serif", background: "hsl(var(--background, 0 0% 100%))", color: "hsl(var(--foreground, 0 0% 7%))", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ maxWidth: 420, textAlign: "center" }}>
+            <h1 style={{ fontSize: 22, marginBottom: 8, fontWeight: 700 }}>⚠️ Algo deu errado</h1>
+            <p style={{ fontSize: 14, color: "#666", marginBottom: 24, lineHeight: 1.6 }}>
+              Ocorreu um erro inesperado. Tente recarregar a página. Se o problema persistir, entre em contato com o suporte.
+            </p>
+            {import.meta.env.DEV && this.state.error && (
+              <pre style={{ fontSize: 11, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#f5f5f5", padding: 12, borderRadius: 8, textAlign: "left", marginBottom: 16, maxHeight: 200, overflow: "auto" }}>
+                {this.state.error.message}
+              </pre>
+            )}
+            <button
+              onClick={() => window.location.reload()}
+              style={{ padding: "12px 28px", background: "#22c55e", color: "#fff", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+            >
+              Recarregar Página
+            </button>
+          </div>
         </div>
       );
     }
