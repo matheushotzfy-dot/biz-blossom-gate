@@ -344,7 +344,7 @@ export default function AdminDashboard() {
               />
             )}
             {activeTab === "transactions" && (
-              <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} />
+              <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
             )}
             {activeTab === "sellers" && (
               <AdminSellersTab
