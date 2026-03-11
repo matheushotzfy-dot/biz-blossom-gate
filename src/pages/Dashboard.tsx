@@ -523,7 +523,6 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
         </div>
-        </div>
 
         {/* Operational Snapshot */}
         <div className="xl:col-span-4 space-y-4">
