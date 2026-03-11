@@ -195,14 +195,14 @@ export default function Dashboard() {
     const totalWithdrawn = withdrawals
       .filter(w => w.status === "approved" || w.status === "pending")
       .reduce((acc, w) => acc + Number(w.amount), 0);
-    const totalChargebacksRefunds = transactions
-      .filter(t => t.status === "chargeback" || t.status === "refunded")
-      .reduce((acc, t) => acc + Number(t.net_amount), 0);
+    // FIX: Chargebacks/refunds were previously ADDING net_amount instead of not counting
+    // Completed revenue already excludes chargebacks/refunds (different status),
+    // so we should NOT subtract them again. Only subtract retained amounts.
     const totalRetained = transactions
       .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
       .reduce((acc, t) => acc + Number(t.retained_amount), 0);
 
-    return { withdrawalPending: _withdrawalPending, balance: totalRevenue + balanceAdjustments - totalWithdrawn - totalChargebacksRefunds - totalRetained };
+    return { withdrawalPending: _withdrawalPending, balance: totalRevenue + balanceAdjustments - totalWithdrawn - totalRetained };
   }, [transactions, withdrawals, balanceAdjustments]);
 
   // Optimized chart: pre-index transactions by date to avoid O(N*M)
