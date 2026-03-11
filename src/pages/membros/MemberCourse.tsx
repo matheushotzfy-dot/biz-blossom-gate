@@ -23,12 +23,22 @@ function extractVimeoId(url: string): string | null {
   return m ? m[1] : null;
 }
 
+function isAllowedVideoUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const allowed = ['youtube.com', 'www.youtube.com', 'youtu.be', 'player.vimeo.com', 'vimeo.com', 'www.vimeo.com', 'fast.wistia.net', 'player.hotmart.com', 'cdn.embedly.com', 'iframe.mediadelivery.net'];
+    return u.protocol === 'https:' && allowed.some(d => u.hostname === d || u.hostname.endsWith('.' + d));
+  } catch { return false; }
+}
+
 function VideoPlayer({ url }: { url: string }) {
   const ytId = extractYouTubeId(url);
   if (ytId) return <iframe src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&autoplay=1`} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />;
   const vimeoId = extractVimeoId(url);
   if (vimeoId) return <iframe src={`https://player.vimeo.com/video/${vimeoId}?byline=0&portrait=0&autoplay=1`} className="w-full h-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />;
-  return <iframe src={url} className="w-full h-full" allowFullScreen />;
+  // FIX: Only allow whitelisted video domains to prevent XSS via iframe injection
+  if (!isAllowedVideoUrl(url)) return <div className="w-full h-full flex items-center justify-center bg-zinc-900 text-zinc-500 text-sm">URL de vídeo não suportada</div>;
+  return <iframe src={url} className="w-full h-full" allowFullScreen sandbox="allow-scripts allow-same-origin" />;
 }
 
 export default function MemberCourse() {
@@ -47,6 +57,18 @@ export default function MemberCourse() {
 
   const loadCourse = async () => {
     if (!courseId || !user) return;
+
+    // FIX: Verify user has access to this course before loading
+    const [{ data: accessData }, { data: ownedData }] = await Promise.all([
+      supabase.from("user_access").select("id").eq("user_id", user.id).eq("course_id", courseId).eq("status", "active").limit(1),
+      supabase.from("courses").select("id").eq("id", courseId).eq("user_id", user.id).limit(1),
+    ]);
+    if ((!accessData || accessData.length === 0) && (!ownedData || ownedData.length === 0)) {
+      toast.error("Você não tem acesso a este curso.");
+      setLoading(false);
+      return;
+    }
+
     const { data: courseData } = await supabase.from("courses").select("id, title, description, thumbnail_url").eq("id", courseId).single();
     if (!courseData) { setLoading(false); return; }
     setCourse(courseData);

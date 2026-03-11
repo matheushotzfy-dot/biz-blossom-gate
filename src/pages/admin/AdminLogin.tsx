@@ -13,10 +13,20 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [attempts, setAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // FIX: Rate limiting - lock after 3 failed attempts for 120s
+    if (Date.now() < lockoutUntil) {
+      const secsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      setError(`Muitas tentativas. Aguarde ${secsLeft}s.`);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -42,6 +52,11 @@ export default function AdminLogin() {
       toast.success("Bem-vindo ao painel administrativo!");
       navigate("/admin-matheus/dashboard");
     } catch (_err: unknown) {
+      setAttempts(prev => {
+        const next = prev + 1;
+        if (next >= 3) setLockoutUntil(Date.now() + 120000);
+        return next;
+      });
       setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);

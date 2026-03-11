@@ -404,7 +404,11 @@ export default function PublicCheckout() {
         else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
       } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
     } catch { toast.error("Instabilidade na rede. Tente novamente."); setCheckoutState("failed"); }
-    finally { setProcessing(false); processingRef.current = false; }
+    finally {
+      setProcessing(false); processingRef.current = false;
+      // FIX: Clear sensitive card data from memory after submission
+      setCardNumber(""); setCardExpiry(""); setCardCvv(""); setCardName("");
+    }
   };
 
   const retryPayment = () => { clearCheckoutSession(slug || ""); setCheckoutState("form"); setPixData(null); setBoletoData(null); setTransactionId(null); };

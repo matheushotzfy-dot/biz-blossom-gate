@@ -86,14 +86,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setSelectedUser(profile);
     setLoading(true);
     const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes] = await Promise.all([
-      supabase.from("activity_logs").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
-      supabase.from("products").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
-      supabase.from("withdrawals").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
-      supabase.from("transactions").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
+      supabase.from("activity_logs").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("products").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("withdrawals").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("transactions").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
       supabase.from("custom_user_fees").select("*").eq("user_id", profile.user_id).maybeSingle(),
-      supabase.from("balance_adjustments").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }),
+      supabase.from("balance_adjustments").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       supabase.from("pix_keys").select("*").eq("user_id", profile.user_id),
-      supabase.from("disputes").select("*").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }),
+      supabase.from("disputes").select("*").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
     ]);
     if (logsRes.data) setUserLogs(logsRes.data as any);
     if (productsRes.data) setUserProducts(productsRes.data);

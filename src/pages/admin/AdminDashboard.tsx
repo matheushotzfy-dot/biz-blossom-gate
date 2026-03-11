@@ -117,9 +117,9 @@ export default function AdminDashboard() {
     setSyncing(true);
     const [txRes, pRes, prodRes, wRes] = await Promise.all([
       supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("products").select("*"),
-      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("products").select("*").limit(500),
+      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(300),
     ]);
     if (txRes.data) setTransactions(txRes.data);
     if (pRes.data) setProfiles(pRes.data);
@@ -148,8 +148,10 @@ export default function AdminDashboard() {
       toast.success("Saque aprovado e enviado!");
       await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {
-      const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id);
+      // FIX: Only reject if still pending (race condition protection)
+      const { error, count } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending");
       if (error) { toast.error("Erro ao recusar"); return; }
+      if (count === 0) { toast.error("Saque já foi processado"); loadData(); return; }
       toast.success("Saque recusado");
       await logAdminAction("reject_withdrawal", "withdrawal", id);
     }

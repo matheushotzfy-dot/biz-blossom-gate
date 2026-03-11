@@ -69,6 +69,8 @@ export default function Auth() {
   const [referralSource, setReferralSource] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number>(0);
   const navigate = useNavigate();
 
   const handleDocumentChange = (value: string) => {
@@ -86,12 +88,28 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // FIX: Rate limiting - lock after 5 failed attempts for 60s
+    if (isLogin && Date.now() < lockoutUntil) {
+      const secsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      toast.error(`Muitas tentativas. Aguarde ${secsLeft}s.`);
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          setLoginAttempts(prev => {
+            const next = prev + 1;
+            if (next >= 5) setLockoutUntil(Date.now() + 60000);
+            return next;
+          });
+          throw error;
+        }
+        setLoginAttempts(0);
         navigate("/dashboard");
       } else {
         if (password !== confirmPassword) {
