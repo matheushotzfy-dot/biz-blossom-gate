@@ -130,7 +130,8 @@ function loadTikTokPixel(pixelId: string) {
 }
 
 function loadKwaiPixel(pixelId: string) {
-  const key = `kwai_${pixelId}`;
+  const safeId = sanitizePixelId(pixelId);
+  const key = `kwai_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
