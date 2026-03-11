@@ -510,7 +510,7 @@ export default function ManagerDashboard() {
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/15 text-[11px] text-amber-400">
-              ⚠️ Mínimos definidos pelo admin: {feeLimits.min_transaction_percentage}% + R$ {feeLimits.min_transaction_fixed} | Saque: R$ {feeLimits.min_withdrawal_fee}
+              Mínimos definidos pelo admin: {feeLimits.min_transaction_percentage}% + R$ {feeLimits.min_transaction_fixed} | Saque: R$ {feeLimits.min_withdrawal_fee}
             </div>
             <div>
               <Label className="text-[11px] text-white/40 uppercase tracking-wider">Taxa Percentual (%)</Label>

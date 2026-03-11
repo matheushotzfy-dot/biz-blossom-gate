@@ -600,7 +600,7 @@ export default function Webhooks() {
                 </pre>
               </div>
               <p className="text-[10px] text-muted-foreground/40">
-                ⚠️ Valores monetários são enviados em centavos (ex: 19700 = R$ 197,00)
+                Valores monetários são enviados em centavos (ex: 19700 = R$ 197,00)
               </p>
             </div>
 

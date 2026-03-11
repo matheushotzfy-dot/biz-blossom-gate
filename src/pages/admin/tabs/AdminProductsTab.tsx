@@ -504,7 +504,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                 <p className="text-muted-foreground">Seller: {getSellerName(suspendTarget.user_id)}</p>
               </div>
               <div className="rounded-xl border border-warning/20 bg-warning/[0.06] p-3 text-xs text-warning">
-                <p className="font-bold">⚠️ Suspensão Cirúrgica</p>
+                <p className="font-bold">Suspensão Cirúrgica</p>
                 <p className="mt-1 text-warning/80">Isso inativa apenas o checkout deste produto. O seller <strong>NÃO</strong> será banido da plataforma.</p>
               </div>
               <div>
