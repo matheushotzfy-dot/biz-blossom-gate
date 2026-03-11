@@ -166,7 +166,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
                         </div>
                       </div>
                     </td>
-                    <td className="p-3"><SellerTypeBadge type={sellerType} /></td>
+                    <td className="p-3 text-[10px] uppercase text-white/30">{type}</td>
                     <td className="p-3">
                       <p className="text-[11px] text-white/60">{productName}</p>
                     </td>
