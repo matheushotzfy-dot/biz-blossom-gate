@@ -418,7 +418,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                               <Button size="sm" className="h-7 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}>
                                 <CheckCircle2 className="h-3 w-3" /> Aprovar
                               </Button>
-                              <Button size="sm" className="h-7 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "rejected")}>
+                              <Button size="sm" className="h-7 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none" onClick={() => { setRejectDialog(w.id); setRejectReason(""); }}>
                                 <XCircle className="h-3 w-3" /> Recusar
                               </Button>
                             </div>
