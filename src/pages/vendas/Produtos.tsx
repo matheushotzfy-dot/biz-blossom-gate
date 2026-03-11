@@ -2,13 +2,13 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts, useInvalidateAll } from "@/hooks/useQueryData";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Sparkles, Palette, Upload } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Sparkles, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { PageShell, PageTitle } from "@/components/PageShell";
@@ -40,7 +40,6 @@ export default function Produtos() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
 
   const uploadImage = async (file: File): Promise<string | null> => {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou GIF"); return null; }
@@ -97,16 +96,6 @@ export default function Produtos() {
     setImageFile(file); setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Formato inválido"); return; }
-    if (file.size > MAX_FILE_SIZE) { toast.error("Máximo 5MB"); return; }
-    setImageFile(file); setImagePreview(URL.createObjectURL(file));
-  };
-
   const getCheckoutLink = (url: string) => {
     const slug = url.split("/").pop()!;
     return `${window.location.origin}/pay/${slug}`;
@@ -125,178 +114,75 @@ export default function Produtos() {
     <PageShell>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Crie, gerencie e configure seus infoprodutos" />
-        <Sheet open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <SheetTrigger asChild>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+          <DialogTrigger asChild>
             <Button className="gap-2 rounded-xl text-sm font-bold bg-primary/20 text-primary border border-primary/30 h-11 px-6 hover:bg-primary/30 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-all duration-300">
               <Plus className="h-4 w-4" /> Novo Produto
             </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-xl md:max-w-2xl p-0 border-l border-border/60 bg-background flex flex-col">
-            {/* Header */}
-            <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40">
-              <SheetTitle className="font-display text-xl flex items-center gap-3">
+          </DialogTrigger>
+          <DialogContent className="max-w-xl rounded-2xl ring-1 ring-white/[0.06] bg-[#141418]/95 backdrop-blur-3xl shadow-2xl shadow-black/60">
+            <DialogHeader>
+              <DialogTitle className="font-display text-xl flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
                   {editId ? <Edit className="h-5 w-5 text-primary" /> : <Sparkles className="h-5 w-5 text-primary" />}
                 </div>
-                <div className="flex-1">
-                  <span className="block">{editId ? "Editar Produto" : "Criar Novo Produto"}</span>
-                  <span className="text-xs font-normal text-muted-foreground">Preencha os dados do seu infoproduto</span>
-                </div>
-                {/* Status toggle in header */}
-                <div className="flex items-center gap-2">
-                  <Switch checked={form.status === "active"} onCheckedChange={(v) => setForm({ ...form, status: v ? "active" : "inactive" })} />
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold",
-                    form.status === "active"
-                      ? "bg-success/10 text-success ring-1 ring-success/20"
-                      : "bg-muted text-muted-foreground ring-1 ring-border"
-                  )}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", form.status === "active" ? "bg-success" : "bg-muted-foreground")} />
-                    {form.status === "active" ? "Ativo" : "Inativo"}
-                  </span>
-                </div>
-              </SheetTitle>
-            </SheetHeader>
-
-            {/* Scrollable Form */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-6" style={{ WebkitOverflowScrolling: 'touch' }}>
-              {/* ── IMAGE UPLOAD HERO ── */}
+                {editId ? "Editar Produto" : "Criar Novo Produto"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-5 mt-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Capa do Produto</p>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Imagem do produto</Label>
                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
                 {imagePreview ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-border/60 group">
-                    <img src={imagePreview} alt="Preview" className="w-full h-52 object-cover" />
-                    <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                      <button type="button" onClick={() => fileInputRef.current?.click()} className="h-10 w-10 rounded-xl bg-primary/20 backdrop-blur flex items-center justify-center text-primary hover:bg-primary/30 transition-colors ring-1 ring-primary/20">
-                        <ImagePlus className="h-5 w-5" />
-                      </button>
-                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-10 w-10 rounded-xl bg-destructive/20 backdrop-blur flex items-center justify-center text-destructive hover:bg-destructive/30 transition-colors ring-1 ring-destructive/20">
-                        <X className="h-5 w-5" />
-                      </button>
+                  <div className="relative rounded-2xl overflow-hidden ring-1 ring-white/[0.06] group">
+                    <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover" />
+                    <div className="absolute inset-0 bg-[#040405]/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                      <button type="button" onClick={() => fileInputRef.current?.click()} className="h-10 w-10 rounded-xl bg-primary/20 backdrop-blur flex items-center justify-center text-primary hover:bg-primary/30 transition-colors ring-1 ring-primary/20"><ImagePlus className="h-5 w-5" /></button>
+                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-10 w-10 rounded-xl bg-destructive/20 backdrop-blur flex items-center justify-center text-destructive hover:bg-destructive/30 transition-colors ring-1 ring-destructive/20"><X className="h-5 w-5" /></button>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={handleDrop}
-                    className={cn(
-                      "w-full h-48 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-all duration-200 group",
-                      dragOver
-                        ? "border-primary bg-primary/5"
-                        : "border-border/40 hover:border-primary/40 hover:bg-muted/20 bg-muted/5"
-                    )}
-                  >
-                    <div className={cn(
-                      "h-14 w-14 rounded-2xl flex items-center justify-center transition-colors",
-                      dragOver ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                    )}>
-                      <Upload className="h-7 w-7" />
-                    </div>
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-40 rounded-2xl border-2 border-dashed border-white/[0.06] hover:border-primary/30 flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary transition-all hover:bg-primary/[0.02] group">
+                    <div className="h-14 w-14 rounded-2xl bg-white/[0.03] group-hover:bg-primary/10 flex items-center justify-center transition-colors ring-1 ring-white/[0.06]"><ImagePlus className="h-7 w-7" /></div>
                     <div className="text-center">
-                      <span className="text-xs font-bold text-foreground block">Arraste a capa do seu produto aqui</span>
-                      <span className="text-[10px] text-muted-foreground mt-0.5 block">ou clique para buscar • JPEG, PNG, WebP até 5MB</span>
+                      <span className="text-xs font-bold block">Clique para adicionar imagem</span>
+                      <span className="text-[10px] text-muted-foreground/60">JPEG, PNG, WebP até 5MB</span>
                     </div>
                   </button>
                 )}
               </div>
-
-              {/* ── SEPARATOR ── */}
-              <div className="border-t border-border/20" />
-
-              {/* ── BASIC INFO ── */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Informações Básicas</p>
-
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Nome do produto</Label>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ex: Curso de Marketing Digital"
-                    className="h-11 rounded-xl bg-muted/10 border-border/40 focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-                    required
-                    maxLength={200}
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Descrição</Label>
-                  <Textarea
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    rows={3}
-                    placeholder="Descreva seu produto para os compradores..."
-                    className="rounded-xl bg-muted/10 border-border/40 focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"
-                    maxLength={2000}
-                  />
-                </div>
+              <div>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nome do produto</Label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-11 rounded-xl border-white/[0.08] bg-white/[0.02]" required maxLength={200} />
               </div>
-
-              {/* ── SEPARATOR ── */}
-              <div className="border-t border-border/20" />
-
-              {/* ── PRICING & LINKS ── */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Precificação e Links</p>
-
+              <div>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Descrição</Label>
+                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5 rounded-xl border-white/[0.08] bg-white/[0.02]" maxLength={2000} />
+              </div>
+              <div>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><ExternalLink className="h-3 w-3" /> URL da Página de Vendas</Label>
+                <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-11 rounded-xl border-white/[0.08] bg-white/[0.02]" type="url" />
+                <p className="text-[10px] text-muted-foreground/60 mt-1">Link da página onde o produto é divulgado (compliance)</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Preço</Label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground select-none">R$</span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="1.00"
-                      max="99999.99"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value })}
-                      placeholder="97.00"
-                      className="h-12 rounded-xl bg-muted/10 border-border/40 pl-10 text-lg font-bold text-foreground focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-                      required
-                    />
+                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><DollarSign className="h-3 w-3" /> Preço (R$)</Label>
+                  <Input type="number" step="0.01" min="1.00" max="99999.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-11 rounded-xl border-white/[0.08] bg-white/[0.02]" required />
+                </div>
+                <div>
+                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Tag className="h-3 w-3" /> Status</Label>
+                  <div className="mt-1.5 flex items-center gap-3 h-11 px-3 rounded-xl ring-1 ring-white/[0.08] bg-white/[0.02]">
+                    <Switch checked={form.status === "active"} onCheckedChange={(v) => setForm({ ...form, status: v ? "active" : "inactive" })} />
+                    <span className={`text-xs font-bold ${form.status === "active" ? "text-primary" : "text-muted-foreground"}`}>{form.status === "active" ? "Ativo" : "Inativo"}</span>
                   </div>
                 </div>
-
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                    <ExternalLink className="h-3 w-3" /> URL da Página de Vendas
-                  </Label>
-                  <Input
-                    value={form.page_url}
-                    onChange={(e) => setForm({ ...form, page_url: e.target.value })}
-                    placeholder="https://suapagina.com/produto"
-                    className="h-11 rounded-xl bg-muted/10 border-border/40 focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-                    type="url"
-                  />
-                  <p className="text-[10px] text-muted-foreground mt-1.5">Link da página onde o produto é divulgado (compliance)</p>
-                </div>
               </div>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all" disabled={uploading}>
+                {uploading ? "Enviando..." : editId ? "Salvar alterações" : "🚀 Criar produto"}
+              </Button>
             </form>
-
-            {/* ── STICKY FOOTER ── */}
-            <div className="px-6 py-4 border-t border-border/40 bg-background/80 backdrop-blur-md flex items-center justify-end gap-3">
-              <Button type="button" variant="ghost" onClick={resetForm} className="rounded-xl h-11 px-5 text-sm font-semibold text-muted-foreground hover:text-foreground">
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                onClick={(e) => {
-                  // Trigger form submit from outside
-                  const form = e.currentTarget.closest('.flex.flex-col')?.querySelector('form');
-                  if (form) form.requestSubmit();
-                }}
-                disabled={uploading}
-                className="rounded-xl h-11 px-6 text-sm font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 transition-all"
-              >
-                {uploading ? "Enviando..." : editId ? "Salvar alterações" : "🚀 Criar Produto"}
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {products.length === 0 ? (
