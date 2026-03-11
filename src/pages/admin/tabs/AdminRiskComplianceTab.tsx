@@ -344,7 +344,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                     rule.action === "flag" ? "bg-warning/10 text-warning border border-warning/20" :
                     "bg-blue-500/10 text-blue-500 border border-blue-500/20"
                   }`}>
-                    Ação: {rule.action === "block" ? "🛑 Bloquear" : rule.action === "flag" ? "🚩 Sinalizar" : "🔔 Notificar"}
+                    Ação: {rule.action === "block" ? "Bloquear" : rule.action === "flag" ? "Sinalizar" : "Notificar"}
                   </span>
                 </div>
               </div>
