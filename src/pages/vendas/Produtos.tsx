@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts, useInvalidateAll } from "@/hooks/useQueryData";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Sparkles } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Sparkles, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -244,7 +244,7 @@ export default function Produtos() {
                 <div className="flex items-center gap-1.5 mt-auto pt-2 opacity-50 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out">
                   <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
                   <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => setPixelProduct(p)}><Crosshair className="h-3 w-3" /> Pixels</Button>
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => navigate("/vendas/checkout")}><ExternalLink className="h-3 w-3" /> Checkout</Button>
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}><Palette className="h-3 w-3" /> Builder</Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="rounded-lg h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all ml-auto"><MoreVertical className="h-3.5 w-3.5" /></Button>

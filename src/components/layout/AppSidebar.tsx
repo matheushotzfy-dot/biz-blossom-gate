@@ -76,7 +76,7 @@ const sections = [
     label: "INFOPRODUTOS",
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
-      { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
+      
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
     ],
   },

@@ -20,6 +20,7 @@ import ControleGastos from "./pages/financeiro/ControleGastos";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
+import CheckoutBuilder from "./pages/vendas/CheckoutBuilder";
 
 import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
@@ -89,6 +90,7 @@ const App = () => (
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
+                <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
                 
                 <Route path="/vendas/webhooks" element={<Webhooks />} />
                 <Route path="/vendas/documentacao" element={<Documentacao />} />
