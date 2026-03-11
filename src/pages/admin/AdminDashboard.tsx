@@ -39,6 +39,7 @@ import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
 import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
+import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -63,6 +64,7 @@ const NAV_ITEMS = [
   { id: "acquirers", label: "Adquirentes", icon: Banknote, section: "system", employeeAccess: false },
   { id: "settings", label: "Config", icon: Settings, section: "system", employeeAccess: false },
   { id: "error-logs", label: "Erros", icon: Bug, section: "system", employeeAccess: false },
+  { id: "notifications", label: "Notificações", icon: Bell, section: "system", employeeAccess: false },
   { id: "audit", label: "Audit", icon: Activity, section: "system", employeeAccess: false },
 ] as const;
 
@@ -416,6 +418,7 @@ export default function AdminDashboard() {
               )}
               {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
               {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
+              {activeTab === "notifications" && isAdmin && <AdminNotificationsTab profiles={profiles} />}
               {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}

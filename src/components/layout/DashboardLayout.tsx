@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
+import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Menu, Bell, Sun, Moon, Search, AlertTriangle, ArrowRight, X as XIcon, CheckCircle2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -22,23 +23,7 @@ function DashboardLayoutInner() {
   const [showApproved, setShowApproved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    if (!user) return;
-    // FIX: Use separate queries instead of .or() with template literals
-    Promise.all([
-      supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(15),
-      supabase.from("notifications").select("*").is("user_id", null).order("created_at", { ascending: false }).limit(5),
-    ]).then(([userRes, globalRes]) => {
-      const all = [...(userRes.data || []), ...(globalRes.data || [])].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ).slice(0, 20);
-      setNotifications(all);
-      setUnreadCount(all.filter((n: any) => !n.is_read).length);
-    });
-  }, [user]);
+  const unreadCount = useNotificationCount();
 
   useEffect(() => {
     if (profile?.account_status === "approved" && user?.id) {
@@ -148,6 +133,7 @@ function DashboardLayoutInner() {
       </div>
 
       <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
 
       {/* ─── ACCOUNT APPROVED POPUP ─── */}
       {showApproved && (
