@@ -201,7 +201,7 @@ export default function AdminDashboard() {
 
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
-        "fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 border-r border-white/[0.06] bg-[#0A0A0C]/90 backdrop-blur-2xl overflow-hidden",
+        "fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 border-r border-zinc-800/80 bg-[#0E0E10] overflow-hidden",
         sidebarCollapsed ? "w-[60px]" : "w-[220px]"
       )}>
         {/* Logo */}
