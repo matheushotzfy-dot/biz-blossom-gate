@@ -206,7 +206,7 @@ export default function AdminDashboard() {
       )}>
         {/* Logo */}
         <div className={cn(
-          "h-14 flex items-center border-b border-white/[0.06] shrink-0",
+          "h-14 flex items-center border-b border-zinc-800/80 shrink-0",
           sidebarCollapsed ? "px-3 justify-center" : "px-4"
         )}>
           <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
