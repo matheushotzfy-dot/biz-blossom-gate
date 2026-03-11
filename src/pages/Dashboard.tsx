@@ -473,7 +473,7 @@ export default function Dashboard() {
       {/* ─── CHART + OPERATIONAL SNAPSHOT ─── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         {/* Chart */}
-        <div className="xl:col-span-8 rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10 min-h-[320px]">
+        <div className="xl:col-span-8 rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5 min-h-[320px]">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-foreground">Performance de Receita</h3>
@@ -481,7 +481,7 @@ export default function Dashboard() {
             </div>
             <div className="text-right">
               <p className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">{fmt(revenue)}</p>
-              <p className="text-[11px] text-muted-foreground">{selectedPeriod.label}</p>
+              <p className="text-[11px] text-primary font-semibold">{selectedPeriod.label}</p>
             </div>
           </div>
           <div className="h-[220px] md:h-[260px]">
@@ -489,8 +489,9 @@ export default function Dashboard() {
               <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                    <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
@@ -498,28 +499,29 @@ export default function Dashboard() {
                 <Tooltip
                   contentStyle={{
                     background: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
+                    border: "1px solid hsl(var(--primary) / 0.2)",
                     borderRadius: "12px",
                     fontSize: "13px",
                     color: "hsl(var(--foreground))",
                     padding: "10px 14px",
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
+                    boxShadow: "0 8px 30px hsl(var(--primary) / 0.1)",
                   }}
                   formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeDasharray: "4 4" }}
                 />
                 <Area
                   type="monotone"
                   dataKey="vendas"
                   stroke="hsl(var(--primary))"
-                  strokeWidth={2.5}
+                  strokeWidth={3}
                   fill="url(#dashboardRevenue)"
                   dot={false}
-                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
+                  activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
+        </div>
         </div>
 
         {/* Operational Snapshot */}
