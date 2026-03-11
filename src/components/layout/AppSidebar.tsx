@@ -79,7 +79,8 @@ const sections = [
     label: "INFOPRODUTOS",
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
-      
+      { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
+      { title: "Coproduções", url: "/vendas/coproducoes", icon: Handshake },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
     ],
   },
