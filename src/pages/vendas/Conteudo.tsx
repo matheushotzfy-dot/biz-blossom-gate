@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useInvalidateAll } from "@/hooks/useQueryData";
@@ -101,6 +102,7 @@ const DURATION_OPTIONS = [
 // ═══════════════════════════════════════════════════════════════════
 export default function AdminConteudo() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: coursesRaw = [] } = useCoursesQuery();
   const { data: productsRaw = [] } = useProductsQuery();
   const invalidateAll = useInvalidateAll();
@@ -346,7 +348,7 @@ export default function AdminConteudo() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-1 mt-auto pt-1">
-                    <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => { setSelectedCourse(c.id); setEditCourseId(c.id); setWizardStep("structure"); setWizardOpen(true); }}>
+                    <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}>
                       <FolderOpen className="h-3 w-3" /> Gerenciar
                     </Button>
                     <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => openWizardEdit(c)}>

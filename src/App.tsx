@@ -26,6 +26,7 @@ import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
 import ApiDocsComplete from "./pages/vendas/ApiDocsComplete";
 import Conteudo from "./pages/vendas/Conteudo";
+import CourseBuilder from "./pages/vendas/CourseBuilder";
 import Apps from "./pages/vendas/Apps";
 import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
@@ -96,6 +97,7 @@ const App = () => (
                 <Route path="/vendas/documentacao" element={<Documentacao />} />
                 <Route path="/vendas/documentacao/completa" element={<ApiDocsComplete />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
+                <Route path="/vendas/conteudo/:courseId/builder" element={<CourseBuilder />} />
                 <Route path="/integracoes/apps" element={<Apps />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
