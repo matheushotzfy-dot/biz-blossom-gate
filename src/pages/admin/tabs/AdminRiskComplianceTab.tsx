@@ -427,7 +427,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
               <Textarea value={newReason} onChange={e => setNewReason(e.target.value)} placeholder="Ex: Chargeback recorrente, fraude confirmada..." className="min-h-[60px]" />
             </div>
             <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/20">
-              <p className="text-[10px] text-destructive font-medium">⚠️ Qualquer compra na plataforma com este dado será <strong>bloqueada automaticamente</strong> antes de atingir a adquirente.</p>
+              <p className="text-[10px] text-destructive font-medium">Qualquer compra na plataforma com este dado será <strong>bloqueada automaticamente</strong> antes de atingir a adquirente.</p>
             </div>
             <Button onClick={handleAddBlacklist} disabled={!newValue.trim() || !newReason.trim()} className="w-full gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
               <Ban className="h-4 w-4" /> Bloquear

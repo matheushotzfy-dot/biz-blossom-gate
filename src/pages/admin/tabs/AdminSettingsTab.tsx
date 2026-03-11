@@ -464,10 +464,10 @@ export default function AdminSettingsTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="info">ℹ️ Informação</SelectItem>
-                  <SelectItem value="success">✅ Sucesso</SelectItem>
-                  <SelectItem value="warning">⚠️ Aviso</SelectItem>
-                  <SelectItem value="alert">🚨 Alerta</SelectItem>
+                  <SelectItem value="info">Informação</SelectItem>
+                  <SelectItem value="success">Sucesso</SelectItem>
+                  <SelectItem value="warning">Aviso</SelectItem>
+                  <SelectItem value="alert">Alerta</SelectItem>
                 </SelectContent>
               </Select>
             </div>
