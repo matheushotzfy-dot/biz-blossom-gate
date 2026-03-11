@@ -128,7 +128,9 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("notifications").delete().eq("id", id);
+    if (!window.confirm("Excluir esta notificação?")) return;
+    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir notificação"); return; }
     toast.success("Notificação excluída");
     setNotifications(prev => prev.filter(n => n.id !== id));
   };

@@ -78,9 +78,11 @@ export function NotificationPanel({ open, onClose }: Props) {
 
   const markAllAsRead = async () => {
     if (!user) return;
-    const unreadIds = notifications.filter(n => !n.is_read && n.user_id === user.id).map(n => n.id);
-    if (unreadIds.length === 0) return;
-    await supabase.from("notifications").update({ is_read: true }).in("id", unreadIds);
+    // FIX: Only mark user-specific notifications as read (global notifs have null user_id and can't be updated by users via RLS)
+    const unreadUserIds = notifications.filter(n => !n.is_read && n.user_id === user.id).map(n => n.id);
+    if (unreadUserIds.length === 0) return;
+    await supabase.from("notifications").update({ is_read: true }).in("id", unreadUserIds);
+    // Visually mark all as read in the UI even if global ones can't be persisted
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 

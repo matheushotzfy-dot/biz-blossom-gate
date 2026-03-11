@@ -108,7 +108,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
   };
 
   const handleUpdateRule = async (rule: VelocityRule, field: string, value: number) => {
-    const { error } = await supabase.from("velocity_rules" as any).update({ [field]: value, updated_by: user?.id } as any).eq("id", rule.id);
+    const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id } as any).eq("id", rule.id);
     if (error) { toast.error("Erro"); return; }
     toast.success("Regra atualizada");
     setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, [field]: value } : r));

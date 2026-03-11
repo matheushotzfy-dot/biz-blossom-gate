@@ -238,7 +238,9 @@ export default function Apps() {
 
   const deleteIntegration = async (id: string) => {
     if (!user) return;
-    await supabase.from("app_integrations").delete().eq("id", id).eq("user_id", user.id);
+    if (!window.confirm("Tem certeza que deseja remover esta integração?")) return;
+    const { error } = await supabase.from("app_integrations").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao remover integração"); return; }
     toast.success("Integração removida"); invalidateAll(["app_integrations"]);
   };
 

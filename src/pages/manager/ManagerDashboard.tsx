@@ -170,9 +170,10 @@ export default function ManagerDashboard() {
   };
 
   const handleApproveKYC = async (seller: Profile) => {
+    // FIX: Use "approved" to match admin panel status convention
     const { error } = await supabase
       .from("profiles")
-      .update({ account_status: "active" })
+      .update({ account_status: "approved" })
       .eq("user_id", seller.user_id);
     if (error) { toast.error("Erro ao aprovar conta"); return; }
     toast.success(`Conta de ${seller.full_name || seller.email} aprovada!`);
@@ -180,6 +181,7 @@ export default function ManagerDashboard() {
   };
 
   const handleRejectKYC = async (seller: Profile) => {
+    if (!window.confirm(`Tem certeza que deseja rejeitar a conta de ${seller.full_name || seller.email}?`)) return;
     const { error } = await supabase
       .from("profiles")
       .update({ account_status: "rejected" })

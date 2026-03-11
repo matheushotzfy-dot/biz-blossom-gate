@@ -223,7 +223,9 @@ export default function AdminSettingsTab() {
   };
 
   const deleteNotification = async (id: string) => {
-    await supabase.from("notifications").delete().eq("id", id);
+    if (!window.confirm("Excluir esta notificação?")) return;
+    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir"); return; }
     loadAll();
   };
 

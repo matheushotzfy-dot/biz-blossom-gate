@@ -116,11 +116,12 @@ export default function AdminDashboard() {
 
   const loadData = async () => {
     setSyncing(true);
+    // FIX: Increased limits to avoid silently truncating data for large platforms
     const [txRes, pRes, prodRes, wRes] = await Promise.all([
-      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("products").select("*").limit(500),
-      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(1000),
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(1000),
+      supabase.from("products").select("*").limit(1000),
+      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
     if (txRes.data) setTransactions(txRes.data);
     if (pRes.data) setProfiles(pRes.data);
