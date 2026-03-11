@@ -96,7 +96,7 @@ export default function AdminLogin() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <Label className="text-[11px] text-white/40 uppercase tracking-[0.12em] font-semibold">E-mail</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required className="mt-2 bg-white/[0.03] border-white/[0.06] h-[52px] text-white placeholder:text-white/15 rounded-2xl text-[14px] focus:border-emerald-500/40 focus:ring-emerald-500/10 transition-all" placeholder="admin@empresa.com" />
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required className="mt-2 bg-white/[0.03] border-white/[0.06] h-[52px] text-white placeholder:text-white/15 rounded-2xl text-[14px] focus:border-indigo-500/40 focus:ring-indigo-500/10 transition-all" placeholder="admin@empresa.com" />
             </div>
             <div>
               <Label className="text-[11px] text-white/40 uppercase tracking-[0.12em] font-semibold">Senha</Label>
