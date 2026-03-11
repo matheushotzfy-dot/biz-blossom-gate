@@ -49,6 +49,7 @@ const NAV_ITEMS = [
   { id: "top-sellers", label: "Top Sellers", icon: Zap, section: "core", employeeAccess: false },
   { id: "inactive-sellers", label: "Inativos", icon: UserX, section: "core", employeeAccess: false },
   { id: "employees", label: "Staff", icon: UserCog, section: "core", employeeAccess: false },
+  { id: "managers", label: "Gerentes", icon: Shield, section: "core", employeeAccess: false },
   { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, section: "treasury", employeeAccess: false },
   { id: "transactions", label: "Transações", icon: CreditCard, section: "treasury", employeeAccess: true },
   { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, section: "risk", employeeAccess: false },
