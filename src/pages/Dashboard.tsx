@@ -774,14 +774,21 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
   );
 }
 
-function SmallMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactNode; label: string; value: string; tone?: "success" | "info" | "destructive" }) {
+  const tStyles: Record<string, { text: string; valueTxt: string }> = {
+    success: { text: "text-success", valueTxt: "text-success" },
+    info: { text: "text-info", valueTxt: "text-foreground" },
+    destructive: { text: "text-destructive", valueTxt: "text-destructive" },
+  };
+  const s = tStyles[tone] || tStyles.info;
+
   return (
-    <div className="rounded-xl border border-border/40 bg-muted/10 p-3 transition-all duration-200 hover:bg-muted/20">
-      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
-        {icon}
-        <span>{label}</span>
+    <div className="group rounded-xl border border-border/40 bg-muted/10 p-3 transition-all duration-200 hover:bg-muted/20 hover:border-border/60">
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className={s.text}>{icon}</span>
+        <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-base md:text-lg font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
     </div>
   );
 }
