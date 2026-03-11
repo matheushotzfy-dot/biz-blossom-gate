@@ -156,10 +156,10 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
     <div className="space-y-5 animate-fade-in">
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi icon={<Ban className="h-5 w-5" />} label="Blacklist Ativa" value={activeBlacklist} sub="Entradas bloqueadas" gradient="from-red-600 to-rose-700" alert={activeBlacklist > 0} />
+        <Kpi icon={<Ban className="h-5 w-5" />} label="Blacklist Ativa" value={String(activeBlacklist)} sub="Entradas bloqueadas" gradient="from-red-600 to-rose-700" alert={activeBlacklist > 0} />
         <Kpi icon={<Zap className="h-5 w-5" />} label="Velocity Rules" value={`${enabledRules}/${velocityRules.length}`} sub="Regras ativas" gradient="from-amber-500 to-orange-600" />
-        <Kpi icon={<ShieldAlert className="h-5 w-5" />} label="Bloqueios Hoje" value={blockedToday} sub="Tentativas barradas" gradient="from-violet-500 to-purple-600" alert={blockedToday > 5} />
-        <Kpi icon={<AlertTriangle className="h-5 w-5" />} label="Sellers em Risco" value={highRiskSellers} sub="Chargeback > 1.5%" gradient="from-destructive to-red-700" alert={highRiskSellers > 0} />
+        <Kpi icon={<ShieldAlert className="h-5 w-5" />} label="Bloqueios Hoje" value={String(blockedToday)} sub="Tentativas barradas" gradient="from-violet-500 to-purple-600" alert={blockedToday > 5} />
+        <Kpi icon={<AlertTriangle className="h-5 w-5" />} label="Sellers em Risco" value={String(highRiskSellers)} sub="Chargeback > 1.5%" gradient="from-destructive to-red-700" alert={highRiskSellers > 0} />
       </div>
 
       {/* Sub-Tabs */}
