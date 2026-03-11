@@ -190,6 +190,9 @@ export default function AdminDashboard() {
     }
     setActiveTab(tabId);
     setMoreOpen(false);
+    // Scroll main content to top
+    const main = document.querySelector("main");
+    if (main) main.scrollTop = 0;
   };
 
   // Visible nav items (first 8 for top bar, rest in "more")
