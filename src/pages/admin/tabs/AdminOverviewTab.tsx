@@ -376,22 +376,22 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-white/[0.06]">{["Vendedor", "Valor", "Taxa", "Líquido", "Data", "Ações"].map(h => (
-                <th key={h} className="text-left p-2.5 text-[9px] font-bold text-white/25 uppercase tracking-[0.2em]">{h}</th>
+              <thead><tr className="border-b border-zinc-800/80">{["Vendedor", "Valor", "Taxa", "Líquido", "Data", "Ações"].map(h => (
+                <th key={h} className="text-left p-2.5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{h}</th>
               ))}</tr></thead>
               <tbody>
                 {pendingWd.slice(0, 10).map(w => {
                   const sp = profiles.find(p => p.user_id === w.user_id);
                   return (
-                    <tr key={w.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-all">
+                    <tr key={w.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-all">
                       <td className="p-2.5">
-                        <p className="text-[12px] font-medium text-white/80">{sp?.full_name || "—"}</p>
-                        <p className="text-[10px] text-white/25">{sp?.email || ""}</p>
+                        <p className="text-[12px] font-medium text-zinc-200">{sp?.full_name || "—"}</p>
+                        <p className="text-[10px] text-zinc-500">{sp?.email || ""}</p>
                       </td>
                       <td className="p-2.5 text-[12px] font-bold text-white">{fmtCurrency(Number(w.amount))}</td>
                       <td className="p-2.5 text-[12px] text-warning">{fmtCurrency(Number(w.fee_amount))}</td>
                       <td className="p-2.5 text-[12px] font-display font-black text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.3)]">{fmtCurrency(Number(w.net_amount))}</td>
-                      <td className="p-2.5 text-[11px] text-white/25">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                      <td className="p-2.5 text-[11px] text-zinc-500">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
                       <td className="p-2.5">
                         <div className="flex gap-1.5">
                           <Button size="sm" className="h-7 text-[10px] bg-primary/15 text-primary hover:bg-primary/25 border border-primary/20 gap-1 rounded-lg shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}><CheckCircle2 className="h-3 w-3" /> Aprovar</Button>
