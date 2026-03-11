@@ -387,7 +387,7 @@ export default function Dashboard() {
               </div>
 
               <p className="text-lg font-display font-black text-primary mb-6">
-                RUMO À LUA! 🚀🌙
+                RUMO À LUA!
               </p>
 
               <button
