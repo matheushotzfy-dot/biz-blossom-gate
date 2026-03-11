@@ -551,10 +551,10 @@ export default function Vendas() {
     return str;
   }, []);
 
-  const handleExportCSV = useCallback(() => {
-    if (filtered.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
+  const handleExportCSV = useCallback((txList: Tables<"transactions">[]) => {
+    if (txList.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
     const headers = ["ID", "Cliente", "Email", "Telefone", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
-    const rows = filtered.map(t => [
+    const rows = txList.map(t => [
       t.id, t.customer_name || "", t.customer_email || "", t.customer_phone || "",
       t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount),
       t.payment_method || "", t.status, t.created_at,
@@ -565,8 +565,8 @@ export default function Vendas() {
     const a = document.createElement("a");
     a.href = url; a.download = `vendas-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
     URL.revokeObjectURL(url);
-    toast.success("Exportação concluída!");
-  }, [filtered, products, sanitizeCsvCell]);
+    toast.success(`${txList.length} transações exportadas!`);
+  }, [products, sanitizeCsvCell]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
