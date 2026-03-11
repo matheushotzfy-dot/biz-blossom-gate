@@ -33,8 +33,8 @@ interface Props {
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-[#141418]/95 backdrop-blur-xl px-3 py-2 shadow-2xl">
-      <p className="text-[10px] text-white/40 font-medium mb-1">{label}</p>
+    <div className="rounded-lg border border-zinc-800/80 bg-[#141415] px-3 py-2 shadow-xl shadow-black/40">
+      <p className="text-[10px] text-zinc-500 font-medium mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-[11px] font-bold" style={{ color: p.color }}>
           {p.name}: {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
@@ -193,38 +193,38 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ═══ ROW 2: Alerts ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <AdminPanel className={cn(chargebackAlert && "border-destructive/20")}>
+        <AdminPanel className={cn(chargebackAlert && "border-destructive/30")}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5">
-              <ShieldAlert className="h-3 w-3 text-destructive/60" /> Chargeback Rate
+            <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5">
+              <div className="h-5 w-5 rounded bg-red-500/10 flex items-center justify-center"><ShieldAlert className="h-3 w-3 text-destructive" /></div> Chargeback Rate
             </span>
             {chargebackAlert && <span className="text-[8px] font-bold text-destructive bg-destructive/15 px-1.5 py-0.5 rounded-full animate-pulse">ALERTA</span>}
           </div>
           <p className={cn("text-2xl font-display font-black", chargebackAlert ? "text-destructive drop-shadow-[0_0_8px_hsl(var(--destructive)/0.4)]" : "text-white")}>{chargebackRate.toFixed(2)}%</p>
-          <p className="text-[10px] text-white/20">{chargebackTx.length} chargebacks / {approved.length} aprovadas</p>
+          <p className="text-[10px] text-zinc-500">{chargebackTx.length} chargebacks / {approved.length} aprovadas</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary/60" /> Conversão</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-emerald-500/10 flex items-center justify-center"><Zap className="h-3 w-3 text-primary" /></div> Conversão</span>
           <p className="text-2xl font-display font-black text-primary mt-1 drop-shadow-[0_0_8px_hsl(var(--primary)/0.3)]">{conversionRate}%</p>
-          <p className="text-[10px] text-white/20">{approved.length}/{allTx.length}</p>
+          <p className="text-[10px] text-zinc-500">{approved.length}/{allTx.length}</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><TrendingUp className="h-3 w-3 text-info/60" /> Ticket Médio</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-blue-500/10 flex items-center justify-center"><TrendingUp className="h-3 w-3 text-info" /></div> Ticket Médio</span>
           <p className="text-2xl font-display font-black text-white mt-1">{fmtCurrency(ticketMedio)}</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><AlertTriangle className="h-3 w-3 text-warning/60" /> Disputas</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-amber-500/10 flex items-center justify-center"><AlertTriangle className="h-3 w-3 text-warning" /></div> Disputas</span>
           <p className="text-2xl font-display font-black text-warning mt-1 drop-shadow-[0_0_6px_hsl(var(--warning)/0.3)]">{openDisputes}</p>
-          <p className="text-[10px] text-white/20">{medpixCount} MedPix total</p>
+          <p className="text-[10px] text-zinc-500">{medpixCount} MedPix total</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><Users className="h-3 w-3 text-primary/60" /> Sellers</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-emerald-500/10 flex items-center justify-center"><Users className="h-3 w-3 text-primary" /></div> Sellers</span>
           <p className="text-2xl font-display font-black text-white mt-1">{profiles.length}</p>
-          <p className="text-[10px] text-white/20">{blackSellers.size}B / {whiteSellers.size}W</p>
+          <p className="text-[10px] text-zinc-500">{blackSellers.size}B / {whiteSellers.size}W</p>
         </AdminPanel>
       </div>
 
@@ -268,18 +268,18 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             {methodApproval.sort((a, b) => b.total - a.total).map(m => (
               <div key={m.method}>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span className="font-semibold text-white/80">{m.method}</span>
+                  <span className="font-semibold text-zinc-300">{m.method}</span>
                   <span className={cn("font-bold", m.rate >= 80 ? "text-primary" : m.rate >= 50 ? "text-warning" : "text-destructive")}>
                     {m.rate.toFixed(1)}%
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                   <div
                     className={cn("h-full rounded-full transition-all", m.rate >= 80 ? "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" : m.rate >= 50 ? "bg-warning" : "bg-destructive")}
                     style={{ width: `${m.rate}%` }}
                   />
                 </div>
-                <p className="text-[9px] text-white/20 mt-0.5">{m.approved}/{m.total}</p>
+                <p className="text-[9px] text-zinc-500 mt-0.5">{m.approved}/{m.total}</p>
               </div>
             ))}
           </div>
@@ -290,7 +290,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           <PanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />}>Feed Tempo Real</PanelTitle>
           <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
             {realtimeTx.map(t => (
-              <div key={t.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
+              <div key={t.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-zinc-900/50 border border-zinc-800/60 hover:bg-zinc-800/40 transition-all">
                 <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
                   t.status === "completed" || t.status === "approved" ? "bg-primary shadow-[0_0_4px_hsl(var(--primary)/0.6)]" :
                   t.status === "pending" ? "bg-warning animate-pulse" :
@@ -298,23 +298,23 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 )} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-white/80 truncate">{fmtCurrency(Number(t.amount))}</span>
-                    <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-white/30")}>
+                    <span className="text-[11px] font-bold text-zinc-200 truncate">{fmtCurrency(Number(t.amount))}</span>
+                    <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-zinc-500")}>
                       {statusLabelMap[t.status] || t.status}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[9px] text-white/20 truncate">{t.customer_name || "Anônimo"}</span>
-                    <span className="text-[9px] text-white/10">•</span>
-                    <span className="text-[9px] text-white/20 uppercase">{t.payment_method || "—"}</span>
-                    <span className="text-[9px] text-white/10">•</span>
-                    <span className="text-[9px] text-white/20">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span className="text-[9px] text-zinc-500 truncate">{t.customer_name || "Anônimo"}</span>
+                    <span className="text-[9px] text-zinc-700">•</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">{t.payment_method || "—"}</span>
+                    <span className="text-[9px] text-zinc-700">•</span>
+                    <span className="text-[9px] text-zinc-500">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
                 </div>
               </div>
             ))}
             {realtimeTx.length === 0 && (
-              <div className="flex items-center justify-center h-32 text-sm text-white/20">Aguardando transações...</div>
+              <div className="flex items-center justify-center h-32 text-sm text-zinc-600">Aguardando transações...</div>
             )}
           </div>
         </AdminPanel>
@@ -358,13 +358,13 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 {statusCounts.map((d, i) => (
                   <div key={d.name} className="flex items-center gap-1 text-[9px]">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="capitalize text-white/30">{statusLabelMap[d.name] || d.name}</span>
-                    <span className="font-bold text-white/70">{d.value}</span>
+                    <span className="capitalize text-zinc-500">{statusLabelMap[d.name] || d.name}</span>
+                    <span className="font-bold text-zinc-300">{d.value}</span>
                   </div>
                 ))}
               </div>
             </>
-          ) : <div className="flex items-center justify-center h-[160px] text-sm text-white/20">Sem dados</div>}
+          ) : <div className="flex items-center justify-center h-[160px] text-sm text-zinc-600">Sem dados</div>}
         </AdminPanel>
       </div>
 
@@ -376,22 +376,22 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-white/[0.06]">{["Vendedor", "Valor", "Taxa", "Líquido", "Data", "Ações"].map(h => (
-                <th key={h} className="text-left p-2.5 text-[9px] font-bold text-white/25 uppercase tracking-[0.2em]">{h}</th>
+              <thead><tr className="border-b border-zinc-800/80">{["Vendedor", "Valor", "Taxa", "Líquido", "Data", "Ações"].map(h => (
+                <th key={h} className="text-left p-2.5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{h}</th>
               ))}</tr></thead>
               <tbody>
                 {pendingWd.slice(0, 10).map(w => {
                   const sp = profiles.find(p => p.user_id === w.user_id);
                   return (
-                    <tr key={w.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-all">
+                    <tr key={w.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-all">
                       <td className="p-2.5">
-                        <p className="text-[12px] font-medium text-white/80">{sp?.full_name || "—"}</p>
-                        <p className="text-[10px] text-white/25">{sp?.email || ""}</p>
+                        <p className="text-[12px] font-medium text-zinc-200">{sp?.full_name || "—"}</p>
+                        <p className="text-[10px] text-zinc-500">{sp?.email || ""}</p>
                       </td>
                       <td className="p-2.5 text-[12px] font-bold text-white">{fmtCurrency(Number(w.amount))}</td>
                       <td className="p-2.5 text-[12px] text-warning">{fmtCurrency(Number(w.fee_amount))}</td>
                       <td className="p-2.5 text-[12px] font-display font-black text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.3)]">{fmtCurrency(Number(w.net_amount))}</td>
-                      <td className="p-2.5 text-[11px] text-white/25">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                      <td className="p-2.5 text-[11px] text-zinc-500">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
                       <td className="p-2.5">
                         <div className="flex gap-1.5">
                           <Button size="sm" className="h-7 text-[10px] bg-primary/15 text-primary hover:bg-primary/25 border border-primary/20 gap-1 rounded-lg shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}><CheckCircle2 className="h-3 w-3" /> Aprovar</Button>
@@ -410,36 +410,36 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       {/* ═══ ROW 6: Quick Stats ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Take Rate Hoje</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Take Rate Hoje</span>
           <p className="text-lg font-display font-black text-warning mt-1 drop-shadow-[0_0_6px_hsl(var(--warning)/0.3)]">{fmtCurrency(takeRateToday)}</p>
-          <p className="text-[10px] text-white/20">{todayTx.length} vendas</p>
+          <p className="text-[10px] text-zinc-500">{todayTx.length} vendas</p>
         </AdminPanel>
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Produtos Ativos</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Produtos Ativos</span>
           <p className="text-lg font-display font-black text-white mt-1">{products.filter(p => p.status === "active").length}</p>
-          <p className="text-[10px] text-white/20">de {products.length} total</p>
+          <p className="text-[10px] text-zinc-500">de {products.length} total</p>
         </AdminPanel>
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Retido Total</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Retido Total</span>
           <p className="text-lg font-display font-black text-white mt-1">{fmtCurrency(totalRetained)}</p>
-          <p className="text-[10px] text-white/20">Rolling Reserve</p>
+          <p className="text-[10px] text-zinc-500">Rolling Reserve</p>
         </AdminPanel>
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Chargebacks</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Chargebacks</span>
           <p className={cn("text-lg font-display font-black mt-1", chargebackAlert ? "text-destructive drop-shadow-[0_0_6px_hsl(var(--destructive)/0.4)]" : "text-white")}>{chargebackTx.length}</p>
-          <p className="text-[10px] text-white/20">{chargebackRate.toFixed(2)}% rate</p>
+          <p className="text-[10px] text-zinc-500">{chargebackRate.toFixed(2)}% rate</p>
         </AdminPanel>
       </div>
     </div>
   );
 }
 
-// ═══ Shared sub-components (ultra-premium) ═══
+// ═══ Shared sub-components (Fintech Crisp) ═══
 
 export function AdminPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "rounded-xl border border-white/[0.06] bg-[#141418]/50 backdrop-blur-xl p-4 shadow-2xl shadow-black/20",
+      "rounded-xl border border-zinc-800/80 bg-[#141415] p-4 shadow-xl shadow-black/40",
       className
     )}>
       {children}
@@ -454,11 +454,11 @@ export function PanelTitle({ children, color, icon }: { children: React.ReactNod
     blue: "bg-info shadow-[0_0_6px_hsl(var(--info)/0.5)]",
     red: "bg-destructive shadow-[0_0_6px_hsl(var(--destructive)/0.5)]",
     violet: "bg-accent-foreground shadow-[0_0_6px_hsl(var(--accent-foreground)/0.5)]",
-    zinc: "bg-white/30",
+    zinc: "bg-zinc-400/30",
     cyan: "bg-info shadow-[0_0_6px_hsl(var(--info)/0.5)]",
   };
   return (
-    <h3 className="text-[13px] font-bold flex items-center gap-2 text-white/80">
+    <h3 className="text-[13px] font-bold flex items-center gap-2 text-zinc-200">
       <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.emerald)} />
       {icon}
       {children}
@@ -471,22 +471,29 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor 
   alert?: boolean; highlight?: boolean; iconColor?: string;
   gradient?: string; glowColor?: string;
 }) {
+  const iconBgMap: Record<string, string> = {
+    "text-primary": "bg-emerald-500/10",
+    "text-info": "bg-blue-500/10",
+    "text-warning": "bg-amber-500/10",
+    "text-destructive": "bg-red-500/10",
+  };
+  const bgClass = iconBgMap[iconColor || "text-primary"] || "bg-emerald-500/10";
   return (
     <div className={cn(
-      "rounded-xl border bg-[#141418]/50 backdrop-blur-xl p-4 shadow-2xl shadow-black/20 group hover:border-white/[0.1] transition-all",
-      alert ? "border-destructive/20" : "border-white/[0.06]"
+      "rounded-xl border bg-[#141415] p-4 shadow-xl shadow-black/40 group hover:border-zinc-700/80 transition-all",
+      alert ? "border-destructive/30" : "border-zinc-800/80"
     )}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/25 font-bold">{label}</span>
-        <div className={cn("h-7 w-7 rounded-lg bg-white/[0.04] flex items-center justify-center", iconColor || "text-primary")}>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-500 font-bold">{label}</span>
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", bgClass, iconColor || "text-primary")}>
           {icon}
         </div>
       </div>
       <p className={cn(
-        "text-xl font-display font-black tracking-tight",
-        highlight ? "text-warning drop-shadow-[0_0_8px_hsl(var(--warning)/0.3)]" : "text-white"
+        "text-xl font-display font-black tracking-tight text-white",
+        highlight && "text-warning drop-shadow-[0_0_8px_hsl(var(--warning)/0.3)]"
       )}>{value}</p>
-      {sub && <p className="text-[10px] text-white/20 mt-1 font-medium">{sub}</p>}
+      {sub && <p className="text-[10px] text-zinc-500 mt-1 font-medium">{sub}</p>}
     </div>
   );
 }
