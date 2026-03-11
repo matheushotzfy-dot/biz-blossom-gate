@@ -55,9 +55,9 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
 
   useEffect(() => {
     Promise.all([
-      supabase.from("global_blacklist" as any).select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("velocity_rules" as any).select("*").order("created_at", { ascending: true }),
-      supabase.from("fraud_logs" as any).select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("velocity_rules").select("*").order("created_at", { ascending: true }),
+      supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(500),
     ]).then(([blRes, vrRes, flRes]) => {
       if (blRes.data) setBlacklist(blRes.data as any[]);
       if (vrRes.data) setVelocityRules(vrRes.data as any[]);
