@@ -282,7 +282,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                             <Snowflake className="h-2.5 w-2.5" /> Congelado
                           </span>
                         ) : isHighRisk ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20">⚠️ Risco</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1 w-fit"><AlertTriangle className="h-2.5 w-2.5" /> Risco</span>
                         ) : (
                           <span className="text-[10px] text-muted-foreground">OK</span>
                         )}
