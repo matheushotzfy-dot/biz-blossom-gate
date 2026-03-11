@@ -9,7 +9,7 @@ import {
   Activity, Settings, ChevronLeft, ChevronRight, Bell,
   Moon, Sun, UserCog, RefreshCw, Rocket,
   Bug, UserX, Search, Command, Banknote, Eye, ShieldCheck,
-  FileWarning, Package2, Radio,
+  FileWarning, Package2, Radio, BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
