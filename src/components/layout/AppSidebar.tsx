@@ -85,7 +85,8 @@ const sections = [
     label: "FINANCEIRO",
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
-      { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },
+      { title: "Saques PIX", url: "/financeiro/saques", icon: ArrowDownToLine },
+      { title: "Saques Crypto", url: "/financeiro/saques-crypto", icon: Bitcoin },
       { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
       { title: "Controle de Gastos", url: "/financeiro/gastos", icon: PieChart },
     ],
