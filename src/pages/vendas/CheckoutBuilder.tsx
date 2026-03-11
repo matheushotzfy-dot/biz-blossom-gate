@@ -477,7 +477,7 @@ export default function CheckoutBuilder() {
                   
                   {/* NEW OPTIONS */}
                   <div className="border-t border-border/20 dark:border-foreground/[0.04] pt-3 mt-1">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/60 mb-3">✨ Novas opções</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/60 mb-3">Novas opções</p>
                   </div>
                   
                   <ToggleRow icon={Star} iconColor="amber-500" title="Depoimentos" desc="Exibir depoimentos de clientes no checkout" checked={testimonialEnabled} onChange={setTestimonialEnabled} badge="Novo" />
