@@ -252,11 +252,11 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [transactions, withdrawals]);
 
-  // Check if scale mode was already unlocked (persisted)
+  // Check if scale mode was already unlocked (persisted per-session)
   useEffect(() => {
     if (!user?.id) return;
     const key = `scale_mode_unlocked_${user.id}`;
-    if (localStorage.getItem(key) === "true") {
+    if (sessionStorage.getItem(key) === "true") {
       setScaleModeUnlocked(true);
       setScaleMode(true);
     }
