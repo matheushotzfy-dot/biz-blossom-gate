@@ -311,7 +311,7 @@ export default function AdminDashboard() {
       {/* ═══ MAIN ═══ */}
       <main className={cn("flex-1 transition-all duration-300 min-h-screen relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
         {/* Header */}
-        <header className="h-12 border-b border-white/[0.06] flex items-center justify-between px-5 bg-[#0A0A0C]/60 backdrop-blur-xl sticky top-0 z-20">
+        <header className="h-12 border-b border-zinc-800/80 flex items-center justify-between px-5 bg-[#0E0E10]/80 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
             <h2 className="text-[13px] font-bold text-white/90">{activeTabLabel}</h2>
             {activeTab === "god-mode" && (
