@@ -345,6 +345,9 @@ export default function AdminDashboard() {
                 isEmployee={isEmployee}
               />
             )}
+            {activeTab === "analytics" && isAdmin && (
+              <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
+            )}
             {activeTab === "transactions" && (
               <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
             )}
