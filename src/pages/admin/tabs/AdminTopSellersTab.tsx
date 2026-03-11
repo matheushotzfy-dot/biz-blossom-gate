@@ -4,7 +4,7 @@ import {
   Zap, BarChart3, Users, DollarSign, Percent, Calendar,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
-import { AdminPanel, PanelTitle } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
 
 interface Props {
   profiles: Tables<"profiles">[];

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, Search, BookOpen, Users, Video, Eye } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Tables } from "@/integrations/supabase/types";
-import { AdminPanel, PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 
 interface Props {
   profiles: Tables<"profiles">[];

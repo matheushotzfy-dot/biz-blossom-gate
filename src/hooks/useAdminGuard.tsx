@@ -56,9 +56,9 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(222,20%,4%)] dark:bg-[hsl(222,20%,4%)] flex items-center justify-center">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-[0_0_60px_rgba(59,130,246,0.3)] animate-pulse">
+          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.3)] animate-pulse">
             <Shield className="h-7 w-7 text-white" />
           </div>
           <p className="text-[11px] text-white/20 font-medium tracking-wider uppercase">

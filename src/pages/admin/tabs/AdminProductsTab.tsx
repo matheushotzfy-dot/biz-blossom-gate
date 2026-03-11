@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
-import { AdminPanel, PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 
