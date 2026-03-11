@@ -490,13 +490,13 @@ export default function Dashboard() {
       </section>
 
       {/* ═══════════════════════════════════════════════
-          KPI TILES — "Bento" cards
+          KPI TILES
       ═══════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-4">
-        <BentoKpi icon={<Wallet className="h-4 w-4 md:h-5 md:w-5" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} sub="Por transação" accent="info" delay="stagger-3" />
-        <BentoKpi icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5" />} label="Saldo Pendente" value={fmt(withdrawalPending)} sub={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} accent="warning" delay="stagger-4" />
-        <BentoKpi icon={<RefreshCw className="h-4 w-4 md:h-5 md:w-5" />} label="Reembolsos" value={String(refunded.length)} sub="No período" accent="info" delay="stagger-5" />
-        <BentoKpi icon={<ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />} label="Chargebacks" value={String(chargebacks.length)} sub="No período" accent="primary" delay="stagger-6" />
+      <section className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
+        <BentoKpi icon={<Wallet className="h-4 w-4" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} sub="Por transação" accent="info" delay="stagger-3" />
+        <BentoKpi icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={fmt(withdrawalPending)} sub={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} accent="warning" delay="stagger-4" />
+        <BentoKpi icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={String(refunded.length)} sub="No período" accent="info" delay="stagger-5" />
+        <BentoKpi icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} sub="No período" accent="primary" delay="stagger-6" />
       </section>
 
       {/* ═══════════════════════════════════════════════
@@ -504,15 +504,15 @@ export default function Dashboard() {
       ═══════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card p-4 md:p-6 animate-fade-in stagger-3">
-          <div className="mb-4 flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Zap className="h-3.5 w-3.5 text-primary" />
+        <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6 animate-fade-in stagger-3">
+          <div className="mb-5 flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-primary/[0.08] flex items-center justify-center">
+              <Zap className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-sm md:text-base font-display font-bold text-foreground">Ações Rápidas</h3>
+            <h3 className="text-sm md:text-[15px] font-display font-bold text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:gap-2.5">
+          <div className="grid grid-cols-2 gap-1.5 md:gap-2">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -528,76 +528,73 @@ export default function Dashboard() {
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/50 p-2.5 md:p-3.5 transition-all hover:border-primary/20 hover:bg-muted/30 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
+                className={`group flex items-center gap-3 rounded-xl p-3 md:p-3.5 transition-all hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
-                <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-primary/[0.07] text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/[0.12] transition-colors">
-                  <action.icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <div className="h-9 w-9 rounded-xl bg-muted/50 text-muted-foreground flex items-center justify-center shrink-0 group-hover:bg-primary/[0.08] group-hover:text-primary transition-colors">
+                  <action.icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] md:text-[13px] font-semibold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] text-muted-foreground hidden md:block">{action.desc}</p>
+                  <p className="text-[13px] font-semibold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 text-muted-foreground/30 hidden md:block group-hover:text-primary/50 transition-colors" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-muted-foreground/50 transition-colors" />
               </Link>
             ))}
           </div>
         </div>
 
         {/* Activity */}
-        <div className="rounded-2xl border border-border/60 bg-card p-4 md:p-6 animate-fade-in stagger-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Activity className="h-3.5 w-3.5 text-primary" />
+        <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6 animate-fade-in stagger-4">
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary/[0.08] flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
               </div>
-              <h3 className="text-sm md:text-base font-display font-bold text-foreground">Atividade</h3>
+              <h3 className="text-sm md:text-[15px] font-display font-bold text-foreground">Atividade</h3>
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" title="Tempo real" />
             </div>
-            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] md:text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
-              Ver tudo <ArrowUpRight className="h-3 w-3" />
+            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
+              Ver tudo <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <div className="space-y-1">
+          <div className="divide-y divide-border/40">
             {activity.length === 0 ? (
-              <div className="rounded-xl border border-border/50 px-4 py-10 text-center">
+              <div className="px-4 py-12 text-center">
                 <p className="text-sm font-semibold text-foreground">Nenhuma atividade</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">Movimentações aparecerão aqui em tempo real.</p>
               </div>
             ) : (
               activity.map((item, i) => {
                 const txStyles: Record<string, { label: string; pill: string; dot: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/10 text-success border-success/20", dot: "bg-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/10 text-warning border-warning/20", dot: "bg-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/10 text-destructive border-destructive/20", dot: "bg-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/10 text-info border-info/20", dot: "bg-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/10 text-destructive border-destructive/20", dot: "bg-destructive" },
-                  default: { label: "Status", pill: "bg-muted text-foreground border-border", dot: "bg-muted-foreground" },
+                  completed: { label: "Aprovada", pill: "bg-success/10 text-success", dot: "bg-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/10 text-warning", dot: "bg-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/10 text-info", dot: "bg-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+                  default: { label: "Status", pill: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
                 };
                 const wdStyles: Record<string, { label: string; pill: string; dot: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/10 text-warning border-warning/20", dot: "bg-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/10 text-success border-success/20", dot: "bg-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/10 text-destructive border-destructive/20", dot: "bg-destructive" },
-                  default: { label: "Saque", pill: "bg-muted text-foreground border-border", dot: "bg-muted-foreground" },
+                  pending: { label: "Em análise", pill: "bg-warning/10 text-warning", dot: "bg-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/10 text-success", dot: "bg-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+                  default: { label: "Saque", pill: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
                 };
                 const styles = item.kind === "transaction"
                   ? txStyles[item.status] || txStyles.default
                   : wdStyles[item.status] || wdStyles.default;
 
                 return (
-                  <div key={item.id} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/20 animate-fade-in ${STAGGER_CLASSES[i + 1] || ""}`}>
-                    {/* Colored dot instead of large icon box */}
-                    <div className="flex flex-col items-center gap-1">
-                      <div className={`h-2 w-2 rounded-full ${styles.dot}`} />
-                    </div>
+                  <div key={item.id} className={`flex items-center gap-3 py-3 first:pt-0 last:pb-0 animate-fade-in ${STAGGER_CLASSES[i + 1] || ""}`}>
+                    <div className={`h-2 w-2 rounded-full shrink-0 ${styles.dot}`} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-sm font-bold text-foreground">{fmt(item.amount)}</p>
-                        <span className={`rounded-md border px-1.5 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[13px] font-bold text-foreground tabular-nums">{fmt(item.amount)}</p>
+                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
                       </div>
                       <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
-                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">{timeAgo(item.createdAt)}</span>
+                    <span className="text-[11px] text-muted-foreground/70 shrink-0 tabular-nums">{timeAgo(item.createdAt)}</span>
                   </div>
                 );
               })
@@ -610,24 +607,23 @@ export default function Dashboard() {
 }
 
 /* ═══════════════════════════════════════════════
-   SUB-COMPONENTS — Signature HOTZFY design
+   SUB-COMPONENTS
 ═══════════════════════════════════════════════ */
 
 type Accent = "primary" | "info" | "success" | "warning";
 
-const accentStyles: Record<Accent, { iconBg: string; iconText: string; glow: string }> = {
-  primary: { iconBg: "bg-primary/10", iconText: "text-primary", glow: "shadow-primary/5" },
-  info: { iconBg: "bg-info/10", iconText: "text-info", glow: "shadow-info/5" },
-  success: { iconBg: "bg-success/10", iconText: "text-success", glow: "shadow-success/5" },
-  warning: { iconBg: "bg-warning/10", iconText: "text-warning", glow: "shadow-warning/5" },
+const accentStyles: Record<Accent, { iconBg: string; iconText: string }> = {
+  primary: { iconBg: "bg-primary/10", iconText: "text-primary" },
+  info: { iconBg: "bg-info/10", iconText: "text-info" },
+  success: { iconBg: "bg-success/10", iconText: "text-success" },
+  warning: { iconBg: "bg-warning/10", iconText: "text-warning" },
 };
 
 function HeroKpi({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent: Accent }) {
   const s = accentStyles[accent];
   return (
     <div className="relative rounded-xl border border-border/50 bg-muted/20 p-3 md:p-3.5 overflow-hidden group hover:border-border transition-colors">
-      {/* Subtle top-left accent line */}
-      <div className={`absolute top-0 left-0 h-[2px] w-12 rounded-br-full ${s.iconBg}`} />
+      <div className={`absolute top-0 left-0 h-[2px] w-10 ${s.iconBg}`} />
       <div className="flex items-center gap-1.5 mb-1.5">
         <div className={`h-5 w-5 md:h-6 md:w-6 rounded-md flex items-center justify-center ${s.iconBg}`}>
           <span className={s.iconText}>{icon}</span>
@@ -642,19 +638,15 @@ function HeroKpi({ icon, label, value, accent }: { icon: React.ReactNode; label:
 function BentoKpi({ icon, label, value, sub, accent, delay }: { icon: React.ReactNode; label: string; value: string; sub: string; accent: Accent; delay?: string }) {
   const s = accentStyles[accent];
   return (
-    <div className={`rounded-2xl border border-border/60 bg-card p-3 md:p-5 hover:border-border transition-all animate-fade-in ${delay || ""} relative overflow-hidden group`}>
-      {/* Accent corner */}
-      <div className={`absolute top-0 right-0 h-16 w-16 rounded-bl-[40px] ${s.iconBg} opacity-50 -mr-2 -mt-2`} />
-      <div className="relative">
-        <div className="mb-2 md:mb-3 flex items-center justify-between">
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
-          <div className={`h-7 w-7 md:h-9 md:w-9 rounded-lg flex items-center justify-center ${s.iconBg}`}>
-            <span className={s.iconText}>{icon}</span>
-          </div>
+    <div className={`rounded-xl border border-border/60 bg-card p-3.5 md:p-5 hover:border-border/80 transition-all animate-fade-in ${delay || ""}`}>
+      <div className="mb-2 md:mb-3 flex items-center justify-between">
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
+        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-lg flex items-center justify-center ${s.iconBg}`}>
+          <span className={s.iconText}>{icon}</span>
         </div>
-        <p className="text-base md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-        <p className="mt-0.5 md:mt-1 text-[9px] md:text-[11px] text-muted-foreground truncate">{sub}</p>
       </div>
+      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className="mt-0.5 md:mt-1 text-[10px] md:text-[11px] text-muted-foreground">{sub}</p>
     </div>
   );
 }
@@ -675,14 +667,14 @@ function HealthRow({ icon, label, value, color }: { icon: React.ReactNode; label
 
 function ConversionRow({ label, value, pct, danger }: { label: string; value: string; pct: number; danger?: boolean }) {
   return (
-    <div className="space-y-1 p-2">
+    <div className="space-y-1.5 p-2">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
         <span className={`text-[12px] font-bold tabular-nums ${danger && pct > 1 ? "text-destructive" : "text-foreground"}`}>{value}</span>
       </div>
-      <div className="h-1 rounded-full bg-muted/50 overflow-hidden">
+      <div className="h-1 rounded-full bg-muted/40 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${danger ? (pct > 1 ? "bg-destructive" : "bg-muted-foreground/30") : "bg-primary"}`}
+          className={`h-full rounded-full transition-all duration-700 ${danger ? (pct > 1 ? "bg-destructive" : "bg-muted-foreground/20") : "bg-primary"}`}
           style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
