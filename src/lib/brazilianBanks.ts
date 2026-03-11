@@ -283,8 +283,8 @@ export const BRAZILIAN_BANKS: BrazilianBank[] = [
  */
 export function searchBanks(query: string): BrazilianBank[] {
   const q = query.toLowerCase().trim();
-  if (!q) return BRAZILIAN_BANKS.slice(0, 20);
+  if (!q) return BRAZILIAN_BANKS;
   return BRAZILIAN_BANKS.filter(
     (b) => b.name.toLowerCase().includes(q) || b.code.includes(q)
-  ).slice(0, 15);
+  );
 }
