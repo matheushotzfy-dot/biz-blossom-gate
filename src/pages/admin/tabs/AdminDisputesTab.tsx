@@ -191,7 +191,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
 
       {/* Create Dialog */}
       <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent className="max-w-lg bg-[hsl(228,18%,6%)] border-white/[0.06] text-white">
+        <DialogContent className="max-w-lg bg-[#0A0A10] border-white/[0.06] text-white">
           <DialogHeader><DialogTitle>Nova {title}</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-2">
             <div>
