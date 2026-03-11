@@ -69,6 +69,8 @@ export default function Auth() {
   const [referralSource, setReferralSource] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number>(0);
   const navigate = useNavigate();
 
   const handleDocumentChange = (value: string) => {
