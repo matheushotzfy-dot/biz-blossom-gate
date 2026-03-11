@@ -5,6 +5,8 @@ import {
   CreditCard,
   GraduationCap,
   Bitcoin,
+  Handshake,
+  Users,
   Layers,
   
   FileText,
