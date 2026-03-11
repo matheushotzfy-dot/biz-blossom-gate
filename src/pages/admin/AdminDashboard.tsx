@@ -367,6 +367,9 @@ export default function AdminDashboard() {
             {activeTab === "acquirers" && isAdmin && (
               <AdminAcquirersTab />
             )}
+            {activeTab === "risk-compliance" && isAdmin && (
+              <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+            )}
             {activeTab === "medpix" && isAdmin && (
               <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
             )}
