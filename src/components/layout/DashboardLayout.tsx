@@ -64,15 +64,14 @@ function DashboardLayoutInner() {
 
   return (
     <SidebarProvider
-      style={{ "--sidebar-width": "22rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
+      style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
     >
         <div className="flex w-full h-full bg-background">
           <AppSidebar />
 
           <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
-          <div className="pointer-events-none absolute inset-0 z-0">
-            <div className="absolute -top-24 right-0 h-80 w-80 rounded-full bg-primary/10 blur-[120px]" />
-            <div className="absolute bottom-0 left-1/4 h-72 w-72 rounded-full bg-info/10 blur-[130px]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 overflow-hidden">
+            <div className="absolute left-1/2 top-[-150px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] opacity-45" />
           </div>
 
           <header className="relative z-20 hidden h-[78px] md:flex items-center gap-3 border-b border-border/80 bg-background/86 backdrop-blur-xl px-5 lg:px-8 sticky top-0">

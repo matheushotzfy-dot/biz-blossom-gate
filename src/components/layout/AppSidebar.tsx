@@ -135,11 +135,8 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border/80 bg-sidebar/95 backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-28 -left-20 h-80 w-80 rounded-full bg-sidebar-primary/12 blur-[90px]" />
-        <div className="absolute bottom-6 -right-10 h-64 w-64 rounded-full bg-sidebar-primary/10 blur-[84px]" />
-      </div>
+    <Sidebar className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-sidebar-primary/10 to-transparent" />
 
       <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>

@@ -296,7 +296,7 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="space-y-4 md:space-y-6 relative">
+    <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative">
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
