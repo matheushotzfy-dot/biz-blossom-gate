@@ -150,7 +150,7 @@ export function AppSidebar() {
           </div>
         </div>
 
-        <div className="mt-4 group-data-[collapsible=icon]:hidden">
+        <div className="mt-4 group-data-[collapsible=icon]:hidden cursor-pointer" onClick={() => navigate("/premiacoes")}>
           <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone cursor-default">
             {/* Ambient glow */}
             <div className="absolute -top-8 -right-8 w-24 h-24 bg-sidebar-primary/15 rounded-full blur-2xl group-hover/milestone:bg-sidebar-primary/25 transition-all duration-700" />
