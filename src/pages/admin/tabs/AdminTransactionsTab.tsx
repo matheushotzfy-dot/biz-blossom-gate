@@ -125,7 +125,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
             <SelectItem value="boleto">Boleto</SelectItem>
           </SelectContent>
         </Select>
-        <Button size="sm" variant="ghost" className="h-10 text-[11px] text-white/40 hover:text-white gap-1.5"
+        <Button size="sm" variant="ghost" className="h-10 text-[11px] text-muted-foreground hover:text-foreground gap-1.5"
           onClick={() => { setSortAsc(!sortAsc); }}>
           <ArrowUpDown className="h-3.5 w-3.5" /> {sortField === "date" ? "Data" : "Valor"}
         </Button>
