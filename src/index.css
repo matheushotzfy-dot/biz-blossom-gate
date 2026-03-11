@@ -437,3 +437,8 @@ tr {
   0% { opacity: 0.9; transform: translateY(0) scale(1); }
   100% { opacity: 0; transform: translateY(-28px) scale(0.2); }
 }
+
+/* Inline mono code */
+.mono-inline {
+  @apply font-mono text-[11px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-semibold;
+}
