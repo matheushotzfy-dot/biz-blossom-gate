@@ -41,6 +41,37 @@ Deno.serve(async (req) => {
       );
     }
 
+    // FIX #65: Validate paymentMethod against allowed values
+    const ALLOWED_METHODS = ['pix', 'credit_card', 'boleto'];
+    if (!ALLOWED_METHODS.includes(paymentMethod)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid payment method' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // FIX #66: Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid email format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // FIX #67: Validate document (CPF 11 digits or CNPJ 14 digits)
+    const cleanDoc = String(customerDocument).replace(/\D/g, '');
+    if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid document' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // FIX #68: Sanitize string inputs (max lengths)
+    const safeName = String(customerName).slice(0, 200).trim();
+    const safeEmail = String(customerEmail).slice(0, 255).trim().toLowerCase();
+    const safePhone = customerPhone ? String(customerPhone).replace(/\D/g, '').slice(0, 11) : null;
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
