@@ -74,51 +74,45 @@ function DashboardLayoutInner() {
             <div className="absolute left-1/2 top-[-150px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] opacity-45" />
           </div>
 
-          <header className="relative z-20 hidden h-[78px] md:flex items-center gap-3 border-b border-border/80 bg-background/86 backdrop-blur-xl px-5 lg:px-8 sticky top-0">
-            <SidebarTrigger className="h-11 w-11 rounded-xl border border-border bg-card hover:bg-muted/60 hover:border-primary/25 transition-all">
-              <Menu className="h-5 w-5 text-foreground" />
+          <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/30 bg-background/80 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
+            <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
+              <Menu className="h-4 w-4 text-muted-foreground" />
             </SidebarTrigger>
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex h-11 w-full max-w-[520px] items-center gap-2.5 rounded-xl border border-border/75 bg-muted/35 px-4 text-muted-foreground transition-colors hover:border-primary/25 hover:bg-muted/55"
+              className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
             >
-              <Search className="h-4 w-4" />
-              <span className="flex-1 text-[13px] md:text-sm text-left">Buscar produtos, checkouts, clientes e transações…</span>
-              <div className="inline-flex items-center gap-1 rounded-md border border-border/80 bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                <Command className="h-3 w-3" /> K
-              </div>
+              <Search className="h-4 w-4 text-muted-foreground" />
             </button>
 
             <div className="flex-1" />
 
             <button
               onClick={toggleTheme}
-              className="h-10 w-10 rounded-xl flex items-center justify-center border border-border/80 bg-card hover:bg-muted/60 hover:border-primary/20 transition-all"
+              className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
             >
               {theme === "dark" ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
             </button>
 
             <button
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative h-10 w-10 rounded-xl flex items-center justify-center border border-border/80 bg-card hover:bg-muted/60 hover:border-primary/20 transition-all"
+              className="relative h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
             >
               <Bell className="h-4 w-4 text-muted-foreground" />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-card flex items-center justify-center text-[9px] font-bold text-primary-foreground">{unreadCount}</span>
+                <span className="absolute top-1 right-1 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-background flex items-center justify-center text-[9px] font-bold text-primary-foreground">{unreadCount}</span>
               )}
             </button>
 
-            <div className="flex items-center gap-3 ml-1 pl-4 border-l border-border/80 cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 ring-1 ring-primary/15">
-                {(profile?.full_name || "U").charAt(0).toUpperCase()}
-              </div>
-              <div className="hidden xl:block min-w-[150px]">
-                <p className="text-sm font-semibold leading-none text-foreground truncate">{profile?.full_name || "Usuário"}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{profile?.email || ""}</p>
-              </div>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground hidden xl:block" />
-            </div>
+            <button onClick={() => navigate("/perfil")} className="ml-1">
+              <Avatar className="h-8 w-8 ring-1 ring-border/40 hover:ring-primary/30 transition-all cursor-pointer">
+                <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                  {(profile?.full_name || "U").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </button>
           </header>
 
           {/* ─── VERIFICATION BANNER ─── */}
