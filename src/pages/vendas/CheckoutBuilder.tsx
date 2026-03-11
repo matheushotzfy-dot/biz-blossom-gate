@@ -471,7 +471,7 @@ export default function CheckoutBuilder() {
                     </div>
                   )}
                   
-                  <ToggleRow icon={Users} iconColor="orange-500" title="Compradores ao vivo" desc='"🔥 14 pessoas comprando agora"' checked={fakeViewersEnabled} onChange={setFakeViewersEnabled} />
+                  <ToggleRow icon={Users} iconColor="orange-500" title="Compradores ao vivo" desc='"14 pessoas comprando agora"' checked={fakeViewersEnabled} onChange={setFakeViewersEnabled} />
                   <ToggleRow icon={ExitIcon} iconColor="red-500" title="Exit Intent Popup" desc="Oferecer desconto ao sair da página" checked={exitIntentEnabled} onChange={setExitIntentEnabled} badge="CRO" />
                   <ToggleRow icon={BarChart3} iconColor="blue-500" title="Barra de Progresso" desc='"Você está a 1 passo de garantir..."' checked={progressBarEnabled} onChange={setProgressBarEnabled} />
                   
