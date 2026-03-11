@@ -87,7 +87,7 @@ function loadGoogleAnalytics(measurementId: string) {
 
   const script = document.createElement('script');
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(safeId)}`;
   document.head.appendChild(script);
 }
 

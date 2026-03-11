@@ -470,6 +470,13 @@ export default function Vendas() {
 
   const loadMore = useCallback(() => setVisibleCount((c) => c + PAGE_SIZE), []);
 
+  // FIX #60: Sanitize CSV values to prevent formula injection (=, +, -, @, \t, \r)
+  const sanitizeCsvCell = useCallback((val: unknown): string => {
+    const str = String(val ?? "");
+    if (/^[=+\-@\t\r]/.test(str)) return `'${str}`;
+    return str;
+  }, []);
+
   const handleExportCSV = useCallback(() => {
     if (filtered.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
     const headers = ["ID", "Cliente", "Email", "Telefone", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
@@ -478,14 +485,14 @@ export default function Vendas() {
       t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount),
       t.payment_method || "", t.status, t.created_at,
     ]);
-    const csv = [headers.join(","), ...rows.map(r => r.map(c => `"${c}"`).join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const csv = [headers.join(","), ...rows.map(r => r.map(c => `"${sanitizeCsvCell(c).replace(/"/g, '""')}"`).join(","))].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = `vendas-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
     URL.revokeObjectURL(url);
     toast.success("Exportação concluída!");
-  }, [filtered, products]);
+  }, [filtered, products, sanitizeCsvCell]);
 
   return (
     <PageShell>

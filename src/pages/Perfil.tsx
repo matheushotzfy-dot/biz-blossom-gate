@@ -109,7 +109,7 @@ export default function Perfil() {
         <GlowPanel className="relative">
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-4">
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
               <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/20 shadow-xl shadow-primary/10" onClick={() => fileRef.current?.click()}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
