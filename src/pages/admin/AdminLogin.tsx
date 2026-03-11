@@ -19,6 +19,14 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // FIX: Rate limiting - lock after 3 failed attempts for 120s
+    if (Date.now() < lockoutUntil) {
+      const secsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      setError(`Muitas tentativas. Aguarde ${secsLeft}s.`);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
