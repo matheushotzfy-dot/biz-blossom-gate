@@ -75,7 +75,8 @@ function loadGoogleAds(conversionId: string) {
 }
 
 function loadGoogleAnalytics(measurementId: string) {
-  const key = `ga_${measurementId}`;
+  const safeId = sanitizePixelId(measurementId);
+  const key = `ga_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
