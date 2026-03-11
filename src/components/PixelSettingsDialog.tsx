@@ -116,7 +116,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   };
 
   const removePixel = async (id: string) => {
-    await supabase.from("product_pixels").delete().eq("id", id);
+    await supabase.from("product_pixels").delete().eq("id", id).eq("user_id", user!.id);
     setPixels(prev => prev.filter(p => p.id !== id));
     toast.success("Pixel removido");
   };
