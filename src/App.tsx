@@ -18,6 +18,7 @@ import Extrato from "./pages/financeiro/Extrato";
 import DadosBancarios from "./pages/financeiro/DadosBancarios";
 import Identidade from "./pages/financeiro/Identidade";
 import Saques from "./pages/financeiro/Saques";
+import SaquesCrypto from "./pages/financeiro/SaquesCrypto";
 import Taxas from "./pages/financeiro/Taxas";
 import ControleGastos from "./pages/financeiro/ControleGastos";
 import Vendas from "./pages/vendas/Vendas";
