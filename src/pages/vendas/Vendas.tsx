@@ -290,6 +290,27 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
     setTimeout(() => setCopiedId(false), 2000);
   };
 
+  const customerName = tx.customer_name || "Cliente";
+  const avatarColor = getAvatarColor(customerName);
+
+  // Parse UTMs from checkout_session_id (stored as JSON) or from tx metadata
+  const utms = useMemo(() => {
+    const params: Record<string, string> = {};
+    try {
+      if (tx.checkout_session_id) {
+        const url = new URL(tx.checkout_session_id);
+        ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "src", "sck"].forEach(k => {
+          const v = url.searchParams.get(k);
+          if (v) params[k] = v;
+        });
+      }
+    } catch { /* not a URL, ignore */ }
+    return params;
+  }, [tx.checkout_session_id]);
+
+  const methodLabel = tx.payment_method === "credit_card" ? "Cartão de Crédito" : tx.payment_method === "pix" ? "PIX" : tx.payment_method === "boleto" ? "Boleto" : tx.payment_method || "—";
+  const methodStyle = tx.payment_method === "pix" ? "bg-success/10 text-success" : tx.payment_method === "credit_card" ? "bg-info/10 text-info" : "bg-warning/10 text-warning";
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
@@ -297,77 +318,164 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/70 backdrop-blur-md"
           onClick={onClose}
         />
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 16 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          transition={{ type: "spring", duration: 0.4 }}
-          className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl shadow-xl"
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ type: "spring", duration: 0.45 }}
+          className="relative w-full max-w-md max-h-[88vh] overflow-y-auto rounded-2xl border border-border/40 bg-card backdrop-blur-2xl shadow-2xl"
         >
-          <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border/30 dark:border-foreground/[0.05] bg-card/95 dark:bg-card/90 backdrop-blur-xl rounded-t-xl">
-            <div>
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Detalhes da Venda</p>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={tx.status} />
-                <span className="text-2xl font-display font-bold text-foreground">{fmt(Number(tx.amount))}</span>
+          {/* Header with avatar */}
+          <div className="sticky top-0 z-10 bg-card backdrop-blur-xl border-b border-border/30 p-5 rounded-t-2xl">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3.5">
+                <Avatar className="h-11 w-11">
+                  <AvatarFallback className={cn("text-sm font-bold", avatarColor)}>
+                    {getInitials(customerName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-base font-bold text-foreground">{customerName}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{tx.customer_email || "Sem email"}</p>
+                </div>
               </div>
+              <button onClick={onClose} className="h-8 w-8 rounded-xl flex items-center justify-center hover:bg-muted/50 transition-colors shrink-0">
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
             </div>
-            <button onClick={onClose} className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-muted/50 transition-colors">
-              <X className="h-4 w-4 text-muted-foreground" />
-            </button>
+
+            {/* Amount hero */}
+            <div className="mt-4 flex items-end justify-between">
+              <div>
+                <p className="text-3xl font-display font-black tracking-tight text-foreground">{fmt(Number(tx.amount))}</p>
+                <p className="text-xs text-muted-foreground mt-1">Valor bruto da transação</p>
+              </div>
+              <StatusBadge status={tx.status} />
+            </div>
           </div>
 
-          <div className="p-5 space-y-5">
-            <div className="rounded-lg bg-primary/5 border border-primary/10 p-4">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Resumo Financeiro</p>
-              <div className="space-y-2.5">
-                <DetailRow label="Valor bruto" value={fmt(Number(tx.amount))} icon={<DollarSign className="h-3 w-3" />} />
-                <DetailRow label="Taxa da plataforma" value={`- ${fmt(Number(tx.fee_amount))}`} className="text-destructive" icon={<ArrowDownRight className="h-3 w-3" />} />
-                <div className="border-t border-border/30 dark:border-foreground/[0.05] pt-2.5 mt-2.5">
-                  <DetailRow label="Valor líquido (seu)" value={fmt(Number(tx.net_amount))} className="text-primary" bold icon={<Zap className="h-3 w-3" />} />
+          <div className="p-5 space-y-4">
+            {/* Financial breakdown */}
+            <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 space-y-3">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Resumo Financeiro</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Valor bruto</span>
+                  <span className="text-sm font-semibold text-foreground">{fmt(Number(tx.amount))}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Taxa da plataforma</span>
+                  <span className="text-sm font-semibold text-destructive">- {fmt(Number(tx.fee_amount))}</span>
+                </div>
+                {Number(tx.retained_amount) > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Retido</span>
+                    <span className="text-sm font-semibold text-warning">- {fmt(Number(tx.retained_amount))}</span>
+                  </div>
+                )}
+                <div className="border-t border-border/30 pt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-foreground">Valor líquido</span>
+                    <span className="text-lg font-display font-black text-primary">{fmt(Number(tx.net_amount))}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Informações da Venda</p>
-              <div className="rounded-lg border border-border/30 dark:border-foreground/[0.05] p-4 space-y-2.5">
-                <DetailRow label="ID da venda" value={
-                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/80 hover:text-primary transition-colors bg-muted/50 px-2 py-1 rounded">
-                    {tx.id.slice(0, 16)}...
-                    {copiedId ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
+            {/* Transaction info */}
+            <div className="rounded-xl border border-border/30 p-4 space-y-3">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Detalhes</p>
+              <div className="grid grid-cols-2 gap-3">
+                <InfoCell label="Método" value={
+                  <span className={cn("inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-md", methodStyle)}>
+                    {methodLabel}
+                  </span>
+                } />
+                <InfoCell label="Data" value={<span className="text-sm font-medium text-foreground">{fmtDate(tx.created_at)}</span>} />
+                <InfoCell label="Horário" value={<span className="text-sm font-medium text-foreground">{fmtTime(tx.created_at)}</span>} />
+                {tx.product_id && <InfoCell label="Produto" value={<span className="text-sm font-medium text-foreground truncate">{products[tx.product_id] || "—"}</span>} />}
+              </div>
+              <div className="pt-1">
+                <InfoCell label="ID da Transação" value={
+                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 hover:text-primary transition-colors bg-muted/40 px-2.5 py-1 rounded-lg">
+                    {tx.id.slice(0, 20)}...
+                    {copiedId ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                   </button>
-                } icon={<Hash className="h-3 w-3" />} />
-                <DetailRow label="Método" value={tx.payment_method === "credit_card" ? "Cartão de crédito" : tx.payment_method === "pix" ? "PIX" : tx.payment_method || "—"} icon={<CreditCard className="h-3 w-3" />} />
-                <DetailRow label="Data" value={fmtFull(tx.created_at)} icon={<CalendarIcon className="h-3 w-3" />} />
-                {tx.product_id && <DetailRow label="Produto" value={products[tx.product_id] || tx.product_id.slice(0, 12)} icon={<Package className="h-3 w-3" />} />}
+                } />
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Cliente</p>
-              <div className="rounded-lg border border-border/30 dark:border-foreground/[0.05] p-4 space-y-2.5">
-                <DetailRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3 w-3" />} />
-                <DetailRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3 w-3" />} />
-                <DetailRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3 w-3" />} />
-                {tx.customer_document && <DetailRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3 w-3" />} />}
+            {/* Client info */}
+            <div className="rounded-xl border border-border/30 p-4 space-y-3">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</p>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    <span className="text-sm">Nome</span>
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{tx.customer_name || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="h-3.5 w-3.5" />
+                    <span className="text-sm">Email</span>
+                  </div>
+                  <span className="text-sm font-medium text-foreground truncate max-w-[180px]">{tx.customer_email || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-3.5 w-3.5" />
+                    <span className="text-sm">Telefone</span>
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{tx.customer_phone || "—"}</span>
+                </div>
+                {tx.customer_document && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Hash className="h-3.5 w-3.5" />
+                      <span className="text-sm">CPF/CNPJ</span>
+                    </div>
+                    <span className="text-sm font-medium text-foreground font-mono">{tx.customer_document}</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="flex gap-3 pt-1">
+            {/* UTMs */}
+            {Object.keys(utms).length > 0 && (
+              <div className="rounded-xl border border-border/30 p-4 space-y-3">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rastreamento (UTMs)</p>
+                <div className="space-y-2">
+                  {Object.entries(utms).map(([key, val]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground font-mono">{key}</span>
+                      <span className="text-xs font-medium text-foreground bg-muted/40 px-2 py-0.5 rounded-md max-w-[180px] truncate">{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2.5 pt-2">
               {tx.customer_phone && (
                 <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-                  <Button variant="outline" className="w-full gap-2 rounded-lg h-10 border-success/20 text-success hover:bg-success/5 font-medium text-[12px]">
+                  <Button variant="outline" className="w-full gap-2 rounded-xl h-11 border-success/20 text-success hover:bg-success/5 font-semibold text-sm">
                     <MessageCircle className="h-4 w-4" /> WhatsApp
                   </Button>
                 </a>
               )}
               {tx.status === "completed" && (
-                <Button variant="outline" className="flex-1 gap-2 rounded-lg h-10 border-destructive/20 text-destructive hover:bg-destructive/5 font-medium text-[12px]" onClick={() => onRefund(tx)}>
-                  <RefreshCw className="h-4 w-4" /> Reembolsar
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 rounded-xl h-11 border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold text-sm"
+                  onClick={() => onRefund(tx)}
+                >
+                  <RefreshCw className="h-4 w-4" /> Emitir Reembolso
                 </Button>
               )}
             </div>
@@ -378,14 +486,11 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
   );
 }
 
-function DetailRow({ label, value, icon, className = "", bold = false }: { label: string; value: React.ReactNode; icon?: React.ReactNode; className?: string; bold?: boolean }) {
+function InfoCell({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-0.5">
-      <div className="flex items-center gap-2 text-muted-foreground text-[12px]">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <span className={`text-[13px] ${bold ? "font-bold text-base" : "font-medium"} ${className || "text-foreground"}`}>{value}</span>
+    <div>
+      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+      {value}
     </div>
   );
 }
