@@ -290,7 +290,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           <PanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />}>Feed Tempo Real</PanelTitle>
           <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
             {realtimeTx.map(t => (
-              <div key={t.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
+              <div key={t.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-zinc-900/50 border border-zinc-800/60 hover:bg-zinc-800/40 transition-all">
                 <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
                   t.status === "completed" || t.status === "approved" ? "bg-primary shadow-[0_0_4px_hsl(var(--primary)/0.6)]" :
                   t.status === "pending" ? "bg-warning animate-pulse" :
@@ -298,23 +298,23 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 )} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-white/80 truncate">{fmtCurrency(Number(t.amount))}</span>
-                    <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-white/30")}>
+                    <span className="text-[11px] font-bold text-zinc-200 truncate">{fmtCurrency(Number(t.amount))}</span>
+                    <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-zinc-500")}>
                       {statusLabelMap[t.status] || t.status}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[9px] text-white/20 truncate">{t.customer_name || "Anônimo"}</span>
-                    <span className="text-[9px] text-white/10">•</span>
-                    <span className="text-[9px] text-white/20 uppercase">{t.payment_method || "—"}</span>
-                    <span className="text-[9px] text-white/10">•</span>
-                    <span className="text-[9px] text-white/20">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span className="text-[9px] text-zinc-500 truncate">{t.customer_name || "Anônimo"}</span>
+                    <span className="text-[9px] text-zinc-700">•</span>
+                    <span className="text-[9px] text-zinc-500 uppercase">{t.payment_method || "—"}</span>
+                    <span className="text-[9px] text-zinc-700">•</span>
+                    <span className="text-[9px] text-zinc-500">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
                 </div>
               </div>
             ))}
             {realtimeTx.length === 0 && (
-              <div className="flex items-center justify-center h-32 text-sm text-white/20">Aguardando transações...</div>
+              <div className="flex items-center justify-center h-32 text-sm text-zinc-600">Aguardando transações...</div>
             )}
           </div>
         </AdminPanel>
