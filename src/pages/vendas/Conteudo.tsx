@@ -361,7 +361,7 @@ export default function AdminConteudo() {
     };
     if (editLessonId) {
       const { module_id, sort_order, ...up } = payload;
-      await supabase.from("lessons").update(up).eq("id", editLessonId);
+      await supabase.from("lessons").update(up).eq("id", editLessonId).eq("module_id", lessonModuleId);
       toast.success("Aula atualizada!");
     } else {
       await supabase.from("lessons").insert(payload);
