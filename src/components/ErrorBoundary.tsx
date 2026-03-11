@@ -28,7 +28,7 @@ export class ErrorBoundary extends React.Component<
       return (
         <div style={{ padding: 32, fontFamily: "sans-serif", background: "hsl(var(--background, 0 0% 100%))", color: "hsl(var(--foreground, 0 0% 7%))", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ maxWidth: 420, textAlign: "center" }}>
-            <h1 style={{ fontSize: 22, marginBottom: 8, fontWeight: 700 }}>⚠️ Algo deu errado</h1>
+            <h1 style={{ fontSize: 22, marginBottom: 8, fontWeight: 700 }}>Algo deu errado</h1>
             <p style={{ fontSize: 14, color: "#666", marginBottom: 24, lineHeight: 1.6 }}>
               Ocorreu um erro inesperado. Tente recarregar a página. Se o problema persistir, entre em contato com o suporte.
             </p>
