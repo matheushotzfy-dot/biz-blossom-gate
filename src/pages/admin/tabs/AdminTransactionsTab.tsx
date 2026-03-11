@@ -85,9 +85,9 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
   const getProductName = (productId: string | null) => (productId && productMap.get(productId)) || "—";
 
   const methodIcon = (m: string | null) => {
-    if (m === "pix") return <Smartphone className="h-3 w-3 text-emerald-500" />;
-    if (m === "credit_card") return <CreditCard className="h-3 w-3 text-blue-500" />;
-    if (m === "boleto") return <FileText className="h-3 w-3 text-amber-500" />;
+    if (m === "pix") return <Smartphone className="h-3 w-3 text-primary" />;
+    if (m === "credit_card") return <CreditCard className="h-3 w-3 text-info" />;
+    if (m === "boleto") return <FileText className="h-3 w-3 text-warning" />;
     return null;
   };
 
