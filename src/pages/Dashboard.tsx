@@ -535,12 +535,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-black/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Resumo</h4>
+          <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-primary/5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-primary/60 mb-3">Resumo</h4>
             <div className="space-y-2.5">
               <OperationalRow icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} tone="primary" />
               <OperationalRow icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={String(refunded.length)} tone="info" />
-              <OperationalRow icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "success"} />
+              <OperationalRow icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "primary"} />
             </div>
           </div>
         </div>
