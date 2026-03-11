@@ -151,43 +151,22 @@ export function AppSidebar() {
         </div>
 
         <div className="mt-4 group-data-[collapsible=icon]:hidden">
-          <div className="relative rounded-xl border border-sidebar-primary/30 bg-sidebar-primary/[0.06] px-3.5 py-3 overflow-hidden">
-            {/* Green fire glow behind bar */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 h-16 w-3/4 rounded-full bg-sidebar-primary/20 blur-[20px] animate-pulse" />
+          <div className="relative rounded-xl border border-sidebar-border/60 bg-sidebar-accent/40 px-3.5 py-3 overflow-hidden">
+            <div className="flex items-center justify-between text-[9px] font-bold text-sidebar-foreground/75">
+              <span>{milestone.current.label}</span>
+              <span>{milestone.next.label}</span>
             </div>
-            <div className="relative">
-              <div className="relative h-3.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden ring-1 ring-sidebar-primary/20">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
-                  style={{
-                    width: `${milestone.pct}%`,
-                    background: 'linear-gradient(90deg, hsl(152 70% 35%), hsl(152 80% 45%), hsl(140 80% 55%))',
-                    boxShadow: '0 0 12px hsl(152 80% 50% / 0.6), 0 0 24px hsl(152 80% 50% / 0.3)',
-                  }}
-                />
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm animate-pulse"
-                  style={{ width: `${milestone.pct}%` }}
-                />
-                {/* Fire tip at the end of progress */}
-                {milestone.pct > 5 && (
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full"
-                    style={{
-                      left: `calc(${milestone.pct}% - 10px)`,
-                      background: 'radial-gradient(circle, hsl(140 80% 60% / 0.9), hsl(152 70% 50% / 0.4), transparent)',
-                      filter: 'blur(2px)',
-                      animation: 'pulse-glow 1.5s ease-in-out infinite',
-                    }}
-                  />
-                )}
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
-                <span className="text-[9px] font-bold text-sidebar-primary">{milestone.next.label}</span>
-              </div>
+
+            <div className="mt-2 h-1.5 w-full rounded-full bg-sidebar-accent/70">
+              <div
+                className="h-full rounded-full bg-sidebar-primary transition-all duration-700"
+                style={{ width: `${milestone.pct}%` }}
+              />
             </div>
+
+            <p className="mt-2 text-[10px] font-semibold text-sidebar-primary">
+              {milestone.pct.toFixed(0)}% para o próximo marco
+            </p>
           </div>
         </div>
       </SidebarHeader>
