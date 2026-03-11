@@ -193,7 +193,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-foreground flex">
+    <div className="h-screen bg-[#0A0A0A] text-foreground flex overflow-hidden">
       {/* ═══ Subtle ambient glow ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[150px]" />
