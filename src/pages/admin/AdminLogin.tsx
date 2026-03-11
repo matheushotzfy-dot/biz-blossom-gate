@@ -74,10 +74,10 @@ export default function AdminLogin() {
       <div className="relative w-full max-w-[420px] p-6 animate-slide-up">
         <div className="flex flex-col items-center mb-10">
           <div className="relative mb-5">
-            <div className="h-20 w-20 rounded-[22px] gradient-primary flex items-center justify-center shadow-[0_20px_60px_rgba(16,185,129,0.2)]">
+            <div className="h-20 w-20 rounded-[22px] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_20px_60px_rgba(99,102,241,0.2)]">
               <Flame className="h-10 w-10 text-white" />
             </div>
-            <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-emerald-500 flex items-center justify-center border-4 border-[hsl(160,12%,3%)]">
+            <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-[#050505]">
               <Fingerprint className="h-3.5 w-3.5 text-white" />
             </div>
           </div>
