@@ -215,7 +215,7 @@ export default function AdminDashboard() {
           {!sidebarCollapsed && (
             <div className="ml-2.5 overflow-hidden">
               <h1 className="text-sm font-display font-black tracking-tight text-white">HOTZFY</h1>
-              <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-white/30">
+              <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
                 {isEmployee ? "Employee" : "God Mode"}
               </p>
             </div>
