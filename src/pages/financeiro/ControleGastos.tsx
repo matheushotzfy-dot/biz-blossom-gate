@@ -96,7 +96,8 @@ export default function ControleGastos() {
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("expenses").delete().eq("id", id);
+    if (!user) return;
+    await supabase.from("expenses").delete().eq("id", id).eq("user_id", user.id);
     toast.success("Gasto removido");
     invalidateAll(["expenses"]);
   };

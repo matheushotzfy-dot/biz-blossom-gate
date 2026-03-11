@@ -74,7 +74,8 @@ export default function Webhooks() {
       toast.error("URL não pode apontar para endereços internos"); return;
     }
 
-    const { error } = await supabase.from("webhook_configs").insert({ user_id: user.id, url, events: selectedEvents, secret: crypto.randomUUID().slice(0, 16) });
+    const secret = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
+    const { error } = await supabase.from("webhook_configs").insert({ user_id: user.id, url, events: selectedEvents, secret });
     if (error) { toast.error("Erro ao criar webhook"); return; }
     toast.success("Webhook criado!"); setOpen(false); setUrl(""); setSelectedEvents([]); invalidateAll(["webhooks"]);
   };

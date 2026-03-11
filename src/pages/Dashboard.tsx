@@ -272,7 +272,7 @@ export default function Dashboard() {
       .reduce((acc, tx) => acc + Number(tx.net_amount), 0);
 
     if (revenue24h >= 2000) {
-      localStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
+      sessionStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
       setScaleModeUnlocked(true);
       setFireEffect(true);
       setTimeout(() => {

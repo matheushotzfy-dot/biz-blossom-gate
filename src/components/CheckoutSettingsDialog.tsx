@@ -103,6 +103,8 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ALLOWED_BANNER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!ALLOWED_BANNER_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou GIF"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
     if (type === "desktop") {
       setBannerDesktopFile(file);
