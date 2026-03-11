@@ -583,11 +583,11 @@ export default function Dashboard() {
         </div>
 
         {/* Latest Sales */}
-        <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
+        <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-info" />
+              <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground">Últimas Vendas</h3>
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" title="Tempo real" />
@@ -605,20 +605,20 @@ export default function Dashboard() {
             ) : (
               activity.map((item) => {
                 const statusConfig: Record<string, { label: string; pill: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive" },
+                  completed: { label: "Aprovada", pill: "bg-primary/20 text-primary" },
+                  pending: { label: "Pendente", pill: "bg-warning/20 text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/20 text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/20 text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/20 text-destructive" },
+                  approved: { label: "Aprovado", pill: "bg-primary/20 text-primary" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/20 text-destructive" },
                 };
                 const config = statusConfig[item.status] || { label: item.status, pill: "bg-muted text-foreground" };
 
                 return (
-                  <div key={item.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30">
-                    <div className="h-9 w-9 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
-                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4 text-foreground/60" /> : <Wallet className="h-4 w-4 text-foreground/60" />}
+                  <div key={item.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-primary/5">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4 text-primary" /> : <Wallet className="h-4 w-4 text-primary" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -634,7 +634,6 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-      </div>
 
       {/* ─── QUICK ACTIONS ─── */}
       <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
