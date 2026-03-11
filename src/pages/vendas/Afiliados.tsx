@@ -56,8 +56,8 @@ export default function Afiliados() {
       supabase.from("affiliate_links" as any).select("*").or(`affiliate_user_id.eq.${user.id},owner_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
       supabase.from("affiliate_sales" as any).select("*").or(`affiliate_user_id.eq.${user.id},seller_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
     ]);
-    if (linksRes.data) setLinks(linksRes.data as AffiliateLink[]);
-    if (salesRes.data) setSales(salesRes.data as AffiliateSale[]);
+    if (linksRes.data) setLinks(linksRes.data as unknown as AffiliateLink[]);
+    if (salesRes.data) setSales(salesRes.data as unknown as AffiliateSale[]);
   };
 
   const loadMarketplace = async () => {

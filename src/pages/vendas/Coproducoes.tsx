@@ -40,7 +40,7 @@ export default function Coproducoes() {
     const { data } = await supabase.from("co_productions" as any).select("*").or(
       `owner_user_id.eq.${user.id},co_producer_email.eq.${user.email}`
     ).order("created_at", { ascending: false });
-    if (data) setCoproductions(data as CoProduction[]);
+    if (data) setCoproductions(data as unknown as CoProduction[]);
 
     // Load profile for current user
     const { data: pData } = await supabase.from("profiles").select("email,user_id").eq("user_id", user.id);
