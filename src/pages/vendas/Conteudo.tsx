@@ -310,6 +310,8 @@ export default function AdminConteudo() {
   };
 
   const deleteModule = async (id: string) => {
+    if (!user) return;
+    await supabase.from("lessons").delete().in("module_id", [id]);
     await supabase.from("modules").delete().eq("id", id);
     const cid = editCourseId || selectedCourse;
     if (cid) loadModules(cid);
