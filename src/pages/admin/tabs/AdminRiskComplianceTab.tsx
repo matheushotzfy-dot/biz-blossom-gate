@@ -376,7 +376,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         f.block_type === "blacklist" ? "bg-destructive/10 text-destructive border border-destructive/20" :
                         "bg-warning/10 text-warning border border-warning/20"
-                      }`}>{f.block_type === "blacklist" ? "🛑 Blacklist" : "⚡ Velocity"}</span>
+                      }`}>{f.block_type === "blacklist" ? "Blacklist" : "Velocity"}</span>
                     </td>
                     <td className="p-3 text-xs text-foreground max-w-[200px] truncate">{f.block_reason}</td>
                     <td className="p-3 text-[10px] text-muted-foreground font-mono">{f.customer_email || "—"}</td>
