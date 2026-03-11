@@ -479,6 +479,7 @@ export default function Vendas() {
   const [datePreset, setDatePreset] = useState<DatePreset>("30d");
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, datePreset]);
 
