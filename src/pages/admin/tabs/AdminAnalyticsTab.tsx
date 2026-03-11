@@ -8,7 +8,7 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line,
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
-import { AdminPanel, PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 import { cn } from "@/lib/utils";
 
 interface Props {

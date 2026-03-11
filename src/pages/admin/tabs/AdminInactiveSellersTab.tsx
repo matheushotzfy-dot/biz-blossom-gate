@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { UserX, Search, Clock, Mail, AlertTriangle, Users, Calendar, TrendingDown, Phone } from "lucide-react";
-import { AdminPanel, PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface Props {

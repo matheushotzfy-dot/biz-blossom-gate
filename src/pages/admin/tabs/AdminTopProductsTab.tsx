@@ -3,7 +3,7 @@ import {
   Package, TrendingUp, ShoppingCart, DollarSign, Percent, BarChart3, Calendar,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
-import { AdminPanel, PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 
 interface Props {
   products: Tables<"products">[];

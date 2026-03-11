@@ -19,29 +19,7 @@ import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
-
-/* ── Shared Admin UI ── */
-export const AdminPanel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-2xl border border-border bg-card p-5 ${className || ""}`}>{children}</div>
-);
-export const PanelTitle = ({ children, color, icon }: { children: React.ReactNode; color?: string; icon?: React.ReactNode }) => (
-  <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-    {icon && <span className={`text-${color || "primary"}`}>{icon}</span>}
-    {children}
-  </div>
-);
-export const AdminKpi = ({ icon, label, value, sub, gradient, glowColor, alert, highlight }: any) => (
-  <div className={`relative rounded-2xl border border-border bg-card p-4 overflow-hidden transition-all hover:shadow-lg ${alert ? "ring-1 ring-warning/30" : ""}`}
-    style={{ boxShadow: highlight ? `0 0 30px ${glowColor}` : undefined }}>
-    <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl bg-gradient-to-br ${gradient} opacity-10`} />
-    <div className="flex items-center gap-2 mb-2">
-      <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-md`}>{icon}</div>
-      <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">{label}</span>
-    </div>
-    <p className="text-xl font-black text-foreground">{value}</p>
-    <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>
-  </div>
-);
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
