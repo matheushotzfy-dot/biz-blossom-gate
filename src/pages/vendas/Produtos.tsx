@@ -2,16 +2,16 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts, useInvalidateAll } from "@/hooks/useQueryData";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Sparkles, Palette } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { PageShell, PageTitle } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
@@ -20,11 +20,6 @@ import { motion } from "framer-motion";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-const stagger = {
-  container: { hidden: {}, show: { transition: { staggerChildren: 0.08 } } },
-  item: { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 30 } } },
-};
 
 export default function Produtos() {
   const { user } = useAuth();
@@ -110,156 +105,203 @@ export default function Produtos() {
     }
   };
 
+  const statusLabel = (s: string) => s === "active" ? "Ativo" : s === "inactive" ? "Inativo" : "Em revisão";
+  const statusColor = (s: string) => s === "active" ? "bg-success/10 text-success" : s === "inactive" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning";
+  const statusDot = (s: string) => s === "active" ? "bg-success" : s === "inactive" ? "bg-destructive" : "bg-warning";
+
   return (
     <PageShell>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Crie, gerencie e configure seus infoprodutos" />
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-sm font-bold bg-primary/20 text-primary border border-primary/30 h-11 px-6 hover:bg-primary/30 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-all duration-300">
-              <Plus className="h-4 w-4" /> Novo Produto
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-xl rounded-2xl ring-1 ring-white/[0.06] bg-[#141418]/95 backdrop-blur-3xl shadow-2xl shadow-black/60">
-            <DialogHeader>
-              <DialogTitle className="font-display text-xl flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
-                  {editId ? <Edit className="h-5 w-5 text-primary" /> : <Sparkles className="h-5 w-5 text-primary" />}
-                </div>
-                {editId ? "Editar Produto" : "Criar Novo Produto"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-5 mt-3">
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Imagem do produto</Label>
-                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
-                {imagePreview ? (
-                  <div className="relative rounded-2xl overflow-hidden ring-1 ring-white/[0.06] group">
-                    <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover" />
-                    <div className="absolute inset-0 bg-[#040405]/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                      <button type="button" onClick={() => fileInputRef.current?.click()} className="h-10 w-10 rounded-xl bg-primary/20 backdrop-blur flex items-center justify-center text-primary hover:bg-primary/30 transition-colors ring-1 ring-primary/20"><ImagePlus className="h-5 w-5" /></button>
-                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-10 w-10 rounded-xl bg-destructive/20 backdrop-blur flex items-center justify-center text-destructive hover:bg-destructive/30 transition-colors ring-1 ring-destructive/20"><X className="h-5 w-5" /></button>
-                    </div>
-                  </div>
-                ) : (
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-40 rounded-2xl border-2 border-dashed border-white/[0.06] hover:border-primary/30 flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary transition-all hover:bg-primary/[0.02] group">
-                    <div className="h-14 w-14 rounded-2xl bg-white/[0.03] group-hover:bg-primary/10 flex items-center justify-center transition-colors ring-1 ring-white/[0.06]"><ImagePlus className="h-7 w-7" /></div>
-                    <div className="text-center">
-                      <span className="text-xs font-bold block">Clique para adicionar imagem</span>
-                      <span className="text-[10px] text-muted-foreground/60">JPEG, PNG, WebP até 5MB</span>
-                    </div>
-                  </button>
-                )}
-              </div>
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nome do produto</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-11 rounded-xl border-white/[0.08] bg-white/[0.02]" required maxLength={200} />
-              </div>
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Descrição</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5 rounded-xl border-white/[0.08] bg-white/[0.02]" maxLength={2000} />
-              </div>
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><ExternalLink className="h-3 w-3" /> URL da Página de Vendas</Label>
-                <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-11 rounded-xl border-white/[0.08] bg-white/[0.02]" type="url" />
-                <p className="text-[10px] text-muted-foreground/60 mt-1">Link da página onde o produto é divulgado (compliance)</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><DollarSign className="h-3 w-3" /> Preço (R$)</Label>
-                  <Input type="number" step="0.01" min="1.00" max="99999.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-11 rounded-xl border-white/[0.08] bg-white/[0.02]" required />
-                </div>
-                <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Tag className="h-3 w-3" /> Status</Label>
-                  <div className="mt-1.5 flex items-center gap-3 h-11 px-3 rounded-xl ring-1 ring-white/[0.08] bg-white/[0.02]">
-                    <Switch checked={form.status === "active"} onCheckedChange={(v) => setForm({ ...form, status: v ? "active" : "inactive" })} />
-                    <span className={`text-xs font-bold ${form.status === "active" ? "text-primary" : "text-muted-foreground"}`}>{form.status === "active" ? "Ativo" : "Inativo"}</span>
-                  </div>
-                </div>
-              </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all" disabled={uploading}>
-                {uploading ? "Enviando..." : editId ? "Salvar alterações" : "🚀 Criar produto"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => setOpen(true)} className="gap-2 rounded-lg text-sm font-semibold h-9 px-4">
+          <Plus className="h-4 w-4" /> Novo Produto
+        </Button>
       </div>
 
       {products.length === 0 ? (
-        <div className="rounded-2xl ring-1 ring-white/[0.05] bg-white/[0.01] backdrop-blur-3xl p-16 flex flex-col items-center text-center">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center mb-4"><Package className="h-8 w-8 text-primary" /></div>
-          <h3 className="text-lg font-display font-bold text-foreground mb-2">Nenhum produto criado</h3>
-          <p className="text-sm text-muted-foreground/50 max-w-sm">Crie seu primeiro infoproduto para começar a vender.</p>
-        </div>
+        <EmptyState
+          icon={<Package className="h-7 w-7" />}
+          title="Nenhum produto criado"
+          subtitle="Crie seu primeiro infoproduto para começar a vender."
+          action={
+            <Button onClick={() => setOpen(true)} size="sm" className="gap-2 rounded-lg">
+              <Plus className="h-3.5 w-3.5" /> Criar Produto
+            </Button>
+          }
+        />
       ) : (
-        <motion.div variants={stagger.container} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 mt-1">
-          {products.map((p) => (
-            <motion.div key={p.id} variants={stagger.item} className="group relative rounded-2xl ring-1 ring-white/[0.05] bg-white/[0.01] backdrop-blur-3xl overflow-hidden flex flex-col hover:ring-white/[0.1] transition-all duration-300">
-              {/* Image + floating badge */}
-              <div className="relative h-48 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          {products.map((p, i) => (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: Math.min(i * 0.05, 0.3) }}
+              className="group rounded-xl border border-border bg-card overflow-hidden flex flex-col hover:border-primary/20 transition-colors"
+            >
+              {/* Image */}
+              <div className="relative h-36 overflow-hidden bg-muted/30">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-white/[0.02]"><Package className="h-12 w-12 text-muted-foreground/15" /></div>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="h-10 w-10 text-muted-foreground/20" />
+                  </div>
                 )}
-                {/* Gradient fade into card */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#040405] pointer-events-none" />
-                {/* Floating status badge */}
-                <div className="absolute top-3 right-3">
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md",
-                    p.status === "active" && "bg-emerald-500/[0.12] text-emerald-400 ring-1 ring-emerald-500/20",
-                    p.status === "inactive" && "bg-red-500/[0.12] text-red-400 ring-1 ring-red-500/20",
-                    p.status === "pending_review" && "bg-amber-500/[0.12] text-amber-400 ring-1 ring-amber-500/20",
-                  )}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", p.status === "active" ? "bg-emerald-400" : p.status === "inactive" ? "bg-red-400" : "bg-amber-400")} />
-                    {p.status === "active" ? "Ativo" : p.status === "inactive" ? "Inativo" : "Em revisão"}
+                {/* Status badge */}
+                <div className="absolute top-2.5 right-2.5">
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold", statusColor(p.status))}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
+                    {statusLabel(p.status)}
                   </span>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-5 flex flex-1 flex-col relative">
-                <div className="flex items-start justify-between gap-3 mb-1.5">
-                  <h3 className="text-base font-display font-bold text-foreground leading-snug line-clamp-2">{p.name}</h3>
-                  <p className="text-xl font-display font-black text-primary whitespace-nowrap drop-shadow-[0_0_8px_hsl(var(--primary)/0.3)]">R$ {Number(p.price).toFixed(2)}</p>
+              <div className="p-4 flex flex-1 flex-col">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="text-[14px] font-semibold text-foreground leading-snug line-clamp-1">{p.name}</h3>
+                  <p className="text-[15px] font-bold text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
                 </div>
-                {p.description ? <p className="text-[12px] text-muted-foreground/50 line-clamp-2 mb-4 leading-relaxed">{p.description}</p> : <p className="text-[12px] text-muted-foreground/30 mb-4">Sem descrição.</p>}
+                {p.description
+                  ? <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
+                  : <p className="text-[12px] text-muted-foreground/50 mb-3">Sem descrição</p>
+                }
 
-                {/* Copy link pill */}
+                {/* Copy link */}
                 {p.checkout_url && (
-                  <button onClick={() => copyCheckout(p)} className="flex items-center gap-2 rounded-full bg-white/[0.04] ring-1 ring-white/[0.06] px-3 py-2 mb-4 hover:bg-white/[0.07] hover:ring-white/[0.1] transition-all duration-200 group/copy w-full">
-                    <span className="text-[10px] text-muted-foreground/40 font-mono truncate flex-1 text-left">{getCheckoutLink(p.checkout_url)}</span>
-                    <span className="shrink-0">
-                      {copiedId === p.id ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 transition-all" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5 text-muted-foreground/40 group-hover/copy:text-primary transition-colors" />
-                      )}
-                    </span>
+                  <button onClick={() => copyCheckout(p)} className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-3 py-1.5 mb-3 hover:bg-muted transition-colors w-full">
+                    <span className="text-[10px] text-muted-foreground font-mono truncate flex-1 text-left">{getCheckoutLink(p.checkout_url)}</span>
+                    {copiedId === p.id
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                      : <Copy className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    }
                   </button>
                 )}
 
-                {/* macOS-style action dock */}
-                <div className="flex items-center gap-1.5 mt-auto pt-2 opacity-50 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out">
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => handleEdit(p)}><Edit className="h-3 w-3" /> Editar</Button>
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => setPixelProduct(p)}><Crosshair className="h-3 w-3" /> Pixels</Button>
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all" onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}><Palette className="h-3 w-3" /> Builder</Button>
+                {/* Actions */}
+                <div className="flex items-center gap-1 mt-auto pt-1">
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => handleEdit(p)}>
+                    <Edit className="h-3 w-3" /> Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => setPixelProduct(p)}>
+                    <Crosshair className="h-3 w-3" /> Pixels
+                  </Button>
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}>
+                    <Palette className="h-3 w-3" /> Builder
+                  </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="rounded-lg h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/[0.06] ring-1 ring-transparent hover:ring-primary/20 transition-all ml-auto"><MoreVertical className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="rounded-lg h-8 w-8 p-0 text-muted-foreground hover:text-foreground ml-auto">
+                        <MoreVertical className="h-3.5 w-3.5" />
+                      </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" side="top" className="rounded-xl p-1.5 min-w-[160px] bg-[#141418]/95 backdrop-blur-3xl ring-1 ring-white/[0.08] border-0">
-                      {p.checkout_url && <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 rounded-lg cursor-pointer"><Eye className="h-3.5 w-3.5" /> Ver checkout</DropdownMenuItem>}
-                      <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-2 rounded-lg cursor-pointer text-destructive focus:text-destructive"><Trash2 className="h-3.5 w-3.5" /> Excluir</DropdownMenuItem>
+                    <DropdownMenuContent align="end" side="top">
+                      {p.checkout_url && (
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 cursor-pointer text-[12px]">
+                          <Eye className="h-3.5 w-3.5" /> Ver checkout
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-2 cursor-pointer text-destructive focus:text-destructive text-[12px]">
+                        <Trash2 className="h-3.5 w-3.5" /> Excluir
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       )}
+
+      {/* Create/Edit Sheet */}
+      <Sheet open={open} onOpenChange={(v) => { if (!v) resetForm(); else setOpen(v); }}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader className="mb-5">
+            <SheetTitle className="flex items-center gap-3 text-lg">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                {editId ? <Edit className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4 text-primary" />}
+              </div>
+              {editId ? "Editar Produto" : "Novo Produto"}
+            </SheetTitle>
+          </SheetHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Image */}
+            <div>
+              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Imagem</Label>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
+              {imagePreview ? (
+                <div className="relative rounded-lg overflow-hidden border border-border group/img">
+                  <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
+                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 w-9 rounded-lg bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors">
+                      <ImagePlus className="h-4 w-4" />
+                    </button>
+                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border flex items-center justify-center text-destructive hover:bg-muted transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-32 rounded-lg border-2 border-dashed border-border hover:border-primary/40 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                  <ImagePlus className="h-6 w-6" />
+                  <span className="text-[11px] font-medium">Clique para adicionar</span>
+                  <span className="text-[10px] text-muted-foreground">JPEG, PNG, WebP até 5MB</span>
+                </button>
+              )}
+            </div>
+
+            {/* Name */}
+            <div>
+              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Nome do produto</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-10 rounded-lg" required maxLength={200} />
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Descrição</Label>
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5 rounded-lg" maxLength={2000} />
+            </div>
+
+            {/* Page URL */}
+            <div>
+              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <ExternalLink className="h-3 w-3" /> URL da Página de Vendas
+              </Label>
+              <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-10 rounded-lg" type="url" />
+              <p className="text-[10px] text-muted-foreground mt-1">Link da página onde o produto é divulgado</p>
+            </div>
+
+            {/* Price + Status */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <DollarSign className="h-3 w-3" /> Preço (R$)
+                </Label>
+                <Input type="number" step="0.01" min="1.00" max="99999.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-10 rounded-lg" required />
+              </div>
+              <div>
+                <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Tag className="h-3 w-3" /> Status
+                </Label>
+                <div className="mt-1.5 flex items-center gap-3 h-10 px-3 rounded-lg border border-border bg-card">
+                  <Switch checked={form.status === "active"} onCheckedChange={(v) => setForm({ ...form, status: v ? "active" : "inactive" })} />
+                  <span className={cn("text-xs font-medium", form.status === "active" ? "text-primary" : "text-muted-foreground")}>
+                    {form.status === "active" ? "Ativo" : "Inativo"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <Button type="submit" className="w-full h-10 rounded-lg font-semibold text-sm" disabled={uploading}>
+              {uploading ? "Enviando..." : editId ? "Salvar alterações" : "Criar produto"}
+            </Button>
+          </form>
+        </SheetContent>
+      </Sheet>
+
       {pixelProduct && <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(v) => { if (!v) setPixelProduct(null); }} />}
     </PageShell>
   );
