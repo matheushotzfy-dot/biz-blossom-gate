@@ -122,7 +122,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   };
 
   const updatePixelSettings = async (pixelId: string, updates: Partial<Pixel>) => {
-    await supabase.from("product_pixels").update(updates).eq("id", pixelId);
+    await supabase.from("product_pixels").update(updates).eq("id", pixelId).eq("user_id", user!.id);
     setPixels(prev => prev.map(p => p.id === pixelId ? { ...p, ...updates } : p));
   };
 
