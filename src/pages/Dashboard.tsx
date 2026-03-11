@@ -697,58 +697,70 @@ const toneMap: Record<Tone, { bg: string; text: string }> = {
 
 function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   return (
-    <div className="rounded-xl border border-border/80 bg-card/80 p-2.5 md:p-3">
-      <div className="flex items-center gap-1 md:gap-1.5 mb-1">
-        <div className={`h-5 w-5 md:h-6 md:w-6 rounded-md flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+    <div className="group relative rounded-xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md p-3 md:p-4 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] overflow-hidden">
+      {/* Ambient glow */}
+      <div className={`absolute -top-8 -right-8 h-20 w-20 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+        tone === "primary" ? "bg-primary/20" : tone === "info" ? "bg-info/20" : tone === "success" ? "bg-success/20" : "bg-warning/20"
+      }`} />
+      <div className="relative z-10">
+        <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
+          <div className={`h-6 w-6 md:h-7 md:w-7 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-white/[0.06]`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 font-semibold truncate">{label}</span>
         </div>
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.12em] md:tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
+        <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
       </div>
-      <p className="text-base md:text-xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
 
 function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
   return (
-    <div className={`rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-3 md:p-5 hover:border-primary/20 transition-all animate-fade-in ${delay || ""}`}>
-      <div className="mb-1.5 md:mb-3 flex items-center justify-between">
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] md:tracking-[0.16em] text-muted-foreground font-bold truncate">{label}</span>
-        <div className={`h-7 w-7 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+    <div className={`group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] overflow-hidden animate-fade-in ${delay || ""}`}>
+      {/* Subtle corner glow on hover */}
+      <div className={`absolute -bottom-6 -right-6 h-16 w-16 rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+        tone === "primary" ? "bg-primary/15" : tone === "info" ? "bg-info/15" : tone === "success" ? "bg-success/15" : "bg-warning/15"
+      }`} />
+      <div className="relative z-10">
+        <div className="mb-2 md:mb-3 flex items-center justify-between">
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground/60 font-semibold truncate">{label}</span>
+          <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-white/[0.06]`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
         </div>
+        <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 md:mt-1.5 text-[9px] md:text-[11px] text-muted-foreground/60 font-medium truncate">{helper}</p>
       </div>
-      <p className="text-base md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-0.5 md:mt-1 text-[9px] md:text-[11px] text-muted-foreground truncate">{helper}</p>
     </div>
   );
 }
 
 function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
-  const styles: Record<string, { bg: string; text: string }> = {
-    success: { bg: "bg-success/10", text: "text-success" },
-    warning: { bg: "bg-warning/10", text: "text-warning" },
-    destructive: { bg: "bg-destructive/10", text: "text-destructive" },
-    info: { bg: "bg-info/10", text: "text-info" },
+  const styles: Record<string, { bg: string; text: string; glow: string }> = {
+    success: { bg: "bg-success/8", text: "text-success", glow: "shadow-[0_0_12px_hsl(var(--success)/0.15)]" },
+    warning: { bg: "bg-warning/8", text: "text-warning", glow: "shadow-[0_0_12px_hsl(var(--warning)/0.15)]" },
+    destructive: { bg: "bg-destructive/8", text: "text-destructive", glow: "shadow-[0_0_12px_hsl(var(--destructive)/0.15)]" },
+    info: { bg: "bg-info/8", text: "text-info", glow: "shadow-[0_0_12px_hsl(var(--info)/0.15)]" },
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5">
-      <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text}`}>{icon}</div>
-      <span className="flex-1 text-[12px] font-medium text-muted-foreground">{label}</span>
-      <span className="text-[13px] font-bold text-foreground">{value}</span>
+    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3 transition-all duration-200 hover:bg-white/[0.04]">
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text} ${styles[tone].glow} ring-1 ring-white/[0.06]`}>{icon}</div>
+      <span className="flex-1 text-[12px] font-medium text-muted-foreground/80">{label}</span>
+      <span className="text-sm font-display font-bold text-foreground tabular-nums">{value}</span>
     </div>
   );
 }
 
 function SmallMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
-      <div className="mb-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-        {icon}
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-all duration-200 hover:bg-white/[0.04]">
+      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
+        <span className="text-muted-foreground/50">{icon}</span>
         <span>{label}</span>
       </div>
-      <p className="text-sm md:text-base font-display font-bold text-foreground">{value}</p>
+      <p className="text-base md:text-lg font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
