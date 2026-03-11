@@ -193,7 +193,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-foreground flex">
+    <div className="h-screen bg-[#0A0A0A] text-foreground flex overflow-hidden">
       {/* ═══ Subtle ambient glow ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[150px]" />
@@ -309,7 +309,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* ═══ MAIN ═══ */}
-      <main className={cn("flex-1 transition-all duration-300 min-h-screen relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
+      <main className={cn("flex-1 transition-all duration-300 h-screen overflow-y-auto relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
         {/* Header */}
         <header className="h-12 border-b border-zinc-800/80 flex items-center justify-between px-5 bg-[#0E0E10]/80 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex items-center gap-2.5">

@@ -152,8 +152,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     toast.success(`Lote processado: ${ok} aprovados, ${fail} falhas`);
     setSelectedIds(new Set());
     setBatchProcessing(false);
-    // parent will reload via onWithdrawalAction side-effect
-    if (ok > 0) window.location.reload();
+    if (ok > 0) onWithdrawalAction("", "approved"); // trigger parent reload
   };
 
   const handleBatchReject = async () => {
@@ -167,7 +166,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     toast.success(`${ok} saques recusados em lote`);
     setSelectedIds(new Set());
     setBatchProcessing(false);
-    if (ok > 0) window.location.reload();
+    if (ok > 0) onWithdrawalAction("", "rejected"); // trigger parent reload
   };
 
   /* ── Single Reject with Reason ── */
@@ -179,7 +178,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     toast.success("Saque recusado com motivo registrado");
     setRejectDialog(null);
     setRejectReason("");
-    window.location.reload();
+    onWithdrawalAction("", "rejected"); // trigger parent reload
   };
 
   const toggleSelect = (id: string) => {

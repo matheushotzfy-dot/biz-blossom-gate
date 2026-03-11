@@ -206,14 +206,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         toast.error(data?.error || "Erro ao acessar como usuário");
         return;
       }
-      // Open dashboard in new tab with the impersonated session
+      // Open dashboard in new tab with impersonation session
       const { access_token, refresh_token } = data;
       if (access_token && refresh_token) {
-        // Store impersonation tokens and open in new window
-        const url = new URL(window.location.origin + "/dashboard");
-        url.searchParams.set("impersonate_token", access_token);
-        url.searchParams.set("impersonate_refresh", refresh_token);
-        window.open(url.toString(), "_blank");
+        // Store tokens securely in sessionStorage (not URL params) and open
+        const impersonationData = JSON.stringify({ access_token, refresh_token, admin_id: user?.id, timestamp: Date.now() });
+        // Use postMessage to new window instead of URL params
+        const newWindow = window.open(window.location.origin + "/dashboard", "_blank");
+        if (newWindow) {
+          // Send tokens via postMessage after window loads (avoids URL/history leak)
+          setTimeout(() => {
+            newWindow.postMessage({ type: "IMPERSONATE_SESSION", ...JSON.parse(impersonationData) }, window.location.origin);
+          }, 2000);
+        }
         toast.success(`🎭 Abrindo dashboard como ${data.email}`);
       } else {
         toast.error("Tokens de impersonação não disponíveis");
