@@ -1572,34 +1572,46 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           created_at: string
+          crypto_address: string | null
+          crypto_currency: string | null
+          crypto_network: string | null
           fee_amount: number
           id: string
           net_amount: number
           processed_at: string | null
           status: string
           user_id: string
+          withdrawal_type: string
         }
         Insert: {
           amount: number
           bank_account_id?: string | null
           created_at?: string
+          crypto_address?: string | null
+          crypto_currency?: string | null
+          crypto_network?: string | null
           fee_amount?: number
           id?: string
           net_amount?: number
           processed_at?: string | null
           status?: string
           user_id: string
+          withdrawal_type?: string
         }
         Update: {
           amount?: number
           bank_account_id?: string | null
           created_at?: string
+          crypto_address?: string | null
+          crypto_currency?: string | null
+          crypto_network?: string | null
           fee_amount?: number
           id?: string
           net_amount?: number
           processed_at?: string | null
           status?: string
           user_id?: string
+          withdrawal_type?: string
         }
         Relationships: [
           {
