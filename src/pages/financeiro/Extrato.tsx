@@ -78,7 +78,7 @@ const getInitials = (name: string) => {
   return (parts[0]?.[0] || "?").toUpperCase();
 };
 
-/* ─── KPI Card ─── */
+/* ─── KPI Card (Glassmorphism) ─── */
 function ExtratoKpi({ label, value, sub, icon: Icon, iconBg, iconColor }: {
   label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
   iconBg: string; iconColor: string;
@@ -88,16 +88,16 @@ function ExtratoKpi({ label, value, sub, icon: Icon, iconBg, iconColor }: {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-xl border border-border bg-card p-5"
+      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5"
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</span>
-        <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center", iconBg)}>
+        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", iconBg)}>
           <Icon className={cn("h-4 w-4", iconColor)} />
         </div>
       </div>
-      <p className="text-2xl font-display font-black text-foreground leading-none tracking-tight">{value}</p>
-      {sub && <p className="text-[12px] text-muted-foreground mt-1.5">{sub}</p>}
+      <p className="text-2xl font-display font-bold text-foreground leading-none tracking-tight">{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/70 mt-1.5 font-medium">{sub}</p>}
     </motion.div>
   );
 }
@@ -111,7 +111,7 @@ function TxRow({ tx, products, onClick, index }: {
     credit_card: { icon: <CreditCard className="h-3 w-3" />, label: "Cartão", color: "text-info bg-info/10" },
     boleto: { icon: <FileText className="h-3 w-3" />, label: "Boleto", color: "text-warning bg-warning/10" },
   };
-  const method = methodConfig[tx.payment_method || ""] || { icon: null, label: tx.payment_method || "—", color: "text-muted-foreground bg-muted" };
+  const method = methodConfig[tx.payment_method || ""] || { icon: null, label: tx.payment_method || "—", color: "text-muted-foreground bg-muted/50" };
   const customerName = tx.customer_name || "Cliente";
   const avatarColor = getAvatarColor(customerName);
 
@@ -121,7 +121,7 @@ function TxRow({ tx, products, onClick, index }: {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.4) }}
       onClick={onClick}
-      className="border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer group"
+      className="border-b border-border/30 dark:border-foreground/[0.04] hover:bg-muted/20 dark:hover:bg-foreground/[0.02] transition-colors cursor-pointer group"
     >
       <td className="p-4">
         <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ function TxRow({ tx, products, onClick, index }: {
           </Avatar>
           <div className="min-w-0">
             <p className="text-foreground font-medium text-[13px] leading-tight truncate">{customerName}</p>
-            {tx.customer_email && <p className="text-muted-foreground text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
+            {tx.customer_email && <p className="text-muted-foreground/60 text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
@@ -152,13 +152,13 @@ function TxRow({ tx, products, onClick, index }: {
       <td className="p-4">
         <div>
           <p className="text-foreground/70 text-[12px] font-medium">{fmtDate(tx.created_at)}</p>
-          <p className="text-muted-foreground text-[10px]">{fmtTime(tx.created_at)}</p>
+          <p className="text-muted-foreground/50 text-[10px]">{fmtTime(tx.created_at)}</p>
         </div>
       </td>
       <td className="p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button className="h-8 w-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted">
+            <button className="h-8 w-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50">
               <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
@@ -198,7 +198,7 @@ function TxCard({ tx, products, onClick, index }: {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-      className="rounded-xl border border-border bg-card p-4 cursor-pointer active:scale-[0.99] transition-transform"
+      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 cursor-pointer active:scale-[0.99] transition-transform"
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -209,8 +209,8 @@ function TxCard({ tx, products, onClick, index }: {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-foreground font-semibold text-[13px] leading-tight truncate">{customerName}</p>
-            <p className="text-muted-foreground text-[11px] mt-0.5 truncate">{tx.customer_email || ""}</p>
+            <p className="text-foreground font-medium text-[13px] leading-tight truncate">{customerName}</p>
+            <p className="text-muted-foreground/60 text-[11px] mt-0.5 truncate">{tx.customer_email || ""}</p>
           </div>
         </div>
         <StatusBadge status={tx.status} />
@@ -221,16 +221,16 @@ function TxCard({ tx, products, onClick, index }: {
             {fmt(Number(tx.net_amount))}
           </p>
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-muted-foreground text-[10px] bg-muted px-2 py-0.5 rounded font-semibold uppercase tracking-wider">
+            <span className="text-muted-foreground text-[10px] bg-muted/50 px-2 py-0.5 rounded font-medium uppercase tracking-wider">
               {methodLabels[tx.payment_method || ""] || tx.payment_method || "—"}
             </span>
-            <span className="text-muted-foreground text-[10px] truncate max-w-[100px]">
+            <span className="text-muted-foreground/60 text-[10px] truncate max-w-[100px]">
               {tx.product_id ? products[tx.product_id] || "Produto" : "—"}
             </span>
           </div>
         </div>
         <div className="text-right flex flex-col items-end gap-2">
-          <p className="text-muted-foreground text-[11px]">{fmtDate(tx.created_at)}</p>
+          <p className="text-muted-foreground/60 text-[11px]">{fmtDate(tx.created_at)}</p>
           {tx.customer_phone && (
             <a
               href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
@@ -274,38 +274,38 @@ function TxDetailModal({ tx, products, onClose }: {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96 }}
           transition={{ type: "spring", duration: 0.4 }}
-          className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-xl border border-border bg-card shadow-xl"
+          className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl shadow-xl"
         >
-          <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border bg-card rounded-t-xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border/30 dark:border-foreground/[0.04] bg-card/95 dark:bg-card/90 backdrop-blur-xl rounded-t-xl">
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Detalhes da Transação</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Detalhes da Transação</p>
               <div className="flex items-center gap-3">
                 <StatusBadge status={tx.status} />
-                <span className="text-2xl font-display font-black text-foreground">{fmt(Number(tx.amount))}</span>
+                <span className="text-2xl font-display font-bold text-foreground">{fmt(Number(tx.amount))}</span>
               </div>
             </div>
-            <button onClick={onClose} className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={onClose} className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-muted/40 transition-colors">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
 
           <div className="p-5 space-y-5">
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Resumo Financeiro</p>
+            <div className="rounded-lg border border-primary/15 bg-primary/[0.04] p-4">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Resumo Financeiro</p>
               <div className="space-y-2.5">
                 <DetailRow label="Valor bruto" value={fmt(Number(tx.amount))} icon={<DollarSign className="h-3 w-3" />} />
                 <DetailRow label="Taxa da plataforma" value={`- ${fmt(Number(tx.fee_amount))}`} className="text-destructive" icon={<ArrowDownRight className="h-3 w-3" />} />
-                <div className="border-t border-border pt-2.5 mt-2.5">
+                <div className="border-t border-border/30 dark:border-foreground/[0.04] pt-2.5 mt-2.5">
                   <DetailRow label="Valor líquido (seu)" value={fmt(Number(tx.net_amount))} className="text-primary" bold icon={<Zap className="h-3 w-3" />} />
                 </div>
               </div>
             </div>
 
             <div className="space-y-2.5">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Informações</p>
-              <div className="rounded-lg border border-border p-4 space-y-2.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Informações</p>
+              <div className="rounded-lg border border-border/30 dark:border-foreground/[0.04] p-4 space-y-2.5">
                 <DetailRow label="ID" value={
-                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/80 hover:text-primary transition-colors bg-muted px-2 py-1 rounded">
+                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 hover:text-primary transition-colors bg-muted/40 px-2 py-1 rounded">
                     {tx.id.slice(0, 16)}...
                     {copiedId ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
                   </button>
@@ -317,8 +317,8 @@ function TxDetailModal({ tx, products, onClose }: {
             </div>
 
             <div className="space-y-2.5">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Cliente</p>
-              <div className="rounded-lg border border-border p-4 space-y-2.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Cliente</p>
+              <div className="rounded-lg border border-border/30 dark:border-foreground/[0.04] p-4 space-y-2.5">
                 <DetailRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3 w-3" />} />
                 <DetailRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3 w-3" />} />
                 <DetailRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3 w-3" />} />
@@ -328,7 +328,7 @@ function TxDetailModal({ tx, products, onClose }: {
 
             {tx.customer_phone && (
               <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="w-full gap-2 rounded-lg h-10 border-success/30 text-success hover:bg-success/5 font-semibold text-[12px]">
+                <Button variant="outline" className="w-full gap-2 rounded-lg h-10 border-success/20 text-success hover:bg-success/5 font-medium text-[12px]">
                   <MessageCircle className="h-4 w-4" /> Abrir WhatsApp
                 </Button>
               </a>
@@ -343,7 +343,7 @@ function TxDetailModal({ tx, products, onClose }: {
 function DetailRow({ label, value, icon, className = "", bold = false }: { label: string; value: React.ReactNode; icon?: React.ReactNode; className?: string; bold?: boolean }) {
   return (
     <div className="flex items-center justify-between py-0.5">
-      <div className="flex items-center gap-2 text-muted-foreground text-[12px]">
+      <div className="flex items-center gap-2 text-muted-foreground/70 text-[12px]">
         {icon}
         <span>{label}</span>
       </div>
@@ -352,7 +352,7 @@ function DetailRow({ label, value, icon, className = "", bold = false }: { label
   );
 }
 
-/* ─── Date Control ─── */
+/* ─── Date Segmented Control (iOS style) ─── */
 function DateSegmentedControl({ datePreset, setDatePreset, customFrom, setCustomFrom, customTo, setCustomTo }: {
   datePreset: DatePreset; setDatePreset: (v: DatePreset) => void;
   customFrom: Date | undefined; setCustomFrom: (v: Date | undefined) => void;
@@ -360,15 +360,15 @@ function DateSegmentedControl({ datePreset, setDatePreset, customFrom, setCustom
 }) {
   return (
     <div className="flex items-center gap-3 flex-wrap">
-      <div className="inline-flex items-center rounded-lg bg-muted/50 border border-border p-1">
+      <div className="inline-flex items-center rounded-lg bg-muted/30 dark:bg-foreground/[0.04] p-1">
         {DATE_PRESETS.map((p) => (
           <button
             key={p.value}
             onClick={() => setDatePreset(p.value)}
             className={cn(
-              "px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+              "px-3 py-1.5 rounded-md text-[11px] font-medium transition-all",
               datePreset === p.value
-                ? "bg-card text-foreground shadow-sm border border-border"
+                ? "bg-card dark:bg-foreground/[0.08] text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -380,10 +380,10 @@ function DateSegmentedControl({ datePreset, setDatePreset, customFrom, setCustom
       <Popover>
         <PopoverTrigger asChild>
           <button className={cn(
-            "px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all border inline-flex items-center gap-1.5",
+            "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border inline-flex items-center gap-1.5",
             datePreset === "custom"
-              ? "bg-primary/10 text-primary border-primary/30"
-              : "bg-card text-muted-foreground border-border hover:text-foreground"
+              ? "bg-primary/10 text-primary border-primary/20"
+              : "bg-transparent text-muted-foreground border-border/40 dark:border-foreground/[0.06] hover:text-foreground"
           )}>
             <CalendarIcon className="h-3 w-3" />
             {datePreset === "custom" && customFrom && customTo
@@ -393,16 +393,16 @@ function DateSegmentedControl({ datePreset, setDatePreset, customFrom, setCustom
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="p-3 border-b border-border">
-            <p className="text-xs font-bold text-foreground mb-1">Selecionar período</p>
+          <div className="p-3 border-b border-border/30 dark:border-foreground/[0.04]">
+            <p className="text-xs font-medium text-foreground mb-1">Selecionar período</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-0 sm:gap-2">
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground px-3 pt-2">De:</p>
+              <p className="text-[10px] font-medium text-muted-foreground px-3 pt-2">De:</p>
               <Calendar mode="single" selected={customFrom} onSelect={(d) => { setCustomFrom(d); setDatePreset("custom"); }} locale={ptBR} className="p-3 pointer-events-auto" />
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground px-3 pt-2">Até:</p>
+              <p className="text-[10px] font-medium text-muted-foreground px-3 pt-2">Até:</p>
               <Calendar mode="single" selected={customTo} onSelect={(d) => { setCustomTo(d); setDatePreset("custom"); }} locale={ptBR} disabled={(date) => customFrom ? date < customFrom : false} className="p-3 pointer-events-auto" />
             </div>
           </div>
@@ -414,12 +414,12 @@ function DateSegmentedControl({ datePreset, setDatePreset, customFrom, setCustom
 
 /* ─── Status pill config ─── */
 const STATUS_PILL_STYLES: Record<string, { active: string; dot: string }> = {
-  all: { active: "bg-primary/10 text-primary border-primary/25", dot: "bg-primary" },
-  completed: { active: "bg-success/10 text-success border-success/25", dot: "bg-success" },
-  pending: { active: "bg-warning/10 text-warning border-warning/25", dot: "bg-warning" },
-  failed: { active: "bg-destructive/10 text-destructive border-destructive/25", dot: "bg-destructive" },
-  refunded: { active: "bg-info/10 text-info border-info/25", dot: "bg-info" },
-  chargeback: { active: "bg-destructive/10 text-destructive border-destructive/25", dot: "bg-destructive" },
+  all: { active: "bg-primary/10 text-primary", dot: "bg-primary" },
+  completed: { active: "bg-success/10 text-success", dot: "bg-success" },
+  pending: { active: "bg-warning/10 text-warning", dot: "bg-warning" },
+  failed: { active: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+  refunded: { active: "bg-info/10 text-info", dot: "bg-info" },
+  chargeback: { active: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
 };
 
 /* ═══════════════════════════════════ MAIN ═══════════════════════════════════ */
@@ -540,7 +540,7 @@ export default function Extrato() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle icon={<Receipt className="h-6 w-6" />} title="Extrato" subtitle="Histórico completo de transações" />
-        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2 rounded-lg h-9 font-semibold text-[12px]">
+        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2 rounded-lg h-9 font-medium text-[12px] border-border/40 dark:border-foreground/[0.06]">
           <Download className="h-3.5 w-3.5" /> Exportar CSV
         </Button>
       </div>
@@ -562,13 +562,13 @@ export default function Extrato() {
             customTo={customTo} setCustomTo={setCustomTo}
           />
           <div className="relative flex-1 min-w-[280px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               id="extrato-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar nome, e-mail, WhatsApp ou ID..."
-              className="w-full h-9 pl-10 pr-16 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all"
+              className="w-full h-9 pl-10 pr-16 rounded-lg bg-muted/20 dark:bg-foreground/[0.03] border border-border/40 dark:border-foreground/[0.05] text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/30 transition-all"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {search ? (
@@ -576,7 +576,7 @@ export default function Extrato() {
                   <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
                 </button>
               ) : (
-                <kbd className="hidden md:inline-flex items-center gap-0.5 text-[9px] font-semibold text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded">
+                <kbd className="hidden md:inline-flex items-center gap-0.5 text-[9px] font-medium text-muted-foreground/50 bg-muted/30 border border-border/30 px-1.5 py-0.5 rounded">
                   ⌘K
                 </kbd>
               )}
@@ -585,7 +585,7 @@ export default function Extrato() {
         </div>
 
         {/* Status Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {statusFilters.map((f) => {
             const isActive = statusFilter === f.value;
             const style = STATUS_PILL_STYLES[f.value];
@@ -594,17 +594,17 @@ export default function Extrato() {
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
                 className={cn(
-                  "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
+                  "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all",
                   isActive
                     ? style.active
-                    : "bg-card text-muted-foreground border-border hover:border-border hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
                 )}
               >
                 {isActive && <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />}
                 {f.label}
                 <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded font-bold min-w-[20px] text-center",
-                  isActive ? "bg-foreground/10" : "bg-muted text-muted-foreground"
+                  "text-[10px] px-1.5 py-0.5 rounded font-medium min-w-[20px] text-center",
+                  isActive ? "bg-foreground/10" : "bg-muted/40 text-muted-foreground/60"
                 )}>{f.count}</span>
               </button>
             );
@@ -614,31 +614,31 @@ export default function Extrato() {
 
       {/* Results summary */}
       <div className="flex items-center justify-between px-1">
-        <p className="text-[12px] text-muted-foreground">
+        <p className="text-[12px] text-muted-foreground/60">
           {filtered.length === 0
             ? "Nenhuma transação encontrada"
             : `Mostrando ${Math.min(visibleCount, filtered.length)} de ${filtered.length} transações`}
         </p>
         {filtered.length > 0 && (
-          <p className="text-[12px] text-primary font-semibold">{fmt(filtered.reduce((a, t) => a + Number(t.net_amount), 0))} no período</p>
+          <p className="text-[12px] text-primary font-medium">{fmt(filtered.reduce((a, t) => a + Number(t.net_amount), 0))} no período</p>
         )}
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block rounded-xl border border-border bg-card overflow-hidden">
+      <div className="hidden md:block rounded-xl bg-card/40 dark:bg-foreground/[0.015] backdrop-blur-xl border border-border/30 dark:border-foreground/[0.04] overflow-hidden">
         {loading ? (
           <div className="p-16 text-center">
             <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-[13px] text-muted-foreground">Carregando transações...</p>
+            <p className="text-[13px] text-muted-foreground/60">Carregando transações...</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted/30">
+                  <tr className="border-b border-border/30 dark:border-foreground/[0.04]">
                     {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left p-4 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                      <th key={h} className="text-left p-4 text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -654,8 +654,8 @@ export default function Extrato() {
               </table>
             </div>
             {visibleCount < filtered.length && (
-              <div className="p-3 border-t border-border text-center">
-                <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground font-semibold">
+              <div className="p-3 border-t border-border/20 dark:border-foreground/[0.03] text-center">
+                <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground/60 hover:text-foreground font-medium">
                   <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
                 </Button>
               </div>
@@ -667,9 +667,9 @@ export default function Extrato() {
       {/* Mobile cards */}
       <div className="md:hidden space-y-2.5">
         {loading ? (
-          <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/30 dark:border-foreground/[0.04] p-12 text-center">
             <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-[13px] text-muted-foreground">Carregando...</p>
+            <p className="text-[13px] text-muted-foreground/60">Carregando...</p>
           </div>
         ) : visibleItems.length === 0 ? (
           <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação" subtitle="Tente ajustar os filtros" />
@@ -679,7 +679,7 @@ export default function Extrato() {
               <TxCard key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
             ))}
             {visibleCount < filtered.length && (
-              <Button variant="ghost" size="sm" onClick={loadMore} className="w-full gap-2 text-xs text-muted-foreground font-semibold">
+              <Button variant="ghost" size="sm" onClick={loadMore} className="w-full gap-2 text-xs text-muted-foreground/60 font-medium">
                 <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
               </Button>
             )}
