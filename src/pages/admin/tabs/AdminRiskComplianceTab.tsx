@@ -75,9 +75,9 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
     if (!newValue.trim() || !newReason.trim()) { toast.error("Preencha valor e motivo"); return; }
     if (!user) return;
     const clean = newType === "cpf" || newType === "cnpj" ? newValue.replace(/\D/g, "") : newValue.trim().toLowerCase();
-    const { error } = await supabase.from("global_blacklist" as any).insert({
+    const { error } = await supabase.from("global_blacklist").insert({
       entry_type: newType, entry_value: clean, reason: newReason.trim(), added_by: user.id,
-    } as any);
+    });
     if (error) {
       if (error.code === "23505") toast.error("Entrada já existe na blacklist");
       else toast.error("Erro ao adicionar");
