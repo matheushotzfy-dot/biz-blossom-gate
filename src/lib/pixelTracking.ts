@@ -57,7 +57,8 @@ function loadFacebookPixel(pixelId: string) {
 }
 
 function loadGoogleAds(conversionId: string) {
-  const key = `gads_${conversionId}`;
+  const safeId = sanitizePixelId(conversionId);
+  const key = `gads_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
