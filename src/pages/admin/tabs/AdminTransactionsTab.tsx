@@ -161,7 +161,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
           </table>
           {visibleCount < filtered.length && (
             <div className="p-4 text-center">
-              <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-white/30 hover:text-white/60">
+              <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground">
                 <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
               </Button>
             </div>
