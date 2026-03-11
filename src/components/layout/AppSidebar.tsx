@@ -207,6 +207,9 @@ export function AppSidebar() {
                     : 'R$ 0'}
                 </span>
               </div>
+              <p className="text-center text-[9px] font-bold text-sidebar-primary/40 group-hover/milestone:text-sidebar-primary/70 mt-2.5 transition-colors">
+                🏆 Ver Premiações
+              </p>
             </div>
           </div>
         </div>
