@@ -20,6 +20,7 @@ import ControleGastos from "./pages/financeiro/ControleGastos";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
+import CheckoutBuilder from "./pages/vendas/CheckoutBuilder";
 
 import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
