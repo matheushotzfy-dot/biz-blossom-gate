@@ -218,7 +218,9 @@ export default function DadosBancarios() {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    await supabase.from("bank_accounts").delete().eq("id", id).eq("user_id", user.id);
+    if (!window.confirm("Tem certeza que deseja excluir esta conta bancária?")) return;
+    const { error } = await supabase.from("bank_accounts").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao excluir conta"); return; }
     toast.success("Conta removida");
     invalidateAll(["bank_accounts"]);
   };
