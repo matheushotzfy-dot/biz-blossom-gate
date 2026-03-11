@@ -295,8 +295,6 @@ export default function Dashboard() {
 
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
-  const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
-
   // Top products from transactions
   const topProducts = useMemo(() => {
     const map = new Map<string, { name: string; count: number; revenue: number }>();
