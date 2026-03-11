@@ -165,16 +165,17 @@ Deno.serve(async (req) => {
         tangible: false,
       }],
       customer: {
-        name: customerName,
-        email: customerEmail,
+        name: safeName,
+        email: safeEmail,
         document: {
-          number: customerDocument.replace(/\D/g, ''),
-          type: customerDocument.replace(/\D/g, '').length > 11 ? 'cnpj' : 'cpf',
+          number: cleanDoc,
+          type: cleanDoc.length > 11 ? 'cnpj' : 'cpf',
         },
       },
       postbackUrl: `${supabaseUrl}/functions/v1/podpay-postback`,
       externalRef: product.id,
-      ip: ip || '0.0.0.0',
+      // FIX #69: Never trust client-provided IP — use request header
+      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0',
     };
 
     if (paymentMethod === 'credit_card') {
