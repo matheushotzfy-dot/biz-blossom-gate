@@ -752,7 +752,7 @@ export default function CheckoutBuilder() {
             {/* Exit intent preview */}
             {exitIntentEnabled && (
               <div className="border-t border-border/20 p-3 bg-muted/5 text-center">
-                <p className="text-[10px] text-muted-foreground/30 font-medium">⚡ Exit Intent ativo — popup ao sair da página</p>
+                <p className="text-[10px] text-muted-foreground/30 font-medium">Exit Intent ativo — popup ao sair da página</p>
               </div>
             )}
           </motion.div>

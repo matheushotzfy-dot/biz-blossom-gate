@@ -449,7 +449,7 @@ export default function Dashboard() {
                     />
                   ))}
                   <Flame className={`h-3.5 w-3.5 md:h-4 md:w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span className="leading-tight">{scaleMode ? "Modo Escala 🔥" : "Modo Escala"}</span>
+                  <span className="leading-tight">Modo Escala</span>
                 </button>
               ) : (
                 <div className="flame-btn group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold border border-primary/30 bg-primary/10 text-primary cursor-not-allowed">
