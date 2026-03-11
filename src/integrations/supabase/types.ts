@@ -104,6 +104,131 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_links: {
+        Row: {
+          affiliate_user_id: string
+          clicks: number
+          commission_pct: number
+          created_at: string
+          id: string
+          is_active: boolean
+          owner_user_id: string
+          product_id: string
+          slug: string
+        }
+        Insert: {
+          affiliate_user_id: string
+          clicks?: number
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          owner_user_id: string
+          product_id: string
+          slug: string
+        }
+        Update: {
+          affiliate_user_id?: string
+          clicks?: number
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          owner_user_id?: string
+          product_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_sales: {
+        Row: {
+          affiliate_link_id: string
+          affiliate_user_id: string
+          commission_amount: number
+          commission_pct: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          product_id: string
+          sale_amount: number
+          seller_user_id: string
+          status: string
+          transaction_id: string
+        }
+        Insert: {
+          affiliate_link_id: string
+          affiliate_user_id: string
+          commission_amount: number
+          commission_pct: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          product_id: string
+          sale_amount: number
+          seller_user_id: string
+          status?: string
+          transaction_id: string
+        }
+        Update: {
+          affiliate_link_id?: string
+          affiliate_user_id?: string
+          commission_amount?: number
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          product_id?: string
+          sale_amount?: number
+          seller_user_id?: string
+          status?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_sales_affiliate_link_id_fkey"
+            columns: ["affiliate_link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_sales_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_integrations: {
         Row: {
           api_key: string | null
@@ -268,6 +393,60 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      co_productions: {
+        Row: {
+          accepted_at: string | null
+          co_producer_email: string
+          co_producer_user_id: string | null
+          created_at: string
+          id: string
+          owner_user_id: string
+          product_id: string
+          split_percentage: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          co_producer_email: string
+          co_producer_user_id?: string | null
+          created_at?: string
+          id?: string
+          owner_user_id: string
+          product_id: string
+          split_percentage?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          co_producer_email?: string
+          co_producer_user_id?: string | null
+          created_at?: string
+          id?: string
+          owner_user_id?: string
+          product_id?: string
+          split_percentage?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "co_productions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "co_productions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coupons: {
         Row: {
@@ -1014,6 +1193,8 @@ export type Database = {
       }
       products: {
         Row: {
+          affiliate_commission: number
+          affiliate_enabled: boolean
           checkout_address_required: boolean | null
           checkout_banner_desktop_url: string | null
           checkout_banner_mobile_url: string | null
@@ -1027,6 +1208,9 @@ export type Database = {
           checkout_timer_enabled: boolean | null
           checkout_timer_minutes: number | null
           checkout_url: string | null
+          co_producer_email: string | null
+          co_production_enabled: boolean
+          co_production_split: number
           created_at: string
           description: string | null
           id: string
@@ -1040,6 +1224,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          affiliate_commission?: number
+          affiliate_enabled?: boolean
           checkout_address_required?: boolean | null
           checkout_banner_desktop_url?: string | null
           checkout_banner_mobile_url?: string | null
@@ -1053,6 +1239,9 @@ export type Database = {
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
+          co_producer_email?: string | null
+          co_production_enabled?: boolean
+          co_production_split?: number
           created_at?: string
           description?: string | null
           id?: string
@@ -1066,6 +1255,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          affiliate_commission?: number
+          affiliate_enabled?: boolean
           checkout_address_required?: boolean | null
           checkout_banner_desktop_url?: string | null
           checkout_banner_mobile_url?: string | null
@@ -1079,6 +1270,9 @@ export type Database = {
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
+          co_producer_email?: string | null
+          co_production_enabled?: boolean
+          co_production_split?: number
           created_at?: string
           description?: string | null
           id?: string
