@@ -572,15 +572,15 @@ export default function Dashboard() {
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-start">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
           <div className="mb-3 md:mb-4 flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -596,24 +596,24 @@ export default function Dashboard() {
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/70 bg-muted/20 p-2.5 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
+                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/40 bg-muted/10 p-2.5 md:p-3.5 transition-all duration-200 hover:border-primary/20 hover:bg-muted/30 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
-                <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <action.icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10">
+                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] md:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
                   <p className="text-[10px] md:text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/40 hidden md:block" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/30 hidden md:block group-hover:text-muted-foreground/60 transition-colors" />
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Activity */}
-        <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4">
-          <div className="mb-3 md:mb-4 flex items-center justify-between">
+        {/* Activity — same max-height as actions */}
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 xl:max-h-[600px] flex flex-col">
+          <div className="mb-3 md:mb-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
               <h3 className="text-sm md:text-lg font-display font-black text-foreground">Atividade</h3>
@@ -624,27 +624,27 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="space-y-0.5">
+          <div className="space-y-1 overflow-y-auto flex-1 min-h-0">
             {activity.length === 0 ? (
-              <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-10 text-center">
+              <div className="rounded-xl border border-border/40 bg-muted/10 px-4 py-10 text-center">
                 <p className="text-sm font-semibold text-foreground">Nenhuma atividade</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">Movimentações aparecerão aqui em tempo real.</p>
               </div>
             ) : (
               activity.map((item, i) => {
                 const txStyles: Record<string, { label: string; pill: string; icon: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "bg-success/12 text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "bg-warning/12 text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "bg-info/12 text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
+                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "bg-success/10 text-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "bg-warning/10 text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "bg-info/10 text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive" },
                   default: { label: "Status", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground" },
                 };
 
                 const wdStyles: Record<string, { label: string; pill: string; icon: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "bg-warning/12 text-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "bg-success/12 text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
+                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "bg-warning/10 text-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "bg-success/10 text-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive" },
                   default: { label: "Saque", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground" },
                 };
 
@@ -656,23 +656,23 @@ export default function Dashboard() {
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30 animate-fade-in ${
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-muted/20 animate-fade-in ${
                       STAGGER_CLASSES[i + 1] || ""
                     }`}
                   >
-                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${styles.icon}`}>
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/30 ${styles.icon}`}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-sm font-bold text-foreground">{fmt(item.amount)}</p>
+                        <p className="text-sm font-bold text-foreground tabular-nums">{fmt(item.amount)}</p>
                         <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
                       </div>
                       <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
 
-                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">{timeAgo(item.createdAt)}</span>
+                    <span className="text-[11px] font-medium text-muted-foreground/60 shrink-0 tabular-nums">{timeAgo(item.createdAt)}</span>
                   </div>
                 );
               })
