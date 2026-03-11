@@ -135,11 +135,8 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border/80 bg-sidebar/95 backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-28 -left-20 h-80 w-80 rounded-full bg-sidebar-primary/12 blur-[90px]" />
-        <div className="absolute bottom-6 -right-10 h-64 w-64 rounded-full bg-sidebar-primary/10 blur-[84px]" />
-      </div>
+    <Sidebar className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-sidebar-primary/10 to-transparent" />
 
       <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
@@ -154,43 +151,22 @@ export function AppSidebar() {
         </div>
 
         <div className="mt-4 group-data-[collapsible=icon]:hidden">
-          <div className="relative rounded-xl border border-sidebar-primary/30 bg-sidebar-primary/[0.06] px-3.5 py-3 overflow-hidden">
-            {/* Green fire glow behind bar */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 h-16 w-3/4 rounded-full bg-sidebar-primary/20 blur-[20px] animate-pulse" />
+          <div className="relative rounded-xl border border-sidebar-border/60 bg-sidebar-accent/40 px-3.5 py-3 overflow-hidden">
+            <div className="flex items-center justify-between text-[9px] font-bold text-sidebar-foreground/75">
+              <span>{milestone.current.label}</span>
+              <span>{milestone.next.label}</span>
             </div>
-            <div className="relative">
-              <div className="relative h-3.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden ring-1 ring-sidebar-primary/20">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
-                  style={{
-                    width: `${milestone.pct}%`,
-                    background: 'linear-gradient(90deg, hsl(152 70% 35%), hsl(152 80% 45%), hsl(140 80% 55%))',
-                    boxShadow: '0 0 12px hsl(152 80% 50% / 0.6), 0 0 24px hsl(152 80% 50% / 0.3)',
-                  }}
-                />
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sidebar-primary/40 to-sidebar-primary/60 blur-sm animate-pulse"
-                  style={{ width: `${milestone.pct}%` }}
-                />
-                {/* Fire tip at the end of progress */}
-                {milestone.pct > 5 && (
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full"
-                    style={{
-                      left: `calc(${milestone.pct}% - 10px)`,
-                      background: 'radial-gradient(circle, hsl(140 80% 60% / 0.9), hsl(152 70% 50% / 0.4), transparent)',
-                      filter: 'blur(2px)',
-                      animation: 'pulse-glow 1.5s ease-in-out infinite',
-                    }}
-                  />
-                )}
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[9px] font-bold text-sidebar-primary">{milestone.pct.toFixed(0)}%</span>
-                <span className="text-[9px] font-bold text-sidebar-primary">{milestone.next.label}</span>
-              </div>
+
+            <div className="mt-2 h-1.5 w-full rounded-full bg-sidebar-accent/70">
+              <div
+                className="h-full rounded-full bg-sidebar-primary transition-all duration-700"
+                style={{ width: `${milestone.pct}%` }}
+              />
             </div>
+
+            <p className="mt-2 text-[10px] font-semibold text-sidebar-primary">
+              {milestone.pct.toFixed(0)}% para o próximo marco
+            </p>
           </div>
         </div>
       </SidebarHeader>
@@ -216,22 +192,22 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-2xl border px-3.5 py-3.5 text-[16px] font-semibold leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2.5 text-[14px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "border-sidebar-primary/35 bg-sidebar-accent text-sidebar-accent-foreground shadow-lg shadow-sidebar-primary/10"
-                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/65 hover:text-sidebar-accent-foreground",
+                              ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                           )}
 
                           <span
                             className={cn(
-                              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                               isActive
-                                ? "bg-sidebar-primary/15 text-sidebar-primary"
-                                : "bg-sidebar-accent/45 text-sidebar-foreground group-hover/nav:bg-sidebar-accent group-hover/nav:text-sidebar-accent-foreground",
+                                ? "bg-sidebar-primary/12 text-sidebar-primary"
+                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover/nav:bg-sidebar-accent/70 group-hover/nav:text-sidebar-accent-foreground",
                             )}
                           >
                             <item.icon className="h-5 w-5" />
