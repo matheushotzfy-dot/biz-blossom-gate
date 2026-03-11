@@ -20,7 +20,7 @@ export function useManagerGuard() {
     supabase.rpc("current_user_has_role", { _role: "manager" as any })
       .then(({ data }) => {
         if (data !== true) {
-          supabase.auth.signOut();
+          // Don't sign out — user may be a regular user who navigated here by mistake
           navigate("/gerentes", { replace: true });
           return;
         }

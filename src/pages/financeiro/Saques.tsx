@@ -46,10 +46,18 @@ export default function Saques() {
     if (pixKeys.length === 0) { toast.error("Cadastre uma chave PIX em Dados Bancários"); return; }
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
+    if (numAmount <= 5) { toast.error("Valor mínimo deve ser maior que a taxa de R$ 5,00"); return; }
     const selected = pixKeys.find(k => k.id === selectedPixKeyId) || pixKeys[0];
     await supabase.from("profiles").update({ pix_key: selected.key_value, pix_key_type: selected.key_type }).eq("user_id", user.id);
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
-    if (error) { toast.error("Erro ao solicitar saque"); return; }
+    if (error) { 
+      const msg = error.message || "";
+      if (msg.includes("Saldo insuficiente")) toast.error(msg);
+      else if (msg.includes("Máximo de 3")) toast.error("Você já tem 3 saques pendentes");
+      else if (msg.includes("congelado")) toast.error("Saldo congelado pelo administrador");
+      else toast.error("Erro ao solicitar saque");
+      return;
+    }
     toast.success("Saque solicitado com sucesso!");
     setOpen(false); setAmount(""); setSelectedPixKeyId(""); invalidateAll(["withdrawals"]);
   };

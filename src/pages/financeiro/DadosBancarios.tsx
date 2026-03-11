@@ -218,7 +218,9 @@ export default function DadosBancarios() {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    await supabase.from("bank_accounts").delete().eq("id", id).eq("user_id", user.id);
+    if (!window.confirm("Tem certeza que deseja excluir esta conta bancária?")) return;
+    const { error } = await supabase.from("bank_accounts").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao excluir conta"); return; }
     toast.success("Conta removida");
     invalidateAll(["bank_accounts"]);
   };
@@ -252,8 +254,9 @@ export default function DadosBancarios() {
 
   const handleDeletePix = async (id: string) => {
     if (!user) return;
-    await supabase.from("pix_keys").delete().eq("id", id).eq("user_id", user.id);
-    toast.success("Chave removida");
+    if (!window.confirm("Tem certeza que deseja excluir esta chave PIX?")) return;
+    const { error } = await supabase.from("pix_keys").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao excluir chave PIX"); return; }
     invalidateAll(["pix_keys"]);
     const { data: keys } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at").limit(1) as { data: PixKey[] | null };
     if (keys && keys.length > 0) {

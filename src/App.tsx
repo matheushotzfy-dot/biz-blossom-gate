@@ -46,7 +46,18 @@ import MemberLayout from "./pages/membros/MemberLayout";
 import MemberHome from "./pages/membros/MemberHome";
 import MemberCourse from "./pages/membros/MemberCourse";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 2 * 60 * 1000,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
 
 const App = () => (
   <ErrorBoundary>

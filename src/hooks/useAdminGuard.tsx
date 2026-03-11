@@ -33,7 +33,7 @@ export function useAdminGuard() {
       const hasEmployee = employeeRes.data === true;
 
       if (!hasAdmin && !hasEmployee) {
-        supabase.auth.signOut();
+        // Don't sign out — user may be a regular user who navigated here by mistake
         navigate("/admin-matheus", { replace: true });
         return;
       }

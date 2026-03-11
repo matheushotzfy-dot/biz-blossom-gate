@@ -176,7 +176,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="h-full flex bg-background text-foreground overflow-y-auto">
+    <div className="min-h-screen flex bg-background text-foreground overflow-y-auto">
       {/* Left — Form */}
       <div className="flex-1 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
         <div className="w-full max-w-md relative z-10">
@@ -232,7 +232,7 @@ export default function Auth() {
               <div>
                 <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
                 <div className="relative mt-1">
-                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={8} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

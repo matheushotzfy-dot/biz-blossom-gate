@@ -74,7 +74,7 @@ export default function Produtos() {
   const invalidateAll = useInvalidateAll();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", status: "active", page_url: "" });
+  const [form, setForm] = useState({ name: "", description: "", price: "", status: "pending_review", page_url: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -136,7 +136,7 @@ export default function Produtos() {
 
   const resetForm = () => {
     setOpen(false); setEditId(null);
-    setForm({ name: "", description: "", price: "", status: "active", page_url: "" });
+    setForm({ name: "", description: "", price: "", status: "pending_review", page_url: "" });
     setImageFile(null); setImagePreview(null);
     setUpsellEnabled(false); setAffiliateEnabled(false); setCoProductionEnabled(false);
     setAffiliateCommission("30"); setCoProductionSplit("50"); setWarrantyDays("7");
@@ -145,15 +145,16 @@ export default function Produtos() {
 
   const handleEdit = (p: Tables<"products">) => {
     setEditId(p.id);
-    setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status, page_url: (p as any).page_url || "" });
+    setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status, page_url: p.page_url || "" });
     setImagePreview(p.image_url || null); setImageFile(null); setOpen(true);
   };
 
   const handleDelete = async (id: string) => {
     if (!user) return;
+    if (!window.confirm("Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) return;
     const { error } = await supabase.from("products").delete().eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error("Erro"); return; }
-    toast.success("Removido"); loadProducts();
+    if (error) { toast.error("Erro ao excluir produto"); return; }
+    toast.success("Produto removido"); loadProducts();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

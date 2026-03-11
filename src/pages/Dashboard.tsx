@@ -77,7 +77,13 @@ function toBrasiliaDate(dateStr: string) {
 }
 
 function brasiliaToday() {
-  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  // Use Intl to get reliable Brasília date parts
+  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" });
+  const parts = fmt.formatToParts(new Date());
+  const y = parts.find(p => p.type === "year")!.value;
+  const m = parts.find(p => p.type === "month")!.value;
+  const d = parts.find(p => p.type === "day")!.value;
+  return new Date(Number(y), Number(m) - 1, Number(d));
 }
 
 function timeAgo(dateStr: string) {
@@ -195,14 +201,14 @@ export default function Dashboard() {
     const totalWithdrawn = withdrawals
       .filter(w => w.status === "approved" || w.status === "pending")
       .reduce((acc, w) => acc + Number(w.amount), 0);
-    const totalChargebacksRefunds = transactions
-      .filter(t => t.status === "chargeback" || t.status === "refunded")
-      .reduce((acc, t) => acc + Number(t.net_amount), 0);
+    // FIX: Chargebacks/refunds were previously ADDING net_amount instead of not counting
+    // Completed revenue already excludes chargebacks/refunds (different status),
+    // so we should NOT subtract them again. Only subtract retained amounts.
     const totalRetained = transactions
       .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
       .reduce((acc, t) => acc + Number(t.retained_amount), 0);
 
-    return { withdrawalPending: _withdrawalPending, balance: totalRevenue + balanceAdjustments - totalWithdrawn - totalChargebacksRefunds - totalRetained };
+    return { withdrawalPending: _withdrawalPending, balance: totalRevenue + balanceAdjustments - totalWithdrawn - totalRetained };
   }, [transactions, withdrawals, balanceAdjustments]);
 
   // Optimized chart: pre-index transactions by date to avoid O(N*M)
