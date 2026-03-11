@@ -647,6 +647,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          drip_days: number | null
           duration_minutes: number | null
           id: string
           is_free: boolean | null
@@ -658,6 +659,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          drip_days?: number | null
           duration_minutes?: number | null
           id?: string
           is_free?: boolean | null
@@ -669,6 +671,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          drip_days?: number | null
           duration_minutes?: number | null
           id?: string
           is_free?: boolean | null
@@ -953,6 +956,7 @@ export type Database = {
           name: string
           page_url: string | null
           price: number
+          rejection_reason: string | null
           status: string
           updated_at: string
           user_id: string
@@ -978,6 +982,7 @@ export type Database = {
           name: string
           page_url?: string | null
           price?: number
+          rejection_reason?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -1003,6 +1008,7 @@ export type Database = {
           name?: string
           page_url?: string | null
           price?: number
+          rejection_reason?: string | null
           status?: string
           updated_at?: string
           user_id?: string
