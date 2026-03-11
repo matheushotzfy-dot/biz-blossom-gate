@@ -735,6 +735,15 @@ export default function Vendas() {
       {selectedTx && (
         <TxDetailModal tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={handleRefund} />
       )}
+      {/* Export Dialog */}
+      <ExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        transactions={dateFiltered}
+        products={products}
+        productsRaw={productsRaw}
+        onExport={handleExportCSV}
+      />
     </PageShell>
   );
 }
