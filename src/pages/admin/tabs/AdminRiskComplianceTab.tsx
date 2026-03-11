@@ -274,7 +274,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                         <span className={`text-xs font-black ${isHighRisk ? "text-destructive" : s.rate > 0.5 ? "text-warning" : "text-emerald-500"}`}>
                           {s.rate.toFixed(2)}%
                         </span>
-                        {isHighRisk && <span className="ml-1 text-[8px]">🚨</span>}
+                        {isHighRisk && <AlertTriangle className="ml-1 h-3 w-3 text-destructive" />}
                       </td>
                       <td className="p-3">
                         {s.frozen ? (
