@@ -193,38 +193,38 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ═══ ROW 2: Alerts ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <AdminPanel className={cn(chargebackAlert && "border-destructive/20")}>
+        <AdminPanel className={cn(chargebackAlert && "border-destructive/30")}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5">
-              <ShieldAlert className="h-3 w-3 text-destructive/60" /> Chargeback Rate
+            <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5">
+              <div className="h-5 w-5 rounded bg-red-500/10 flex items-center justify-center"><ShieldAlert className="h-3 w-3 text-destructive" /></div> Chargeback Rate
             </span>
             {chargebackAlert && <span className="text-[8px] font-bold text-destructive bg-destructive/15 px-1.5 py-0.5 rounded-full animate-pulse">ALERTA</span>}
           </div>
           <p className={cn("text-2xl font-display font-black", chargebackAlert ? "text-destructive drop-shadow-[0_0_8px_hsl(var(--destructive)/0.4)]" : "text-white")}>{chargebackRate.toFixed(2)}%</p>
-          <p className="text-[10px] text-white/20">{chargebackTx.length} chargebacks / {approved.length} aprovadas</p>
+          <p className="text-[10px] text-zinc-500">{chargebackTx.length} chargebacks / {approved.length} aprovadas</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary/60" /> Conversão</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-emerald-500/10 flex items-center justify-center"><Zap className="h-3 w-3 text-primary" /></div> Conversão</span>
           <p className="text-2xl font-display font-black text-primary mt-1 drop-shadow-[0_0_8px_hsl(var(--primary)/0.3)]">{conversionRate}%</p>
-          <p className="text-[10px] text-white/20">{approved.length}/{allTx.length}</p>
+          <p className="text-[10px] text-zinc-500">{approved.length}/{allTx.length}</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><TrendingUp className="h-3 w-3 text-info/60" /> Ticket Médio</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-blue-500/10 flex items-center justify-center"><TrendingUp className="h-3 w-3 text-info" /></div> Ticket Médio</span>
           <p className="text-2xl font-display font-black text-white mt-1">{fmtCurrency(ticketMedio)}</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><AlertTriangle className="h-3 w-3 text-warning/60" /> Disputas</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-amber-500/10 flex items-center justify-center"><AlertTriangle className="h-3 w-3 text-warning" /></div> Disputas</span>
           <p className="text-2xl font-display font-black text-warning mt-1 drop-shadow-[0_0_6px_hsl(var(--warning)/0.3)]">{openDisputes}</p>
-          <p className="text-[10px] text-white/20">{medpixCount} MedPix total</p>
+          <p className="text-[10px] text-zinc-500">{medpixCount} MedPix total</p>
         </AdminPanel>
 
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/25 flex items-center gap-1.5"><Users className="h-3 w-3 text-primary/60" /> Sellers</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500 flex items-center gap-1.5"><div className="h-5 w-5 rounded bg-emerald-500/10 flex items-center justify-center"><Users className="h-3 w-3 text-primary" /></div> Sellers</span>
           <p className="text-2xl font-display font-black text-white mt-1">{profiles.length}</p>
-          <p className="text-[10px] text-white/20">{blackSellers.size}B / {whiteSellers.size}W</p>
+          <p className="text-[10px] text-zinc-500">{blackSellers.size}B / {whiteSellers.size}W</p>
         </AdminPanel>
       </div>
 
