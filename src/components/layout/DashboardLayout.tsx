@@ -133,6 +133,7 @@ function DashboardLayoutInner() {
       </div>
 
       <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
 
       {/* ─── ACCOUNT APPROVED POPUP ─── */}
       {showApproved && (

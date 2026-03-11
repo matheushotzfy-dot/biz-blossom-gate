@@ -418,6 +418,7 @@ export default function AdminDashboard() {
               )}
               {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
               {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
+              {activeTab === "notifications" && isAdmin && <AdminNotificationsTab profiles={profiles} />}
               {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
