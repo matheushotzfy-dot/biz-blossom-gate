@@ -4,6 +4,7 @@ import {
   Package,
   CreditCard,
   GraduationCap,
+  Bitcoin,
   Layers,
   
   FileText,
