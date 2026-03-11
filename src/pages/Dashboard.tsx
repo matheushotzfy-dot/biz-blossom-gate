@@ -543,21 +543,33 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="xl:col-span-4 space-y-3">
-          {/* Health - icons only */}
-          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+        <div className="xl:col-span-4 flex flex-col gap-3">
+          {/* Health */}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-6 w-6 rounded-lg bg-success/10 flex items-center justify-center">
+                <Activity className="h-3.5 w-3.5 text-success" />
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Saúde</span>
+            </div>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
             </div>
           </div>
 
-          {/* Snapshot → Conversions */}
-          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3">
+          {/* Conversions */}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-6 w-6 rounded-lg bg-info/10 flex items-center justify-center">
+                <BarChart3 className="h-3.5 w-3.5 text-info" />
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Conversões</span>
+            </div>
             <div className="grid grid-cols-1 gap-2">
-              <SmallMetric icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} />
-              <SmallMetric icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} />
-              <SmallMetric icon={<AlertTriangle className="h-4 w-4" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} />
+              <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
+              <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
+              <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
             </div>
           </div>
         </div>
