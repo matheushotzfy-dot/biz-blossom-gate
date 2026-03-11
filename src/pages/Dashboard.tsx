@@ -358,7 +358,7 @@ export default function Dashboard() {
 
               <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight">
                 MODO ESCALA<br />
-                <span className="text-gradient">ATIVADO! 🔥</span>
+                <span className="text-gradient">ATIVADO!</span>
               </h2>
 
               <div className="space-y-4 text-sm text-muted-foreground leading-relaxed mb-6">
