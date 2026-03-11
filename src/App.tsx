@@ -74,6 +74,10 @@ const App = () => (
               <Route path="/admin-matheus/auditoria" element={<RequireAdmin><AdminAuditoria /></RequireAdmin>} />
               <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
 
+              {/* Manager Panel */}
+              <Route path="/gerentes" element={<ManagerLogin />} />
+              <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
+
               {/* User Dashboard */}
               <Route
                 element={
