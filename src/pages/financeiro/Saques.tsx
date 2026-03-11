@@ -106,24 +106,47 @@ export default function Saques() {
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Chave PIX</Label>
                 {pixKeys.length > 0 ? (
-                  <Select value={selectedPixKeyId || pixKeys[0]?.id} onValueChange={setSelectedPixKeyId}>
-                    <SelectTrigger className="mt-1.5 h-12 rounded-lg">
-                      <SelectValue placeholder="Selecione a chave PIX" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {pixKeys.map((pk) => (
-                        <SelectItem key={pk.id} value={pk.id}>
-                          <span className="flex items-center gap-2">
-                            <Key className="h-3 w-3 text-primary" />
-                            <span className="text-[11px] text-muted-foreground">{pixKeyTypeLabels[pk.key_type]}:</span>
-                            <span className="font-mono text-sm font-medium">{pk.key_value}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="mt-2 space-y-1.5">
+                    {pixKeys.map((pk) => {
+                      const isSelected = (selectedPixKeyId || pixKeys[0]?.id) === pk.id;
+                      return (
+                        <button
+                          key={pk.id}
+                          type="button"
+                          onClick={() => setSelectedPixKeyId(pk.id)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all text-left",
+                            isSelected
+                              ? "border-primary/40 bg-primary/5 shadow-sm shadow-primary/5"
+                              : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/40"
+                          )}
+                        >
+                          <div className={cn(
+                            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                            isSelected ? "bg-primary/15" : "bg-muted/50"
+                          )}>
+                            <Key className={cn("h-3.5 w-3.5", isSelected ? "text-primary" : "text-muted-foreground/50")} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn("text-[11px] font-medium", isSelected ? "text-primary" : "text-muted-foreground")}>
+                              {pixKeyTypeLabels[pk.key_type]}
+                            </p>
+                            <p className={cn("font-mono text-sm font-semibold truncate", isSelected ? "text-foreground" : "text-foreground/70")}>
+                              {pk.key_value}
+                            </p>
+                          </div>
+                          <div className={cn(
+                            "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                            isSelected ? "border-primary bg-primary" : "border-border/60"
+                          )}>
+                            {isSelected && <CheckCircle2 className="h-3 w-3 text-primary-foreground" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 ) : (
-                  <div className="mt-1.5 p-4 rounded-lg border border-destructive/15 bg-destructive/5">
+                  <div className="mt-2 p-4 rounded-xl border border-destructive/15 bg-destructive/5">
                     <p className="text-[12px] text-destructive font-medium flex items-center gap-2">
                       <XCircle className="h-3.5 w-3.5" /> Cadastre uma chave PIX em Dados Bancários
                     </p>
