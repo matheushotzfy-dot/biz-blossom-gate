@@ -249,7 +249,7 @@ export default function AdminConteudo() {
         </Button>
       </div>
 
-      {/* KPIs */}
+      {/* KPIs — Glass */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Cursos", value: String(totalCourses), icon: BookOpen, bg: "bg-primary/10", color: "text-primary" },
@@ -257,14 +257,14 @@ export default function AdminConteudo() {
           { label: "Módulos", value: String(totalModules), icon: Layers, bg: "bg-info/10", color: "text-info" },
           { label: "Aulas", value: String(totalLessons), icon: PlayCircle, bg: "bg-warning/10", color: "text-warning" },
         ].map((kpi) => (
-          <motion.div key={kpi.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-border bg-card p-4">
+          <motion.div key={kpi.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
+              <span className="text-[11px] font-medium text-muted-foreground tracking-wide">{kpi.label}</span>
               <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", kpi.bg)}>
-                <kpi.icon className={cn("h-4 w-4", kpi.color)} />
+                <kpi.icon className={cn("h-3.5 w-3.5", kpi.color)} />
               </div>
             </div>
-            <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
+            <p className="text-2xl font-display font-bold text-foreground">{kpi.value}</p>
           </motion.div>
         ))}
       </div>
