@@ -143,8 +143,8 @@ function DashboardLayoutInner() {
 
           <MobileRevenueBar />
 
-          <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-4 md:px-6 lg:px-8 pb-24 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="mx-auto w-full max-w-[1400px] py-5 md:py-7">
+          <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-4 md:px-7 xl:px-10 pb-24 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="mx-auto w-full max-w-[1180px] py-6 md:py-8">
               <Outlet />
             </div>
           </div>

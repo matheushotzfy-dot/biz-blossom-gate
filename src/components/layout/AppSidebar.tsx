@@ -192,22 +192,22 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-2xl border px-3.5 py-3.5 text-[16px] font-semibold leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2.5 text-[14px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "border-sidebar-primary/35 bg-sidebar-accent text-sidebar-accent-foreground shadow-lg shadow-sidebar-primary/10"
-                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/65 hover:text-sidebar-accent-foreground",
+                              ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                           )}
 
                           <span
                             className={cn(
-                              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                               isActive
-                                ? "bg-sidebar-primary/15 text-sidebar-primary"
-                                : "bg-sidebar-accent/45 text-sidebar-foreground group-hover/nav:bg-sidebar-accent group-hover/nav:text-sidebar-accent-foreground",
+                                ? "bg-sidebar-primary/12 text-sidebar-primary"
+                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover/nav:bg-sidebar-accent/70 group-hover/nav:text-sidebar-accent-foreground",
                             )}
                           >
                             <item.icon className="h-5 w-5" />
