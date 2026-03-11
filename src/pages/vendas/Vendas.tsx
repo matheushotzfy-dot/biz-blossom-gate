@@ -6,8 +6,11 @@ import {
   Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
   RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
   Download, Smartphone, FileText, BarChart3, ArrowDownRight, Zap, Filter,
-  MoreHorizontal, ExternalLink, Receipt,
+  MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
