@@ -698,13 +698,14 @@ export default function Dashboard() {
 
 /* ─── Sub-components ─── */
 
-type Tone = "primary" | "info" | "success" | "warning";
+type Tone = "primary" | "info" | "success" | "warning" | "destructive";
 
 const toneMap: Record<Tone, { bg: string; text: string }> = {
   primary: { bg: "bg-primary/12", text: "text-primary" },
   info: { bg: "bg-info/12", text: "text-info" },
   success: { bg: "bg-success/12", text: "text-success" },
   warning: { bg: "bg-warning/12", text: "text-warning" },
+  destructive: { bg: "bg-destructive/12", text: "text-destructive" },
 };
 
 function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.ReactNode; label: string; value: string; tone: Tone; idx?: number }) {
