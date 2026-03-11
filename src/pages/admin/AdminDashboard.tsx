@@ -291,7 +291,7 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center justify-center h-7 rounded-lg text-white/20 hover:bg-white/[0.03] hover:text-white/50 transition-all"
+            className="w-full flex items-center justify-center h-7 rounded-lg text-zinc-600 hover:bg-zinc-800/30 hover:text-zinc-400 transition-all"
           >
             {sidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
           </button>
