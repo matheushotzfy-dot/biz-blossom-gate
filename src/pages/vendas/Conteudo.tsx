@@ -312,7 +312,7 @@ export default function AdminConteudo() {
                   )}
                   <div className="absolute top-2.5 right-2.5">
                     <span className={cn(
-                      "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold",
+                      "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm",
                       c.is_published ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                     )}>
                       {c.is_published ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
