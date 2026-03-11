@@ -278,11 +278,11 @@ export default function AdminDashboard() {
         </nav>
 
         {/* Bottom */}
-        <div className="border-t border-white/[0.06] p-2 shrink-0 space-y-0.5">
+        <div className="border-t border-zinc-800/80 p-2 shrink-0 space-y-0.5">
           <button
             onClick={toggleTheme}
             className={cn(
-              "w-full flex items-center gap-2.5 rounded-lg h-8 transition-all text-white/30 hover:bg-white/[0.03] hover:text-white/60",
+              "w-full flex items-center gap-2.5 rounded-lg h-8 transition-all text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300",
               sidebarCollapsed ? "justify-center" : "px-3"
             )}
           >
