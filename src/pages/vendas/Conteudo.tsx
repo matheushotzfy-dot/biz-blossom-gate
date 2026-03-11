@@ -302,7 +302,7 @@ export default function AdminConteudo() {
                 className="group rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/15 transition-colors"
               >
                 {/* Thumbnail */}
-                <div className="relative h-36 overflow-hidden bg-muted/30">
+                <div className="relative h-36 overflow-hidden bg-muted/20">
                   {c.thumbnail_url ? (
                     <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                   ) : (
