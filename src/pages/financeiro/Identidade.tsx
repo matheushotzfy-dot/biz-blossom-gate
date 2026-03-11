@@ -103,7 +103,8 @@ export default function Identidade() {
     if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
     setUploading(type);
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/${type}.${ext}`;
+    // FIX #62: Use randomized KYC filenames to prevent predictable paths
+    const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
     if (error) toast.error("Erro no upload"); else { toast.success("Documento enviado!"); await loadKycDocs(); }
     setUploading(null);

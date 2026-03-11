@@ -24,8 +24,14 @@ const loadedScripts = new Set<string>();
 
 // ============ SCRIPT LOADERS ============
 
+// FIX #64: Sanitize pixel IDs to prevent script injection
+function sanitizePixelId(id: string): string {
+  return id.replace(/[^a-zA-Z0-9_\-\.]/g, '');
+}
+
 function loadFacebookPixel(pixelId: string) {
-  const key = `fb_${pixelId}`;
+  const safeId = sanitizePixelId(pixelId);
+  const key = `fb_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
@@ -51,7 +57,8 @@ function loadFacebookPixel(pixelId: string) {
 }
 
 function loadGoogleAds(conversionId: string) {
-  const key = `gads_${conversionId}`;
+  const safeId = sanitizePixelId(conversionId);
+  const key = `gads_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
@@ -68,7 +75,8 @@ function loadGoogleAds(conversionId: string) {
 }
 
 function loadGoogleAnalytics(measurementId: string) {
-  const key = `ga_${measurementId}`;
+  const safeId = sanitizePixelId(measurementId);
+  const key = `ga_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
@@ -76,16 +84,17 @@ function loadGoogleAnalytics(measurementId: string) {
   w.dataLayer = w.dataLayer || [];
   w.gtag = function (...args: any[]) { w.dataLayer.push(args); };
   w.gtag('js', new Date());
-  w.gtag('config', measurementId);
+  w.gtag('config', safeId);
 
   const script = document.createElement('script');
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(safeId)}`;
   document.head.appendChild(script);
 }
 
 function loadTikTokPixel(pixelId: string) {
-  const key = `tt_${pixelId}`;
+  const safeId = sanitizePixelId(pixelId);
+  const key = `tt_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
@@ -113,15 +122,16 @@ function loadTikTokPixel(pixelId: string) {
       const s = document.createElement('script');
       s.type = 'text/javascript';
       s.async = true;
-      s.src = n + '?sdkid=' + e + '&lib=ttq';
+      s.src = n + '?sdkid=' + encodeURIComponent(e) + '&lib=ttq';
       document.head.appendChild(s);
     };
   }
-  w.ttq.load(pixelId);
+  w.ttq.load(safeId);
 }
 
 function loadKwaiPixel(pixelId: string) {
-  const key = `kwai_${pixelId}`;
+  const safeId = sanitizePixelId(pixelId);
+  const key = `kwai_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
@@ -132,13 +142,13 @@ function loadKwaiPixel(pixelId: string) {
       kwaiq._pixelId = id;
       const s = document.createElement('script');
       s.async = true;
-      s.src = `https://s1.kwai.net/kos/s101/nlav11HAg/pixel/events.js?sdkid=${id}`;
+      s.src = `https://s1.kwai.net/kos/s101/nlav11HAg/pixel/events.js?sdkid=${encodeURIComponent(id)}`;
       document.head.appendChild(s);
     };
     kwaiq.page = function () { kwaiq.queue.push(['page']); };
     kwaiq.track = function (...args: any[]) { kwaiq.queue.push(['track', ...args]); };
   }
-  w.kwaiq.load(pixelId);
+  w.kwaiq.load(safeId);
 }
 
 // ============ EVENT MAPPERS ============
@@ -250,6 +260,9 @@ function generateEventId(eventName: string): string {
   _eventIdCounter++;
   return `${eventName}_${Date.now()}_${_eventIdCounter}_${Math.random().toString(36).slice(2, 8)}`;
 }
+
+// FIX #63: Prevent unbounded cache growth — clear old session event IDs periodically
+setInterval(() => { if (_sessionEventIds.size > 500) _sessionEventIds.clear(); }, 60_000);
 
 // Store eventId per checkout session for InitiateCheckout→Purchase dedup
 const _sessionEventIds = new Map<string, string>();

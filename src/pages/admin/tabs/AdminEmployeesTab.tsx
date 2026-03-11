@@ -65,25 +65,29 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
     setSearching(false);
   };
 
+  // FIX #61: Remove raw SQL exposure - use proper insert/delete with admin RLS
   const addEmployee = async () => {
     if (!foundUser) return;
-    // Use service role via edge function or direct insert with admin RLS
-    // Since user_roles has deny-all INSERT policy, we need an edge function
-    // For now, we use the admin's service role context
-    const { error } = await supabase.rpc("has_role", { _user_id: foundUser.user_id, _role: "employee" as any });
-    
-    // We need to use a server-side approach. Let's create a simple edge function call
-    // For now, show instructions
-    toast.info("Para adicionar um funcionário, execute no SQL do banco: INSERT INTO user_roles (user_id, role) VALUES ('" + foundUser.user_id + "', 'employee');");
+    const { error } = await supabase.from("user_roles").insert({ user_id: foundUser.user_id, role: "employee" as any });
+    if (error) {
+      if (error.code === "23505") toast.error("Este usuário já possui essa role");
+      else toast.error("Erro ao adicionar funcionário. Verifique as permissões.");
+      return;
+    }
+    toast.success("Funcionário adicionado com sucesso!");
     await logAdminAction("add_employee", "user_roles", foundUser.user_id, { email: foundUser.email });
     setShowAddDialog(false);
     setSearchEmail("");
     setFoundUser(null);
+    loadEmployees();
   };
 
   const removeEmployee = async (userId: string) => {
-    toast.info("Para remover um funcionário, execute no SQL do banco: DELETE FROM user_roles WHERE user_id = '" + userId + "' AND role = 'employee';");
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "employee" as any);
+    if (error) { toast.error("Erro ao remover funcionário"); return; }
+    toast.success("Funcionário removido!");
     await logAdminAction("remove_employee", "user_roles", userId);
+    loadEmployees();
   };
 
   const getProfile = (userId: string) => profiles.find(p => p.user_id === userId);

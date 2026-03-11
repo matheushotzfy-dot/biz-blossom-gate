@@ -41,6 +41,37 @@ Deno.serve(async (req) => {
       );
     }
 
+    // FIX #65: Validate paymentMethod against allowed values
+    const ALLOWED_METHODS = ['pix', 'credit_card', 'boleto'];
+    if (!ALLOWED_METHODS.includes(paymentMethod)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid payment method' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // FIX #66: Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid email format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // FIX #67: Validate document (CPF 11 digits or CNPJ 14 digits)
+    const cleanDoc = String(customerDocument).replace(/\D/g, '');
+    if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid document' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // FIX #68: Sanitize string inputs (max lengths)
+    const safeName = String(customerName).slice(0, 200).trim();
+    const safeEmail = String(customerEmail).slice(0, 255).trim().toLowerCase();
+    const safePhone = customerPhone ? String(customerPhone).replace(/\D/g, '').slice(0, 11) : null;
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -134,16 +165,17 @@ Deno.serve(async (req) => {
         tangible: false,
       }],
       customer: {
-        name: customerName,
-        email: customerEmail,
+        name: safeName,
+        email: safeEmail,
         document: {
-          number: customerDocument.replace(/\D/g, ''),
-          type: customerDocument.replace(/\D/g, '').length > 11 ? 'cnpj' : 'cpf',
+          number: cleanDoc,
+          type: cleanDoc.length > 11 ? 'cnpj' : 'cpf',
         },
       },
       postbackUrl: `${supabaseUrl}/functions/v1/podpay-postback`,
       externalRef: product.id,
-      ip: ip || '0.0.0.0',
+      // FIX #69: Never trust client-provided IP — use request header
+      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0',
     };
 
     if (paymentMethod === 'credit_card') {
@@ -215,10 +247,10 @@ Deno.serve(async (req) => {
       net_amount: netAmount,
       status: 'pending',
       payment_method: paymentMethod,
-      customer_name: customerName,
-      customer_email: customerEmail,
-      customer_document: customerDocument,
-      customer_phone: customerPhone || null,
+      customer_name: safeName,
+      customer_email: safeEmail,
+      customer_document: cleanDoc,
+      customer_phone: safePhone,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       checkout_session_id: checkoutSessionId || null,
     }).select().single();
