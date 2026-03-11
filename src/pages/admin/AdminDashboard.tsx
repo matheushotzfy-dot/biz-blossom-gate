@@ -61,6 +61,7 @@ const SIDEBAR_SECTIONS = [
   {
     title: "🛡️ RISCO & COMPLIANCE",
     items: [
+      { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
       { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
       { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
       { id: "premed", label: "Pre-Med PIX", icon: ShieldAlert, employeeAccess: false },
