@@ -572,15 +572,15 @@ export default function Dashboard() {
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-start">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
           <div className="mb-3 md:mb-4 flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -596,24 +596,24 @@ export default function Dashboard() {
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/70 bg-muted/20 p-2.5 md:p-4 transition-all hover:border-primary/25 hover:bg-muted/40 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
+                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/40 bg-muted/10 p-2.5 md:p-3.5 transition-all duration-200 hover:border-primary/20 hover:bg-muted/30 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
-                <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <action.icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10">
+                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] md:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
                   <p className="text-[10px] md:text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/40 hidden md:block" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/30 hidden md:block group-hover:text-muted-foreground/60 transition-colors" />
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Activity */}
-        <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4">
-          <div className="mb-3 md:mb-4 flex items-center justify-between">
+        {/* Activity — same max-height as actions */}
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 xl:max-h-[600px] flex flex-col">
+          <div className="mb-3 md:mb-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
               <h3 className="text-sm md:text-lg font-display font-black text-foreground">Atividade</h3>
@@ -624,27 +624,27 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="space-y-0.5">
+          <div className="space-y-1 overflow-y-auto flex-1 min-h-0">
             {activity.length === 0 ? (
-              <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-10 text-center">
+              <div className="rounded-xl border border-border/40 bg-muted/10 px-4 py-10 text-center">
                 <p className="text-sm font-semibold text-foreground">Nenhuma atividade</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">Movimentações aparecerão aqui em tempo real.</p>
               </div>
             ) : (
               activity.map((item, i) => {
                 const txStyles: Record<string, { label: string; pill: string; icon: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "bg-success/12 text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "bg-warning/12 text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "bg-info/12 text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
+                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "bg-success/10 text-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "bg-warning/10 text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "bg-info/10 text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive" },
                   default: { label: "Status", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground" },
                 };
 
                 const wdStyles: Record<string, { label: string; pill: string; icon: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "bg-warning/12 text-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "bg-success/12 text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/12 text-destructive" },
+                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "bg-warning/10 text-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "bg-success/10 text-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive" },
                   default: { label: "Saque", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground" },
                 };
 
@@ -656,23 +656,23 @@ export default function Dashboard() {
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30 animate-fade-in ${
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-muted/20 animate-fade-in ${
                       STAGGER_CLASSES[i + 1] || ""
                     }`}
                   >
-                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${styles.icon}`}>
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/30 ${styles.icon}`}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-sm font-bold text-foreground">{fmt(item.amount)}</p>
+                        <p className="text-sm font-bold text-foreground tabular-nums">{fmt(item.amount)}</p>
                         <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
                       </div>
                       <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
 
-                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">{timeAgo(item.createdAt)}</span>
+                    <span className="text-[11px] font-medium text-muted-foreground/60 shrink-0 tabular-nums">{timeAgo(item.createdAt)}</span>
                   </div>
                 );
               })
@@ -697,57 +697,45 @@ const toneMap: Record<Tone, { bg: string; text: string }> = {
 
 function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   return (
-    <div className="group relative rounded-xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md p-3 md:p-4 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] overflow-hidden">
-      {/* Ambient glow */}
-      <div className={`absolute -top-8 -right-8 h-20 w-20 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-        tone === "primary" ? "bg-primary/20" : tone === "info" ? "bg-info/20" : tone === "success" ? "bg-success/20" : "bg-warning/20"
-      }`} />
-      <div className="relative z-10">
-        <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
-          <div className={`h-6 w-6 md:h-7 md:w-7 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-white/[0.06]`}>
-            <span className={toneMap[tone].text}>{icon}</span>
-          </div>
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 font-semibold truncate">{label}</span>
+    <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-md p-3 md:p-4 transition-all duration-200 hover:border-primary/20 overflow-hidden">
+      <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
+        <div className={`h-6 w-6 md:h-7 md:w-7 rounded-lg flex items-center justify-center ${toneMap[tone].bg}`}>
+          <span className={toneMap[tone].text}>{icon}</span>
         </div>
-        <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold truncate">{label}</span>
       </div>
+      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
 
 function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
   return (
-    <div className={`group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] overflow-hidden animate-fade-in ${delay || ""}`}>
-      {/* Subtle corner glow on hover */}
-      <div className={`absolute -bottom-6 -right-6 h-16 w-16 rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-        tone === "primary" ? "bg-primary/15" : tone === "info" ? "bg-info/15" : tone === "success" ? "bg-success/15" : "bg-warning/15"
-      }`} />
-      <div className="relative z-10">
-        <div className="mb-2 md:mb-3 flex items-center justify-between">
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground/60 font-semibold truncate">{label}</span>
-          <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-white/[0.06]`}>
-            <span className={toneMap[tone].text}>{icon}</span>
-          </div>
+    <div className={`rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-200 hover:border-primary/20 overflow-hidden animate-fade-in ${delay || ""}`}>
+      <div className="mb-2 md:mb-3 flex items-center justify-between">
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold truncate">{label}</span>
+        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
+          <span className={toneMap[tone].text}>{icon}</span>
         </div>
-        <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-        <p className="mt-1 md:mt-1.5 text-[9px] md:text-[11px] text-muted-foreground/60 font-medium truncate">{helper}</p>
       </div>
+      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className="mt-1 md:mt-1.5 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
     </div>
   );
 }
 
 function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
-  const styles: Record<string, { bg: string; text: string; glow: string }> = {
-    success: { bg: "bg-success/8", text: "text-success", glow: "shadow-[0_0_12px_hsl(var(--success)/0.15)]" },
-    warning: { bg: "bg-warning/8", text: "text-warning", glow: "shadow-[0_0_12px_hsl(var(--warning)/0.15)]" },
-    destructive: { bg: "bg-destructive/8", text: "text-destructive", glow: "shadow-[0_0_12px_hsl(var(--destructive)/0.15)]" },
-    info: { bg: "bg-info/8", text: "text-info", glow: "shadow-[0_0_12px_hsl(var(--info)/0.15)]" },
+  const styles: Record<string, { bg: string; text: string }> = {
+    success: { bg: "bg-success/10", text: "text-success" },
+    warning: { bg: "bg-warning/10", text: "text-warning" },
+    destructive: { bg: "bg-destructive/10", text: "text-destructive" },
+    info: { bg: "bg-info/10", text: "text-info" },
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3 transition-all duration-200 hover:bg-white/[0.04]">
-      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text} ${styles[tone].glow} ring-1 ring-white/[0.06]`}>{icon}</div>
-      <span className="flex-1 text-[12px] font-medium text-muted-foreground/80">{label}</span>
+    <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-muted/10 px-3.5 py-3 transition-all duration-200 hover:bg-muted/20">
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text}`}>{icon}</div>
+      <span className="flex-1 text-[12px] font-medium text-muted-foreground">{label}</span>
       <span className="text-sm font-display font-bold text-foreground tabular-nums">{value}</span>
     </div>
   );
@@ -755,9 +743,9 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
 
 function SmallMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-all duration-200 hover:bg-white/[0.04]">
-      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-        <span className="text-muted-foreground/50">{icon}</span>
+    <div className="rounded-xl border border-border/40 bg-muted/10 p-3 transition-all duration-200 hover:bg-muted/20">
+      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
+        {icon}
         <span>{label}</span>
       </div>
       <p className="text-base md:text-lg font-display font-black tracking-tight text-foreground">{value}</p>
