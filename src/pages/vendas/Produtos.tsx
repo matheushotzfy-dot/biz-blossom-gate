@@ -113,7 +113,7 @@ export default function Produtos() {
     <PageShell>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Crie, gerencie e configure seus infoprodutos" />
-        <Button onClick={() => setOpen(true)} className="gap-2 rounded-lg text-sm font-semibold h-9 px-4">
+        <Button onClick={() => setOpen(true)} className="gap-2 rounded-lg text-sm font-medium h-9 px-4">
           <Plus className="h-4 w-4" /> Novo Produto
         </Button>
       </div>
@@ -137,20 +137,20 @@ export default function Produtos() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: Math.min(i * 0.05, 0.3) }}
-              className="group rounded-xl border border-border bg-card overflow-hidden flex flex-col hover:border-primary/20 transition-colors"
+              className="group rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/15 transition-colors"
             >
               {/* Image */}
-              <div className="relative h-36 overflow-hidden bg-muted/30">
+              <div className="relative h-36 overflow-hidden bg-muted/20">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-10 w-10 text-muted-foreground/20" />
+                    <Package className="h-10 w-10 text-muted-foreground/15" />
                   </div>
                 )}
                 {/* Status badge */}
                 <div className="absolute top-2.5 right-2.5">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold", statusColor(p.status))}>
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm", statusColor(p.status))}>
                     <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
                     {statusLabel(p.status)}
                   </span>
@@ -160,21 +160,21 @@ export default function Produtos() {
               {/* Content */}
               <div className="p-4 flex flex-1 flex-col">
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="text-[14px] font-semibold text-foreground leading-snug line-clamp-1">{p.name}</h3>
+                  <h3 className="text-[14px] font-medium text-foreground leading-snug line-clamp-1">{p.name}</h3>
                   <p className="text-[15px] font-bold text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
                 </div>
                 {p.description
-                  ? <p className="text-[12px] text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
-                  : <p className="text-[12px] text-muted-foreground/50 mb-3">Sem descrição</p>
+                  ? <p className="text-[12px] text-muted-foreground/70 line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
+                  : <p className="text-[12px] text-muted-foreground/40 mb-3">Sem descrição</p>
                 }
 
                 {/* Copy link */}
                 {p.checkout_url && (
-                  <button onClick={() => copyCheckout(p)} className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-3 py-1.5 mb-3 hover:bg-muted transition-colors w-full">
-                    <span className="text-[10px] text-muted-foreground font-mono truncate flex-1 text-left">{getCheckoutLink(p.checkout_url)}</span>
+                  <button onClick={() => copyCheckout(p)} className="flex items-center gap-2 rounded-lg bg-muted/30 dark:bg-foreground/[0.03] border border-border/30 dark:border-foreground/[0.04] px-3 py-1.5 mb-3 hover:bg-muted/50 transition-colors w-full">
+                    <span className="text-[10px] text-muted-foreground/60 font-mono truncate flex-1 text-left">{getCheckoutLink(p.checkout_url)}</span>
                     {copiedId === p.id
                       ? <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
-                      : <Copy className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      : <Copy className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                     }
                   </button>
                 )}
@@ -229,63 +229,63 @@ export default function Produtos() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Image */}
             <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Imagem</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Imagem</Label>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
               {imagePreview ? (
-                <div className="relative rounded-lg overflow-hidden border border-border group/img">
+                <div className="relative rounded-lg overflow-hidden border border-border/30 group/img">
                   <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
                   <div className="absolute inset-0 bg-background/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 w-9 rounded-lg bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors">
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 w-9 rounded-lg bg-card border border-border/30 flex items-center justify-center text-foreground hover:bg-muted transition-colors">
                       <ImagePlus className="h-4 w-4" />
                     </button>
-                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border flex items-center justify-center text-destructive hover:bg-muted transition-colors">
+                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border/30 flex items-center justify-center text-destructive hover:bg-muted transition-colors">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
               ) : (
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-32 rounded-lg border-2 border-dashed border-border hover:border-primary/40 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-32 rounded-lg border-2 border-dashed border-border/40 hover:border-primary/30 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
                   <ImagePlus className="h-6 w-6" />
                   <span className="text-[11px] font-medium">Clique para adicionar</span>
-                  <span className="text-[10px] text-muted-foreground">JPEG, PNG, WebP até 5MB</span>
+                  <span className="text-[10px] text-muted-foreground/60">JPEG, PNG, WebP até 5MB</span>
                 </button>
               )}
             </div>
 
             {/* Name */}
             <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Nome do produto</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nome do produto</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-10 rounded-lg" required maxLength={200} />
             </div>
 
             {/* Description */}
             <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Descrição</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Descrição</Label>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5 rounded-lg" maxLength={2000} />
             </div>
 
             {/* Page URL */}
             <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> URL da Página de Vendas
               </Label>
               <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-10 rounded-lg" type="url" />
-              <p className="text-[10px] text-muted-foreground mt-1">Link da página onde o produto é divulgado</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1">Link da página onde o produto é divulgado</p>
             </div>
 
             {/* Price + Status */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <DollarSign className="h-3 w-3" /> Preço (R$)
                 </Label>
                 <Input type="number" step="0.01" min="1.00" max="99999.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-10 rounded-lg" required />
               </div>
               <div>
-                <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Tag className="h-3 w-3" /> Status
                 </Label>
-                <div className="mt-1.5 flex items-center gap-3 h-10 px-3 rounded-lg border border-border bg-card">
+                <div className="mt-1.5 flex items-center gap-3 h-10 px-3 rounded-lg border border-border/40 bg-card/50">
                   <Switch checked={form.status === "active"} onCheckedChange={(v) => setForm({ ...form, status: v ? "active" : "inactive" })} />
                   <span className={cn("text-xs font-medium", form.status === "active" ? "text-primary" : "text-muted-foreground")}>
                     {form.status === "active" ? "Ativo" : "Inativo"}
@@ -295,7 +295,7 @@ export default function Produtos() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full h-10 rounded-lg font-semibold text-sm" disabled={uploading}>
+            <Button type="submit" className="w-full h-10 rounded-lg font-medium text-sm" disabled={uploading}>
               {uploading ? "Enviando..." : editId ? "Salvar alterações" : "Criar produto"}
             </Button>
           </form>
