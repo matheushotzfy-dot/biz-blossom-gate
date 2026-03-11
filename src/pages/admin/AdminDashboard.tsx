@@ -415,6 +415,7 @@ export default function AdminDashboard() {
                 <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
+              {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
               {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
