@@ -737,30 +737,30 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
 }
 
 function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
-  const styles: Record<string, { bg: string; text: string }> = {
-    success: { bg: "bg-success/10", text: "text-success" },
-    warning: { bg: "bg-warning/10", text: "text-warning" },
-    destructive: { bg: "bg-destructive/10", text: "text-destructive" },
-    info: { bg: "bg-info/10", text: "text-info" },
+  const styles: Record<string, { bg: string; text: string; glow: string }> = {
+    success: { bg: "bg-success/8", text: "text-success", glow: "shadow-[0_0_12px_hsl(var(--success)/0.15)]" },
+    warning: { bg: "bg-warning/8", text: "text-warning", glow: "shadow-[0_0_12px_hsl(var(--warning)/0.15)]" },
+    destructive: { bg: "bg-destructive/8", text: "text-destructive", glow: "shadow-[0_0_12px_hsl(var(--destructive)/0.15)]" },
+    info: { bg: "bg-info/8", text: "text-info", glow: "shadow-[0_0_12px_hsl(var(--info)/0.15)]" },
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5">
-      <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text}`}>{icon}</div>
-      <span className="flex-1 text-[12px] font-medium text-muted-foreground">{label}</span>
-      <span className="text-[13px] font-bold text-foreground">{value}</span>
+    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3 transition-all duration-200 hover:bg-white/[0.04]">
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text} ${styles[tone].glow} ring-1 ring-white/[0.06]`}>{icon}</div>
+      <span className="flex-1 text-[12px] font-medium text-muted-foreground/80">{label}</span>
+      <span className="text-sm font-display font-bold text-foreground tabular-nums">{value}</span>
     </div>
   );
 }
 
 function SmallMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
-      <div className="mb-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-        {icon}
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-all duration-200 hover:bg-white/[0.04]">
+      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
+        <span className="text-muted-foreground/50">{icon}</span>
         <span>{label}</span>
       </div>
-      <p className="text-sm md:text-base font-display font-bold text-foreground">{value}</p>
+      <p className="text-base md:text-lg font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
