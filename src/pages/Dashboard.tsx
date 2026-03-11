@@ -440,9 +440,9 @@ export default function Dashboard() {
           icon={<DollarSign className="h-5 w-5" />}
           label="Receita Líquida"
           value={fmt(revenue)}
-          trend={approved.length > 0 ? "+15%" : "0%"}
+          trend={approved.length > 0 ? "+15% vs ontem" : "0%"}
           trendUp={approved.length > 0}
-          tone="success"
+          tone="primary"
         />
         <FintechKpiCard
           icon={<ShoppingCart className="h-5 w-5" />}
@@ -450,7 +450,7 @@ export default function Dashboard() {
           value={String(approved.length)}
           trend={`${pending.length} pendentes`}
           trendUp={true}
-          tone="info"
+          tone="primary"
         />
         <FintechKpiCard
           icon={<Target className="h-5 w-5" />}
@@ -466,7 +466,7 @@ export default function Dashboard() {
           value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`}
           trend={`${withdrawals.filter(w => w.status === "pending").length} saques pendentes`}
           trendUp={balance > 0}
-          tone={balance >= 0 ? "success" : "warning"}
+          tone={balance >= 0 ? "primary" : "warning"}
         />
       </div>
 
