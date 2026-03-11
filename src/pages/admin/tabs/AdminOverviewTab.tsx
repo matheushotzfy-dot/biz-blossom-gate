@@ -1,21 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DollarSign, PiggyBank, Landmark, Users, ArrowDownToLine,
   TrendingUp, AlertTriangle, CheckCircle2, XCircle, Zap,
   Shield, Globe, CreditCard, Package, BarChart3, Activity, Percent,
-  ShieldAlert, RotateCcw,
+  ShieldAlert, RotateCcw, Clock, Smartphone, FileText, Lock,
+  TrendingDown, Eye, Radio,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Tables } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 
-interface Acquirer { id: string; name: string; slug: string; type: string; is_active: boolean; }
-interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; }
+interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; }
 
 interface Props {
   transactions: Tables<"transactions">[];
@@ -29,245 +30,384 @@ interface Props {
 }
 
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false }: Props) {
-  const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
-  const [chartFilter, setChartFilter] = useState<"total" | "black" | "white">("total");
+  const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
+  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
 
   useEffect(() => {
-    supabase.from("acquirers").select("*").then(({ data }) => { if (data) setAcquirers(data as Acquirer[]); });
-    supabase.from("disputes").select("id,type,status,seller_user_id,amount").then(({ data }) => { if (data) setDisputes(data as Dispute[]); });
+    supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at").then(({ data }) => { if (data) setDisputes(data as Dispute[]); });
   }, []);
 
+  // Realtime feed
+  useEffect(() => {
+    setRealtimeTx(transactions.slice(0, 25));
+
+    const channel = supabase
+      .channel("admin-god-mode-tx")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "transactions" }, (payload) => {
+        setRealtimeTx(prev => [payload.new as Tables<"transactions">, ...prev].slice(0, 25));
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "transactions" }, (payload) => {
+        setRealtimeTx(prev => prev.map(t => t.id === (payload.new as any).id ? payload.new as Tables<"transactions"> : t));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [transactions]);
+
+  // ═══ KPIs ═══
   const allTx = transactions;
-  const approved = allTx.filter(t => t.status === "approved" || t.status === "completed");
+  const approved = useMemo(() => allTx.filter(t => t.status === "approved" || t.status === "completed"), [allTx]);
+  
+  const today = new Date();
+  const todayStr = today.toDateString();
+  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  
+  const todayTx = useMemo(() => approved.filter(t => new Date(t.created_at).toDateString() === todayStr), [approved, todayStr]);
+  const monthTx = useMemo(() => approved.filter(t => new Date(t.created_at) >= thisMonthStart), [approved, thisMonthStart]);
+
+  const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
+  const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
   const totalVolume = approved.reduce((a, t) => a + Number(t.amount), 0);
-  const totalFees = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const totalNet = approved.reduce((a, t) => a + Number(t.net_amount), 0);
+  
+  // Take Rate = platform fees (lucro real da gateway)
+  const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const takeRateMonth = monthTx.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const takeRateTotal = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
+
+  // Withdrawal volume
+  const totalWithdrawn = withdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
   const pendingWd = withdrawals.filter(w => w.status === "pending");
-  const pendingAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
-  const conversionRate = allTx.length > 0 ? ((approved.length / allTx.length) * 100).toFixed(1) : "0.0";
-  const approvedWd = withdrawals.filter(w => w.status === "approved");
-  const totalWithdrawn = approvedWd.reduce((a, w) => a + Number(w.amount), 0);
+  const pendingWdAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
 
-  const blackSellers = new Set(profiles.filter(p => p.seller_type === "black").map(p => p.user_id));
-  const whiteSellers = new Set(profiles.filter(p => p.seller_type === "white").map(p => p.user_id));
-  const unsetSellers = new Set(profiles.filter(p => p.seller_type == null).map(p => p.user_id));
+  // Saldo retido (retained balance across all sellers)
+  const totalRetained = approved.filter(t => !t.retention_released && Number(t.retained_amount) > 0)
+    .reduce((a, t) => a + Number(t.retained_amount), 0);
 
-  const blackTx = approved.filter(t => blackSellers.has(t.user_id));
-  const whiteTx = approved.filter(t => whiteSellers.has(t.user_id));
-  const unsetTx = approved.filter(t => unsetSellers.has(t.user_id));
+  // Net balance on platform (earned - withdrawn)
+  const totalNet = approved.reduce((a, t) => a + Number(t.net_amount), 0);
+  const platformBalance = totalNet - totalWithdrawn;
 
-  const blackVolume = blackTx.reduce((a, t) => a + Number(t.amount), 0);
-  const whiteVolume = whiteTx.reduce((a, t) => a + Number(t.amount), 0);
-  const blackFees = blackTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const whiteFees = whiteTx.reduce((a, t) => a + Number(t.fee_amount), 0);
+  // ═══ Approval rates by method ═══
+  const methodApproval = useMemo(() => {
+    const methods: Record<string, { total: number; approved: number }> = {};
+    allTx.forEach(t => {
+      const m = t.payment_method || "other";
+      if (!methods[m]) methods[m] = { total: 0, approved: 0 };
+      methods[m].total++;
+      if (t.status === "approved" || t.status === "completed") methods[m].approved++;
+    });
+    return Object.entries(methods).map(([method, stats]) => ({
+      method: method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : method,
+      total: stats.total,
+      approved: stats.approved,
+      rate: stats.total > 0 ? ((stats.approved / stats.total) * 100) : 0,
+    }));
+  }, [allTx]);
 
-  const allBlackTx = allTx.filter(t => blackSellers.has(t.user_id));
-  const allWhiteTx = allTx.filter(t => whiteSellers.has(t.user_id));
-  const blackConversion = allBlackTx.length > 0 ? ((blackTx.length / allBlackTx.length) * 100).toFixed(1) : "0.0";
-  const whiteConversion = allWhiteTx.length > 0 ? ((whiteTx.length / allWhiteTx.length) * 100).toFixed(1) : "0.0";
+  // ═══ Chargeback rate ═══
+  const chargebackTx = allTx.filter(t => t.status === "chargeback");
+  const chargebackRate = approved.length > 0 ? ((chargebackTx.length / approved.length) * 100) : 0;
+  const chargebackAlert = chargebackRate > 1;
 
-  const medpixCount = disputes.filter(d => d.type === "medpix").length;
-  const premedCount = disputes.filter(d => d.type === "pre_med_pix").length;
-  const refundCount = disputes.filter(d => d.type === "refund").length;
-  const openDisputes = disputes.filter(d => d.status === "open" || d.status === "in_review").length;
+  // ═══ Hourly sales chart (today) ═══
+  const hourlyData = useMemo(() => {
+    const hours = Array.from({ length: 24 }, (_, i) => ({ hour: `${String(i).padStart(2, "0")}h`, volume: 0, count: 0 }));
+    const todayAll = allTx.filter(t => new Date(t.created_at).toDateString() === todayStr);
+    todayAll.forEach(t => {
+      const h = new Date(t.created_at).getHours();
+      if (t.status === "approved" || t.status === "completed") {
+        hours[h].volume += Number(t.amount);
+      }
+      hours[h].count++;
+    });
+    return hours;
+  }, [allTx, todayStr]);
 
-  const statusCounts = allTx.reduce((acc, t) => { acc[t.status] = (acc[t.status] || 0) + 1; return acc; }, {} as Record<string, number>);
-  const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
-  const PIE_COLORS = ["hsl(152,60%,45%)", "hsl(35,90%,55%)", "hsl(0,72%,51%)", "hsl(200,70%,50%)", "hsl(280,65%,55%)"];
-
-  const chartData = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (6 - i));
+  // ═══ 7d / 30d chart ═══
+  const days = chartPeriod === "7d" ? 7 : 30;
+  const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
     const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
     const dayTx = approved.filter(t => new Date(t.created_at).toDateString() === d.toDateString());
-    const dayBlack = dayTx.filter(t => blackSellers.has(t.user_id));
-    const dayWhite = dayTx.filter(t => whiteSellers.has(t.user_id));
     return {
       name: dayStr,
-      volume: dayTx.reduce((a, t) => a + Number(t.amount), 0),
-      lucro: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0),
-      black: dayBlack.reduce((a, t) => a + Number(t.amount), 0),
-      white: dayWhite.reduce((a, t) => a + Number(t.amount), 0),
+      tpv: dayTx.reduce((a, t) => a + Number(t.amount), 0),
+      takeRate: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0),
+      vendas: dayTx.length,
     };
-  });
+  }), [approved, days]);
 
-  const methodStats = approved.reduce((acc, t) => {
-    const m = t.payment_method || "other";
-    if (!acc[m]) acc[m] = { volume: 0, count: 0 };
-    acc[m].volume += Number(t.amount);
-    acc[m].count += 1;
-    return acc;
-  }, {} as Record<string, { volume: number; count: number }>);
+  // ═══ Status distribution ═══
+  const statusCounts = useMemo(() => {
+    const acc: Record<string, number> = {};
+    allTx.forEach(t => { acc[t.status] = (acc[t.status] || 0) + 1; });
+    return Object.entries(acc).map(([name, value]) => ({ name, value }));
+  }, [allTx]);
+  const PIE_COLORS = ["hsl(152,60%,45%)", "hsl(35,90%,55%)", "hsl(0,72%,51%)", "hsl(200,70%,50%)", "hsl(280,65%,55%)", "hsl(45,90%,55%)"];
 
-  const today = new Date();
-  const todayTx = approved.filter(t => new Date(t.created_at).toDateString() === today.toDateString());
-  const todayVolume = todayTx.reduce((a, t) => a + Number(t.amount), 0);
-  const todayFees = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
+  // ═══ Seller segments ═══
+  const blackSellers = new Set(profiles.filter(p => p.seller_type === "black").map(p => p.user_id));
+  const whiteSellers = new Set(profiles.filter(p => p.seller_type === "white").map(p => p.user_id));
 
-  const chartMainKey = chartFilter === "black" ? "black" : chartFilter === "white" ? "white" : "volume";
-  const chartMainColor = chartFilter === "black" ? "hsl(0,0%,55%)" : chartFilter === "white" ? "hsl(210,20%,75%)" : "hsl(var(--primary))";
+  const conversionRate = allTx.length > 0 ? ((approved.length / allTx.length) * 100).toFixed(1) : "0.0";
+  const ticketMedio = approved.length > 0 ? totalVolume / approved.length : 0;
 
-  // Seller ranking
-  const clientMap = new Map<string, { userId: string; volume: number; fees: number; net: number; txCount: number; name: string; email: string; type: string | null }>();
-  approved.forEach(t => {
-    const existing = clientMap.get(t.user_id) || { userId: t.user_id, volume: 0, fees: 0, net: 0, txCount: 0, name: "", email: "", type: null };
-    existing.volume += Number(t.amount); existing.fees += Number(t.fee_amount); existing.net += Number(t.net_amount); existing.txCount += 1;
-    clientMap.set(t.user_id, existing);
-  });
-  clientMap.forEach((client, userId) => {
-    const profile = profiles.find(p => p.user_id === userId);
-    if (profile) { client.name = profile.full_name || "Sem nome"; client.email = profile.email || ""; client.type = profile.seller_type; }
-  });
-  const clientBreakdown = Array.from(clientMap.values()).sort((a, b) => b.volume - a.volume);
+  // ═══ Dispute stats ═══
+  const openDisputes = disputes.filter(d => d.status === "open" || d.status === "in_review").length;
+  const medpixCount = disputes.filter(d => d.type === "medpix").length;
 
-  const SellerTypeBadge = ({ type }: { type: string | null }) => {
-    if (type === "black") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-muted text-muted-foreground border border-border">B</span>;
-    if (type === "white") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">W</span>;
-    return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">?</span>;
+  const statusColorMap: Record<string, string> = {
+    completed: "text-primary", approved: "text-primary", pending: "text-warning",
+    failed: "text-destructive", expired: "text-muted-foreground", refunded: "text-info",
+    chargeback: "text-destructive",
+  };
+  const statusLabelMap: Record<string, string> = {
+    completed: "Pago", approved: "Pago", pending: "Pendente",
+    failed: "Recusado", expired: "Expirado", refunded: "Estornado", chargeback: "Chargeback",
   };
 
-  return (
-    <div className="space-y-5">
-      {/* KPIs */}
-      {!isEmployee && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <AdminKpi icon={<DollarSign className="h-4 w-4" />} label="Volume Total" value={fmtCurrency(totalVolume)} sub={`${approved.length} vendas`} />
-          <AdminKpi icon={<PiggyBank className="h-4 w-4" />} label="Lucro Gateway" value={fmtCurrency(totalFees)} sub="Taxas cobradas" highlight />
-          <AdminKpi icon={<ArrowDownToLine className="h-4 w-4" />} label="Saques Pendentes" value={fmtCurrency(pendingAmount)} sub={`${pendingWd.length} solicitações`} alert={pendingWd.length > 0} />
-          <AdminKpi icon={<Zap className="h-4 w-4" />} label="Hoje" value={fmtCurrency(todayVolume)} sub={`Lucro: ${fmtCurrency(todayFees)}`} />
-        </div>
-      )}
-      {isEmployee && (
+  if (isEmployee) {
+    return (
+      <div className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <AdminKpi icon={<Users className="h-4 w-4" />} label="Sellers" value={String(profiles.length)} sub="Total cadastrados" />
           <AdminKpi icon={<Package className="h-4 w-4" />} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} />
           <AdminKpi icon={<CreditCard className="h-4 w-4" />} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} />
           <AdminKpi icon={<Percent className="h-4 w-4" />} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} />
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Segments */}
-      {!isEmployee && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+  return (
+    <div className="space-y-5">
+      {/* ═══ ROW 1: Primary KPIs ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        <AdminKpi
+          icon={<DollarSign className="h-4 w-4" />}
+          label="TPV Hoje"
+          value={fmtCurrency(tpvToday)}
+          sub={`${todayTx.length} vendas`}
+        />
+        <AdminKpi
+          icon={<BarChart3 className="h-4 w-4" />}
+          label="TPV Mensal"
+          value={fmtCurrency(tpvMonth)}
+          sub={`${monthTx.length} vendas`}
+        />
+        <AdminKpi
+          icon={<PiggyBank className="h-4 w-4" />}
+          label="Take Rate (Lucro)"
+          value={fmtCurrency(takeRateMonth)}
+          sub={`${takeRatePct}% do volume`}
+          highlight
+        />
+        <AdminKpi
+          icon={<ArrowDownToLine className="h-4 w-4" />}
+          label="Volume Sacado"
+          value={fmtCurrency(totalWithdrawn)}
+          sub={`${pendingWd.length} pendentes: ${fmtCurrency(pendingWdAmount)}`}
+          alert={pendingWd.length > 5}
+        />
+        <AdminKpi
+          icon={<Lock className="h-4 w-4" />}
+          label="Saldo Retido"
+          value={fmtCurrency(totalRetained)}
+          sub="Rolling reserve ativo"
+        />
+        <AdminKpi
+          icon={<Landmark className="h-4 w-4" />}
+          label="Saldo Plataforma"
+          value={fmtCurrency(platformBalance)}
+          sub={`Líquido - Sacado`}
+          highlight
+        />
+      </div>
+
+      {/* ═══ ROW 2: Alerts ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <AdminPanel className={cn(chargebackAlert && "border-destructive/40 bg-destructive/[0.03]")}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5">
+              <ShieldAlert className="h-3 w-3" /> Chargeback Rate
+            </span>
+            {chargebackAlert && <span className="text-[9px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full animate-pulse">ALERTA</span>}
+          </div>
+          <p className={cn("text-2xl font-black", chargebackAlert ? "text-destructive" : "text-foreground")}>{chargebackRate.toFixed(2)}%</p>
+          <p className="text-[10px] text-muted-foreground">{chargebackTx.length} chargebacks / {approved.length} aprovadas</p>
+        </AdminPanel>
+
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><Zap className="h-3 w-3" /> Conversão</span>
+          <p className="text-2xl font-black text-primary mt-1">{conversionRate}%</p>
+          <p className="text-[10px] text-muted-foreground">{approved.length}/{allTx.length}</p>
+        </AdminPanel>
+
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><TrendingUp className="h-3 w-3" /> Ticket Médio</span>
+          <p className="text-2xl font-black text-foreground mt-1">{fmtCurrency(ticketMedio)}</p>
+        </AdminPanel>
+
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><AlertTriangle className="h-3 w-3" /> Disputas</span>
+          <p className="text-2xl font-black text-warning mt-1">{openDisputes}</p>
+          <p className="text-[10px] text-muted-foreground">{medpixCount} MedPix total</p>
+        </AdminPanel>
+
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Sellers</span>
+          <p className="text-2xl font-black text-foreground mt-1">{profiles.length}</p>
+          <p className="text-[10px] text-muted-foreground">{blackSellers.size}B / {whiteSellers.size}W</p>
+        </AdminPanel>
+      </div>
+
+      {/* ═══ ROW 3: Charts + Realtime Feed ═══ */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
+        {/* Volume chart */}
+        <div className="xl:col-span-2">
           <AdminPanel>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><Shield className="h-3 w-3" /> Black</span>
-              <span className="text-[10px] text-muted-foreground">{blackSellers.size} sellers</span>
+            <div className="flex items-center justify-between mb-4">
+              <PanelTitle color="emerald">Volume & Take Rate</PanelTitle>
+              <div className="flex gap-0.5 bg-muted/40 border border-border rounded-lg p-0.5">
+                {(["7d", "30d"] as const).map(f => (
+                  <button key={f} onClick={() => setChartPeriod(f)}
+                    className={`px-2.5 py-1 rounded text-[10px] font-bold transition-all ${chartPeriod === f ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p className="text-lg font-black text-foreground">{fmtCurrency(blackVolume)}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Lucro: <span className="text-warning font-bold">{fmtCurrency(blackFees)}</span> • Conv: {blackConversion}%</p>
-          </AdminPanel>
-          <AdminPanel>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><Globe className="h-3 w-3" /> White</span>
-              <span className="text-[10px] text-muted-foreground">{whiteSellers.size} sellers</span>
-            </div>
-            <p className="text-lg font-black text-foreground">{fmtCurrency(whiteVolume)}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Lucro: <span className="text-warning font-bold">{fmtCurrency(whiteFees)}</span> • Conv: {whiteConversion}%</p>
-          </AdminPanel>
-          <AdminPanel>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground flex items-center gap-1.5"><Landmark className="h-3 w-3" /> Sacado</span>
-            </div>
-            <p className="text-lg font-black text-foreground">{fmtCurrency(totalWithdrawn)}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Distribuído: {fmtCurrency(totalNet)}</p>
-          </AdminPanel>
-          <AdminPanel>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-destructive flex items-center gap-1.5"><ShieldAlert className="h-3 w-3" /> Disputas</span>
-              <span className="text-[10px] text-muted-foreground">{openDisputes} abertas</span>
-            </div>
-            <div className="flex gap-4 mt-1">
-              <div><p className="text-lg font-black text-warning">{medpixCount}</p><p className="text-[9px] text-muted-foreground">MedPix</p></div>
-              <div><p className="text-lg font-black text-foreground">{premedCount}</p><p className="text-[9px] text-muted-foreground">Pre-Med</p></div>
-              <div><p className="text-lg font-black text-destructive">{refundCount}</p><p className="text-[9px] text-muted-foreground">Reembolso</p></div>
-            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="tpvGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "11px", color: "hsl(var(--foreground))" }} formatter={(value: number) => [fmtCurrency(value), ""]} />
+                <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" fill="url(#tpvGrad)" strokeWidth={2} dot={false} name="TPV" />
+                <Area type="monotone" dataKey="takeRate" stroke="hsl(var(--warning))" fillOpacity={0} strokeWidth={1.5} dot={false} strokeDasharray="4 2" name="Take Rate" />
+              </AreaChart>
+            </ResponsiveContainer>
           </AdminPanel>
         </div>
-      )}
 
-      {/* Chart + Pie */}
-      {!isEmployee && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="lg:col-span-2">
-            <AdminPanel>
-              <div className="flex items-center justify-between mb-4">
-                <PanelTitle color="emerald">Volume 7 dias</PanelTitle>
-                <div className="flex gap-0.5 bg-muted/40 border border-border rounded-lg p-0.5">
-                  {(["total", "black", "white"] as const).map(f => (
-                    <button key={f} onClick={() => setChartFilter(f)}
-                      className={`px-2.5 py-1 rounded text-[10px] font-bold transition-all ${chartFilter === f ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                      {f === "total" ? "Total" : f === "black" ? "Black" : "White"}
-                    </button>
-                  ))}
+        {/* Approval rate by method */}
+        <AdminPanel>
+          <PanelTitle color="blue" icon={<CreditCard className="h-4 w-4" />}>Aprovação por Método</PanelTitle>
+          <div className="space-y-3 mt-4">
+            {methodApproval.sort((a, b) => b.total - a.total).map(m => (
+              <div key={m.method}>
+                <div className="flex justify-between text-[11px] mb-1">
+                  <span className="font-semibold text-foreground">{m.method}</span>
+                  <span className={cn("font-bold", m.rate >= 80 ? "text-primary" : m.rate >= 50 ? "text-warning" : "text-destructive")}>
+                    {m.rate.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
+                  <div
+                    className={cn("h-full rounded-full transition-all", m.rate >= 80 ? "bg-primary" : m.rate >= 50 ? "bg-warning" : "bg-destructive")}
+                    style={{ width: `${m.rate}%` }}
+                  />
+                </div>
+                <p className="text-[9px] text-muted-foreground mt-0.5">{m.approved}/{m.total} aprovadas</p>
+              </div>
+            ))}
+          </div>
+        </AdminPanel>
+
+        {/* Realtime Feed */}
+        <AdminPanel className="max-h-[400px] overflow-hidden flex flex-col">
+          <PanelTitle color="red" icon={<Radio className="h-4 w-4 text-destructive animate-pulse" />}>Feed em Tempo Real</PanelTitle>
+          <div className="flex-1 overflow-y-auto mt-3 space-y-1.5 pr-1">
+            {realtimeTx.map(t => (
+              <div key={t.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/20 border border-border/50 hover:bg-muted/30 transition-all">
+                <div className={cn("h-2 w-2 rounded-full shrink-0",
+                  t.status === "completed" || t.status === "approved" ? "bg-primary" :
+                  t.status === "pending" ? "bg-warning animate-pulse" :
+                  "bg-destructive"
+                )} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-foreground truncate">{fmtCurrency(Number(t.amount))}</span>
+                    <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-muted-foreground")}>
+                      {statusLabelMap[t.status] || t.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[9px] text-muted-foreground truncate">{t.customer_name || "Anônimo"}</span>
+                    <span className="text-[9px] text-muted-foreground">•</span>
+                    <span className="text-[9px] text-muted-foreground uppercase">{t.payment_method || "—"}</span>
+                    <span className="text-[9px] text-muted-foreground">•</span>
+                    <span className="text-[9px] text-muted-foreground">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={240}>
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={chartMainColor} stopOpacity={0.15} />
-                      <stop offset="100%" stopColor={chartMainColor} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "11px", color: "hsl(var(--foreground))" }} formatter={(value: number) => [fmtCurrency(value), ""]} />
-                  <Area type="monotone" dataKey={chartMainKey} stroke={chartMainColor} fill="url(#chartGrad)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="lucro" stroke="hsl(var(--warning))" fillOpacity={0} strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </AdminPanel>
+            ))}
+            {realtimeTx.length === 0 && (
+              <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">Aguardando transações...</div>
+            )}
           </div>
+        </AdminPanel>
+      </div>
 
-          <div className="space-y-3">
-            <AdminPanel>
-              <PanelTitle color="blue">Status Transações</PanelTitle>
-              {pieData.length > 0 ? (
-                <>
-                  <ResponsiveContainer width="100%" height={140}>
-                    <PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value" paddingAngle={3} strokeWidth={0}>{pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie></PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-1">
-                    {pieData.map((d, i) => (<div key={d.name} className="flex items-center gap-1 text-[9px]"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} /><span className="capitalize text-muted-foreground">{d.name}</span><span className="font-bold text-foreground">{d.value}</span></div>))}
-                  </div>
-                </>
-              ) : (<div className="flex items-center justify-center h-[140px] text-sm text-muted-foreground">Sem dados</div>)}
-            </AdminPanel>
-            <AdminPanel>
-              <PanelTitle color="violet">Pagamentos</PanelTitle>
-              <div className="space-y-2 mt-2">
-                {Object.entries(methodStats).sort((a, b) => b[1].volume - a[1].volume).map(([method, stats]) => {
-                  const pct = totalVolume > 0 ? (stats.volume / totalVolume) * 100 : 0;
-                  const labels: Record<string, string> = { pix: "PIX", credit_card: "Cartão", boleto: "Boleto", other: "Outro" };
-                  return (
-                    <div key={method}>
-                      <div className="flex justify-between text-[10px] mb-0.5">
-                        <span className="text-muted-foreground">{labels[method] || method}</span>
-                        <span className="text-foreground/70 font-bold">{pct.toFixed(1)}% • {stats.count}</span>
-                      </div>
-                      <div className="h-1 rounded-full bg-muted/50 overflow-hidden">
-                        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </AdminPanel>
-          </div>
+      {/* ═══ ROW 4: Hourly + Status Pie ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="lg:col-span-2">
+          <AdminPanel>
+            <PanelTitle color="violet" icon={<Clock className="h-4 w-4" />}>Volume por Hora (Hoje)</PanelTitle>
+            <ResponsiveContainer width="100%" height={200} className="mt-4">
+              <BarChart data={hourlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={9} tickLine={false} axisLine={false} interval={2} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={9} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "11px", color: "hsl(var(--foreground))" }} formatter={(value: number, name: string) => [name === "volume" ? fmtCurrency(value) : value, name === "volume" ? "Volume" : "Qtd"]} />
+                <Bar dataKey="volume" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Volume" />
+              </BarChart>
+            </ResponsiveContainer>
+          </AdminPanel>
         </div>
-      )}
 
-      {/* Pending Withdrawals */}
-      {!isEmployee && pendingWd.length > 0 && (
+        <AdminPanel>
+          <PanelTitle color="amber">Status Transações</PanelTitle>
+          {statusCounts.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie data={statusCounts} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" paddingAngle={3} strokeWidth={0}>
+                    {statusCounts.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-1">
+                {statusCounts.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-1 text-[9px]">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                    <span className="capitalize text-muted-foreground">{statusLabelMap[d.name] || d.name}</span>
+                    <span className="font-bold text-foreground">{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : <div className="flex items-center justify-center h-[160px] text-sm text-muted-foreground">Sem dados</div>}
+        </AdminPanel>
+      </div>
+
+      {/* ═══ ROW 5: Pending Withdrawals ═══ */}
+      {pendingWd.length > 0 && (
         <AdminPanel>
           <div className="flex items-center justify-between mb-3">
             <PanelTitle color="amber" icon={<AlertTriangle className="h-4 w-4" />}>Saques Pendentes ({pendingWd.length})</PanelTitle>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">{["Vendedor", "Tipo", "Valor", "Taxa", "Líquido", "Data", "Ações"].map(h => (
+              <thead><tr className="border-b border-border">{["Vendedor", "Valor", "Taxa", "Líquido", "Data", "Ações"].map(h => (
                 <th key={h} className="text-left p-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
               ))}</tr></thead>
               <tbody>
@@ -275,8 +415,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                   const sp = profiles.find(p => p.user_id === w.user_id);
                   return (
                     <tr key={w.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                      <td className="p-2.5 text-xs font-medium text-foreground">{sp?.full_name || "—"}</td>
-                      <td className="p-2.5"><SellerTypeBadge type={sp?.seller_type || null} /></td>
+                      <td className="p-2.5">
+                        <p className="text-xs font-medium text-foreground">{sp?.full_name || "—"}</p>
+                        <p className="text-[10px] text-muted-foreground">{sp?.email || ""}</p>
+                      </td>
                       <td className="p-2.5 text-xs font-bold text-foreground">{fmtCurrency(Number(w.amount))}</td>
                       <td className="p-2.5 text-xs text-warning">{fmtCurrency(Number(w.fee_amount))}</td>
                       <td className="p-2.5 text-xs text-primary">{fmtCurrency(Number(w.net_amount))}</td>
@@ -296,62 +438,29 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </AdminPanel>
       )}
 
-      {/* Seller Ranking */}
-      {!isEmployee && clientBreakdown.length > 0 && (
+      {/* ═══ ROW 6: Quick Stats ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminPanel>
-          <PanelTitle color="emerald" icon={<TrendingUp className="h-4 w-4" />}>Top Vendedores</PanelTitle>
-          <div className="overflow-x-auto mt-3">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">
-                {["#", "Vendedor", "Tipo", "Vendas", "Volume", "Taxa", "Líquido"].map((h, i) => (
-                  <th key={h} className={`${i >= 3 ? "text-right" : "text-left"} p-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider`}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
-                {clientBreakdown.slice(0, 10).map((c, idx) => (
-                  <tr key={c.userId} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                    <td className="p-2.5 text-xs text-muted-foreground font-bold">{idx + 1}</td>
-                    <td className="p-2.5">
-                      <p className="text-xs font-bold text-foreground">{c.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{c.email}</p>
-                    </td>
-                    <td className="p-2.5"><SellerTypeBadge type={c.type} /></td>
-                    <td className="p-2.5 text-right text-xs font-bold text-foreground">{c.txCount}</td>
-                    <td className="p-2.5 text-xs font-bold text-right text-foreground">{fmtCurrency(c.volume)}</td>
-                    <td className="p-2.5 text-xs font-bold text-right text-warning">{fmtCurrency(c.fees)}</td>
-                    <td className="p-2.5 text-xs font-bold text-right text-primary">{fmtCurrency(c.net)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Take Rate Hoje</span>
+          <p className="text-lg font-black text-warning mt-1">{fmtCurrency(takeRateToday)}</p>
+          <p className="text-[10px] text-muted-foreground">{todayTx.length} vendas</p>
         </AdminPanel>
-      )}
-
-      {/* Quick stats */}
-      {!isEmployee && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <AdminPanel>
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Produtos</span>
-            <p className="text-lg font-black text-foreground mt-1">{products.length}</p>
-            <p className="text-[10px] text-muted-foreground">{products.filter(p => p.status === "active").length} ativos</p>
-          </AdminPanel>
-          <AdminPanel>
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Conversão</span>
-            <p className="text-lg font-black text-primary mt-1">{conversionRate}%</p>
-            <p className="text-[10px] text-muted-foreground">{approved.length}/{allTx.length} tx</p>
-          </AdminPanel>
-          <AdminPanel>
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Ticket Médio</span>
-            <p className="text-lg font-black text-foreground mt-1">{fmtCurrency(approved.length > 0 ? totalVolume / approved.length : 0)}</p>
-          </AdminPanel>
-          <AdminPanel>
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Sellers</span>
-            <p className="text-lg font-black text-foreground mt-1">{profiles.length}</p>
-            <p className="text-[10px] text-muted-foreground">{blackSellers.size}B / {whiteSellers.size}W / {unsetSellers.size}?</p>
-          </AdminPanel>
-        </div>
-      )}
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Produtos Ativos</span>
+          <p className="text-lg font-black text-foreground mt-1">{products.filter(p => p.status === "active").length}</p>
+          <p className="text-[10px] text-muted-foreground">de {products.length} total</p>
+        </AdminPanel>
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Retido Total</span>
+          <p className="text-lg font-black text-foreground mt-1">{fmtCurrency(totalRetained)}</p>
+          <p className="text-[10px] text-muted-foreground">Rolling Reserve</p>
+        </AdminPanel>
+        <AdminPanel>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Chargebacks</span>
+          <p className={cn("text-lg font-black mt-1", chargebackAlert ? "text-destructive" : "text-foreground")}>{chargebackTx.length}</p>
+          <p className="text-[10px] text-muted-foreground">{chargebackRate.toFixed(2)}% rate</p>
+        </AdminPanel>
+      </div>
     </div>
   );
 }
@@ -360,7 +469,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
 export function AdminPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-border bg-card p-4 ${className || ""}`}>
+    <div className={cn("rounded-xl border border-border bg-card p-4", className)}>
       {children}
     </div>
   );
@@ -383,12 +492,12 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight }: {
   gradient?: string; glowColor?: string;
 }) {
   return (
-    <div className={`rounded-xl border bg-card p-4 ${alert ? "border-destructive/30" : "border-border"}`}>
+    <div className={cn("rounded-xl border bg-card p-4", alert ? "border-destructive/30" : "border-border")}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</span>
         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{icon}</div>
       </div>
-      <p className={`text-xl font-extrabold ${highlight ? "text-warning" : "text-foreground"}`}>{value}</p>
+      <p className={cn("text-xl font-extrabold", highlight ? "text-warning" : "text-foreground")}>{value}</p>
       {sub && <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>}
     </div>
   );

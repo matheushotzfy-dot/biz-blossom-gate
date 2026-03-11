@@ -8,7 +8,8 @@ import {
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, ChevronLeft, ChevronRight, Bell,
   Moon, Sun, UserCog, RefreshCw, Rocket,
-  Bug, UserX, Search, Command,
+  Bug, UserX, Search, Command, Banknote, Eye, ShieldCheck,
+  FileWarning, Package2, Radio,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -31,36 +32,33 @@ import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
 import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
 import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 
-const EMPLOYEE_ALLOWED_TABS = new Set(["overview", "sellers", "products", "transactions"] as string[]);
+const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
 const SIDEBAR_SECTIONS = [
   {
-    title: "PRINCIPAL",
+    title: "📊 GOD MODE",
     items: [
-      { id: "overview", label: "Visão Geral", icon: LayoutDashboard, employeeAccess: true },
-      { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
-      { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
+      { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
     ],
   },
   {
-    title: "VENDEDORES",
+    title: "👥 SELLERS (CRM)",
     items: [
-      { id: "sellers", label: "Vendedores", icon: Users, employeeAccess: true },
+      { id: "sellers", label: "Gestão de Sellers", icon: Users, employeeAccess: true },
       { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
       { id: "inactive-sellers", label: "Inativos", icon: UserX, employeeAccess: false },
+      { id: "employees", label: "Funcionários", icon: UserCog, employeeAccess: false },
     ],
   },
   {
-    title: "PRODUTOS",
+    title: "💸 TESOURARIA",
     items: [
-      { id: "products", label: "Produtos", icon: Package, employeeAccess: true },
-      { id: "top-products", label: "Top Produtos", icon: Package, employeeAccess: false },
-      { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
-      { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
+      { id: "withdrawals", label: "Fila de Saques", icon: ArrowDownToLine, employeeAccess: false },
+      { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
     ],
   },
   {
-    title: "DISPUTAS",
+    title: "🛡️ RISCO & COMPLIANCE",
     items: [
       { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
       { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
@@ -68,18 +66,26 @@ const SIDEBAR_SECTIONS = [
     ],
   },
   {
-    title: "SISTEMA",
+    title: "📦 PRODUTOS",
     items: [
-      { id: "acquirers", label: "Adquirentes", icon: CreditCard, employeeAccess: false },
-      { id: "employees", label: "Funcionários", icon: UserCog, employeeAccess: false },
+      { id: "products", label: "Moderação", icon: Package, employeeAccess: true },
+      { id: "top-products", label: "Top Produtos", icon: Package2, employeeAccess: false },
+      { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
+      { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
+    ],
+  },
+  {
+    title: "⚙️ SISTEMA",
+    items: [
+      { id: "acquirers", label: "Adquirentes", icon: Banknote, employeeAccess: false },
+      { id: "settings", label: "Config Global", icon: Settings, employeeAccess: false },
       { id: "error-logs", label: "Log de Erros", icon: Bug, employeeAccess: false },
-      { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
-      { id: "settings", label: "Configurações", icon: Settings, employeeAccess: false },
+      { id: "audit", label: "Audit Trail", icon: Activity, employeeAccess: false },
     ],
   },
 ] as const;
 
-type TabId = "overview" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers";
+type TabId = "god-mode" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -92,11 +98,10 @@ export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [activeTab, setActiveTab] = useState<TabId>("god-mode");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  // FIX #51: Use RPC instead of direct table query for role check
   useEffect(() => {
     if (!user) return;
     Promise.all([
@@ -134,7 +139,7 @@ export default function AdminDashboard() {
         <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
           <Shield className="h-7 w-7 text-primary-foreground" />
         </div>
-        <p className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">Carregando painel...</p>
+        <p className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">Carregando God Mode...</p>
       </div>
     </div>
   );
@@ -148,7 +153,6 @@ export default function AdminDashboard() {
       toast.success("Saque aprovado e enviado!");
       await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {
-      // FIX: Only reject if still pending (race condition protection)
       const { error, count } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending");
       if (error) { toast.error("Erro ao recusar"); return; }
       if (count === 0) { toast.error("Saque já foi processado"); loadData(); return; }
@@ -203,7 +207,7 @@ export default function AdminDashboard() {
             <div className="ml-3 overflow-hidden">
               <h1 className="text-lg font-display font-black tracking-tight text-foreground">HOTZFY</h1>
               <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                {isEmployee ? "Employee" : "Admin"}
+                {isEmployee ? "Employee" : "God Mode"}
               </p>
             </div>
           )}
@@ -295,7 +299,14 @@ export default function AdminDashboard() {
       <main className={cn("flex-1 transition-all duration-300 min-h-screen", sidebarCollapsed ? "ml-[68px]" : "ml-[260px]")}>
         {/* Header */}
         <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card/80 backdrop-blur-sm sticky top-0 z-20">
-          <h2 className="text-sm font-bold text-foreground">{activeTabLabel}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold text-foreground">{activeTabLabel}</h2>
+            {activeTab === "god-mode" && (
+              <span className="text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 uppercase tracking-wider flex items-center gap-1">
+                <Radio className="h-2.5 w-2.5 animate-pulse" /> Live
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             {isEmployee && (
@@ -322,7 +333,7 @@ export default function AdminDashboard() {
         {/* Content */}
         <div className="p-5 lg:p-6">
           <div className="mx-auto max-w-[1800px]">
-            {activeTab === "overview" && (
+            {activeTab === "god-mode" && (
               <AdminOverviewTab
                 transactions={transactions} profiles={profiles} products={products}
                 withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
