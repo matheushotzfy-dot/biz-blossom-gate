@@ -176,7 +176,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="h-full flex bg-background text-foreground overflow-y-auto">
+    <div className="min-h-screen flex bg-background text-foreground overflow-y-auto">
       {/* Left — Form */}
       <div className="flex-1 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
         <div className="w-full max-w-md relative z-10">

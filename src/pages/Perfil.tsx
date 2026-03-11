@@ -66,10 +66,22 @@ export default function Perfil() {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").update(form).eq("user_id", user.id);
+    // Only include fields that are not KYC-locked
+    const updates: Record<string, string> = {};
+    if (!profile?.full_name) updates.full_name = form.full_name;
+    if (!profile?.email) updates.email = form.email;
+    if (!profile?.phone) updates.phone = form.phone;
+    
+    if (Object.keys(updates).length === 0) {
+      toast.info("Todos os campos estão bloqueados por KYC");
+      setSaving(false);
+      return;
+    }
+    
+    const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar");
     else {
-      updateProfile(form);
+      updateProfile(updates);
       toast.success("Perfil atualizado!");
     }
     setSaving(false);

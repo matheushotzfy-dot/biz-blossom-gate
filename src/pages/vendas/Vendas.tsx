@@ -293,18 +293,20 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
   const customerName = tx.customer_name || "Cliente";
   const avatarColor = getAvatarColor(customerName);
 
-  // Parse UTMs from checkout_session_id (stored as JSON) or from tx metadata
+  // Parse UTMs from checkout_session_id — could be a URL or plain UUID
   const utms = useMemo(() => {
     const params: Record<string, string> = {};
+    if (!tx.checkout_session_id) return params;
     try {
-      if (tx.checkout_session_id) {
+      // Only try parsing as URL if it looks like one
+      if (tx.checkout_session_id.startsWith("http")) {
         const url = new URL(tx.checkout_session_id);
         ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "src", "sck"].forEach(k => {
           const v = url.searchParams.get(k);
           if (v) params[k] = v;
         });
       }
-    } catch { /* not a URL, ignore */ }
+    } catch { /* not a valid URL, ignore */ }
     return params;
   }, [tx.checkout_session_id]);
 

@@ -292,11 +292,13 @@ export default function PublicCheckout() {
     else if (product.checkout_boleto_enabled) setMethod("boleto");
   }, [product]);
 
-  // Body overflow
+  // Body overflow — allow scrolling on checkout
   useEffect(() => {
+    const prev = window.document.body.style.overflow;
     window.document.body.style.overflow = "auto";
     window.document.body.style.overscrollBehavior = "auto";
-    return () => { window.document.body.style.overflow = "hidden"; window.document.body.style.overscrollBehavior = "none"; };
+    return () => { window.document.body.style.overflow = prev || ""; window.document.body.style.overscrollBehavior = ""; };
+  }, []);
   }, []);
 
   // Poll transaction status with adaptive interval

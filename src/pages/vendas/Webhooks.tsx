@@ -258,7 +258,9 @@ export default function Webhooks() {
 
   const deleteWebhook = async (id: string) => {
     if (!user) return;
-    await supabase.from("webhook_configs").delete().eq("id", id).eq("user_id", user.id);
+    if (!window.confirm("Tem certeza que deseja excluir este webhook?")) return;
+    const { error } = await supabase.from("webhook_configs").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao excluir webhook"); return; }
     toast.success("Webhook removido");
     invalidateAll(["webhooks"]);
   };
