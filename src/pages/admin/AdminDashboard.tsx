@@ -313,7 +313,7 @@ export default function AdminDashboard() {
         {/* Header */}
         <header className="h-12 border-b border-zinc-800/80 flex items-center justify-between px-5 bg-[#0E0E10]/80 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-[13px] font-bold text-white/90">{activeTabLabel}</h2>
+            <h2 className="text-[13px] font-bold text-zinc-200">{activeTabLabel}</h2>
             {activeTab === "god-mode" && (
               <span className="text-[8px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 uppercase tracking-wider flex items-center gap-1">
                 <Radio className="h-2 w-2 animate-pulse" /> Live
