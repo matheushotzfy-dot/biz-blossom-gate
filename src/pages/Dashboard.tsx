@@ -576,11 +576,11 @@ export default function Dashboard() {
       </section>
 
       {/* ─── KPI TILES ─── */}
-      <section className="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-4 w-4 md:h-5 md:w-5" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
-        <KpiTile icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
-        <KpiTile icon={<RefreshCw className="h-4 w-4 md:h-5 md:w-5" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
-        <KpiTile icon={<ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone="primary" delay="stagger-6" />
+      <section className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
+        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
+        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
+        <KpiTile icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
+        <KpiTile icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone={chargebacks.length > 0 ? "destructive" : "success"} delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
