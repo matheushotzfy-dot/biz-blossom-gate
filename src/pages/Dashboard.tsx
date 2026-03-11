@@ -495,11 +495,11 @@ export default function Dashboard() {
           </div>
 
           {/* Hero metrics */}
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" />
-            <MiniHeroCard icon={<TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" />
-            <MiniHeroCard icon={<Target className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-            <MiniHeroCard icon={<Wallet className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Saldo" value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} />
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
+            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" idx={0} />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" idx={1} />
+            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" idx={2} />
+            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
           </div>
         </div>
       </section>
@@ -543,44 +543,56 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="xl:col-span-4 space-y-3">
-          {/* Health - icons only */}
-          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+        <div className="xl:col-span-4 flex flex-col gap-3">
+          {/* Health */}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-6 w-6 rounded-lg bg-success/10 flex items-center justify-center">
+                <Activity className="h-3.5 w-3.5 text-success" />
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Saúde</span>
+            </div>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
             </div>
           </div>
 
-          {/* Snapshot → Conversions */}
-          <div className="rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3">
+          {/* Conversions */}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-6 w-6 rounded-lg bg-info/10 flex items-center justify-center">
+                <BarChart3 className="h-3.5 w-3.5 text-info" />
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Conversões</span>
+            </div>
             <div className="grid grid-cols-1 gap-2">
-              <SmallMetric icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} />
-              <SmallMetric icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} />
-              <SmallMetric icon={<AlertTriangle className="h-4 w-4" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} />
+              <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
+              <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
+              <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
             </div>
           </div>
         </div>
       </section>
 
       {/* ─── KPI TILES ─── */}
-      <section className="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-4 w-4 md:h-5 md:w-5" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
-        <KpiTile icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
-        <KpiTile icon={<RefreshCw className="h-4 w-4 md:h-5 md:w-5" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
-        <KpiTile icon={<ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone="primary" delay="stagger-6" />
+      <section className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
+        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
+        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={fmt(withdrawalPending)} helper={`${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
+        <KpiTile icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
+        <KpiTile icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} helper="No período" tone={chargebacks.length > 0 ? "destructive" : "success"} delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-start">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-stretch">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
-          <div className="mb-3 md:mb-4 flex items-center gap-2">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
+          <div className="mb-3 md:mb-4 flex items-center gap-2 shrink-0">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5 flex-1 auto-rows-min">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -611,8 +623,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Activity — same max-height as actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 xl:max-h-[600px] flex flex-col">
+        {/* Activity — same height as actions */}
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 flex flex-col">
           <div className="mb-3 md:mb-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
@@ -686,40 +698,63 @@ export default function Dashboard() {
 
 /* ─── Sub-components ─── */
 
-type Tone = "primary" | "info" | "success" | "warning";
+type Tone = "primary" | "info" | "success" | "warning" | "destructive";
 
 const toneMap: Record<Tone, { bg: string; text: string }> = {
   primary: { bg: "bg-primary/12", text: "text-primary" },
   info: { bg: "bg-info/12", text: "text-info" },
   success: { bg: "bg-success/12", text: "text-success" },
   warning: { bg: "bg-warning/12", text: "text-warning" },
+  destructive: { bg: "bg-destructive/12", text: "text-destructive" },
 };
 
-function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
+function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.ReactNode; label: string; value: string; tone: Tone; idx?: number }) {
+  const glowColors: Record<Tone, string> = {
+    primary: "from-primary/8 via-transparent to-transparent",
+    info: "from-info/8 via-transparent to-transparent",
+    success: "from-success/8 via-transparent to-transparent",
+    warning: "from-warning/8 via-transparent to-transparent",
+    destructive: "from-destructive/8 via-transparent to-transparent",
+  };
+
   return (
-    <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-md p-3 md:p-4 transition-all duration-200 hover:border-primary/20 overflow-hidden">
-      <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
-        <div className={`h-6 w-6 md:h-7 md:w-7 rounded-lg flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+    <div className={`group relative rounded-xl border border-border/40 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+      {/* Subtle glow */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${glowColors[tone]} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-3">
+          <div className={`h-7 w-7 md:h-8 md:w-8 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
         </div>
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold truncate">{label}</span>
+        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-tight text-foreground tabular-nums">{value}</p>
       </div>
-      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
 
 function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
+  const borderAccent: Record<Tone, string> = {
+    primary: "hover:border-primary/25",
+    info: "hover:border-info/25",
+    success: "hover:border-success/25",
+    warning: "hover:border-warning/25",
+    destructive: "hover:border-destructive/25",
+  } as any;
+
   return (
-    <div className={`rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-200 hover:border-primary/20 overflow-hidden animate-fade-in ${delay || ""}`}>
-      <div className="mb-2 md:mb-3 flex items-center justify-between">
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold truncate">{label}</span>
-        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
+    <div className={`group relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-4 md:p-5 transition-all duration-300 ${(borderAccent as any)[tone] || "hover:border-primary/25"} hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
+      {/* Top accent line */}
+      <div className={`absolute top-0 left-3 right-3 h-[2px] rounded-full ${toneMap[tone].bg} opacity-60`} />
+      <div className="mb-3 md:mb-4 flex items-center justify-between">
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold truncate">{label}</span>
+        <div className={`h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
           <span className={toneMap[tone].text}>{icon}</span>
         </div>
       </div>
-      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-1 md:mt-1.5 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
+      <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-tight text-foreground tabular-nums">{value}</p>
+      <p className="mt-1.5 md:mt-2 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
     </div>
   );
 }
@@ -741,14 +776,21 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
   );
 }
 
-function SmallMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactNode; label: string; value: string; tone?: "success" | "info" | "destructive" }) {
+  const tStyles: Record<string, { text: string; valueTxt: string }> = {
+    success: { text: "text-success", valueTxt: "text-success" },
+    info: { text: "text-info", valueTxt: "text-foreground" },
+    destructive: { text: "text-destructive", valueTxt: "text-destructive" },
+  };
+  const s = tStyles[tone] || tStyles.info;
+
   return (
-    <div className="rounded-xl border border-border/40 bg-muted/10 p-3 transition-all duration-200 hover:bg-muted/20">
-      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
-        {icon}
-        <span>{label}</span>
+    <div className="group rounded-xl border border-border/40 bg-muted/10 p-3 transition-all duration-200 hover:bg-muted/20 hover:border-border/60">
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className={s.text}>{icon}</span>
+        <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-base md:text-lg font-display font-black tracking-tight text-foreground">{value}</p>
+      <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
     </div>
   );
 }
