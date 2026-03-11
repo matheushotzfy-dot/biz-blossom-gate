@@ -38,14 +38,14 @@ const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "trans
 
 const SIDEBAR_SECTIONS = [
   {
-    title: "📊 GOD MODE",
+    title: "GOD MODE",
     items: [
       { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
       { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
     ],
   },
   {
-    title: "👥 SELLERS (CRM)",
+    title: "SELLERS",
     items: [
       { id: "sellers", label: "Gestão de Sellers", icon: Users, employeeAccess: true },
       { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
@@ -54,14 +54,14 @@ const SIDEBAR_SECTIONS = [
     ],
   },
   {
-    title: "💸 TESOURARIA",
+    title: "TESOURARIA",
     items: [
       { id: "withdrawals", label: "Fila de Saques", icon: ArrowDownToLine, employeeAccess: false },
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
     ],
   },
   {
-    title: "🛡️ RISCO & COMPLIANCE",
+    title: "RISCO",
     items: [
       { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
       { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
@@ -70,7 +70,7 @@ const SIDEBAR_SECTIONS = [
     ],
   },
   {
-    title: "📦 PRODUTOS",
+    title: "PRODUTOS",
     items: [
       { id: "products", label: "Moderação", icon: Package, employeeAccess: true },
       { id: "top-products", label: "Top Produtos", icon: Package2, employeeAccess: false },
@@ -79,7 +79,7 @@ const SIDEBAR_SECTIONS = [
     ],
   },
   {
-    title: "⚙️ SISTEMA",
+    title: "SISTEMA",
     items: [
       { id: "acquirers", label: "Adquirentes", icon: Banknote, employeeAccess: false },
       { id: "settings", label: "Config Global", icon: Settings, employeeAccess: false },
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-[#09090B]">
       <div className="flex flex-col items-center gap-4">
         <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
           <Shield className="h-7 w-7 text-primary-foreground" />
@@ -193,24 +193,30 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
+    <div className="min-h-screen bg-[#09090B] text-foreground flex">
+      {/* ═══ Ambient glow background ═══ */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.04] rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-info/[0.03] rounded-full blur-[120px]" />
+      </div>
+
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
-        "fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 border-r border-border bg-card overflow-hidden",
-        sidebarCollapsed ? "w-[68px]" : "w-[260px]"
+        "fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 border-r border-white/[0.06] bg-[#0A0A0C]/90 backdrop-blur-2xl overflow-hidden",
+        sidebarCollapsed ? "w-[60px]" : "w-[220px]"
       )}>
         {/* Logo */}
         <div className={cn(
-          "h-16 flex items-center border-b border-border shrink-0",
-          sidebarCollapsed ? "px-3 justify-center" : "px-5"
+          "h-14 flex items-center border-b border-white/[0.06] shrink-0",
+          sidebarCollapsed ? "px-3 justify-center" : "px-4"
         )}>
-          <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-            <Rocket className="h-4 w-4 text-primary-foreground" />
+          <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+            <Rocket className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
           {!sidebarCollapsed && (
-            <div className="ml-3 overflow-hidden">
-              <h1 className="text-lg font-display font-black tracking-tight text-foreground">HOTZFY</h1>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="ml-2.5 overflow-hidden">
+              <h1 className="text-sm font-display font-black tracking-tight text-white">HOTZFY</h1>
+              <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-white/30">
                 {isEmployee ? "Employee" : "God Mode"}
               </p>
             </div>
@@ -218,7 +224,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-4">
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
           {SIDEBAR_SECTIONS.map((section) => {
             const visibleItems = isEmployee
               ? section.items.filter(i => i.employeeAccess)
@@ -228,7 +234,7 @@ export default function AdminDashboard() {
             return (
               <div key={section.title}>
                 {!sidebarCollapsed && (
-                  <p className="text-[9px] uppercase tracking-[0.2em] font-bold px-3 mb-1.5 text-muted-foreground/50">{section.title}</p>
+                  <p className="text-[9px] uppercase tracking-[0.25em] font-bold px-3 mb-2 text-white/20">{section.title}</p>
                 )}
                 <div className="space-y-0.5">
                   {visibleItems.map((item) => {
@@ -240,20 +246,24 @@ export default function AdminDashboard() {
                         onClick={() => handleTabChange(item.id as TabId)}
                         title={sidebarCollapsed ? item.label : undefined}
                         className={cn(
-                          "group relative w-full flex items-center gap-2.5 rounded-lg transition-all duration-150",
-                          sidebarCollapsed ? "h-10 justify-center" : "h-9 px-3",
+                          "group relative w-full flex items-center gap-2.5 rounded-lg transition-all duration-200",
+                          sidebarCollapsed ? "h-9 justify-center" : "h-8 px-3",
                           isActive
-                            ? "bg-primary/10 text-primary font-semibold"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                            ? "bg-white/[0.06] text-white"
+                            : "text-white/35 hover:bg-white/[0.03] hover:text-white/70"
                         )}
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        {/* Active indicator - neon left bar */}
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-r-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                        )}
+                        <item.icon className={cn("h-3.5 w-3.5 shrink-0 transition-colors", isActive && "text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]")} />
                         {!sidebarCollapsed && (
-                          <span className="text-[13px] whitespace-nowrap flex-1 text-left truncate">{item.label}</span>
+                          <span className={cn("text-[12px] whitespace-nowrap flex-1 text-left truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
                         )}
                         {hasBadge && (
                           <span className={cn(
-                            "h-4 min-w-[16px] px-1 rounded-full bg-destructive text-[9px] font-bold flex items-center justify-center text-destructive-foreground",
+                            "h-4 min-w-[16px] px-1 rounded-full bg-destructive/80 text-[9px] font-bold flex items-center justify-center text-white",
                             sidebarCollapsed && "absolute -top-0.5 -right-0.5"
                           )}>
                             {pendingWdCount}
@@ -269,67 +279,67 @@ export default function AdminDashboard() {
         </nav>
 
         {/* Bottom */}
-        <div className="border-t border-border p-2 shrink-0 space-y-0.5">
+        <div className="border-t border-white/[0.06] p-2 shrink-0 space-y-0.5">
           <button
             onClick={toggleTheme}
             className={cn(
-              "w-full flex items-center gap-2.5 rounded-lg h-9 transition-all text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+              "w-full flex items-center gap-2.5 rounded-lg h-8 transition-all text-white/30 hover:bg-white/[0.03] hover:text-white/60",
               sidebarCollapsed ? "justify-center" : "px-3"
             )}
           >
-            {theme === "dark" ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4" />}
-            {!sidebarCollapsed && <span className="text-[13px]">{theme === "dark" ? "Claro" : "Escuro"}</span>}
+            {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-warning" /> : <Moon className="h-3.5 w-3.5" />}
+            {!sidebarCollapsed && <span className="text-[12px]">{theme === "dark" ? "Claro" : "Escuro"}</span>}
           </button>
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center justify-center h-8 rounded-lg text-muted-foreground/50 hover:bg-muted/50 hover:text-foreground transition-all"
+            className="w-full flex items-center justify-center h-7 rounded-lg text-white/20 hover:bg-white/[0.03] hover:text-white/50 transition-all"
           >
-            {sidebarCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+            {sidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
           </button>
           <button
             onClick={handleLogout}
             className={cn(
-              "w-full flex items-center gap-2.5 rounded-lg h-9 transition-all text-destructive/60 hover:text-destructive hover:bg-destructive/[0.06]",
+              "w-full flex items-center gap-2.5 rounded-lg h-8 transition-all text-destructive/50 hover:text-destructive hover:bg-destructive/[0.06]",
               sidebarCollapsed ? "justify-center" : "px-3"
             )}
           >
-            <LogOut className="h-4 w-4 shrink-0" />
-            {!sidebarCollapsed && <span className="text-[13px]">Sair</span>}
+            <LogOut className="h-3.5 w-3.5 shrink-0" />
+            {!sidebarCollapsed && <span className="text-[12px]">Sair</span>}
           </button>
         </div>
       </aside>
 
       {/* ═══ MAIN ═══ */}
-      <main className={cn("flex-1 transition-all duration-300 min-h-screen", sidebarCollapsed ? "ml-[68px]" : "ml-[260px]")}>
+      <main className={cn("flex-1 transition-all duration-300 min-h-screen relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
         {/* Header */}
-        <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card/80 backdrop-blur-sm sticky top-0 z-20">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-foreground">{activeTabLabel}</h2>
+        <header className="h-12 border-b border-white/[0.06] flex items-center justify-between px-5 bg-[#0A0A0C]/60 backdrop-blur-xl sticky top-0 z-20">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-[13px] font-bold text-white/90">{activeTabLabel}</h2>
             {activeTab === "god-mode" && (
-              <span className="text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 uppercase tracking-wider flex items-center gap-1">
-                <Radio className="h-2.5 w-2.5 animate-pulse" /> Live
+              <span className="text-[8px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 uppercase tracking-wider flex items-center gap-1">
+                <Radio className="h-2 w-2 animate-pulse" /> Live
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2">
             {isEmployee && (
-              <span className="text-[10px] font-bold text-warning bg-warning/10 border border-warning/20 rounded-full px-2.5 py-1 uppercase tracking-wider">Funcionário</span>
+              <span className="text-[9px] font-bold text-warning bg-warning/10 border border-warning/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Funcionário</span>
             )}
 
-            <span className="hidden lg:block text-[11px] text-muted-foreground">{profiles.length} sellers</span>
+            <span className="hidden lg:block text-[10px] text-white/25 font-medium">{profiles.length} sellers</span>
 
-            <button className="relative h-8 w-8 rounded-lg flex items-center justify-center border border-border bg-card hover:bg-muted/50 transition-all">
-              <Bell className="h-3.5 w-3.5 text-muted-foreground" />
-              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-destructive rounded-full" />}
+            <button className="relative h-7 w-7 rounded-lg flex items-center justify-center border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] transition-all">
+              <Bell className="h-3 w-3 text-white/30" />
+              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-destructive rounded-full shadow-[0_0_6px_hsl(var(--destructive)/0.5)]" />}
             </button>
 
             <button
               onClick={loadData}
               disabled={syncing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border border-border bg-card hover:bg-muted/50 text-muted-foreground"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] text-white/35 hover:text-white/60"
             >
-              <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} /> Sync
+              <RefreshCw className={cn("h-2.5 w-2.5", syncing && "animate-spin")} /> Sync
             </button>
           </div>
         </header>
