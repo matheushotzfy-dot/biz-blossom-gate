@@ -193,81 +193,35 @@ export function useFees() {
   });
 }
 
-/** Prefetch all common data on layout mount */
+/** Prefetch all common data on layout mount — wrapped in useEffect to avoid work on every render */
 export function usePrefetchDashboardData() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  if (user?.id) {
+  useEffect(() => {
+    if (!user?.id) return;
+    const uid = user.id;
     qc.prefetchQuery({
-      queryKey: ["products", user.id],
+      queryKey: ["products", uid],
       queryFn: async () => {
-        const { data } = await supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+        const { data } = await supabase.from("products").select("*").eq("user_id", uid).order("created_at", { ascending: false });
         return (data || []) as Tables<"products">[];
       },
       staleTime: STALE_TIME,
     });
     qc.prefetchQuery({
-      queryKey: ["transactions", user.id],
+      queryKey: ["transactions", uid],
       queryFn: async () => {
-        const { data } = await supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+        const { data } = await supabase.from("transactions").select("*").eq("user_id", uid).order("created_at", { ascending: false });
         return (data || []) as Tables<"transactions">[];
       },
       staleTime: STALE_TIME,
     });
     qc.prefetchQuery({
-      queryKey: ["withdrawals", user.id, 10],
+      queryKey: ["withdrawals", uid, 10],
       queryFn: async () => {
-        const { data } = await supabase.from("withdrawals").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10);
+        const { data } = await supabase.from("withdrawals").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(10);
         return (data || []) as Tables<"withdrawals">[];
-      },
-      staleTime: STALE_TIME,
-    });
-    qc.prefetchQuery({
-      queryKey: ["pix_keys", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("pix_keys").select("*").eq("user_id", user.id).order("created_at");
-        return (data || []) as PixKey[];
-      },
-      staleTime: STALE_TIME,
-    });
-    qc.prefetchQuery({
-      queryKey: ["bank_accounts", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("bank_accounts").select("*").eq("user_id", user.id).order("created_at");
-        return (data || []) as Tables<"bank_accounts">[];
-      },
-      staleTime: STALE_TIME,
-    });
-    qc.prefetchQuery({
-      queryKey: ["expenses", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("expenses").select("*").eq("user_id", user.id).order("expense_date", { ascending: false });
-        return (data || []) as Tables<"expenses">[];
-      },
-      staleTime: STALE_TIME,
-    });
-    qc.prefetchQuery({
-      queryKey: ["webhooks", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("webhook_configs_safe" as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-        return (data || []) as any[];
-      },
-      staleTime: STALE_TIME,
-    });
-    qc.prefetchQuery({
-      queryKey: ["app_integrations", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("app_integrations").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-        return (data || []) as Tables<"app_integrations">[];
-      },
-      staleTime: STALE_TIME,
-    });
-    qc.prefetchQuery({
-      queryKey: ["courses", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("courses").select("*, modules ( id, lessons ( id ) )").eq("user_id", user.id).order("sort_order");
-        return (data || []) as any[];
       },
       staleTime: STALE_TIME,
     });
@@ -279,15 +233,7 @@ export function usePrefetchDashboardData() {
       },
       staleTime: 5 * 60 * 1000,
     });
-    qc.prefetchQuery({
-      queryKey: ["coupons", user.id],
-      queryFn: async () => {
-        const { data } = await supabase.from("coupons").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-        return (data || []) as Tables<"coupons">[];
-      },
-      staleTime: STALE_TIME,
-    });
-  }
+  }, [user?.id, qc]);
 }
 
 export function useInvalidateAll() {
