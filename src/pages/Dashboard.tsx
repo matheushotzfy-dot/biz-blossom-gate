@@ -495,11 +495,11 @@ export default function Dashboard() {
           </div>
 
           {/* Hero metrics */}
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" />
-            <MiniHeroCard icon={<TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" />
-            <MiniHeroCard icon={<Target className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" />
-            <MiniHeroCard icon={<Wallet className="h-3.5 w-3.5 md:h-4 md:w-4" />} label="Saldo" value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} />
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
+            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Realizadas" value={fmt(revenue)} tone="primary" idx={0} />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Qtd. de Vendas" value={String(approved.length)} tone="info" idx={1} />
+            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={`${conversion.toFixed(1)}%`} tone="success" idx={2} />
+            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
           </div>
         </div>
       </section>
