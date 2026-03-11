@@ -328,10 +328,10 @@ export default function AdminConteudo() {
 
                   {/* Stats row */}
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
+                     <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 bg-muted/30 px-2 py-0.5 rounded">
                       <Layers className="h-3 w-3" /> {stats.modules} módulos
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 bg-muted/30 px-2 py-0.5 rounded">
                       <PlayCircle className="h-3 w-3" /> {stats.lessons} aulas
                     </span>
                   </div>
