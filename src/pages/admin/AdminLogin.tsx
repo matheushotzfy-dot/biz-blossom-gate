@@ -101,7 +101,7 @@ export default function AdminLogin() {
             <div>
               <Label className="text-[11px] text-white/40 uppercase tracking-[0.12em] font-semibold">Senha</Label>
               <div className="relative mt-2">
-                <Input value={password} onChange={(e) => setPassword(e.target.value)} type={showPassword ? "text" : "password"} required minLength={6} className="bg-white/[0.03] border-white/[0.06] h-[52px] text-white placeholder:text-white/15 pr-12 rounded-2xl text-[14px] focus:border-emerald-500/40 focus:ring-emerald-500/10 transition-all" placeholder="••••••••" />
+                <Input value={password} onChange={(e) => setPassword(e.target.value)} type={showPassword ? "text" : "password"} required minLength={6} className="bg-white/[0.03] border-white/[0.06] h-[52px] text-white placeholder:text-white/15 pr-12 rounded-2xl text-[14px] focus:border-indigo-500/40 focus:ring-indigo-500/10 transition-all" placeholder="••••••••" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/50 transition-colors">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
