@@ -595,6 +595,31 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ═══ REJECT WITH REASON DIALOG ═══ */}
+      <Dialog open={!!rejectDialog} onOpenChange={() => setRejectDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><XCircle className="h-5 w-5 text-destructive" /> Recusar Saque</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">
+              Saque <strong className="text-foreground font-mono">{rejectDialog?.slice(0, 8)}</strong> será recusado.
+            </p>
+            <div className="space-y-2">
+              <Label className="text-xs">Motivo da Rejeição <span className="text-destructive">*</span></Label>
+              <Textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Ex: Documentação pendente, dados bancários incorretos..." className="min-h-[80px]" />
+              <p className="text-[10px] text-muted-foreground">O motivo será registrado no Audit Trail.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setRejectDialog(null)} className="flex-1 rounded-xl">Cancelar</Button>
+              <Button onClick={handleRejectWithReason} disabled={!rejectReason.trim()} className="flex-1 gap-1.5 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                <XCircle className="h-4 w-4" /> Confirmar Rejeição
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
