@@ -64,11 +64,11 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[hsl(160,12%,3%)] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#050505] relative overflow-hidden">
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(135deg,hsl(160,12%,5%)_0%,hsl(160,10%,3%)_50%,hsl(160,12%,6%)_100%)]" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-emerald-600/[0.03] rounded-full blur-[150px]" />
-        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(160,8%,8%) 0.5px, transparent 0)", backgroundSize: "32px 32px" }} />
+        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(135deg,#050505_0%,#080810_50%,#050508_100%)]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-900/[0.06] rounded-full blur-[150px]" />
+        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.02) 0.5px, transparent 0)", backgroundSize: "32px 32px" }} />
       </div>
 
       <div className="relative w-full max-w-[420px] p-6 animate-slide-up">
