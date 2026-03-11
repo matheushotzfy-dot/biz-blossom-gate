@@ -372,8 +372,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                     const audit = getWithdrawalAudit(w.id);
                     const autoConfig = getAutoConfig(w.user_id);
                     const isPending = w.status === "pending";
-                    return (
-                      <tr key={w.id} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${isPending ? "bg-warning/[0.03]" : ""}`}>
+                        const isOver10k = Number(w.amount) > 10000;
+                        return (
+                      <tr key={w.id} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${isPending ? "bg-warning/[0.03]" : ""} ${isOver10k && isPending ? "ring-1 ring-destructive/30 bg-destructive/[0.04]" : ""}`}>
                         <td className="p-3">
                           {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
                         </td>
@@ -386,7 +387,10 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                         </td>
                         <td className="p-3"><SellerTypeBadge type={getSellerType(w.user_id)} /></td>
                         <td className="p-3"><RiskBadge withdrawal={w} /></td>
-                        <td className="p-3 text-xs font-extrabold text-foreground">R$ {Number(w.amount).toFixed(2)}</td>
+                        <td className={`p-3 text-xs font-extrabold ${isOver10k ? "text-destructive" : "text-foreground"}`}>
+                          R$ {Number(w.amount).toFixed(2)}
+                          {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">⚠️</span>}
+                        </td>
                         <td className="p-3 text-xs text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
                         <td className="p-3 text-xs text-primary font-bold">R$ {Number(w.net_amount).toFixed(2)}</td>
                         <td className="p-3"><StatusBadge status={w.status} /></td>
