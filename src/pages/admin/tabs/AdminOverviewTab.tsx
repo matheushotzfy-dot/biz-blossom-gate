@@ -33,8 +33,8 @@ interface Props {
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-[#141418]/95 backdrop-blur-xl px-3 py-2 shadow-2xl">
-      <p className="text-[10px] text-white/40 font-medium mb-1">{label}</p>
+    <div className="rounded-lg border border-zinc-800/80 bg-[#141415] px-3 py-2 shadow-xl shadow-black/40">
+      <p className="text-[10px] text-zinc-500 font-medium mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-[11px] font-bold" style={{ color: p.color }}>
           {p.name}: {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
