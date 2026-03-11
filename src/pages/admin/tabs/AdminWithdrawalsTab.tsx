@@ -166,8 +166,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     toast.success(`${ok} saques recusados em lote`);
     setSelectedIds(new Set());
     setBatchProcessing(false);
-    if (ok > 0) window.location.reload();
-  };
+    if (ok > 0) onWithdrawalAction("", "rejected"); // trigger parent reload
 
   /* ── Single Reject with Reason ── */
   const handleRejectWithReason = async () => {
