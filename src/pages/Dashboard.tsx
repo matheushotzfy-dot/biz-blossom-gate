@@ -714,6 +714,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
     info: "from-info/8 via-transparent to-transparent",
     success: "from-success/8 via-transparent to-transparent",
     warning: "from-warning/8 via-transparent to-transparent",
+    destructive: "from-destructive/8 via-transparent to-transparent",
   };
 
   return (
