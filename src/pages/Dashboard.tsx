@@ -363,7 +363,7 @@ export default function Dashboard() {
 
               <div className="space-y-4 text-sm text-muted-foreground leading-relaxed mb-6">
                 <p className="font-bold text-foreground text-base">
-                  AGORA É SANGUE NOS OLHOS! 💪
+                  AGORA É SANGUE NOS OLHOS!
                 </p>
                 <p>
                   O futuro de luxo já está lá, falta <strong className="text-foreground">VOCÊ</strong> alcançar — e sabemos que irá conseguir!
