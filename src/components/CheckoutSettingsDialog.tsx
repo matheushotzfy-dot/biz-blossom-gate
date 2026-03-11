@@ -91,7 +91,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
         checkout_credit_card_enabled: creditCardEnabled,
         checkout_address_required: addressRequired,
         checkout_email_confirm: emailConfirm,
-      }).eq("id", product.id);
+      }).eq("id", product.id).eq("user_id", user!.id);
 
       if (error) { toast.error("Erro ao salvar"); return; }
       toast.success("Checkout personalizado!");
