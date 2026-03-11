@@ -251,6 +251,9 @@ function generateEventId(eventName: string): string {
   return `${eventName}_${Date.now()}_${_eventIdCounter}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+// FIX #63: Prevent unbounded cache growth — clear old session event IDs periodically
+setInterval(() => { if (_sessionEventIds.size > 500) _sessionEventIds.clear(); }, 60_000);
+
 // Store eventId per checkout session for InitiateCheckout→Purchase dedup
 const _sessionEventIds = new Map<string, string>();
 
