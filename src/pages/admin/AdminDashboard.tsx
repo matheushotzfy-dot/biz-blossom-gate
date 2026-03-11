@@ -326,7 +326,7 @@ export default function AdminDashboard() {
               <span className="text-[9px] font-bold text-warning bg-warning/10 border border-warning/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Funcionário</span>
             )}
 
-            <span className="hidden lg:block text-[10px] text-white/25 font-medium">{profiles.length} sellers</span>
+            <span className="hidden lg:block text-[10px] text-zinc-600 font-medium">{profiles.length} sellers</span>
 
             <button className="relative h-7 w-7 rounded-lg flex items-center justify-center border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] transition-all">
               <Bell className="h-3 w-3 text-white/30" />
