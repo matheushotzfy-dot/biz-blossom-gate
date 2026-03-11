@@ -315,6 +315,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5 md:space-y-6 relative">
+      {/* Ambient glow */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-32 left-1/3 h-96 w-96 rounded-full bg-primary/8 blur-[150px]" />
+        <div className="absolute top-1/4 -right-20 h-72 w-72 rounded-full bg-primary/5 blur-[120px]" />
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
