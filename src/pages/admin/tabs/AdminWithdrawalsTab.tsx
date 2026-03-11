@@ -362,7 +362,14 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                             <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
                           </div>
                         </td>
-                        <td className="p-3"><SellerTypeBadge type={getSellerType(w.user_id)} /></td>
+                        <td className="p-3">
+                          <SellerTypeBadge type={getSellerType(w.user_id)} />
+                          {(w as any).withdrawal_type === "crypto" && (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                              {(w as any).crypto_currency || "CRYPTO"}
+                            </span>
+                          )}
+                        </td>
                         <td className="p-3"><RiskBadge withdrawal={w} /></td>
                         <td className={`p-3 text-xs font-extrabold ${isOver10k ? "text-destructive" : "text-foreground"}`}>
                           R$ {Number(w.amount).toFixed(2)}
