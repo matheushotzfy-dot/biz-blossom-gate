@@ -117,8 +117,15 @@ export default function Produtos() {
     let imageUrl: string | null = null;
     if (imageFile) imageUrl = await uploadImage(imageFile);
     try {
+      const affiliateData = {
+        affiliate_enabled: affiliateEnabled,
+        affiliate_commission: Number(affiliateCommission) || 30,
+        co_production_enabled: coProductionEnabled,
+        co_producer_email: coProductionEnabled ? (form as any).co_producer_email || null : null,
+        co_production_split: Number(coProductionSplit) || 50,
+      };
       if (editId) {
-        const updateData: Record<string, unknown> = { name: form.name, description: form.description, price, status: form.status, page_url: form.page_url || null };
+        const updateData: Record<string, unknown> = { name: form.name, description: form.description, price, status: form.status, page_url: form.page_url || null, ...affiliateData };
         if (imageUrl) updateData.image_url = imageUrl;
         const { error } = await supabase.from("products").update(updateData).eq("id", editId).eq("user_id", user.id);
         if (error) { toast.error("Erro ao atualizar"); return; }
@@ -126,7 +133,7 @@ export default function Produtos() {
       } else {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl, image_url: imageUrl, status: form.status, page_url: form.page_url || null });
+        const { error } = await supabase.from("products").insert({ name: form.name, description: form.description, price, user_id: user.id, checkout_url: checkoutUrl, image_url: imageUrl, status: form.status, page_url: form.page_url || null, ...affiliateData } as any);
         if (error) { toast.error("Erro ao criar produto"); return; }
         toast.success("Produto criado!");
       }
