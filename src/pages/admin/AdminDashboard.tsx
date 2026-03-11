@@ -89,7 +89,7 @@ const SIDEBAR_SECTIONS = [
   },
 ] as const;
 
-type TabId = "god-mode" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers" | "risk-compliance";
+type TabId = "god-mode" | "analytics" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers" | "risk-compliance";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
