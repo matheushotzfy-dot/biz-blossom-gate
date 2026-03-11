@@ -131,7 +131,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
           { l: "Em Análise", v: disputes.filter(d => d.status === "in_review").length, c: "text-blue-400" },
           { l: "Resolvidas", v: disputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length, c: "text-emerald-400" },
         ].map(s => (
-          <div key={s.l} className="bg-[hsl(228,18%,6%)] rounded-xl border border-white/[0.04] p-4">
+          <div key={s.l} className="rounded-xl bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
             <p className="text-[10px] text-white/30 uppercase tracking-wider">{s.l}</p>
             <p className={`text-2xl font-extrabold mt-1 ${s.c}`}>{s.v}</p>
           </div>
