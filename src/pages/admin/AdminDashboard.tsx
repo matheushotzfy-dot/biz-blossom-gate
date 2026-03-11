@@ -248,8 +248,8 @@ export default function AdminDashboard() {
                           "group relative w-full flex items-center gap-2.5 rounded-lg transition-all duration-200",
                           sidebarCollapsed ? "h-9 justify-center" : "h-8 px-3",
                           isActive
-                            ? "bg-white/[0.06] text-white"
-                            : "text-white/35 hover:bg-white/[0.03] hover:text-white/70"
+                            ? "bg-zinc-800/50 text-white font-medium"
+                            : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
                         )}
                       >
                         {/* Active indicator - neon left bar */}
