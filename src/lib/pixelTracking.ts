@@ -93,7 +93,8 @@ function loadGoogleAnalytics(measurementId: string) {
 }
 
 function loadTikTokPixel(pixelId: string) {
-  const key = `tt_${pixelId}`;
+  const safeId = sanitizePixelId(pixelId);
+  const key = `tt_${safeId}`;
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
