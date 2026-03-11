@@ -136,7 +136,7 @@ export default function Produtos() {
 
   const resetForm = () => {
     setOpen(false); setEditId(null);
-    setForm({ name: "", description: "", price: "", status: "active", page_url: "" });
+    setForm({ name: "", description: "", price: "", status: "pending_review", page_url: "" });
     setImageFile(null); setImagePreview(null);
     setUpsellEnabled(false); setAffiliateEnabled(false); setCoProductionEnabled(false);
     setAffiliateCommission("30"); setCoProductionSplit("50"); setWarrantyDays("7");
