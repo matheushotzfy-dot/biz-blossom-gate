@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -6,15 +6,20 @@ import { useNavigate } from "react-router-dom";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
-  Activity, Settings, ChevronLeft, ChevronRight, Bell,
+  Activity, Settings, Bell,
   Moon, Sun, UserCog, RefreshCw, Rocket,
-  Bug, UserX, Search, Command, Banknote, Eye, ShieldCheck,
-  FileWarning, Package2, Radio, BarChart3,
+  Bug, UserX, Search, Banknote, ShieldCheck,
+  FileWarning, Package2, Radio, BarChart3, Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format, subDays, startOfDay, endOfDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import AdminOverviewTab from "./tabs/AdminOverviewTab";
 import AdminSellersTab from "./tabs/AdminSellersTab";
 import AdminProductsTab from "./tabs/AdminProductsTab";
@@ -36,60 +41,37 @@ import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
-const SIDEBAR_SECTIONS = [
-  {
-    title: "GOD MODE",
-    items: [
-      { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
-      { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
-    ],
-  },
-  {
-    title: "SELLERS",
-    items: [
-      { id: "sellers", label: "Gestão de Sellers", icon: Users, employeeAccess: true },
-      { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
-      { id: "inactive-sellers", label: "Inativos", icon: UserX, employeeAccess: false },
-      { id: "employees", label: "Funcionários", icon: UserCog, employeeAccess: false },
-    ],
-  },
-  {
-    title: "TESOURARIA",
-    items: [
-      { id: "withdrawals", label: "Fila de Saques", icon: ArrowDownToLine, employeeAccess: false },
-      { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
-    ],
-  },
-  {
-    title: "RISCO",
-    items: [
-      { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
-      { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
-      { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
-      { id: "premed", label: "Pre-Med PIX", icon: ShieldAlert, employeeAccess: false },
-    ],
-  },
-  {
-    title: "PRODUTOS",
-    items: [
-      { id: "products", label: "Moderação", icon: Package, employeeAccess: true },
-      { id: "top-products", label: "Top Produtos", icon: Package2, employeeAccess: false },
-      { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
-      { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
-    ],
-  },
-  {
-    title: "SISTEMA",
-    items: [
-      { id: "acquirers", label: "Adquirentes", icon: Banknote, employeeAccess: false },
-      { id: "settings", label: "Config Global", icon: Settings, employeeAccess: false },
-      { id: "error-logs", label: "Log de Erros", icon: Bug, employeeAccess: false },
-      { id: "audit", label: "Audit Trail", icon: Activity, employeeAccess: false },
-    ],
-  },
+const NAV_ITEMS = [
+  { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, section: "core", employeeAccess: true },
+  { id: "analytics", label: "Analytics", icon: BarChart3, section: "core", employeeAccess: false },
+  { id: "sellers", label: "Sellers", icon: Users, section: "core", employeeAccess: true },
+  { id: "top-sellers", label: "Top Sellers", icon: Zap, section: "core", employeeAccess: false },
+  { id: "inactive-sellers", label: "Inativos", icon: UserX, section: "core", employeeAccess: false },
+  { id: "employees", label: "Staff", icon: UserCog, section: "core", employeeAccess: false },
+  { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, section: "treasury", employeeAccess: false },
+  { id: "transactions", label: "Transações", icon: CreditCard, section: "treasury", employeeAccess: true },
+  { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, section: "risk", employeeAccess: false },
+  { id: "medpix", label: "MedPix", icon: AlertTriangle, section: "risk", employeeAccess: false },
+  { id: "refunds", label: "Reembolsos", icon: RotateCcw, section: "risk", employeeAccess: false },
+  { id: "premed", label: "Pre-Med", icon: ShieldAlert, section: "risk", employeeAccess: false },
+  { id: "products", label: "Produtos", icon: Package, section: "content", employeeAccess: true },
+  { id: "top-products", label: "Top Prod.", icon: Package2, section: "content", employeeAccess: false },
+  { id: "courses", label: "Cursos", icon: GraduationCap, section: "content", employeeAccess: false },
+  { id: "coupons", label: "Cupons", icon: Tag, section: "content", employeeAccess: false },
+  { id: "acquirers", label: "Adquirentes", icon: Banknote, section: "system", employeeAccess: false },
+  { id: "settings", label: "Config", icon: Settings, section: "system", employeeAccess: false },
+  { id: "error-logs", label: "Erros", icon: Bug, section: "system", employeeAccess: false },
+  { id: "audit", label: "Audit", icon: Activity, section: "system", employeeAccess: false },
 ] as const;
 
-type TabId = "god-mode" | "analytics" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers" | "risk-compliance";
+type TabId = typeof NAV_ITEMS[number]["id"];
+
+const DATE_PRESETS = [
+  { label: "Hoje", days: 0 },
+  { label: "7d", days: 7 },
+  { label: "30d", days: 30 },
+  { label: "90d", days: 90 },
+];
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -103,8 +85,14 @@ export default function AdminDashboard() {
   const [isEmployee, setIsEmployee] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("god-mode");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
+  const [datePreset, setDatePreset] = useState("30d");
+  const [calOpen, setCalOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -137,14 +125,21 @@ export default function AdminDashboard() {
     setSyncing(false);
   };
 
+  const handleDatePreset = (days: number) => {
+    const to = new Date();
+    const from = days === 0 ? startOfDay(to) : subDays(to, days);
+    setDateRange({ from, to });
+    setDatePreset(days === 0 ? "Hoje" : `${days}d`);
+  };
+
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
-          <Shield className="h-7 w-7 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#050505", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
+        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30 animate-pulse">
+          <Shield className="h-7 w-7 text-white" />
         </div>
-        <p className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">Carregando God Mode...</p>
-      </div>
+        <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-white/30">Initializing God Mode...</p>
+      </motion.div>
     </div>
   );
 
@@ -182,7 +177,7 @@ export default function AdminDashboard() {
 
   const fmtCurrency = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
   const pendingWdCount = withdrawals.filter(w => w.status === "pending").length;
-  const activeTabLabel = SIDEBAR_SECTIONS.flatMap(s => [...s.items]).find((i: any) => i.id === activeTab)?.label || "";
+  const activeTabLabel = NAV_ITEMS.find(i => i.id === activeTab)?.label || "";
 
   const handleTabChange = (tabId: TabId) => {
     if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId)) {
@@ -190,232 +185,245 @@ export default function AdminDashboard() {
       return;
     }
     setActiveTab(tabId);
+    setMoreOpen(false);
   };
 
+  // Visible nav items (first 8 for top bar, rest in "more")
+  const visibleItems = isEmployee ? NAV_ITEMS.filter(i => i.employeeAccess) : [...NAV_ITEMS];
+  const primaryNav = visibleItems.slice(0, 10);
+  const overflowNav = visibleItems.slice(10);
+
   return (
-    <div className="h-screen bg-[#0A0A0A] text-foreground flex overflow-hidden">
-      {/* ═══ Subtle ambient glow ═══ */}
+    <div
+      className="h-screen text-white flex flex-col overflow-hidden"
+      style={{
+        background: "#050505",
+        fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif",
+      }}
+    >
+      {/* ═══ Ambient Glow — indigo/violet ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[150px]" />
+        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-indigo-900/[0.06] rounded-full blur-[180px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-violet-900/[0.04] rounded-full blur-[150px]" />
       </div>
 
-      {/* ═══ SIDEBAR ═══ */}
-      <aside className={cn(
-        "fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 border-r border-zinc-800/80 bg-[#0E0E10] overflow-hidden",
-        sidebarCollapsed ? "w-[60px]" : "w-[220px]"
-      )}>
+      {/* ═══ TOP NAVIGATION BAR (Vercel-style) ═══ */}
+      <header className="relative z-50 h-14 border-b border-white/[0.06] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-2xl bg-[#050505]/90">
         {/* Logo */}
-        <div className={cn(
-          "h-14 flex items-center border-b border-zinc-800/80 shrink-0",
-          sidebarCollapsed ? "px-3 justify-center" : "px-4"
-        )}>
-          <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-            <Rocket className="h-3.5 w-3.5 text-primary-foreground" />
+        <div className="flex items-center gap-2.5 mr-4">
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <Rocket className="h-3.5 w-3.5 text-white" />
           </div>
-          {!sidebarCollapsed && (
-            <div className="ml-2.5 overflow-hidden">
-              <h1 className="text-sm font-display font-black tracking-tight text-white">HOTZFY</h1>
-              <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-                {isEmployee ? "Employee" : "God Mode"}
-              </p>
-            </div>
-          )}
+          <div className="hidden sm:block">
+            <h1 className="text-sm font-extrabold tracking-tight">HOTZFY</h1>
+            <p className="text-[7px] font-semibold uppercase tracking-[0.3em] text-white/20">
+              {isEmployee ? "Employee" : "God Mode"}
+            </p>
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
-          {SIDEBAR_SECTIONS.map((section) => {
-            const visibleItems = isEmployee
-              ? section.items.filter(i => i.employeeAccess)
-              : section.items;
-            if (visibleItems.length === 0) return null;
+        {/* Separator */}
+        <div className="h-5 w-px bg-white/[0.08] mr-1" />
 
+        {/* Primary Navigation */}
+        <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-none">
+          {primaryNav.map((item) => {
+            const isActive = activeTab === item.id;
+            const hasBadge = item.id === "withdrawals" && pendingWdCount > 0;
             return (
-              <div key={section.title}>
-                {!sidebarCollapsed && (
-                  <p className="text-[9px] uppercase tracking-[0.25em] font-bold px-3 mb-2 text-white/20">{section.title}</p>
+              <button
+                key={item.id}
+                onClick={() => handleTabChange(item.id as TabId)}
+                className={cn(
+                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all duration-200",
+                  isActive
+                    ? "bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]"
+                    : "text-white/30 hover:text-white/60 hover:bg-white/[0.03]"
                 )}
-                <div className="space-y-0.5">
-                  {visibleItems.map((item) => {
-                    const isActive = activeTab === item.id;
-                    const hasBadge = item.id === "withdrawals" && pendingWdCount > 0;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleTabChange(item.id as TabId)}
-                        title={sidebarCollapsed ? item.label : undefined}
-                        className={cn(
-                          "group relative w-full flex items-center gap-2.5 rounded-lg transition-all duration-200",
-                          sidebarCollapsed ? "h-9 justify-center" : "h-8 px-3",
-                          isActive
-                            ? "bg-zinc-800/50 text-white font-medium"
-                            : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
-                        )}
-                      >
-                        {/* Active indicator - neon left bar */}
-                        {isActive && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-r-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
-                        )}
-                        <item.icon className={cn("h-3.5 w-3.5 shrink-0 transition-colors", isActive && "text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]")} />
-                        {!sidebarCollapsed && (
-                          <span className={cn("text-[12px] whitespace-nowrap flex-1 text-left truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
-                        )}
-                        {hasBadge && (
-                          <span className={cn(
-                            "h-4 min-w-[16px] px-1 rounded-full bg-destructive/80 text-[9px] font-bold flex items-center justify-center text-white",
-                            sidebarCollapsed && "absolute -top-0.5 -right-0.5"
-                          )}>
-                            {pendingWdCount}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              >
+                <item.icon className={cn("h-3 w-3", isActive && "text-indigo-400")} />
+                <span className="hidden lg:inline">{item.label}</span>
+                {hasBadge && (
+                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-red-500 text-[8px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(239,68,68,0.5)]">
+                    {pendingWdCount}
+                  </span>
+                )}
+                {isActive && (
+                  <motion.div
+                    layoutId="admin-nav-indicator"
+                    className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.5)]"
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  />
+                )}
+              </button>
             );
           })}
+
+          {/* More dropdown */}
+          {overflowNav.length > 0 && (
+            <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all">
+                  <span>More</span>
+                  <span className="text-[9px] bg-white/[0.06] rounded px-1 py-0.5">{overflowNav.length}</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1.5 bg-[#0A0A10] border-white/[0.08] shadow-2xl shadow-black/60" align="start">
+                {overflowNav.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleTabChange(item.id as TabId)}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-medium transition-all",
+                      activeTab === item.id
+                        ? "bg-indigo-500/10 text-indigo-400"
+                        : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
+                    )}
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                    {item.label}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          )}
         </nav>
 
-        {/* Bottom */}
-        <div className="border-t border-zinc-800/80 p-2 shrink-0 space-y-0.5">
-          <button
-            onClick={toggleTheme}
-            className={cn(
-              "w-full flex items-center gap-2.5 rounded-lg h-8 transition-all text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300",
-              sidebarCollapsed ? "justify-center" : "px-3"
-            )}
-          >
-            {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-warning" /> : <Moon className="h-3.5 w-3.5" />}
-            {!sidebarCollapsed && <span className="text-[12px]">{theme === "dark" ? "Claro" : "Escuro"}</span>}
+        {/* Right Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Date Picker */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+            {DATE_PRESETS.map(p => (
+              <button
+                key={p.label}
+                onClick={() => handleDatePreset(p.days)}
+                className={cn(
+                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
+                    ? "bg-indigo-500/15 text-indigo-400 shadow-sm"
+                    : "text-white/25 hover:text-white/50"
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+            <Popover open={calOpen} onOpenChange={setCalOpen}>
+              <PopoverTrigger asChild>
+                <button className="px-2 py-1 rounded-md text-white/25 hover:text-white/50 transition-all">
+                  <Calendar className="h-3 w-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-[#0A0A10] border-white/[0.08]" align="end">
+                <CalendarComponent
+                  mode="range"
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={(range: any) => {
+                    if (range?.from && range?.to) {
+                      setDateRange({ from: range.from, to: range.to });
+                      setDatePreset("custom");
+                      setCalOpen(false);
+                    }
+                  }}
+                  className="p-3 pointer-events-auto"
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {isEmployee && (
+            <span className="text-[8px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Staff</span>
+          )}
+
+          <button className="relative h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all">
+            <Bell className="h-3 w-3 text-white/30" />
+            {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-500 rounded-full shadow-[0_0_6px_rgba(239,68,68,0.5)]" />}
           </button>
+
           <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center justify-center h-7 rounded-lg text-zinc-600 hover:bg-zinc-800/30 hover:text-zinc-400 transition-all"
+            onClick={loadData}
+            disabled={syncing}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-medium border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-all"
           >
-            {sidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+            <RefreshCw className={cn("h-2.5 w-2.5", syncing && "animate-spin")} /> Sync
           </button>
-          <button
-            onClick={handleLogout}
-            className={cn(
-              "w-full flex items-center gap-2.5 rounded-lg h-8 transition-all text-destructive/50 hover:text-destructive hover:bg-destructive/[0.06]",
-              sidebarCollapsed ? "justify-center" : "px-3"
-            )}
-          >
-            <LogOut className="h-3.5 w-3.5 shrink-0" />
-            {!sidebarCollapsed && <span className="text-[12px]">Sair</span>}
+
+          <button onClick={toggleTheme} className="h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all">
+            {theme === "dark" ? <Sun className="h-3 w-3 text-amber-400" /> : <Moon className="h-3 w-3 text-white/30" />}
+          </button>
+
+          <button onClick={handleLogout} className="h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all">
+            <LogOut className="h-3 w-3" />
           </button>
         </div>
-      </aside>
+      </header>
 
-      {/* ═══ MAIN ═══ */}
-      <main className={cn("flex-1 transition-all duration-300 h-screen overflow-y-auto relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
-        {/* Header */}
-        <header className="h-12 border-b border-zinc-800/80 flex items-center justify-between px-5 bg-[#0E0E10]/80 backdrop-blur-xl sticky top-0 z-20">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-[13px] font-bold text-zinc-200">{activeTabLabel}</h2>
-            {activeTab === "god-mode" && (
-              <span className="text-[8px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 uppercase tracking-wider flex items-center gap-1">
-                <Radio className="h-2 w-2 animate-pulse" /> Live
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {isEmployee && (
-              <span className="text-[9px] font-bold text-warning bg-warning/10 border border-warning/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Funcionário</span>
-            )}
-
-            <span className="hidden lg:block text-[10px] text-zinc-600 font-medium">{profiles.length} sellers</span>
-
-            <button className="relative h-7 w-7 rounded-lg flex items-center justify-center border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-800/50 transition-all">
-              <Bell className="h-3 w-3 text-zinc-500" />
-              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-destructive rounded-full shadow-[0_0_6px_hsl(var(--destructive)/0.5)]" />}
-            </button>
-
-            <button
-              onClick={loadData}
-              disabled={syncing}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-800/50 text-zinc-500 hover:text-zinc-300"
-            >
-              <RefreshCw className={cn("h-2.5 w-2.5", syncing && "animate-spin")} /> Sync
-            </button>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className="p-5 lg:p-6">
-          <div className="mx-auto max-w-[1800px]">
-            {activeTab === "god-mode" && (
-              <AdminOverviewTab
-                transactions={transactions} profiles={profiles} products={products}
-                withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
-                onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
-                isEmployee={isEmployee}
-              />
-            )}
-            {activeTab === "analytics" && isAdmin && (
-              <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "transactions" && (
-              <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
-            )}
-            {activeTab === "sellers" && (
-              <AdminSellersTab
-                profiles={profiles} transactions={transactions} withdrawals={withdrawals}
-                onReload={loadData} fmtCurrency={fmtCurrency}
-              />
-            )}
-            {activeTab === "products" && (
-              <AdminProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} onReload={loadData} />
-            )}
-            {activeTab === "top-sellers" && isAdmin && (
-              <AdminTopSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "top-products" && isAdmin && (
-              <AdminTopProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "withdrawals" && isAdmin && (
-              <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "acquirers" && isAdmin && (
-              <AdminAcquirersTab />
-            )}
-            {activeTab === "risk-compliance" && isAdmin && (
-              <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "medpix" && isAdmin && (
-              <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "refunds" && isAdmin && (
-              <AdminDisputesTab type="refund" title="Reembolsos" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "premed" && isAdmin && (
-              <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "employees" && isAdmin && (
-              <AdminEmployeesTab profiles={profiles} onReload={loadData} />
-            )}
-            {activeTab === "coupons" && isAdmin && (
-              <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "courses" && isAdmin && (
-              <AdminCoursesTab profiles={profiles} products={products} />
-            )}
-            {activeTab === "audit" && isAdmin && (
-              <AdminAuditTab profiles={profiles} />
-            )}
-            {activeTab === "error-logs" && isAdmin && (
-              <AdminErrorLogsTab profiles={profiles} />
-            )}
-            {activeTab === "inactive-sellers" && isAdmin && (
-              <AdminInactiveSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
-            )}
-            {activeTab === "settings" && isAdmin && (
-              <AdminSettingsTab />
-            )}
-          </div>
-        </div>
+      {/* ═══ MAIN CONTENT ═══ */}
+      <main className="flex-1 overflow-y-auto relative z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="p-4 lg:p-6"
+          >
+            <div className="mx-auto max-w-[1800px]">
+              {activeTab === "god-mode" && (
+                <AdminOverviewTab
+                  transactions={transactions} profiles={profiles} products={products}
+                  withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
+                  onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
+                  isEmployee={isEmployee} dateRange={dateRange}
+                />
+              )}
+              {activeTab === "analytics" && isAdmin && (
+                <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "transactions" && (
+                <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
+              )}
+              {activeTab === "sellers" && (
+                <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "products" && (
+                <AdminProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} onReload={loadData} />
+              )}
+              {activeTab === "top-sellers" && isAdmin && (
+                <AdminTopSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "top-products" && isAdmin && (
+                <AdminTopProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "withdrawals" && isAdmin && (
+                <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "acquirers" && isAdmin && <AdminAcquirersTab />}
+              {activeTab === "risk-compliance" && isAdmin && (
+                <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "medpix" && isAdmin && (
+                <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "refunds" && isAdmin && (
+                <AdminDisputesTab type="refund" title="Reembolsos" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "premed" && isAdmin && (
+                <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
+              {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+              {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
+              {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
+              {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
+              {activeTab === "inactive-sellers" && isAdmin && (
+                <AdminInactiveSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+              )}
+              {activeTab === "settings" && isAdmin && <AdminSettingsTab />}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );
