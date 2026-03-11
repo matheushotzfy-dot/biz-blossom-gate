@@ -595,7 +595,7 @@ export default function CheckoutBuilder() {
               <div className="px-4 pt-3">
                 <div className="flex items-center gap-2 text-[11px] font-bold text-red-400 bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/15">
                   <Clock className="h-3.5 w-3.5" />
-                  ⚠️ Apenas {scarcityUnits} vagas restantes
+                  Apenas {scarcityUnits} vagas restantes
                 </div>
               </div>
             )}
