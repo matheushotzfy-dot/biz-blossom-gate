@@ -83,7 +83,7 @@ function loadGoogleAnalytics(measurementId: string) {
   w.dataLayer = w.dataLayer || [];
   w.gtag = function (...args: any[]) { w.dataLayer.push(args); };
   w.gtag('js', new Date());
-  w.gtag('config', measurementId);
+  w.gtag('config', safeId);
 
   const script = document.createElement('script');
   script.async = true;
