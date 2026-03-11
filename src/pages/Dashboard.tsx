@@ -708,7 +708,7 @@ function FintechKpiCard({ icon, label, value, trend, trendUp, tone }: {
 function OperationalRow({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   const colors = toneColors[tone];
   return (
-    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-muted/10 hover:bg-muted/20 transition-colors">
+    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors">
       <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${colors.iconBg}`}>
         <span className={colors.iconText}>{icon}</span>
       </div>
