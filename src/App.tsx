@@ -12,6 +12,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
+import Premiacoes from "./pages/Premiacoes";
 import Extrato from "./pages/financeiro/Extrato";
 
 import DadosBancarios from "./pages/financeiro/DadosBancarios";
