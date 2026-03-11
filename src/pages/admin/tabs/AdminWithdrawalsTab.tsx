@@ -177,8 +177,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     toast.success("Saque recusado com motivo registrado");
     setRejectDialog(null);
     setRejectReason("");
-    window.location.reload();
-  };
+    onWithdrawalAction("", "rejected"); // trigger parent reload
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {

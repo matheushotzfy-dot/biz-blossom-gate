@@ -309,7 +309,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* ═══ MAIN ═══ */}
-      <main className={cn("flex-1 transition-all duration-300 min-h-screen relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
+      <main className={cn("flex-1 transition-all duration-300 h-screen overflow-y-auto relative z-10", sidebarCollapsed ? "ml-[60px]" : "ml-[220px]")}>
         {/* Header */}
         <header className="h-12 border-b border-zinc-800/80 flex items-center justify-between px-5 bg-[#0E0E10]/80 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
