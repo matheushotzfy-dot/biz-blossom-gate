@@ -584,15 +584,15 @@ export default function Dashboard() {
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-start">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-stretch">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
-          <div className="mb-3 md:mb-4 flex items-center gap-2">
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
+          <div className="mb-3 md:mb-4 flex items-center gap-2 shrink-0">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5 flex-1 auto-rows-min">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -623,8 +623,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Activity — same max-height as actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 xl:max-h-[600px] flex flex-col">
+        {/* Activity — same height as actions */}
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 flex flex-col">
           <div className="mb-3 md:mb-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
