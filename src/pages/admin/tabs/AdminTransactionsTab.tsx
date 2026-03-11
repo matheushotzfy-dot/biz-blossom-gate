@@ -101,13 +101,13 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input placeholder="Buscar por cliente, vendedor, ID..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.12]" />
+            className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px] h-10 bg-white/[0.04] border-white/[0.06] text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent className="bg-[hsl(228,18%,8%)] border-white/[0.08]">
+          <SelectTrigger className="w-[140px] h-10 text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
             <SelectItem value="all">Todos status</SelectItem>
             <SelectItem value="completed">Aprovada</SelectItem>
             <SelectItem value="pending">Pendente</SelectItem>
@@ -117,15 +117,15 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
           </SelectContent>
         </Select>
         <Select value={methodFilter} onValueChange={setMethodFilter}>
-          <SelectTrigger className="w-[140px] h-10 bg-white/[0.04] border-white/[0.06] text-xs rounded-xl"><SelectValue placeholder="Método" /></SelectTrigger>
-          <SelectContent className="bg-[hsl(228,18%,8%)] border-white/[0.08]">
+          <SelectTrigger className="w-[140px] h-10 text-xs rounded-xl"><SelectValue placeholder="Método" /></SelectTrigger>
+          <SelectContent>
             <SelectItem value="all">Todos métodos</SelectItem>
             <SelectItem value="pix">PIX</SelectItem>
             <SelectItem value="credit_card">Cartão</SelectItem>
             <SelectItem value="boleto">Boleto</SelectItem>
           </SelectContent>
         </Select>
-        <Button size="sm" variant="ghost" className="h-10 text-[11px] text-white/40 hover:text-white gap-1.5"
+        <Button size="sm" variant="ghost" className="h-10 text-[11px] text-muted-foreground hover:text-foreground gap-1.5"
           onClick={() => { setSortAsc(!sortAsc); }}>
           <ArrowUpDown className="h-3.5 w-3.5" /> {sortField === "date" ? "Data" : "Valor"}
         </Button>
@@ -136,32 +136,32 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
         <PanelTitle color="blue" icon={<CreditCard className="h-4 w-4" />}>Transações ({filtered.length})</PanelTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/[0.04]">
+            <thead><tr className="border-b border-border">
               {["ID", "Cliente", "Vendedor", "Produto", "Método", "Valor Bruto", "Taxa", "Líquido", "Status", "Data"].map(h => (
-                <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>
+                <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
               ))}
             </tr></thead>
             <tbody>
               {visibleItems.map(t => (
-                <tr key={t.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="p-3 font-mono text-[10px] text-white/25">{t.id.slice(0, 8)}</td>
-                  <td className="p-3"><div><p className="text-xs font-medium">{t.customer_name || "—"}</p><p className="text-[10px] text-white/25">{t.customer_email}</p></div></td>
-                  <td className="p-3 text-xs text-white/50">{getSellerName(t.user_id)}</td>
-                  <td className="p-3 text-xs text-white/40 max-w-[120px] truncate">{getProductName(t.product_id)}</td>
-                  <td className="p-3"><div className="flex items-center gap-1.5">{methodIcon(t.payment_method)}<span className="text-[10px] text-white/40 uppercase">{t.payment_method || "—"}</span></div></td>
-                  <td className="p-3 text-xs font-bold">{fmtCurrency(Number(t.amount))}</td>
-                  <td className="p-3 text-xs text-amber-400">{fmtCurrency(Number(t.fee_amount))}</td>
-                  <td className="p-3 text-xs text-emerald-400 font-bold">{fmtCurrency(Number(t.net_amount))}</td>
+                <tr key={t.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                  <td className="p-3 font-mono text-[10px] text-muted-foreground">{t.id.slice(0, 8)}</td>
+                  <td className="p-3"><div><p className="text-xs font-medium text-foreground">{t.customer_name || "—"}</p><p className="text-[10px] text-muted-foreground">{t.customer_email}</p></div></td>
+                  <td className="p-3 text-xs text-muted-foreground">{getSellerName(t.user_id)}</td>
+                  <td className="p-3 text-xs text-muted-foreground max-w-[120px] truncate">{getProductName(t.product_id)}</td>
+                  <td className="p-3"><div className="flex items-center gap-1.5">{methodIcon(t.payment_method)}<span className="text-[10px] text-muted-foreground uppercase">{t.payment_method || "—"}</span></div></td>
+                  <td className="p-3 text-xs font-bold text-foreground">{fmtCurrency(Number(t.amount))}</td>
+                  <td className="p-3 text-xs text-warning">{fmtCurrency(Number(t.fee_amount))}</td>
+                  <td className="p-3 text-xs text-primary font-bold">{fmtCurrency(Number(t.net_amount))}</td>
                   <td className="p-3"><StatusBadge status={t.status} /></td>
-                  <td className="p-3 text-[10px] text-white/25">{fmtDateCached(t.created_at)}</td>
+                  <td className="p-3 text-[10px] text-muted-foreground">{fmtDateCached(t.created_at)}</td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-white/20 text-xs">Nenhuma transação</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-muted-foreground text-xs">Nenhuma transação</td></tr>}
             </tbody>
           </table>
           {visibleCount < filtered.length && (
             <div className="p-4 text-center">
-              <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-white/30 hover:text-white/60">
+              <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground">
                 <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
               </Button>
             </div>
