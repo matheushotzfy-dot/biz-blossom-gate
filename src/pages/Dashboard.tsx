@@ -636,7 +636,7 @@ export default function Dashboard() {
         </div>
 
       {/* ─── QUICK ACTIONS ─── */}
-      <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
+      <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
         <div className="mb-3 md:mb-4 flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Zap className="h-4 w-4 text-primary" />
