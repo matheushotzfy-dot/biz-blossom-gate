@@ -733,16 +733,26 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
 }
 
 function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
+  const borderAccent: Record<Tone, string> = {
+    primary: "hover:border-primary/25",
+    info: "hover:border-info/25",
+    success: "hover:border-success/25",
+    warning: "hover:border-warning/25",
+    destructive: "hover:border-destructive/25",
+  } as any;
+
   return (
-    <div className={`rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-200 hover:border-primary/20 overflow-hidden animate-fade-in ${delay || ""}`}>
-      <div className="mb-2 md:mb-3 flex items-center justify-between">
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-semibold truncate">{label}</span>
-        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg}`}>
+    <div className={`group relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-4 md:p-5 transition-all duration-300 ${(borderAccent as any)[tone] || "hover:border-primary/25"} hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
+      {/* Top accent line */}
+      <div className={`absolute top-0 left-3 right-3 h-[2px] rounded-full ${toneMap[tone].bg} opacity-60`} />
+      <div className="mb-3 md:mb-4 flex items-center justify-between">
+        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold truncate">{label}</span>
+        <div className={`h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
           <span className={toneMap[tone].text}>{icon}</span>
         </div>
       </div>
-      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
-      <p className="mt-1 md:mt-1.5 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
+      <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-tight text-foreground tabular-nums">{value}</p>
+      <p className="mt-1.5 md:mt-2 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
     </div>
   );
 }
