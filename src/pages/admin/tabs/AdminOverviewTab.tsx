@@ -358,8 +358,8 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 {statusCounts.map((d, i) => (
                   <div key={d.name} className="flex items-center gap-1 text-[9px]">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="capitalize text-white/30">{statusLabelMap[d.name] || d.name}</span>
-                    <span className="font-bold text-white/70">{d.value}</span>
+                    <span className="capitalize text-zinc-500">{statusLabelMap[d.name] || d.name}</span>
+                    <span className="font-bold text-zinc-300">{d.value}</span>
                   </div>
                 ))}
               </div>
