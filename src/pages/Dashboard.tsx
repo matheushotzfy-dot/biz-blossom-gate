@@ -634,6 +634,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+      </div>
 
       {/* ─── QUICK ACTIONS ─── */}
       <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
