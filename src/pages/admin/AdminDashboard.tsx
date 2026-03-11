@@ -117,9 +117,9 @@ export default function AdminDashboard() {
     setSyncing(true);
     const [txRes, pRes, prodRes, wRes] = await Promise.all([
       supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("products").select("*"),
-      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("products").select("*").limit(500),
+      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(300),
     ]);
     if (txRes.data) setTransactions(txRes.data);
     if (pRes.data) setProfiles(pRes.data);
