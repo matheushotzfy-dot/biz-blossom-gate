@@ -76,6 +76,58 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // === ANTI-FRAUD: Blacklist Check ===
+    const requestIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0';
+    const { data: blCheck } = await supabase.rpc('check_blacklist', {
+      _email: safeEmail,
+      _document: cleanDoc,
+      _ip: requestIp,
+    });
+    if (blCheck && blCheck.length > 0 && blCheck[0].blocked) {
+      // Log to fraud_logs
+      await supabase.from('fraud_logs').insert({
+        block_type: 'blacklist',
+        block_reason: blCheck[0].block_reason,
+        matched_type: blCheck[0].matched_type,
+        matched_value: blCheck[0].matched_value,
+        customer_email: safeEmail,
+        customer_document: cleanDoc,
+        customer_ip: requestIp,
+        product_id: productId,
+      });
+      safeLog('Blocked by blacklist', { productId });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Não foi possível processar o pagamento. Tente novamente.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // === ANTI-FRAUD: Velocity Checks ===
+    const velocityChecks = ['ip_card_fail', 'ip_attempts', 'email_high_value'];
+    for (const ruleType of velocityChecks) {
+      const { data: velCheck } = await supabase.rpc('check_velocity', {
+        _email: safeEmail,
+        _ip: requestIp,
+        _rule_type: ruleType,
+      });
+      if (velCheck && velCheck.length > 0 && velCheck[0].blocked) {
+        await supabase.from('fraud_logs').insert({
+          block_type: 'velocity',
+          block_reason: velCheck[0].block_reason,
+          customer_email: safeEmail,
+          customer_document: cleanDoc,
+          customer_ip: requestIp,
+          product_id: productId,
+          metadata: { rule_type: ruleType, attempt_count: velCheck[0].attempt_count },
+        });
+        safeLog('Blocked by velocity check', { productId });
+        return new Response(
+          JSON.stringify({ success: false, error: 'Não foi possível processar o pagamento. Tente novamente.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // === IDEMPOTENCY: Check for existing pending transaction with same session ===
     if (checkoutSessionId) {
       const { data: existing } = await supabase
