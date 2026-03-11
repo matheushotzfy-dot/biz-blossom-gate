@@ -85,7 +85,7 @@ export default function AdminLogin() {
           <p className="text-[13px] text-white/30 mt-1 font-medium">Painel de Controle Administrativo</p>
         </div>
 
-        <div className="bg-[hsl(160,10%,6%)] rounded-3xl border border-white/[0.06] p-8 shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
+        <div className="bg-[#0A0A10] rounded-3xl border border-white/[0.06] p-8 shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
           {error && (
             <div className="flex items-center gap-2.5 bg-red-500/8 border border-red-500/15 rounded-2xl p-4 mb-6 text-[13px] text-red-400 font-medium">
               <AlertTriangle className="h-4 w-4 shrink-0" />
