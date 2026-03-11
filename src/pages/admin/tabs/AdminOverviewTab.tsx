@@ -434,12 +434,12 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   );
 }
 
-// ═══ Shared sub-components (ultra-premium) ═══
+// ═══ Shared sub-components (Fintech Crisp) ═══
 
 export function AdminPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "rounded-xl border border-white/[0.06] bg-[#141418]/50 backdrop-blur-xl p-4 shadow-2xl shadow-black/20",
+      "rounded-xl border border-zinc-800/80 bg-[#141415] p-4 shadow-xl shadow-black/40",
       className
     )}>
       {children}
@@ -454,11 +454,11 @@ export function PanelTitle({ children, color, icon }: { children: React.ReactNod
     blue: "bg-info shadow-[0_0_6px_hsl(var(--info)/0.5)]",
     red: "bg-destructive shadow-[0_0_6px_hsl(var(--destructive)/0.5)]",
     violet: "bg-accent-foreground shadow-[0_0_6px_hsl(var(--accent-foreground)/0.5)]",
-    zinc: "bg-white/30",
+    zinc: "bg-zinc-400/30",
     cyan: "bg-info shadow-[0_0_6px_hsl(var(--info)/0.5)]",
   };
   return (
-    <h3 className="text-[13px] font-bold flex items-center gap-2 text-white/80">
+    <h3 className="text-[13px] font-bold flex items-center gap-2 text-zinc-200">
       <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.emerald)} />
       {icon}
       {children}
@@ -471,22 +471,29 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor 
   alert?: boolean; highlight?: boolean; iconColor?: string;
   gradient?: string; glowColor?: string;
 }) {
+  const iconBgMap: Record<string, string> = {
+    "text-primary": "bg-emerald-500/10",
+    "text-info": "bg-blue-500/10",
+    "text-warning": "bg-amber-500/10",
+    "text-destructive": "bg-red-500/10",
+  };
+  const bgClass = iconBgMap[iconColor || "text-primary"] || "bg-emerald-500/10";
   return (
     <div className={cn(
-      "rounded-xl border bg-[#141418]/50 backdrop-blur-xl p-4 shadow-2xl shadow-black/20 group hover:border-white/[0.1] transition-all",
-      alert ? "border-destructive/20" : "border-white/[0.06]"
+      "rounded-xl border bg-[#141415] p-4 shadow-xl shadow-black/40 group hover:border-zinc-700/80 transition-all",
+      alert ? "border-destructive/30" : "border-zinc-800/80"
     )}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/25 font-bold">{label}</span>
-        <div className={cn("h-7 w-7 rounded-lg bg-white/[0.04] flex items-center justify-center", iconColor || "text-primary")}>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-500 font-bold">{label}</span>
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", bgClass, iconColor || "text-primary")}>
           {icon}
         </div>
       </div>
       <p className={cn(
-        "text-xl font-display font-black tracking-tight",
-        highlight ? "text-warning drop-shadow-[0_0_8px_hsl(var(--warning)/0.3)]" : "text-white"
+        "text-xl font-display font-black tracking-tight text-white",
+        highlight && "text-warning drop-shadow-[0_0_8px_hsl(var(--warning)/0.3)]"
       )}>{value}</p>
-      {sub && <p className="text-[10px] text-white/20 mt-1 font-medium">{sub}</p>}
+      {sub && <p className="text-[10px] text-zinc-500 mt-1 font-medium">{sub}</p>}
     </div>
   );
 }

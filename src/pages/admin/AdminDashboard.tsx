@@ -138,7 +138,7 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090B]">
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
       <div className="flex flex-col items-center gap-4">
         <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
           <Shield className="h-7 w-7 text-primary-foreground" />
