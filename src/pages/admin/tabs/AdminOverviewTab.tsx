@@ -410,24 +410,24 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       {/* ═══ ROW 6: Quick Stats ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Take Rate Hoje</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Take Rate Hoje</span>
           <p className="text-lg font-display font-black text-warning mt-1 drop-shadow-[0_0_6px_hsl(var(--warning)/0.3)]">{fmtCurrency(takeRateToday)}</p>
-          <p className="text-[10px] text-white/20">{todayTx.length} vendas</p>
+          <p className="text-[10px] text-zinc-500">{todayTx.length} vendas</p>
         </AdminPanel>
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Produtos Ativos</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Produtos Ativos</span>
           <p className="text-lg font-display font-black text-white mt-1">{products.filter(p => p.status === "active").length}</p>
-          <p className="text-[10px] text-white/20">de {products.length} total</p>
+          <p className="text-[10px] text-zinc-500">de {products.length} total</p>
         </AdminPanel>
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Retido Total</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Retido Total</span>
           <p className="text-lg font-display font-black text-white mt-1">{fmtCurrency(totalRetained)}</p>
-          <p className="text-[10px] text-white/20">Rolling Reserve</p>
+          <p className="text-[10px] text-zinc-500">Rolling Reserve</p>
         </AdminPanel>
         <AdminPanel>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20">Chargebacks</span>
+          <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-500">Chargebacks</span>
           <p className={cn("text-lg font-display font-black mt-1", chargebackAlert ? "text-destructive drop-shadow-[0_0_6px_hsl(var(--destructive)/0.4)]" : "text-white")}>{chargebackTx.length}</p>
-          <p className="text-[10px] text-white/20">{chargebackRate.toFixed(2)}% rate</p>
+          <p className="text-[10px] text-zinc-500">{chargebackRate.toFixed(2)}% rate</p>
         </AdminPanel>
       </div>
     </div>
