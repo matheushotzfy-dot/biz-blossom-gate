@@ -32,6 +32,7 @@ import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
 import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
 import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
+import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
