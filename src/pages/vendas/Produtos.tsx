@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts, useInvalidateAll } from "@/hooks/useQueryData";
-import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Palette } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ExternalLink, ImagePlus, X, Crosshair, Eye, MoreVertical, Copy, CheckCircle2, DollarSign, Tag, Palette, Sparkles, ShoppingCart, TrendingUp, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,27 @@ import { motion } from "framer-motion";
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+/* ─── Mini KPI ─── */
+function ProductKpi({ label, value, icon: Icon, color }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; color: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative group rounded-2xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 overflow-hidden"
+    >
+      {/* Ambient glow */}
+      <div className={cn("absolute -top-6 -right-6 h-16 w-16 rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500", color)} />
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+        <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", color.replace("bg-", "bg-") + "/10")}>
+          <Icon className={cn("h-3 w-3", color.replace("bg-", "text-"))} />
+        </div>
+      </div>
+      <p className="text-xl font-black text-foreground tracking-tight">{value}</p>
+    </motion.div>
+  );
+}
+
 export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +56,9 @@ export default function Produtos() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const activeProducts = products.filter(p => p.status === "active").length;
+  const totalValue = products.reduce((a, p) => a + Number(p.price), 0);
 
   const uploadImage = async (file: File): Promise<string | null> => {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou GIF"); return null; }
@@ -111,12 +135,25 @@ export default function Produtos() {
 
   return (
     <PageShell>
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Crie, gerencie e configure seus infoprodutos" />
-        <Button onClick={() => setOpen(true)} className="gap-2 rounded-lg text-sm font-medium h-9 px-4">
-          <Plus className="h-4 w-4" /> Novo Produto
-        </Button>
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
+          <Button onClick={() => setOpen(true)} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+            <Plus className="h-4 w-4" /> Novo Produto
+          </Button>
+        </motion.div>
       </div>
+
+      {/* KPI Cards */}
+      {products.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <ProductKpi label="Total Produtos" value={String(products.length)} icon={Layers} color="bg-primary" />
+          <ProductKpi label="Ativos" value={String(activeProducts)} icon={Sparkles} color="bg-success" />
+          <ProductKpi label="Valor Médio" value={`R$ ${(totalValue / (products.length || 1)).toFixed(0)}`} icon={TrendingUp} color="bg-warning" />
+          <ProductKpi label="Catálogo" value={`R$ ${totalValue.toFixed(0)}`} icon={ShoppingCart} color="bg-info" />
+        </div>
+      )}
 
       {products.length === 0 ? (
         <EmptyState
@@ -124,70 +161,83 @@ export default function Produtos() {
           title="Nenhum produto criado"
           subtitle="Crie seu primeiro infoproduto para começar a vender."
           action={
-            <Button onClick={() => setOpen(true)} size="sm" className="gap-2 rounded-lg">
+            <Button onClick={() => setOpen(true)} size="sm" className="gap-2 rounded-xl shadow-lg shadow-primary/20">
               <Plus className="h-3.5 w-3.5" /> Criar Produto
             </Button>
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {products.map((p, i) => (
             <motion.div
               key={p.id}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: Math.min(i * 0.05, 0.3) }}
-              className="group rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/15 transition-colors"
+              transition={{ duration: 0.3, delay: Math.min(i * 0.06, 0.4) }}
+              className="group relative rounded-2xl bg-card/50 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
             >
+              {/* Hover gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              
               {/* Image */}
-              <div className="relative h-36 overflow-hidden bg-muted/20">
+              <div className="relative h-40 overflow-hidden bg-gradient-to-br from-muted/30 to-muted/10">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-10 w-10 text-muted-foreground/15" />
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-primary/5 rounded-full blur-xl scale-150" />
+                      <Package className="h-12 w-12 text-muted-foreground/10 relative" />
+                    </div>
                   </div>
                 )}
+                {/* Gradient overlay on image */}
+                <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent" />
+                
                 {/* Status badge */}
-                <div className="absolute top-2.5 right-2.5">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm", statusColor(p.status))}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
+                <div className="absolute top-3 right-3">
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md shadow-sm", statusColor(p.status))}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", statusDot(p.status))} />
                     {statusLabel(p.status)}
+                  </span>
+                </div>
+                
+                {/* Price floating badge */}
+                <div className="absolute bottom-3 left-3">
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-card/90 backdrop-blur-md border border-border/30 px-3 py-1.5 text-[15px] font-black text-primary shadow-lg">
+                    R$ {Number(p.price).toFixed(2)}
                   </span>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-4 flex flex-1 flex-col">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="text-[14px] font-medium text-foreground leading-snug line-clamp-1">{p.name}</h3>
-                  <p className="text-[15px] font-bold text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</p>
-                </div>
+              <div className="p-4 flex flex-1 flex-col relative z-10">
+                <h3 className="text-[15px] font-bold text-foreground leading-snug line-clamp-1 mb-1">{p.name}</h3>
                 {p.description
-                  ? <p className="text-[12px] text-muted-foreground/70 line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
-                  : <p className="text-[12px] text-muted-foreground/40 mb-3">Sem descrição</p>
+                  ? <p className="text-[12px] text-muted-foreground/60 line-clamp-2 mb-3 leading-relaxed">{p.description}</p>
+                  : <p className="text-[12px] text-muted-foreground/30 italic mb-3">Sem descrição</p>
                 }
 
-                {/* Copy link */}
+                {/* Checkout link pill */}
                 {p.checkout_url && (
-                  <button onClick={() => copyCheckout(p)} className="flex items-center gap-2 rounded-lg bg-muted/30 dark:bg-foreground/[0.03] border border-border/30 dark:border-foreground/[0.04] px-3 py-1.5 mb-3 hover:bg-muted/50 transition-colors w-full">
-                    <span className="text-[10px] text-muted-foreground/60 font-mono truncate flex-1 text-left">{getCheckoutLink(p.checkout_url)}</span>
+                  <button onClick={() => copyCheckout(p)} className="flex items-center gap-2 rounded-xl bg-muted/20 dark:bg-foreground/[0.03] border border-border/20 dark:border-foreground/[0.04] px-3 py-2 mb-3 hover:bg-primary/5 hover:border-primary/20 transition-all duration-200 w-full group/link">
+                    <span className="text-[10px] text-muted-foreground/50 font-mono truncate flex-1 text-left group-hover/link:text-primary/70 transition-colors">{getCheckoutLink(p.checkout_url)}</span>
                     {copiedId === p.id
                       ? <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
-                      : <Copy className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                      : <Copy className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0 group-hover/link:text-primary transition-colors" />
                     }
                   </button>
                 )}
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 mt-auto pt-1">
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => handleEdit(p)}>
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors" onClick={() => handleEdit(p)}>
                     <Edit className="h-3 w-3" /> Editar
                   </Button>
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => setPixelProduct(p)}>
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors" onClick={() => setPixelProduct(p)}>
                     <Crosshair className="h-3 w-3" /> Pixels
                   </Button>
-                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-muted-foreground hover:text-foreground" onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}>
+                  <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg text-[11px] h-8 font-medium text-primary bg-primary/5 hover:bg-primary/10 transition-colors" onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}>
                     <Palette className="h-3 w-3" /> Builder
                   </Button>
                   <DropdownMenu>
@@ -211,83 +261,102 @@ export default function Produtos() {
               </div>
             </motion.div>
           ))}
+
+          {/* "Add new" ghost card */}
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: Math.min(products.length * 0.06, 0.4) }}
+            onClick={() => setOpen(true)}
+            className="rounded-2xl border-2 border-dashed border-border/30 dark:border-foreground/[0.06] hover:border-primary/30 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-3 min-h-[280px] transition-all duration-300 group/add"
+          >
+            <div className="h-14 w-14 rounded-2xl bg-primary/5 group-hover/add:bg-primary/10 flex items-center justify-center transition-colors">
+              <Plus className="h-6 w-6 text-primary/40 group-hover/add:text-primary transition-colors" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-muted-foreground/50 group-hover/add:text-foreground transition-colors">Novo Produto</p>
+              <p className="text-[11px] text-muted-foreground/30">Clique para adicionar</p>
+            </div>
+          </motion.button>
         </div>
       )}
 
       {/* Create/Edit Sheet */}
       <Sheet open={open} onOpenChange={(v) => { if (!v) resetForm(); else setOpen(v); }}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/40">
           <SheetHeader className="mb-5">
             <SheetTitle className="flex items-center gap-3 text-lg">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                {editId ? <Edit className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4 text-primary" />}
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/10">
+                {editId ? <Edit className="h-4.5 w-4.5 text-primary" /> : <Plus className="h-4.5 w-4.5 text-primary" />}
               </div>
               {editId ? "Editar Produto" : "Novo Produto"}
             </SheetTitle>
           </SheetHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Image */}
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Imagem</Label>
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] mb-2.5 block">Imagem do produto</Label>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
               {imagePreview ? (
-                <div className="relative rounded-lg overflow-hidden border border-border/30 group/img">
-                  <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
-                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 w-9 rounded-lg bg-card border border-border/30 flex items-center justify-center text-foreground hover:bg-muted transition-colors">
+                <div className="relative rounded-xl overflow-hidden border border-border/30 group/img shadow-lg">
+                  <img src={imagePreview} alt="Preview" className="w-full h-44 object-cover" />
+                  <div className="absolute inset-0 bg-background/70 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-10 w-10 rounded-xl bg-card border border-border/30 flex items-center justify-center text-foreground hover:bg-muted shadow-lg transition-colors">
                       <ImagePlus className="h-4 w-4" />
                     </button>
-                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border/30 flex items-center justify-center text-destructive hover:bg-muted transition-colors">
+                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-10 w-10 rounded-xl bg-card border border-border/30 flex items-center justify-center text-destructive hover:bg-muted shadow-lg transition-colors">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
               ) : (
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-32 rounded-lg border-2 border-dashed border-border/40 hover:border-primary/30 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                  <ImagePlus className="h-6 w-6" />
-                  <span className="text-[11px] font-medium">Clique para adicionar</span>
-                  <span className="text-[10px] text-muted-foreground/60">JPEG, PNG, WebP até 5MB</span>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-36 rounded-xl border-2 border-dashed border-border/30 hover:border-primary/30 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-2.5 text-muted-foreground hover:text-primary transition-all duration-200">
+                  <div className="h-12 w-12 rounded-xl bg-muted/20 flex items-center justify-center">
+                    <ImagePlus className="h-5 w-5" />
+                  </div>
+                  <span className="text-[11px] font-semibold">Clique para adicionar imagem</span>
+                  <span className="text-[10px] text-muted-foreground/40">JPEG, PNG, WebP até 5MB</span>
                 </button>
               )}
             </div>
 
             {/* Name */}
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nome do produto</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-10 rounded-lg" required maxLength={200} />
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Nome do produto</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Curso de Marketing Digital" className="mt-1.5 h-11 rounded-xl" required maxLength={200} />
             </div>
 
             {/* Description */}
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Descrição</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5 rounded-lg" maxLength={2000} />
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Descrição</Label>
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Descreva seu produto..." className="mt-1.5 rounded-xl" maxLength={2000} />
             </div>
 
             {/* Page URL */}
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> URL da Página de Vendas
               </Label>
-              <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-10 rounded-lg" type="url" />
-              <p className="text-[10px] text-muted-foreground/60 mt-1">Link da página onde o produto é divulgado</p>
+              <Input value={form.page_url} onChange={(e) => setForm({ ...form, page_url: e.target.value })} placeholder="https://suapagina.com/produto" className="mt-1.5 h-11 rounded-xl" type="url" />
+              <p className="text-[10px] text-muted-foreground/40 mt-1.5">Link da página onde o produto é divulgado</p>
             </div>
 
             {/* Price + Status */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] flex items-center gap-1.5">
                   <DollarSign className="h-3 w-3" /> Preço (R$)
                 </Label>
-                <Input type="number" step="0.01" min="1.00" max="99999.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-10 rounded-lg" required />
+                <Input type="number" step="0.01" min="1.00" max="99999.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="97.00" className="mt-1.5 h-11 rounded-xl" required />
               </div>
               <div>
-                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] flex items-center gap-1.5">
                   <Tag className="h-3 w-3" /> Status
                 </Label>
-                <div className="mt-1.5 flex items-center gap-3 h-10 px-3 rounded-lg border border-border/40 bg-card/50">
+                <div className="mt-1.5 flex items-center gap-3 h-11 px-3 rounded-xl border border-border/40 bg-card/50">
                   <Switch checked={form.status === "active"} onCheckedChange={(v) => setForm({ ...form, status: v ? "active" : "inactive" })} />
-                  <span className={cn("text-xs font-medium", form.status === "active" ? "text-primary" : "text-muted-foreground")}>
+                  <span className={cn("text-xs font-semibold", form.status === "active" ? "text-primary" : "text-muted-foreground")}>
                     {form.status === "active" ? "Ativo" : "Inativo"}
                   </span>
                 </div>
@@ -295,7 +364,7 @@ export default function Produtos() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full h-10 rounded-lg font-medium text-sm" disabled={uploading}>
+            <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-sm shadow-lg shadow-primary/20" disabled={uploading}>
               {uploading ? "Enviando..." : editId ? "Salvar alterações" : "Criar produto"}
             </Button>
           </form>
