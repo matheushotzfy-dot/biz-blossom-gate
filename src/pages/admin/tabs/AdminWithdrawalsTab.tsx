@@ -170,6 +170,18 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     if (ok > 0) window.location.reload();
   };
 
+  /* ── Single Reject with Reason ── */
+  const handleRejectWithReason = async () => {
+    if (!rejectDialog || !rejectReason.trim()) { toast.error("Informe o motivo da rejeição"); return; }
+    const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", rejectDialog).eq("status", "pending");
+    if (error) { toast.error("Erro ao recusar"); return; }
+    await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() } as any);
+    toast.success("Saque recusado com motivo registrado");
+    setRejectDialog(null);
+    setRejectReason("");
+    window.location.reload();
+  };
+
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
       const n = new Set(prev);
