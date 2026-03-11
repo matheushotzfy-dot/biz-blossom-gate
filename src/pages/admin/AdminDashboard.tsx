@@ -336,7 +336,7 @@ export default function AdminDashboard() {
             <button
               onClick={loadData}
               disabled={syncing}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] text-white/35 hover:text-white/60"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-800/50 text-zinc-500 hover:text-zinc-300"
             >
               <RefreshCw className={cn("h-2.5 w-2.5", syncing && "animate-spin")} /> Sync
             </button>
