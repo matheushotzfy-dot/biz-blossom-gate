@@ -74,11 +74,12 @@ function ImageUploadZone({ value, onChange, label, aspect = "16:9" }: {
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) { toast.error("Apenas imagens"); return; }
+    const ALLOWED_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!ALLOWED_CONTENT_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou GIF"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
     setUploading(true);
     const ext = file.name.split(".").pop();
-    const path = `content/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const path = `content/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file);
     if (error) { toast.error("Erro no upload"); setUploading(false); return; }
     const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
@@ -310,6 +311,8 @@ export default function AdminConteudo() {
   };
 
   const deleteModule = async (id: string) => {
+    if (!user) return;
+    await supabase.from("lessons").delete().in("module_id", [id]);
     await supabase.from("modules").delete().eq("id", id);
     const cid = editCourseId || selectedCourse;
     if (cid) loadModules(cid);
@@ -359,7 +362,7 @@ export default function AdminConteudo() {
     };
     if (editLessonId) {
       const { module_id, sort_order, ...up } = payload;
-      await supabase.from("lessons").update(up).eq("id", editLessonId);
+      await supabase.from("lessons").update(up).eq("id", editLessonId).eq("module_id", lessonModuleId);
       toast.success("Aula atualizada!");
     } else {
       await supabase.from("lessons").insert(payload);
@@ -371,6 +374,7 @@ export default function AdminConteudo() {
   };
 
   const deleteLesson = async (id: string) => {
+    if (!user) return;
     await supabase.from("lessons").delete().eq("id", id);
     const cid = editCourseId || selectedCourse;
     if (cid) loadModules(cid);
