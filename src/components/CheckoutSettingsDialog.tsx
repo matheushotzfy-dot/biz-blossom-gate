@@ -91,7 +91,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
         checkout_credit_card_enabled: creditCardEnabled,
         checkout_address_required: addressRequired,
         checkout_email_confirm: emailConfirm,
-      }).eq("id", product.id);
+      }).eq("id", product.id).eq("user_id", user!.id);
 
       if (error) { toast.error("Erro ao salvar"); return; }
       toast.success("Checkout personalizado!");
@@ -130,7 +130,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
   };
 
   const removeBump = async (id: string) => {
-    await supabase.from("order_bumps").delete().eq("id", id);
+    await supabase.from("order_bumps").delete().eq("id", id).eq("product_id", product.id);
     setOrderBumps(prev => prev.filter(b => b.id !== id));
     toast.success("Order bump removido");
   };
