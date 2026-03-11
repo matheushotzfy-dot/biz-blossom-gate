@@ -707,16 +707,27 @@ const toneMap: Record<Tone, { bg: string; text: string }> = {
   warning: { bg: "bg-warning/12", text: "text-warning" },
 };
 
-function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
+function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.ReactNode; label: string; value: string; tone: Tone; idx?: number }) {
+  const glowColors: Record<Tone, string> = {
+    primary: "from-primary/8 via-transparent to-transparent",
+    info: "from-info/8 via-transparent to-transparent",
+    success: "from-success/8 via-transparent to-transparent",
+    warning: "from-warning/8 via-transparent to-transparent",
+  };
+
   return (
-    <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-md p-3 md:p-4 transition-all duration-200 hover:border-primary/20 overflow-hidden">
-      <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
-        <div className={`h-6 w-6 md:h-7 md:w-7 rounded-lg flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+    <div className={`group relative rounded-xl border border-border/40 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+      {/* Subtle glow */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${glowColors[tone]} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-3">
+          <div className={`h-7 w-7 md:h-8 md:w-8 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
         </div>
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold truncate">{label}</span>
+        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-tight text-foreground tabular-nums">{value}</p>
       </div>
-      <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
