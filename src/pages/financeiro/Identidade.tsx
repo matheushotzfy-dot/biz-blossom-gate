@@ -85,14 +85,20 @@ export default function Identidade() {
   const loadKycDocs = async () => {
     if (!user) return;
     const types = ["front", "back", "selfie"];
+    // FIX: Load KYC docs in parallel instead of sequentially
+    const results = await Promise.all(
+      types.map(type => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type }))
+    );
     const docs: Record<string, string | null> = {};
-    for (const type of types) {
-      const { data } = await supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type });
+    types.forEach((type, i) => {
+      const data = results[i].data;
       if (data && data.length > 0) {
         const { data: urlData } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
         docs[type] = urlData?.publicUrl || null;
-      } else { docs[type] = null; }
-    }
+      } else {
+        docs[type] = null;
+      }
+    });
     setKycDocs(docs);
   };
 

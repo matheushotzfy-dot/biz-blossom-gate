@@ -368,7 +368,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* ═══ MAIN CONTENT ═══ */}
-      <main className="flex-1 overflow-y-auto relative z-10">
+      <main className="flex-1 overflow-y-auto relative z-10" data-admin-content>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
