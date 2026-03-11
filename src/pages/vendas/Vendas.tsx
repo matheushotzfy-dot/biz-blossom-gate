@@ -799,7 +799,7 @@ export default function Vendas() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  const [datePreset, setDatePreset] = useState<DatePreset>("today");
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const [showExportDialog, setShowExportDialog] = useState(false);
