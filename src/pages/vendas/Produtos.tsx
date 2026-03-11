@@ -153,7 +153,13 @@ export default function Produtos() {
   const handleEdit = (p: Tables<"products">) => {
     setEditId(p.id);
     setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status, page_url: p.page_url || "" });
-    setImagePreview(p.image_url || null); setImageFile(null); setOpen(true);
+    setImagePreview(p.image_url || null); setImageFile(null);
+    // Load affiliate/co-production settings from product
+    setAffiliateEnabled((p as any).affiliate_enabled || false);
+    setAffiliateCommission(String((p as any).affiliate_commission || 30));
+    setCoProductionEnabled((p as any).co_production_enabled || false);
+    setCoProductionSplit(String((p as any).co_production_split || 50));
+    setOpen(true);
   };
 
   const handleDelete = async (id: string) => {
