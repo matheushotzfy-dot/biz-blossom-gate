@@ -32,6 +32,8 @@ import ApiDocsComplete from "./pages/vendas/ApiDocsComplete";
 import Conteudo from "./pages/vendas/Conteudo";
 import CourseBuilder from "./pages/vendas/CourseBuilder";
 import Apps from "./pages/vendas/Apps";
+import Afiliados from "./pages/vendas/Afiliados";
+import Coproducoes from "./pages/vendas/Coproducoes";
 import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -122,6 +124,8 @@ const App = () => (
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/vendas/conteudo/:courseId/builder" element={<CourseBuilder />} />
                 <Route path="/integracoes/apps" element={<Apps />} />
+                <Route path="/vendas/afiliados" element={<Afiliados />} />
+                <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
