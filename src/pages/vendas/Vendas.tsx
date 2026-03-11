@@ -461,6 +461,224 @@ const STATUS_PILL_STYLES: Record<string, { active: string; dot: string }> = {
   chargeback: { active: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
 };
 
+/* ─── Export Dialog ─── */
+const ALL_STATUSES = [
+  { value: "completed", label: "Aprovadas", dot: "bg-success" },
+  { value: "pending", label: "Pendentes", dot: "bg-warning" },
+  { value: "failed", label: "Falhas", dot: "bg-destructive" },
+  { value: "refunded", label: "Reembolsos", dot: "bg-info" },
+  { value: "chargeback", label: "Chargebacks", dot: "bg-destructive" },
+];
+const ALL_METHODS = [
+  { value: "pix", label: "PIX", icon: Smartphone },
+  { value: "credit_card", label: "Cartão", icon: CreditCard },
+  { value: "boleto", label: "Boleto", icon: FileText },
+];
+
+function ExportDialog({ open, onOpenChange, transactions, products, productsRaw, onExport }: {
+  open: boolean; onOpenChange: (v: boolean) => void;
+  transactions: Tables<"transactions">[];
+  products: Record<string, string>;
+  productsRaw: any[];
+  onExport: (txList: Tables<"transactions">[]) => void;
+}) {
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(ALL_STATUSES.map(s => s.value)));
+  const [selectedMethods, setSelectedMethods] = useState<Set<string>>(new Set(ALL_METHODS.map(m => m.value)));
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set(["all"]));
+
+  const toggleStatus = (v: string) => {
+    setSelectedStatuses(prev => {
+      const next = new Set(prev);
+      next.has(v) ? next.delete(v) : next.add(v);
+      return next;
+    });
+  };
+  const toggleMethod = (v: string) => {
+    setSelectedMethods(prev => {
+      const next = new Set(prev);
+      next.has(v) ? next.delete(v) : next.add(v);
+      return next;
+    });
+  };
+  const toggleProduct = (id: string) => {
+    if (id === "all") {
+      setSelectedProducts(new Set(["all"]));
+      return;
+    }
+    setSelectedProducts(prev => {
+      const next = new Set(prev);
+      next.delete("all");
+      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.size === 0) next.add("all");
+      return next;
+    });
+  };
+
+  const selectAllStatuses = () => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)));
+  const selectAllMethods = () => setSelectedMethods(new Set(ALL_METHODS.map(m => m.value)));
+
+  const exportFiltered = useMemo(() => {
+    return transactions.filter(t => {
+      if (!selectedStatuses.has(t.status)) return false;
+      if (t.payment_method && !selectedMethods.has(t.payment_method)) return false;
+      if (!selectedProducts.has("all") && t.product_id && !selectedProducts.has(t.product_id)) return false;
+      return true;
+    });
+  }, [transactions, selectedStatuses, selectedMethods, selectedProducts]);
+
+  const handleExport = () => {
+    onExport(exportFiltered);
+    onOpenChange(false);
+  };
+
+  // Unique products from transactions
+  const txProducts = useMemo(() => {
+    const ids = new Set(transactions.map(t => t.product_id).filter(Boolean) as string[]);
+    return Array.from(ids).map(id => ({ id, name: products[id] || id.slice(0, 8) }));
+  }, [transactions, products]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <Download className="h-5 w-5 text-primary" />
+            Exportar Vendas
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-[13px]">
+            Escolha os filtros para a exportação CSV
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2">
+          {/* Status filter */}
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</p>
+              <button onClick={selectAllStatuses} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_STATUSES.map(s => {
+                const active = selectedStatuses.has(s.value);
+                return (
+                  <button
+                    key={s.value}
+                    onClick={() => toggleStatus(s.value)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border",
+                      active
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-border/30 dark:border-foreground/[0.06] text-muted-foreground hover:border-border/50"
+                    )}
+                  >
+                    <span className={cn("h-1.5 w-1.5 rounded-full", active ? s.dot : "bg-muted-foreground/30")} />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Payment method filter */}
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Método de Pagamento</p>
+              <button onClick={selectAllMethods} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_METHODS.map(m => {
+                const active = selectedMethods.has(m.value);
+                const Icon = m.icon;
+                return (
+                  <button
+                    key={m.value}
+                    onClick={() => toggleMethod(m.value)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border",
+                      active
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-border/30 dark:border-foreground/[0.06] text-muted-foreground hover:border-border/50"
+                    )}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Product filter */}
+          {txProducts.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Produtos</p>
+              <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
+                <button
+                  onClick={() => toggleProduct("all")}
+                  className={cn(
+                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all text-left",
+                    selectedProducts.has("all")
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/30"
+                  )}
+                >
+                  {selectedProducts.has("all")
+                    ? <CheckSquare className="h-3.5 w-3.5 shrink-0" />
+                    : <Square className="h-3.5 w-3.5 shrink-0" />
+                  }
+                  Todos os produtos
+                </button>
+                {txProducts.map(p => {
+                  const active = selectedProducts.has(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => toggleProduct(p.id)}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all text-left",
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted/30"
+                      )}
+                    >
+                      {active
+                        ? <CheckSquare className="h-3.5 w-3.5 shrink-0" />
+                        : <Square className="h-3.5 w-3.5 shrink-0" />
+                      }
+                      <span className="truncate">{p.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Preview count */}
+          <div className="rounded-lg bg-muted/20 dark:bg-foreground/[0.03] border border-border/30 dark:border-foreground/[0.05] p-3 flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-medium text-foreground">{exportFiltered.length} transações</p>
+              <p className="text-[10px] text-muted-foreground">serão exportadas</p>
+            </div>
+            <p className="text-[14px] font-bold text-primary font-display">
+              {fmt(exportFiltered.reduce((a, t) => a + Number(t.net_amount), 0))}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-1">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-lg h-10 text-[12px] font-medium">
+            Cancelar
+          </Button>
+          <Button onClick={handleExport} disabled={exportFiltered.length === 0} className="flex-1 rounded-lg h-10 gap-2 text-[12px] font-medium">
+            <Download className="h-3.5 w-3.5" />
+            Exportar {exportFiltered.length > 0 ? `(${exportFiltered.length})` : ""}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ═══════════════════════════════════ MAIN ═══════════════════════════════════ */
 
 export default function Vendas() {
