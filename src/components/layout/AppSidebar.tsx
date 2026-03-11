@@ -151,22 +151,63 @@ export function AppSidebar() {
         </div>
 
         <div className="mt-4 group-data-[collapsible=icon]:hidden">
-          <div className="relative rounded-xl border border-sidebar-border/60 bg-sidebar-accent/40 px-3.5 py-3 overflow-hidden">
-            <div className="flex items-center justify-between text-[9px] font-bold text-sidebar-foreground/75">
-              <span>{milestone.current.label}</span>
-              <span>{milestone.next.label}</span>
+          <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone cursor-default">
+            {/* Ambient glow */}
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-sidebar-primary/15 rounded-full blur-2xl group-hover/milestone:bg-sidebar-primary/25 transition-all duration-700" />
+            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-sidebar-primary/10 rounded-full blur-xl" />
+
+            {/* Flame icon */}
+            <div className="relative flex items-center gap-2 mb-3">
+              <div className="relative h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center">
+                <span className="text-[16px] animate-pulse">🔥</span>
+                <div className="absolute inset-0 rounded-xl bg-sidebar-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/50">Faturamento</p>
+                <p className="text-[18px] font-black text-sidebar-accent-foreground leading-tight tracking-tight">
+                  {revenue >= 1000000
+                    ? `R$ ${(revenue / 1000000).toFixed(2).replace('.', ',')}M`
+                    : revenue >= 1000
+                    ? `R$ ${(revenue / 1000).toFixed(1).replace('.', ',')}K`
+                    : `R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                </p>
+              </div>
             </div>
 
-            <div className="mt-2 h-1.5 w-full rounded-full bg-sidebar-accent/70">
-              <div
-                className="h-full rounded-full bg-sidebar-primary transition-all duration-700"
-                style={{ width: `${milestone.pct}%` }}
-              />
+            {/* Progress bar */}
+            <div className="relative">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[9px] font-bold text-sidebar-primary/80">{milestone.current.label}</span>
+                <span className="text-[9px] font-bold text-sidebar-foreground/40">Meta: {milestone.next.label}</span>
+              </div>
+              <div className="relative h-2.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden">
+                {/* Glow track */}
+                <div
+                  className="absolute h-full rounded-full bg-gradient-to-r from-sidebar-primary via-sidebar-primary to-sidebar-primary/70 transition-all duration-1000 ease-out"
+                  style={{ width: `${milestone.pct}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-[shimmer_2s_infinite]" />
+                </div>
+                {/* Glow dot at end */}
+                {milestone.pct > 3 && (
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full bg-sidebar-primary shadow-[0_0_10px_2px] shadow-sidebar-primary/50 border-2 border-sidebar/80 transition-all duration-1000"
+                    style={{ left: `calc(${milestone.pct}% - 7px)` }}
+                  />
+                )}
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[11px] font-extrabold text-sidebar-primary">
+                  {milestone.pct.toFixed(0)}%
+                </span>
+                <span className="text-[9px] font-semibold text-sidebar-foreground/35">
+                  Faltam {milestone.next.value - revenue > 0
+                    ? `R$ ${((milestone.next.value - revenue) / (milestone.next.value >= 1000000 ? 1000000 : 1000)).toFixed(1).replace('.', ',')}${milestone.next.value >= 1000000 ? 'M' : 'K'}`
+                    : 'R$ 0'}
+                </span>
+              </div>
             </div>
-
-            <p className="mt-2 text-[10px] font-semibold text-sidebar-primary">
-              {milestone.pct.toFixed(0)}% para o próximo marco
-            </p>
           </div>
         </div>
       </SidebarHeader>
