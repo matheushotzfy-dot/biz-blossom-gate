@@ -211,7 +211,9 @@ export default function ControleGastos() {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    await supabase.from("expenses").delete().eq("id", id).eq("user_id", user.id);
+    if (!window.confirm("Tem certeza que deseja excluir este gasto?")) return;
+    const { error } = await supabase.from("expenses").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao remover gasto"); return; }
     toast.success("Gasto removido");
     invalidateAll(["expenses"]);
   };

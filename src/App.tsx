@@ -18,6 +18,7 @@ import Extrato from "./pages/financeiro/Extrato";
 import DadosBancarios from "./pages/financeiro/DadosBancarios";
 import Identidade from "./pages/financeiro/Identidade";
 import Saques from "./pages/financeiro/Saques";
+import Taxas from "./pages/financeiro/Taxas";
 import ControleGastos from "./pages/financeiro/ControleGastos";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
@@ -106,6 +107,7 @@ const App = () => (
                 <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
                 <Route path="/financeiro/identidade" element={<Identidade />} />
                 <Route path="/financeiro/saques" element={<Saques />} />
+                <Route path="/financeiro/taxas" element={<Taxas />} />
                 <Route path="/financeiro/gastos" element={<ControleGastos />} />
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />

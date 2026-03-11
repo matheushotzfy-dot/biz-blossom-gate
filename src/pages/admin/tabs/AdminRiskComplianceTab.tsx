@@ -55,9 +55,9 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
 
   useEffect(() => {
     Promise.all([
-      supabase.from("global_blacklist" as any).select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("velocity_rules" as any).select("*").order("created_at", { ascending: true }),
-      supabase.from("fraud_logs" as any).select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("velocity_rules").select("*").order("created_at", { ascending: true }),
+      supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(500),
     ]).then(([blRes, vrRes, flRes]) => {
       if (blRes.data) setBlacklist(blRes.data as any[]);
       if (vrRes.data) setVelocityRules(vrRes.data as any[]);
@@ -75,9 +75,9 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
     if (!newValue.trim() || !newReason.trim()) { toast.error("Preencha valor e motivo"); return; }
     if (!user) return;
     const clean = newType === "cpf" || newType === "cnpj" ? newValue.replace(/\D/g, "") : newValue.trim().toLowerCase();
-    const { error } = await supabase.from("global_blacklist" as any).insert({
+    const { error } = await supabase.from("global_blacklist").insert({
       entry_type: newType, entry_value: clean, reason: newReason.trim(), added_by: user.id,
-    } as any);
+    });
     if (error) {
       if (error.code === "23505") toast.error("Entrada já existe na blacklist");
       else toast.error("Erro ao adicionar");
@@ -86,12 +86,12 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
     toast.success(`${newType.toUpperCase()} adicionado à Blacklist`);
     await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: newReason.trim() } as any);
     setAddDialog(false); setNewValue(""); setNewReason("");
-    const { data } = await supabase.from("global_blacklist" as any).select("*").order("created_at", { ascending: false }).limit(500);
+    const { data } = await supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500);
     if (data) setBlacklist(data as any[]);
   };
 
   const handleRemoveBlacklist = async (id: string, value: string) => {
-    const { error } = await supabase.from("global_blacklist" as any).update({ is_active: false } as any).eq("id", id);
+    const { error } = await supabase.from("global_blacklist").update({ is_active: false }).eq("id", id);
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Removido da Blacklist");
     await logAdminAction("remove_blacklist", "global_blacklist", value);
@@ -100,7 +100,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
 
   /* ── Velocity Actions ── */
   const handleToggleRule = async (rule: VelocityRule) => {
-    const { error } = await supabase.from("velocity_rules" as any).update({ is_enabled: !rule.is_enabled, updated_by: user?.id } as any).eq("id", rule.id);
+    const { error } = await supabase.from("velocity_rules").update({ is_enabled: !rule.is_enabled, updated_by: user?.id }).eq("id", rule.id);
     if (error) { toast.error("Erro"); return; }
     toast.success(`Regra ${!rule.is_enabled ? "ativada" : "desativada"}`);
     await logAdminAction("toggle_velocity_rule", "velocity_rules", rule.id, { rule_name: rule.rule_name, enabled: !rule.is_enabled } as any);
@@ -108,7 +108,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
   };
 
   const handleUpdateRule = async (rule: VelocityRule, field: string, value: number) => {
-    const { error } = await supabase.from("velocity_rules" as any).update({ [field]: value, updated_by: user?.id } as any).eq("id", rule.id);
+    const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id } as any).eq("id", rule.id);
     if (error) { toast.error("Erro"); return; }
     toast.success("Regra atualizada");
     setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, [field]: value } : r));
