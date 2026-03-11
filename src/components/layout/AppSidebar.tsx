@@ -150,8 +150,8 @@ export function AppSidebar() {
           </div>
         </div>
 
-        <div className="mt-4 group-data-[collapsible=icon]:hidden">
-          <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone cursor-default">
+        <div className="mt-4 group-data-[collapsible=icon]:hidden cursor-pointer" onClick={() => navigate("/premiacoes")}>
+          <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone hover:border-sidebar-primary/40 hover:shadow-lg hover:shadow-sidebar-primary/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
             {/* Ambient glow */}
             <div className="absolute -top-8 -right-8 w-24 h-24 bg-sidebar-primary/15 rounded-full blur-2xl group-hover/milestone:bg-sidebar-primary/25 transition-all duration-700" />
             <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-sidebar-primary/10 rounded-full blur-xl" />
@@ -207,6 +207,9 @@ export function AppSidebar() {
                     : 'R$ 0'}
                 </span>
               </div>
+              <p className="text-center text-[9px] font-bold text-sidebar-primary/40 group-hover/milestone:text-sidebar-primary/70 mt-2.5 transition-colors">
+                🏆 Ver Premiações
+              </p>
             </div>
           </div>
         </div>

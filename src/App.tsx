@@ -12,6 +12,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
+import Premiacoes from "./pages/Premiacoes";
 import Extrato from "./pages/financeiro/Extrato";
 
 import DadosBancarios from "./pages/financeiro/DadosBancarios";
@@ -88,6 +89,7 @@ const App = () => (
               >
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<Perfil />} />
+                <Route path="/premiacoes" element={<Premiacoes />} />
                 <Route path="/financeiro/extrato" element={<Extrato />} />
                 
                 <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
