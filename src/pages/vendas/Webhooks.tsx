@@ -251,7 +251,8 @@ export default function Webhooks() {
 
   const toggleActive = async (id: string, current: boolean) => {
     if (!user) return;
-    await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id).eq("user_id", user.id);
+    const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao atualizar webhook"); return; }
     invalidateAll(["webhooks"]);
   };
 
