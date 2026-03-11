@@ -364,7 +364,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 ))}
               </div>
             </>
-          ) : <div className="flex items-center justify-center h-[160px] text-sm text-white/20">Sem dados</div>}
+          ) : <div className="flex items-center justify-center h-[160px] text-sm text-zinc-600">Sem dados</div>}
         </AdminPanel>
       </div>
 
