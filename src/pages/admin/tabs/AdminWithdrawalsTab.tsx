@@ -167,6 +167,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     setSelectedIds(new Set());
     setBatchProcessing(false);
     if (ok > 0) onWithdrawalAction("", "rejected"); // trigger parent reload
+  };
 
   /* ── Single Reject with Reason ── */
   const handleRejectWithReason = async () => {
@@ -178,6 +179,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     setRejectDialog(null);
     setRejectReason("");
     onWithdrawalAction("", "rejected"); // trigger parent reload
+  };
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
