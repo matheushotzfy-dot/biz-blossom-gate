@@ -41,6 +41,7 @@ const SIDEBAR_SECTIONS = [
     title: "📊 GOD MODE",
     items: [
       { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
+      { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
     ],
   },
   {
