@@ -77,7 +77,13 @@ function toBrasiliaDate(dateStr: string) {
 }
 
 function brasiliaToday() {
-  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  // Use Intl to get reliable Brasília date parts
+  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" });
+  const parts = fmt.formatToParts(new Date());
+  const y = parts.find(p => p.type === "year")!.value;
+  const m = parts.find(p => p.type === "month")!.value;
+  const d = parts.find(p => p.type === "day")!.value;
+  return new Date(Number(y), Number(m) - 1, Number(d));
 }
 
 function timeAgo(dateStr: string) {

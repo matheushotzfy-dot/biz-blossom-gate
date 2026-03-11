@@ -151,9 +151,10 @@ export default function Produtos() {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
+    if (!window.confirm("Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) return;
     const { error } = await supabase.from("products").delete().eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error("Erro"); return; }
-    toast.success("Removido"); loadProducts();
+    if (error) { toast.error("Erro ao excluir produto"); return; }
+    toast.success("Produto removido"); loadProducts();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
