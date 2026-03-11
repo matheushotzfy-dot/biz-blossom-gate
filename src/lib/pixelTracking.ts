@@ -122,11 +122,11 @@ function loadTikTokPixel(pixelId: string) {
       const s = document.createElement('script');
       s.type = 'text/javascript';
       s.async = true;
-      s.src = n + '?sdkid=' + e + '&lib=ttq';
+      s.src = n + '?sdkid=' + encodeURIComponent(e) + '&lib=ttq';
       document.head.appendChild(s);
     };
   }
-  w.ttq.load(pixelId);
+  w.ttq.load(safeId);
 }
 
 function loadKwaiPixel(pixelId: string) {
