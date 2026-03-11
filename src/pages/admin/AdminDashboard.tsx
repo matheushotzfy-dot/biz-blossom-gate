@@ -9,7 +9,7 @@ import {
   Activity, Settings, ChevronLeft, ChevronRight, Bell,
   Moon, Sun, UserCog, RefreshCw, Rocket,
   Bug, UserX, Search, Command, Banknote, Eye, ShieldCheck,
-  FileWarning, Package2, Radio,
+  FileWarning, Package2, Radio, BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -32,6 +32,7 @@ import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
 import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
 import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
+import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -40,6 +41,7 @@ const SIDEBAR_SECTIONS = [
     title: "📊 GOD MODE",
     items: [
       { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
+      { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
     ],
   },
   {
@@ -87,7 +89,7 @@ const SIDEBAR_SECTIONS = [
   },
 ] as const;
 
-type TabId = "god-mode" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers" | "risk-compliance";
+type TabId = "god-mode" | "analytics" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers" | "risk-compliance";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -342,6 +344,9 @@ export default function AdminDashboard() {
                 onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
                 isEmployee={isEmployee}
               />
+            )}
+            {activeTab === "analytics" && isAdmin && (
+              <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
             )}
             {activeTab === "transactions" && (
               <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
