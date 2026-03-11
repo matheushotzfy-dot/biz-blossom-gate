@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { RequireAuth } from "@/hooks/useAuth";
 import { RequireAdmin } from "@/hooks/useAdminGuard";
+import { RequireManager } from "@/hooks/useManagerGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
@@ -36,7 +37,8 @@ import AdminAuditoria from "./pages/admin/AdminAuditoria";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 import NotFound from "./pages/NotFound";
-
+import ManagerLogin from "./pages/manager/ManagerLogin";
+import ManagerDashboard from "./pages/manager/ManagerDashboard";
 // Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
@@ -71,6 +73,10 @@ const App = () => (
               <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
               <Route path="/admin-matheus/auditoria" element={<RequireAdmin><AdminAuditoria /></RequireAdmin>} />
               <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
+
+              {/* Manager Panel */}
+              <Route path="/gerentes" element={<ManagerLogin />} />
+              <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
 
               {/* User Dashboard */}
               <Route

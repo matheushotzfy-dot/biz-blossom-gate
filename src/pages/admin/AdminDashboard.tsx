@@ -38,6 +38,7 @@ import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
 import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
 import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
+import AdminManagersTab from "./tabs/AdminManagersTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -48,6 +49,7 @@ const NAV_ITEMS = [
   { id: "top-sellers", label: "Top Sellers", icon: Zap, section: "core", employeeAccess: false },
   { id: "inactive-sellers", label: "Inativos", icon: UserX, section: "core", employeeAccess: false },
   { id: "employees", label: "Staff", icon: UserCog, section: "core", employeeAccess: false },
+  { id: "managers", label: "Gerentes", icon: Shield, section: "core", employeeAccess: false },
   { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, section: "treasury", employeeAccess: false },
   { id: "transactions", label: "Transações", icon: CreditCard, section: "treasury", employeeAccess: true },
   { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, section: "risk", employeeAccess: false },
@@ -413,6 +415,7 @@ export default function AdminDashboard() {
                 <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
+              {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
               {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}

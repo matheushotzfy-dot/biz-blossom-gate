@@ -711,6 +711,63 @@ export type Database = {
           },
         ]
       }
+      manager_fee_limits: {
+        Row: {
+          created_at: string
+          id: string
+          min_transaction_fixed: number
+          min_transaction_percentage: number
+          min_withdrawal_fee: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_transaction_fixed?: number
+          min_transaction_percentage?: number
+          min_withdrawal_fee?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_transaction_fixed?: number
+          min_transaction_percentage?: number
+          min_withdrawal_fee?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      manager_seller_assignments: {
+        Row: {
+          assigned_by: string
+          created_at: string
+          id: string
+          manager_user_id: string
+          notes: string | null
+          seller_user_id: string
+        }
+        Insert: {
+          assigned_by: string
+          created_at?: string
+          id?: string
+          manager_user_id: string
+          notes?: string | null
+          seller_user_id: string
+        }
+        Update: {
+          assigned_by?: string
+          created_at?: string
+          id?: string
+          manager_user_id?: string
+          notes?: string | null
+          seller_user_id?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           banner_url: string | null
@@ -1220,6 +1277,33 @@ export type Database = {
           max_amount?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      seller_notes: {
+        Row: {
+          author_role: string
+          author_user_id: string
+          content: string
+          created_at: string
+          id: string
+          seller_user_id: string
+        }
+        Insert: {
+          author_role?: string
+          author_user_id: string
+          content: string
+          created_at?: string
+          id?: string
+          seller_user_id: string
+        }
+        Update: {
+          author_role?: string
+          author_user_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          seller_user_id?: string
         }
         Relationships: []
       }
@@ -1758,7 +1842,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "employee"
+      app_role: "admin" | "user" | "employee" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1886,7 +1970,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "employee"],
+      app_role: ["admin", "user", "employee", "manager"],
     },
   },
 } as const
