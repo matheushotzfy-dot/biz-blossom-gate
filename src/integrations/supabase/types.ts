@@ -550,6 +550,99 @@ export type Database = {
         }
         Relationships: []
       }
+      fraud_logs: {
+        Row: {
+          block_reason: string
+          block_type: string
+          created_at: string
+          customer_document: string | null
+          customer_email: string | null
+          customer_ip: string | null
+          id: string
+          matched_type: string | null
+          matched_value: string | null
+          metadata: Json | null
+          product_id: string | null
+          seller_user_id: string | null
+        }
+        Insert: {
+          block_reason: string
+          block_type: string
+          created_at?: string
+          customer_document?: string | null
+          customer_email?: string | null
+          customer_ip?: string | null
+          id?: string
+          matched_type?: string | null
+          matched_value?: string | null
+          metadata?: Json | null
+          product_id?: string | null
+          seller_user_id?: string | null
+        }
+        Update: {
+          block_reason?: string
+          block_type?: string
+          created_at?: string
+          customer_document?: string | null
+          customer_email?: string | null
+          customer_ip?: string | null
+          id?: string
+          matched_type?: string | null
+          matched_value?: string | null
+          metadata?: Json | null
+          product_id?: string | null
+          seller_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_logs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fraud_logs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_blacklist: {
+        Row: {
+          added_by: string
+          created_at: string
+          entry_type: string
+          entry_value: string
+          id: string
+          is_active: boolean
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          entry_type: string
+          entry_value: string
+          id?: string
+          is_active?: boolean
+          reason?: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          entry_type?: string
+          entry_value?: string
+          id?: string
+          is_active?: boolean
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           created_at: string
@@ -1288,6 +1381,48 @@ export type Database = {
         }
         Relationships: []
       }
+      velocity_rules: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          max_attempts: number
+          rule_name: string
+          rule_type: string
+          threshold_amount: number | null
+          time_window_minutes: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          max_attempts?: number
+          rule_name: string
+          rule_type: string
+          threshold_amount?: number | null
+          time_window_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          max_attempts?: number
+          rule_name?: string
+          rule_type?: string
+          threshold_amount?: number | null
+          time_window_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       webhook_configs: {
         Row: {
           created_at: string
@@ -1562,6 +1697,23 @@ export type Database = {
       }
     }
     Functions: {
+      check_blacklist: {
+        Args: { _document?: string; _email?: string; _ip?: string }
+        Returns: {
+          block_reason: string
+          blocked: boolean
+          matched_type: string
+          matched_value: string
+        }[]
+      }
+      check_velocity: {
+        Args: { _email?: string; _ip?: string; _rule_type?: string }
+        Returns: {
+          attempt_count: number
+          block_reason: string
+          blocked: boolean
+        }[]
+      }
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean

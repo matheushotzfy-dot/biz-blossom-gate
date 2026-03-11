@@ -31,6 +31,7 @@ import AdminTopSellersTab from "./tabs/AdminTopSellersTab";
 import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
 import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
 import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
+import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -60,6 +61,7 @@ const SIDEBAR_SECTIONS = [
   {
     title: "🛡️ RISCO & COMPLIANCE",
     items: [
+      { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
       { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
       { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
       { id: "premed", label: "Pre-Med PIX", icon: ShieldAlert, employeeAccess: false },
@@ -85,7 +87,7 @@ const SIDEBAR_SECTIONS = [
   },
 ] as const;
 
-type TabId = "god-mode" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers";
+type TabId = "god-mode" | "transactions" | "sellers" | "products" | "top-sellers" | "top-products" | "withdrawals" | "acquirers" | "medpix" | "refunds" | "premed" | "employees" | "coupons" | "courses" | "audit" | "settings" | "error-logs" | "inactive-sellers" | "risk-compliance";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -364,6 +366,9 @@ export default function AdminDashboard() {
             )}
             {activeTab === "acquirers" && isAdmin && (
               <AdminAcquirersTab />
+            )}
+            {activeTab === "risk-compliance" && isAdmin && (
+              <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
             )}
             {activeTab === "medpix" && isAdmin && (
               <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
