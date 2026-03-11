@@ -152,8 +152,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     toast.success(`Lote processado: ${ok} aprovados, ${fail} falhas`);
     setSelectedIds(new Set());
     setBatchProcessing(false);
-    // parent will reload via onWithdrawalAction side-effect
-    if (ok > 0) window.location.reload();
+    if (ok > 0) onWithdrawalAction("", "approved"); // trigger parent reload
   };
 
   const handleBatchReject = async () => {
