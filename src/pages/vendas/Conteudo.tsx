@@ -249,7 +249,7 @@ export default function AdminConteudo() {
         </Button>
       </div>
 
-      {/* KPIs */}
+      {/* KPIs — Glass */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Cursos", value: String(totalCourses), icon: BookOpen, bg: "bg-primary/10", color: "text-primary" },
@@ -257,26 +257,26 @@ export default function AdminConteudo() {
           { label: "Módulos", value: String(totalModules), icon: Layers, bg: "bg-info/10", color: "text-info" },
           { label: "Aulas", value: String(totalLessons), icon: PlayCircle, bg: "bg-warning/10", color: "text-warning" },
         ].map((kpi) => (
-          <motion.div key={kpi.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-border bg-card p-4">
+          <motion.div key={kpi.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
+              <span className="text-[11px] font-medium text-muted-foreground tracking-wide">{kpi.label}</span>
               <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", kpi.bg)}>
-                <kpi.icon className={cn("h-4 w-4", kpi.color)} />
+                <kpi.icon className={cn("h-3.5 w-3.5", kpi.color)} />
               </div>
             </div>
-            <p className="text-2xl font-display font-black text-foreground">{kpi.value}</p>
+            <p className="text-2xl font-display font-bold text-foreground">{kpi.value}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Search */}
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+        <input
           placeholder="Buscar cursos..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="pl-10 h-9 rounded-lg"
+          className="w-full h-9 pl-10 pr-4 rounded-lg bg-muted/30 dark:bg-foreground/[0.03] border border-border/40 dark:border-foreground/[0.05] text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
         />
       </div>
 
@@ -299,10 +299,10 @@ export default function AdminConteudo() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: Math.min(i * 0.05, 0.3) }}
-                className="group rounded-xl border border-border bg-card overflow-hidden flex flex-col hover:border-primary/20 transition-colors"
+                className="group rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/15 transition-colors"
               >
                 {/* Thumbnail */}
-                <div className="relative h-36 overflow-hidden bg-muted/30">
+                <div className="relative h-36 overflow-hidden bg-muted/20">
                   {c.thumbnail_url ? (
                     <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                   ) : (
@@ -312,7 +312,7 @@ export default function AdminConteudo() {
                   )}
                   <div className="absolute top-2.5 right-2.5">
                     <span className={cn(
-                      "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold",
+                      "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm",
                       c.is_published ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                     )}>
                       {c.is_published ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
@@ -328,10 +328,10 @@ export default function AdminConteudo() {
 
                   {/* Stats row */}
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
+                     <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 bg-muted/30 px-2 py-0.5 rounded">
                       <Layers className="h-3 w-3" /> {stats.modules} módulos
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 bg-muted/30 px-2 py-0.5 rounded">
                       <PlayCircle className="h-3 w-3" /> {stats.lessons} aulas
                     </span>
                   </div>
