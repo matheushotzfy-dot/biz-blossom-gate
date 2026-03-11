@@ -102,6 +102,7 @@ const DURATION_OPTIONS = [
 // ═══════════════════════════════════════════════════════════════════
 export default function AdminConteudo() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: coursesRaw = [] } = useCoursesQuery();
   const { data: productsRaw = [] } = useProductsQuery();
   const invalidateAll = useInvalidateAll();
