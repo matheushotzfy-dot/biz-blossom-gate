@@ -145,7 +145,7 @@ export default function Produtos() {
 
   const handleEdit = (p: Tables<"products">) => {
     setEditId(p.id);
-    setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status, page_url: (p as any).page_url || "" });
+    setForm({ name: p.name, description: p.description || "", price: String(p.price), status: p.status, page_url: p.page_url || "" });
     setImagePreview(p.image_url || null); setImageFile(null); setOpen(true);
   };
 
