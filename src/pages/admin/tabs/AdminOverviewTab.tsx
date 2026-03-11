@@ -268,18 +268,18 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             {methodApproval.sort((a, b) => b.total - a.total).map(m => (
               <div key={m.method}>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span className="font-semibold text-white/80">{m.method}</span>
+                  <span className="font-semibold text-zinc-300">{m.method}</span>
                   <span className={cn("font-bold", m.rate >= 80 ? "text-primary" : m.rate >= 50 ? "text-warning" : "text-destructive")}>
                     {m.rate.toFixed(1)}%
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                   <div
                     className={cn("h-full rounded-full transition-all", m.rate >= 80 ? "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" : m.rate >= 50 ? "bg-warning" : "bg-destructive")}
                     style={{ width: `${m.rate}%` }}
                   />
                 </div>
-                <p className="text-[9px] text-white/20 mt-0.5">{m.approved}/{m.total}</p>
+                <p className="text-[9px] text-zinc-500 mt-0.5">{m.approved}/{m.total}</p>
               </div>
             ))}
           </div>
