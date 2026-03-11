@@ -148,8 +148,10 @@ export default function AdminDashboard() {
       toast.success("Saque aprovado e enviado!");
       await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {
-      const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id);
+      // FIX: Only reject if still pending (race condition protection)
+      const { error, count } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending");
       if (error) { toast.error("Erro ao recusar"); return; }
+      if (count === 0) { toast.error("Saque já foi processado"); loadData(); return; }
       toast.success("Saque recusado");
       await logAdminAction("reject_withdrawal", "withdrawal", id);
     }

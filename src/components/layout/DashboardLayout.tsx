@@ -27,18 +27,17 @@ function DashboardLayoutInner() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("notifications")
-      .select("*")
-      .or(`user_id.eq.${user.id},user_id.is.null`)
-      .order("created_at", { ascending: false })
-      .limit(20)
-      .then(({ data }) => {
-        if (data) {
-          setNotifications(data);
-          setUnreadCount(data.filter((n: any) => !n.is_read).length);
-        }
-      });
+    // FIX: Use separate queries instead of .or() with template literals
+    Promise.all([
+      supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(15),
+      supabase.from("notifications").select("*").is("user_id", null).order("created_at", { ascending: false }).limit(5),
+    ]).then(([userRes, globalRes]) => {
+      const all = [...(userRes.data || []), ...(globalRes.data || [])].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ).slice(0, 20);
+      setNotifications(all);
+      setUnreadCount(all.filter((n: any) => !n.is_read).length);
+    });
   }, [user]);
 
   useEffect(() => {

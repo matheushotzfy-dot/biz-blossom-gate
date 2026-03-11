@@ -33,14 +33,21 @@ export default function MemberAuth() {
     setLoading(true);
 
     if (mode === "register") {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         if (error.message.includes("already registered")) {
           toast.error("Este email já possui conta. Faça login.");
           setMode("login");
         } else {
-          toast.error(error.message);
+          toast.error("Erro ao criar conta. Tente novamente.");
         }
+        setLoading(false);
+        return;
+      }
+      // FIX: Check if email confirmation is required (user exists but no session)
+      if (signUpData?.user && !signUpData.session) {
+        toast.success("Conta criada! Verifique seu e-mail para ativar.");
+        setMode("login");
         setLoading(false);
         return;
       }

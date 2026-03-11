@@ -57,6 +57,18 @@ export default function MemberCourse() {
 
   const loadCourse = async () => {
     if (!courseId || !user) return;
+
+    // FIX: Verify user has access to this course before loading
+    const [{ data: accessData }, { data: ownedData }] = await Promise.all([
+      supabase.from("user_access").select("id").eq("user_id", user.id).eq("course_id", courseId).eq("status", "active").limit(1),
+      supabase.from("courses").select("id").eq("id", courseId).eq("user_id", user.id).limit(1),
+    ]);
+    if ((!accessData || accessData.length === 0) && (!ownedData || ownedData.length === 0)) {
+      toast.error("Você não tem acesso a este curso.");
+      setLoading(false);
+      return;
+    }
+
     const { data: courseData } = await supabase.from("courses").select("id, title, description, thumbnail_url").eq("id", courseId).single();
     if (!courseData) { setLoading(false); return; }
     setCourse(courseData);

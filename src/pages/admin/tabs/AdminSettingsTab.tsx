@@ -62,7 +62,7 @@ export default function AdminSettingsTab() {
       supabase.from("fees").select("*").order("name"),
       supabase.from("platform_settings").select("*"),
       supabase.from("retention_settings").select("*"),
-      supabase.from("profiles").select("user_id, full_name, email"),
+      supabase.from("profiles").select("user_id, full_name, email").limit(500),
       supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
     if (feesRes.data) {

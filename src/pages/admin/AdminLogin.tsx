@@ -52,6 +52,11 @@ export default function AdminLogin() {
       toast.success("Bem-vindo ao painel administrativo!");
       navigate("/admin-matheus/dashboard");
     } catch (_err: unknown) {
+      setAttempts(prev => {
+        const next = prev + 1;
+        if (next >= 3) setLockoutUntil(Date.now() + 120000);
+        return next;
+      });
       setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);
