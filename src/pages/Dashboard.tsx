@@ -549,10 +549,10 @@ export default function Dashboard() {
       {/* ─── BOTTOM GRID: TOP PRODUCTS + LATEST SALES ─── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* Top Products */}
-        <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
+        <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center">
                 <Package className="h-4 w-4 text-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground">Top Produtos</h3>
@@ -566,16 +566,16 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-1">
-              {topProducts.map((p, i) => (
-                <div key={p.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30">
-                  <div className="h-9 w-9 rounded-lg bg-muted/50 flex items-center justify-center text-xs font-black text-foreground shrink-0">
+              {topProducts.map((p) => (
+                <div key={p.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-primary/5">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-black text-primary shrink-0">
                     {p.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
                     <p className="text-[11px] text-muted-foreground">{p.count} vendas</p>
                   </div>
-                  <p className="text-sm font-black text-foreground">{fmt(p.revenue)}</p>
+                  <p className="text-sm font-black text-primary">{fmt(p.revenue)}</p>
                 </div>
               ))}
             </div>
