@@ -156,9 +156,10 @@ export default function AdminDashboard() {
       toast.success("Saque aprovado e enviado!");
       await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
     } else {
-      const { error, count } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending");
+      // FIX: Supabase JS v2 doesn't return count by default. Use select after update to verify.
+      const { error, data: updated } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending").select("id");
       if (error) { toast.error("Erro ao recusar"); return; }
-      if (count === 0) { toast.error("Saque já foi processado"); loadData(); return; }
+      if (!updated || updated.length === 0) { toast.error("Saque já foi processado"); loadData(); return; }
       toast.success("Saque recusado");
       await logAdminAction("reject_withdrawal", "withdrawal", id);
     }
