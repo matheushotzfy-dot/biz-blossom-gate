@@ -584,7 +584,7 @@ export default function Vendas() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle icon={<Receipt className="h-6 w-6" />} title="Minhas Vendas" subtitle="Acompanhe todas as suas transações" />
-        <Button variant="ghost" size="sm" onClick={handleExportCSV} className="gap-2 rounded-lg h-9 font-medium text-[12px] text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="sm" onClick={() => setShowExportDialog(true)} className="gap-2 rounded-lg h-9 font-medium text-[12px] text-muted-foreground hover:text-foreground">
           <Download className="h-3.5 w-3.5" /> Exportar CSV
         </Button>
       </div>
