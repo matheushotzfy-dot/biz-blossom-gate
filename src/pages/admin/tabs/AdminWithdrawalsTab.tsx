@@ -85,6 +85,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
   const [adjustReason, setAdjustReason] = useState("");
   const [subTab, setSubTab] = useState<SubTab>("queue");
+  const [rejectDialog, setRejectDialog] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -166,6 +168,18 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
     setSelectedIds(new Set());
     setBatchProcessing(false);
     if (ok > 0) window.location.reload();
+  };
+
+  /* ── Single Reject with Reason ── */
+  const handleRejectWithReason = async () => {
+    if (!rejectDialog || !rejectReason.trim()) { toast.error("Informe o motivo da rejeição"); return; }
+    const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", rejectDialog).eq("status", "pending");
+    if (error) { toast.error("Erro ao recusar"); return; }
+    await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() } as any);
+    toast.success("Saque recusado com motivo registrado");
+    setRejectDialog(null);
+    setRejectReason("");
+    window.location.reload();
   };
 
   const toggleSelect = (id: string) => {
@@ -358,8 +372,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                     const audit = getWithdrawalAudit(w.id);
                     const autoConfig = getAutoConfig(w.user_id);
                     const isPending = w.status === "pending";
-                    return (
-                      <tr key={w.id} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${isPending ? "bg-warning/[0.03]" : ""}`}>
+                        const isOver10k = Number(w.amount) > 10000;
+                        return (
+                      <tr key={w.id} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${isPending ? "bg-warning/[0.03]" : ""} ${isOver10k && isPending ? "ring-1 ring-destructive/30 bg-destructive/[0.04]" : ""}`}>
                         <td className="p-3">
                           {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
                         </td>
@@ -372,7 +387,10 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                         </td>
                         <td className="p-3"><SellerTypeBadge type={getSellerType(w.user_id)} /></td>
                         <td className="p-3"><RiskBadge withdrawal={w} /></td>
-                        <td className="p-3 text-xs font-extrabold text-foreground">R$ {Number(w.amount).toFixed(2)}</td>
+                        <td className={`p-3 text-xs font-extrabold ${isOver10k ? "text-destructive" : "text-foreground"}`}>
+                          R$ {Number(w.amount).toFixed(2)}
+                          {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">⚠️</span>}
+                        </td>
                         <td className="p-3 text-xs text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
                         <td className="p-3 text-xs text-primary font-bold">R$ {Number(w.net_amount).toFixed(2)}</td>
                         <td className="p-3"><StatusBadge status={w.status} /></td>
@@ -400,7 +418,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                               <Button size="sm" className="h-7 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}>
                                 <CheckCircle2 className="h-3 w-3" /> Aprovar
                               </Button>
-                              <Button size="sm" className="h-7 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "rejected")}>
+                              <Button size="sm" className="h-7 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none" onClick={() => { setRejectDialog(w.id); setRejectReason(""); }}>
                                 <XCircle className="h-3 w-3" /> Recusar
                               </Button>
                             </div>
@@ -574,6 +592,31 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
             <Button onClick={handleAdjustment} className="w-full gap-2" disabled={!adjustUserId || !adjustAmount || !adjustReason.trim()}>
               <CheckCircle2 className="h-4 w-4" /> Aplicar Ajuste
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ REJECT WITH REASON DIALOG ═══ */}
+      <Dialog open={!!rejectDialog} onOpenChange={() => setRejectDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><XCircle className="h-5 w-5 text-destructive" /> Recusar Saque</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">
+              Saque <strong className="text-foreground font-mono">{rejectDialog?.slice(0, 8)}</strong> será recusado.
+            </p>
+            <div className="space-y-2">
+              <Label className="text-xs">Motivo da Rejeição <span className="text-destructive">*</span></Label>
+              <Textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Ex: Documentação pendente, dados bancários incorretos..." className="min-h-[80px]" />
+              <p className="text-[10px] text-muted-foreground">O motivo será registrado no Audit Trail.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setRejectDialog(null)} className="flex-1 rounded-xl">Cancelar</Button>
+              <Button onClick={handleRejectWithReason} disabled={!rejectReason.trim()} className="flex-1 gap-1.5 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                <XCircle className="h-4 w-4" /> Confirmar Rejeição
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
