@@ -16,22 +16,7 @@ import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
-
-/* ── Shared UI ── */
-const Panel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-2xl border border-border bg-card p-5 ${className || ""}`}>{children}</div>
-);
-const Kpi = ({ icon, label, value, sub, gradient, alert }: any) => (
-  <div className={`relative rounded-2xl border border-border bg-card p-4 overflow-hidden ${alert ? "ring-1 ring-destructive/30" : ""}`}>
-    <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl bg-gradient-to-br ${gradient} opacity-10`} />
-    <div className="flex items-center gap-2 mb-2">
-      <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-md`}>{icon}</div>
-      <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">{label}</span>
-    </div>
-    <p className="text-xl font-black text-foreground">{value}</p>
-    <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>
-  </div>
-);
+import { GlassPanel as Panel, AdminKpi as Kpi, GlassPanelTitle } from "./AdminOverviewTab";
 
 /* ── Types ── */
 interface BlacklistEntry { id: string; entry_type: string; entry_value: string; reason: string; added_by: string; is_active: boolean; created_at: string; }

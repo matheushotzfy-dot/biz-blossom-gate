@@ -223,7 +223,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
 
       {/* Edit Dialog */}
       <Dialog open={!!editing} onOpenChange={v => { if (!v) setEditing(null); }}>
-        <DialogContent className="max-w-2xl bg-[hsl(228,18%,6%)] border-white/[0.06] text-white">
+        <DialogContent className="max-w-2xl bg-[#0A0A10] border-white/[0.06] text-white">
           <DialogHeader><DialogTitle>Detalhes da Disputa</DialogTitle></DialogHeader>
           {editing && (() => {
             const tx = getTransactionDetails(editing.transaction_id);
