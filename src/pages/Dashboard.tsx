@@ -697,14 +697,20 @@ const toneMap: Record<Tone, { bg: string; text: string }> = {
 
 function MiniHeroCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   return (
-    <div className="rounded-xl border border-border/80 bg-card/80 p-2.5 md:p-3">
-      <div className="flex items-center gap-1 md:gap-1.5 mb-1">
-        <div className={`h-5 w-5 md:h-6 md:w-6 rounded-md flex items-center justify-center ${toneMap[tone].bg}`}>
-          <span className={toneMap[tone].text}>{icon}</span>
+    <div className="group relative rounded-xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md p-3 md:p-4 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] overflow-hidden">
+      {/* Ambient glow */}
+      <div className={`absolute -top-8 -right-8 h-20 w-20 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+        tone === "primary" ? "bg-primary/20" : tone === "info" ? "bg-info/20" : tone === "success" ? "bg-success/20" : "bg-warning/20"
+      }`} />
+      <div className="relative z-10">
+        <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-2.5">
+          <div className={`h-6 w-6 md:h-7 md:w-7 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-white/[0.06]`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 font-semibold truncate">{label}</span>
         </div>
-        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.12em] md:tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
+        <p className="text-lg md:text-2xl font-display font-black tracking-tight text-foreground">{value}</p>
       </div>
-      <p className="text-base md:text-xl font-display font-black tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
