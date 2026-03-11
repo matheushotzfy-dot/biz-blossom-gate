@@ -6,8 +6,11 @@ import {
   Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
   RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
   Download, Smartphone, FileText, BarChart3, ArrowDownRight, Zap, Filter,
-  MoreHorizontal, ExternalLink, Receipt,
+  MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
@@ -458,6 +461,224 @@ const STATUS_PILL_STYLES: Record<string, { active: string; dot: string }> = {
   chargeback: { active: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
 };
 
+/* ─── Export Dialog ─── */
+const ALL_STATUSES = [
+  { value: "completed", label: "Aprovadas", dot: "bg-success" },
+  { value: "pending", label: "Pendentes", dot: "bg-warning" },
+  { value: "failed", label: "Falhas", dot: "bg-destructive" },
+  { value: "refunded", label: "Reembolsos", dot: "bg-info" },
+  { value: "chargeback", label: "Chargebacks", dot: "bg-destructive" },
+];
+const ALL_METHODS = [
+  { value: "pix", label: "PIX", icon: Smartphone },
+  { value: "credit_card", label: "Cartão", icon: CreditCard },
+  { value: "boleto", label: "Boleto", icon: FileText },
+];
+
+function ExportDialog({ open, onOpenChange, transactions, products, productsRaw, onExport }: {
+  open: boolean; onOpenChange: (v: boolean) => void;
+  transactions: Tables<"transactions">[];
+  products: Record<string, string>;
+  productsRaw: any[];
+  onExport: (txList: Tables<"transactions">[]) => void;
+}) {
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(ALL_STATUSES.map(s => s.value)));
+  const [selectedMethods, setSelectedMethods] = useState<Set<string>>(new Set(ALL_METHODS.map(m => m.value)));
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set(["all"]));
+
+  const toggleStatus = (v: string) => {
+    setSelectedStatuses(prev => {
+      const next = new Set(prev);
+      next.has(v) ? next.delete(v) : next.add(v);
+      return next;
+    });
+  };
+  const toggleMethod = (v: string) => {
+    setSelectedMethods(prev => {
+      const next = new Set(prev);
+      next.has(v) ? next.delete(v) : next.add(v);
+      return next;
+    });
+  };
+  const toggleProduct = (id: string) => {
+    if (id === "all") {
+      setSelectedProducts(new Set(["all"]));
+      return;
+    }
+    setSelectedProducts(prev => {
+      const next = new Set(prev);
+      next.delete("all");
+      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.size === 0) next.add("all");
+      return next;
+    });
+  };
+
+  const selectAllStatuses = () => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)));
+  const selectAllMethods = () => setSelectedMethods(new Set(ALL_METHODS.map(m => m.value)));
+
+  const exportFiltered = useMemo(() => {
+    return transactions.filter(t => {
+      if (!selectedStatuses.has(t.status)) return false;
+      if (t.payment_method && !selectedMethods.has(t.payment_method)) return false;
+      if (!selectedProducts.has("all") && t.product_id && !selectedProducts.has(t.product_id)) return false;
+      return true;
+    });
+  }, [transactions, selectedStatuses, selectedMethods, selectedProducts]);
+
+  const handleExport = () => {
+    onExport(exportFiltered);
+    onOpenChange(false);
+  };
+
+  // Unique products from transactions
+  const txProducts = useMemo(() => {
+    const ids = new Set(transactions.map(t => t.product_id).filter(Boolean) as string[]);
+    return Array.from(ids).map(id => ({ id, name: products[id] || id.slice(0, 8) }));
+  }, [transactions, products]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <Download className="h-5 w-5 text-primary" />
+            Exportar Vendas
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-[13px]">
+            Escolha os filtros para a exportação CSV
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2">
+          {/* Status filter */}
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</p>
+              <button onClick={selectAllStatuses} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_STATUSES.map(s => {
+                const active = selectedStatuses.has(s.value);
+                return (
+                  <button
+                    key={s.value}
+                    onClick={() => toggleStatus(s.value)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border",
+                      active
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-border/30 dark:border-foreground/[0.06] text-muted-foreground hover:border-border/50"
+                    )}
+                  >
+                    <span className={cn("h-1.5 w-1.5 rounded-full", active ? s.dot : "bg-muted-foreground/30")} />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Payment method filter */}
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Método de Pagamento</p>
+              <button onClick={selectAllMethods} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_METHODS.map(m => {
+                const active = selectedMethods.has(m.value);
+                const Icon = m.icon;
+                return (
+                  <button
+                    key={m.value}
+                    onClick={() => toggleMethod(m.value)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border",
+                      active
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-border/30 dark:border-foreground/[0.06] text-muted-foreground hover:border-border/50"
+                    )}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Product filter */}
+          {txProducts.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Produtos</p>
+              <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
+                <button
+                  onClick={() => toggleProduct("all")}
+                  className={cn(
+                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all text-left",
+                    selectedProducts.has("all")
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/30"
+                  )}
+                >
+                  {selectedProducts.has("all")
+                    ? <CheckSquare className="h-3.5 w-3.5 shrink-0" />
+                    : <Square className="h-3.5 w-3.5 shrink-0" />
+                  }
+                  Todos os produtos
+                </button>
+                {txProducts.map(p => {
+                  const active = selectedProducts.has(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => toggleProduct(p.id)}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all text-left",
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted/30"
+                      )}
+                    >
+                      {active
+                        ? <CheckSquare className="h-3.5 w-3.5 shrink-0" />
+                        : <Square className="h-3.5 w-3.5 shrink-0" />
+                      }
+                      <span className="truncate">{p.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Preview count */}
+          <div className="rounded-lg bg-muted/20 dark:bg-foreground/[0.03] border border-border/30 dark:border-foreground/[0.05] p-3 flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-medium text-foreground">{exportFiltered.length} transações</p>
+              <p className="text-[10px] text-muted-foreground">serão exportadas</p>
+            </div>
+            <p className="text-[14px] font-bold text-primary font-display">
+              {fmt(exportFiltered.reduce((a, t) => a + Number(t.net_amount), 0))}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-1">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-lg h-10 text-[12px] font-medium">
+            Cancelar
+          </Button>
+          <Button onClick={handleExport} disabled={exportFiltered.length === 0} className="flex-1 rounded-lg h-10 gap-2 text-[12px] font-medium">
+            <Download className="h-3.5 w-3.5" />
+            Exportar {exportFiltered.length > 0 ? `(${exportFiltered.length})` : ""}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ═══════════════════════════════════ MAIN ═══════════════════════════════════ */
 
 export default function Vendas() {
@@ -476,6 +697,7 @@ export default function Vendas() {
   const [datePreset, setDatePreset] = useState<DatePreset>("30d");
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, datePreset]);
 
@@ -547,10 +769,10 @@ export default function Vendas() {
     return str;
   }, []);
 
-  const handleExportCSV = useCallback(() => {
-    if (filtered.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
+  const handleExportCSV = useCallback((txList: Tables<"transactions">[]) => {
+    if (txList.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
     const headers = ["ID", "Cliente", "Email", "Telefone", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
-    const rows = filtered.map(t => [
+    const rows = txList.map(t => [
       t.id, t.customer_name || "", t.customer_email || "", t.customer_phone || "",
       t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount),
       t.payment_method || "", t.status, t.created_at,
@@ -561,8 +783,8 @@ export default function Vendas() {
     const a = document.createElement("a");
     a.href = url; a.download = `vendas-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
     URL.revokeObjectURL(url);
-    toast.success("Exportação concluída!");
-  }, [filtered, products, sanitizeCsvCell]);
+    toast.success(`${txList.length} transações exportadas!`);
+  }, [products, sanitizeCsvCell]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -580,7 +802,7 @@ export default function Vendas() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle icon={<Receipt className="h-6 w-6" />} title="Minhas Vendas" subtitle="Acompanhe todas as suas transações" />
-        <Button variant="ghost" size="sm" onClick={handleExportCSV} className="gap-2 rounded-lg h-9 font-medium text-[12px] text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="sm" onClick={() => setShowExportDialog(true)} className="gap-2 rounded-lg h-9 font-medium text-[12px] text-muted-foreground hover:text-foreground">
           <Download className="h-3.5 w-3.5" /> Exportar CSV
         </Button>
       </div>
@@ -731,6 +953,15 @@ export default function Vendas() {
       {selectedTx && (
         <TxDetailModal tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={handleRefund} />
       )}
+      {/* Export Dialog */}
+      <ExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        transactions={dateFiltered}
+        products={products}
+        productsRaw={productsRaw}
+        onExport={handleExportCSV}
+      />
     </PageShell>
   );
 }
