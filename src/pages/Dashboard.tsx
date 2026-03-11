@@ -394,7 +394,7 @@ export default function Dashboard() {
                 onClick={() => setShowScalePopup(false)}
                 className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
               >
-                BORA ESCALAR! 🔥
+                BORA ESCALAR!
               </button>
             </div>
           </div>
