@@ -86,7 +86,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
     toast.success(`${newType.toUpperCase()} adicionado à Blacklist`);
     await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: newReason.trim() } as any);
     setAddDialog(false); setNewValue(""); setNewReason("");
-    const { data } = await supabase.from("global_blacklist" as any).select("*").order("created_at", { ascending: false }).limit(500);
+    const { data } = await supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500);
     if (data) setBlacklist(data as any[]);
   };
 
