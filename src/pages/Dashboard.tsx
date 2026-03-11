@@ -315,6 +315,11 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5 md:space-y-6 relative">
+      {/* Ambient glow */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-32 left-1/3 h-96 w-96 rounded-full bg-primary/8 blur-[150px]" />
+        <div className="absolute top-1/4 -right-20 h-72 w-72 rounded-full bg-primary/5 blur-[120px]" />
+      </div>
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -436,9 +441,9 @@ export default function Dashboard() {
           icon={<DollarSign className="h-5 w-5" />}
           label="Receita Líquida"
           value={fmt(revenue)}
-          trend={approved.length > 0 ? "+15%" : "0%"}
+          trend={approved.length > 0 ? "+15% vs ontem" : "0%"}
           trendUp={approved.length > 0}
-          tone="success"
+          tone="primary"
         />
         <FintechKpiCard
           icon={<ShoppingCart className="h-5 w-5" />}
@@ -446,7 +451,7 @@ export default function Dashboard() {
           value={String(approved.length)}
           trend={`${pending.length} pendentes`}
           trendUp={true}
-          tone="info"
+          tone="primary"
         />
         <FintechKpiCard
           icon={<Target className="h-5 w-5" />}
@@ -462,14 +467,14 @@ export default function Dashboard() {
           value={`${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`}
           trend={`${withdrawals.filter(w => w.status === "pending").length} saques pendentes`}
           trendUp={balance > 0}
-          tone={balance >= 0 ? "success" : "warning"}
+          tone={balance >= 0 ? "primary" : "warning"}
         />
       </div>
 
       {/* ─── CHART + OPERATIONAL SNAPSHOT ─── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         {/* Chart */}
-        <div className="xl:col-span-8 rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10 min-h-[320px]">
+        <div className="xl:col-span-8 rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5 min-h-[320px]">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-foreground">Performance de Receita</h3>
@@ -477,7 +482,7 @@ export default function Dashboard() {
             </div>
             <div className="text-right">
               <p className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">{fmt(revenue)}</p>
-              <p className="text-[11px] text-muted-foreground">{selectedPeriod.label}</p>
+              <p className="text-[11px] text-primary font-semibold">{selectedPeriod.label}</p>
             </div>
           </div>
           <div className="h-[220px] md:h-[260px]">
@@ -485,8 +490,9 @@ export default function Dashboard() {
               <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                    <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
@@ -494,24 +500,24 @@ export default function Dashboard() {
                 <Tooltip
                   contentStyle={{
                     background: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
+                    border: "1px solid hsl(var(--primary) / 0.2)",
                     borderRadius: "12px",
                     fontSize: "13px",
                     color: "hsl(var(--foreground))",
                     padding: "10px 14px",
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
+                    boxShadow: "0 8px 30px hsl(var(--primary) / 0.1)",
                   }}
                   formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeDasharray: "4 4" }}
                 />
                 <Area
                   type="monotone"
                   dataKey="vendas"
                   stroke="hsl(var(--primary))"
-                  strokeWidth={2.5}
+                  strokeWidth={3}
                   fill="url(#dashboardRevenue)"
                   dot={false}
-                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
+                  activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -520,21 +526,21 @@ export default function Dashboard() {
 
         {/* Operational Snapshot */}
         <div className="xl:col-span-4 space-y-4">
-          <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-black/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Operacional</h4>
+          <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-primary/5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-primary/60 mb-3">Operacional</h4>
             <div className="space-y-2.5">
-              <OperationalRow icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
-              <OperationalRow icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
-              <OperationalRow icon={<AlertTriangle className="h-4 w-4" />} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
+              <OperationalRow icon={<Percent className="h-4 w-4" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="primary" />
+              <OperationalRow icon={<CreditCard className="h-4 w-4" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="primary" />
+              <OperationalRow icon={<AlertTriangle className="h-4 w-4" />} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "primary"} />
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-black/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Resumo</h4>
+          <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-primary/5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-primary/60 mb-3">Resumo</h4>
             <div className="space-y-2.5">
               <OperationalRow icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={fmt(approved.length > 0 ? revenue / approved.length : 0)} tone="primary" />
               <OperationalRow icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={String(refunded.length)} tone="info" />
-              <OperationalRow icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "success"} />
+              <OperationalRow icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "primary"} />
             </div>
           </div>
         </div>
@@ -543,10 +549,10 @@ export default function Dashboard() {
       {/* ─── BOTTOM GRID: TOP PRODUCTS + LATEST SALES ─── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* Top Products */}
-        <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
+        <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center">
                 <Package className="h-4 w-4 text-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground">Top Produtos</h3>
@@ -560,16 +566,16 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-1">
-              {topProducts.map((p, i) => (
-                <div key={p.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30">
-                  <div className="h-9 w-9 rounded-lg bg-muted/50 flex items-center justify-center text-xs font-black text-foreground shrink-0">
+              {topProducts.map((p) => (
+                <div key={p.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-primary/5">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-black text-primary shrink-0">
                     {p.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
                     <p className="text-[11px] text-muted-foreground">{p.count} vendas</p>
                   </div>
-                  <p className="text-sm font-black text-foreground">{fmt(p.revenue)}</p>
+                  <p className="text-sm font-black text-primary">{fmt(p.revenue)}</p>
                 </div>
               ))}
             </div>
@@ -577,11 +583,11 @@ export default function Dashboard() {
         </div>
 
         {/* Latest Sales */}
-        <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
+        <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-info" />
+              <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
               </div>
               <h3 className="text-sm font-bold text-foreground">Últimas Vendas</h3>
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" title="Tempo real" />
@@ -599,20 +605,20 @@ export default function Dashboard() {
             ) : (
               activity.map((item) => {
                 const statusConfig: Record<string, { label: string; pill: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive" },
+                  completed: { label: "Aprovada", pill: "bg-primary/20 text-primary" },
+                  pending: { label: "Pendente", pill: "bg-warning/20 text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/20 text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/20 text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/20 text-destructive" },
+                  approved: { label: "Aprovado", pill: "bg-primary/20 text-primary" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/20 text-destructive" },
                 };
                 const config = statusConfig[item.status] || { label: item.status, pill: "bg-muted text-foreground" };
 
                 return (
-                  <div key={item.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/30">
-                    <div className="h-9 w-9 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
-                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4 text-foreground/60" /> : <Wallet className="h-4 w-4 text-foreground/60" />}
+                  <div key={item.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-primary/5">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4 text-primary" /> : <Wallet className="h-4 w-4 text-primary" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -631,7 +637,7 @@ export default function Dashboard() {
       </div>
 
       {/* ─── QUICK ACTIONS ─── */}
-      <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-black/10">
+      <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-6 shadow-xl shadow-primary/5">
         <div className="mb-3 md:mb-4 flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Zap className="h-4 w-4 text-primary" />
@@ -684,17 +690,17 @@ function FintechKpiCard({ icon, label, value, trend, trendUp, tone }: {
 }) {
   const colors = toneColors[tone];
   return (
-    <div className="rounded-2xl border border-border/60 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-black/10 transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:border-primary/15 group">
+    <div className="rounded-2xl border border-primary/10 bg-card backdrop-blur-md p-4 md:p-5 shadow-xl shadow-primary/5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 group">
       <div className="flex items-center justify-between mb-2 md:mb-3">
         <span className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-bold">{label}</span>
-        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-lg flex items-center justify-center ${colors.iconBg} transition-colors`}>
-          <span className={colors.iconText}>{icon}</span>
+        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-lg flex items-center justify-center bg-primary/15 transition-colors group-hover:bg-primary/25`}>
+          <span className="text-primary">{icon}</span>
         </div>
       </div>
       <p className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-foreground leading-none mb-1.5">{value}</p>
       <div className="flex items-center gap-1">
-        {trendUp ? <ArrowUpRight className={`h-3 w-3 ${colors.trendText}`} /> : <ArrowDownRight className="h-3 w-3 text-muted-foreground" />}
-        <span className={`text-[10px] md:text-[11px] font-semibold ${trendUp ? colors.trendText : "text-muted-foreground"}`}>{trend}</span>
+        {trendUp ? <ArrowUpRight className="h-3 w-3 text-primary" /> : <ArrowDownRight className="h-3 w-3 text-muted-foreground" />}
+        <span className={`text-[10px] md:text-[11px] font-bold ${trendUp ? "text-primary" : "text-muted-foreground"}`}>{trend}</span>
       </div>
     </div>
   );
@@ -703,7 +709,7 @@ function FintechKpiCard({ icon, label, value, trend, trendUp, tone }: {
 function OperationalRow({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: Tone }) {
   const colors = toneColors[tone];
   return (
-    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-muted/10 hover:bg-muted/20 transition-colors">
+    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors">
       <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${colors.iconBg}`}>
         <span className={colors.iconText}>{icon}</span>
       </div>
