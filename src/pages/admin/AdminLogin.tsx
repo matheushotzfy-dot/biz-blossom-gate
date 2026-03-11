@@ -107,7 +107,7 @@ export default function AdminLogin() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full h-[52px] gradient-primary hover:opacity-90 text-white font-semibold rounded-2xl shadow-[0_10px_40px_rgba(16,185,129,0.25)] hover:shadow-[0_15px_50px_rgba(16,185,129,0.35)] transition-all duration-300 text-[14px]" disabled={loading}>
+            <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-indigo-500 to-violet-600 hover:opacity-90 text-white font-semibold rounded-2xl shadow-[0_10px_40px_rgba(99,102,241,0.25)] hover:shadow-[0_15px_50px_rgba(99,102,241,0.35)] transition-all duration-300 text-[14px]" disabled={loading}>
               <Lock className="h-4 w-4 mr-2" />
               {loading ? "Autenticando..." : "Acessar Painel"}
             </Button>
