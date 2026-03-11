@@ -299,7 +299,7 @@ export default function AdminConteudo() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: Math.min(i * 0.05, 0.3) }}
-                className="group rounded-xl border border-border bg-card overflow-hidden flex flex-col hover:border-primary/20 transition-colors"
+                className="group rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/15 transition-colors"
               >
                 {/* Thumbnail */}
                 <div className="relative h-36 overflow-hidden bg-muted/30">
