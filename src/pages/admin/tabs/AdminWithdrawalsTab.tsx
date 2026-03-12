@@ -309,9 +309,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
               <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Filtro de Risco" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="flagged">⚠️ Com Flag</SelectItem>
-                <SelectItem value="new_seller">🆕 Sellers Novos</SelectItem>
-                <SelectItem value="high_value">💰 Acima R$ 50k</SelectItem>
+                <SelectItem value="flagged">Com Flag</SelectItem>
+                <SelectItem value="new_seller">Sellers Novos</SelectItem>
+                <SelectItem value="high_value">Acima R$ 50k</SelectItem>
               </SelectContent>
             </Select>
 
