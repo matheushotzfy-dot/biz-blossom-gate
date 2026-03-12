@@ -189,7 +189,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       supabase.from("products").update({ status: "suspended" }).eq("user_id", userId),
     ]);
     if (profileRes.error || productsRes.error) { toast.error("Erro ao banir seller"); return; }
-    toast.success("⛔ Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
+    toast.success("Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
     await logAdminAction("ban_seller", "profile", userId, { action: "block+freeze+suspend_products" });
     onReload();
     if (selectedUser?.user_id === userId) setSelectedUser(null);
