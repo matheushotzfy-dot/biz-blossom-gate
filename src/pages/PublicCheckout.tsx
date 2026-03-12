@@ -468,7 +468,7 @@ export default function PublicCheckout() {
             <CheckCircle2 className="h-14 w-14 text-white" />
           </div>
         </div>
-        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado! 🎉</h1>
+        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado!</h1>
         <p className="text-white/50 mb-8 text-base">
           Seu acesso foi liberado com sucesso.
         </p>
