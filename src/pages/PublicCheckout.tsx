@@ -662,7 +662,7 @@ export default function PublicCheckout() {
               </div>
               <div>
                 <p className="text-[13px] font-bold text-white/80">
-                  🔥 <span style={{ color: btnColor }}>{socialCount}+ compradores</span> nas últimas 24h
+                  <span style={{ color: btnColor }}>{socialCount}+ compradores</span> nas últimas 24h
                 </p>
                 <p className="text-[10px] text-white/25 mt-0.5">Produto verificado • Alta demanda</p>
               </div>

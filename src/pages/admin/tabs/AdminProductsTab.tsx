@@ -383,12 +383,12 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                   <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-1.5">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Config. Checkout</p>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                      <span className="text-muted-foreground">PIX:</span><span className="font-medium text-foreground">{selectedProduct.checkout_pix_enabled ? "✅ Sim" : "❌ Não"}</span>
-                      <span className="text-muted-foreground">Cartão:</span><span className="font-medium text-foreground">{selectedProduct.checkout_credit_card_enabled ? "✅ Sim" : "❌ Não"}</span>
-                      <span className="text-muted-foreground">Boleto:</span><span className="font-medium text-foreground">{selectedProduct.checkout_boleto_enabled ? "✅ Sim" : "❌ Não"}</span>
+                      <span className="text-muted-foreground">PIX:</span><span className="font-medium text-foreground">{selectedProduct.checkout_pix_enabled ? "Sim" : "Não"}</span>
+                      <span className="text-muted-foreground">Cartão:</span><span className="font-medium text-foreground">{selectedProduct.checkout_credit_card_enabled ? "Sim" : "Não"}</span>
+                      <span className="text-muted-foreground">Boleto:</span><span className="font-medium text-foreground">{selectedProduct.checkout_boleto_enabled ? "Sim" : "Não"}</span>
                       <span className="text-muted-foreground">Timer:</span><span className="font-medium text-foreground">{selectedProduct.checkout_timer_enabled ? `${selectedProduct.checkout_timer_minutes}min` : "Não"}</span>
-                      <span className="text-muted-foreground">Garantia:</span><span className="font-medium text-foreground">{selectedProduct.checkout_guarantee_enabled ? "✅ Sim" : "❌ Não"}</span>
-                      <span className="text-muted-foreground">Endereço:</span><span className="font-medium text-foreground">{selectedProduct.checkout_address_required ? "✅ Obrig." : "Não"}</span>
+                      <span className="text-muted-foreground">Garantia:</span><span className="font-medium text-foreground">{selectedProduct.checkout_guarantee_enabled ? "Sim" : "Não"}</span>
+                      <span className="text-muted-foreground">Endereço:</span><span className="font-medium text-foreground">{selectedProduct.checkout_address_required ? "Obrig." : "Não"}</span>
                     </div>
                     {selectedProduct.checkout_url && (
                       <div className="pt-2 mt-2 border-t border-border/50">

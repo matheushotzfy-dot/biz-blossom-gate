@@ -373,7 +373,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                         <td className="p-3"><RiskBadge withdrawal={w} /></td>
                         <td className={`p-3 text-xs font-extrabold ${isOver10k ? "text-destructive" : "text-foreground"}`}>
                           R$ {Number(w.amount).toFixed(2)}
-                          {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">⚠️</span>}
+                          {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">!</span>}
                         </td>
                         <td className="p-3 text-xs text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
                         <td className="p-3 text-xs text-primary font-bold">R$ {Number(w.net_amount).toFixed(2)}</td>
