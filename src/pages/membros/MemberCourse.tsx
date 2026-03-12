@@ -138,7 +138,7 @@ export default function MemberCourse() {
       { onConflict: "user_id,lesson_id" }
     );
     setProgress(prev => { const next = new Map(prev); next.set(lessonId, { lesson_id: lessonId, completed: true, progress_seconds: 0 }); return next; });
-    toast.success("Aula concluída! 🎉");
+    toast.success("Aula concluída!");
     // Auto-advance to next
     const allLessons = modules.flatMap(m => m.lessons);
     const idx = allLessons.findIndex(l => l.id === lessonId);
