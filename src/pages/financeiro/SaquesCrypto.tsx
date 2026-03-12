@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useWithdrawals, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
+import { useWithdrawals, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   ArrowDownToLine, Clock, CheckCircle2, XCircle, Shield, Zap, Copy,
-  Wallet, AlertTriangle, Info, ExternalLink,
+  Wallet, AlertTriangle, Info, ExternalLink, Globe, Link2, Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,19 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Crypto definitions ── */
+interface CryptoNetwork {
+  id: string;
+  name: string;
+  shortName: string;
+}
+
 interface CryptoAsset {
   id: string;
   symbol: string;
   name: string;
   coingeckoId: string;
   color: string;
-  networks: { id: string; name: string; icon: string }[];
+  networks: CryptoNetwork[];
 }
 
 const CRYPTO_ASSETS: CryptoAsset[] = [
@@ -30,34 +36,36 @@ const CRYPTO_ASSETS: CryptoAsset[] = [
     id: "btc", symbol: "BTC", name: "Bitcoin", coingeckoId: "bitcoin",
     color: "#F7931A",
     networks: [
-      { id: "onchain", name: "Onchain (BTC)", icon: "🔗" },
-      { id: "lightning", name: "Lightning Network", icon: "⚡" },
-      { id: "liquid", name: "Liquid Network", icon: "💧" },
+      { id: "onchain", name: "Bitcoin Onchain", shortName: "BTC" },
+      { id: "lightning", name: "Lightning Network", shortName: "LN" },
+      { id: "liquid", name: "Liquid Network", shortName: "L-BTC" },
     ],
   },
   {
     id: "usdt", symbol: "USDT", name: "Tether", coingeckoId: "tether",
     color: "#26A17B",
     networks: [
-      { id: "tron", name: "Tron (TRC-20)", icon: "🔴" },
-      { id: "polygon", name: "Polygon", icon: "🟣" },
-      { id: "arbitrum", name: "Arbitrum One", icon: "🔵" },
-      { id: "solana", name: "Solana", icon: "🟢" },
-      { id: "optimism", name: "Optimism", icon: "🔴" },
-      { id: "near", name: "NEAR Protocol", icon: "⬛" },
-      { id: "polkadot", name: "Polkadot", icon: "🩷" },
-      { id: "bsc", name: "BNB Smart Chain", icon: "🟡" },
-      { id: "ethereum", name: "Ethereum (ERC-20)", icon: "🔷" },
+      { id: "tron", name: "Tron (TRC-20)", shortName: "TRC20" },
+      { id: "polygon", name: "Polygon", shortName: "MATIC" },
+      { id: "arbitrum", name: "Arbitrum One", shortName: "ARB" },
+      { id: "solana", name: "Solana", shortName: "SOL" },
+      { id: "optimism", name: "Optimism", shortName: "OP" },
+      { id: "near", name: "NEAR Protocol", shortName: "NEAR" },
+      { id: "polkadot", name: "Polkadot", shortName: "DOT" },
+      { id: "bsc", name: "BNB Smart Chain", shortName: "BSC" },
+      { id: "ethereum", name: "Ethereum (ERC-20)", shortName: "ETH" },
     ],
   },
   {
     id: "xmr", symbol: "XMR", name: "Monero", coingeckoId: "monero",
     color: "#FF6600",
     networks: [
-      { id: "monero", name: "Monero Network", icon: "🟠" },
+      { id: "monero", name: "Monero Network", shortName: "XMR" },
     ],
   },
 ];
+
+const MARKUP = 1.03; // 3% above market
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 const fmtUSD = (v: number) => `$ ${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -108,26 +116,30 @@ export default function SaquesCrypto() {
     return () => clearInterval(interval);
   }, []);
 
-  // Refresh withdrawals
   useEffect(() => {
     if (!user?.id) return;
     const interval = setInterval(() => refetchWithdrawals(), 30000);
     return () => clearInterval(interval);
   }, [user?.id, refetchWithdrawals]);
 
-  // Filter crypto withdrawals
   const cryptoWithdrawals = useMemo(
     () => withdrawals.filter(w => (w as any).withdrawal_type === "crypto"),
     [withdrawals]
   );
 
-  // Check if first crypto withdrawal
   const hasCompletedCrypto = cryptoWithdrawals.some(w => w.status === "approved");
   const dailyLimit = hasCompletedCrypto ? 6000 : 500;
 
   const handleSelectAsset = (asset: CryptoAsset) => {
     setSelectedAsset(asset);
     setSelectedNetwork(asset.networks[0]);
+  };
+
+  // Price with 3% markup (user pays more BRL per crypto unit)
+  const getMarkupPrice = (assetId: string) => {
+    const p = prices[assetId];
+    if (!p) return null;
+    return { ...p, brl: p.brl * MARKUP, usd: p.usd * MARKUP };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,7 +149,7 @@ export default function SaquesCrypto() {
     if (isNaN(numAmount) || numAmount <= 0) { toast.error("Valor inválido"); return; }
     if (!cryptoAddress.trim()) { toast.error("Insira o endereço da carteira"); return; }
 
-    const fee = numAmount * 0.07 + 5;
+    const fee = numAmount * 0.05 + 5;
     if (numAmount <= fee) { toast.error(`Valor deve ser maior que a taxa de ${fmt(fee)}`); return; }
 
     const { error } = await supabase.from("withdrawals").insert({
@@ -168,11 +180,11 @@ export default function SaquesCrypto() {
   const approved = cryptoWithdrawals.filter(w => w.status === "approved");
   const totalApproved = approved.reduce((a, w) => a + Number(w.net_amount), 0);
 
-  const currentPrice = prices[selectedAsset.id];
+  const markupPrice = getMarkupPrice(selectedAsset.id);
   const numAmount = parseFloat(amount) || 0;
-  const fee = numAmount > 0 ? numAmount * 0.07 + 5 : 0;
+  const fee = numAmount > 0 ? numAmount * 0.05 + 5 : 0;
   const netAmount = numAmount > fee ? numAmount - fee : 0;
-  const cryptoAmount = currentPrice && currentPrice.brl > 0 ? netAmount / currentPrice.brl : 0;
+  const cryptoAmount = markupPrice && markupPrice.brl > 0 ? netAmount / markupPrice.brl : 0;
 
   return (
     <PageShell>
@@ -205,66 +217,74 @@ export default function SaquesCrypto() {
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Moeda</Label>
                 <div className="mt-2 grid grid-cols-3 gap-2">
-                  {CRYPTO_ASSETS.map(asset => (
-                    <button
-                      key={asset.id}
-                      type="button"
-                      onClick={() => handleSelectAsset(asset)}
-                      className={cn(
-                        "relative flex flex-col items-center gap-2 p-3 rounded-xl border transition-all",
-                        selectedAsset.id === asset.id
-                          ? "border-primary/40 bg-primary/5 shadow-sm"
-                          : "border-border/50 bg-muted/20 hover:border-border hover:bg-muted/40"
-                      )}
-                    >
-                      <div
-                        className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                        style={{ backgroundColor: asset.color }}
+                  {CRYPTO_ASSETS.map(asset => {
+                    const mp = getMarkupPrice(asset.id);
+                    return (
+                      <button
+                        key={asset.id}
+                        type="button"
+                        onClick={() => handleSelectAsset(asset)}
+                        className={cn(
+                          "relative flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all duration-200",
+                          selectedAsset.id === asset.id
+                            ? "border-primary/50 bg-primary/5 shadow-md shadow-primary/5 ring-1 ring-primary/20"
+                            : "border-border/40 bg-muted/10 hover:border-border/60 hover:bg-muted/30"
+                        )}
                       >
-                        {asset.symbol.charAt(0)}
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[12px] font-bold">{asset.symbol}</p>
-                        <p className="text-[9px] text-muted-foreground">{asset.name}</p>
-                      </div>
-                      {prices[asset.id] && (
-                        <div className="text-center">
-                          <p className="text-[10px] font-mono font-semibold text-foreground">
-                            {fmt(prices[asset.id].brl)}
-                          </p>
-                          <p className={cn(
-                            "text-[9px] font-bold",
-                            prices[asset.id].brl_24h_change >= 0 ? "text-success" : "text-destructive"
-                          )}>
-                            {prices[asset.id].brl_24h_change >= 0 ? "+" : ""}
-                            {prices[asset.id].brl_24h_change.toFixed(1)}%
-                          </p>
+                        <div
+                          className="h-11 w-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg"
+                          style={{ backgroundColor: asset.color, boxShadow: `0 4px 14px ${asset.color}30` }}
+                        >
+                          {asset.symbol.charAt(0)}
                         </div>
-                      )}
-                    </button>
-                  ))}
+                        <div className="text-center">
+                          <p className="text-[12px] font-bold">{asset.symbol}</p>
+                          <p className="text-[9px] text-muted-foreground">{asset.name}</p>
+                        </div>
+                        {mp && (
+                          <div className="text-center">
+                            <p className="text-[10px] font-mono font-semibold text-foreground">
+                              {fmt(mp.brl)}
+                            </p>
+                            <p className={cn(
+                              "text-[9px] font-bold",
+                              mp.brl_24h_change >= 0 ? "text-success" : "text-destructive"
+                            )}>
+                              {mp.brl_24h_change >= 0 ? "+" : ""}
+                              {mp.brl_24h_change.toFixed(1)}%
+                            </p>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Network Selection */}
               <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-1.5">
+                  <Globe className="h-3 w-3" />
                   Rede ({selectedAsset.symbol})
                 </Label>
-                <div className="mt-2 grid grid-cols-2 gap-1.5 max-h-[200px] overflow-y-auto pr-1">
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   {selectedAsset.networks.map(net => (
                     <button
                       key={net.id}
                       type="button"
                       onClick={() => setSelectedNetwork(net)}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-left text-[11px] font-medium",
+                        "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all duration-200 text-[11px] font-medium",
                         selectedNetwork.id === net.id
-                          ? "border-primary/40 bg-primary/5 text-primary"
-                          : "border-border/40 bg-muted/10 text-muted-foreground hover:border-border hover:bg-muted/30"
+                          ? "border-primary/50 bg-primary/10 text-primary ring-1 ring-primary/20 shadow-sm"
+                          : "border-border/30 bg-muted/5 text-muted-foreground hover:border-border/50 hover:bg-muted/20"
                       )}
                     >
-                      <span className="text-sm">{net.icon}</span>
+                      <span className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        selectedNetwork.id === net.id ? "bg-primary" : "bg-muted-foreground/30"
+                      )} />
+                      <span className="font-bold text-[10px] opacity-60">{net.shortName}</span>
                       <span className="truncate">{net.name}</span>
                     </button>
                   ))}
@@ -273,15 +293,19 @@ export default function SaquesCrypto() {
 
               {/* Address */}
               <div>
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
-                  Endereço da Carteira ({selectedAsset.symbol} - {selectedNetwork.name})
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-1.5">
+                  <Link2 className="h-3 w-3" />
+                  Endereço da Carteira
                 </Label>
+                <p className="text-[9px] text-muted-foreground/60 mt-0.5 mb-1.5">
+                  {selectedAsset.symbol} na rede {selectedNetwork.name}
+                </p>
                 <Input
                   value={cryptoAddress}
                   onChange={(e) => setCryptoAddress(e.target.value)}
                   placeholder={`Cole seu endereço ${selectedAsset.symbol} aqui`}
                   required
-                  className="mt-1.5 h-11 font-mono text-[12px] rounded-lg"
+                  className="h-11 font-mono text-[12px] rounded-lg"
                 />
               </div>
 
@@ -301,7 +325,7 @@ export default function SaquesCrypto() {
                   className="mt-1.5 h-14 text-xl font-display font-bold rounded-lg"
                 />
                 <div className="flex items-center justify-between mt-2.5">
-                  <p className="text-[11px] text-muted-foreground/70">Taxa: 7% + R$ 5,00</p>
+                  <p className="text-[11px] text-muted-foreground/70">Taxa: 5% + R$ 5,00</p>
                   {fee > 0 && <p className="text-[12px] font-medium text-warning">- {fmt(fee)}</p>}
                 </div>
 
@@ -314,17 +338,25 @@ export default function SaquesCrypto() {
                       </div>
                       <span className="text-lg font-display font-bold text-primary">{fmt(netAmount)}</span>
                     </div>
-                    {currentPrice && currentPrice.brl > 0 && (
+                    {markupPrice && markupPrice.brl > 0 && (
                       <div className="flex items-center justify-between pt-2 border-t border-primary/10">
-                        <span className="text-[11px] text-muted-foreground">≈ em {selectedAsset.symbol}</span>
-                        <span className="text-[14px] font-mono font-bold" style={{ color: selectedAsset.color }}>
-                          {cryptoAmount < 0.0001
-                            ? cryptoAmount.toFixed(8)
-                            : cryptoAmount < 1
-                            ? cryptoAmount.toFixed(6)
-                            : cryptoAmount.toFixed(4)
-                          } {selectedAsset.symbol}
-                        </span>
+                        <div>
+                          <span className="text-[11px] text-muted-foreground block">Cotação aplicada</span>
+                          <span className="text-[9px] text-muted-foreground/50">Atualizada ao vivo</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[14px] font-mono font-bold" style={{ color: selectedAsset.color }}>
+                            {cryptoAmount < 0.0001
+                              ? cryptoAmount.toFixed(8)
+                              : cryptoAmount < 1
+                              ? cryptoAmount.toFixed(6)
+                              : cryptoAmount.toFixed(4)
+                            } {selectedAsset.symbol}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground/50 block">
+                            1 {selectedAsset.symbol} = {fmt(markupPrice.brl)}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -351,10 +383,11 @@ export default function SaquesCrypto() {
         </Dialog>
       </div>
 
-      {/* Live Prices */}
+      {/* Live Prices (with markup) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {CRYPTO_ASSETS.map((asset, i) => {
-          const price = prices[asset.id];
+          const mp = getMarkupPrice(asset.id);
+          const rawPrice = prices[asset.id];
           return (
             <motion.div
               key={asset.id}
@@ -365,8 +398,8 @@ export default function SaquesCrypto() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
-                  className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                  style={{ backgroundColor: asset.color }}
+                  className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-lg"
+                  style={{ backgroundColor: asset.color, boxShadow: `0 4px 14px ${asset.color}25` }}
                 >
                   {asset.symbol.charAt(0)}
                 </div>
@@ -374,21 +407,27 @@ export default function SaquesCrypto() {
                   <p className="text-[13px] font-bold text-foreground">{asset.symbol}</p>
                   <p className="text-[10px] text-muted-foreground">{asset.name}</p>
                 </div>
-                {price && (
+                {rawPrice && (
                   <div className={cn(
                     "ml-auto px-2 py-0.5 rounded-md text-[10px] font-bold",
-                    price.brl_24h_change >= 0
+                    rawPrice.brl_24h_change >= 0
                       ? "bg-success/10 text-success"
                       : "bg-destructive/10 text-destructive"
                   )}>
-                    {price.brl_24h_change >= 0 ? "▲" : "▼"} {Math.abs(price.brl_24h_change).toFixed(1)}%
+                    {rawPrice.brl_24h_change >= 0 ? "+" : ""}{rawPrice.brl_24h_change.toFixed(1)}%
                   </div>
                 )}
               </div>
-              {price ? (
+              {mp ? (
                 <div>
-                  <p className="text-2xl font-display font-bold text-foreground tracking-tight">{fmt(price.brl)}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{fmtUSD(price.usd)}</p>
+                  <p className="text-2xl font-display font-bold text-foreground tracking-tight">{fmt(mp.brl)}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[11px] text-muted-foreground">{fmtUSD(mp.usd)}</p>
+                    <div className="flex items-center gap-1">
+                      <Radio className="h-2.5 w-2.5 text-success animate-pulse" />
+                      <span className="text-[9px] text-success font-medium">Ao vivo</span>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="h-10 flex items-center">
@@ -564,14 +603,14 @@ export default function SaquesCrypto() {
         <div className="flex items-center gap-3">
           <Shield className="h-4 w-4 text-primary shrink-0" />
           <p className="text-[11px] text-muted-foreground/70">
-            Saques crypto são processados manualmente. Taxa de 7% + R$ 5,00 por operação.
+            Saques crypto são processados manualmente. Taxa de 5% + R$ 5,00 por operação.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Info className="h-4 w-4 text-muted-foreground/50 shrink-0" />
           <p className="text-[11px] text-muted-foreground/50">
             Primeiro saque: limite R$ 500. Após aprovação, limite diário de R$ 6.000.
-            Cotações atualizadas a cada minuto via CoinGecko.
+            Cotações atualizadas ao vivo via CoinGecko com spread operacional.
           </p>
         </div>
       </div>
