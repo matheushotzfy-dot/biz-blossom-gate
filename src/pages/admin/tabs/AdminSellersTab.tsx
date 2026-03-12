@@ -219,7 +219,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             newWindow.postMessage({ type: "IMPERSONATE_SESSION", ...JSON.parse(impersonationData) }, window.location.origin);
           }, 2000);
         }
-        toast.success(`🎭 Abrindo dashboard como ${data.email}`);
+        toast.success(`Abrindo dashboard como ${data.email}`);
       } else {
         toast.error("Tokens de impersonação não disponíveis");
       }
