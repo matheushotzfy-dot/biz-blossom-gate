@@ -21,6 +21,7 @@ import {
   LogOut,
   ChevronRight,
   Headphones,
+  Zap,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
