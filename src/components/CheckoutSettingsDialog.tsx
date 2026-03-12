@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Settings, Palette, Timer, Image, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2 } from "lucide-react";
+import { Settings, Palette, Timer, Image, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -223,7 +223,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
-                <span className="text-sm">👥</span>
+                <span className="text-sm text-muted-foreground"><Users className="h-4 w-4" /></span>
                 <div>
                   <p className="text-sm font-medium">Prova social</p>
                   <p className="text-xs text-muted-foreground">"X pessoas compraram"</p>

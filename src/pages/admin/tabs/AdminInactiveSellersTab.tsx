@@ -147,7 +147,7 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
               })}
               {filtered.length === 0 && (
                 <tr><td colSpan={7} className="p-10 text-center text-muted-foreground text-xs">
-                  {inactiveSellers.length === 0 ? "Todos os sellers estão ativos! 🎉" : "Nenhum seller encontrado"}
+                  {inactiveSellers.length === 0 ? "Todos os sellers estão ativos!" : "Nenhum seller encontrado"}
                 </td></tr>
               )}
             </tbody>

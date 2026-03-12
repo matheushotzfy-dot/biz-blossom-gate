@@ -21,6 +21,7 @@ import {
   LogOut,
   ChevronRight,
   Headphones,
+  Zap,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
@@ -164,7 +165,7 @@ export function AppSidebar() {
             {/* Flame icon */}
             <div className="relative flex items-center gap-2 mb-3">
               <div className="relative h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center">
-                <span className="text-[16px] animate-pulse">🔥</span>
+                <Zap className="h-4 w-4 text-sidebar-primary animate-pulse" />
                 <div className="absolute inset-0 rounded-xl bg-sidebar-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
               </div>
               <div className="flex-1 min-w-0">
@@ -213,7 +214,7 @@ export function AppSidebar() {
                 </span>
               </div>
               <p className="text-center text-[9px] font-bold text-sidebar-primary/40 group-hover/milestone:text-sidebar-primary/70 mt-2.5 transition-colors">
-                🏆 Ver Premiações
+                Ver Premiações
               </p>
             </div>
           </div>

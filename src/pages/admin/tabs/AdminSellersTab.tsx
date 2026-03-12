@@ -176,7 +176,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const handleFreezeBalance = async (userId: string, freeze: boolean) => {
     const { error } = await supabase.from("profiles").update({ balance_frozen: freeze } as any).eq("user_id", userId);
     if (error) { toast.error("Erro ao alterar status"); return; }
-    toast.success(freeze ? "🧊 Saldo congelado! Saques bloqueados." : "🔓 Saldo descongelado! Saques liberados.");
+    toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
     await logAdminAction(freeze ? "freeze_balance" : "unfreeze_balance", "profile", userId);
     onReload();
   };
@@ -189,7 +189,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       supabase.from("products").update({ status: "suspended" }).eq("user_id", userId),
     ]);
     if (profileRes.error || productsRes.error) { toast.error("Erro ao banir seller"); return; }
-    toast.success("⛔ Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
+    toast.success("Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
     await logAdminAction("ban_seller", "profile", userId, { action: "block+freeze+suspend_products" });
     onReload();
     if (selectedUser?.user_id === userId) setSelectedUser(null);
@@ -219,7 +219,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             newWindow.postMessage({ type: "IMPERSONATE_SESSION", ...JSON.parse(impersonationData) }, window.location.origin);
           }, 2000);
         }
-        toast.success(`🎭 Abrindo dashboard como ${data.email}`);
+        toast.success(`Abrindo dashboard como ${data.email}`);
       } else {
         toast.error("Tokens de impersonação não disponíveis");
       }
@@ -402,7 +402,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         <div className="flex gap-1 bg-card border border-border rounded-xl p-1">
           {[
             { id: "all" as const, label: "Todos", count: profiles.length },
-            { id: "kyc" as const, label: "🔍 Fila KYC", count: kycPendingProfiles.length },
+            { id: "kyc" as const, label: "Fila KYC", count: kycPendingProfiles.length },
             { id: "black" as const, label: "Black", count: blackCount },
             { id: "white" as const, label: "White", count: whiteCount },
             { id: "unset" as const, label: "Sem tipo", count: unsetCount },
@@ -457,7 +457,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             {filtered.length === 0 && (
               <div className="text-center py-12">
                 <CheckCircle2 className="h-8 w-8 text-primary/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">Nenhum KYC pendente 🎉</p>
+                <p className="text-sm text-muted-foreground">Nenhum KYC pendente</p>
               </div>
             )}
           </div>

@@ -145,7 +145,7 @@ export default function MemberHome() {
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Greeting */}
           <div className="flex-1 p-5 rounded-2xl bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 border border-zinc-800/40 backdrop-blur-sm">
-            <p className="text-zinc-500 text-xs font-medium mb-1">{greeting} 👋</p>
+            <p className="text-zinc-500 text-xs font-medium mb-1">{greeting}</p>
             <p className="text-lg font-extrabold text-white tracking-tight">{user?.email?.split("@")[0]}</p>
             <p className="text-xs text-zinc-600 mt-1">
               {courses.length} {courses.length === 1 ? "curso disponível" : "cursos disponíveis"}

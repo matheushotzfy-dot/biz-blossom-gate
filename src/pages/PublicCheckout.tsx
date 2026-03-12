@@ -468,7 +468,7 @@ export default function PublicCheckout() {
             <CheckCircle2 className="h-14 w-14 text-white" />
           </div>
         </div>
-        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado! 🎉</h1>
+        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado!</h1>
         <p className="text-white/50 mb-8 text-base">
           Seu acesso foi liberado com sucesso.
         </p>
@@ -482,7 +482,7 @@ export default function PublicCheckout() {
             <span className="font-extrabold text-lg" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
           </div>
         </div>
-        <p className="text-xs text-white/25">📧 Confirmação enviada para <strong className="text-white/50">{email}</strong></p>
+        <p className="text-xs text-white/25">Confirmação enviada para <strong className="text-white/50">{email}</strong></p>
       </div>
     </div>
   );
@@ -662,7 +662,7 @@ export default function PublicCheckout() {
               </div>
               <div>
                 <p className="text-[13px] font-bold text-white/80">
-                  🔥 <span style={{ color: btnColor }}>{socialCount}+ compradores</span> nas últimas 24h
+                  <span style={{ color: btnColor }}>{socialCount}+ compradores</span> nas últimas 24h
                 </p>
                 <p className="text-[10px] text-white/25 mt-0.5">Produto verificado • Alta demanda</p>
               </div>

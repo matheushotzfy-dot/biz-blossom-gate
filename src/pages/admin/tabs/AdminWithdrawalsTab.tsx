@@ -223,8 +223,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   /* ── Risk Badge ── */
   const RiskBadge = ({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) => {
     const flags: string[] = [];
-    if (isNewSeller(getProfile(withdrawal.user_id))) flags.push("🆕 Novo");
-    if (isHighValue(Number(withdrawal.amount))) flags.push("💰 Alto Valor");
+    if (isNewSeller(getProfile(withdrawal.user_id))) flags.push("Novo");
+    if (isHighValue(Number(withdrawal.amount))) flags.push("Alto Valor");
     if (flags.length === 0) return null;
     return (
       <div className="flex flex-col gap-0.5">
@@ -261,7 +261,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
         <AdminKpi icon={<CheckCircle2 className="h-5 w-5" />} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
         <AdminKpi icon={<XCircle className="h-5 w-5" />} label="Recusados" value={String(rejected.length)} sub="Negados" gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" />
         <AdminKpi icon={<Wallet className="h-5 w-5" />} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" highlight />
-        <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="⚠️ Risco" value={String(riskCount)} sub="Requer revisão" gradient="from-red-600 to-pink-600" glowColor="rgba(239,68,68,0.2)" alert={riskCount > 0} />
+        <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="Risco" value={String(riskCount)} sub="Requer revisão" gradient="from-red-600 to-pink-600" glowColor="rgba(239,68,68,0.2)" alert={riskCount > 0} />
         <AdminKpi icon={<TrendingUp className="h-5 w-5" />} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" gradient="from-teal-500 to-cyan-600" glowColor="rgba(6,182,212,0.15)" />
         <AdminKpi icon={<TrendingDown className="h-5 w-5" />} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" gradient="from-orange-500 to-red-500" glowColor="rgba(249,115,22,0.15)" />
       </div>
@@ -309,9 +309,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
               <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Filtro de Risco" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="flagged">⚠️ Com Flag</SelectItem>
-                <SelectItem value="new_seller">🆕 Sellers Novos</SelectItem>
-                <SelectItem value="high_value">💰 Acima R$ 50k</SelectItem>
+                <SelectItem value="flagged">Com Flag</SelectItem>
+                <SelectItem value="new_seller">Sellers Novos</SelectItem>
+                <SelectItem value="high_value">Acima R$ 50k</SelectItem>
               </SelectContent>
             </Select>
 
@@ -373,7 +373,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                         <td className="p-3"><RiskBadge withdrawal={w} /></td>
                         <td className={`p-3 text-xs font-extrabold ${isOver10k ? "text-destructive" : "text-foreground"}`}>
                           R$ {Number(w.amount).toFixed(2)}
-                          {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">⚠️</span>}
+                          {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">!</span>}
                         </td>
                         <td className="p-3 text-xs text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
                         <td className="p-3 text-xs text-primary font-bold">R$ {Number(w.net_amount).toFixed(2)}</td>

@@ -138,7 +138,7 @@ export default function MemberCourse() {
       { onConflict: "user_id,lesson_id" }
     );
     setProgress(prev => { const next = new Map(prev); next.set(lessonId, { lesson_id: lessonId, completed: true, progress_seconds: 0 }); return next; });
-    toast.success("Aula concluída! 🎉");
+    toast.success("Aula concluída!");
     // Auto-advance to next
     const allLessons = modules.flatMap(m => m.lessons);
     const idx = allLessons.findIndex(l => l.id === lessonId);
@@ -202,7 +202,7 @@ export default function MemberCourse() {
         {isComplete && (
           <div className="flex items-center gap-2 mt-3 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
             <Award className="h-4 w-4 text-emerald-500" />
-            <span className="text-[11px] font-bold text-emerald-500">Curso concluído! 🎉</span>
+            <span className="text-[11px] font-bold text-emerald-500">Curso concluído!</span>
           </div>
         )}
       </div>
