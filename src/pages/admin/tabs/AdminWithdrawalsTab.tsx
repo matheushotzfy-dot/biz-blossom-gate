@@ -223,8 +223,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   /* ── Risk Badge ── */
   const RiskBadge = ({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) => {
     const flags: string[] = [];
-    if (isNewSeller(getProfile(withdrawal.user_id))) flags.push("🆕 Novo");
-    if (isHighValue(Number(withdrawal.amount))) flags.push("💰 Alto Valor");
+    if (isNewSeller(getProfile(withdrawal.user_id))) flags.push("Novo");
+    if (isHighValue(Number(withdrawal.amount))) flags.push("Alto Valor");
     if (flags.length === 0) return null;
     return (
       <div className="flex flex-col gap-0.5">
