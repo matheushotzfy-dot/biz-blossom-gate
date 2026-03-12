@@ -200,7 +200,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
         <AdminKpi icon={<Target className="h-5 w-5" />} label="Taxa Aprovação" value={`${approvalRate.toFixed(1)}%`} sub={`${approved.length}/${transactions.length}`} />
         <AdminKpi icon={<Users className="h-5 w-5" />} label="Sellers Ativos" value={String(activeSellers)} sub={`de ${profiles.length}`} />
         <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Ticket Médio" value={fmtCurrency(avgTicket)} sub="Por venda" />
-        <AdminKpi icon={<TrendingUp className="h-5 w-5" />} label="Projeção Mês" value={fmtCurrency(forecast.monthProjection)} sub={forecast.trend === "up" ? "📈 Crescendo" : forecast.trend === "down" ? "📉 Caindo" : "→ Estável"} />
+        <AdminKpi icon={<TrendingUp className="h-5 w-5" />} label="Projeção Mês" value={fmtCurrency(forecast.monthProjection)} sub={forecast.trend === "up" ? "Crescendo" : forecast.trend === "down" ? "Caindo" : "Estável"} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -176,7 +176,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const handleFreezeBalance = async (userId: string, freeze: boolean) => {
     const { error } = await supabase.from("profiles").update({ balance_frozen: freeze } as any).eq("user_id", userId);
     if (error) { toast.error("Erro ao alterar status"); return; }
-    toast.success(freeze ? "🧊 Saldo congelado! Saques bloqueados." : "🔓 Saldo descongelado! Saques liberados.");
+    toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
     await logAdminAction(freeze ? "freeze_balance" : "unfreeze_balance", "profile", userId);
     onReload();
   };

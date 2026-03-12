@@ -396,7 +396,7 @@ export default function CheckoutBuilder() {
                   <ToggleRow icon={CreditCard} iconColor="blue-500" title="Cartão de Crédito" desc="Até 12x sem juros" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
                   
                   <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
-                    <p className="text-[10px] text-primary/70 font-medium">💡 Habilite PIX para maior conversão — taxa de aprovação de 99%</p>
+                    <p className="text-[10px] text-primary/70 font-medium">Habilite PIX para maior conversão — taxa de aprovação de 99%</p>
                   </div>
                 </>
               )}

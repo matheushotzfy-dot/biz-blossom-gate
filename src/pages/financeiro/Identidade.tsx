@@ -28,10 +28,10 @@ import { cn } from "@/lib/utils";
 
 /* ─── Status Map ─── msDev's */
 const STATUS_MAP: Record<string, { label: string; cls: string; icon: string }> = {
-  approved: { label: "Conta Aprovada", cls: "text-primary bg-primary/10 border-primary/15", icon: "✅" },
-  pending_review: { label: "Em Análise", cls: "text-warning bg-warning/10 border-warning/15", icon: "⏳" },
-  rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "❌" },
-  blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "🚫" },
+  approved: { label: "Conta Aprovada", cls: "text-primary bg-primary/10 border-primary/15", icon: "" },
+  pending_review: { label: "Em Análise", cls: "text-warning bg-warning/10 border-warning/15", icon: "" },
+  rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "" },
+  blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15", icon: "" },
 };
 
 /* ─── CPF/CNPJ formatting — msDev's ─── */

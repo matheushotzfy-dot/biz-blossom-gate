@@ -100,7 +100,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
     if (reason) updateData.rejection_reason = reason;
     const { error } = await supabase.from("products").update(updateData).eq("id", productId);
     if (error) { toast.error("Erro ao atualizar produto"); return; }
-    const labels: Record<string, string> = { active: "aprovado ✅", blocked: "suspenso 🚫", rejected: "recusado ❌", pending_review: "em revisão" };
+    const labels: Record<string, string> = { active: "aprovado", blocked: "suspenso", rejected: "recusado", pending_review: "em revisão" };
     toast.success(`Produto ${labels[status] || status}!`);
     await logAdminAction(`product_${status}`, "product", productId, { status, user_id: userId, reason });
     onReload();
