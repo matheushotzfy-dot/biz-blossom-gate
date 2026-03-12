@@ -261,7 +261,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
         <AdminKpi icon={<CheckCircle2 className="h-5 w-5" />} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
         <AdminKpi icon={<XCircle className="h-5 w-5" />} label="Recusados" value={String(rejected.length)} sub="Negados" gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" />
         <AdminKpi icon={<Wallet className="h-5 w-5" />} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" highlight />
-        <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="⚠️ Risco" value={String(riskCount)} sub="Requer revisão" gradient="from-red-600 to-pink-600" glowColor="rgba(239,68,68,0.2)" alert={riskCount > 0} />
+        <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="Risco" value={String(riskCount)} sub="Requer revisão" gradient="from-red-600 to-pink-600" glowColor="rgba(239,68,68,0.2)" alert={riskCount > 0} />
         <AdminKpi icon={<TrendingUp className="h-5 w-5" />} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" gradient="from-teal-500 to-cyan-600" glowColor="rgba(6,182,212,0.15)" />
         <AdminKpi icon={<TrendingDown className="h-5 w-5" />} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" gradient="from-orange-500 to-red-500" glowColor="rgba(249,115,22,0.15)" />
       </div>
