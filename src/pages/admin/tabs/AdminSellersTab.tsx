@@ -457,7 +457,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             {filtered.length === 0 && (
               <div className="text-center py-12">
                 <CheckCircle2 className="h-8 w-8 text-primary/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">Nenhum KYC pendente 🎉</p>
+                <p className="text-sm text-muted-foreground">Nenhum KYC pendente</p>
               </div>
             )}
           </div>
