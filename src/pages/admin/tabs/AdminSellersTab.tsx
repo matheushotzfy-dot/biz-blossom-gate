@@ -402,7 +402,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         <div className="flex gap-1 bg-card border border-border rounded-xl p-1">
           {[
             { id: "all" as const, label: "Todos", count: profiles.length },
-            { id: "kyc" as const, label: "🔍 Fila KYC", count: kycPendingProfiles.length },
+            { id: "kyc" as const, label: "Fila KYC", count: kycPendingProfiles.length },
             { id: "black" as const, label: "Black", count: blackCount },
             { id: "white" as const, label: "White", count: whiteCount },
             { id: "unset" as const, label: "Sem tipo", count: unsetCount },

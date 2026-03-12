@@ -495,8 +495,8 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="text-[12px] font-bold text-white/80">{fmtCurrency(Number(w.amount))}</p>
-                        {isHigh && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">💰 ALTO</span>}
-                        {isNew && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">🆕 NOVO</span>}
+                         {isHigh && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">ALTO</span>}
+                         {isNew && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">NOVO</span>}
                       </div>
                       <p className="text-[10px] text-white/25 truncate">{sp?.full_name || "—"} • {sp?.email || ""}</p>
                     </div>

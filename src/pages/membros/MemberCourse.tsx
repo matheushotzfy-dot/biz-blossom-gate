@@ -202,7 +202,7 @@ export default function MemberCourse() {
         {isComplete && (
           <div className="flex items-center gap-2 mt-3 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
             <Award className="h-4 w-4 text-emerald-500" />
-            <span className="text-[11px] font-bold text-emerald-500">Curso concluído! 🎉</span>
+            <span className="text-[11px] font-bold text-emerald-500">Curso concluído!</span>
           </div>
         )}
       </div>

@@ -223,7 +223,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-border">
               <div className="flex items-center gap-2">
-                <span className="text-sm">👥</span>
+                <span className="text-sm text-muted-foreground"><Users className="h-4 w-4" /></span>
                 <div>
                   <p className="text-sm font-medium">Prova social</p>
                   <p className="text-xs text-muted-foreground">"X pessoas compraram"</p>

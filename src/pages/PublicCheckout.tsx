@@ -482,7 +482,7 @@ export default function PublicCheckout() {
             <span className="font-extrabold text-lg" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
           </div>
         </div>
-        <p className="text-xs text-white/25">📧 Confirmação enviada para <strong className="text-white/50">{email}</strong></p>
+        <p className="text-xs text-white/25">Confirmação enviada para <strong className="text-white/50">{email}</strong></p>
       </div>
     </div>
   );

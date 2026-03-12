@@ -469,7 +469,7 @@ export default function Dashboard() {
                   <Lock className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   <span className="leading-tight">Modo Escala</span>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                    <p className="text-[11px] font-bold text-foreground mb-1">🔒 Modo Escala Bloqueado</p>
+                    <p className="text-[11px] font-bold text-foreground mb-1">Modo Escala Bloqueado</p>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado automaticamente ao atingir R$ 2.000 faturados em 24 horas. Continue vendendo!</p>
                   </div>
                 </div>
