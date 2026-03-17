@@ -565,7 +565,7 @@ export default function Dashboard() {
           </div>
 
           {/* Conversions */}
-          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-6 w-6 rounded-lg bg-info/10 flex items-center justify-center">
                 <BarChart3 className="h-3.5 w-3.5 text-info" />
