@@ -715,19 +715,19 @@ const toneMap: Record<Tone, { bg: string; text: string }> = {
 };
 
 function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.ReactNode; label: string; value: string; tone: Tone; idx?: number }) {
-  const glowColors: Record<Tone, string> = {
-    primary: "from-primary/8 via-transparent to-transparent",
-    info: "from-info/8 via-transparent to-transparent",
-    success: "from-success/8 via-transparent to-transparent",
-    warning: "from-warning/8 via-transparent to-transparent",
-    destructive: "from-destructive/8 via-transparent to-transparent",
+  const accentBar: Record<Tone, string> = {
+    primary: "bg-primary",
+    info: "bg-info",
+    success: "bg-success",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
   };
 
   return (
-    <div className={`group relative rounded-xl border border-border/40 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
-      {/* Subtle glow */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${glowColors[tone]} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-      <div className="relative z-10">
+    <div className={`group relative rounded-xl border border-border/50 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+      {/* Left accent bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
+      <div className="relative z-10 pl-1.5">
         <div className="flex items-center gap-2 mb-3">
           <div className={`h-7 w-7 md:h-8 md:w-8 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
             <span className={toneMap[tone].text}>{icon}</span>
