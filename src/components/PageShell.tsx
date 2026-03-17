@@ -15,18 +15,19 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Panel({ children, className, onClick, style }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
+export function Panel({ children, className, onClick, style, accent }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties; accent?: string }) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/35 bg-card/35 p-5 backdrop-blur-xl transition-all duration-300",
-        "shadow-[0_8px_28px_hsl(var(--foreground)/0.04)]",
-        "hover:border-border/55 hover:bg-card/45 hover:shadow-[0_12px_32px_hsl(var(--foreground)/0.06)]",
+        "relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
+        "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
+        "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
         className,
       )}
       onClick={onClick}
       style={style}
     >
+      {accent && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />}
       {children}
     </div>
   );
