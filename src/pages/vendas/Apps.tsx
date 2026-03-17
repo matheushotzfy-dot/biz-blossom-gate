@@ -302,13 +302,6 @@ export default function Apps() {
                   </div>
                 )}
 
-                {/* Category tag */}
-                <span className={cn(
-                  "absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded-md bg-muted/30 border border-border/20",
-                  categoryColor(app.category)
-                )}>
-                  {app.category}
-                </span>
               </div>
 
               {/* Bottom: Info */}
