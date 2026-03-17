@@ -15,18 +15,19 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Panel({ children, className, onClick, style }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
+export function Panel({ children, className, onClick, style, accent }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties; accent?: string }) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/35 bg-card/35 p-5 backdrop-blur-xl transition-all duration-300",
-        "shadow-[0_8px_28px_hsl(var(--foreground)/0.04)]",
-        "hover:border-border/55 hover:bg-card/45 hover:shadow-[0_12px_32px_hsl(var(--foreground)/0.06)]",
+        "relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
+        "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
+        "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
         className,
       )}
       onClick={onClick}
       style={style}
     >
+      {accent && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />}
       {children}
     </div>
   );
@@ -45,9 +46,9 @@ export function GlowPanel({ children, className, onClick, style, glow = "primary
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/35 bg-card/35 p-5 backdrop-blur-xl transition-all duration-300",
-        "shadow-[0_8px_28px_hsl(var(--foreground)/0.04)]",
-        "hover:border-border/55 hover:bg-card/45 hover:shadow-[0_12px_32px_hsl(var(--foreground)/0.06)]",
+        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
+        "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
+        "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
         className,
       )}
       onClick={onClick}
@@ -90,20 +91,23 @@ export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; ti
   );
 }
 
-export function KpiCard({ label, value, sub, icon, color, bg }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string;
+export function KpiCard({ label, value, sub, icon, color, bg, accent }: {
+  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string; accent?: string;
 }) {
   const Icon = icon;
   return (
-    <GlowPanel className="p-4 md:p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
-        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border border-border/30", bg)}>
-          <Icon className={cn("h-[18px] w-[18px]", color)} />
+    <GlowPanel className="relative overflow-hidden p-4 md:p-5">
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent || "bg-primary")} />
+      <div className="pl-2">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border border-border/30", bg)}>
+            <Icon className={cn("h-[18px] w-[18px]", color)} />
+          </div>
         </div>
+        <p className="font-display text-[22px] font-black leading-none text-foreground md:text-2xl">{value}</p>
+        {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
       </div>
-      <p className="font-display text-[22px] font-black leading-none text-foreground md:text-2xl">{value}</p>
-      {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
     </GlowPanel>
   );
 }
