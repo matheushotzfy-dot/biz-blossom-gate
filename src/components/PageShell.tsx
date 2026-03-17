@@ -46,9 +46,9 @@ export function GlowPanel({ children, className, onClick, style, glow = "primary
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/35 bg-card/35 p-5 backdrop-blur-xl transition-all duration-300",
-        "shadow-[0_8px_28px_hsl(var(--foreground)/0.04)]",
-        "hover:border-border/55 hover:bg-card/45 hover:shadow-[0_12px_32px_hsl(var(--foreground)/0.06)]",
+        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
+        "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
+        "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
         className,
       )}
       onClick={onClick}
