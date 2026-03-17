@@ -750,7 +750,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-md p-4 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/60 bg-card/95 shadow-sm backdrop-blur-md p-4 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="pl-1.5">
