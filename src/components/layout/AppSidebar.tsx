@@ -224,9 +224,8 @@ export function AppSidebar() {
       <SidebarContent className="relative px-2.5 py-4 overflow-y-auto">
         {sections.map((section, idx) => (
           <SidebarGroup key={section.label} className={cn("px-0", idx > 0 && "mt-3.5")}>
-            <SidebarGroupLabel className="px-3.5 mb-2 text-[10px] uppercase tracking-[0.22em] font-bold text-sidebar-foreground/75 group-data-[collapsible=icon]:hidden">
-              {section.label}
-            </SidebarGroupLabel>
+            {/* Section divider line instead of label */}
+            {idx > 0 && <div className="mx-3 mb-2 border-t border-sidebar-border/40 group-data-[collapsible=icon]:mx-1" />}
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1.5 px-1">
                 {section.items.map((item) => {
