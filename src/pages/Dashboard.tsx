@@ -560,12 +560,6 @@ export default function Dashboard() {
 
           {/* Conversions */}
           <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-6 w-6 rounded-lg bg-info/10 flex items-center justify-center">
-                <BarChart3 className="h-3.5 w-3.5 text-info" />
-              </div>
-              <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Conversões</span>
-            </div>
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
