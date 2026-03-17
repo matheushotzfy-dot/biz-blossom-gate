@@ -552,12 +552,6 @@ export default function Dashboard() {
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Health */}
           <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-6 w-6 rounded-lg bg-success/10 flex items-center justify-center">
-                <Activity className="h-3.5 w-3.5 text-success" />
-              </div>
-              <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Saúde</span>
-            </div>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
