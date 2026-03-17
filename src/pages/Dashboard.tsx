@@ -402,7 +402,7 @@ export default function Dashboard() {
       )}
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-8 animate-fade-in">
+      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
           <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
@@ -512,7 +512,7 @@ export default function Dashboard() {
 
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/92 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
+        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -551,7 +551,7 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Health */}
-          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-6 w-6 rounded-lg bg-success/10 flex items-center justify-center">
                 <Activity className="h-3.5 w-3.5 text-success" />
@@ -565,7 +565,7 @@ export default function Dashboard() {
           </div>
 
           {/* Conversions */}
-          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-6 w-6 rounded-lg bg-info/10 flex items-center justify-center">
                 <BarChart3 className="h-3.5 w-3.5 text-info" />
@@ -592,7 +592,7 @@ export default function Dashboard() {
       {/* ─── ACTIONS + ACTIVITY ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-stretch">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
+        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
           <div className="mb-3 md:mb-4 flex items-center gap-2 shrink-0">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
@@ -724,7 +724,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
   };
 
   return (
-    <div className={`group relative rounded-xl border border-border/50 bg-card/80 backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+    <div className={`group relative rounded-xl border border-border/60 bg-card/95 shadow-sm backdrop-blur-md p-3.5 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="relative z-10 pl-1.5">
@@ -750,7 +750,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-md p-4 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/60 bg-card/95 shadow-sm backdrop-blur-md p-4 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="pl-1.5">
