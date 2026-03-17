@@ -592,7 +592,7 @@ export default function Dashboard() {
       {/* ─── ACTIONS + ACTIVITY ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-stretch">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
+        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
           <div className="mb-3 md:mb-4 flex items-center gap-2 shrink-0">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
