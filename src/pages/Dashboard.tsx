@@ -551,7 +551,7 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Health */}
-          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-6 w-6 rounded-lg bg-success/10 flex items-center justify-center">
                 <Activity className="h-3.5 w-3.5 text-success" />
