@@ -141,7 +141,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-sidebar-primary/10 to-transparent" />
 
       <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
@@ -152,7 +152,6 @@ export function AppSidebar() {
 
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-sidebar-foreground mt-1">Infoprodutos Ecosystem</p>
           </div>
         </div>
 
@@ -206,11 +205,6 @@ export function AppSidebar() {
               <div className="flex items-center justify-between mt-2">
                 <span className="text-[11px] font-extrabold text-sidebar-primary">
                   {milestone.pct.toFixed(0)}%
-                </span>
-                <span className="text-[9px] font-semibold text-sidebar-foreground/35">
-                  Faltam {milestone.next.value - revenue > 0
-                    ? `R$ ${((milestone.next.value - revenue) / (milestone.next.value >= 1000000 ? 1000000 : 1000)).toFixed(1).replace('.', ',')}${milestone.next.value >= 1000000 ? 'M' : 'K'}`
-                    : 'R$ 0'}
                 </span>
               </div>
               <p className="text-center text-[9px] font-bold text-sidebar-primary/40 group-hover/milestone:text-sidebar-primary/70 mt-2.5 transition-colors">
