@@ -152,7 +152,6 @@ export function AppSidebar() {
 
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-sidebar-foreground mt-1">Infoprodutos Ecosystem</p>
           </div>
         </div>
 
