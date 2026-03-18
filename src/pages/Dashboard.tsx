@@ -412,9 +412,6 @@ export default function Dashboard() {
           {/* Title row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1.5 md:space-y-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] uppercase text-primary">
-                <Sparkles className="h-3 w-3" /> Dashboard
-              </div>
               <h1 className="text-xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
                 {nickname ? (
                   <>Bem Vindo, <span className="text-gradient">{nickname}</span></>

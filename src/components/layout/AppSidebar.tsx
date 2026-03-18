@@ -206,11 +206,6 @@ export function AppSidebar() {
                 <span className="text-[11px] font-extrabold text-sidebar-primary">
                   {milestone.pct.toFixed(0)}%
                 </span>
-                <span className="text-[9px] font-semibold text-sidebar-foreground/35">
-                  Faltam {milestone.next.value - revenue > 0
-                    ? `R$ ${((milestone.next.value - revenue) / (milestone.next.value >= 1000000 ? 1000000 : 1000)).toFixed(1).replace('.', ',')}${milestone.next.value >= 1000000 ? 'M' : 'K'}`
-                    : 'R$ 0'}
-                </span>
               </div>
               <p className="text-center text-[9px] font-bold text-sidebar-primary/40 group-hover/milestone:text-sidebar-primary/70 mt-2.5 transition-colors">
                 Ver Premiações
