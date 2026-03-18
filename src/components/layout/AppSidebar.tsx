@@ -141,7 +141,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-sidebar-primary/10 to-transparent" />
 
       <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
