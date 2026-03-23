@@ -312,14 +312,9 @@
 /* Safe area for mobile bottom nav */
 .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-/* Smooth dropdown/popover/tooltip appearance */
-[data-radix-popper-content-wrapper] {
-  animation: smoothPopIn 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
-@keyframes smoothPopIn {
-  from { opacity: 0; transform: scale(0.97) translateY(-2px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
+/* Radix portal wrapper must not animate transforms.
+   Each content component already handles its own entry animation,
+   and animating this wrapper breaks the computed popper position. */
 
 /* Smooth table row interactions */
 tr {
