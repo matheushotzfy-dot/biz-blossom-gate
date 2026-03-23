@@ -447,3 +447,13 @@ tr {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+/* Prevent Radix popper flash at top-left before positioning */
+[data-radix-popper-content-wrapper] {
+  opacity: 0;
+  animation: radix-popper-appear 0s 1ms forwards;
+}
+
+@keyframes radix-popper-appear {
+  to { opacity: 1; }
+}
