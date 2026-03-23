@@ -1,7 +1,7 @@
 /**
- * Checkout Builder — Split-screen immersive checkout customizer
+ * Checkout Builder — Premium Split-screen immersive checkout customizer
  * @module CheckoutBuilder
- * @version 2.0.0
+ * @version 3.0.0
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -13,7 +13,7 @@ import {
   Timer, Image, ShieldCheck, QrCode, FileText, MapPin, X, Upload,
   Zap, Video, Users, LogOut as ExitIcon, BarChart3, Monitor, Smartphone, Check, Eye,
   MessageSquare, Gift, Clock, Star, Lock, Heart, Megaphone, Percent,
-  Sparkles, Phone, Hash,
+  Sparkles, Phone, Hash, ChevronRight, Grip, CircleDot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,11 +25,11 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TABS = [
-  { id: "visual", label: "Visual", icon: Palette },
-  { id: "payment", label: "Pagamento", icon: CreditCard },
-  { id: "form", label: "Formulário", icon: Mail },
-  { id: "bumps", label: "Bumps", icon: Package },
-  { id: "cro", label: "Conversão", icon: Zap },
+  { id: "visual", label: "Visual", icon: Palette, color: "text-violet-400" },
+  { id: "payment", label: "Pagamento", icon: CreditCard, color: "text-blue-400" },
+  { id: "form", label: "Form", icon: Mail, color: "text-cyan-400" },
+  { id: "bumps", label: "Bumps", icon: Package, color: "text-amber-400" },
+  { id: "cro", label: "CRO", icon: Zap, color: "text-rose-400" },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -80,7 +80,6 @@ export default function CheckoutBuilder() {
   const [fakeViewersEnabled, setFakeViewersEnabled] = useState(false);
   const [exitIntentEnabled, setExitIntentEnabled] = useState(false);
   const [progressBarEnabled, setProgressBarEnabled] = useState(false);
-  // New CRO options
   const [testimonialEnabled, setTestimonialEnabled] = useState(false);
   const [scarcityEnabled, setScarcityEnabled] = useState(false);
   const [scarcityUnits, setScarcityUnits] = useState("17");
@@ -206,18 +205,33 @@ export default function CheckoutBuilder() {
 
   if (loading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground animate-pulse">Carregando builder...</p>
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <div className="h-12 w-12 border-2 border-primary/10 border-t-primary rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Palette className="h-4 w-4 text-primary/60" />
+          </div>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-bold text-foreground">Checkout Builder</p>
+          <p className="text-xs text-muted-foreground/40 animate-pulse">Carregando configurações...</p>
+        </div>
       </div>
     </div>
   );
 
   /* ── Section Header ── */
-  const SectionHeader = ({ title, desc }: { title: string; desc: string }) => (
-    <div className="mb-1">
-      <p className="text-[13px] font-bold text-foreground">{title}</p>
-      <p className="text-[11px] text-muted-foreground/50">{desc}</p>
+  const SectionHeader = ({ title, desc, icon: Icon }: { title: string; desc: string; icon?: React.ComponentType<{ className?: string }> }) => (
+    <div className="flex items-center gap-3 mb-1">
+      {Icon && (
+        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center border border-primary/10">
+          <Icon className="h-3.5 w-3.5 text-primary" />
+        </div>
+      )}
+      <div>
+        <p className="text-[13px] font-bold text-foreground">{title}</p>
+        <p className="text-[10px] text-muted-foreground/40">{desc}</p>
+      </div>
     </div>
   );
 
@@ -227,26 +241,30 @@ export default function CheckoutBuilder() {
     checked: boolean; onChange: (v: boolean) => void; extra?: React.ReactNode; badge?: string;
   }) => (
     <div className={cn(
-      "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200",
+      "group/toggle relative flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-300",
       checked
-        ? "border-primary/20 bg-primary/[0.03] shadow-sm shadow-primary/5"
-        : "border-border/40 dark:border-foreground/[0.06] bg-card/30 dark:bg-foreground/[0.01] hover:border-border/60"
+        ? "border-primary/20 bg-gradient-to-r from-primary/[0.04] to-transparent shadow-sm"
+        : "border-border/20 bg-card/20 hover:border-border/30 hover:bg-card/30"
     )}>
+      {/* Active indicator bar */}
+      {checked && <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-primary/60" />}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className={cn(
-          "h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+          "h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 border",
           checked
-            ? (iconColor ? `bg-${iconColor}/15` : "bg-primary/15")
-            : "bg-muted/20"
+            ? "bg-primary/10 border-primary/15 shadow-sm shadow-primary/5"
+            : "bg-muted/10 border-transparent"
         )}>
-          <Icon className={cn("h-4 w-4 transition-colors", checked ? (iconColor ? `text-${iconColor}` : "text-primary") : "text-muted-foreground/50")} />
+          <Icon className={cn("h-4 w-4 transition-colors duration-300", checked ? (iconColor ? `text-${iconColor}` : "text-primary") : "text-muted-foreground/30")} />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-[13px] font-semibold text-foreground">{title}</p>
-            {badge && <span className="text-[8px] font-black uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{badge}</span>}
+            <p className={cn("text-[12px] font-bold transition-colors", checked ? "text-foreground" : "text-foreground/70")}>{title}</p>
+            {badge && (
+              <span className="text-[8px] font-black uppercase tracking-wider bg-gradient-to-r from-primary/15 to-primary/5 text-primary px-2 py-0.5 rounded-full border border-primary/10">{badge}</span>
+            )}
           </div>
-          <p className="text-[10px] text-muted-foreground/50 leading-snug">{desc}</p>
+          <p className="text-[10px] text-muted-foreground/40 leading-snug">{desc}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
@@ -259,123 +277,171 @@ export default function CheckoutBuilder() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* ─── LEFT: Control Panel ─── */}
-      <aside className="w-[400px] shrink-0 border-r border-border/40 dark:border-foreground/[0.06] bg-card/20 dark:bg-foreground/[0.01] backdrop-blur-xl flex flex-col h-screen sticky top-0 overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-border/40 dark:border-foreground/[0.06]">
+      <aside className="w-[420px] shrink-0 border-r border-border/20 bg-gradient-to-b from-card/30 to-background backdrop-blur-2xl flex flex-col h-screen sticky top-0 overflow-hidden">
+        {/* Header — Premium */}
+        <div className="p-4 pb-3 border-b border-border/15">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/vendas/produtos")} className="h-9 w-9 p-0 rounded-xl hover:bg-muted/30">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/vendas/produtos")} className="h-9 w-9 p-0 rounded-xl hover:bg-muted/20 text-muted-foreground/60 hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="min-w-0 flex-1">
               <h1 className="text-sm font-bold text-foreground truncate">{product?.name}</h1>
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.16em] font-bold">Checkout Builder</p>
-                {saving && (
-                  <span className="inline-flex items-center gap-1 text-[9px] text-primary font-semibold animate-pulse">
-                    <span className="h-1 w-1 rounded-full bg-primary animate-ping" />
-                    Salvando
-                  </span>
-                )}
+              <div className="flex items-center gap-2.5 mt-0.5">
+                <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.2em]">Builder</span>
+                <AnimatePresence>
+                  {saving && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="inline-flex items-center gap-1.5 text-[9px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                      Salvando
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
-            <span className="text-sm font-black text-primary">R$ {Number(product?.price || 0).toFixed(2)}</span>
+            <div className="text-right">
+              <span className="text-base font-black text-primary tracking-tight">R$ {Number(product?.price || 0).toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <nav className="flex gap-0.5 p-2 border-b border-border/30 dark:border-foreground/[0.04]">
+        {/* Tabs — Pill style */}
+        <nav className="flex gap-1 p-2 mx-2 mt-2 rounded-2xl bg-muted/10 border border-border/10">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl text-[9px] font-bold uppercase tracking-[0.14em] transition-all relative",
+                "relative flex-1 flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[9px] font-bold uppercase tracking-[0.12em] transition-all duration-300",
                 activeTab === tab.id
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-muted/20"
+                  ? "text-foreground"
+                  : "text-muted-foreground/30 hover:text-muted-foreground/60"
               )}
             >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
               {activeTab === tab.id && (
-                <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full bg-primary" />
+                <motion.div
+                  layoutId="builder-tab-bg"
+                  className="absolute inset-0 rounded-xl bg-card/80 border border-border/20 shadow-sm"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+                />
               )}
+              <tab.icon className={cn("h-4 w-4 relative z-10 transition-colors", activeTab === tab.id ? tab.color : "")} />
+              <span className="relative z-10">{tab.label}</span>
             </button>
           ))}
         </nav>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 pt-3">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={{ duration: 0.15 }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
               className="space-y-3"
             >
               {/* ── VISUAL TAB ── */}
               {activeTab === "visual" && (
                 <>
-                  <SectionHeader title="Aparência" desc="Personalize as cores e banners do checkout" />
+                  <SectionHeader icon={Palette} title="Aparência" desc="Personalize cores e banners do seu checkout" />
                   
-                  <div className="p-4 rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/30 space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 block">Cor do botão CTA</Label>
-                    <div className="flex gap-2 flex-wrap">
-                      {PRESET_COLORS.map(c => (
-                        <button
-                          key={c.hex}
-                          onClick={() => setButtonColor(c.hex)}
-                          className={cn(
-                            "h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-background transition-all hover:scale-110 shadow-sm",
-                            buttonColor === c.hex ? "ring-primary scale-110" : "ring-transparent"
-                          )}
-                          style={{ backgroundColor: c.hex }}
-                          title={c.name}
-                        />
-                      ))}
+                  {/* Color picker card */}
+                  <div className="rounded-2xl border border-border/15 bg-card/20 overflow-hidden">
+                    <div className="p-4 space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/40 block">Cor do Botão CTA</Label>
+                      <div className="flex gap-2 flex-wrap">
+                        {PRESET_COLORS.map(c => (
+                          <button
+                            key={c.hex}
+                            onClick={() => setButtonColor(c.hex)}
+                            className={cn(
+                              "h-8 w-8 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 relative",
+                              buttonColor === c.hex ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110 shadow-lg" : "shadow-sm hover:shadow-md"
+                            )}
+                            style={{ backgroundColor: c.hex }}
+                            title={c.name}
+                          >
+                            {buttonColor === c.hex && (
+                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute inset-0 flex items-center justify-center">
+                                <Check className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+                              </motion.div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="w-9 h-9 rounded-xl border border-border/20 cursor-pointer opacity-0 absolute inset-0" />
+                          <div className="h-9 w-9 rounded-xl border border-border/20 flex items-center justify-center" style={{ backgroundColor: buttonColor }}>
+                            <Palette className="h-3.5 w-3.5 text-white/80" />
+                          </div>
+                        </div>
+                        <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="flex-1 font-mono text-xs h-9 rounded-xl bg-card/40 border-border/15" />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="w-9 h-9 rounded-lg border border-border cursor-pointer" />
-                      <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="flex-1 font-mono text-xs h-9 rounded-xl" />
-                    </div>
-                    <div className="mt-1 h-11 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg transition-all" style={{ backgroundColor: buttonColor, boxShadow: `0 8px 25px -8px ${buttonColor}60` }}>
-                      <Sparkles className="h-4 w-4 mr-2" /> Comprar agora
+                    {/* CTA Preview */}
+                    <div className="px-4 pb-4">
+                      <div
+                        className="h-12 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-xl transition-all duration-300 gap-2"
+                        style={{ backgroundColor: buttonColor, boxShadow: `0 12px 30px -8px ${buttonColor}40` }}
+                      >
+                        <Sparkles className="h-4 w-4" /> Comprar agora
+                      </div>
                     </div>
                   </div>
 
                   <ToggleRow icon={Timer} iconColor="amber-500" title="Timer de urgência" desc="Contador regressivo no checkout"
                     checked={timerEnabled} onChange={setTimerEnabled}
-                    extra={timerEnabled ? <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="w-14 h-7 text-center text-[11px] rounded-md" /> : undefined}
+                    extra={timerEnabled ? <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="w-14 h-7 text-center text-[11px] rounded-lg bg-card/40 border-border/15" /> : undefined}
                   />
 
-                  <div className="space-y-3">
-                    <div className="p-3.5 rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/30 space-y-2.5">
-                      <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 flex items-center gap-1.5"><Monitor className="h-3 w-3" /> Banner Desktop</Label>
+                  {/* Banners */}
+                  <div className="space-y-2.5">
+                    {/* Desktop Banner */}
+                    <div className="rounded-2xl border border-border/15 bg-card/20 p-3.5 space-y-2.5">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/40 flex items-center gap-1.5">
+                        <Monitor className="h-3 w-3" /> Banner Desktop
+                      </Label>
                       <input ref={desktopRef} type="file" accept="image/*" onChange={(e) => handleFile(e, "desktop")} className="hidden" />
                       {bannerDesktopPreview ? (
-                        <div className="relative rounded-xl overflow-hidden border border-border/30">
+                        <div className="relative rounded-xl overflow-hidden border border-border/15 group/banner">
                           <img src={bannerDesktopPreview} alt="Desktop" className="w-full h-24 object-cover" />
-                          <button type="button" onClick={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/60 backdrop-blur flex items-center justify-center text-white"><X className="h-3 w-3" /></button>
+                          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center">
+                            <button type="button" onClick={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} className="h-9 w-9 rounded-xl bg-card/90 border border-border/20 flex items-center justify-center text-destructive shadow-lg active:scale-95 transition-transform">
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                       ) : (
-                        <button type="button" onClick={() => desktopRef.current?.click()} className="w-full h-14 rounded-xl border border-dashed border-border/40 hover:border-primary/30 flex items-center justify-center gap-2 text-muted-foreground/40 hover:text-primary text-[11px] transition-colors">
+                        <button type="button" onClick={() => desktopRef.current?.click()} className="w-full h-16 rounded-xl border border-dashed border-border/20 hover:border-primary/25 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground/30 hover:text-primary/60 text-[11px] font-semibold transition-all duration-200 active:scale-[0.98]">
                           <Upload className="h-3.5 w-3.5" /> Enviar imagem
                         </button>
                       )}
                     </div>
 
-                    <div className="p-3.5 rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/30 space-y-2.5">
-                      <Label className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 flex items-center gap-1.5"><Smartphone className="h-3 w-3" /> Banner Mobile</Label>
+                    {/* Mobile Banner */}
+                    <div className="rounded-2xl border border-border/15 bg-card/20 p-3.5 space-y-2.5">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/40 flex items-center gap-1.5">
+                        <Smartphone className="h-3 w-3" /> Banner Mobile
+                      </Label>
                       <input ref={mobileRef} type="file" accept="image/*" onChange={(e) => handleFile(e, "mobile")} className="hidden" />
                       {bannerMobilePreview ? (
-                        <div className="relative rounded-xl overflow-hidden border border-border/30">
+                        <div className="relative rounded-xl overflow-hidden border border-border/15 group/banner">
                           <img src={bannerMobilePreview} alt="Mobile" className="w-full h-24 object-cover" />
-                          <button type="button" onClick={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/60 backdrop-blur flex items-center justify-center text-white"><X className="h-3 w-3" /></button>
+                          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center">
+                            <button type="button" onClick={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} className="h-9 w-9 rounded-xl bg-card/90 border border-border/20 flex items-center justify-center text-destructive shadow-lg active:scale-95 transition-transform">
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                       ) : (
-                        <button type="button" onClick={() => mobileRef.current?.click()} className="w-full h-14 rounded-xl border border-dashed border-border/40 hover:border-primary/30 flex items-center justify-center gap-2 text-muted-foreground/40 hover:text-primary text-[11px] transition-colors">
+                        <button type="button" onClick={() => mobileRef.current?.click()} className="w-full h-16 rounded-xl border border-dashed border-border/20 hover:border-primary/25 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground/30 hover:text-primary/60 text-[11px] font-semibold transition-all duration-200 active:scale-[0.98]">
                           <Upload className="h-3.5 w-3.5" /> Enviar imagem
                         </button>
                       )}
@@ -390,13 +456,19 @@ export default function CheckoutBuilder() {
               {/* ── PAYMENT TAB ── */}
               {activeTab === "payment" && (
                 <>
-                  <SectionHeader title="Métodos de Pagamento" desc="Escolha quais formas de pagamento aceitar" />
+                  <SectionHeader icon={CreditCard} title="Métodos de Pagamento" desc="Escolha quais formas de pagamento aceitar" />
                   <ToggleRow icon={QrCode} iconColor="emerald-500" title="PIX" desc="Pagamento instantâneo via QR Code" checked={pixEnabled} onChange={setPixEnabled} />
                   <ToggleRow icon={FileText} iconColor="amber-500" title="Boleto Bancário" desc="Vencimento em 3 dias úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />
                   <ToggleRow icon={CreditCard} iconColor="blue-500" title="Cartão de Crédito" desc="Até 12x sem juros" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
                   
-                  <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
-                    <p className="text-[10px] text-primary/70 font-medium">Habilite PIX para maior conversão — taxa de aprovação de 99%</p>
+                  <div className="rounded-2xl bg-gradient-to-r from-primary/[0.06] to-transparent border border-primary/10 p-3.5 flex items-start gap-2.5">
+                    <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Zap className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-bold text-foreground/80">Dica de conversão</p>
+                      <p className="text-[10px] text-muted-foreground/50 mt-0.5">Habilite PIX para maior conversão — taxa de aprovação de 99%</p>
+                    </div>
                   </div>
                 </>
               )}
@@ -404,7 +476,7 @@ export default function CheckoutBuilder() {
               {/* ── FORM TAB ── */}
               {activeTab === "form" && (
                 <>
-                  <SectionHeader title="Campos do Formulário" desc="Configure quais dados o comprador precisa informar" />
+                  <SectionHeader icon={Mail} title="Campos do Formulário" desc="Configure quais dados o comprador precisa informar" />
                   <ToggleRow icon={Mail} title="Confirmação de e-mail" desc="Pede para digitar o e-mail 2 vezes" checked={emailConfirm} onChange={setEmailConfirm} />
                   <ToggleRow icon={Phone} title="Telefone / WhatsApp" desc="Solicita número de telefone" checked={phoneRequired} onChange={setPhoneRequired} />
                   <ToggleRow icon={Hash} title="CPF / CNPJ" desc="Solicita documento do comprador" checked={cpfRequired} onChange={setCpfRequired} />
@@ -416,44 +488,112 @@ export default function CheckoutBuilder() {
               {/* ── BUMPS TAB ── */}
               {activeTab === "bumps" && (
                 <>
-                  <SectionHeader title="Order Bumps" desc="Ofertas adicionais exibidas no checkout" />
-                  {orderBumps.map(bump => {
-                    const prod = allProducts.find(p => p.id === bump.bump_product_id);
-                    return (
-                      <div key={bump.id} className="flex items-center justify-between p-3.5 rounded-xl border border-primary/20 bg-primary/[0.03]">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {prod?.image_url ? (
-                            <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-xl object-cover border border-border/20" />
-                          ) : (
-                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"><Package className="h-4 w-4 text-primary" /></div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold truncate text-foreground">{prod?.name || "Produto"}</p>
-                            <p className="text-[10px] text-primary font-semibold">+ R$ {Number(prod?.price || 0).toFixed(2)}</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={() => removeBump(bump.id)} className="text-destructive/60 hover:text-destructive h-8 w-8 p-0 rounded-xl">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                  {availableForBump.length > 0 && (
-                    <div className="flex gap-2">
-                      <select value={selectedBumpProduct} onChange={e => setSelectedBumpProduct(e.target.value)}
-                        className="flex-1 h-9 rounded-xl border border-border/40 bg-background text-foreground text-xs px-2.5">
-                        <option value="">Selecione um produto...</option>
-                        {availableForBump.map(p => <option key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</option>)}
-                      </select>
-                      <Button onClick={addBump} disabled={!selectedBumpProduct} size="sm" className="gap-1.5 rounded-xl h-9 text-xs font-semibold">
-                        <Plus className="h-3.5 w-3.5" /> Adicionar
-                      </Button>
+                  <SectionHeader icon={Package} title="Order Bumps" desc="Ofertas adicionais exibidas no checkout" />
+                  
+                  {/* Active bumps */}
+                  {orderBumps.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 block">Bumps Ativos ({orderBumps.length})</Label>
+                      {orderBumps.map((bump, i) => {
+                        const prod = allProducts.find(p => p.id === bump.bump_product_id);
+                        return (
+                          <motion.div
+                            key={bump.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="group/bump relative flex items-center gap-3 p-3 rounded-2xl border border-primary/15 bg-gradient-to-r from-primary/[0.04] to-transparent hover:from-primary/[0.06] transition-all duration-200"
+                          >
+                            <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-primary/50" />
+                            {prod?.image_url ? (
+                              <img src={prod.image_url} alt={prod.name} className="h-11 w-11 rounded-xl object-cover border border-border/15 shadow-sm" />
+                            ) : (
+                              <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/10">
+                                <Package className="h-4 w-4 text-primary/60" />
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[12px] font-bold truncate text-foreground">{prod?.name || "Produto"}</p>
+                              <p className="text-[11px] font-black text-primary">+ R$ {Number(prod?.price || 0).toFixed(2)}</p>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => removeBump(bump.id)} className="text-muted-foreground/20 hover:text-destructive h-8 w-8 p-0 rounded-xl opacity-0 group-hover/bump:opacity-100 transition-all">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   )}
+
+                  {/* Add new bump — Premium card selector */}
+                  {availableForBump.length > 0 && (
+                    <div className="space-y-2.5">
+                      <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 block">Adicionar Bump</Label>
+                      <div className="rounded-2xl border border-border/15 bg-card/20 overflow-hidden">
+                        <div className="max-h-[220px] overflow-y-auto divide-y divide-border/10">
+                          {availableForBump.map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => setSelectedBumpProduct(prev => prev === p.id ? "" : p.id)}
+                              className={cn(
+                                "w-full flex items-center gap-3 p-3 text-left transition-all duration-200 active:scale-[0.99]",
+                                selectedBumpProduct === p.id
+                                  ? "bg-primary/[0.06]"
+                                  : "hover:bg-muted/10"
+                              )}
+                            >
+                              <div className={cn(
+                                "h-5 w-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all duration-200",
+                                selectedBumpProduct === p.id
+                                  ? "border-primary bg-primary"
+                                  : "border-border/30"
+                              )}>
+                                {selectedBumpProduct === p.id && (
+                                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                    <Check className="h-3 w-3 text-primary-foreground" />
+                                  </motion.div>
+                                )}
+                              </div>
+                              {p.image_url ? (
+                                <img src={p.image_url} alt={p.name} className="h-10 w-10 rounded-xl object-cover border border-border/10 shadow-sm" />
+                              ) : (
+                                <div className="h-10 w-10 rounded-xl bg-muted/10 flex items-center justify-center border border-border/10">
+                                  <Package className="h-4 w-4 text-muted-foreground/20" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[12px] font-bold text-foreground truncate">{p.name}</p>
+                                <p className="text-[11px] text-muted-foreground/40 font-semibold">R$ {Number(p.price).toFixed(2)}</p>
+                              </div>
+                              <ChevronRight className={cn(
+                                "h-3.5 w-3.5 shrink-0 transition-all duration-200",
+                                selectedBumpProduct === p.id ? "text-primary rotate-90" : "text-muted-foreground/15"
+                              )} />
+                            </button>
+                          ))}
+                        </div>
+                        {/* Add button */}
+                        <div className="p-2.5 border-t border-border/10 bg-card/30">
+                          <Button
+                            onClick={addBump}
+                            disabled={!selectedBumpProduct}
+                            size="sm"
+                            className="w-full gap-2 rounded-xl h-9 text-xs font-bold shadow-sm disabled:opacity-30 transition-all"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Adicionar como Order Bump
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {allProducts.length === 0 && orderBumps.length === 0 && (
-                    <div className="text-center py-10">
-                      <Package className="h-8 w-8 text-muted-foreground/15 mx-auto mb-2" />
-                      <p className="text-muted-foreground/40 text-xs">Cadastre outros produtos para usar como bumps</p>
+                    <div className="text-center py-12 rounded-2xl border border-dashed border-border/15 bg-card/10">
+                      <div className="h-14 w-14 rounded-2xl bg-muted/10 flex items-center justify-center mx-auto mb-3">
+                        <Package className="h-6 w-6 text-muted-foreground/15" />
+                      </div>
+                      <p className="text-muted-foreground/30 text-xs font-semibold">Cadastre outros produtos</p>
+                      <p className="text-muted-foreground/20 text-[10px] mt-1">para usar como order bumps</p>
                     </div>
                   )}
                 </>
@@ -462,12 +602,12 @@ export default function CheckoutBuilder() {
               {/* ── CRO TAB ── */}
               {activeTab === "cro" && (
                 <>
-                  <SectionHeader title="Gatilhos de Conversão" desc="Aumente suas vendas com táticas avançadas de CRO" />
+                  <SectionHeader icon={Zap} title="Gatilhos de Conversão" desc="Aumente suas vendas com táticas avançadas de CRO" />
                   
                   <ToggleRow icon={Video} iconColor="red-500" title="VSL no Checkout" desc="Exibir vídeo de vendas no topo" checked={vslEnabled} onChange={setVslEnabled} />
                   {vslEnabled && (
                     <div className="ml-12 -mt-1">
-                      <Input value={vslUrl} onChange={(e) => setVslUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="h-8 rounded-lg text-xs" />
+                      <Input value={vslUrl} onChange={(e) => setVslUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="h-8 rounded-xl text-xs bg-card/40 border-border/15" />
                     </div>
                   )}
                   
@@ -475,9 +615,12 @@ export default function CheckoutBuilder() {
                   <ToggleRow icon={ExitIcon} iconColor="red-500" title="Exit Intent Popup" desc="Oferecer desconto ao sair da página" checked={exitIntentEnabled} onChange={setExitIntentEnabled} badge="CRO" />
                   <ToggleRow icon={BarChart3} iconColor="blue-500" title="Barra de Progresso" desc='"Você está a 1 passo de garantir..."' checked={progressBarEnabled} onChange={setProgressBarEnabled} />
                   
-                  {/* NEW OPTIONS */}
-                  <div className="border-t border-border/20 dark:border-foreground/[0.04] pt-3 mt-1">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/60 mb-3">Novas opções</p>
+                  {/* Separator */}
+                  <div className="relative py-1">
+                    <div className="h-px bg-gradient-to-r from-transparent via-border/20 to-transparent" />
+                    <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-1/2 bg-background px-2.5">
+                      <span className="text-[8px] font-black uppercase tracking-[0.25em] text-primary/40">Novidades</span>
+                    </div>
                   </div>
                   
                   <ToggleRow icon={Star} iconColor="amber-500" title="Depoimentos" desc="Exibir depoimentos de clientes no checkout" checked={testimonialEnabled} onChange={setTestimonialEnabled} badge="Novo" />
@@ -485,23 +628,23 @@ export default function CheckoutBuilder() {
                   <ToggleRow icon={Clock} iconColor="red-500" title="Escassez de vagas" desc='"Apenas X vagas restantes"' checked={scarcityEnabled} onChange={setScarcityEnabled} badge="Novo" />
                   {scarcityEnabled && (
                     <div className="ml-12 -mt-1 flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground">Vagas:</span>
-                      <Input type="number" min="1" max="999" value={scarcityUnits} onChange={(e) => setScarcityUnits(e.target.value)} className="w-16 h-7 text-center text-[11px] rounded-md" />
+                      <span className="text-[10px] text-muted-foreground/40 font-medium">Vagas:</span>
+                      <Input type="number" min="1" max="999" value={scarcityUnits} onChange={(e) => setScarcityUnits(e.target.value)} className="w-16 h-7 text-center text-[11px] rounded-lg bg-card/40 border-border/15" />
                     </div>
                   )}
                   
                   <ToggleRow icon={MessageSquare} iconColor="emerald-500" title="Botão WhatsApp" desc="Atendimento via WhatsApp no checkout" checked={whatsappEnabled} onChange={setWhatsappEnabled} badge="Novo" />
                   {whatsappEnabled && (
                     <div className="ml-12 -mt-1">
-                      <Input value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="11999999999" className="h-8 rounded-lg text-xs" />
+                      <Input value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="11999999999" className="h-8 rounded-xl text-xs bg-card/40 border-border/15" />
                     </div>
                   )}
                   
                   <ToggleRow icon={Percent} iconColor="emerald-500" title="Badge de desconto" desc="Mostra preço original riscado + desconto" checked={discountBadgeEnabled} onChange={setDiscountBadgeEnabled} badge="Novo" />
                   {discountBadgeEnabled && (
                     <div className="ml-12 -mt-1 flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">De R$</span>
-                      <Input type="number" step="0.01" value={discountOriginalPrice} onChange={(e) => setDiscountOriginalPrice(e.target.value)} placeholder="297.00" className="w-24 h-7 text-[11px] rounded-md" />
+                      <span className="text-[10px] text-muted-foreground/40 whitespace-nowrap font-medium">De R$</span>
+                      <Input type="number" step="0.01" value={discountOriginalPrice} onChange={(e) => setDiscountOriginalPrice(e.target.value)} placeholder="297.00" className="w-24 h-7 text-[11px] rounded-lg bg-card/40 border-border/15" />
                     </div>
                   )}
                   
@@ -516,52 +659,60 @@ export default function CheckoutBuilder() {
       {/* ─── RIGHT: Live Preview ─── */}
       <main className="flex-1 flex flex-col min-h-screen">
         {/* Preview header */}
-        <div className="h-12 border-b border-border/30 dark:border-foreground/[0.04] bg-card/10 backdrop-blur-sm flex items-center justify-between px-4 sticky top-0 z-10">
-          <div className="flex items-center gap-2">
-            <Eye className="h-3.5 w-3.5 text-muted-foreground/40" />
-            <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.16em]">Live Preview</span>
+        <div className="h-14 border-b border-border/15 bg-card/5 backdrop-blur-md flex items-center justify-between px-5 sticky top-0 z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Eye className="h-3 w-3 text-primary/60" />
+            </div>
+            <span className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-[0.2em]">Live Preview</span>
           </div>
-          <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-muted/20 border border-border/30">
-            <button onClick={() => setPreviewMode("desktop")} className={cn("p-1.5 rounded-lg transition-all", previewMode === "desktop" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground")}>
-              <Monitor className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/10 border border-border/10">
+            <button onClick={() => setPreviewMode("desktop")} className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200",
+              previewMode === "desktop" ? "bg-card shadow-sm text-foreground border border-border/15" : "text-muted-foreground/30 hover:text-muted-foreground/60"
+            )}>
+              <Monitor className="h-3 w-3" /> Desktop
             </button>
-            <button onClick={() => setPreviewMode("mobile")} className={cn("p-1.5 rounded-lg transition-all", previewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground")}>
-              <Smartphone className="h-3.5 w-3.5" />
+            <button onClick={() => setPreviewMode("mobile")} className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200",
+              previewMode === "mobile" ? "bg-card shadow-sm text-foreground border border-border/15" : "text-muted-foreground/30 hover:text-muted-foreground/60"
+            )}>
+              <Smartphone className="h-3 w-3" /> Mobile
             </button>
           </div>
           {checkoutUrl && (
-            <Button variant="ghost" size="sm" onClick={() => window.open(checkoutUrl, "_blank")} className="gap-1.5 text-[10px] h-7 rounded-lg text-muted-foreground/40 hover:text-primary font-semibold">
+            <Button variant="ghost" size="sm" onClick={() => window.open(checkoutUrl, "_blank")} className="gap-1.5 text-[10px] h-8 rounded-xl text-muted-foreground/30 hover:text-primary font-bold">
               <Eye className="h-3 w-3" /> Abrir checkout
             </Button>
           )}
         </div>
 
         {/* Preview area */}
-        <div className="flex-1 bg-muted/5 flex items-start justify-center p-6 overflow-auto"
-          style={{ backgroundImage: "radial-gradient(circle, hsl(var(--border)/0.15) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+        <div className="flex-1 bg-gradient-to-br from-muted/5 to-muted/[0.02] flex items-start justify-center p-8 overflow-auto"
+          style={{ backgroundImage: "radial-gradient(circle, hsl(var(--border)/0.1) 1px, transparent 1px)", backgroundSize: "20px 20px" }}
         >
           <motion.div
             layout
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-              "bg-card rounded-2xl border border-border/40 dark:border-foreground/[0.06] shadow-2xl shadow-black/10 overflow-hidden",
+              "bg-card rounded-2xl border border-border/20 shadow-2xl shadow-black/8 overflow-hidden transition-all duration-500",
               previewMode === "desktop" ? "w-full max-w-2xl" : "w-[375px]"
             )}
           >
             {/* Preview: Banner */}
             {(previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview) && (
-              <img src={previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="Banner" className="w-full h-32 object-cover" />
+              <img src={previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="Banner" className="w-full h-36 object-cover" />
             )}
 
             {/* Preview: VSL */}
             {vslEnabled && vslUrl && (
-              <div className="p-4 pb-0">
-                <div className="aspect-video rounded-xl bg-black/90 border border-border/20 flex items-center justify-center text-muted-foreground/20">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center">
-                      <Video className="h-5 w-5" />
+              <div className="p-5 pb-0">
+                <div className="aspect-video rounded-2xl bg-black/90 border border-border/10 flex items-center justify-center text-muted-foreground/15 overflow-hidden">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur">
+                      <Video className="h-6 w-6" />
                     </div>
-                    <span className="text-[10px]">Vídeo de vendas</span>
+                    <span className="text-[10px] font-medium">Vídeo de vendas</span>
                   </div>
                 </div>
               </div>
@@ -569,21 +720,21 @@ export default function CheckoutBuilder() {
 
             {/* Preview: Progress bar */}
             {progressBarEnabled && (
-              <div className="px-4 pt-4">
-                <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 mb-1.5">
-                  <span className="h-5 w-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[9px] font-black">1</span>
+              <div className="px-5 pt-5">
+                <div className="flex items-center gap-2.5 text-[11px] font-semibold text-foreground/70 mb-2">
+                  <span className="h-6 w-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[10px] font-black border border-primary/10">1</span>
                   Você está a 1 passo de garantir sua vaga
                 </div>
-                <div className="h-2 rounded-full bg-muted/30 overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: "66%" }} transition={{ duration: 1.5, ease: "easeOut" }} className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70" />
+                <div className="h-2 rounded-full bg-muted/20 overflow-hidden">
+                  <motion.div initial={{ width: 0 }} animate={{ width: "66%" }} transition={{ duration: 1.5, ease: "easeOut" }} className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60" />
                 </div>
               </div>
             )}
 
             {/* Preview: Fake viewers */}
             {fakeViewersEnabled && (
-              <div className="px-4 pt-3">
-                <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full bg-orange-500/10 text-orange-400 px-3 py-1.5 border border-orange-500/15">
+              <div className="px-5 pt-4">
+                <div className="inline-flex items-center gap-2 text-[11px] font-bold rounded-xl bg-orange-500/8 text-orange-400 px-3.5 py-2 border border-orange-500/10">
                   <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" /></span>
                   14 pessoas estão comprando agora
                 </div>
@@ -592,8 +743,8 @@ export default function CheckoutBuilder() {
 
             {/* Preview: Scarcity */}
             {scarcityEnabled && (
-              <div className="px-4 pt-3">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-red-400 bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/15">
+              <div className="px-5 pt-4">
+                <div className="flex items-center gap-2.5 text-[11px] font-bold text-red-400 bg-red-500/8 rounded-xl py-2.5 px-4 border border-red-500/10">
                   <Clock className="h-3.5 w-3.5" />
                   Apenas {scarcityUnits} vagas restantes
                 </div>
@@ -602,52 +753,53 @@ export default function CheckoutBuilder() {
 
             {/* Preview: Timer */}
             {timerEnabled && (
-              <div className="px-4 pt-3">
-                <div className="flex items-center justify-center gap-2 text-[12px] font-bold text-amber-400 bg-amber-500/10 rounded-xl py-2.5 border border-amber-500/10">
-                  <Timer className="h-3.5 w-3.5" /> Oferta expira em {timerMinutes}:00
+              <div className="px-5 pt-4">
+                <div className="flex items-center justify-center gap-2.5 text-[12px] font-bold text-amber-400 bg-amber-500/8 rounded-xl py-3 border border-amber-500/8">
+                  <Timer className="h-4 w-4" /> Oferta expira em {timerMinutes}:00
                 </div>
               </div>
             )}
 
             {/* Preview: Discount badge */}
             {discountBadgeEnabled && discountOriginalPrice && (
-              <div className="px-4 pt-3">
-                <div className="inline-flex items-center gap-2 text-[11px] font-bold bg-success/10 text-success px-3 py-1.5 rounded-full border border-success/15">
-                  <Percent className="h-3 w-3" />
-                  De <span className="line-through text-muted-foreground">R$ {Number(discountOriginalPrice).toFixed(2)}</span> por <span className="text-success">R$ {Number(product?.price || 0).toFixed(2)}</span>
+              <div className="px-5 pt-4">
+                <div className="inline-flex items-center gap-2 text-[11px] font-bold bg-success/8 text-success px-4 py-2 rounded-xl border border-success/10">
+                  <Percent className="h-3.5 w-3.5" />
+                  De <span className="line-through text-muted-foreground/60">R$ {Number(discountOriginalPrice).toFixed(2)}</span> por <span className="text-success font-black">R$ {Number(product?.price || 0).toFixed(2)}</span>
                 </div>
               </div>
             )}
 
-            <div className="p-4 space-y-4">
+            <div className="p-5 space-y-5">
               {/* Product info */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {product?.image_url ? (
-                  <img src={product.image_url} className="h-14 w-14 rounded-xl object-cover border border-border/20 shadow-sm" />
+                  <img src={product.image_url} className="h-16 w-16 rounded-2xl object-cover border border-border/15 shadow-lg" />
                 ) : (
-                  <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center"><Package className="h-6 w-6 text-primary" /></div>
+                  <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/10"><Package className="h-6 w-6 text-primary/60" /></div>
                 )}
                 <div>
                   <p className="text-sm font-bold text-foreground">{product?.name}</p>
-                  <p className="text-xl font-black text-primary">R$ {Number(product?.price || 0).toFixed(2)}</p>
+                  <p className="text-2xl font-black text-primary tracking-tight">R$ {Number(product?.price || 0).toFixed(2)}</p>
                 </div>
               </div>
 
               {/* Testimonials */}
               {testimonialEnabled && (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {[
                     { name: "Maria S.", text: "Melhor investimento que fiz!", rating: 5 },
                     { name: "João P.", text: "Conteúdo incrível, recomendo!", rating: 5 },
                   ].map((t, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-muted/20 border border-border/20">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <div className="flex">
+                    <div key={i} className="p-3.5 rounded-2xl bg-muted/10 border border-border/10">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className="h-6 w-6 rounded-full bg-gradient-to-br from-amber-400/20 to-amber-400/5 flex items-center justify-center text-[9px] font-black text-amber-400">{t.name[0]}</div>
+                        <div className="flex gap-0.5">
                           {Array.from({ length: t.rating }).map((_, j) => <Star key={j} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />)}
                         </div>
-                        <span className="text-[10px] font-bold text-foreground/60">{t.name}</span>
+                        <span className="text-[10px] font-bold text-foreground/50">{t.name}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground italic">"{t.text}"</p>
+                      <p className="text-[11px] text-muted-foreground/60 italic pl-8">"{t.text}"</p>
                     </div>
                   ))}
                 </div>
@@ -655,16 +807,18 @@ export default function CheckoutBuilder() {
 
               {/* Social proof */}
               {socialProof && (
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <div className="flex -space-x-1.5">
-                    {[1,2,3,4].map(i => <div key={i} className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-card" />)}
+                <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground/70">
+                  <div className="flex -space-x-2">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-card shadow-sm" />
+                    ))}
                   </div>
-                  <span className="font-medium">+127 compraram nas últimas 24h</span>
+                  <span className="font-semibold">+127 compraram nas últimas 24h</span>
                 </div>
               )}
 
               {/* Form preview */}
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <PreviewField label="Nome completo" />
                 <PreviewField label="E-mail" />
                 {emailConfirm && <PreviewField label="Confirme seu e-mail" />}
@@ -672,7 +826,7 @@ export default function CheckoutBuilder() {
                 {cpfRequired && <PreviewField label="CPF / CNPJ" />}
                 {nameOnCardRequired && creditCardEnabled && <PreviewField label="Nome impresso no cartão" />}
                 {addressRequired && (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2.5">
                     <PreviewField label="CEP" />
                     <div className="col-span-2"><PreviewField label="Endereço" /></div>
                   </div>
@@ -681,24 +835,27 @@ export default function CheckoutBuilder() {
 
               {/* Payment methods preview */}
               <div className="flex gap-2 flex-wrap">
-                {pixEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 inline-flex items-center gap-1.5"><QrCode className="h-3 w-3" /> PIX</span>}
-                {boletoEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/15 inline-flex items-center gap-1.5"><FileText className="h-3 w-3" /> Boleto</span>}
-                {creditCardEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/15 inline-flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Cartão</span>}
+                {pixEnabled && <span className="text-[10px] font-bold px-3 py-2 rounded-xl bg-emerald-500/8 text-emerald-400 border border-emerald-500/10 inline-flex items-center gap-1.5"><QrCode className="h-3 w-3" /> PIX</span>}
+                {boletoEnabled && <span className="text-[10px] font-bold px-3 py-2 rounded-xl bg-amber-500/8 text-amber-400 border border-amber-500/10 inline-flex items-center gap-1.5"><FileText className="h-3 w-3" /> Boleto</span>}
+                {creditCardEnabled && <span className="text-[10px] font-bold px-3 py-2 rounded-xl bg-blue-500/8 text-blue-400 border border-blue-500/10 inline-flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Cartão</span>}
               </div>
 
               {/* Order bumps preview */}
               {orderBumps.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {orderBumps.map(bump => {
                     const prod = allProducts.find(p => p.id === bump.bump_product_id);
                     return (
-                      <div key={bump.id} className="p-3.5 rounded-xl border-2 border-dashed border-primary/25 bg-primary/[0.03]">
-                        <div className="flex items-center gap-2.5">
-                          <div className="h-5 w-5 rounded border-2 border-primary/40" />
-                          <div className="flex-1">
-                            <span className="text-xs font-bold text-foreground">{prod?.name || "Bump"}</span>
+                      <div key={bump.id} className="p-4 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.04] transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="h-5 w-5 rounded-lg border-2 border-primary/30 flex items-center justify-center">
+                            <Plus className="h-2.5 w-2.5 text-primary/40" />
                           </div>
-                          <span className="text-xs font-black text-primary">+ R$ {Number(prod?.price || 0).toFixed(2)}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-bold text-foreground truncate block">{prod?.name || "Bump"}</span>
+                            <span className="text-[10px] text-muted-foreground/40">Adicione ao seu pedido</span>
+                          </div>
+                          <span className="text-sm font-black text-primary">+ R$ {Number(prod?.price || 0).toFixed(2)}</span>
                         </div>
                       </div>
                     );
@@ -708,24 +865,26 @@ export default function CheckoutBuilder() {
 
               {/* CTA button */}
               <button
-                className="w-full h-13 py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-                style={{ backgroundColor: buttonColor, boxShadow: `0 10px 30px -10px ${buttonColor}50` }}
+                className="w-full py-4 rounded-2xl text-white font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2.5"
+                style={{ backgroundColor: buttonColor, boxShadow: `0 12px 35px -10px ${buttonColor}40` }}
               >
-                <Lock className="h-3.5 w-3.5" />
+                <Lock className="h-4 w-4" />
                 COMPRAR AGORA
               </button>
 
               {/* Trust badges */}
               {trustBadgesEnabled && (
-                <div className="flex items-center justify-center gap-4 py-2">
+                <div className="flex items-center justify-center gap-6 py-2">
                   {[
                     { icon: Lock, label: "SSL Seguro" },
                     { icon: ShieldCheck, label: "Compra Protegida" },
                     { icon: CreditCard, label: "Dados Criptografados" },
                   ].map((b, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1">
-                      <b.icon className="h-4 w-4 text-muted-foreground/30" />
-                      <span className="text-[8px] font-medium text-muted-foreground/30">{b.label}</span>
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <div className="h-7 w-7 rounded-lg bg-muted/10 flex items-center justify-center border border-border/10">
+                        <b.icon className="h-3.5 w-3.5 text-muted-foreground/25" />
+                      </div>
+                      <span className="text-[8px] font-bold text-muted-foreground/25 uppercase tracking-wider">{b.label}</span>
                     </div>
                   ))}
                 </div>
@@ -733,7 +892,7 @@ export default function CheckoutBuilder() {
 
               {/* Guarantee seal */}
               {guaranteeEnabled && (
-                <div className="flex items-center justify-center gap-2 py-1 text-[11px] text-emerald-400 font-semibold">
+                <div className="flex items-center justify-center gap-2 py-2 text-[11px] text-emerald-400 font-semibold">
                   <ShieldCheck className="h-4 w-4" /> Garantia de 7 dias ou seu dinheiro de volta
                 </div>
               )}
@@ -741,8 +900,8 @@ export default function CheckoutBuilder() {
               {/* WhatsApp button */}
               {whatsappEnabled && (
                 <div className="flex items-center justify-center">
-                  <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/15 cursor-pointer hover:bg-emerald-500/15 transition-colors">
-                    <MessageSquare className="h-3.5 w-3.5" />
+                  <div className="inline-flex items-center gap-2.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/8 px-5 py-2.5 rounded-xl border border-emerald-500/10 cursor-pointer hover:bg-emerald-500/12 transition-all duration-200 active:scale-[0.98]">
+                    <MessageSquare className="h-4 w-4" />
                     Dúvidas? Fale no WhatsApp
                   </div>
                 </div>
@@ -751,8 +910,10 @@ export default function CheckoutBuilder() {
 
             {/* Exit intent preview */}
             {exitIntentEnabled && (
-              <div className="border-t border-border/20 p-3 bg-muted/5 text-center">
-                <p className="text-[10px] text-muted-foreground/30 font-medium">Exit Intent ativo — popup ao sair da página</p>
+              <div className="border-t border-border/10 p-3.5 bg-muted/[0.03] text-center">
+                <p className="text-[10px] text-muted-foreground/25 font-medium flex items-center justify-center gap-1.5">
+                  <ExitIcon className="h-3 w-3" /> Exit Intent ativo — popup ao sair da página
+                </p>
               </div>
             )}
           </motion.div>
@@ -766,8 +927,8 @@ export default function CheckoutBuilder() {
 function PreviewField({ label }: { label: string }) {
   return (
     <div>
-      <p className="text-[9px] font-medium text-muted-foreground/40 mb-1">{label}</p>
-      <div className="h-9 rounded-lg bg-muted/15 border border-border/20" />
+      <p className="text-[9px] font-bold text-muted-foreground/30 mb-1.5 uppercase tracking-wider">{label}</p>
+      <div className="h-10 rounded-xl bg-muted/10 border border-border/10" />
     </div>
   );
 }
