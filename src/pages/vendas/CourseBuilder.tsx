@@ -128,7 +128,7 @@ export default function CourseBuilder() {
       .select("*")
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: false });
-    setAttachments((data || []) as Attachment[]);
+    setAttachments((data || []) as unknown as Attachment[]);
   }, []);
 
   // ─── Auto-save ──────────────────────────────────────────────────
