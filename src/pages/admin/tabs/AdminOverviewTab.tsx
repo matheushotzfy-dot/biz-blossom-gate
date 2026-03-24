@@ -656,18 +656,19 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor,
 }) {
   return (
     <div className={cn(
-      "rounded-xl bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-4",
-      "shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] hover:border-white/[0.08] transition-all",
-      alert && "border-amber-500/20"
+      "rounded-xl bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-2xl border border-white/[0.06] p-4",
+      "shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_16px_rgba(0,0,0,0.15)]",
+      "hover:border-white/[0.08] transition-all duration-300",
+      alert && "border-amber-500/20 ring-1 ring-amber-500/10"
     )}
-      style={{ boxShadow: highlight && glowColor ? `0 0 30px ${glowColor}` : undefined }}
+      style={{ boxShadow: highlight && glowColor ? `inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px ${glowColor}` : undefined }}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/20 font-bold">{label}</span>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-white/15 font-bold">{label}</span>
         {gradient ? (
-          <div className={cn("h-8 w-8 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md", gradient)}>{icon}</div>
+          <div className={cn("h-8 w-8 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md ring-1 ring-white/[0.1]", gradient)}>{icon}</div>
         ) : (
-          <div className={cn("h-8 w-8 rounded-lg bg-white/[0.04] flex items-center justify-center", iconColor || "text-white/30")}>{icon}</div>
+          <div className={cn("h-8 w-8 rounded-lg bg-white/[0.04] flex items-center justify-center ring-1 ring-white/[0.04]", iconColor || "text-white/30")}>{icon}</div>
         )}
       </div>
       <p className={cn("text-xl font-extrabold tracking-tight text-white", highlight && "text-amber-400")}>{value}</p>
