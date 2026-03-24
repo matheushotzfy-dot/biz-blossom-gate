@@ -19,13 +19,7 @@ interface Props {
   fmtCurrency: (v: number) => string;
 }
 
-const COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--warning))",
-  "hsl(var(--destructive))",
-  "hsl(var(--info, 210 100% 50%))",
-  "hsl(var(--accent))",
-];
+const COLORS = ["#6366f1", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"];
 
 export default function AdminAnalyticsTab({ transactions, profiles, products, withdrawals, fmtCurrency }: Props) {
 
@@ -87,12 +81,12 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
     const chargeback = transactions.filter(t => t.status === "chargeback").length;
 
     return [
-      { stage: "Iniciadas", count: total, pct: 100, color: "hsl(var(--info, 210 100% 50%))" },
-      { stage: "Pendentes", count: pending, pct: total > 0 ? (pending / total) * 100 : 0, color: "hsl(var(--warning))" },
-      { stage: "Aprovadas", count: completed, pct: total > 0 ? (completed / total) * 100 : 0, color: "hsl(var(--primary))" },
-      { stage: "Recusadas", count: failed, pct: total > 0 ? (failed / total) * 100 : 0, color: "hsl(var(--destructive))" },
-      { stage: "Estornos", count: refunded, pct: total > 0 ? (refunded / total) * 100 : 0, color: "hsl(var(--warning))" },
-      { stage: "Chargebacks", count: chargeback, pct: total > 0 ? (chargeback / total) * 100 : 0, color: "hsl(var(--destructive))" },
+      { stage: "Iniciadas", count: total, pct: 100, color: "#3b82f6" },
+      { stage: "Pendentes", count: pending, pct: total > 0 ? (pending / total) * 100 : 0, color: "#f59e0b" },
+      { stage: "Aprovadas", count: completed, pct: total > 0 ? (completed / total) * 100 : 0, color: "#6366f1" },
+      { stage: "Recusadas", count: failed, pct: total > 0 ? (failed / total) * 100 : 0, color: "#ef4444" },
+      { stage: "Estornos", count: refunded, pct: total > 0 ? (refunded / total) * 100 : 0, color: "#f59e0b" },
+      { stage: "Chargebacks", count: chargeback, pct: total > 0 ? (chargeback / total) * 100 : 0, color: "#ef4444" },
     ];
   }, [transactions]);
 
@@ -212,12 +206,12 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <div className="h-[300px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={forecast.chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={4} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
-                <Area type="monotone" dataKey="receita" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} name="Receita" />
-                <Area type="monotone" dataKey="previsao" stroke="hsl(var(--warning))" fill="hsl(var(--warning))" fillOpacity={0.1} strokeDasharray="5 5" name="Previsão" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} interval={4} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
+                <Area type="monotone" dataKey="receita" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} name="Receita" />
+                <Area type="monotone" dataKey="previsao" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} strokeDasharray="5 5" name="Previsão" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -230,10 +224,10 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
             {funnel.map((stage, i) => (
               <div key={stage.stage} className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="font-medium text-foreground">{stage.stage}</span>
-                  <span className="text-muted-foreground">{stage.count} ({stage.pct.toFixed(1)}%)</span>
+                  <span className="font-medium text-white/80">{stage.stage}</span>
+                  <span className="text-white/30">{stage.count} ({stage.pct.toFixed(1)}%)</span>
                 </div>
-                <div className="h-6 bg-muted/30 rounded-lg overflow-hidden relative">
+                <div className="h-6 bg-white/[0.04] rounded-lg overflow-hidden relative">
                   <div
                     className="h-full rounded-lg transition-all duration-500"
                     style={{ width: `${Math.max(stage.pct, 2)}%`, backgroundColor: stage.color, opacity: 0.8 }}
@@ -255,7 +249,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
+                <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -267,13 +261,13 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <div className="h-[280px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyBars}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="receita" fill="hsl(var(--primary))" name="Receita Líquida" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="taxas" fill="hsl(var(--warning))" name="Taxas Coletadas" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
+                <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
+                <Bar dataKey="receita" fill="#6366f1" name="Receita Líquida" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="taxas" fill="#f59e0b" name="Taxas Coletadas" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -284,25 +278,25 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <PanelTitle color="cyan" icon={<Calendar className="h-4 w-4" />}>Análise de Cohort — Sellers por Mês de Cadastro</PanelTitle>
           <div className="overflow-x-auto mt-4">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">
+              <thead><tr className="border-b border-white/[0.06]">
                 {["Mês", "Novos Sellers", "Ativos (venderam)", "Receita Gerada", "Retenção"].map(h => (
-                  <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/25 uppercase tracking-wider">{h}</th>
                 ))}
               </tr></thead>
               <tbody>
                 {cohortData.map(c => (
-                  <tr key={c.month} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                    <td className="p-3 text-xs font-bold text-foreground">{c.month}</td>
-                    <td className="p-3 text-xs text-foreground">{c.newSellers}</td>
-                    <td className="p-3 text-xs text-primary font-medium">{c.activeSellers}</td>
-                    <td className="p-3 text-xs font-bold text-foreground">{fmtCurrency(c.revenue)}</td>
+                  <tr key={c.month} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
+                    <td className="p-3 text-xs font-bold text-white/80">{c.month}</td>
+                    <td className="p-3 text-xs text-white/60">{c.newSellers}</td>
+                    <td className="p-3 text-xs text-indigo-400 font-medium">{c.activeSellers}</td>
+                    <td className="p-3 text-xs font-bold text-white/80">{fmtCurrency(c.revenue)}</td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-16 bg-muted/30 rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", c.retention >= 50 ? "bg-primary" : c.retention >= 25 ? "bg-warning" : "bg-destructive")}
+                        <div className="h-2 w-16 bg-white/[0.06] rounded-full overflow-hidden">
+                          <div className={cn("h-full rounded-full", c.retention >= 50 ? "bg-indigo-500" : c.retention >= 25 ? "bg-amber-500" : "bg-red-500")}
                             style={{ width: `${c.retention}%` }} />
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{c.retention}%</span>
+                        <span className="text-[10px] text-white/30">{c.retention}%</span>
                       </div>
                     </td>
                   </tr>

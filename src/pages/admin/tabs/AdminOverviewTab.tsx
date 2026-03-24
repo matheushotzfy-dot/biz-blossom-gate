@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DollarSign, PiggyBank, Landmark, Users, ArrowDownToLine,
@@ -84,6 +85,17 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const allTx = transactions;
   const approved = useMemo(() => allTx.filter(t => t.status === "approved" || t.status === "completed"), [allTx]);
 
+  // ═══ DATE RANGE FILTERING ═══
+  const filteredTx = useMemo(() => {
+    if (!dateRange) return allTx;
+    return allTx.filter(t => {
+      const d = new Date(t.created_at);
+      return d >= dateRange.from && d <= dateRange.to;
+    });
+  }, [allTx, dateRange]);
+
+  const filteredApproved = useMemo(() => filteredTx.filter(t => t.status === "approved" || t.status === "completed"), [filteredTx]);
+
   const today = new Date();
   const todayStr = today.toDateString();
   const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -91,35 +103,44 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const todayTx = useMemo(() => approved.filter(t => new Date(t.created_at).toDateString() === todayStr), [approved, todayStr]);
   const monthTx = useMemo(() => approved.filter(t => new Date(t.created_at) >= thisMonthStart), [approved, thisMonthStart]);
 
+  // Use filtered data for main KPIs
   const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
   const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
-  const totalVolume = approved.reduce((a, t) => a + Number(t.amount), 0);
+  const totalVolume = filteredApproved.reduce((a, t) => a + Number(t.amount), 0);
 
   const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRateMonth = monthTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateTotal = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const takeRateTotal = filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
 
-  const totalWithdrawn = withdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
+  const filteredWithdrawals = useMemo(() => {
+    if (!dateRange) return withdrawals;
+    return withdrawals.filter(w => {
+      const d = new Date(w.created_at);
+      return d >= dateRange.from && d <= dateRange.to;
+    });
+  }, [withdrawals, dateRange]);
+
+  const totalWithdrawn = filteredWithdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
   const pendingWd = withdrawals.filter(w => w.status === "pending");
   const pendingWdAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
 
-  const totalRetained = approved.filter(t => !t.retention_released && Number(t.retained_amount) > 0)
+  const totalRetained = filteredApproved.filter(t => !t.retention_released && Number(t.retained_amount) > 0)
     .reduce((a, t) => a + Number(t.retained_amount), 0);
 
-  const totalNet = approved.reduce((a, t) => a + Number(t.net_amount), 0);
+  const totalNet = filteredApproved.reduce((a, t) => a + Number(t.net_amount), 0);
 
-  const chargebackTx = allTx.filter(t => t.status === "chargeback");
-  const chargebackRate = approved.length > 0 ? ((chargebackTx.length / approved.length) * 100) : 0;
+  const chargebackTx = filteredTx.filter(t => t.status === "chargeback");
+  const chargebackRate = filteredApproved.length > 0 ? ((chargebackTx.length / filteredApproved.length) * 100) : 0;
   const chargebackAlert = chargebackRate > 1;
 
   const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
-  const conversionRate = allTx.length > 0 ? ((approved.length / allTx.length) * 100).toFixed(1) : "0.0";
-  const ticketMedio = approved.length > 0 ? totalVolume / approved.length : 0;
+  const conversionRate = filteredTx.length > 0 ? ((filteredApproved.length / filteredTx.length) * 100).toFixed(1) : "0.0";
+  const ticketMedio = filteredApproved.length > 0 ? totalVolume / filteredApproved.length : 0;
 
   const methodApproval = useMemo(() => {
     const methods: Record<string, { total: number; approved: number; volume: number }> = {};
-    allTx.forEach(t => {
+    filteredTx.forEach(t => {
       const m = t.payment_method || "other";
       if (!methods[m]) methods[m] = { total: 0, approved: 0, volume: 0 };
       methods[m].total++;
@@ -133,7 +154,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       total: stats.total, approved: stats.approved, volume: stats.volume,
       rate: stats.total > 0 ? ((stats.approved / stats.total) * 100) : 0,
     }));
-  }, [allTx]);
+  }, [filteredTx]);
 
   const days = chartPeriod === "7d" ? 7 : 30;
   const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
@@ -203,9 +224,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         />
         <HeroKpi
           icon={<Globe className="h-6 w-6" />}
-          label="TPV Global"
+          label="TPV Período"
           value={fmtCurrency(totalVolume)}
-          sub={`${approved.length} transações aprovadas`}
+          sub={`${filteredApproved.length} transações aprovadas`}
           gradient="from-emerald-400 to-teal-600"
         />
         <HeroKpi
@@ -458,7 +479,11 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                       onClick={() => onUserStatus(p.user_id, "approved")}>
                       <CheckCircle2 className="h-3 w-3" /> Aprovar
                     </Button>
-                    <Button size="sm" className="h-7 text-[9px] bg-white/[0.03] text-white/30 hover:text-white/60 hover:bg-white/[0.06] border border-white/[0.06] gap-1 rounded-lg shadow-none font-bold">
+                    <Button size="sm" className="h-7 text-[9px] bg-white/[0.03] text-white/30 hover:text-white/60 hover:bg-white/[0.06] border border-white/[0.06] gap-1 rounded-lg shadow-none font-bold"
+                      onClick={() => {
+                        window.open(`mailto:${p.email || ""}?subject=Verificação KYC - Documentação Pendente`, "_blank");
+                        toast.info(`Abrindo análise de ${p.full_name || p.email || "seller"}`, { description: `Doc: ${p.document_number || "Não informado"} | Tipo: ${p.seller_type || "N/A"}` });
+                      }}>
                       <Eye className="h-3 w-3" /> Analisar
                     </Button>
                   </div>
