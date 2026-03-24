@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -21,7 +22,16 @@ type AdminProduct = Pick<Tables<"products">, "id" | "user_id" | "name" | "price"
 type AdminWithdrawal = Pick<Tables<"withdrawals">, "id" | "user_id" | "amount" | "fee_amount" | "net_amount" | "status" | "created_at">;
 
 export default function Admin() {
+  const { theme, setTheme } = useTheme();
   const { user } = useAuth();
+
+  // Force dark mode on admin
+  useEffect(() => {
+    const prev = theme;
+    setTheme("dark");
+    return () => setTheme(prev as "light" | "dark");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [transactions, setTransactions] = useState<AdminTx[]>([]);
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
   const [products, setProducts] = useState<AdminProduct[]>([]);

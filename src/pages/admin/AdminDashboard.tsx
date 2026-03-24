@@ -7,7 +7,7 @@ import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, Bell,
-  Moon, Sun, UserCog, RefreshCw, Rocket,
+  UserCog, RefreshCw, Rocket,
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
 } from "lucide-react";
@@ -79,7 +79,7 @@ const DATE_PRESETS = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
@@ -97,6 +97,17 @@ export default function AdminDashboard() {
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // CRITICAL: Force dark mode on admin panel to prevent white flash
+  // Save previous theme and restore on unmount
+  useEffect(() => {
+    const prevTheme = theme;
+    setTheme("dark");
+    return () => {
+      // Restore previous theme when leaving admin
+      setTheme(prevTheme as "light" | "dark");
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user) return;
@@ -365,9 +376,7 @@ export default function AdminDashboard() {
             <RefreshCw className={cn("h-2.5 w-2.5", syncing && "animate-spin")} /> Sync
           </button>
 
-          <button onClick={toggleTheme} className="h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all">
-            {theme === "dark" ? <Sun className="h-3 w-3 text-amber-400" /> : <Moon className="h-3 w-3 text-white/30" />}
-          </button>
+          {/* Admin is always dark — no theme toggle needed */}
 
           <button onClick={handleLogout} className="h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all">
             <LogOut className="h-3 w-3" />
