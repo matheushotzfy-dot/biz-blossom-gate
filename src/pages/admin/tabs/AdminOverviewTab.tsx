@@ -344,7 +344,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
         {/* Realtime Feed */}
         <GlassPanel className="overflow-hidden flex flex-col max-h-[380px]">
-          <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}></GlassPanelTitle>
+          <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>{""}</GlassPanelTitle>
           <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
             {realtimeTx.map(t => (
               <div key={t.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
