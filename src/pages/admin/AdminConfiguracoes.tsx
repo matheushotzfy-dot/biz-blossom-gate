@@ -33,8 +33,8 @@ export default function AdminConfiguracoes() {
             <Globe className="h-4 w-4 text-primary" /> Plataforma
           </h3>
           <div className="space-y-4">
-            <ConfigRow label="Nome" value="PayGate" />
-            <ConfigRow label="Versão" value="1.0.0" mono />
+            <ConfigRow label="Nome" value="HOTZFY" />
+            <ConfigRow label="Versão" value="2.0.0" mono />
             <ConfigRow label="Status" value="Ativo" valueClass="text-primary font-medium" />
             <ConfigRow label="Ambiente" value="Produção" />
           </div>

@@ -540,19 +540,20 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert, pulse }: 
     <motion.div variants={fadeUp} className="relative group">
       <div className={cn(
         "relative rounded-2xl p-6 overflow-hidden transition-all duration-300",
-        "bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05]",
-        "shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]",
-        "hover:border-white/[0.1] hover:shadow-xl hover:shadow-black/40",
+        "bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-2xl border border-white/[0.06]",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.3)]",
+        "hover:border-white/[0.12] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.4)]",
+        "hover:-translate-y-0.5",
         alert && "border-red-500/20 ring-1 ring-red-500/10",
         pulse && "animate-pulse"
       )}>
         {/* Gradient glow */}
-        <div className={cn("absolute -top-12 -right-12 h-32 w-32 rounded-full blur-[60px] opacity-20 group-hover:opacity-30 transition-opacity bg-gradient-to-br", gradient)} />
+        <div className={cn("absolute -top-16 -right-16 h-40 w-40 rounded-full blur-[70px] opacity-15 group-hover:opacity-25 transition-opacity duration-500 bg-gradient-to-br", gradient)} />
 
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-white/25">{label}</span>
-            <div className={cn("h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg", gradient)}>
+            <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-white/20">{label}</span>
+            <div className={cn("h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.1]", gradient)}>
               {icon}
             </div>
           </div>
@@ -564,7 +565,7 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert, pulse }: 
           )}>
             {value}
           </p>
-          {sub && <p className="text-[11px] text-white/25 mt-1.5 font-medium">{sub}</p>}
+          {sub && <p className="text-[11px] text-white/20 mt-1.5 font-medium">{sub}</p>}
         </div>
       </div>
     </motion.div>
@@ -593,7 +594,8 @@ export function GlassPanel({ children, className }: { children: React.ReactNode;
   return (
     <div className={cn(
       "rounded-2xl bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5",
-      "shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]",
+      "shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.2)]",
+      "hover:border-white/[0.07] transition-all duration-300",
       className
     )}>
       {children}
@@ -654,18 +656,19 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor,
 }) {
   return (
     <div className={cn(
-      "rounded-xl bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-4",
-      "shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] hover:border-white/[0.08] transition-all",
-      alert && "border-amber-500/20"
+      "rounded-xl bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-2xl border border-white/[0.06] p-4",
+      "shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_16px_rgba(0,0,0,0.15)]",
+      "hover:border-white/[0.08] transition-all duration-300",
+      alert && "border-amber-500/20 ring-1 ring-amber-500/10"
     )}
-      style={{ boxShadow: highlight && glowColor ? `0 0 30px ${glowColor}` : undefined }}
+      style={{ boxShadow: highlight && glowColor ? `inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px ${glowColor}` : undefined }}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/20 font-bold">{label}</span>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-white/15 font-bold">{label}</span>
         {gradient ? (
-          <div className={cn("h-8 w-8 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md", gradient)}>{icon}</div>
+          <div className={cn("h-8 w-8 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md ring-1 ring-white/[0.1]", gradient)}>{icon}</div>
         ) : (
-          <div className={cn("h-8 w-8 rounded-lg bg-white/[0.04] flex items-center justify-center", iconColor || "text-white/30")}>{icon}</div>
+          <div className={cn("h-8 w-8 rounded-lg bg-white/[0.04] flex items-center justify-center ring-1 ring-white/[0.04]", iconColor || "text-white/30")}>{icon}</div>
         )}
       </div>
       <p className={cn("text-xl font-extrabold tracking-tight text-white", highlight && "text-amber-400")}>{value}</p>
