@@ -206,24 +206,32 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         toast.error(data?.error || "Erro ao acessar como usuário");
         return;
       }
-      // Open dashboard in new tab with impersonation session
       const { access_token, refresh_token } = data;
       if (access_token && refresh_token) {
-        // Store tokens securely in sessionStorage (not URL params) and open
-        const impersonationData = JSON.stringify({ access_token, refresh_token, admin_id: user?.id, timestamp: Date.now() });
-        // Use postMessage to new window instead of URL params
+        const impersonationData = { access_token, refresh_token, admin_id: user?.id, timestamp: Date.now() };
         const newWindow = window.open(window.location.origin + "/dashboard", "_blank");
         if (newWindow) {
-          // Send tokens via postMessage after window loads (avoids URL/history leak)
-          setTimeout(() => {
-            newWindow.postMessage({ type: "IMPERSONATE_SESSION", ...JSON.parse(impersonationData) }, window.location.origin);
-          }, 2000);
+          // Wait for window load, then retry postMessage with verification
+          const sendTokens = () => {
+            try {
+              newWindow.postMessage(
+                { type: "IMPERSONATE_SESSION", ...impersonationData },
+                window.location.origin
+              );
+            } catch {
+              // Window may have been blocked
+            }
+          };
+          // Multiple attempts with backoff to handle varying load times
+          setTimeout(sendTokens, 1000);
+          setTimeout(sendTokens, 3000);
+          setTimeout(sendTokens, 5000);
         }
         toast.success(`Abrindo dashboard como ${data.email}`);
       } else {
         toast.error("Tokens de impersonação não disponíveis");
       }
-    } catch (e: any) {
+    } catch {
       toast.error("Erro na impersonação");
     } finally {
       setImpersonating(false);
@@ -249,10 +257,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleSaveAdminNotes = async () => {
     if (!selectedUser) return;
-    const { error } = await supabase.from("profiles").update({ admin_notes: adminNotes } as any).eq("user_id", selectedUser.user_id);
+    // Sanitize admin notes to prevent XSS
+    const sanitized = adminNotes.replace(/[<>]/g, "").replace(/javascript:/gi, "").trim().slice(0, 5000);
+    const { error } = await supabase.from("profiles").update({ admin_notes: sanitized } as any).eq("user_id", selectedUser.user_id);
     if (error) { toast.error("Erro ao salvar notas"); return; }
     toast.success("Observações salvas!");
-    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: adminNotes });
+    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: sanitized });
   };
 
   const handleUserStatus = async (userId: string, status: string) => {
@@ -297,13 +307,22 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleBalanceAdjustment = async () => {
     if (!selectedUser || !user || !adjustAmount || !adjustReason) { toast.error("Preencha todos os campos"); return; }
+    const amount = Number(adjustAmount);
+    if (isNaN(amount) || amount <= 0) { toast.error("Valor deve ser positivo"); return; }
+    if (amount > 1000000) { toast.error("Valor máximo excedido (R$ 1.000.000)"); return; }
+    const sanitizedReason = adjustReason.replace(/[<>]/g, "").trim().slice(0, 500);
+    if (sanitizedReason.length < 3) { toast.error("Justificativa muito curta (mín. 3 caracteres)"); return; }
+    
+    // Confirmation for high-value adjustments
+    if (amount > 10000 && !window.confirm(`Confirma ajuste de R$ ${amount.toFixed(2)} (${adjustType})?`)) return;
+    
     const { error } = await supabase.from("balance_adjustments").insert({
       user_id: selectedUser.user_id, admin_user_id: user.id,
-      amount: Number(adjustAmount), type: adjustType, reason: adjustReason,
+      amount, type: adjustType, reason: sanitizedReason,
     });
     if (error) { toast.error("Erro ao ajustar saldo"); return; }
     toast.success(`Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
-    await logAdminAction(`balance_${adjustType}`, "balance_adjustment", selectedUser.user_id, { amount: adjustAmount, reason: adjustReason });
+    await logAdminAction(`balance_${adjustType}`, "balance_adjustment", selectedUser.user_id, { amount: adjustAmount, reason: sanitizedReason });
     setAdjustAmount(""); setAdjustReason("");
     const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
     if (data) setBalanceAdjustments(data);

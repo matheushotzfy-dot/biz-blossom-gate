@@ -167,13 +167,24 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
   const handleRefund = async () => {
     if (!selectedTx) return;
     if (!refundReason.trim()) { toast.error("Justificativa obrigatória"); return; }
+    if (refundReason.trim().length < 5) { toast.error("Justificativa muito curta (mín. 5 caracteres)"); return; }
     const amount = refundType === "full" ? Number(selectedTx.amount) : Number(refundAmount);
-    if (amount <= 0 || amount > Number(selectedTx.amount)) { toast.error("Valor inválido"); return; }
+    if (isNaN(amount) || amount <= 0 || amount > Number(selectedTx.amount)) { toast.error("Valor inválido"); return; }
+
+    // Only allow refund on completed transactions
+    if (selectedTx.status !== "completed" && selectedTx.status !== "approved") {
+      toast.error("Só é possível estornar transações aprovadas");
+      return;
+    }
+
+    // Confirmation dialog for safety
+    if (!window.confirm(`Confirma estorno de R$ ${amount.toFixed(2)}?`)) return;
 
     setRefunding(true);
     try {
+      const sanitizedReason = refundReason.replace(/[<>]/g, "").trim().slice(0, 500);
       const { data, error } = await supabase.functions.invoke("podpay-refund", {
-        body: { transactionId: selectedTx.id, amount, reason: refundReason.trim() },
+        body: { transactionId: selectedTx.id, amount, reason: sanitizedReason },
       });
       if (error || !data?.success) {
         toast.error(data?.error || "Erro ao processar estorno");
@@ -181,7 +192,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
       }
       toast.success(`Estorno de ${fmtCurrency(amount)} processado!`);
       await logAdminAction("refund_transaction", "transaction", selectedTx.id, {
-        amount, type: refundType, reason: refundReason.trim(),
+        amount, type: refundType, reason: sanitizedReason,
       });
       setRefundOpen(false);
       setSheetOpen(false);

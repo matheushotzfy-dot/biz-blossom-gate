@@ -117,20 +117,30 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   /* ── Batch Approval ── */
   const handleBatchApprove = async () => {
     if (selectedIds.size === 0) { toast.error("Selecione ao menos 1 saque"); return; }
+    if (!window.confirm(`Confirma aprovação em lote de ${selectedIds.size} saque(s)?`)) return;
     setBatchProcessing(true);
-    let ok = 0, fail = 0;
+    let ok = 0, fail = 0, frozen = 0;
     for (const id of selectedIds) {
       try {
+        // Check if seller balance is frozen
+        const withdrawal = withdrawals.find(w => w.id === id);
+        if (withdrawal) {
+          const profile = getProfile(withdrawal.user_id);
+          if (profile?.balance_frozen) { frozen++; continue; }
+        }
         const { data, error } = await supabase.functions.invoke("podpay-cashout", { body: { withdrawalId: id } });
         if (error || !data?.success) { fail++; continue; }
         await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "batch_podpay_pix" });
         ok++;
       } catch { fail++; }
     }
-    toast.success(`Lote processado: ${ok} aprovados, ${fail} falhas`);
+    let msg = `Lote processado: ${ok} aprovados`;
+    if (fail > 0) msg += `, ${fail} falhas`;
+    if (frozen > 0) msg += `, ${frozen} ignorados (saldo congelado)`;
+    toast.success(msg);
     setSelectedIds(new Set());
     setBatchProcessing(false);
-    if (ok > 0) onWithdrawalAction("", "approved"); // trigger parent reload
+    if (ok > 0) onWithdrawalAction("", "approved");
   };
 
   const handleBatchReject = async () => {
