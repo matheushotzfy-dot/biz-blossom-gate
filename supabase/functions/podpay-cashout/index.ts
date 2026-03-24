@@ -65,10 +65,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    // IDEMPOTENCY: Only process pending withdrawals
+    // IDEMPOTENCY: Only process pending withdrawals (atomic check)
     if (withdrawal.status !== 'pending') {
       return new Response(
         JSON.stringify({ success: true, message: `Already ${withdrawal.status}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Double-check with idempotency key
+    const idemKey = `cashout_${withdrawalId}`;
+    const { data: existingIdem } = await supabase
+      .from('idempotency_keys')
+      .select('response')
+      .eq('key', idemKey)
+      .maybeSingle();
+
+    if (existingIdem) {
+      return new Response(
+        JSON.stringify(existingIdem.response),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
