@@ -346,9 +346,9 @@ export default function AdminDashboard() {
             <span className="text-[8px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Staff</span>
           )}
 
-          <button className="relative h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all">
-            <Bell className="h-3 w-3 text-white/30" />
-            {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-500 rounded-full shadow-[0_0_6px_rgba(239,68,68,0.5)]" />}
+          <button className="relative h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all group">
+            <Bell className="h-3 w-3 text-white/30 group-hover:text-white/60 transition-colors" />
+            {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)] ring-2 ring-[#08081a]" />}
           </button>
 
           <button
