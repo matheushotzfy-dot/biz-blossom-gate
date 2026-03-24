@@ -218,7 +218,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           icon={<PiggyBank className="h-6 w-6" />}
           label="Lucro da Plataforma"
           value={fmtCurrency(takeRateTotal)}
-          sub={`${takeRatePct}% Take Rate`}
+          sub={`${takeRatePct}% `}
           gradient="from-indigo-500 to-violet-600"
           metallic
         />
