@@ -138,12 +138,18 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#050505", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
-      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
-        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30 animate-pulse">
-          <Shield className="h-7 w-7 text-white" />
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #06060e 0%, #050508 40%, #030305 100%)", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5">
+        <div className="relative">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.3)] ring-1 ring-white/[0.1]">
+            <Shield className="h-7 w-7 text-white drop-shadow-lg" />
+          </div>
+          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 blur-xl animate-pulse" />
         </div>
-        <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-white/30">Initializing God Mode...</p>
+        <div className="text-center">
+          <p className="text-[11px] font-bold tracking-[0.35em] uppercase text-white/20">Initializing</p>
+          <p className="text-[9px] font-medium tracking-[0.2em] uppercase text-indigo-400/40 mt-1">God Mode</p>
+        </div>
       </motion.div>
     </div>
   );
