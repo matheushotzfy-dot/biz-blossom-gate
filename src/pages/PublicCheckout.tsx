@@ -24,6 +24,7 @@ type Product = {
   checkout_pix_enabled: boolean | null; checkout_boleto_enabled: boolean | null;
   checkout_credit_card_enabled: boolean | null; checkout_address_required: boolean | null;
   checkout_email_confirm: boolean | null;
+  checkout_theme?: string | null;
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
 type PaymentMethod = "pix" | "credit_card" | "boleto";
@@ -242,7 +243,11 @@ export default function PublicCheckout() {
 
       if (cancelled) return;
       if (!prod) { setLoading(false); return; }
-      setProduct(prod as unknown as Product);
+      // Also fetch checkout_theme from products table (not in the public view)
+      const { data: themeData } = await supabase.from("products").select("checkout_theme").eq("id", prod.id).maybeSingle();
+      const productWithTheme = { ...prod, checkout_theme: (themeData as any)?.checkout_theme || "gray" };
+      if (cancelled) return;
+      setProduct(productWithTheme as unknown as Product);
 
       // Step 2: Load pixels + bumps in parallel (both need product.id)
       const [pixelsRes, bumpsRes] = await Promise.all([
@@ -444,6 +449,8 @@ export default function PublicCheckout() {
   const bumpsTotal = orderBumps.filter(b => selectedBumps.has(b.id)).reduce((s, b) => s + Number(b.bump_product.price), 0);
   const totalPrice = price + bumpsTotal;
   const btnColor = product.checkout_button_color || "#10b981";
+  const theme = product.checkout_theme || "gray";
+  const isWhite = theme === "white";
   const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
   const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
@@ -607,14 +614,14 @@ export default function PublicCheckout() {
   /* ═══ FORMULÁRIO PRINCIPAL ═════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
 
-  const inputClass = "mt-1.5 h-12 rounded-xl bg-gray-50 border-gray-200 text-white placeholder:text-gray-300 focus:border-[color:var(--btn-color)]/60 focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium";
-  const sectionClass = "rounded-2xl border border-gray-200 bg-white overflow-hidden";
+  const inputClass = `mt-1.5 h-12 rounded-xl border text-gray-900 placeholder:text-gray-300 focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium ${isWhite ? "bg-white border-gray-200" : "bg-gray-100/80 border-gray-200"}`;
+  const sectionClass = `rounded-2xl border bg-white overflow-hidden shadow-sm ${isWhite ? "border-gray-100" : "border-gray-200"}`;
   const sectionHeaderClass = "px-5 py-4 border-b border-gray-100 flex items-center gap-3";
   const sectionBodyClass = "p-5 space-y-4";
   const labelClass = "text-[11px] text-gray-400 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-emerald-500/20" style={{ "--btn-color": btnColor } as React.CSSProperties}>
+    <div className={`min-h-screen text-gray-900 selection:bg-emerald-500/20 ${isWhite ? "bg-[#fafbfc]" : "bg-[#f0f1f3]"}`} style={{ "--btn-color": btnColor } as React.CSSProperties}>
 
       {/* ═══ Social Proof Toast ═══ */}
       {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
@@ -674,7 +681,7 @@ export default function PublicCheckout() {
         )}
 
         {/* ═══ Product Card ═══ */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 mb-5">
+        <div className={`rounded-2xl border bg-white p-5 mb-5 shadow-sm ${isWhite ? "border-gray-100" : "border-gray-200"}`}>
           <div className="flex items-center gap-4">
             <div className="h-[72px] w-[72px] rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
               {product.image_url ? (
