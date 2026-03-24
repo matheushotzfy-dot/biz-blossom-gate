@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                   <Calendar className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-[#0C0C18]/95 backdrop-blur-2xl border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rounded-xl" align="end">
+              <PopoverContent className="w-auto p-0 bg-[#0e0e22]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
