@@ -62,7 +62,7 @@ export default function AdminCoursesTab({ profiles, products }: Props) {
     return c.title.toLowerCase().includes(s) || getSellerName(c.user_id).toLowerCase().includes(s);
   });
 
-  if (loading) return <div className="flex items-center justify-center py-20 text-white/30 text-sm">Carregando cursos...</div>;
+  if (loading) return <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Carregando cursos...</div>;
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -74,34 +74,34 @@ export default function AdminCoursesTab({ profiles, products }: Props) {
       </div>
 
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input placeholder="Buscar curso ou vendedor..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full h-10 pl-10 pr-4 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.12]" />
+          className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
       </div>
 
       <AdminPanel>
         <PanelTitle color="blue" icon={<GraduationCap className="h-4 w-4" />}>Cursos ({filtered.length})</PanelTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/[0.04]">
+            <thead><tr className="border-b border-border">
               {["Curso", "Vendedor", "Produto", "Módulos", "Aulas", "Alunos", "Status", "Criado"].map(h => (
-                <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>
+                <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
               ))}
             </tr></thead>
             <tbody>
               {filtered.map(c => (
-                <tr key={c.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="p-3"><div><p className="text-xs font-bold">{c.title}</p><p className="text-[10px] text-white/25 max-w-[200px] truncate">{c.description || "—"}</p></div></td>
-                  <td className="p-3 text-xs text-white/50">{getSellerName(c.user_id)}</td>
-                  <td className="p-3 text-xs text-white/40">{c.product_id ? getProductName(c.product_id) : "Livre"}</td>
-                  <td className="p-3"><span className="text-xs font-bold bg-white/[0.04] px-2 py-0.5 rounded">{c.moduleCount}</span></td>
-                  <td className="p-3"><span className="text-xs font-bold bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded">{c.lessonCount}</span></td>
-                  <td className="p-3"><span className="text-xs font-bold bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded">{c.accessCount}</span></td>
+                <tr key={c.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                  <td className="p-3"><div><p className="text-xs font-bold text-foreground">{c.title}</p><p className="text-[10px] text-muted-foreground max-w-[200px] truncate">{c.description || "—"}</p></div></td>
+                  <td className="p-3 text-xs text-muted-foreground">{getSellerName(c.user_id)}</td>
+                  <td className="p-3 text-xs text-muted-foreground">{c.product_id ? getProductName(c.product_id) : "Livre"}</td>
+                  <td className="p-3"><span className="text-xs font-bold bg-muted/30 px-2 py-0.5 rounded">{c.moduleCount}</span></td>
+                  <td className="p-3"><span className="text-xs font-bold bg-info/10 text-info px-2 py-0.5 rounded">{c.lessonCount}</span></td>
+                  <td className="p-3"><span className="text-xs font-bold bg-violet-500/10 text-violet-500 px-2 py-0.5 rounded">{c.accessCount}</span></td>
                   <td className="p-3"><StatusBadge status={c.is_published ? "active" : "draft"} /></td>
-                  <td className="p-3 text-[10px] text-white/25">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
+                  <td className="p-3 text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={8} className="p-10 text-center text-white/20 text-xs">Nenhum curso</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={8} className="p-10 text-center text-muted-foreground text-xs">Nenhum curso</td></tr>}
             </tbody>
           </table>
         </div>

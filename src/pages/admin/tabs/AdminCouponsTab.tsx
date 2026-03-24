@@ -40,35 +40,35 @@ export default function AdminCouponsTab({ profiles, fmtCurrency }: Props) {
       </div>
 
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input placeholder="Buscar cupom ou vendedor..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full h-10 pl-10 pr-4 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.12]" />
+          className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
       </div>
 
       <AdminPanel>
         <PanelTitle color="violet" icon={<Tag className="h-4 w-4" />}>Cupons ({filtered.length})</PanelTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-white/[0.04]">
+            <thead><tr className="border-b border-border">
               {["Código", "Vendedor", "Tipo", "Valor", "Usos", "Limite", "Status", "Expira", "Criado"].map(h => (
-                <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/30 uppercase tracking-wider">{h}</th>
+                <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
               ))}
             </tr></thead>
             <tbody>
               {filtered.map(c => (
-                <tr key={c.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="p-3 font-mono text-xs font-bold text-violet-400">{c.code}</td>
-                  <td className="p-3 text-xs text-white/50">{getSellerName(c.user_id)}</td>
-                  <td className="p-3 text-[10px] uppercase text-white/30">{c.discount_type}</td>
-                  <td className="p-3 text-xs font-bold">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : fmtCurrency(Number(c.discount_value))}</td>
-                  <td className="p-3"><span className="text-xs font-bold bg-white/[0.04] px-2 py-0.5 rounded">{c.current_uses}</span></td>
-                  <td className="p-3 text-xs text-white/30">{c.max_uses || "∞"}</td>
+                <tr key={c.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                  <td className="p-3 font-mono text-xs font-bold text-violet-500">{c.code}</td>
+                  <td className="p-3 text-xs text-muted-foreground">{getSellerName(c.user_id)}</td>
+                  <td className="p-3 text-[10px] uppercase text-muted-foreground">{c.discount_type}</td>
+                  <td className="p-3 text-xs font-bold text-foreground">{c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : fmtCurrency(Number(c.discount_value))}</td>
+                  <td className="p-3"><span className="text-xs font-bold bg-muted/30 px-2 py-0.5 rounded">{c.current_uses}</span></td>
+                  <td className="p-3 text-xs text-muted-foreground">{c.max_uses || "∞"}</td>
                   <td className="p-3"><StatusBadge status={c.is_active ? "active" : "inactive"} /></td>
-                  <td className="p-3 text-[10px] text-white/25">{c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "—"}</td>
-                  <td className="p-3 text-[10px] text-white/25">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
+                  <td className="p-3 text-[10px] text-muted-foreground">{c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "—"}</td>
+                  <td className="p-3 text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={9} className="p-10 text-center text-white/20 text-xs">Nenhum cupom</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={9} className="p-10 text-center text-muted-foreground text-xs">Nenhum cupom</td></tr>}
             </tbody>
           </table>
         </div>
