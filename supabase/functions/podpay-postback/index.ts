@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
       if (product) {
         const { data: webhooks } = await supabase
           .from('webhook_configs')
-          .select('*')
+          .select('id, url, events, secret')
           .eq('user_id', product.user_id)
           .eq('is_active', true);
 

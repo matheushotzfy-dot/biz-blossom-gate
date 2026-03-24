@@ -92,8 +92,13 @@ Deno.serve(async (req) => {
     }
 
     const AMOUNT = Number(product.price);
-    const FEE_PCT = 4.99;
-    const FEE_FIXED = 2.50;
+    
+    // Get fees from DB instead of hardcoding
+    const { data: fees } = await supabase.from('fees').select('name, fee_type, value');
+    const percentageFee = fees?.find(f => f.name === 'Taxa por Transação' && f.fee_type === 'percentage');
+    const fixedFee = fees?.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
+    const FEE_PCT = percentageFee ? Number(percentageFee.value) : 4.99;
+    const FEE_FIXED = fixedFee ? Number(fixedFee.value) : 2.50;
     const FEE_AMOUNT = Number(((AMOUNT * FEE_PCT / 100) + FEE_FIXED).toFixed(2));
     const NET_AMOUNT = Number((AMOUNT - FEE_AMOUNT).toFixed(2));
     const TOTAL = Math.min(body.total || 100, 500); // Cap at 500
