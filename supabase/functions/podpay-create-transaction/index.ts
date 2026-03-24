@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const body = await req.json();
     const {
       productId,
       paymentMethod,
@@ -32,7 +33,8 @@ Deno.serve(async (req) => {
       cardToken,
       ip,
       checkoutSessionId,
-    } = await req.json();
+      idempotencyKey,
+    } = body;
 
     if (!productId || !paymentMethod || !customerName || !customerEmail || !customerDocument) {
       return new Response(
@@ -75,6 +77,24 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // === IDEMPOTENCY KEY CHECK (prevents duplicate payments from retries/replays) ===
+    if (idempotencyKey) {
+      const safeIdemKey = String(idempotencyKey).slice(0, 255);
+      const { data: existingIdem } = await supabase
+        .from('idempotency_keys')
+        .select('response, expires_at')
+        .eq('key', safeIdemKey)
+        .maybeSingle();
+
+      if (existingIdem && new Date(existingIdem.expires_at) > new Date()) {
+        safeLog('Idempotent request - returning cached response', { productId });
+        return new Response(
+          JSON.stringify(existingIdem.response),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // === ANTI-FRAUD: Blacklist Check ===
     const requestIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0';
@@ -339,18 +359,29 @@ Deno.serve(async (req) => {
       }
     }
 
+    const responseBody = {
+      success: true,
+      data: {
+        transactionId: transaction?.id,
+        podpayId,
+        status: podpayData.data?.status || podpayData.status,
+        pix: podpayData.data?.pix || podpayData.pix || null,
+        boleto: podpayData.data?.boleto || podpayData.boleto || null,
+        secureUrl: podpayData.data?.secureUrl || podpayData.secureUrl || null,
+      },
+    };
+
+    // Store idempotency key for replay protection (24h TTL)
+    if (idempotencyKey) {
+      await supabase.from('idempotency_keys').upsert({
+        key: String(idempotencyKey).slice(0, 255),
+        response: responseBody,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      }, { onConflict: 'key' });
+    }
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        data: {
-          transactionId: transaction?.id,
-          podpayId,
-          status: podpayData.data?.status || podpayData.status,
-          pix: podpayData.data?.pix || podpayData.pix || null,
-          boleto: podpayData.data?.boleto || podpayData.boleto || null,
-          secureUrl: podpayData.data?.secureUrl || podpayData.secureUrl || null,
-        },
-      }),
+      JSON.stringify(responseBody),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
