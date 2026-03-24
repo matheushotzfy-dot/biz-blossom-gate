@@ -308,16 +308,16 @@ export default function AdminDashboard() {
 
         {/* Right Controls */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Date Picker */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+        {/* Date Picker */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
                 onClick={() => handleDatePreset(p.days)}
                 className={cn(
-                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  "px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                   datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
-                    ? "bg-indigo-500/15 text-indigo-400 shadow-sm"
+                    ? "bg-indigo-500/15 text-indigo-400 shadow-sm ring-1 ring-indigo-500/20"
                     : "text-white/25 hover:text-white/50"
                 )}
               >
