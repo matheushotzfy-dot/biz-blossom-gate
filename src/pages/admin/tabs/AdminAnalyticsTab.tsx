@@ -87,12 +87,12 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
     const chargeback = transactions.filter(t => t.status === "chargeback").length;
 
     return [
-      { stage: "Iniciadas", count: total, pct: 100, color: "hsl(var(--info, 210 100% 50%))" },
-      { stage: "Pendentes", count: pending, pct: total > 0 ? (pending / total) * 100 : 0, color: "hsl(var(--warning))" },
-      { stage: "Aprovadas", count: completed, pct: total > 0 ? (completed / total) * 100 : 0, color: "hsl(var(--primary))" },
-      { stage: "Recusadas", count: failed, pct: total > 0 ? (failed / total) * 100 : 0, color: "hsl(var(--destructive))" },
-      { stage: "Estornos", count: refunded, pct: total > 0 ? (refunded / total) * 100 : 0, color: "hsl(var(--warning))" },
-      { stage: "Chargebacks", count: chargeback, pct: total > 0 ? (chargeback / total) * 100 : 0, color: "hsl(var(--destructive))" },
+      { stage: "Iniciadas", count: total, pct: 100, color: "#3b82f6" },
+      { stage: "Pendentes", count: pending, pct: total > 0 ? (pending / total) * 100 : 0, color: "#f59e0b" },
+      { stage: "Aprovadas", count: completed, pct: total > 0 ? (completed / total) * 100 : 0, color: "#6366f1" },
+      { stage: "Recusadas", count: failed, pct: total > 0 ? (failed / total) * 100 : 0, color: "#ef4444" },
+      { stage: "Estornos", count: refunded, pct: total > 0 ? (refunded / total) * 100 : 0, color: "#f59e0b" },
+      { stage: "Chargebacks", count: chargeback, pct: total > 0 ? (chargeback / total) * 100 : 0, color: "#ef4444" },
     ];
   }, [transactions]);
 
