@@ -79,7 +79,7 @@ const DATE_PRESETS = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
@@ -97,6 +97,17 @@ export default function AdminDashboard() {
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // CRITICAL: Force dark mode on admin panel to prevent white flash
+  // Save previous theme and restore on unmount
+  useEffect(() => {
+    const prevTheme = theme;
+    setTheme("dark");
+    return () => {
+      // Restore previous theme when leaving admin
+      setTheme(prevTheme as "light" | "dark");
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user) return;
