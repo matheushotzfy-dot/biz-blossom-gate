@@ -750,6 +750,70 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_ledger: {
+        Row: {
+          adjustment_id: string | null
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string
+          entry_type: string
+          id: string
+          idempotency_key: string | null
+          transaction_id: string | null
+          user_id: string
+          withdrawal_id: string | null
+        }
+        Insert: {
+          adjustment_id?: string | null
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string
+          entry_type: string
+          id?: string
+          idempotency_key?: string | null
+          transaction_id?: string | null
+          user_id: string
+          withdrawal_id?: string | null
+        }
+        Update: {
+          adjustment_id?: string | null
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string
+          entry_type?: string
+          id?: string
+          idempotency_key?: string | null
+          transaction_id?: string | null
+          user_id?: string
+          withdrawal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_ledger_adjustment_id_fkey"
+            columns: ["adjustment_id"]
+            isOneToOne: false
+            referencedRelation: "balance_adjustments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "withdrawals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fraud_logs: {
         Row: {
           block_reason: string
@@ -840,6 +904,30 @@ export type Database = {
           is_active?: boolean
           reason?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      idempotency_keys: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          key: string
+          response: Json
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          key: string
+          response?: Json
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          key?: string
+          response?: Json
         }
         Relationships: []
       }
@@ -2086,6 +2174,7 @@ export type Database = {
         Args: { _transaction_id: string }
         Returns: string
       }
+      get_ledger_balance: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
