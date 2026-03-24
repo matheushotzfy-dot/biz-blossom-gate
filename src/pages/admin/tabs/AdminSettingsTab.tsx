@@ -131,8 +131,7 @@ export default function AdminSettingsTab() {
     setSaving(true);
     const val = { enabled: autoApproveEnabled, max_amount: Number(autoApproveMaxAmount) };
     const { error } = await supabase.from("platform_settings")
-      .update({ value: val as any, updated_at: new Date().toISOString(), updated_by: user.id })
-      .eq("key", "auto_approve_withdrawals");
+      .upsert({ key: "auto_approve_withdrawals", value: val as any, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
     if (error) { toast.error("Erro ao salvar"); setSaving(false); return; }
     toast.success("Configuração de auto-aprovação salva!");
     await logAdminAction("update_auto_approve", "platform_settings", "auto_approve_withdrawals", val as any);
