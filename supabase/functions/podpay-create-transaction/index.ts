@@ -191,15 +191,37 @@ Deno.serve(async (req) => {
 
     const amountInCents = Math.round(Number(product.price) * 100);
 
-    // === Calculate fees from DB ===
-    const { data: fees } = await supabase.from('fees').select('*');
-    const percentageFee = fees?.find(f => f.name === 'Taxa por Transação' && f.fee_type === 'percentage');
-    const fixedFee = fees?.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
+    // === Calculate fees from DB (STRICT — no fallbacks) ===
+    const { data: fees, error: feesError } = await supabase.from('fees').select('*');
+    if (feesError || !fees || fees.length === 0) {
+      safeLog('Fee configuration missing', { error: feesError?.message || 'no fees found' });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Configuração de taxas indisponível. Contate o suporte.' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const percentageFee = fees.find(f => f.name === 'Taxa por Transação' && f.fee_type === 'percentage');
+    const fixedFee = fees.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
     
-    const feePercentage = percentageFee ? Number(percentageFee.value) : 4.99;
-    const feeFixed = fixedFee ? Number(fixedFee.value) : 2.50;
-    const feeAmount = (Number(product.price) * feePercentage / 100) + feeFixed;
-    const netAmount = Number(product.price) - feeAmount;
+    if (!percentageFee || !fixedFee) {
+      safeLog('Required fee entries missing', { hasPercentage: !!percentageFee, hasFixed: !!fixedFee });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Configuração de taxas incompleta. Contate o suporte.' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const feePercentage = Number(percentageFee.value);
+    const feeFixed = Number(fixedFee.value);
+    if (feePercentage < 0 || feePercentage > 50 || feeFixed < 0 || feeFixed > 100) {
+      safeLog('Fee values out of safe range', { feePercentage, feeFixed });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Erro na configuração de taxas. Contate o suporte.' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const feeAmount = Math.round(((Number(product.price) * feePercentage / 100) + feeFixed) * 100) / 100;
+    const netAmount = Math.round((Number(product.price) - feeAmount) * 100) / 100;
 
     // === Build PodPay payload ===
     const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
