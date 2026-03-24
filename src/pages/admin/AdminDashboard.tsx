@@ -245,7 +245,7 @@ export default function AdminDashboard() {
           <div className="hidden sm:block">
             <h1 className="text-[14px] font-black tracking-tight bg-gradient-to-r from-white via-white/90 to-indigo-200 bg-clip-text text-transparent">HOTZFY</h1>
             <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-indigo-400/60">
-              {isEmployee ? "Employee Panel" : "Control Center"}
+              {isEmployee ? "Employee Panel" : ""}
             </p>
           </div>
         </div>

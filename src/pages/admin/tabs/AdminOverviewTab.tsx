@@ -405,7 +405,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
           {/* Refund/Chargeback Trend */}
           <GlassPanel className="lg:col-span-1">
-            <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Tendência Devoluções (7d)</GlassPanelTitle>
+            <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Devoluções (7d)</GlassPanelTitle>
             <ResponsiveContainer width="100%" height={200} className="mt-3">
               <LineChart data={refundTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
