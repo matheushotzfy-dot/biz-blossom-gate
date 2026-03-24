@@ -299,7 +299,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-16 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", c.retention >= 50 ? "bg-primary" : c.retention >= 25 ? "bg-warning" : "bg-destructive")}
+                          <div className={cn("h-full rounded-full", c.retention >= 50 ? "bg-indigo-500" : c.retention >= 25 ? "bg-amber-500" : "bg-red-500")}
                             style={{ width: `${c.retention}%` }} />
                         </div>
                         <span className="text-[10px] text-white/30">{c.retention}%</span>
