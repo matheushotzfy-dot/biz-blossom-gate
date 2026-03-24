@@ -8,14 +8,14 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for impersonation tokens first
-    const impersonateData = localStorage.getItem("impersonate_session");
+    // Check for impersonation tokens first (one-time use, 15s expiry)
+    const impersonateData = sessionStorage.getItem("impersonate_session");
     if (impersonateData) {
       try {
         const { access_token, refresh_token, timestamp } = JSON.parse(impersonateData);
-        // Only use if less than 60 seconds old
-        if (Date.now() - timestamp < 60000 && access_token && refresh_token) {
-          localStorage.removeItem("impersonate_session");
+        // Strict 15-second window + immediate cleanup
+        sessionStorage.removeItem("impersonate_session");
+        if (Date.now() - timestamp < 15000 && access_token && refresh_token) {
           supabase.auth.setSession({ access_token, refresh_token }).then(({ data: { session }, error }) => {
             if (!error && session) {
               setUser(session.user);
