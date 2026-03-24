@@ -138,6 +138,7 @@ Deno.serve(async (req) => {
         customer_document: randomCPF(),
         customer_phone: randomPhone(),
         created_at: createdAt,
+        is_simulated: true,
       });
     }
 

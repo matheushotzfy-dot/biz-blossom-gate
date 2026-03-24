@@ -88,7 +88,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [impersonating, setImpersonating] = useState(false);
 
   useEffect(() => {
-    supabase.from("acquirers").select("*").eq("is_active", true).then(({ data }) => {
+    supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
       if (data) setAcquirers(data as Acquirer[]);
     });
   }, []);
@@ -97,15 +97,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setSelectedUser(profile);
     setLoading(true);
     const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
-      supabase.from("activity_logs").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-      supabase.from("products").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-      supabase.from("withdrawals").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-      supabase.from("transactions").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
-      supabase.from("custom_user_fees").select("*").eq("user_id", profile.user_id).maybeSingle(),
-      supabase.from("balance_adjustments").select("*").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
-      supabase.from("pix_keys").select("*").eq("user_id", profile.user_id),
-      supabase.from("disputes").select("*").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
-      supabase.from("retention_settings").select("*").eq("user_id", profile.user_id).maybeSingle(),
+      supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
+      supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
+      supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
+      supabase.from("custom_user_fees").select("id, user_id, transaction_percentage, transaction_fixed, withdrawal_fee, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
+      supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
+      supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
+      supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
+      supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days").eq("user_id", profile.user_id).maybeSingle(),
     ]);
     if (logsRes.data) setUserLogs(logsRes.data as any);
     if (productsRes.data) setUserProducts(productsRes.data);
