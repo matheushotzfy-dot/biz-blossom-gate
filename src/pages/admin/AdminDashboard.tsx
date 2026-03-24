@@ -285,7 +285,7 @@ export default function AdminDashboard() {
                   <span className="text-[9px] bg-white/[0.06] rounded px-1 py-0.5">{overflowNav.length}</span>
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-52 p-2 bg-[#0C0C18]/95 backdrop-blur-2xl border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rounded-xl" align="start">
+              <PopoverContent className="w-56 p-2 bg-[#0e0e22]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="start">
                 {overflowNav.map((item) => (
                   <button
                     key={item.id}
@@ -293,8 +293,8 @@ export default function AdminDashboard() {
                     className={cn(
                       "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all",
                       activeTab === item.id
-                        ? "bg-indigo-500/10 text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.15)]"
-                        : "text-white/35 hover:text-white/70 hover:bg-white/[0.04]"
+                        ? "bg-indigo-500/12 text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.2)]"
+                        : "text-white/35 hover:text-white/70 hover:bg-white/[0.05]"
                     )}
                   >
                     <item.icon className="h-3.5 w-3.5" />
