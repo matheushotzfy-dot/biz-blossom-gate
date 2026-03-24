@@ -169,16 +169,34 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Update withdrawal status
-    await supabase
+    // Update withdrawal status atomically (only if still pending)
+    const { data: updatedW } = await supabase
       .from('withdrawals')
       .update({ status: 'approved', processed_at: new Date().toISOString() })
       .eq('id', withdrawalId)
-      .eq('status', 'pending'); // Extra safety: only update if still pending
+      .eq('status', 'pending')
+      .select('id')
+      .maybeSingle();
 
-    // FIX #4: Never leak raw PodPay response to admin client
+    if (!updatedW) {
+      // Race condition: another request already processed it
+      return new Response(
+        JSON.stringify({ success: true, message: 'Already processed by another request' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const cashoutResponse = { success: true, message: 'Cash-out processed successfully', withdrawalId };
+
+    // Store idempotency key
+    await supabase.from('idempotency_keys').upsert({
+      key: idemKey,
+      response: cashoutResponse,
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    }, { onConflict: 'key' });
+
     return new Response(
-      JSON.stringify({ success: true, message: 'Cash-out processed successfully', withdrawalId }),
+      JSON.stringify(cashoutResponse),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
