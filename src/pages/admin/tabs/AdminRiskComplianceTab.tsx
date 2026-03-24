@@ -73,10 +73,31 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
   /* ── Blacklist Actions ── */
   const handleAddBlacklist = async () => {
     if (!newValue.trim() || !newReason.trim()) { toast.error("Preencha valor e motivo"); return; }
+    if (newReason.trim().length < 3) { toast.error("Motivo muito curto"); return; }
     if (!user) return;
-    const clean = newType === "cpf" || newType === "cnpj" ? newValue.replace(/\D/g, "") : newValue.trim().toLowerCase();
+    
+    // Validate and sanitize input based on type
+    let clean = newValue.trim();
+    if (newType === "cpf") {
+      clean = clean.replace(/\D/g, "");
+      if (clean.length !== 11) { toast.error("CPF deve ter 11 dígitos"); return; }
+    } else if (newType === "cnpj") {
+      clean = clean.replace(/\D/g, "");
+      if (clean.length !== 14) { toast.error("CNPJ deve ter 14 dígitos"); return; }
+    } else if (newType === "email") {
+      clean = clean.toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { toast.error("E-mail inválido"); return; }
+    } else if (newType === "ip") {
+      if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(clean)) { toast.error("IP inválido"); return; }
+    } else if (newType === "bin") {
+      clean = clean.replace(/\D/g, "");
+      if (clean.length !== 6) { toast.error("BIN deve ter 6 dígitos"); return; }
+    }
+
+    const sanitizedReason = newReason.replace(/[<>]/g, "").trim().slice(0, 500);
+    
     const { error } = await supabase.from("global_blacklist").insert({
-      entry_type: newType, entry_value: clean, reason: newReason.trim(), added_by: user.id,
+      entry_type: newType, entry_value: clean, reason: sanitizedReason, added_by: user.id,
     });
     if (error) {
       if (error.code === "23505") toast.error("Entrada já existe na blacklist");
@@ -84,7 +105,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
       return;
     }
     toast.success(`${newType.toUpperCase()} adicionado à Blacklist`);
-    await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: newReason.trim() } as any);
+    await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: sanitizedReason } as any);
     setAddDialog(false); setNewValue(""); setNewReason("");
     const { data } = await supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500);
     if (data) setBlacklist(data as any[]);
