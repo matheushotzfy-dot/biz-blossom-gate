@@ -201,7 +201,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
         {/* Revenue Forecast */}
         <AdminPanel className="lg:col-span-2">
           <PanelTitle color="emerald" icon={<TrendingUp className="h-4 w-4" />}>
-            Previsão de Receita (30 dias + 7 dias projetados)
+            Receita (30 dias + 7 dias projetados)
           </PanelTitle>
           <div className="h-[300px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
