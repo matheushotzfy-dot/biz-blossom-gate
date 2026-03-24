@@ -208,25 +208,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       }
       const { access_token, refresh_token } = data;
       if (access_token && refresh_token) {
-        const impersonationData = { access_token, refresh_token, admin_id: user?.id, timestamp: Date.now() };
-        const newWindow = window.open(window.location.origin + "/dashboard", "_blank");
-        if (newWindow) {
-          // Wait for window load, then retry postMessage with verification
-          const sendTokens = () => {
-            try {
-              newWindow.postMessage(
-                { type: "IMPERSONATE_SESSION", ...impersonationData },
-                window.location.origin
-              );
-            } catch {
-              // Window may have been blocked
-            }
-          };
-          // Multiple attempts with backoff to handle varying load times
-          setTimeout(sendTokens, 1000);
-          setTimeout(sendTokens, 3000);
-          setTimeout(sendTokens, 5000);
-        }
+        // Store tokens in localStorage for the new window to pick up
+        localStorage.setItem("impersonate_session", JSON.stringify({
+          access_token,
+          refresh_token,
+          admin_id: user?.id,
+          timestamp: Date.now(),
+        }));
+        // Open dashboard in new tab — useAuth will detect and apply the session
+        window.open(window.location.origin + "/dashboard?impersonate=1", "_blank");
         toast.success(`Abrindo dashboard como ${data.email}`);
       } else {
         toast.error("Tokens de impersonação não disponíveis");
