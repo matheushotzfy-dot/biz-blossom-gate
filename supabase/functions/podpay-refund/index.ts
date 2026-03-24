@@ -50,6 +50,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    // A-07 FIX: Round amount to 2 decimal places to prevent fractional cent exploits
+    const roundedAmount = Math.round(Number(amount) * 100) / 100;
+    if (isNaN(roundedAmount) || roundedAmount <= 0) {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid amount' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Sanitize reason server-side
+    const safeReason = String(reason).replace(/<[^>]*>/g, '').trim().slice(0, 500);
+    if (safeReason.length < 3) {
+      return new Response(JSON.stringify({ success: false, error: 'Reason too short' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get transaction
     const { data: tx, error: txError } = await supabase
       .from('transactions')
