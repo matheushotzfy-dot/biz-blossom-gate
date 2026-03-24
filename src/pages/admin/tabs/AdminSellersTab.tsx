@@ -208,8 +208,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       }
       const { access_token, refresh_token } = data;
       if (access_token && refresh_token) {
-        // Store tokens in localStorage for the new window to pick up
-        localStorage.setItem("impersonate_session", JSON.stringify({
+        // Store tokens in sessionStorage (not localStorage) - more secure, tab-scoped
+        sessionStorage.setItem("impersonate_session", JSON.stringify({
           access_token,
           refresh_token,
           admin_id: user?.id,
