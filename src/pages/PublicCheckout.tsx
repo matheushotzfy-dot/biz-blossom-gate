@@ -98,8 +98,8 @@ function LiveViewers({ color }: { color: string }) {
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
         <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: color }} />
       </span>
-      <span className="text-[11px] font-semibold text-white/50">
-        <strong className="text-white/80">{count}</strong> pessoas vendo agora
+      <span className="text-[11px] font-semibold text-gray-400">
+        <strong className="text-gray-700">{count}</strong> pessoas vendo agora
       </span>
     </div>
   );
@@ -128,13 +128,13 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
   if (!visible) return null;
   return (
     <div className="fixed bottom-4 left-4 z-50 animate-slide-in-left max-w-[320px]">
-      <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl p-3.5 shadow-2xl shadow-black/40 flex items-center gap-3">
+      <div className="bg-white border border-gray-200 rounded-2xl p-3.5 shadow-xl shadow-black/10 flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + "20" }}>
           <Check className="h-5 w-5" style={{ color }} />
         </div>
         <div className="min-w-0">
           <p className="text-[12px] font-bold text-white truncate">{buyer.name} de {buyer.city}</p>
-          <p className="text-[10px] text-white/40">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
+          <p className="text-[10px] text-gray-400">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
         </div>
       </div>
     </div>
@@ -151,7 +151,7 @@ function StepIndicator({ current, total, color }: { current: number; total: numb
         const isDone = step < current;
         return (
           <div key={step} className="flex-1 flex items-center gap-1">
-            <div className="flex-1 h-1 rounded-full overflow-hidden bg-white/[0.06]">
+            <div className="flex-1 h-1 rounded-full overflow-hidden bg-gray-100">
               <div
                 className="h-full rounded-full transition-all duration-700 ease-out"
                 style={{
@@ -416,25 +416,25 @@ export default function PublicCheckout() {
 
   /* ─── Loading / Not found ─── */
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#08080a]">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
-          <div className="h-12 w-12 rounded-2xl bg-emerald-500/20 animate-pulse" />
-          <Loader2 className="h-6 w-6 animate-spin text-emerald-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <div className="h-12 w-12 rounded-2xl bg-emerald-100 animate-pulse" />
+          <Loader2 className="h-6 w-6 animate-spin text-emerald-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
         </div>
-        <p className="text-white/30 text-sm">Carregando checkout seguro...</p>
+        <p className="text-gray-400 text-sm">Carregando checkout seguro...</p>
       </div>
     </div>
   );
 
   if (!product) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#08080a] text-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-white px-4">
       <div className="text-center">
-        <div className="h-20 w-20 rounded-3xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-6">
-          <AlertCircle className="h-10 w-10 text-white/20" />
+        <div className="h-20 w-20 rounded-3xl bg-gray-50 border border-gray-200 flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="h-10 w-10 text-gray-300" />
         </div>
         <h1 className="text-xl font-bold mb-2">Produto não encontrado</h1>
-        <p className="text-sm text-white/40">Verifique o link e tente novamente.</p>
+        <p className="text-sm text-gray-400">Verifique o link e tente novamente.</p>
       </div>
     </div>
   );
@@ -458,7 +458,7 @@ export default function PublicCheckout() {
   /* ═══ TELA: APROVADO ═══════════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "approved") return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#08080a] text-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 text-white">
       <div className="text-center animate-fade-in max-w-md w-full">
         {/* Confetti-like effect */}
         <div className="relative mx-auto mb-8 w-28 h-28">
@@ -469,20 +469,20 @@ export default function PublicCheckout() {
           </div>
         </div>
         <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado!</h1>
-        <p className="text-white/50 mb-8 text-base">
+        <p className="text-gray-400 mb-8 text-base">
           Seu acesso foi liberado com sucesso.
         </p>
-        <div className="rounded-2xl p-6 bg-white/[0.04] border border-white/10 mb-6 text-left space-y-3">
+        <div className="rounded-2xl p-6 bg-gray-50 border border-gray-200 mb-6 text-left space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-white/40 text-sm">Produto</span>
+            <span className="text-gray-400 text-sm">Produto</span>
             <span className="font-bold">{product.name}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-white/40 text-sm">Valor</span>
+            <span className="text-gray-400 text-sm">Valor</span>
             <span className="font-extrabold text-lg" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
           </div>
         </div>
-        <p className="text-xs text-white/25">Confirmação enviada para <strong className="text-white/50">{email}</strong></p>
+        <p className="text-xs text-gray-400">Confirmação enviada para <strong className="text-gray-400">{email}</strong></p>
       </div>
     </div>
   );
@@ -491,7 +491,7 @@ export default function PublicCheckout() {
   /* ═══ TELA: FALHA ══════════════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "failed") return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#08080a] text-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 text-white">
       <div className="text-center animate-fade-in max-w-md w-full">
         <div className="relative mx-auto mb-8 w-24 h-24">
           <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl animate-pulse" />
@@ -500,7 +500,7 @@ export default function PublicCheckout() {
           </div>
         </div>
         <h1 className="text-2xl font-extrabold mb-2">Pagamento não aprovado</h1>
-        <p className="text-white/40 mb-8 text-sm">Verifique seus dados ou tente outro método de pagamento.</p>
+        <p className="text-gray-400 mb-8 text-sm">Verifique seus dados ou tente outro método de pagamento.</p>
         <Button onClick={retryPayment} className="h-13 px-10 rounded-xl text-white font-bold text-base gap-2 hover:opacity-90 shadow-xl" style={{ backgroundColor: btnColor }}>
           <RefreshCw className="h-4 w-4" /> Tentar novamente
         </Button>
@@ -512,12 +512,12 @@ export default function PublicCheckout() {
   /* ═══ TELA: PENDENTE (PIX/BOLETO) ═════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "pending") return (
-    <div className="min-h-screen bg-[#08080a] text-white">
+    <div className="min-h-screen bg-gray-50 text-white">
       <div className="max-w-lg mx-auto px-4 py-8 md:py-14">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0 overflow-hidden">
-            {product.image_url ? <img src={product.image_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <Sparkles className="h-6 w-6 text-white/20" />}
+          <div className="h-14 w-14 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+            {product.image_url ? <img src={product.image_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <Sparkles className="h-6 w-6 text-gray-300" />}
           </div>
           <div>
             <h2 className="font-bold text-lg">{product.name}</h2>
@@ -535,23 +535,23 @@ export default function PublicCheckout() {
 
         {/* PIX */}
         {pixData && (
-          <div className="rounded-3xl p-6 md:p-8 bg-white/[0.03] border border-white/[0.08] mb-6 space-y-6">
+          <div className="rounded-3xl p-6 md:p-8 bg-gray-50 border border-gray-200 mb-6 space-y-6">
             <div className="text-center">
               <h3 className="font-bold text-lg flex items-center justify-center gap-2 mb-1" style={{ color: btnColor }}>
                 <QrCode className="h-5 w-5" /> PIX
               </h3>
-              <p className="text-xs text-white/30">Escaneie o QR Code ou copie o código</p>
+              <p className="text-xs text-gray-400">Escaneie o QR Code ou copie o código</p>
             </div>
 
             {(pixData.qrcode || pixData.qrCode || pixData.qrCodeText) && (
               <div className="flex justify-center">
-                <div className="bg-white p-5 rounded-3xl shadow-2xl shadow-black/20">
+                <div className="bg-white p-5 rounded-3xl shadow-lg shadow-black/5">
                   <QRCodeSVG value={pixData.qrcode || pixData.qrCodeText || pixData.qrCode} size={220} />
                 </div>
               </div>
             )}
 
-            <div className="flex items-center gap-3 text-xs text-white/30 justify-center">
+            <div className="flex items-center gap-3 text-xs text-gray-400 justify-center">
               <Clock className="h-3.5 w-3.5" /> Expira em 30 minutos
             </div>
 
@@ -573,7 +573,7 @@ export default function PublicCheckout() {
 
         {/* Boleto */}
         {boletoData && (
-          <div className="rounded-3xl p-6 md:p-8 bg-white/[0.03] border border-white/[0.08] mb-6 space-y-4">
+          <div className="rounded-3xl p-6 md:p-8 bg-gray-50 border border-gray-200 mb-6 space-y-4">
             <h3 className="text-center font-bold text-lg" style={{ color: btnColor }}>Boleto gerado com sucesso</h3>
             {boletoData.url && (
               <button type="button" onClick={() => window.open(boletoData.url, "_blank")}
@@ -584,7 +584,7 @@ export default function PublicCheckout() {
             )}
             {boletoData.barCode && (
               <button type="button" onClick={() => { navigator.clipboard.writeText(boletoData.barCode); toast.success("Código copiado!"); }}
-                className="w-full h-12 rounded-2xl font-semibold text-sm bg-white/[0.06] hover:bg-white/10 border border-white/10 text-white flex items-center justify-center gap-2">
+                className="w-full h-12 rounded-2xl font-semibold text-sm bg-gray-100 hover:bg-gray-100 border border-gray-200 text-white flex items-center justify-center gap-2">
                 <Copy className="h-4 w-4" /> Copiar código de barras
               </button>
             )}
@@ -592,10 +592,10 @@ export default function PublicCheckout() {
         )}
 
         <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2 text-xs text-white/25">
+          <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verificando automaticamente...
           </div>
-          <button className="text-xs text-white/30 hover:text-white/60 underline transition-colors" onClick={retryPayment}>
+          <button className="text-xs text-gray-400 hover:text-gray-500 underline transition-colors" onClick={retryPayment}>
             Cancelar e tentar outro método
           </button>
         </div>
@@ -607,32 +607,32 @@ export default function PublicCheckout() {
   /* ═══ FORMULÁRIO PRINCIPAL ═════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
 
-  const inputClass = "mt-1.5 h-12 rounded-xl bg-[#111114] border-[#1e1e24] text-white placeholder:text-white/15 focus:border-[color:var(--btn-color)]/60 focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium";
-  const sectionClass = "rounded-2xl border border-white/[0.06] bg-[#0e0e11] overflow-hidden";
-  const sectionHeaderClass = "px-5 py-4 border-b border-white/[0.04] flex items-center gap-3";
+  const inputClass = "mt-1.5 h-12 rounded-xl bg-gray-50 border-gray-200 text-white placeholder:text-gray-300 focus:border-[color:var(--btn-color)]/60 focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium";
+  const sectionClass = "rounded-2xl border border-gray-200 bg-white overflow-hidden";
+  const sectionHeaderClass = "px-5 py-4 border-b border-gray-100 flex items-center gap-3";
   const sectionBodyClass = "p-5 space-y-4";
-  const labelClass = "text-[11px] text-white/40 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
+  const labelClass = "text-[11px] text-gray-400 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
 
   return (
-    <div className="min-h-screen bg-[#08080a] text-white selection:bg-emerald-500/30" style={{ "--btn-color": btnColor } as React.CSSProperties}>
+    <div className="min-h-screen bg-gray-50 text-white selection:bg-emerald-500/30" style={{ "--btn-color": btnColor } as React.CSSProperties}>
 
       {/* ═══ Social Proof Toast ═══ */}
       {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
 
       {/* ═══ Timer Bar ═══ */}
       {product.checkout_timer_enabled && (
-        <div className="sticky top-0 z-50 backdrop-blur-2xl border-b border-white/[0.04]" style={{ backgroundColor: "#08080af0" }}>
+        <div className="sticky top-0 z-50 backdrop-blur-2xl border-b border-gray-100" style={{ backgroundColor: "rgba(255,255,255,0.95)" }}>
           <div className="max-w-[660px] mx-auto px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: btnColor + "15" }}>
                 <Zap className="h-3.5 w-3.5" style={{ color: btnColor }} />
               </div>
-              <span className="text-xs font-semibold text-white/60">Oferta especial expira em</span>
+              <span className="text-xs font-semibold text-gray-500">Oferta especial expira em</span>
             </div>
             <div className="flex items-center gap-1 font-mono">
-              <span className="bg-white/[0.06] border border-white/[0.08] rounded-lg px-2.5 py-1 text-base font-extrabold tabular-nums">{mins}</span>
-              <span className="text-white/20 font-bold mx-0.5 animate-pulse">:</span>
-              <span className="bg-white/[0.06] border border-white/[0.08] rounded-lg px-2.5 py-1 text-base font-extrabold tabular-nums">{secs}</span>
+              <span className="bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1 text-base font-extrabold tabular-nums">{mins}</span>
+              <span className="text-gray-300 font-bold mx-0.5 animate-pulse">:</span>
+              <span className="bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1 text-base font-extrabold tabular-nums">{secs}</span>
             </div>
           </div>
         </div>
@@ -651,20 +651,20 @@ export default function PublicCheckout() {
 
         {/* ═══ Social Proof Bar ═══ */}
         {product.checkout_social_proof && (
-          <div className="mb-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+          <div className="mb-5 rounded-2xl border border-gray-200 bg-gray-50 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
             <div className="flex items-center gap-3 flex-1">
               <div className="flex -space-x-2">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-[#0e0e11] flex items-center justify-center text-[9px] font-bold shadow-lg" style={{ backgroundColor: `hsl(${150 + i * 12}, 55%, ${28 + i * 5}%)`, zIndex: 6 - i }}>
+                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold shadow-lg" style={{ backgroundColor: `hsl(${150 + i * 12}, 55%, ${28 + i * 5}%)`, zIndex: 6 - i }}>
                     {["AS", "CM", "JR", "PH", "ML", "LF"][i]}
                   </div>
                 ))}
               </div>
               <div>
-                <p className="text-[13px] font-bold text-white/80">
+                <p className="text-[13px] font-bold text-gray-700">
                   <span style={{ color: btnColor }}>{socialCount}+ compradores</span> nas últimas 24h
                 </p>
-                <p className="text-[10px] text-white/25 mt-0.5">Produto verificado • Alta demanda</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Produto verificado • Alta demanda</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -674,9 +674,9 @@ export default function PublicCheckout() {
         )}
 
         {/* ═══ Product Card ═══ */}
-        <div className="rounded-2xl border border-white/[0.06] bg-[#0e0e11] p-5 mb-5">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 mb-5">
           <div className="flex items-center gap-4">
-            <div className="h-[72px] w-[72px] rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="h-[72px] w-[72px] rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
               {product.image_url ? (
                 <img src={product.image_url} alt={product.name} className="h-[72px] w-[72px] rounded-2xl object-cover" />
               ) : (
@@ -687,17 +687,17 @@ export default function PublicCheckout() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-white/30">Acesso imediato</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-gray-50 border border-gray-200 text-gray-400">Acesso imediato</span>
               </div>
               <h1 className="font-bold text-base md:text-lg leading-tight">{product.name}</h1>
-              {product.description && <p className="text-[11px] text-white/25 mt-0.5 line-clamp-1">{product.description}</p>}
+              {product.description && <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-1">{product.description}</p>}
             </div>
             <div className="text-right shrink-0">
               <p className="text-2xl font-extrabold tracking-tight" style={{ color: btnColor }}>
                 R$ {fmtBRL(price)}
               </p>
               {product.checkout_credit_card_enabled && (
-                <p className="text-[10px] text-white/25 mt-0.5">ou 12x de R$ {fmtBRL(price * 1.2189 / 12)}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">ou 12x de R$ {fmtBRL(price * 1.2189 / 12)}</p>
               )}
             </div>
           </div>
@@ -715,10 +715,10 @@ export default function PublicCheckout() {
               <div className="h-8 w-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)` }}>1</div>
               <div>
                 <h3 className="text-sm font-bold">Identificação</h3>
-                <p className="text-[10px] text-white/25">Preencha seus dados para continuar</p>
+                <p className="text-[10px] text-gray-400">Preencha seus dados para continuar</p>
               </div>
               <div className="ml-auto">
-                <Lock className="h-3.5 w-3.5 text-white/15" />
+                <Lock className="h-3.5 w-3.5 text-gray-300" />
               </div>
             </div>
             <div className={sectionBodyClass}>
@@ -756,7 +756,7 @@ export default function PublicCheckout() {
             <section className={sectionClass}>
               <div className={sectionHeaderClass}>
                 <div className="h-8 w-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)` }}>2</div>
-                <div><h3 className="text-sm font-bold">Endereço</h3><p className="text-[10px] text-white/25">Para emissão da nota fiscal</p></div>
+                <div><h3 className="text-sm font-bold">Endereço</h3><p className="text-[10px] text-gray-400">Para emissão da nota fiscal</p></div>
               </div>
               <div className={sectionBodyClass}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -764,7 +764,7 @@ export default function PublicCheckout() {
                     <Label className={labelClass}>CEP</Label>
                     <div className="relative">
                       <Input value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" required className={inputClass} inputMode="numeric" />
-                      {loadingCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-white/30 mt-1" />}
+                      {loadingCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400 mt-1" />}
                     </div>
                   </div>
                   <div>
@@ -787,7 +787,7 @@ export default function PublicCheckout() {
                   </div>
                   <div className="col-span-2 sm:col-span-1">
                     <Label className={labelClass}>Cidade / UF</Label>
-                    <Input value={city && state ? `${city} - ${state}` : ""} readOnly placeholder="Preenchido via CEP" className={inputClass + " !bg-[#0a0a0d] !text-white/50"} />
+                    <Input value={city && state ? `${city} - ${state}` : ""} readOnly placeholder="Preenchido via CEP" className={inputClass + " !bg-gray-100 !text-gray-400"} />
                   </div>
                 </div>
               </div>
@@ -808,23 +808,23 @@ export default function PublicCheckout() {
                   <button key={bump.id} type="button" onClick={() => toggleBump(bump.id)}
                     className={`w-full rounded-2xl border-2 p-4 md:p-5 text-left transition-all duration-300 relative overflow-hidden ${
                       selected
-                        ? "border-emerald-500/50 bg-emerald-500/[0.04]"
+                        ? "border-emerald-500/50 bg-emerald-50"
                         : "border-dashed border-amber-500/25 bg-gradient-to-br from-amber-500/[0.03] to-transparent hover:border-amber-500/50"
                     }`}>
                     {selected && <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl" style={{ backgroundColor: "#10b981" }}>ADICIONADO ✓</div>}
-                    {!selected && <div className="absolute top-0 right-0 bg-amber-500 text-black text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl animate-pulse">APROVEITE!</div>}
+                    {!selected && <div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl animate-pulse">APROVEITE!</div>}
                     <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
-                        {bump.bump_product.image_url ? <img src={bump.bump_product.image_url} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <Package className="h-6 w-6 text-white/15" />}
+                      <div className="h-14 w-14 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+                        {bump.bump_product.image_url ? <img src={bump.bump_product.image_url} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <Package className="h-6 w-6 text-gray-300" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm leading-tight">{bump.bump_product.name}</p>
-                        {bump.bump_product.description && <p className="text-[11px] text-white/30 mt-1 line-clamp-2">{bump.bump_product.description}</p>}
+                        {bump.bump_product.description && <p className="text-[11px] text-gray-400 mt-1 line-clamp-2">{bump.bump_product.description}</p>}
                         <p className="font-extrabold text-base mt-1" style={{ color: selected ? "#10b981" : btnColor }}>
                           + R$ {fmtBRL(Number(bump.bump_product.price))}
                         </p>
                       </div>
-                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-white/[0.04] border border-white/10 text-white/20"}`}>
+                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-gray-50 border border-gray-200 text-gray-300"}`}>
                         {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                       </div>
                     </div>
@@ -842,11 +842,11 @@ export default function PublicCheckout() {
               </div>
               <div>
                 <h3 className="text-sm font-bold">Pagamento</h3>
-                <p className="text-[10px] text-white/25">Escolha a forma de pagamento</p>
+                <p className="text-[10px] text-gray-400">Escolha a forma de pagamento</p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
-                <Lock className="h-3 w-3 text-white/15" />
-                <span className="text-[9px] text-white/15 font-semibold">SSL</span>
+                <Lock className="h-3 w-3 text-gray-300" />
+                <span className="text-[9px] text-gray-300 font-semibold">SSL</span>
               </div>
             </div>
 
@@ -859,12 +859,12 @@ export default function PublicCheckout() {
                     return (
                       <button key={m.id} type="button" onClick={() => { setMethod(m.id); setPixData(null); setBoletoData(null); }}
                         className={`flex flex-col items-center gap-1.5 px-3 py-3.5 rounded-xl border-2 text-center transition-all ${
-                          active ? "bg-white/[0.04] text-white" : "bg-transparent border-transparent text-white/30 hover:text-white/50 hover:bg-white/[0.02]"
+                          active ? "bg-gray-50 text-white" : "bg-transparent border-transparent text-gray-400 hover:text-gray-400 hover:bg-gray-50"
                         }`}
                         style={active ? { borderColor: btnColor + "50", boxShadow: `0 0 30px ${btnColor}08` } : { borderColor: "transparent" }}>
                         <m.icon className={`h-5 w-5 ${active ? "" : "opacity-50"}`} style={active ? { color: btnColor } : undefined} />
                         <span className="text-xs font-bold">{m.label}</span>
-                        {m.badge && <span className={`text-[8px] ${active ? "text-white/40" : "text-white/15"}`}>{m.badge}</span>}
+                        {m.badge && <span className={`text-[8px] ${active ? "text-gray-400" : "text-gray-300"}`}>{m.badge}</span>}
                       </button>
                     );
                   })}
@@ -873,13 +873,13 @@ export default function PublicCheckout() {
 
               {/* PIX indicator */}
               {method === "pix" && (
-                <div className="rounded-xl p-4 border border-white/[0.04] bg-white/[0.02] flex items-center gap-4">
+                <div className="rounded-xl p-4 border border-gray-100 bg-gray-50 flex items-center gap-4">
                   <div className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: btnColor + "12" }}>
                     <QrCode className="h-6 w-6" style={{ color: btnColor }} />
                   </div>
                   <div>
                     <p className="text-sm font-bold flex items-center gap-2">Pagamento instantâneo <Zap className="h-3.5 w-3.5" style={{ color: btnColor }} /></p>
-                    <p className="text-[11px] text-white/25 mt-0.5">QR Code gerado na hora • Aprovação em segundos</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">QR Code gerado na hora • Aprovação em segundos</p>
                   </div>
                 </div>
               )}
@@ -903,10 +903,10 @@ export default function PublicCheckout() {
                     <div>
                       <Label className={labelClass}>Parcelas</Label>
                       <div className="relative mt-1.5">
-                        <select value={installments} onChange={e => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-[#111114] border-[#1e1e24] text-white text-[16px] px-3 pr-8 appearance-none focus:outline-none font-medium">
-                          {installmentOptions.map(opt => <option key={opt.n} value={opt.n} className="bg-[#111114]">{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
+                        <select value={installments} onChange={e => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-gray-50 border-gray-200 text-white text-[16px] px-3 pr-8 appearance-none focus:outline-none font-medium">
+                          {installmentOptions.map(opt => <option key={opt.n} value={opt.n} className="bg-gray-50">{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 pointer-events-none" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
                       </div>
                     </div>
                   </div>
@@ -919,13 +919,13 @@ export default function PublicCheckout() {
 
               {/* Boleto indicator */}
               {method === "boleto" && (
-                <div className="rounded-xl p-4 border border-white/[0.04] bg-white/[0.02] flex items-center gap-4">
+                <div className="rounded-xl p-4 border border-gray-100 bg-gray-50 flex items-center gap-4">
                   <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
                     <FileText className="h-6 w-6 text-amber-400" />
                   </div>
                   <div>
                     <p className="text-sm font-bold">Boleto Bancário</p>
-                    <p className="text-[11px] text-white/25 mt-0.5">Compensação em 1-3 dias úteis</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Compensação em 1-3 dias úteis</p>
                   </div>
                 </div>
               )}
@@ -933,21 +933,21 @@ export default function PublicCheckout() {
           </section>
 
           {/* ═══════ RESUMO ═══════ */}
-          <div className="rounded-2xl border border-white/[0.06] bg-[#0e0e11] p-5 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-white/30 mb-3">Resumo do pedido</h3>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Resumo do pedido</h3>
             <div className="space-y-2.5 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-white/40 flex items-center gap-2"><Package className="h-3.5 w-3.5" /> {product.name}</span>
-                <span className="text-white/70 font-semibold">R$ {fmtBRL(price)}</span>
+                <span className="text-gray-400 flex items-center gap-2"><Package className="h-3.5 w-3.5" /> {product.name}</span>
+                <span className="text-gray-600 font-semibold">R$ {fmtBRL(price)}</span>
               </div>
               {orderBumps.filter(b => selectedBumps.has(b.id)).map(b => (
                 <div key={b.id} className="flex justify-between items-center">
-                  <span className="text-white/40 flex items-center gap-2"><Plus className="h-3 w-3" style={{ color: btnColor }} /> {b.bump_product.name}</span>
-                  <span className="text-white/70 font-semibold">R$ {fmtBRL(Number(b.bump_product.price))}</span>
+                  <span className="text-gray-400 flex items-center gap-2"><Plus className="h-3 w-3" style={{ color: btnColor }} /> {b.bump_product.name}</span>
+                  <span className="text-gray-600 font-semibold">R$ {fmtBRL(Number(b.bump_product.price))}</span>
                 </div>
               ))}
-              <div className="border-t border-white/[0.06] pt-3 flex justify-between items-center">
-                <span className="font-bold text-white text-base">Total</span>
+              <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+                <span className="font-bold text-gray-800 text-base">Total</span>
                 <div className="text-right">
                   <span className="font-extrabold text-xl" style={{ color: btnColor }}>
                     {method === "credit_card" && installments !== "1"
@@ -955,7 +955,7 @@ export default function PublicCheckout() {
                       : `R$ ${fmtBRL(totalPrice)}`}
                   </span>
                   {method === "credit_card" && installments !== "1" && (
-                    <p className="text-[10px] text-white/20 mt-0.5">Total: R$ {fmtBRL(selectedInstallment.total)}</p>
+                    <p className="text-[10px] text-gray-300 mt-0.5">Total: R$ {fmtBRL(selectedInstallment.total)}</p>
                   )}
                 </div>
               </div>
@@ -964,7 +964,7 @@ export default function PublicCheckout() {
 
           {/* ═══════ GUARANTEE ═══════ */}
           {product.checkout_guarantee_enabled && (
-            <div className="rounded-2xl p-5 border border-white/[0.06] bg-white/[0.02] flex items-center gap-4">
+            <div className="rounded-2xl p-5 border border-gray-200 bg-gray-50 flex items-center gap-4">
               <div className="h-14 w-14 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: btnColor + "10", border: `1px solid ${btnColor}20` }}>
                 <ShieldCheck className="h-7 w-7" style={{ color: btnColor }} />
               </div>
@@ -972,7 +972,7 @@ export default function PublicCheckout() {
                 <p className="text-sm font-bold text-white flex items-center gap-2">
                   Garantia incondicional de 7 dias
                 </p>
-                <p className="text-[11px] text-white/30 mt-0.5 leading-relaxed">
+                <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
                   Não ficou satisfeito? Devolvemos 100% do valor. Sem burocracia, sem perguntas.
                 </p>
               </div>
@@ -1010,25 +1010,25 @@ export default function PublicCheckout() {
           {/* ═══════ TRUST FOOTER ═══════ */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-center gap-6">
-              <div className="flex items-center gap-1.5 text-white/15">
+              <div className="flex items-center gap-1.5 text-gray-300">
                 <Lock className="h-3.5 w-3.5" />
                 <span className="text-[10px] font-semibold">Criptografia SSL</span>
               </div>
-              <div className="h-3 w-px bg-white/[0.06]" />
-              <div className="flex items-center gap-1.5 text-white/15">
+              <div className="h-3 w-px bg-gray-100" />
+              <div className="flex items-center gap-1.5 text-gray-300">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 <span className="text-[10px] font-semibold">Compra segura</span>
               </div>
-              <div className="h-3 w-px bg-white/[0.06]" />
-              <div className="flex items-center gap-1.5 text-white/15">
+              <div className="h-3 w-px bg-gray-100" />
+              <div className="flex items-center gap-1.5 text-gray-300">
                 <Eye className="h-3.5 w-3.5" />
                 <span className="text-[10px] font-semibold">Dados protegidos</span>
               </div>
             </div>
-            <p className="text-center text-[10px] text-white/10 leading-relaxed px-6">
+            <p className="text-center text-[10px] text-gray-300 leading-relaxed px-6">
               Ao clicar em "Finalizar compra", declaro que li e concordo com os{" "}
-              <span className="underline cursor-pointer hover:text-white/20">Termos de Uso</span> e{" "}
-              <span className="underline cursor-pointer hover:text-white/20">Política de Privacidade</span>.
+              <span className="underline cursor-pointer hover:text-gray-300">Termos de Uso</span> e{" "}
+              <span className="underline cursor-pointer hover:text-gray-300">Política de Privacidade</span>.
             </p>
           </div>
         </form>
