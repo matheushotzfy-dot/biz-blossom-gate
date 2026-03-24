@@ -1556,6 +1556,7 @@ export type Database = {
           customer_phone: string | null
           fee_amount: number
           id: string
+          is_simulated: boolean
           net_amount: number
           payment_method: string | null
           podpay_event_id: string | null
@@ -1578,6 +1579,7 @@ export type Database = {
           customer_phone?: string | null
           fee_amount?: number
           id?: string
+          is_simulated?: boolean
           net_amount?: number
           payment_method?: string | null
           podpay_event_id?: string | null
@@ -1600,6 +1602,7 @@ export type Database = {
           customer_phone?: string | null
           fee_amount?: number
           id?: string
+          is_simulated?: boolean
           net_amount?: number
           payment_method?: string | null
           podpay_event_id?: string | null
