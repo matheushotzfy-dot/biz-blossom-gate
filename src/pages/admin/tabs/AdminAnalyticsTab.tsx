@@ -255,7 +255,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
+                <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
