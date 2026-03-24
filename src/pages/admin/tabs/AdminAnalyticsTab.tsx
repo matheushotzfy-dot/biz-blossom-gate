@@ -267,13 +267,13 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <div className="h-[280px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyBars}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="receita" fill="hsl(var(--primary))" name="Receita Líquida" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="taxas" fill="hsl(var(--warning))" name="Taxas Coletadas" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
+                <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
+                <Bar dataKey="receita" fill="#6366f1" name="Receita Líquida" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="taxas" fill="#f59e0b" name="Taxas Coletadas" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
