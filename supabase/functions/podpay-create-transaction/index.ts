@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     // === Get product ===
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, price, user_id, status')
       .eq('id', productId)
       .eq('status', 'active')
       .single();

@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Verify admin role from auth header
+    // Verify admin role
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check admin role
     const { data: hasAdmin } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
     if (!hasAdmin) {
       return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
@@ -50,15 +49,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    // A-07 FIX: Round amount to 2 decimal places to prevent fractional cent exploits
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(transactionId)) {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid transaction ID' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const roundedAmount = Math.round(Number(amount) * 100) / 100;
-    if (isNaN(roundedAmount) || roundedAmount <= 0) {
+    if (isNaN(roundedAmount) || roundedAmount <= 0 || roundedAmount > 999999) {
       return new Response(JSON.stringify({ success: false, error: 'Invalid amount' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Sanitize reason server-side
     const safeReason = String(reason).replace(/<[^>]*>/g, '').trim().slice(0, 500);
     if (safeReason.length < 3) {
       return new Response(JSON.stringify({ success: false, error: 'Reason too short' }), {
@@ -66,10 +71,25 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get transaction
+    // === IDEMPOTENCY CHECK ===
+    const idemKey = `refund_${transactionId}`;
+    const { data: existingIdem } = await supabase
+      .from('idempotency_keys')
+      .select('response, expires_at')
+      .eq('key', idemKey)
+      .maybeSingle();
+
+    if (existingIdem && new Date(existingIdem.expires_at) > new Date()) {
+      return new Response(
+        JSON.stringify(existingIdem.response),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get transaction with explicit columns (no select *)
     const { data: tx, error: txError } = await supabase
       .from('transactions')
-      .select('*')
+      .select('id, user_id, amount, status, podpay_payment_id, is_simulated')
       .eq('id', transactionId)
       .single();
 
@@ -79,6 +99,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Only refund completed/approved transactions
     if (tx.status !== 'completed' && tx.status !== 'approved') {
       return new Response(JSON.stringify({ success: false, error: 'Transaction is not refundable' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -91,12 +112,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Call PodPay refund API if we have a payment ID
-    if (tx.podpay_payment_id) {
+    // === ATOMIC STATUS UPDATE (only if still completed/approved) ===
+    const { data: updatedTx } = await supabase
+      .from('transactions')
+      .update({ status: 'refunded' })
+      .eq('id', transactionId)
+      .in('status', ['completed', 'approved'])
+      .select('id')
+      .maybeSingle();
+
+    if (!updatedTx) {
+      // Race condition: another request already changed the status
+      return new Response(JSON.stringify({ success: false, error: 'Transaction already processed' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Call PodPay refund API (non-blocking for simulated)
+    if (tx.podpay_payment_id && !tx.is_simulated) {
       const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
       const secretKey = Deno.env.get('PODPAY_SECRET_KEY')!;
       const auth = 'Basic ' + btoa(publicKey + ':' + secretKey);
 
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       try {
         const refundResp = await fetch(
           `https://api.podpay.co/v1/transactions/${tx.podpay_payment_id}/refund`,
@@ -108,32 +147,46 @@ Deno.serve(async (req) => {
               'Accept': 'application/json',
             },
             body: JSON.stringify({ amount: Math.round(roundedAmount * 100) }),
+            signal: controller.signal,
           }
         );
 
         if (!refundResp.ok) {
-          const errData = await refundResp.json().catch(() => ({}));
-          console.log('[podpay-refund] PodPay error:', refundResp.status, errData);
+          console.log('[podpay-refund] PodPay error:', refundResp.status);
+          // Revert transaction status if PodPay fails
+          await supabase
+            .from('transactions')
+            .update({ status: 'completed' })
+            .eq('id', transactionId)
+            .eq('status', 'refunded');
+          
+          clearTimeout(timeout);
+          return new Response(
+            JSON.stringify({ success: false, error: 'Falha ao processar estorno na adquirente. Tente novamente.' }),
+            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
       } catch (e) {
         console.log('[podpay-refund] PodPay call failed:', e instanceof Error ? e.message : 'unknown');
+        // Revert on timeout/network failure
+        await supabase
+          .from('transactions')
+          .update({ status: 'completed' })
+          .eq('id', transactionId)
+          .eq('status', 'refunded');
+        
+        clearTimeout(timeout);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Timeout ao processar estorno. Tente novamente.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } finally {
+        clearTimeout(timeout);
       }
     }
 
-    // Update transaction status
+    // Create balance adjustment
     const isPartial = roundedAmount < Number(tx.amount);
-    const { error: updateErr } = await supabase
-      .from('transactions')
-      .update({ status: 'refunded' })
-      .eq('id', transactionId);
-
-    if (updateErr) {
-      return new Response(JSON.stringify({ success: false, error: 'Failed to update transaction' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Create a negative balance adjustment to deduct from seller
     await supabase.from('balance_adjustments').insert({
       user_id: tx.user_id,
       admin_user_id: user.id,
@@ -142,23 +195,32 @@ Deno.serve(async (req) => {
       reason: `Estorno ${isPartial ? 'parcial' : 'total'}: ${safeReason}`,
     });
 
-    // Log audit
+    // Audit log
     await supabase.from('audit_logs').insert({
       admin_user_id: user.id,
       action: 'refund_processed',
       entity_type: 'transaction',
       entity_id: transactionId,
-      details: { amount: roundedAmount, reason: safeReason, partial: isPartial, seller_user_id: tx.user_id },
+      details: { amount: roundedAmount, reason: safeReason, partial: isPartial },
     });
 
+    const responseBody = { success: true, data: { refunded: true, amount: roundedAmount } };
+
+    // Store idempotency key (24h TTL)
+    await supabase.from('idempotency_keys').upsert({
+      key: idemKey,
+      response: responseBody,
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    }, { onConflict: 'key' });
+
     return new Response(
-      JSON.stringify({ success: true, data: { refunded: true, amount: roundedAmount } }),
+      JSON.stringify(responseBody),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.log('[podpay-refund] Error:', error instanceof Error ? error.message : 'unknown');
     return new Response(
-      JSON.stringify({ success: false, error: 'Internal error' }),
+      JSON.stringify({ success: false, error: 'Erro interno ao processar estorno' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
