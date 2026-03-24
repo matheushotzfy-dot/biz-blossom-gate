@@ -359,18 +359,29 @@ Deno.serve(async (req) => {
       }
     }
 
+    const responseBody = {
+      success: true,
+      data: {
+        transactionId: transaction?.id,
+        podpayId,
+        status: podpayData.data?.status || podpayData.status,
+        pix: podpayData.data?.pix || podpayData.pix || null,
+        boleto: podpayData.data?.boleto || podpayData.boleto || null,
+        secureUrl: podpayData.data?.secureUrl || podpayData.secureUrl || null,
+      },
+    };
+
+    // Store idempotency key for replay protection (24h TTL)
+    if (idempotencyKey) {
+      await supabase.from('idempotency_keys').upsert({
+        key: String(idempotencyKey).slice(0, 255),
+        response: responseBody,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      }, { onConflict: 'key' });
+    }
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        data: {
-          transactionId: transaction?.id,
-          podpayId,
-          status: podpayData.data?.status || podpayData.status,
-          pix: podpayData.data?.pix || podpayData.pix || null,
-          boleto: podpayData.data?.boleto || podpayData.boleto || null,
-          secureUrl: podpayData.data?.secureUrl || podpayData.secureUrl || null,
-        },
-      }),
+      JSON.stringify(responseBody),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
