@@ -227,20 +227,20 @@ export default function AdminDashboard() {
       {/* ═══ TOP NAVIGATION BAR ═══ */}
       <header className="relative z-50 h-[56px] border-b border-white/[0.06] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-3xl bg-[#0a0a1e]/80">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 mr-4">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.25)] ring-1 ring-white/[0.08]">
-            <Rocket className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+        <div className="flex items-center gap-3 mr-5">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_24px_rgba(99,102,241,0.3)] ring-1 ring-white/10">
+            <Rocket className="h-4 w-4 text-white drop-shadow-sm" />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-[13px] font-black tracking-tight bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">HOTZFY</h1>
-            <p className="text-[7px] font-bold uppercase tracking-[0.35em] text-indigo-400/50">
-              {isEmployee ? "Employee" : "God Mode"}
+            <h1 className="text-[14px] font-black tracking-tight bg-gradient-to-r from-white via-white/90 to-indigo-200 bg-clip-text text-transparent">HOTZFY</h1>
+            <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-indigo-400/60">
+              {isEmployee ? "Employee Panel" : "Control Center"}
             </p>
           </div>
         </div>
 
         {/* Separator */}
-        <div className="h-5 w-px bg-white/[0.08] mr-1" />
+        <div className="h-6 w-px bg-gradient-to-b from-transparent via-white/[0.08] to-transparent mr-1" />
 
         {/* Primary Navigation */}
         <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-none py-1">
