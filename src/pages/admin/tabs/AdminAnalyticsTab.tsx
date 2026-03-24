@@ -233,7 +233,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
                   <span className="font-medium text-foreground">{stage.stage}</span>
                   <span className="text-muted-foreground">{stage.count} ({stage.pct.toFixed(1)}%)</span>
                 </div>
-                <div className="h-6 bg-muted/30 rounded-lg overflow-hidden relative">
+                <div className="h-6 bg-white/[0.04] rounded-lg overflow-hidden relative">
                   <div
                     className="h-full rounded-lg transition-all duration-500"
                     style={{ width: `${Math.max(stage.pct, 2)}%`, backgroundColor: stage.color, opacity: 0.8 }}
