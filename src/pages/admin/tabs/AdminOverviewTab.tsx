@@ -139,7 +139,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
   const methodApproval = useMemo(() => {
     const methods: Record<string, { total: number; approved: number; volume: number }> = {};
-    allTx.forEach(t => {
+    filteredTx.forEach(t => {
       const m = t.payment_method || "other";
       if (!methods[m]) methods[m] = { total: 0, approved: 0, volume: 0 };
       methods[m].total++;
@@ -153,7 +153,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       total: stats.total, approved: stats.approved, volume: stats.volume,
       rate: stats.total > 0 ? ((stats.approved / stats.total) * 100) : 0,
     }));
-  }, [allTx]);
+  }, [filteredTx]);
 
   const days = chartPeriod === "7d" ? 7 : 30;
   const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
