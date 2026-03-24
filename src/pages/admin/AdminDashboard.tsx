@@ -279,16 +279,16 @@ export default function AdminDashboard() {
                   <span className="text-[9px] bg-white/[0.06] rounded px-1 py-0.5">{overflowNav.length}</span>
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-48 p-1.5 bg-[#0A0A10] border-white/[0.08] shadow-2xl shadow-black/60" align="start">
+              <PopoverContent className="w-52 p-2 bg-[#0C0C18]/95 backdrop-blur-2xl border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rounded-xl" align="start">
                 {overflowNav.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => handleTabChange(item.id as TabId)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-medium transition-all",
+                      "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all",
                       activeTab === item.id
-                        ? "bg-indigo-500/10 text-indigo-400"
-                        : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
+                        ? "bg-indigo-500/10 text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.15)]"
+                        : "text-white/35 hover:text-white/70 hover:bg-white/[0.04]"
                     )}
                   >
                     <item.icon className="h-3.5 w-3.5" />
