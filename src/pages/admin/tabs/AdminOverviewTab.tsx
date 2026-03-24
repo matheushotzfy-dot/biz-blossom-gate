@@ -258,7 +258,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </motion.div>
 
       {/* ═══ 3. VOLUME CHART + ACQUIRER ROUTING + REALTIME FEED ═══ */}
-      <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-stretch">
+      <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {/* Volume Chart */}
         <GlassPanel className="xl:col-span-2 flex flex-col">
           <div className="flex items-center justify-between mb-4">
@@ -291,9 +291,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </GlassPanel>
 
         {/* Acquirer Routing Performance */}
-        <GlassPanel className="flex flex-col">
+        <GlassPanel className="flex flex-col max-h-[380px]">
           <GlassPanelTitle color="cyan" icon={<Server className="h-3.5 w-3.5" />}>Performance Adquirentes</GlassPanelTitle>
-          <div className="space-y-3 mt-4 flex-1">
+          <div className="space-y-3 mt-4 flex-1 overflow-y-auto">
             {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
               const isHealthy = m.rate >= 85;
               const isWarning = m.rate >= 60 && m.rate < 85;
@@ -343,7 +343,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </GlassPanel>
 
         {/* Realtime Feed */}
-        <GlassPanel className="overflow-hidden flex flex-col">
+        <GlassPanel className="overflow-hidden flex flex-col max-h-[380px]">
           <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>Feed Tempo Real</GlassPanelTitle>
           <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
             {realtimeTx.map(t => (
