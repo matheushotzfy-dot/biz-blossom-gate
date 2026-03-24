@@ -284,18 +284,18 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <PanelTitle color="cyan" icon={<Calendar className="h-4 w-4" />}>Análise de Cohort — Sellers por Mês de Cadastro</PanelTitle>
           <div className="overflow-x-auto mt-4">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">
+              <thead><tr className="border-b border-white/[0.06]">
                 {["Mês", "Novos Sellers", "Ativos (venderam)", "Receita Gerada", "Retenção"].map(h => (
-                  <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/25 uppercase tracking-wider">{h}</th>
                 ))}
               </tr></thead>
               <tbody>
                 {cohortData.map(c => (
-                  <tr key={c.month} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                    <td className="p-3 text-xs font-bold text-foreground">{c.month}</td>
-                    <td className="p-3 text-xs text-foreground">{c.newSellers}</td>
-                    <td className="p-3 text-xs text-primary font-medium">{c.activeSellers}</td>
-                    <td className="p-3 text-xs font-bold text-foreground">{fmtCurrency(c.revenue)}</td>
+                  <tr key={c.month} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
+                    <td className="p-3 text-xs font-bold text-white/80">{c.month}</td>
+                    <td className="p-3 text-xs text-white/60">{c.newSellers}</td>
+                    <td className="p-3 text-xs text-indigo-400 font-medium">{c.activeSellers}</td>
+                    <td className="p-3 text-xs font-bold text-white/80">{fmtCurrency(c.revenue)}</td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-16 bg-muted/30 rounded-full overflow-hidden">
