@@ -243,7 +243,7 @@ export default function AdminDashboard() {
         <div className="h-6 w-px bg-gradient-to-b from-transparent via-white/[0.08] to-transparent mr-1" />
 
         {/* Primary Navigation */}
-        <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-none py-1">
+        <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-none py-1.5">
           {primaryNav.map((item) => {
             const isActive = activeTab === item.id;
             const hasBadge = item.id === "withdrawals" && pendingWdCount > 0;
@@ -252,23 +252,23 @@ export default function AdminDashboard() {
                 key={item.id}
                 onClick={() => handleTabChange(item.id as TabId)}
                 className={cn(
-                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all duration-200",
+                  "relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all duration-200",
                   isActive
-                    ? "bg-gradient-to-b from-white/[0.08] to-white/[0.04] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_3px_rgba(0,0,0,0.3)] border border-white/[0.06]"
-                    : "text-white/25 hover:text-white/50 hover:bg-white/[0.03]"
+                    ? "bg-gradient-to-b from-indigo-500/15 to-indigo-500/5 text-white shadow-[inset_0_1px_0_rgba(99,102,241,0.15),0_2px_8px_rgba(0,0,0,0.2)] border border-indigo-500/20"
+                    : "text-white/30 hover:text-white/60 hover:bg-white/[0.04]"
                 )}
               >
-                <item.icon className={cn("h-3 w-3", isActive ? "text-indigo-400" : "opacity-60")} />
+                <item.icon className={cn("h-3.5 w-3.5", isActive ? "text-indigo-400" : "opacity-50")} />
                 <span className="hidden lg:inline">{item.label}</span>
                 {hasBadge && (
-                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-[8px] font-bold flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.5)] ring-1 ring-red-400/30">
+                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-[8px] font-bold flex items-center justify-center shadow-[0_0_12px_rgba(239,68,68,0.5)] ring-1 ring-red-400/30">
                     {pendingWdCount}
                   </span>
                 )}
                 {isActive && (
                   <motion.div
                     layoutId="admin-nav-indicator"
-                    className="absolute -bottom-[9px] left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-indigo-400 to-violet-400 shadow-[0_0_12px_rgba(99,102,241,0.6)]"
+                    className="absolute -bottom-[11px] left-2 right-2 h-[2px] rounded-full bg-gradient-to-r from-indigo-400 via-violet-400 to-indigo-400 shadow-[0_0_16px_rgba(99,102,241,0.7)]"
                     transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   />
                 )}
