@@ -58,6 +58,7 @@ export default function CheckoutBuilder() {
 
   // Settings state
   const [buttonColor, setButtonColor] = useState("#10b981");
+  const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white">("gray");
   const [timerEnabled, setTimerEnabled] = useState(true);
   const [timerMinutes, setTimerMinutes] = useState("15");
   const [socialProof, setSocialProof] = useState(false);
@@ -108,6 +109,7 @@ export default function CheckoutBuilder() {
         if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
         setProduct(data);
         setButtonColor(data.checkout_button_color || "#10b981");
+        setCheckoutTheme((data as any).checkout_theme === "white" ? "white" : "gray");
         setTimerEnabled(data.checkout_timer_enabled ?? true);
         setTimerMinutes(String(data.checkout_timer_minutes ?? 15));
         setSocialProof(data.checkout_social_proof ?? false);
@@ -151,6 +153,7 @@ export default function CheckoutBuilder() {
 
     const { error } = await supabase.from("products").update({
       checkout_button_color: buttonColor,
+      checkout_theme: checkoutTheme,
       checkout_timer_enabled: timerEnabled,
       checkout_timer_minutes: parseInt(timerMinutes) || 15,
       checkout_banner_desktop_url: desktopUrl || null,
@@ -166,7 +169,7 @@ export default function CheckoutBuilder() {
 
     setSaving(false);
     if (!error) toast.success("Alterações salvas", { duration: 1500 });
-  }, [user?.id, productId, buttonColor, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, bannerDesktopPreview, bannerMobilePreview, bannerDesktopFile, bannerMobileFile]);
+  }, [user?.id, productId, buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, bannerDesktopPreview, bannerMobilePreview, bannerDesktopFile, bannerMobileFile]);
 
   // Trigger auto-save on settings change
   useEffect(() => {
@@ -174,7 +177,7 @@ export default function CheckoutBuilder() {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(autoSave, 1200);
     return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); };
-  }, [buttonColor, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm]);
+  }, [buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
     const file = e.target.files?.[0];
@@ -351,6 +354,53 @@ export default function CheckoutBuilder() {
                 <>
                   <SectionHeader icon={Palette} title="Aparência" desc="Personalize cores e banners do seu checkout" />
                   
+                  {/* Theme Selector */}
+                  <div className="rounded-2xl border border-border/15 bg-card/20 p-4 space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/40 block">Tema do Checkout</Label>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setCheckoutTheme("gray")}
+                        className={cn(
+                          "relative rounded-xl border-2 p-3 transition-all duration-300 text-left",
+                          checkoutTheme === "gray"
+                            ? "border-primary/50 bg-primary/[0.04] shadow-sm"
+                            : "border-border/20 bg-card/20 hover:border-border/40"
+                        )}
+                      >
+                        {checkoutTheme === "gray" && (
+                          <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="h-3 w-3 text-white" />
+                          </div>
+                        )}
+                        <div className="h-10 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 mb-2 border border-gray-300" />
+                        <p className="text-[11px] font-bold text-foreground">Cinza Suave</p>
+                        <p className="text-[9px] text-muted-foreground/40">Tom neutro e elegante</p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCheckoutTheme("white")}
+                        className={cn(
+                          "relative rounded-xl border-2 p-3 transition-all duration-300 text-left",
+                          checkoutTheme === "white"
+                            ? "border-primary/50 bg-primary/[0.04] shadow-sm"
+                            : "border-border/20 bg-card/20 hover:border-border/40"
+                        )}
+                      >
+                        {checkoutTheme === "white" && (
+                          <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="h-3 w-3 text-white" />
+                          </div>
+                        )}
+                        <div className="h-10 rounded-lg bg-gradient-to-br from-white to-gray-50 mb-2 border border-gray-200 relative overflow-hidden">
+                          <div className="absolute bottom-0 left-0 right-0 h-2 rounded-b-lg" style={{ backgroundColor: buttonColor + "20" }} />
+                        </div>
+                        <p className="text-[11px] font-bold text-foreground">Branco Premium</p>
+                        <p className="text-[9px] text-muted-foreground/40">Limpo com acentos verdes</p>
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Color picker card */}
                   <div className="rounded-2xl border border-border/15 bg-card/20 overflow-hidden">
                     <div className="p-4 space-y-3">
