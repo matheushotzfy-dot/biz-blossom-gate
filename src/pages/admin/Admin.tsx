@@ -21,7 +21,9 @@ type AdminProfile = Pick<Tables<"profiles">, "id" | "user_id" | "full_name" | "e
 type AdminProduct = Pick<Tables<"products">, "id" | "user_id" | "name" | "price" | "status" | "created_at">;
 type AdminWithdrawal = Pick<Tables<"withdrawals">, "id" | "user_id" | "amount" | "fee_amount" | "net_amount" | "status" | "created_at">;
 
+export default function Admin() {
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
 
   // Force dark mode on admin
   useEffect(() => {
@@ -30,7 +32,6 @@ type AdminWithdrawal = Pick<Tables<"withdrawals">, "id" | "user_id" | "amount" |
     return () => setTheme(prev as "light" | "dark");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { user } = useAuth();
   const [transactions, setTransactions] = useState<AdminTx[]>([]);
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
   const [products, setProducts] = useState<AdminProduct[]>([]);
