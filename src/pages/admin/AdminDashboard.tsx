@@ -138,17 +138,17 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #06060e 0%, #050508 40%, #030305 100%)", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
+    <div className="dark min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #07071a 0%, #060614 40%, #04040f 100%)", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5">
         <div className="relative">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.3)] ring-1 ring-white/[0.1]">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.35)] ring-1 ring-white/10">
             <Shield className="h-7 w-7 text-white drop-shadow-lg" />
           </div>
-          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 blur-xl animate-pulse" />
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 blur-xl animate-pulse" />
         </div>
         <div className="text-center">
-          <p className="text-[11px] font-bold tracking-[0.35em] uppercase text-white/20">Initializing</p>
-          <p className="text-[9px] font-medium tracking-[0.2em] uppercase text-indigo-400/40 mt-1">God Mode</p>
+          <p className="text-[11px] font-bold tracking-[0.35em] uppercase text-white/25">Initializing</p>
+          <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-indigo-400/50 mt-1.5">Control Center</p>
         </div>
       </motion.div>
     </div>
@@ -211,39 +211,39 @@ export default function AdminDashboard() {
 
   return (
     <div
-      className="h-screen text-white flex flex-col overflow-hidden"
+      className="dark h-screen text-white flex flex-col overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, #06060e 0%, #050508 40%, #030305 100%)",
+        background: "linear-gradient(180deg, #07071a 0%, #060614 40%, #04040f 100%)",
         fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif",
       }}
     >
       {/* ═══ Ambient Glow — multi-layered ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-200px] left-1/3 w-[900px] h-[600px] bg-indigo-950/[0.08] rounded-full blur-[200px]" />
-        <div className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-violet-950/[0.05] rounded-full blur-[160px]" />
-        <div className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-950/[0.04] rounded-full blur-[150px]" />
+        <div className="absolute top-[-200px] left-1/4 w-[900px] h-[600px] bg-indigo-950/10 rounded-full blur-[200px]" />
+        <div className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-violet-950/[0.07] rounded-full blur-[160px]" />
+        <div className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-950/[0.05] rounded-full blur-[150px]" />
       </div>
 
       {/* ═══ TOP NAVIGATION BAR ═══ */}
-      <header className="relative z-50 h-[52px] border-b border-white/[0.05] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-3xl bg-[#08081a]/70">
+      <header className="relative z-50 h-[56px] border-b border-white/[0.06] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-3xl bg-[#0a0a1e]/80">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 mr-4">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.25)] ring-1 ring-white/[0.08]">
-            <Rocket className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+        <div className="flex items-center gap-3 mr-5">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_24px_rgba(99,102,241,0.3)] ring-1 ring-white/10">
+            <Rocket className="h-4 w-4 text-white drop-shadow-sm" />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-[13px] font-black tracking-tight bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">HOTZFY</h1>
-            <p className="text-[7px] font-bold uppercase tracking-[0.35em] text-indigo-400/50">
-              {isEmployee ? "Employee" : "God Mode"}
+            <h1 className="text-[14px] font-black tracking-tight bg-gradient-to-r from-white via-white/90 to-indigo-200 bg-clip-text text-transparent">HOTZFY</h1>
+            <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-indigo-400/60">
+              {isEmployee ? "Employee Panel" : "Control Center"}
             </p>
           </div>
         </div>
 
         {/* Separator */}
-        <div className="h-5 w-px bg-white/[0.08] mr-1" />
+        <div className="h-6 w-px bg-gradient-to-b from-transparent via-white/[0.08] to-transparent mr-1" />
 
         {/* Primary Navigation */}
-        <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-none py-1">
+        <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-none py-1.5">
           {primaryNav.map((item) => {
             const isActive = activeTab === item.id;
             const hasBadge = item.id === "withdrawals" && pendingWdCount > 0;
@@ -252,23 +252,23 @@ export default function AdminDashboard() {
                 key={item.id}
                 onClick={() => handleTabChange(item.id as TabId)}
                 className={cn(
-                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all duration-200",
+                  "relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all duration-200",
                   isActive
-                    ? "bg-gradient-to-b from-white/[0.08] to-white/[0.04] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_3px_rgba(0,0,0,0.3)] border border-white/[0.06]"
-                    : "text-white/25 hover:text-white/50 hover:bg-white/[0.03]"
+                    ? "bg-gradient-to-b from-indigo-500/15 to-indigo-500/5 text-white shadow-[inset_0_1px_0_rgba(99,102,241,0.15),0_2px_8px_rgba(0,0,0,0.2)] border border-indigo-500/20"
+                    : "text-white/30 hover:text-white/60 hover:bg-white/[0.04]"
                 )}
               >
-                <item.icon className={cn("h-3 w-3", isActive ? "text-indigo-400" : "opacity-60")} />
+                <item.icon className={cn("h-3.5 w-3.5", isActive ? "text-indigo-400" : "opacity-50")} />
                 <span className="hidden lg:inline">{item.label}</span>
                 {hasBadge && (
-                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-[8px] font-bold flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.5)] ring-1 ring-red-400/30">
+                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-[8px] font-bold flex items-center justify-center shadow-[0_0_12px_rgba(239,68,68,0.5)] ring-1 ring-red-400/30">
                     {pendingWdCount}
                   </span>
                 )}
                 {isActive && (
                   <motion.div
                     layoutId="admin-nav-indicator"
-                    className="absolute -bottom-[9px] left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-indigo-400 to-violet-400 shadow-[0_0_12px_rgba(99,102,241,0.6)]"
+                    className="absolute -bottom-[11px] left-2 right-2 h-[2px] rounded-full bg-gradient-to-r from-indigo-400 via-violet-400 to-indigo-400 shadow-[0_0_16px_rgba(99,102,241,0.7)]"
                     transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   />
                 )}
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
                   <span className="text-[9px] bg-white/[0.06] rounded px-1 py-0.5">{overflowNav.length}</span>
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-52 p-2 bg-[#0C0C18]/95 backdrop-blur-2xl border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rounded-xl" align="start">
+              <PopoverContent className="w-56 p-2 bg-[#0e0e22]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="start">
                 {overflowNav.map((item) => (
                   <button
                     key={item.id}
@@ -293,8 +293,8 @@ export default function AdminDashboard() {
                     className={cn(
                       "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all",
                       activeTab === item.id
-                        ? "bg-indigo-500/10 text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.15)]"
-                        : "text-white/35 hover:text-white/70 hover:bg-white/[0.04]"
+                        ? "bg-indigo-500/12 text-indigo-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.2)]"
+                        : "text-white/35 hover:text-white/70 hover:bg-white/[0.05]"
                     )}
                   >
                     <item.icon className="h-3.5 w-3.5" />
@@ -308,16 +308,16 @@ export default function AdminDashboard() {
 
         {/* Right Controls */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Date Picker */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+        {/* Date Picker */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
                 onClick={() => handleDatePreset(p.days)}
                 className={cn(
-                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  "px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                   datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
-                    ? "bg-indigo-500/15 text-indigo-400 shadow-sm"
+                    ? "bg-indigo-500/15 text-indigo-400 shadow-sm ring-1 ring-indigo-500/20"
                     : "text-white/25 hover:text-white/50"
                 )}
               >
@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                   <Calendar className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-[#0C0C18]/95 backdrop-blur-2xl border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rounded-xl" align="end">
+              <PopoverContent className="w-auto p-0 bg-[#0e0e22]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}

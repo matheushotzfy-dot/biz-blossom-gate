@@ -81,7 +81,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="space-y-6 dark">
+    <div className="dark space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-6 w-6 text-primary" /> Painel Admin</h1>
         <p className="text-muted-foreground text-sm mt-1">Controle total da operação</p>
