@@ -8,13 +8,13 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for impersonation tokens first (one-time use, 15s expiry)
-    const impersonateData = sessionStorage.getItem("impersonate_session");
+    // Check for impersonation tokens (localStorage with tight 15s window + immediate cleanup)
+    const impersonateData = localStorage.getItem("impersonate_session");
     if (impersonateData) {
       try {
         const { access_token, refresh_token, timestamp } = JSON.parse(impersonateData);
-        // Strict 15-second window + immediate cleanup
-        sessionStorage.removeItem("impersonate_session");
+        // Immediate cleanup BEFORE using - one-time use
+        localStorage.removeItem("impersonate_session");
         if (Date.now() - timestamp < 15000 && access_token && refresh_token) {
           supabase.auth.setSession({ access_token, refresh_token }).then(({ data: { session }, error }) => {
             if (!error && session) {
@@ -31,10 +31,10 @@ export function useAuth() {
           });
           return;
       } else {
-        sessionStorage.removeItem("impersonate_session");
+        localStorage.removeItem("impersonate_session");
       }
       } catch {
-        sessionStorage.removeItem("impersonate_session");
+        localStorage.removeItem("impersonate_session");
       }
     }
 
