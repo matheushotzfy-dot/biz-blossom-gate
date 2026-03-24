@@ -30,9 +30,9 @@ export function useAuth() {
             initNormalSession();
           });
           return;
-        } else {
-          localStorage.removeItem("impersonate_session");
-        }
+      } else {
+        sessionStorage.removeItem("impersonate_session");
+      }
       } catch {
         localStorage.removeItem("impersonate_session");
       }
