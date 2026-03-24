@@ -8,11 +8,44 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session first (synchronous from cache)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Check for impersonation tokens first
+    const impersonateData = localStorage.getItem("impersonate_session");
+    if (impersonateData) {
+      try {
+        const { access_token, refresh_token, timestamp } = JSON.parse(impersonateData);
+        // Only use if less than 60 seconds old
+        if (Date.now() - timestamp < 60000 && access_token && refresh_token) {
+          localStorage.removeItem("impersonate_session");
+          supabase.auth.setSession({ access_token, refresh_token }).then(({ data: { session }, error }) => {
+            if (!error && session) {
+              setUser(session.user);
+              setLoading(false);
+              // Clean URL param
+              const url = new URL(window.location.href);
+              url.searchParams.delete("impersonate");
+              window.history.replaceState({}, "", url.toString());
+              return;
+            }
+            // Fallback to normal flow
+            initNormalSession();
+          });
+          return;
+        } else {
+          localStorage.removeItem("impersonate_session");
+        }
+      } catch {
+        localStorage.removeItem("impersonate_session");
+      }
+    }
+
+    initNormalSession();
+
+    function initNormalSession() {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
