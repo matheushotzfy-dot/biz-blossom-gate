@@ -258,7 +258,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </motion.div>
 
       {/* ═══ 3. VOLUME CHART + ACQUIRER ROUTING + REALTIME FEED ═══ */}
-      <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-stretch">
+      <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {/* Volume Chart */}
         <GlassPanel className="xl:col-span-2 flex flex-col">
           <div className="flex items-center justify-between mb-4">
