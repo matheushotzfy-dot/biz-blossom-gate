@@ -379,7 +379,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       {/* ═══ 4. RISK RADAR (Bento Box) ═══ */}
       <motion.div variants={fadeUp}>
         <h3 className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/15 mb-3">Compliance & Risco</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
           {/* Live Fraud Feed */}
           <GlassPanel className="lg:col-span-1 max-h-[340px] overflow-hidden flex flex-col">
             <GlassPanelTitle color="red" icon={<ShieldAlert className="h-3.5 w-3.5" />}>Bloqueios Anti-Fraude</GlassPanelTitle>
