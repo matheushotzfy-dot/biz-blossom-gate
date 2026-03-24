@@ -307,13 +307,22 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleBalanceAdjustment = async () => {
     if (!selectedUser || !user || !adjustAmount || !adjustReason) { toast.error("Preencha todos os campos"); return; }
+    const amount = Number(adjustAmount);
+    if (isNaN(amount) || amount <= 0) { toast.error("Valor deve ser positivo"); return; }
+    if (amount > 1000000) { toast.error("Valor máximo excedido (R$ 1.000.000)"); return; }
+    const sanitizedReason = adjustReason.replace(/[<>]/g, "").trim().slice(0, 500);
+    if (sanitizedReason.length < 3) { toast.error("Justificativa muito curta (mín. 3 caracteres)"); return; }
+    
+    // Confirmation for high-value adjustments
+    if (amount > 10000 && !window.confirm(`Confirma ajuste de R$ ${amount.toFixed(2)} (${adjustType})?`)) return;
+    
     const { error } = await supabase.from("balance_adjustments").insert({
       user_id: selectedUser.user_id, admin_user_id: user.id,
-      amount: Number(adjustAmount), type: adjustType, reason: adjustReason,
+      amount, type: adjustType, reason: sanitizedReason,
     });
     if (error) { toast.error("Erro ao ajustar saldo"); return; }
     toast.success(`Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
-    await logAdminAction(`balance_${adjustType}`, "balance_adjustment", selectedUser.user_id, { amount: adjustAmount, reason: adjustReason });
+    await logAdminAction(`balance_${adjustType}`, "balance_adjustment", selectedUser.user_id, { amount: adjustAmount, reason: sanitizedReason });
     setAdjustAmount(""); setAdjustReason("");
     const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
     if (data) setBalanceAdjustments(data);
