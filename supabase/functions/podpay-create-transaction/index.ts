@@ -78,6 +78,24 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // === IDEMPOTENCY KEY CHECK (prevents duplicate payments from retries/replays) ===
+    if (idempotencyKey) {
+      const safeIdemKey = String(idempotencyKey).slice(0, 255);
+      const { data: existingIdem } = await supabase
+        .from('idempotency_keys')
+        .select('response, expires_at')
+        .eq('key', safeIdemKey)
+        .maybeSingle();
+
+      if (existingIdem && new Date(existingIdem.expires_at) > new Date()) {
+        safeLog('Idempotent request - returning cached response', { productId });
+        return new Response(
+          JSON.stringify(existingIdem.response),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // === ANTI-FRAUD: Blacklist Check ===
     const requestIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0';
     const { data: blCheck } = await supabase.rpc('check_blacklist', {
