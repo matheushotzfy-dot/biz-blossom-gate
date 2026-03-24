@@ -31,7 +31,7 @@ export function useAuth() {
           });
           return;
       } else {
-        sessionStorage.removeItem("impersonate_session");
+        localStorage.removeItem("impersonate_session");
       }
       } catch {
         sessionStorage.removeItem("impersonate_session");
