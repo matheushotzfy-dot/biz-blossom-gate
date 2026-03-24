@@ -138,17 +138,17 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #06060e 0%, #050508 40%, #030305 100%)", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
+    <div className="dark min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #07071a 0%, #060614 40%, #04040f 100%)", fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif" }}>
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5">
         <div className="relative">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.3)] ring-1 ring-white/[0.1]">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.35)] ring-1 ring-white/10">
             <Shield className="h-7 w-7 text-white drop-shadow-lg" />
           </div>
-          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 blur-xl animate-pulse" />
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 blur-xl animate-pulse" />
         </div>
         <div className="text-center">
-          <p className="text-[11px] font-bold tracking-[0.35em] uppercase text-white/20">Initializing</p>
-          <p className="text-[9px] font-medium tracking-[0.2em] uppercase text-indigo-400/40 mt-1">God Mode</p>
+          <p className="text-[11px] font-bold tracking-[0.35em] uppercase text-white/25">Initializing</p>
+          <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-indigo-400/50 mt-1.5">Control Center</p>
         </div>
       </motion.div>
     </div>
