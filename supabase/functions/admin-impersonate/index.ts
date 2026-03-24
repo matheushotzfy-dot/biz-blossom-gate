@@ -18,14 +18,14 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the caller is an admin
+    // Verify the caller is authenticated
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user: caller } } = await callerClient.auth.getUser();
     if (!caller) throw new Error("Unauthorized");
 
-    // Check admin role server-side
+    // Check admin role SERVER-SIDE using service_role
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: isAdmin } = await adminClient.rpc("has_role", {
       _user_id: caller.id,
@@ -36,7 +36,21 @@ Deno.serve(async (req) => {
     const { targetUserId } = await req.json();
     if (!targetUserId) throw new Error("Missing targetUserId");
 
-    // Get target user email
+    // Validate UUID format to prevent injection
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(targetUserId)) throw new Error("Invalid targetUserId format");
+
+    // Prevent self-impersonation
+    if (targetUserId === caller.id) throw new Error("Cannot impersonate yourself");
+
+    // Prevent impersonating other admins
+    const { data: targetIsAdmin } = await adminClient.rpc("has_role", {
+      _user_id: targetUserId,
+      _role: "admin",
+    });
+    if (targetIsAdmin) throw new Error("Cannot impersonate another admin");
+
+    // Get target user
     const { data: targetUser, error: userError } = await adminClient.auth.admin.getUserById(targetUserId);
     if (userError || !targetUser?.user) throw new Error("User not found");
 
@@ -48,19 +62,22 @@ Deno.serve(async (req) => {
 
     if (linkError || !linkData) throw new Error("Failed to generate impersonation link");
 
-    // Log the impersonation
+    // Log the impersonation with details
     await adminClient.from("audit_logs").insert({
       admin_user_id: caller.id,
       action: "impersonate_user",
       entity_type: "profile",
       entity_id: targetUserId,
-      details: { target_email: targetUser.user.email },
+      details: {
+        target_email: targetUser.user.email,
+        timestamp: new Date().toISOString(),
+        admin_email: caller.email,
+      },
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        // Return the token properties for client-side auth
         access_token: linkData.properties?.access_token,
         refresh_token: linkData.properties?.refresh_token,
         email: targetUser.user.email,

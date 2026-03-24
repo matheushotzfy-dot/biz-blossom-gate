@@ -13,21 +13,11 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [attempts, setAttempts] = useState(0);
-  const [lockoutUntil, setLockoutUntil] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Rate limiting - exponential backoff: 3 attempts → 120s, 5 → 300s, 7+ → 600s
-    if (Date.now() < lockoutUntil) {
-      const secsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
-      setError(`Muitas tentativas. Aguarde ${secsLeft}s.`);
-      return;
-    }
-
-    // Basic input validation
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       setError("E-mail inválido.");
@@ -42,48 +32,35 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password,
+      // ALL authentication + rate limiting + role checking happens SERVER-SIDE
+      const { data, error: fnError } = await supabase.functions.invoke("admin-login", {
+        body: { email: trimmedEmail, password },
       });
-      if (authError) throw authError;
 
-      // Server-side role verification via SECURITY DEFINER function
-      const [adminRes, employeeRes] = await Promise.all([
-        supabase.rpc("current_user_has_role", { _role: "admin" }),
-        supabase.rpc("current_user_has_role", { _role: "employee" as any }),
-      ]);
+      if (fnError) throw new Error("Erro de conexão.");
 
-      const hasAdmin = adminRes.data === true;
-      const hasEmployee = employeeRes.data === true;
-
-      if (!hasAdmin && !hasEmployee) {
-        await supabase.auth.signOut();
-        // Generic error — don't reveal if user exists
-        setError("Acesso negado. Credenciais inválidas ou sem permissão.");
+      if (!data?.success) {
+        setError(data?.error || "Credenciais inválidas ou acesso não autorizado.");
+        if (data?.locked) {
+          setError("Muitas tentativas. Aguarde 15 minutos.");
+        }
         return;
       }
 
-      // Reset attempts on success
-      setAttempts(0);
-      setLockoutUntil(0);
+      // Set session with tokens from backend
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+      });
+
+      if (sessionError) throw sessionError;
 
       toast.success("Bem-vindo ao painel administrativo!");
       navigate("/admin-matheus/dashboard");
     } catch (_err: unknown) {
-      setAttempts(prev => {
-        const next = prev + 1;
-        // Exponential lockout
-        if (next >= 7) setLockoutUntil(Date.now() + 600000);
-        else if (next >= 5) setLockoutUntil(Date.now() + 300000);
-        else if (next >= 3) setLockoutUntil(Date.now() + 120000);
-        return next;
-      });
-      // Generic error message — prevents user enumeration
       setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);
-      // Clear password from memory
       setPassword("");
     }
   };
@@ -145,9 +122,9 @@ export default function AdminLogin() {
             <span className="text-[10px] text-white/20 font-medium">SSL Ativo</span>
           </div>
           <span className="text-white/10">•</span>
-          <span className="text-[10px] text-white/20 font-medium">Acessos monitorados</span>
+          <span className="text-[10px] text-white/20 font-medium">Rate Limit Backend</span>
           <span className="text-white/10">•</span>
-          <span className="text-[10px] text-white/20 font-medium">2FA Recomendado</span>
+          <span className="text-[10px] text-white/20 font-medium">Acessos monitorados</span>
         </div>
       </div>
     </div>
