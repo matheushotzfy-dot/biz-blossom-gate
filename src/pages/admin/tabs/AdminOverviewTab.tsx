@@ -223,9 +223,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         />
         <HeroKpi
           icon={<Globe className="h-6 w-6" />}
-          label="TPV Global"
+          label="TPV Período"
           value={fmtCurrency(totalVolume)}
-          sub={`${approved.length} transações aprovadas`}
+          sub={`${filteredApproved.length} transações aprovadas`}
           gradient="from-emerald-400 to-teal-600"
         />
         <HeroKpi
