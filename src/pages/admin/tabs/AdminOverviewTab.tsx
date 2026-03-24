@@ -258,9 +258,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </motion.div>
 
       {/* ═══ 3. VOLUME CHART + ACQUIRER ROUTING + REALTIME FEED ═══ */}
-      <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-stretch">
         {/* Volume Chart */}
-        <GlassPanel className="xl:col-span-2">
+        <GlassPanel className="xl:col-span-2 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <GlassPanelTitle color="indigo">Volume & Take Rate</GlassPanelTitle>
             <div className="flex gap-0.5 bg-white/[0.04] border border-white/[0.06] rounded-lg p-0.5">
@@ -291,9 +291,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </GlassPanel>
 
         {/* Acquirer Routing Performance */}
-        <GlassPanel>
+        <GlassPanel className="flex flex-col">
           <GlassPanelTitle color="cyan" icon={<Server className="h-3.5 w-3.5" />}>Performance Adquirentes</GlassPanelTitle>
-          <div className="space-y-3 mt-4">
+          <div className="space-y-3 mt-4 flex-1">
             {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
               const isHealthy = m.rate >= 85;
               const isWarning = m.rate >= 60 && m.rate < 85;
@@ -343,7 +343,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </GlassPanel>
 
         {/* Realtime Feed */}
-        <GlassPanel className="max-h-[420px] overflow-hidden flex flex-col">
+        <GlassPanel className="overflow-hidden flex flex-col">
           <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>Feed Tempo Real</GlassPanelTitle>
           <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
             {realtimeTx.map(t => (
@@ -379,7 +379,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       {/* ═══ 4. RISK RADAR (Bento Box) ═══ */}
       <motion.div variants={fadeUp}>
         <h3 className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/15 mb-3">Compliance & Risco</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
           {/* Live Fraud Feed */}
           <GlassPanel className="lg:col-span-1 max-h-[340px] overflow-hidden flex flex-col">
             <GlassPanelTitle color="red" icon={<ShieldAlert className="h-3.5 w-3.5" />}>Bloqueios Anti-Fraude</GlassPanelTitle>
