@@ -291,9 +291,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </GlassPanel>
 
         {/* Acquirer Routing Performance */}
-        <GlassPanel className="flex flex-col">
+        <GlassPanel className="flex flex-col max-h-[380px]">
           <GlassPanelTitle color="cyan" icon={<Server className="h-3.5 w-3.5" />}>Performance Adquirentes</GlassPanelTitle>
-          <div className="space-y-3 mt-4 flex-1">
+          <div className="space-y-3 mt-4 flex-1 overflow-y-auto">
             {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
               const isHealthy = m.rate >= 85;
               const isWarning = m.rate >= 60 && m.rate < 85;
