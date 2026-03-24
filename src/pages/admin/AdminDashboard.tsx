@@ -370,15 +370,15 @@ export default function AdminDashboard() {
       </header>
 
       {/* ═══ MAIN CONTENT ═══ */}
-      <main className="flex-1 overflow-y-auto relative z-10" data-admin-content>
+      <main className="flex-1 overflow-y-auto relative z-10 scrollbar-thin" data-admin-content>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="p-4 lg:p-6"
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="p-4 lg:p-6 xl:p-8"
           >
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (
