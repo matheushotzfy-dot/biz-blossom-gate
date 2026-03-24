@@ -478,7 +478,11 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                       onClick={() => onUserStatus(p.user_id, "approved")}>
                       <CheckCircle2 className="h-3 w-3" /> Aprovar
                     </Button>
-                    <Button size="sm" className="h-7 text-[9px] bg-white/[0.03] text-white/30 hover:text-white/60 hover:bg-white/[0.06] border border-white/[0.06] gap-1 rounded-lg shadow-none font-bold">
+                    <Button size="sm" className="h-7 text-[9px] bg-white/[0.03] text-white/30 hover:text-white/60 hover:bg-white/[0.06] border border-white/[0.06] gap-1 rounded-lg shadow-none font-bold"
+                      onClick={() => {
+                        window.open(`mailto:${p.email || ""}?subject=Verificação KYC - Documentação Pendente`, "_blank");
+                        toast.info(`Abrindo análise de ${p.full_name || p.email || "seller"}`, { description: `Doc: ${p.document_number || "Não informado"} | Tipo: ${p.seller_type || "N/A"}` });
+                      }}>
                       <Eye className="h-3 w-3" /> Analisar
                     </Button>
                   </div>

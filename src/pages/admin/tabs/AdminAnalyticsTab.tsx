@@ -19,13 +19,7 @@ interface Props {
   fmtCurrency: (v: number) => string;
 }
 
-const COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--warning))",
-  "hsl(var(--destructive))",
-  "hsl(var(--info, 210 100% 50%))",
-  "hsl(var(--accent))",
-];
+const COLORS = ["#6366f1", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"];
 
 export default function AdminAnalyticsTab({ transactions, profiles, products, withdrawals, fmtCurrency }: Props) {
 
