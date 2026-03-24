@@ -84,6 +84,17 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const allTx = transactions;
   const approved = useMemo(() => allTx.filter(t => t.status === "approved" || t.status === "completed"), [allTx]);
 
+  // ═══ DATE RANGE FILTERING ═══
+  const filteredTx = useMemo(() => {
+    if (!dateRange) return allTx;
+    return allTx.filter(t => {
+      const d = new Date(t.created_at);
+      return d >= dateRange.from && d <= dateRange.to;
+    });
+  }, [allTx, dateRange]);
+
+  const filteredApproved = useMemo(() => filteredTx.filter(t => t.status === "approved" || t.status === "completed"), [filteredTx]);
+
   const today = new Date();
   const todayStr = today.toDateString();
   const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -91,13 +102,14 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const todayTx = useMemo(() => approved.filter(t => new Date(t.created_at).toDateString() === todayStr), [approved, todayStr]);
   const monthTx = useMemo(() => approved.filter(t => new Date(t.created_at) >= thisMonthStart), [approved, thisMonthStart]);
 
+  // Use filtered data for main KPIs
   const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
   const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
-  const totalVolume = approved.reduce((a, t) => a + Number(t.amount), 0);
+  const totalVolume = filteredApproved.reduce((a, t) => a + Number(t.amount), 0);
 
   const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRateMonth = monthTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateTotal = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const takeRateTotal = filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
 
   const totalWithdrawn = withdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
