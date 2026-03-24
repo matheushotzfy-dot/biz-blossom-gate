@@ -25,31 +25,45 @@ export default function ManagerLogin() {
       return;
     }
 
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError("E-mail inválido.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
       if (authError) throw authError;
 
       const { data } = await supabase.rpc("current_user_has_role", { _role: "manager" as any });
       if (data !== true) {
         await supabase.auth.signOut();
-        setError("Acesso negado. Você não tem permissão de gerente.");
+        setError("Acesso negado. Credenciais inválidas ou sem permissão.");
         return;
       }
 
+      setAttempts(0);
+      setLockoutUntil(0);
       toast.success("Bem-vindo ao painel de gerente!");
       navigate("/gerentes/dashboard");
     } catch {
       setAttempts(prev => {
         const next = prev + 1;
-        if (next >= 3) setLockoutUntil(Date.now() + 120000);
+        if (next >= 7) setLockoutUntil(Date.now() + 600000);
+        else if (next >= 5) setLockoutUntil(Date.now() + 300000);
+        else if (next >= 3) setLockoutUntil(Date.now() + 120000);
         return next;
       });
       setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);
+      setPassword("");
     }
   };
 

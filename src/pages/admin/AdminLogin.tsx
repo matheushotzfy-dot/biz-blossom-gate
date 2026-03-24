@@ -20,10 +20,21 @@ export default function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // FIX: Rate limiting - lock after 3 failed attempts for 120s
+    // Rate limiting - exponential backoff: 3 attempts → 120s, 5 → 300s, 7+ → 600s
     if (Date.now() < lockoutUntil) {
       const secsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
       setError(`Muitas tentativas. Aguarde ${secsLeft}s.`);
+      return;
+    }
+
+    // Basic input validation
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError("E-mail inválido.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Senha deve ter no mínimo 6 caracteres.");
       return;
     }
 
@@ -31,7 +42,10 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
       if (authError) throw authError;
 
       // Server-side role verification via SECURITY DEFINER function
@@ -45,21 +59,32 @@ export default function AdminLogin() {
 
       if (!hasAdmin && !hasEmployee) {
         await supabase.auth.signOut();
-        setError("Acesso negado. Você não tem permissão de administrador.");
+        // Generic error — don't reveal if user exists
+        setError("Acesso negado. Credenciais inválidas ou sem permissão.");
         return;
       }
+
+      // Reset attempts on success
+      setAttempts(0);
+      setLockoutUntil(0);
 
       toast.success("Bem-vindo ao painel administrativo!");
       navigate("/admin-matheus/dashboard");
     } catch (_err: unknown) {
       setAttempts(prev => {
         const next = prev + 1;
-        if (next >= 3) setLockoutUntil(Date.now() + 120000);
+        // Exponential lockout
+        if (next >= 7) setLockoutUntil(Date.now() + 600000);
+        else if (next >= 5) setLockoutUntil(Date.now() + 300000);
+        else if (next >= 3) setLockoutUntil(Date.now() + 120000);
         return next;
       });
+      // Generic error message — prevents user enumeration
       setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);
+      // Clear password from memory
+      setPassword("");
     }
   };
 
