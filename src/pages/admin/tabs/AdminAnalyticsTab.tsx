@@ -212,9 +212,9 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <div className="h-[300px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={forecast.chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={4} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} interval={4} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
                 <Area type="monotone" dataKey="receita" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} name="Receita" />
                 <Area type="monotone" dataKey="previsao" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} strokeDasharray="5 5" name="Previsão" />
