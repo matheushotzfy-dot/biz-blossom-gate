@@ -34,7 +34,7 @@ export function useAuth() {
         localStorage.removeItem("impersonate_session");
       }
       } catch {
-        sessionStorage.removeItem("impersonate_session");
+        localStorage.removeItem("impersonate_session");
       }
     }
 
