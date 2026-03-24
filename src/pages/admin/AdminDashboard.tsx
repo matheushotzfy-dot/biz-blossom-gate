@@ -7,7 +7,7 @@ import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, Bell,
-  Moon, Sun, UserCog, RefreshCw, Rocket,
+  UserCog, RefreshCw, Rocket,
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
 } from "lucide-react";
