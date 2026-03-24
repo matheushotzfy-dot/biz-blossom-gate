@@ -615,7 +615,7 @@ export default function PublicCheckout() {
   /* ══════════════════════════════════════════════════════ */
 
   const inputClass = `mt-1.5 h-12 rounded-xl border text-gray-900 placeholder:text-gray-300 focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium ${isWhite ? "bg-white border-gray-200" : "bg-gray-100/80 border-gray-200"}`;
-  const sectionClass = "rounded-2xl border border-gray-200 bg-white overflow-hidden";
+  const sectionClass = `rounded-2xl border bg-white overflow-hidden shadow-sm ${isWhite ? "border-gray-100" : "border-gray-200"}`;
   const sectionHeaderClass = "px-5 py-4 border-b border-gray-100 flex items-center gap-3";
   const sectionBodyClass = "p-5 space-y-4";
   const labelClass = "text-[11px] text-gray-400 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
@@ -681,7 +681,7 @@ export default function PublicCheckout() {
         )}
 
         {/* ═══ Product Card ═══ */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 mb-5">
+        <div className={`rounded-2xl border bg-white p-5 mb-5 shadow-sm ${isWhite ? "border-gray-100" : "border-gray-200"}`}>
           <div className="flex items-center gap-4">
             <div className="h-[72px] w-[72px] rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
               {product.image_url ? (
