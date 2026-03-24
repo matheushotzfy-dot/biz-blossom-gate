@@ -376,9 +376,7 @@ export default function AdminDashboard() {
             <RefreshCw className={cn("h-2.5 w-2.5", syncing && "animate-spin")} /> Sync
           </button>
 
-          <button onClick={toggleTheme} className="h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all">
-            {theme === "dark" ? <Sun className="h-3 w-3 text-amber-400" /> : <Moon className="h-3 w-3 text-white/30" />}
-          </button>
+          {/* Admin is always dark — no theme toggle needed */}
 
           <button onClick={handleLogout} className="h-7 w-7 rounded-lg flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all">
             <LogOut className="h-3 w-3" />
