@@ -211,21 +211,21 @@ export default function AdminDashboard() {
 
   return (
     <div
-      className="h-screen text-white flex flex-col overflow-hidden"
+      className="dark h-screen text-white flex flex-col overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, #06060e 0%, #050508 40%, #030305 100%)",
+        background: "linear-gradient(180deg, #07071a 0%, #060614 40%, #04040f 100%)",
         fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif",
       }}
     >
       {/* ═══ Ambient Glow — multi-layered ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-200px] left-1/3 w-[900px] h-[600px] bg-indigo-950/[0.08] rounded-full blur-[200px]" />
-        <div className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-violet-950/[0.05] rounded-full blur-[160px]" />
-        <div className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-950/[0.04] rounded-full blur-[150px]" />
+        <div className="absolute top-[-200px] left-1/4 w-[900px] h-[600px] bg-indigo-950/10 rounded-full blur-[200px]" />
+        <div className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-violet-950/[0.07] rounded-full blur-[160px]" />
+        <div className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-950/[0.05] rounded-full blur-[150px]" />
       </div>
 
       {/* ═══ TOP NAVIGATION BAR ═══ */}
-      <header className="relative z-50 h-[52px] border-b border-white/[0.05] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-3xl bg-[#08081a]/70">
+      <header className="relative z-50 h-[56px] border-b border-white/[0.06] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-3xl bg-[#0a0a1e]/80">
         {/* Logo */}
         <div className="flex items-center gap-2.5 mr-4">
           <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.25)] ring-1 ring-white/[0.08]">
