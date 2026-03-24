@@ -24,10 +24,10 @@ export default function Admin() {
   const load = async () => {
     if (!user) return;
     const [txRes, pRes, prodRes, wRes] = await Promise.all([
-      supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(50),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("products").select("*"),
-      supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, created_at").order("created_at", { ascending: false }).limit(50),
+      supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, created_at").order("created_at", { ascending: false }),
+      supabase.from("products").select("id, user_id, name, price, status, created_at"),
+      supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at").order("created_at", { ascending: false }).limit(20),
     ]);
     if (txRes.data) setTransactions(txRes.data);
     if (pRes.data) setProfiles(pRes.data);

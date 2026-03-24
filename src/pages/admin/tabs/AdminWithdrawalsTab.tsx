@@ -71,8 +71,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
       supabase.from("audit_logs").select("id,admin_user_id,action,entity_id,created_at")
         .or("action.eq.approve_withdrawal,action.eq.reject_withdrawal")
         .order("created_at", { ascending: false }).limit(500),
-      supabase.from("seller_auto_withdraw").select("*"),
-      supabase.from("balance_adjustments").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("seller_auto_withdraw").select("id, user_id, enabled, max_amount, admin_user_id"),
+      supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").order("created_at", { ascending: false }).limit(300),
     ]).then(([auditRes, autoRes, adjRes]) => {
       if (auditRes.data) setAuditLogs(auditRes.data as AuditLog[]);
       if (autoRes.data) setAutoConfigs(autoRes.data as AutoWithdrawConfig[]);
