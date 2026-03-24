@@ -14,12 +14,18 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
+// Lean types — only the columns we actually select (no PII over-fetching)
+type AdminTx = Pick<Tables<"transactions">, "id" | "user_id" | "product_id" | "amount" | "fee_amount" | "net_amount" | "status" | "payment_method" | "created_at">;
+type AdminProfile = Pick<Tables<"profiles">, "id" | "user_id" | "full_name" | "email" | "account_status" | "document_number" | "created_at">;
+type AdminProduct = Pick<Tables<"products">, "id" | "user_id" | "name" | "price" | "status" | "created_at">;
+type AdminWithdrawal = Pick<Tables<"withdrawals">, "id" | "user_id" | "amount" | "fee_amount" | "net_amount" | "status" | "created_at">;
+
 export default function Admin() {
   const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
-  const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
-  const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
+  const [transactions, setTransactions] = useState<AdminTx[]>([]);
+  const [profiles, setProfiles] = useState<AdminProfile[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [withdrawals, setWithdrawals] = useState<AdminWithdrawal[]>([]);
 
   const load = async () => {
     if (!user) return;
