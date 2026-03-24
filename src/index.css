@@ -582,12 +582,24 @@ tr {
   backdrop-filter: blur(8px);
 }
 
-/* Recharts tooltip inside admin — force dark */
-[data-admin-content] .recharts-tooltip-wrapper .recharts-default-tooltip {
+/* Recharts tooltip inside admin — force dark (works both inside and portal) */
+[data-admin-content] .recharts-tooltip-wrapper .recharts-default-tooltip,
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
   background: rgba(12, 12, 24, 0.95) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: white !important;
   border-radius: 12px !important;
+}
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Recharts legend text in dark mode */
+.dark .recharts-legend-item-text {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Admin scrollbar — more subtle */
@@ -596,4 +608,15 @@ tr {
 }
 [data-admin-content]::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.3);
+}
+
+/* Force Radix portals (popovers, selects, dialogs) to dark when admin panel is active */
+.dark [data-radix-popper-content-wrapper] {
+  color-scheme: dark;
+}
+.dark [data-radix-popper-content-wrapper] [role="listbox"],
+.dark [data-radix-popper-content-wrapper] [role="menu"] {
+  background: hsl(232 28% 12%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
