@@ -1205,6 +1205,7 @@ export type Database = {
           checkout_guarantee_enabled: boolean | null
           checkout_pix_enabled: boolean | null
           checkout_social_proof: boolean | null
+          checkout_theme: string
           checkout_timer_enabled: boolean | null
           checkout_timer_minutes: number | null
           checkout_url: string | null
@@ -1236,6 +1237,7 @@ export type Database = {
           checkout_guarantee_enabled?: boolean | null
           checkout_pix_enabled?: boolean | null
           checkout_social_proof?: boolean | null
+          checkout_theme?: string
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
@@ -1267,6 +1269,7 @@ export type Database = {
           checkout_guarantee_enabled?: boolean | null
           checkout_pix_enabled?: boolean | null
           checkout_social_proof?: boolean | null
+          checkout_theme?: string
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
