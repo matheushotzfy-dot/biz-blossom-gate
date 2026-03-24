@@ -112,22 +112,30 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const takeRateTotal = filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
 
-  const totalWithdrawn = withdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
+  const filteredWithdrawals = useMemo(() => {
+    if (!dateRange) return withdrawals;
+    return withdrawals.filter(w => {
+      const d = new Date(w.created_at);
+      return d >= dateRange.from && d <= dateRange.to;
+    });
+  }, [withdrawals, dateRange]);
+
+  const totalWithdrawn = filteredWithdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
   const pendingWd = withdrawals.filter(w => w.status === "pending");
   const pendingWdAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
 
-  const totalRetained = approved.filter(t => !t.retention_released && Number(t.retained_amount) > 0)
+  const totalRetained = filteredApproved.filter(t => !t.retention_released && Number(t.retained_amount) > 0)
     .reduce((a, t) => a + Number(t.retained_amount), 0);
 
-  const totalNet = approved.reduce((a, t) => a + Number(t.net_amount), 0);
+  const totalNet = filteredApproved.reduce((a, t) => a + Number(t.net_amount), 0);
 
-  const chargebackTx = allTx.filter(t => t.status === "chargeback");
-  const chargebackRate = approved.length > 0 ? ((chargebackTx.length / approved.length) * 100) : 0;
+  const chargebackTx = filteredTx.filter(t => t.status === "chargeback");
+  const chargebackRate = filteredApproved.length > 0 ? ((chargebackTx.length / filteredApproved.length) * 100) : 0;
   const chargebackAlert = chargebackRate > 1;
 
   const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
-  const conversionRate = allTx.length > 0 ? ((approved.length / allTx.length) * 100).toFixed(1) : "0.0";
-  const ticketMedio = approved.length > 0 ? totalVolume / approved.length : 0;
+  const conversionRate = filteredTx.length > 0 ? ((filteredApproved.length / filteredTx.length) * 100).toFixed(1) : "0.0";
+  const ticketMedio = filteredApproved.length > 0 ? totalVolume / filteredApproved.length : 0;
 
   const methodApproval = useMemo(() => {
     const methods: Record<string, { total: number; approved: number; volume: number }> = {};
