@@ -428,7 +428,7 @@ export default function PublicCheckout() {
   );
 
   if (!product) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-900 px-4">
       <div className="text-center">
         <div className="h-20 w-20 rounded-3xl bg-gray-50 border border-gray-200 flex items-center justify-center mx-auto mb-6">
           <AlertCircle className="h-10 w-10 text-gray-300" />
@@ -614,7 +614,7 @@ export default function PublicCheckout() {
   const labelClass = "text-[11px] text-gray-400 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
 
   return (
-    <div className="min-h-screen bg-gray-50 text-white selection:bg-emerald-500/30" style={{ "--btn-color": btnColor } as React.CSSProperties}>
+    <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-emerald-500/20" style={{ "--btn-color": btnColor } as React.CSSProperties}>
 
       {/* ═══ Social Proof Toast ═══ */}
       {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
@@ -809,7 +809,7 @@ export default function PublicCheckout() {
                     className={`w-full rounded-2xl border-2 p-4 md:p-5 text-left transition-all duration-300 relative overflow-hidden ${
                       selected
                         ? "border-emerald-500/50 bg-emerald-50"
-                        : "border-dashed border-amber-500/25 bg-gradient-to-br from-amber-500/[0.03] to-transparent hover:border-amber-500/50"
+                        : "border-dashed border-amber-400/40 bg-gradient-to-br from-amber-50 to-transparent hover:border-amber-500/60"
                     }`}>
                     {selected && <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl" style={{ backgroundColor: "#10b981" }}>ADICIONADO ✓</div>}
                     {!selected && <div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl animate-pulse">APROVEITE!</div>}
@@ -824,7 +824,7 @@ export default function PublicCheckout() {
                           + R$ {fmtBRL(Number(bump.bump_product.price))}
                         </p>
                       </div>
-                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-gray-50 border border-gray-200 text-gray-300"}`}>
+                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-gray-50 border border-gray-200 text-gray-300"}`}>
                         {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                       </div>
                     </div>
