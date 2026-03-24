@@ -24,6 +24,7 @@ type Product = {
   checkout_pix_enabled: boolean | null; checkout_boleto_enabled: boolean | null;
   checkout_credit_card_enabled: boolean | null; checkout_address_required: boolean | null;
   checkout_email_confirm: boolean | null;
+  checkout_theme?: string | null;
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
 type PaymentMethod = "pix" | "credit_card" | "boleto";
@@ -242,7 +243,11 @@ export default function PublicCheckout() {
 
       if (cancelled) return;
       if (!prod) { setLoading(false); return; }
-      setProduct(prod as unknown as Product);
+      // Also fetch checkout_theme from products table (not in the public view)
+      const { data: themeData } = await supabase.from("products").select("checkout_theme").eq("id", prod.id).maybeSingle();
+      const productWithTheme = { ...prod, checkout_theme: (themeData as any)?.checkout_theme || "gray" };
+      if (cancelled) return;
+      setProduct(productWithTheme as unknown as Product);
 
       // Step 2: Load pixels + bumps in parallel (both need product.id)
       const [pixelsRes, bumpsRes] = await Promise.all([
@@ -444,6 +449,8 @@ export default function PublicCheckout() {
   const bumpsTotal = orderBumps.filter(b => selectedBumps.has(b.id)).reduce((s, b) => s + Number(b.bump_product.price), 0);
   const totalPrice = price + bumpsTotal;
   const btnColor = product.checkout_button_color || "#10b981";
+  const theme = product.checkout_theme || "gray";
+  const isWhite = theme === "white";
   const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
   const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
