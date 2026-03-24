@@ -614,14 +614,14 @@ export default function PublicCheckout() {
   /* ═══ FORMULÁRIO PRINCIPAL ═════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
 
-  const inputClass = "mt-1.5 h-12 rounded-xl bg-gray-50 border-gray-200 text-white placeholder:text-gray-300 focus:border-[color:var(--btn-color)]/60 focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium";
+  const inputClass = `mt-1.5 h-12 rounded-xl border text-gray-900 placeholder:text-gray-300 focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium ${isWhite ? "bg-white border-gray-200" : "bg-gray-100/80 border-gray-200"}`;
   const sectionClass = "rounded-2xl border border-gray-200 bg-white overflow-hidden";
   const sectionHeaderClass = "px-5 py-4 border-b border-gray-100 flex items-center gap-3";
   const sectionBodyClass = "p-5 space-y-4";
   const labelClass = "text-[11px] text-gray-400 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-emerald-500/20" style={{ "--btn-color": btnColor } as React.CSSProperties}>
+    <div className={`min-h-screen text-gray-900 selection:bg-emerald-500/20 ${isWhite ? "bg-[#fafbfc]" : "bg-[#f0f1f3]"}`} style={{ "--btn-color": btnColor } as React.CSSProperties}>
 
       {/* ═══ Social Proof Toast ═══ */}
       {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
