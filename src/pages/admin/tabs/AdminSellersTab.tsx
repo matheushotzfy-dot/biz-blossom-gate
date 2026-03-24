@@ -257,10 +257,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleSaveAdminNotes = async () => {
     if (!selectedUser) return;
-    const { error } = await supabase.from("profiles").update({ admin_notes: adminNotes } as any).eq("user_id", selectedUser.user_id);
+    // Sanitize admin notes to prevent XSS
+    const sanitized = adminNotes.replace(/[<>]/g, "").replace(/javascript:/gi, "").trim().slice(0, 5000);
+    const { error } = await supabase.from("profiles").update({ admin_notes: sanitized } as any).eq("user_id", selectedUser.user_id);
     if (error) { toast.error("Erro ao salvar notas"); return; }
     toast.success("Observações salvas!");
-    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: adminNotes });
+    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: sanitized });
   };
 
   const handleUserStatus = async (userId: string, status: string) => {
