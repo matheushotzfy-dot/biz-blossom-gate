@@ -230,8 +230,8 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
             {funnel.map((stage, i) => (
               <div key={stage.stage} className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="font-medium text-foreground">{stage.stage}</span>
-                  <span className="text-muted-foreground">{stage.count} ({stage.pct.toFixed(1)}%)</span>
+                  <span className="font-medium text-white/80">{stage.stage}</span>
+                  <span className="text-white/30">{stage.count} ({stage.pct.toFixed(1)}%)</span>
                 </div>
                 <div className="h-6 bg-white/[0.04] rounded-lg overflow-hidden relative">
                   <div
