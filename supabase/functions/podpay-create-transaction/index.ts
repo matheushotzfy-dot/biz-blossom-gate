@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const body = await req.json();
     const {
       productId,
       paymentMethod,
@@ -32,7 +33,8 @@ Deno.serve(async (req) => {
       cardToken,
       ip,
       checkoutSessionId,
-    } = await req.json();
+      idempotencyKey,
+    } = body;
 
     if (!productId || !paymentMethod || !customerName || !customerEmail || !customerDocument) {
       return new Response(
