@@ -123,10 +123,10 @@ export default function AdminDashboard() {
       supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
       supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").order("created_at", { ascending: false }).limit(1000),
     ]);
-    if (txRes.data) setTransactions(txRes.data);
-    if (pRes.data) setProfiles(pRes.data);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (wRes.data) setWithdrawals(wRes.data);
+    if (txRes.data) setTransactions(txRes.data as any);
+    if (pRes.data) setProfiles(pRes.data as any);
+    if (prodRes.data) setProducts(prodRes.data as any);
+    if (wRes.data) setWithdrawals(wRes.data as any);
     setSyncing(false);
   };
 
