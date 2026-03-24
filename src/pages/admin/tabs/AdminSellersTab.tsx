@@ -88,7 +88,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [impersonating, setImpersonating] = useState(false);
 
   useEffect(() => {
-    supabase.from("acquirers").select("*").eq("is_active", true).then(({ data }) => {
+    supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
       if (data) setAcquirers(data as Acquirer[]);
     });
   }, []);
