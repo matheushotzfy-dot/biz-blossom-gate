@@ -207,26 +207,27 @@ export default function AdminDashboard() {
     <div
       className="h-screen text-white flex flex-col overflow-hidden"
       style={{
-        background: "#050505",
+        background: "linear-gradient(180deg, #06060e 0%, #050508 40%, #030305 100%)",
         fontFamily: "'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif",
       }}
     >
-      {/* ═══ Ambient Glow — indigo/violet ═══ */}
+      {/* ═══ Ambient Glow — multi-layered ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-indigo-900/[0.06] rounded-full blur-[180px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-violet-900/[0.04] rounded-full blur-[150px]" />
+        <div className="absolute top-[-200px] left-1/3 w-[900px] h-[600px] bg-indigo-950/[0.08] rounded-full blur-[200px]" />
+        <div className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-violet-950/[0.05] rounded-full blur-[160px]" />
+        <div className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-950/[0.04] rounded-full blur-[150px]" />
       </div>
 
-      {/* ═══ TOP NAVIGATION BAR (Vercel-style) ═══ */}
-      <header className="relative z-50 h-14 border-b border-white/[0.06] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-2xl bg-[#050505]/90">
+      {/* ═══ TOP NAVIGATION BAR ═══ */}
+      <header className="relative z-50 h-[52px] border-b border-white/[0.05] flex items-center px-4 lg:px-6 gap-3 shrink-0 backdrop-blur-3xl bg-[#08081a]/70">
         {/* Logo */}
         <div className="flex items-center gap-2.5 mr-4">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Rocket className="h-3.5 w-3.5 text-white" />
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.25)] ring-1 ring-white/[0.08]">
+            <Rocket className="h-3.5 w-3.5 text-white drop-shadow-sm" />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-sm font-extrabold tracking-tight">HOTZFY</h1>
-            <p className="text-[7px] font-semibold uppercase tracking-[0.3em] text-white/20">
+            <h1 className="text-[13px] font-black tracking-tight bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">HOTZFY</h1>
+            <p className="text-[7px] font-bold uppercase tracking-[0.35em] text-indigo-400/50">
               {isEmployee ? "Employee" : "God Mode"}
             </p>
           </div>
