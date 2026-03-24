@@ -218,7 +218,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           icon={<PiggyBank className="h-6 w-6" />}
           label="Lucro da Plataforma"
           value={fmtCurrency(takeRateTotal)}
-          sub={`${takeRatePct}% Take Rate`}
+          sub={`${takeRatePct}% `}
           gradient="from-indigo-500 to-violet-600"
           metallic
         />
@@ -344,7 +344,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
         {/* Realtime Feed */}
         <GlassPanel className="overflow-hidden flex flex-col max-h-[380px]">
-          <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>Feed Tempo Real</GlassPanelTitle>
+          <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>{""}</GlassPanelTitle>
           <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
             {realtimeTx.map(t => (
               <div key={t.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
@@ -405,7 +405,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
           {/* Refund/Chargeback Trend */}
           <GlassPanel className="lg:col-span-1">
-            <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Tendência Devoluções (7d)</GlassPanelTitle>
+            <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Devoluções (7d)</GlassPanelTitle>
             <ResponsiveContainer width="100%" height={200} className="mt-3">
               <LineChart data={refundTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
