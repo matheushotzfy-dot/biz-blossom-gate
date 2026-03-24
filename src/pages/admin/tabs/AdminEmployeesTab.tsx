@@ -86,8 +86,8 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Funcionários</h2>
-          <p className="text-sm mt-1 text-white/40">Gerencie os funcionários com acesso limitado ao painel</p>
+          <h2 className="text-xl font-bold text-foreground">Funcionários</h2>
+          <p className="text-sm mt-1 text-muted-foreground">Gerencie os funcionários com acesso limitado ao painel</p>
         </div>
         <Button onClick={() => setShowAddDialog(true)}
           className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 gap-2">
@@ -97,17 +97,17 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
 
       {/* Info card */}
       <AdminPanel>
-        <div className="flex items-start gap-4 p-1 text-white/60">
+        <div className="flex items-start gap-4 p-1">
           <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-500/10">
-            <Shield className="h-5 w-5 text-indigo-400" />
+            <Shield className="h-5 w-5 text-indigo-500" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-white">Permissões de Funcionário</h3>
-            <p className="text-[13px] mt-1">
-              Funcionários podem: <strong className="text-white/80">visualizar produtos, vendedores e transações</strong>, e <strong className="text-white/80">aprovar/bloquear contas de sellers</strong>.
+            <h3 className="font-semibold text-sm text-foreground">Permissões de Funcionário</h3>
+            <p className="text-[13px] mt-1 text-muted-foreground">
+              Funcionários podem: <strong className="text-foreground/80">visualizar produtos, vendedores e transações</strong>, e <strong className="text-foreground/80">aprovar/bloquear contas de sellers</strong>.
             </p>
-            <p className="text-[13px] mt-1">
-              Funcionários <strong className="text-white/80">NÃO</strong> podem: ver lucro/faturamento geral, gerenciar saques, editar configurações da plataforma, acessar disputas ou auditoria.
+            <p className="text-[13px] mt-1 text-muted-foreground">
+              Funcionários <strong className="text-foreground/80">NÃO</strong> podem: ver lucro/faturamento geral, gerenciar saques, editar configurações da plataforma, acessar disputas ou auditoria.
             </p>
           </div>
         </div>
@@ -118,9 +118,9 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
         <PanelTitle color="indigo" icon={<UserCog className="h-4 w-4" />}>Lista de Funcionários</PanelTitle>
         <div className="mt-4">
           {loading ? (
-            <div className="text-center py-12 text-sm text-white/20">Carregando...</div>
+            <div className="text-center py-12 text-sm text-muted-foreground">Carregando...</div>
           ) : employees.length === 0 ? (
-            <div className="text-center py-16 text-white/20">
+            <div className="text-center py-16 text-muted-foreground">
               <UserCog className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p className="text-sm font-medium">Nenhum funcionário cadastrado</p>
               <p className="text-xs mt-1">Clique em "Adicionar Funcionário" para começar</p>
@@ -129,9 +129,9 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/[0.04]">
+                  <tr className="border-b border-border">
                     {["Nome", "E-mail", "Status da Conta", "Desde", "Ações"].map(h => (
-                      <th key={h} className="text-left p-3 text-[11px] font-semibold uppercase tracking-wider text-white/30">{h}</th>
+                      <th key={h} className="text-left p-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -139,32 +139,32 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
                   {employees.map(emp => {
                     const profile = getProfile(emp.user_id);
                     return (
-                      <tr key={emp.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                      <tr key={emp.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                         <td className="p-3">
                           <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold bg-indigo-500/10 text-indigo-400">
+                            <div className="h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold bg-indigo-500/10 text-indigo-500">
                               {(profile?.full_name || "?")[0].toUpperCase()}
                             </div>
-                            <span className="font-medium text-white">{profile?.full_name || "—"}</span>
+                            <span className="font-medium text-foreground">{profile?.full_name || "—"}</span>
                           </div>
                         </td>
-                        <td className="p-3 text-[13px] text-white/50">{profile?.email || "—"}</td>
+                        <td className="p-3 text-[13px] text-muted-foreground">{profile?.email || "—"}</td>
                         <td className="p-3">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
                             profile?.account_status === "approved"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              ? "bg-primary/10 text-primary border border-primary/20"
+                              : "bg-warning/10 text-warning border border-warning/20"
                           }`}>
                             {profile?.account_status === "approved" ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
                             {profile?.account_status || "pending"}
                           </span>
                         </td>
-                        <td className="p-3 text-[12px] text-white/30">
+                        <td className="p-3 text-[12px] text-muted-foreground">
                           {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
                         </td>
                         <td className="p-3">
                           <Button size="sm" variant="ghost" onClick={() => removeEmployee(emp.user_id)}
-                            className="text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl gap-1.5 text-[11px]">
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl gap-1.5 text-[11px]">
                             <Trash2 className="h-3.5 w-3.5" /> Remover
                           </Button>
                         </td>
@@ -180,16 +180,16 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
 
       {/* Add Employee Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-[#0A0A10] border-white/[0.06] text-white rounded-2xl max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Adicionar Funcionário</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-[11px] uppercase tracking-wider font-semibold text-white/40">E-mail do usuário</Label>
+              <Label className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">E-mail do usuário</Label>
               <div className="flex gap-2 mt-2">
                 <Input value={searchEmail} onChange={e => setSearchEmail(e.target.value)} placeholder="usuario@email.com"
-                  className="flex-1 h-11 rounded-xl bg-white/[0.03] border-white/[0.06] text-white placeholder:text-white/20"
+                  className="flex-1 h-11 rounded-xl"
                   onKeyDown={e => e.key === "Enter" && searchUser()} />
                 <Button onClick={searchUser} disabled={searching} className="h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4">
                   <Search className="h-4 w-4" />
@@ -197,14 +197,14 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
               </div>
             </div>
             {foundUser && (
-              <div className="rounded-xl p-4 border bg-white/[0.02] border-white/[0.06]">
+              <div className="rounded-xl p-4 border border-border bg-muted/30">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold bg-indigo-500/10 text-indigo-400">
+                  <div className="h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold bg-indigo-500/10 text-indigo-500">
                     {(foundUser.full_name || "?")[0].toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">{foundUser.full_name || "Sem nome"}</p>
-                    <p className="text-xs text-white/40">{foundUser.email}</p>
+                    <p className="font-semibold text-sm text-foreground">{foundUser.full_name || "Sem nome"}</p>
+                    <p className="text-xs text-muted-foreground">{foundUser.email}</p>
                   </div>
                 </div>
                 <Button onClick={addEmployee} className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 gap-2">
