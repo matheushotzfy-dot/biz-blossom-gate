@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (Number(amount) > Number(tx.amount)) {
+    if (roundedAmount > Number(tx.amount)) {
       return new Response(JSON.stringify({ success: false, error: 'Refund amount exceeds transaction' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -107,14 +107,13 @@ Deno.serve(async (req) => {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
             },
-            body: JSON.stringify({ amount: Math.round(Number(amount) * 100) }),
+            body: JSON.stringify({ amount: Math.round(roundedAmount * 100) }),
           }
         );
 
         if (!refundResp.ok) {
           const errData = await refundResp.json().catch(() => ({}));
           console.log('[podpay-refund] PodPay error:', refundResp.status, errData);
-          // Continue anyway — update local status even if gateway fails
         }
       } catch (e) {
         console.log('[podpay-refund] PodPay call failed:', e instanceof Error ? e.message : 'unknown');
@@ -122,7 +121,7 @@ Deno.serve(async (req) => {
     }
 
     // Update transaction status
-    const isPartial = Number(amount) < Number(tx.amount);
+    const isPartial = roundedAmount < Number(tx.amount);
     const { error: updateErr } = await supabase
       .from('transactions')
       .update({ status: 'refunded' })
@@ -138,9 +137,9 @@ Deno.serve(async (req) => {
     await supabase.from('balance_adjustments').insert({
       user_id: tx.user_id,
       admin_user_id: user.id,
-      amount: Number(amount),
+      amount: roundedAmount,
       type: 'debit',
-      reason: `Estorno ${isPartial ? 'parcial' : 'total'}: ${reason}`,
+      reason: `Estorno ${isPartial ? 'parcial' : 'total'}: ${safeReason}`,
     });
 
     // Log audit
@@ -149,11 +148,11 @@ Deno.serve(async (req) => {
       action: 'refund_processed',
       entity_type: 'transaction',
       entity_id: transactionId,
-      details: { amount, reason, partial: isPartial, seller_user_id: tx.user_id },
+      details: { amount: roundedAmount, reason: safeReason, partial: isPartial, seller_user_id: tx.user_id },
     });
 
     return new Response(
-      JSON.stringify({ success: true, data: { refunded: true, amount } }),
+      JSON.stringify({ success: true, data: { refunded: true, amount: roundedAmount } }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
