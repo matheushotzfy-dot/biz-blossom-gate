@@ -35,10 +35,10 @@ export default function Admin() {
       supabase.from("products").select("id, user_id, name, price, status, created_at"),
       supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at").order("created_at", { ascending: false }).limit(20),
     ]);
-    if (txRes.data) setTransactions(txRes.data);
-    if (pRes.data) setProfiles(pRes.data);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (wRes.data) setWithdrawals(wRes.data);
+    if (txRes.data) setTransactions(txRes.data as any);
+    if (pRes.data) setProfiles(pRes.data as any);
+    if (prodRes.data) setProducts(prodRes.data as any);
+    if (wRes.data) setWithdrawals(wRes.data as any);
   };
 
   useEffect(() => { load(); }, [user]);
