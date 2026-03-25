@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -338,15 +339,15 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
           <div className="space-y-4 mt-2">
             <div>
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Taxa Percentual Mínima (%)</Label>
-              <Input value={feeForm.percentage} onChange={e => setFeeForm(p => ({ ...p, percentage: e.target.value }))} type="number" step="0.01" min="0" className="mt-1" />
+              <NumberInput value={feeForm.percentage} onChange={v => setFeeForm(p => ({ ...p, percentage: v }))} step={0.01} min={0} className="mt-1" />
             </div>
             <div>
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Taxa Fixa Mínima (R$)</Label>
-              <Input value={feeForm.fixed} onChange={e => setFeeForm(p => ({ ...p, fixed: e.target.value }))} type="number" step="0.01" min="0" className="mt-1" />
+              <NumberInput value={feeForm.fixed} onChange={v => setFeeForm(p => ({ ...p, fixed: v }))} step={0.01} min={0} className="mt-1" />
             </div>
             <div>
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Taxa de Saque Mínima (R$)</Label>
-              <Input value={feeForm.withdrawal} onChange={e => setFeeForm(p => ({ ...p, withdrawal: e.target.value }))} type="number" step="0.01" min="0" className="mt-1" />
+              <NumberInput value={feeForm.withdrawal} onChange={v => setFeeForm(p => ({ ...p, withdrawal: v }))} step={0.01} min={0} className="mt-1" />
             </div>
           </div>
           <DialogFooter>
