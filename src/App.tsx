@@ -94,6 +94,9 @@ const App = () => (
               <Route path="/gerentes" element={<ManagerLogin />} />
               <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
 
+              {/* Standalone full-screen pages (outside dashboard layout) */}
+              <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
+
               {/* User Dashboard */}
               <Route
                 element={
@@ -122,7 +125,6 @@ const App = () => (
                 <Route path="/vendas/documentacao" element={<Documentacao />} />
                 <Route path="/vendas/documentacao/completa" element={<Documentacao />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
-                <Route path="/vendas/conteudo/:courseId/builder" element={<CourseBuilder />} />
                 <Route path="/integracoes/apps" element={<Apps />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />

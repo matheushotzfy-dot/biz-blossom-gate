@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ShieldAlert, Shield, Search, Plus, Trash2, ToggleLeft, ToggleRight,
@@ -348,14 +349,14 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] text-muted-foreground">Máx. Tentativas</Label>
-                    <Input type="number" min="1" value={rule.max_attempts}
-                      onChange={e => handleUpdateRule(rule, "max_attempts", Number(e.target.value))}
+                    <NumberInput min={1} value={rule.max_attempts}
+                      onChange={v => handleUpdateRule(rule, "max_attempts", Number(v))}
                       className="h-8 text-xs" disabled={!rule.is_enabled} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] text-muted-foreground">Janela (minutos)</Label>
-                    <Input type="number" min="1" value={rule.time_window_minutes}
-                      onChange={e => handleUpdateRule(rule, "time_window_minutes", Number(e.target.value))}
+                    <NumberInput min={1} value={rule.time_window_minutes}
+                      onChange={v => handleUpdateRule(rule, "time_window_minutes", Number(v))}
                       className="h-8 text-xs" disabled={!rule.is_enabled} />
                   </div>
                 </div>

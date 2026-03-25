@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -722,21 +723,21 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Retenção PIX (%)</Label>
-                        <input type="number" step="0.1" min="0" max="100" value={retentionForm.pix_pct}
-                          onChange={e => setRetentionForm(p => ({ ...p, pix_pct: e.target.value }))}
-                          placeholder="0" className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground mt-1" />
+                        <NumberInput step={0.1} min={0} max={100} value={retentionForm.pix_pct}
+                          onChange={v => setRetentionForm(p => ({ ...p, pix_pct: v }))}
+                          placeholder="0" className="mt-1 text-xs" />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Retenção Cartão (%)</Label>
-                        <input type="number" step="0.1" min="0" max="100" value={retentionForm.card_pct}
-                          onChange={e => setRetentionForm(p => ({ ...p, card_pct: e.target.value }))}
-                          placeholder="5" className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground mt-1" />
+                        <NumberInput step={0.1} min={0} max={100} value={retentionForm.card_pct}
+                          onChange={v => setRetentionForm(p => ({ ...p, card_pct: v }))}
+                          placeholder="5" className="mt-1 text-xs" />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Dias de Retenção</Label>
-                        <input type="number" min="1" max="365" value={retentionForm.days}
-                          onChange={e => setRetentionForm(p => ({ ...p, days: e.target.value }))}
-                          placeholder="14" className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground mt-1" />
+                        <NumberInput min={1} max={365} value={retentionForm.days}
+                          onChange={v => setRetentionForm(p => ({ ...p, days: v }))}
+                          placeholder="14" className="mt-1 text-xs" />
                       </div>
                     </div>
                     {userRetention && (
@@ -867,8 +868,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Valor (R$)</Label>
-                        <input type="number" value={adjustAmount} onChange={e => setAdjustAmount(e.target.value)} placeholder="0.00"
-                          className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground" />
+                        <NumberInput step={0.01} min={0} value={adjustAmount}
+                          onChange={v => setAdjustAmount(v)} placeholder="0.00" className="text-xs" />
                       </div>
                       <div className="col-span-2">
                         <Label className="text-[10px] text-muted-foreground">Motivo (obrigatório)</Label>
@@ -1061,18 +1062,21 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Taxa por transação (%)</Label>
-                        <input type="number" step="0.01" value={customFees.transaction_percentage} onChange={e => setCustomFees(p => ({ ...p, transaction_percentage: e.target.value }))}
-                          placeholder="4.99" className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground mt-1" />
+                        <NumberInput step={0.01} min={0} value={customFees.transaction_percentage}
+                          onChange={v => setCustomFees(p => ({ ...p, transaction_percentage: v }))}
+                          placeholder="4.99" className="mt-1 text-xs" />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Taxa fixa por transação (R$)</Label>
-                        <input type="number" step="0.01" value={customFees.transaction_fixed} onChange={e => setCustomFees(p => ({ ...p, transaction_fixed: e.target.value }))}
-                          placeholder="2.50" className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground mt-1" />
+                        <NumberInput step={0.01} min={0} value={customFees.transaction_fixed}
+                          onChange={v => setCustomFees(p => ({ ...p, transaction_fixed: v }))}
+                          placeholder="2.50" className="mt-1 text-xs" />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Taxa de saque (R$)</Label>
-                        <input type="number" step="0.01" value={customFees.withdrawal_fee} onChange={e => setCustomFees(p => ({ ...p, withdrawal_fee: e.target.value }))}
-                          placeholder="5.00" className="w-full h-9 px-3 bg-muted/20 border border-border rounded-md text-xs text-foreground mt-1" />
+                        <NumberInput step={0.01} min={0} value={customFees.withdrawal_fee}
+                          onChange={v => setCustomFees(p => ({ ...p, withdrawal_fee: v }))}
+                          placeholder="5.00" className="mt-1 text-xs" />
                       </div>
                     </div>
                     <Button size="sm" className="bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs" onClick={handleSaveCustomFees}>
