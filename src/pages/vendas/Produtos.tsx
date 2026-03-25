@@ -667,10 +667,15 @@ export default function Produtos() {
                       <p className="text-[10px] text-muted-foreground/50">Selo de confiança no checkout</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Input type="number" min="0" max="365" value={warrantyDays} onChange={(e) => setWarrantyDays(e.target.value)} className="h-9 rounded-xl w-16 bg-card/40 border-border/20 text-center text-sm font-bold" />
-                    <span className="text-[10px] text-muted-foreground/40 font-medium">dias</span>
-                  </div>
+                  <select
+                    value={warrantyDays}
+                    onChange={(e) => setWarrantyDays(e.target.value)}
+                    className="h-9 rounded-xl w-auto px-3 bg-card/40 border border-border/20 text-center text-sm font-bold text-foreground appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="7">7 dias</option>
+                    <option value="14">14 dias</option>
+                    <option value="30">30 dias</option>
+                  </select>
                 </div>
               </div>
 
