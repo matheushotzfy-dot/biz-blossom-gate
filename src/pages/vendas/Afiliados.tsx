@@ -232,18 +232,31 @@ export default function Afiliados() {
             <div className="p-6 space-y-5">
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Produto</Label>
-                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+              <Select value={selectedProduct} onValueChange={setSelectedProduct}>
                   <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {affiliateProducts.length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Seus Produtos</div>
                         {affiliateProducts.map(p => (
-                          <SelectItem key={p.id} value={p.id}>
+                          <SelectItem key={`own-${p.id}`} value={p.id}>
                             {p.name} — {fmt(Number(p.price))} ({(p as any).affiliate_commission || 30}% comissão)
                           </SelectItem>
                         ))}
                       </>
+                    )}
+                    {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-1 border-t border-border/20 pt-2">Marketplace</div>
+                        {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
+                          <SelectItem key={`mkt-${p.id}`} value={p.id}>
+                            {p.name} — {fmt(Number(p.price))}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {affiliateProducts.length === 0 && marketProducts.length === 0 && (
+                      <div className="px-2 py-3 text-[11px] text-muted-foreground text-center">Nenhum produto disponível</div>
                     )}
                   </SelectContent>
                 </Select>
