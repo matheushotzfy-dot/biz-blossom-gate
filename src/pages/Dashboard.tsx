@@ -610,51 +610,41 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Activity feed — premium style */}
+        {/* Activity feed */}
         <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[13px] font-bold text-foreground leading-tight">Atividade Recente</p>
-                <p className="text-[10px] text-muted-foreground">Transações em tempo real</p>
-              </div>
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse ml-1" title="Tempo real" />
+          {/* Subtle top bar */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              <p className="text-[12px] font-medium text-muted-foreground tracking-wide">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:gap-1.5 transition-all rounded-lg px-2.5 py-1.5 hover:bg-primary/10">
-              Ver tudo <ArrowUpRight className="h-3 w-3" />
+            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors">
+              Ver tudo
             </Link>
           </div>
 
-          {/* Activity list */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+          {/* List */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-0.5">
             {activity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <div className="h-12 w-12 rounded-2xl bg-muted/20 flex items-center justify-center mb-3">
-                  <Activity className="h-5 w-5 text-muted-foreground/40" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Nenhuma atividade</p>
-                <p className="mt-1 text-[12px] text-muted-foreground max-w-[200px]">Suas movimentações aparecerão aqui em tempo real.</p>
+              <div className="flex flex-col items-center justify-center py-14 text-center">
+                <p className="text-sm text-muted-foreground">Sem movimentações ainda</p>
               </div>
             ) : (
               activity.map((item, i) => {
-                const txStyles: Record<string, { label: string; pill: string; icon: string; accent: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "bg-success/10 text-success", accent: "border-l-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "bg-warning/10 text-warning", accent: "border-l-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive", accent: "border-l-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "bg-info/10 text-info", accent: "border-l-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive", accent: "border-l-destructive" },
-                  default: { label: "Status", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground", accent: "border-l-muted" },
+                const txStyles: Record<string, { label: string; pill: string; icon: string }> = {
+                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "text-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "text-destructive" },
+                  default: { label: "Status", pill: "bg-muted text-foreground", icon: "text-muted-foreground" },
                 };
 
-                const wdStyles: Record<string, { label: string; pill: string; icon: string; accent: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "bg-warning/10 text-warning", accent: "border-l-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "bg-success/10 text-success", accent: "border-l-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "bg-destructive/10 text-destructive", accent: "border-l-destructive" },
-                  default: { label: "Saque", pill: "bg-muted text-foreground", icon: "bg-muted text-foreground", accent: "border-l-muted" },
+                const wdStyles: Record<string, { label: string; pill: string; icon: string }> = {
+                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "text-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "text-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "text-destructive" },
+                  default: { label: "Saque", pill: "bg-muted text-foreground", icon: "text-muted-foreground" },
                 };
 
                 const styles =
@@ -665,23 +655,23 @@ export default function Dashboard() {
                 return (
                   <div
                     key={item.id}
-                    className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-muted/15 border-l-[3px] ${styles.accent} animate-fade-in ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/10 animate-fade-in ${
                       STAGGER_CLASSES[i + 1] || ""
                     }`}
                   >
-                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${styles.icon}`}>
-                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
+                    <div className={`h-8 w-8 rounded-lg bg-muted/15 flex items-center justify-center shrink-0 ${styles.icon}`}>
+                      {item.kind === "transaction" ? <DollarSign className="h-3.5 w-3.5" /> : <Wallet className="h-3.5 w-3.5" />}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-[13px] font-bold text-foreground tabular-nums">{fmt(item.amount)}</p>
-                        <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${styles.pill}`}>{styles.label}</span>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground tabular-nums">{fmt(item.amount)}</p>
+                        <span className={`rounded-full px-2 py-px text-[9px] font-semibold ${styles.pill}`}>{styles.label}</span>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[11px] text-muted-foreground/70 truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
 
-                    <span className="text-[10px] font-medium text-muted-foreground/50 shrink-0 tabular-nums">{timeAgo(item.createdAt)}</span>
+                    <span className="text-[10px] text-muted-foreground/40 shrink-0 tabular-nums">{timeAgo(item.createdAt)}</span>
                   </div>
                 );
               })
