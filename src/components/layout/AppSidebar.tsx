@@ -218,7 +218,7 @@ export function AppSidebar() {
       <SidebarContent className="relative gap-0 px-2.5 py-2 overflow-y-auto">
         {sections.map((section, idx) => (
           <SidebarGroup key={section.label} className="px-0 py-0">
-            {idx > 0 && <div className="mx-3 my-1 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1" />}
+            {idx > 0 && <div className="mx-3 my-2.5 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1" />}
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5 px-1">
                 {section.items.map((item) => {
