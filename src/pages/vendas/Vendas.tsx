@@ -999,8 +999,8 @@ export default function Vendas() {
         )}
       </div>
 
-      {/* Desktop table — no outer border, breathing space */}
-      <div className="hidden md:block">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl overflow-hidden">
         {loading ? (
           <div className="p-16 text-center">
             <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
@@ -1011,13 +1011,13 @@ export default function Vendas() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border/30 dark:border-foreground/[0.05]">
+                  <tr className="border-b border-border/40">
                     {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left p-4 text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="text-left px-5 py-3.5 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/20 dark:divide-foreground/[0.03]">
+                <tbody>
                   {visibleItems.length === 0 ? (
                     <tr><td colSpan={7}>
                       <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda encontrada" subtitle="Tente ajustar os filtros ou período" />
@@ -1029,7 +1029,7 @@ export default function Vendas() {
               </table>
             </div>
             {visibleCount < filtered.length && (
-              <div className="p-3 text-center">
+              <div className="p-3 text-center border-t border-border/30">
                 <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground font-medium">
                   <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
                 </Button>
