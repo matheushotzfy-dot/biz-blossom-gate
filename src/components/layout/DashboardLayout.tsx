@@ -26,14 +26,18 @@ function DashboardLayoutInner() {
   const unreadCount = useNotificationCount();
 
   useEffect(() => {
-    if (!user?.id || !profile?.account_status) return;
+    if (!user?.id || !profile?.account_status || !profile?.updated_at) return;
     const key = `hotzfy_account_approved_shown_${user.id}`;
-    // Only show popup if account is approved AND we haven't shown it before
     if (profile.account_status === "approved" && !localStorage.getItem(key)) {
-      setShowApproved(true);
+      // Only show if profile was updated in the last 5 minutes (i.e. just approved)
+      const updatedAt = new Date(profile.updated_at).getTime();
+      const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+      if (updatedAt > fiveMinAgo) {
+        setShowApproved(true);
+      }
       localStorage.setItem(key, "true");
     }
-  }, [profile?.account_status, user?.id]);
+  }, [profile?.account_status, profile?.updated_at, user?.id]);
 
   // Cmd+K shortcut
   useEffect(() => {
