@@ -15,11 +15,15 @@ import {
   Clock3,
   CreditCard,
   DollarSign,
+  Eye,
   Flame,
   GraduationCap,
+  Hash,
   Layers,
   Lock,
+  Mail,
   Package,
+  Phone,
   RefreshCw,
   Rocket,
   ShieldCheck,
@@ -40,6 +44,7 @@ import {
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
