@@ -573,6 +573,7 @@ const ALL_STATUSES = [
   { value: "completed", label: "Aprovadas", dot: "bg-success" },
   { value: "pending", label: "Pendentes", dot: "bg-warning" },
   { value: "failed", label: "Falhas", dot: "bg-destructive" },
+  { value: "expired", label: "Expiradas", dot: "bg-muted-foreground" },
   { value: "refunded", label: "Reembolsos", dot: "bg-info" },
   { value: "chargeback", label: "Chargebacks", dot: "bg-destructive" },
 ];
@@ -622,7 +623,9 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
   };
 
   const selectAllStatuses = () => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)));
+  const clearAllStatuses = () => setSelectedStatuses(new Set());
   const selectAllMethods = () => setSelectedMethods(new Set(ALL_METHODS.map(m => m.value)));
+  const clearAllMethods = () => setSelectedMethods(new Set());
 
   const exportFiltered = useMemo(() => {
     return transactions.filter(t => {
