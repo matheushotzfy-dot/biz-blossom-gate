@@ -889,9 +889,10 @@ export default function Vendas() {
 
   const handleExportCSV = useCallback((txList: Tables<"transactions">[]) => {
     if (txList.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
-    const headers = ["ID", "Cliente", "Email", "Telefone", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
+    const headers = ["ID", "Cliente", "Email", "Telefone", "CPF/CNPJ", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
     const rows = txList.map(t => [
       t.id, t.customer_name || "", t.customer_email || "", t.customer_phone || "",
+      t.customer_document || "",
       t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount),
       t.payment_method || "", t.status, t.created_at,
     ]);
