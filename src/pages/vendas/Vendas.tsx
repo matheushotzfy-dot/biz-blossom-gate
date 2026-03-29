@@ -665,7 +665,11 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</p>
-              <button onClick={selectAllStatuses} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+              <div className="flex items-center gap-2">
+                <button onClick={clearAllStatuses} className="text-[10px] text-muted-foreground hover:text-foreground hover:underline font-medium">Limpar</button>
+                <span className="text-muted-foreground/30">|</span>
+                <button onClick={selectAllStatuses} className="text-[10px] text-primary hover:underline font-medium">Todos</button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ALL_STATUSES.map(s => {
@@ -693,7 +697,11 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Método de Pagamento</p>
-              <button onClick={selectAllMethods} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+              <div className="flex items-center gap-2">
+                <button onClick={clearAllMethods} className="text-[10px] text-muted-foreground hover:text-foreground hover:underline font-medium">Limpar</button>
+                <span className="text-muted-foreground/30">|</span>
+                <button onClick={selectAllMethods} className="text-[10px] text-primary hover:underline font-medium">Todos</button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ALL_METHODS.map(m => {
