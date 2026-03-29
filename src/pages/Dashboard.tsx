@@ -618,11 +618,11 @@ export default function Dashboard() {
 
         {/* Activity feed */}
         <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
-          {/* Subtle top bar */}
+          {/* Top bar */}
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-[12px] font-medium text-muted-foreground tracking-wide">Tempo real</p>
+              <p className="text-[12px] font-medium text-muted-foreground">Tempo real</p>
             </div>
             <Link to="/financeiro/extrato" className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors">
               Ver tudo
@@ -630,27 +630,27 @@ export default function Dashboard() {
           </div>
 
           {/* List */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-0.5">
+          <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 space-y-px">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
                 <p className="text-sm text-muted-foreground">Sem movimentações ainda</p>
               </div>
             ) : (
               activity.map((item, i) => {
-                const txStyles: Record<string, { label: string; pill: string; icon: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", icon: "text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", icon: "text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", icon: "text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", icon: "text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", icon: "text-destructive" },
-                  default: { label: "Status", pill: "bg-muted text-foreground", icon: "text-muted-foreground" },
+                const txStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
+                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", iconBg: "bg-info/10", iconText: "text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  default: { label: "Status", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
                 };
 
-                const wdStyles: Record<string, { label: string; pill: string; icon: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", icon: "text-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", icon: "text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", icon: "text-destructive" },
-                  default: { label: "Saque", pill: "bg-muted text-foreground", icon: "text-muted-foreground" },
+                const wdStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
+                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  default: { label: "Saque", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
                 };
 
                 const styles =
@@ -658,26 +658,40 @@ export default function Dashboard() {
                     ? txStyles[item.status] || txStyles.default
                     : wdStyles[item.status] || wdStyles.default;
 
+                // Find full transaction data for detail view
+                const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) : null;
+
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/10 animate-fade-in ${
+                    className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 animate-fade-in ${
                       STAGGER_CLASSES[i + 1] || ""
                     }`}
                   >
-                    <div className={`h-8 w-8 rounded-lg bg-muted/15 flex items-center justify-center shrink-0 ${styles.icon}`}>
-                      {item.kind === "transaction" ? <DollarSign className="h-3.5 w-3.5" /> : <Wallet className="h-3.5 w-3.5" />}
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${styles.iconBg} ${styles.iconText}`}>
+                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-foreground tabular-nums">{fmt(item.amount)}</p>
-                        <span className={`rounded-full px-2 py-px text-[9px] font-semibold ${styles.pill}`}>{styles.label}</span>
+                        <p className="text-sm font-bold text-foreground tabular-nums">{fmt(item.amount)}</p>
+                        <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/70 truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
 
-                    <span className="text-[10px] text-muted-foreground/40 shrink-0 tabular-nums">{timeAgo(item.createdAt)}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {fullTx && (
+                        <button
+                          onClick={() => setDetailTx(fullTx)}
+                          className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-all"
+                          title="Ver detalhes"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <span className="text-[10px] text-muted-foreground/40 tabular-nums">{timeAgo(item.createdAt)}</span>
+                    </div>
                   </div>
                 );
               })
@@ -685,6 +699,96 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      {/* Transaction Detail Modal */}
+      <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
+        <DialogContent className="sm:max-w-md border-border/40 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden">
+          {detailTx && (() => {
+            const statusMap: Record<string, { label: string; color: string }> = {
+              completed: { label: "Aprovada", color: "bg-success/15 text-success" },
+              pending: { label: "Pendente", color: "bg-warning/15 text-warning" },
+              failed: { label: "Falhou", color: "bg-destructive/15 text-destructive" },
+              refunded: { label: "Reembolso", color: "bg-info/15 text-info" },
+              chargeback: { label: "Chargeback", color: "bg-destructive/15 text-destructive" },
+            };
+            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "bg-muted text-foreground" };
+            const productName = productsData?.find(p => p.id === detailTx.product_id)?.name;
+
+            return (
+              <div>
+                {/* Header */}
+                <div className="px-6 pt-6 pb-4 border-b border-border/30">
+                  <div className="flex items-center justify-between">
+                    <p className="text-2xl font-bold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</p>
+                    <span className={`rounded-lg px-2.5 py-1 text-[11px] font-bold ${s.color}`}>{s.label}</span>
+                  </div>
+                  {productName && <p className="text-[13px] text-muted-foreground mt-1">{productName}</p>}
+                </div>
+
+                {/* Details grid */}
+                <div className="px-6 py-4 space-y-3">
+                  {detailTx.customer_name && (
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Cliente</p>
+                        <p className="text-sm font-medium text-foreground truncate">{detailTx.customer_name}</p>
+                      </div>
+                    </div>
+                  )}
+                  {detailTx.customer_email && (
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Email</p>
+                        <p className="text-sm font-medium text-foreground truncate">{detailTx.customer_email}</p>
+                      </div>
+                    </div>
+                  )}
+                  {detailTx.customer_phone && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Telefone</p>
+                        <p className="text-sm font-medium text-foreground">{detailTx.customer_phone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Financial breakdown */}
+                  <div className="rounded-xl border border-border/30 bg-muted/5 p-3 mt-1 space-y-2">
+                    <div className="flex justify-between text-[12px]">
+                      <span className="text-muted-foreground">Bruto</span>
+                      <span className="font-semibold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</span>
+                    </div>
+                    <div className="flex justify-between text-[12px]">
+                      <span className="text-muted-foreground">Taxas</span>
+                      <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
+                    </div>
+                    <div className="border-t border-border/20 pt-2 flex justify-between text-[13px]">
+                      <span className="font-semibold text-foreground">Líquido</span>
+                      <span className="font-bold text-primary tabular-nums">{fmt(Number(detailTx.net_amount))}</span>
+                    </div>
+                  </div>
+
+                  {/* Meta */}
+                  <div className="flex items-center gap-4 pt-1 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <CreditCard className="h-3 w-3" />
+                      {detailTx.payment_method === "credit_card" ? "Cartão" : detailTx.payment_method === "pix" ? "PIX" : detailTx.payment_method || "—"}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock3 className="h-3 w-3" />
+                      {new Date(detailTx.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/40 font-mono truncate pt-1">ID: {detailTx.id}</p>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
