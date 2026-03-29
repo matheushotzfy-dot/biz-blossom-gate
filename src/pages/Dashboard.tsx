@@ -578,13 +578,8 @@ export default function Dashboard() {
       {/* ─── ACTIONS + ACTIVITY ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
-          <div className="mb-3 md:mb-4 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-primary" />
-            <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 md:gap-2.5">
+        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex flex-col">
+          <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -616,13 +611,8 @@ export default function Dashboard() {
         </div>
 
         {/* Activity — matches quick actions height */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 flex flex-col max-h-[540px]">
-          <div className="mb-3 md:mb-4 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" />
-              <h3 className="text-sm md:text-lg font-display font-black text-foreground">Atividade</h3>
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" title="Tempo real" />
-            </div>
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-4 flex flex-col">
+          <div className="mb-2 flex items-center justify-end shrink-0">
             <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] md:text-[12px] font-semibold text-primary hover:gap-1.5 transition-all">
               Ver tudo <ArrowUpRight className="h-3 w-3 md:h-3.5 md:w-3.5" />
             </Link>
