@@ -91,16 +91,16 @@ function VendasKpi({ label, value, sub, icon: Icon, iconBg, iconColor }: {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5"
+      className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl p-5 relative overflow-hidden group hover:border-border/70 transition-colors"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-start justify-between mb-4">
         <span className="text-[11px] font-medium text-muted-foreground tracking-wide">{label}</span>
-        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", iconBg)}>
-          <Icon className={cn("h-3.5 w-3.5", iconColor)} />
+        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", iconBg)}>
+          <Icon className={cn("h-4 w-4", iconColor)} />
         </div>
       </div>
-      <p className="text-2xl font-display font-bold text-foreground leading-none tracking-tight">{value}</p>
-      {sub && <p className="text-[12px] text-muted-foreground/70 mt-1.5">{sub}</p>}
+      <p className="text-[22px] font-display font-bold text-foreground leading-none tracking-tight tabular-nums">{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/60 mt-2">{sub}</p>}
     </motion.div>
   );
 }
@@ -293,12 +293,10 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
   const customerName = tx.customer_name || "Cliente";
   const avatarColor = getAvatarColor(customerName);
 
-  // Parse UTMs from checkout_session_id — could be a URL or plain UUID
   const utms = useMemo(() => {
     const params: Record<string, string> = {};
     if (!tx.checkout_session_id) return params;
     try {
-      // Only try parsing as URL if it looks like one
       if (tx.checkout_session_id.startsWith("http")) {
         const url = new URL(tx.checkout_session_id);
         ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "src", "sck"].forEach(k => {
@@ -306,178 +304,179 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
           if (v) params[k] = v;
         });
       }
-    } catch { /* not a valid URL, ignore */ }
+    } catch { /* ignore */ }
     return params;
   }, [tx.checkout_session_id]);
 
-  const methodLabel = tx.payment_method === "credit_card" ? "Cartão de Crédito" : tx.payment_method === "pix" ? "PIX" : tx.payment_method === "boleto" ? "Boleto" : tx.payment_method || "—";
+  const methodLabel = tx.payment_method === "credit_card" ? "Cartão" : tx.payment_method === "pix" ? "PIX" : tx.payment_method === "boleto" ? "Boleto" : tx.payment_method || "—";
   const methodStyle = tx.payment_method === "pix" ? "bg-success/10 text-success" : tx.payment_method === "credit_card" ? "bg-info/10 text-info" : "bg-warning/10 text-warning";
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-hidden">
+      <div className="fixed inset-0 z-[70] overflow-hidden">
+        {/* Backdrop — full coverage, no gaps */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/60 backdrop-blur-sm"
           onClick={onClose}
         />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
-          className="relative w-full max-w-[420px] max-h-[85vh] overflow-y-auto rounded-2xl border border-border/50 bg-card shadow-2xl"
-        >
-          {/* Close button */}
-          <button onClick={onClose} className="absolute top-4 right-4 z-20 h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted/30 transition-colors">
-            <X className="h-4 w-4 text-muted-foreground" />
-          </button>
 
-          {/* Amount header */}
-          <div className="px-6 pt-6 pb-5">
-            <div className="flex items-start gap-3">
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarFallback className={cn("text-xs font-bold", avatarColor)}>
-                  {getInitials(customerName)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1 pr-8">
-                <p className="text-sm font-semibold text-foreground truncate">{customerName}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{tx.customer_email || "Sem email"}</p>
+        {/* Modal — true center */}
+        <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
+            className="pointer-events-auto w-full max-w-[440px] max-h-[82vh] overflow-y-auto rounded-2xl border border-border/60 bg-card shadow-2xl"
+          >
+            {/* Close */}
+            <button onClick={onClose} className="absolute top-4 right-4 z-20 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors">
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Header */}
+            <div className="px-6 pt-6 pb-5">
+              <div className="flex items-center gap-3 pr-10">
+                <Avatar className="h-10 w-10 shrink-0">
+                  <AvatarFallback className={cn("text-xs font-bold", avatarColor)}>
+                    {getInitials(customerName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{customerName}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{tx.customer_email || "—"}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-end justify-between">
+                <div>
+                  <p className="text-[28px] font-display font-black tracking-tight text-foreground tabular-nums leading-none">{fmt(Number(tx.amount))}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Valor bruto da transação</p>
+                </div>
+                <StatusBadge status={tx.status} />
               </div>
             </div>
 
-            <div className="mt-4 flex items-end justify-between">
-              <div>
-                <p className="text-2xl font-display font-black tracking-tight text-foreground tabular-nums">{fmt(Number(tx.amount))}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Valor bruto</p>
-              </div>
-              <StatusBadge status={tx.status} />
-            </div>
-          </div>
-
-          <div className="px-6 pb-6 space-y-4">
-            {/* Financial breakdown */}
-            <div className="rounded-xl border border-border/30 p-4 space-y-2.5">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Resumo Financeiro</p>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Valor bruto</span>
-                <span className="font-semibold text-foreground tabular-nums">{fmt(Number(tx.amount))}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Taxa da plataforma</span>
-                <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(tx.fee_amount))}</span>
-              </div>
-              {Number(tx.retained_amount) > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Retido</span>
-                  <span className="font-semibold text-warning tabular-nums">- {fmt(Number(tx.retained_amount))}</span>
+            {/* Content sections */}
+            <div className="px-6 pb-6 space-y-3">
+              {/* Financial */}
+              <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-2.5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Resumo Financeiro</p>
+                <div className="flex justify-between text-[13px]">
+                  <span className="text-muted-foreground">Valor bruto</span>
+                  <span className="font-semibold text-foreground tabular-nums">{fmt(Number(tx.amount))}</span>
                 </div>
-              )}
-              <div className="border-t border-border/20 pt-2.5 flex items-center justify-between">
-                <span className="text-sm font-bold text-foreground">Valor líquido</span>
-                <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(Number(tx.net_amount))}</span>
-              </div>
-            </div>
-
-            {/* Transaction details */}
-            <div className="rounded-xl border border-border/30 p-4 space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Detalhes</p>
-              <div className="grid grid-cols-2 gap-3">
-                <InfoCell label="Método" value={
-                  <span className={cn("inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-md", methodStyle)}>
-                    {methodLabel}
-                  </span>
-                } />
-                <InfoCell label="Data" value={<span className="text-sm font-medium text-foreground">{fmtDate(tx.created_at)}</span>} />
-                <InfoCell label="Horário" value={<span className="text-sm font-medium text-foreground">{fmtTime(tx.created_at)}</span>} />
-                {tx.product_id && <InfoCell label="Produto" value={<span className="text-sm font-medium text-foreground truncate block max-w-full" title={products[tx.product_id] || "—"}>{products[tx.product_id] || "—"}</span>} />}
-              </div>
-              <div className="pt-1">
-                <InfoCell label="ID da Transação" value={
-                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 hover:text-primary transition-colors bg-muted/20 px-2.5 py-1 rounded-lg max-w-full">
-                    <span className="truncate">{tx.id.slice(0, 22)}...</span>
-                    {copiedId ? <Check className="h-3 w-3 text-success shrink-0" /> : <Copy className="h-3 w-3 shrink-0" />}
-                  </button>
-                } />
-              </div>
-            </div>
-
-            {/* Client info */}
-            <div className="rounded-xl border border-border/30 p-4 space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</p>
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                    <Users className="h-3.5 w-3.5" />
-                    <span className="text-sm">Nome</span>
-                  </div>
-                  <span className="text-sm font-medium text-foreground truncate">{tx.customer_name || "—"}</span>
+                <div className="flex justify-between text-[13px]">
+                  <span className="text-muted-foreground">Taxa da plataforma</span>
+                  <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(tx.fee_amount))}</span>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                    <Mail className="h-3.5 w-3.5" />
-                    <span className="text-sm">Email</span>
-                  </div>
-                  <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{tx.customer_email || "—"}</span>
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                    <Phone className="h-3.5 w-3.5" />
-                    <span className="text-sm">Telefone</span>
-                  </div>
-                  <span className="text-sm font-medium text-foreground">{tx.customer_phone || "—"}</span>
-                </div>
-                {tx.customer_document && (
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                      <Hash className="h-3.5 w-3.5" />
-                      <span className="text-sm">CPF/CNPJ</span>
-                    </div>
-                    <span className="text-sm font-medium text-foreground font-mono">{tx.customer_document}</span>
+                {Number(tx.retained_amount) > 0 && (
+                  <div className="flex justify-between text-[13px]">
+                    <span className="text-muted-foreground">Retido</span>
+                    <span className="font-semibold text-warning tabular-nums">- {fmt(Number(tx.retained_amount))}</span>
                   </div>
                 )}
+                <div className="border-t border-border/30 pt-2.5 flex justify-between">
+                  <span className="text-[13px] font-bold text-foreground">Valor líquido</span>
+                  <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(Number(tx.net_amount))}</span>
+                </div>
               </div>
-            </div>
 
-            {/* UTMs */}
-            {Object.keys(utms).length > 0 && (
-              <div className="rounded-xl border border-border/30 p-4 space-y-3">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rastreamento (UTMs)</p>
+              {/* Details */}
+              <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-3">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Detalhes</p>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Método</p>
+                    <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-md", methodStyle)}>
+                      {methodLabel}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Data</p>
+                    <p className="text-[13px] font-medium text-foreground">{fmtDate(tx.created_at)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Horário</p>
+                    <p className="text-[13px] font-medium text-foreground">{fmtTime(tx.created_at)}</p>
+                  </div>
+                  {tx.product_id && (
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Produto</p>
+                      <p className="text-[13px] font-medium text-foreground truncate" title={products[tx.product_id] || "—"}>{products[tx.product_id] || "—"}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="pt-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">ID da Transação</p>
+                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground hover:text-primary transition-colors bg-muted/15 px-2.5 py-1 rounded-lg max-w-full">
+                    <span className="truncate">{tx.id.slice(0, 24)} ...</span>
+                    {copiedId ? <Check className="h-3 w-3 text-success shrink-0" /> : <Copy className="h-3 w-3 shrink-0" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Client */}
+              <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-3">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</p>
                 <div className="space-y-2">
-                  {Object.entries(utms).map(([key, val]) => (
-                    <div key={key} className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-muted-foreground font-mono">{key}</span>
-                      <span className="text-xs font-medium text-foreground bg-muted/20 px-2 py-0.5 rounded-md max-w-[180px] truncate">{val}</span>
+                  {[
+                    { icon: Users, label: "Nome", val: tx.customer_name || "—" },
+                    { icon: Mail, label: "Email", val: tx.customer_email || "—" },
+                    { icon: Phone, label: "Telefone", val: tx.customer_phone || "—" },
+                    ...(tx.customer_document ? [{ icon: Hash, label: "CPF/CNPJ", val: tx.customer_document }] : []),
+                  ].map(({ icon: Ico, label, val }) => (
+                    <div key={label} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+                        <Ico className="h-3.5 w-3.5" />
+                        <span className="text-[12px]">{label}</span>
+                      </div>
+                      <span className="text-[12px] font-medium text-foreground truncate max-w-[200px] text-right">{val}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
 
-            {/* Actions */}
-            <div className="flex gap-2.5 pt-1">
-              {tx.customer_phone && (
-                <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-                  <Button variant="outline" className="w-full gap-2 rounded-xl h-10 border-success/20 text-success hover:bg-success/5 font-semibold text-[13px]">
-                    <MessageCircle className="h-4 w-4" /> WhatsApp
+              {/* UTMs */}
+              {Object.keys(utms).length > 0 && (
+                <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-3">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rastreamento (UTMs)</p>
+                  <div className="space-y-1.5">
+                    {Object.entries(utms).map(([key, val]) => (
+                      <div key={key} className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] text-muted-foreground font-mono">{key}</span>
+                        <span className="text-[11px] font-medium text-foreground bg-muted/15 px-2 py-0.5 rounded-md max-w-[180px] truncate">{val}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2.5 pt-1">
+                {tx.customer_phone && (
+                  <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
+                    <Button variant="outline" className="w-full gap-2 rounded-xl h-10 border-success/20 text-success hover:bg-success/5 font-semibold text-[12px]">
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </Button>
+                  </a>
+                )}
+                {tx.status === "completed" && (
+                  <Button
+                    variant="outline"
+                    className="flex-1 gap-2 rounded-xl h-10 border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold text-[12px]"
+                    onClick={() => onRefund(tx)}
+                  >
+                    <RefreshCw className="h-4 w-4" /> Reembolso
                   </Button>
-                </a>
-              )}
-              {tx.status === "completed" && (
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 rounded-xl h-10 border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold text-[13px]"
-                  onClick={() => onRefund(tx)}
-                >
-                  <RefreshCw className="h-4 w-4" /> Reembolso
-                </Button>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );
@@ -1000,8 +999,8 @@ export default function Vendas() {
         )}
       </div>
 
-      {/* Desktop table — no outer border, breathing space */}
-      <div className="hidden md:block">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl overflow-hidden">
         {loading ? (
           <div className="p-16 text-center">
             <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
@@ -1012,13 +1011,13 @@ export default function Vendas() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border/30 dark:border-foreground/[0.05]">
+                  <tr className="border-b border-border/40">
                     {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left p-4 text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="text-left px-5 py-3.5 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/20 dark:divide-foreground/[0.03]">
+                <tbody>
                   {visibleItems.length === 0 ? (
                     <tr><td colSpan={7}>
                       <EmptyState icon={<ShoppingCart className="h-7 w-7" />} title="Nenhuma venda encontrada" subtitle="Tente ajustar os filtros ou período" />
@@ -1030,7 +1029,7 @@ export default function Vendas() {
               </table>
             </div>
             {visibleCount < filtered.length && (
-              <div className="p-3 text-center">
+              <div className="p-3 text-center border-t border-border/30">
                 <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground font-medium">
                   <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
                 </Button>
