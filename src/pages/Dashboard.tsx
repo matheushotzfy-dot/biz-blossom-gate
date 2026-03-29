@@ -113,6 +113,7 @@ export default function Dashboard() {
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
+  const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
 
   // Realtime subscription for transactions
   useEffect(() => {
