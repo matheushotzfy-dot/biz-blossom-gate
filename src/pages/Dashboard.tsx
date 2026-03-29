@@ -258,11 +258,11 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [transactions, withdrawals]);
 
-  // Check if scale mode was already unlocked (persisted per-session)
+  // Check if scale mode was already unlocked (persisted permanently in localStorage)
   useEffect(() => {
     if (!user?.id) return;
     const key = `scale_mode_unlocked_${user.id}`;
-    if (sessionStorage.getItem(key) === "true") {
+    if (localStorage.getItem(key) === "true") {
       setScaleModeUnlocked(true);
       setScaleMode(true);
     }
@@ -278,7 +278,8 @@ export default function Dashboard() {
       .reduce((acc, tx) => acc + Number(tx.net_amount), 0);
 
     if (revenue24h >= 2000) {
-      sessionStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
+      // Persist permanently so it can never be turned off
+      localStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
       setScaleModeUnlocked(true);
       setFireEffect(true);
       setTimeout(() => {
