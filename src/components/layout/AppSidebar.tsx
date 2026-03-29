@@ -215,13 +215,12 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="relative px-2.5 py-4 overflow-y-auto">
+      <SidebarContent className="relative gap-0 px-2.5 py-2 overflow-y-auto">
         {sections.map((section, idx) => (
-          <SidebarGroup key={section.label} className={cn("px-0", idx > 0 && "mt-3.5")}>
-            {/* Section divider line instead of label */}
-            {idx > 0 && <div className="mx-3 mb-2 border-t border-sidebar-border/40 group-data-[collapsible=icon]:mx-1" />}
+          <SidebarGroup key={section.label} className="px-0 py-0">
+            {idx > 0 && <div className="mx-3 my-1 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1" />}
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-0.5 px-1">
+              <SidebarMenu className="gap-0 px-1">
                 {section.items.map((item) => {
                   const isActive = item.url === "/dashboard" || item.url === "/vendas"
                     ? location.pathname === item.url
@@ -235,7 +234,7 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2.5 text-[14px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
                               ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
                               : "border-transparent text-sidebar-foreground hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
