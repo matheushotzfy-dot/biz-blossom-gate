@@ -91,16 +91,16 @@ function VendasKpi({ label, value, sub, icon: Icon, iconBg, iconColor }: {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5"
+      className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl p-5 relative overflow-hidden group hover:border-border/70 transition-colors"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-start justify-between mb-4">
         <span className="text-[11px] font-medium text-muted-foreground tracking-wide">{label}</span>
-        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", iconBg)}>
-          <Icon className={cn("h-3.5 w-3.5", iconColor)} />
+        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", iconBg)}>
+          <Icon className={cn("h-4 w-4", iconColor)} />
         </div>
       </div>
-      <p className="text-2xl font-display font-bold text-foreground leading-none tracking-tight">{value}</p>
-      {sub && <p className="text-[12px] text-muted-foreground/70 mt-1.5">{sub}</p>}
+      <p className="text-[22px] font-display font-bold text-foreground leading-none tracking-tight tabular-nums">{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/60 mt-2">{sub}</p>}
     </motion.div>
   );
 }
