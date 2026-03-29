@@ -573,6 +573,7 @@ const ALL_STATUSES = [
   { value: "completed", label: "Aprovadas", dot: "bg-success" },
   { value: "pending", label: "Pendentes", dot: "bg-warning" },
   { value: "failed", label: "Falhas", dot: "bg-destructive" },
+  { value: "expired", label: "Expiradas", dot: "bg-muted-foreground" },
   { value: "refunded", label: "Reembolsos", dot: "bg-info" },
   { value: "chargeback", label: "Chargebacks", dot: "bg-destructive" },
 ];
@@ -622,7 +623,9 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
   };
 
   const selectAllStatuses = () => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)));
+  const clearAllStatuses = () => setSelectedStatuses(new Set());
   const selectAllMethods = () => setSelectedMethods(new Set(ALL_METHODS.map(m => m.value)));
+  const clearAllMethods = () => setSelectedMethods(new Set());
 
   const exportFiltered = useMemo(() => {
     return transactions.filter(t => {
@@ -662,7 +665,11 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</p>
-              <button onClick={selectAllStatuses} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+              <div className="flex items-center gap-2">
+                <button onClick={clearAllStatuses} className="text-[10px] text-muted-foreground hover:text-foreground hover:underline font-medium">Limpar</button>
+                <span className="text-muted-foreground/30">|</span>
+                <button onClick={selectAllStatuses} className="text-[10px] text-primary hover:underline font-medium">Todos</button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ALL_STATUSES.map(s => {
@@ -690,7 +697,11 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Método de Pagamento</p>
-              <button onClick={selectAllMethods} className="text-[10px] text-primary hover:underline font-medium">Selecionar todos</button>
+              <div className="flex items-center gap-2">
+                <button onClick={clearAllMethods} className="text-[10px] text-muted-foreground hover:text-foreground hover:underline font-medium">Limpar</button>
+                <span className="text-muted-foreground/30">|</span>
+                <button onClick={selectAllMethods} className="text-[10px] text-primary hover:underline font-medium">Todos</button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ALL_METHODS.map(m => {
@@ -878,9 +889,10 @@ export default function Vendas() {
 
   const handleExportCSV = useCallback((txList: Tables<"transactions">[]) => {
     if (txList.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
-    const headers = ["ID", "Cliente", "Email", "Telefone", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
+    const headers = ["ID", "Cliente", "Email", "Telefone", "CPF/CNPJ", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
     const rows = txList.map(t => [
       t.id, t.customer_name || "", t.customer_email || "", t.customer_phone || "",
+      t.customer_document || "",
       t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount),
       t.payment_method || "", t.status, t.created_at,
     ]);
