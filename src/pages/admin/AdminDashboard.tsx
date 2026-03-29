@@ -40,6 +40,7 @@ import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
 import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
 import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
+import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -61,6 +62,7 @@ const NAV_ITEMS = [
   { id: "top-products", label: "Top Prod.", icon: Package2, section: "content", employeeAccess: false },
   { id: "courses", label: "Cursos", icon: GraduationCap, section: "content", employeeAccess: false },
   { id: "coupons", label: "Cupons", icon: Tag, section: "content", employeeAccess: false },
+  { id: "affiliates", label: "Afiliados", icon: Users, section: "content", employeeAccess: false },
   { id: "acquirers", label: "Adquirentes", icon: Banknote, section: "system", employeeAccess: false },
   { id: "settings", label: "Config", icon: Settings, section: "system", employeeAccess: false },
   { id: "error-logs", label: "Erros", icon: Bug, section: "system", employeeAccess: false },
@@ -443,6 +445,7 @@ export default function AdminDashboard() {
               {activeTab === "notifications" && isAdmin && <AdminNotificationsTab profiles={profiles} />}
               {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
+              {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
               {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
               {activeTab === "inactive-sellers" && isAdmin && (
