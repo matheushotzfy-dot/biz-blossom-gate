@@ -26,12 +26,12 @@ function DashboardLayoutInner() {
   const unreadCount = useNotificationCount();
 
   useEffect(() => {
-    if (profile?.account_status === "approved" && user?.id) {
-      const key = `hotzfy_account_approved_${user.id}`;
-      if (!localStorage.getItem(key)) {
-        setShowApproved(true);
-        localStorage.setItem(key, "1");
-      }
+    if (!user?.id || !profile?.account_status) return;
+    const key = `hotzfy_account_approved_shown_${user.id}`;
+    // Only show popup if account is approved AND we haven't shown it before
+    if (profile.account_status === "approved" && !localStorage.getItem(key)) {
+      setShowApproved(true);
+      localStorage.setItem(key, "true");
     }
   }, [profile?.account_status, user?.id]);
 

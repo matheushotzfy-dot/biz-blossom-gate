@@ -258,11 +258,11 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [transactions, withdrawals]);
 
-  // Check if scale mode was already unlocked (persisted per-session)
+  // Check if scale mode was already unlocked (persisted permanently in localStorage)
   useEffect(() => {
     if (!user?.id) return;
     const key = `scale_mode_unlocked_${user.id}`;
-    if (sessionStorage.getItem(key) === "true") {
+    if (localStorage.getItem(key) === "true") {
       setScaleModeUnlocked(true);
       setScaleMode(true);
     }
@@ -278,7 +278,8 @@ export default function Dashboard() {
       .reduce((acc, tx) => acc + Number(tx.net_amount), 0);
 
     if (revenue24h >= 2000) {
-      sessionStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
+      // Persist permanently so it can never be turned off
+      localStorage.setItem(`scale_mode_unlocked_${user.id}`, "true");
       setScaleModeUnlocked(true);
       setFireEffect(true);
       setTimeout(() => {
@@ -575,15 +576,15 @@ export default function Dashboard() {
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2 xl:items-stretch">
+      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3 flex flex-col">
-          <div className="mb-3 md:mb-4 flex items-center gap-2 shrink-0">
+        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-3">
+          <div className="mb-3 md:mb-4 flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="text-sm md:text-lg font-display font-black text-foreground">Ações Rápidas</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-2 md:gap-2.5 flex-1 auto-rows-min">
+          <div className="grid grid-cols-2 gap-2 md:gap-2.5">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -614,8 +615,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Activity — same height as actions */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 flex flex-col">
+        {/* Activity — matches quick actions height */}
+        <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-4 flex flex-col max-h-[540px]">
           <div className="mb-3 md:mb-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />

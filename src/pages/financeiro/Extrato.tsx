@@ -266,30 +266,31 @@ function TxDetailModal({ tx, products, onClose }: {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/80"
+          style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
           onClick={onClose}
         />
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
           transition={{ type: "spring", duration: 0.4 }}
-          className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl shadow-xl"
+          className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border/60 dark:border-foreground/[0.08] bg-card shadow-2xl shadow-black/20"
         >
-          <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-border/30 dark:border-foreground/[0.04] bg-card/95 dark:bg-card/90 backdrop-blur-xl rounded-t-xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-border/40 dark:border-foreground/[0.06] bg-card rounded-t-2xl">
             <div>
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Detalhes da Transação</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Detalhes da Transação</p>
               <div className="flex items-center gap-3">
                 <StatusBadge status={tx.status} />
                 <span className="text-2xl font-display font-bold text-foreground">{fmt(Number(tx.amount))}</span>
               </div>
             </div>
-            <button onClick={onClose} className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-muted/40 transition-colors">
+            <button onClick={onClose} className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted/40 transition-colors border border-border/30">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
 
-          <div className="p-5 space-y-5">
+          <div className="p-6 space-y-5">
             <div className="rounded-lg border border-primary/15 bg-primary/[0.04] p-4">
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Resumo Financeiro</p>
               <div className="space-y-2.5">
