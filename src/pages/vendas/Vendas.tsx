@@ -315,79 +315,74 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-hidden">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/70 backdrop-blur-md"
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm"
           onClick={onClose}
         />
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.96, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ type: "spring", duration: 0.45 }}
-          className="relative w-full max-w-md max-h-[88vh] overflow-y-auto rounded-2xl border border-border/40 bg-card backdrop-blur-2xl shadow-2xl"
+          exit={{ opacity: 0, scale: 0.96 }}
+          transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
+          className="relative w-full max-w-[420px] max-h-[85vh] overflow-y-auto rounded-2xl border border-border/50 bg-card shadow-2xl"
         >
-          {/* Header with avatar */}
-          <div className="sticky top-0 z-10 bg-card backdrop-blur-xl border-b border-border/30 p-5 rounded-t-2xl">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3.5">
-                <Avatar className="h-11 w-11">
-                  <AvatarFallback className={cn("text-sm font-bold", avatarColor)}>
-                    {getInitials(customerName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-base font-bold text-foreground">{customerName}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{tx.customer_email || "Sem email"}</p>
-                </div>
+          {/* Close button */}
+          <button onClick={onClose} className="absolute top-4 right-4 z-20 h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted/30 transition-colors">
+            <X className="h-4 w-4 text-muted-foreground" />
+          </button>
+
+          {/* Amount header */}
+          <div className="px-6 pt-6 pb-5">
+            <div className="flex items-start gap-3">
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarFallback className={cn("text-xs font-bold", avatarColor)}>
+                  {getInitials(customerName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1 pr-8">
+                <p className="text-sm font-semibold text-foreground truncate">{customerName}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{tx.customer_email || "Sem email"}</p>
               </div>
-              <button onClick={onClose} className="h-8 w-8 rounded-xl flex items-center justify-center hover:bg-muted/50 transition-colors shrink-0">
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
             </div>
 
-            {/* Amount hero */}
             <div className="mt-4 flex items-end justify-between">
               <div>
-                <p className="text-3xl font-display font-black tracking-tight text-foreground">{fmt(Number(tx.amount))}</p>
-                <p className="text-xs text-muted-foreground mt-1">Valor bruto da transação</p>
+                <p className="text-2xl font-display font-black tracking-tight text-foreground tabular-nums">{fmt(Number(tx.amount))}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Valor bruto</p>
               </div>
               <StatusBadge status={tx.status} />
             </div>
           </div>
 
-          <div className="p-5 space-y-4">
+          <div className="px-6 pb-6 space-y-4">
             {/* Financial breakdown */}
-            <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 space-y-3">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Resumo Financeiro</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Valor bruto</span>
-                  <span className="text-sm font-semibold text-foreground">{fmt(Number(tx.amount))}</span>
+            <div className="rounded-xl border border-border/30 p-4 space-y-2.5">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Resumo Financeiro</p>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Valor bruto</span>
+                <span className="font-semibold text-foreground tabular-nums">{fmt(Number(tx.amount))}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Taxa da plataforma</span>
+                <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(tx.fee_amount))}</span>
+              </div>
+              {Number(tx.retained_amount) > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Retido</span>
+                  <span className="font-semibold text-warning tabular-nums">- {fmt(Number(tx.retained_amount))}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Taxa da plataforma</span>
-                  <span className="text-sm font-semibold text-destructive">- {fmt(Number(tx.fee_amount))}</span>
-                </div>
-                {Number(tx.retained_amount) > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Retido</span>
-                    <span className="text-sm font-semibold text-warning">- {fmt(Number(tx.retained_amount))}</span>
-                  </div>
-                )}
-                <div className="border-t border-border/30 pt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-foreground">Valor líquido</span>
-                    <span className="text-lg font-display font-black text-primary">{fmt(Number(tx.net_amount))}</span>
-                  </div>
-                </div>
+              )}
+              <div className="border-t border-border/20 pt-2.5 flex items-center justify-between">
+                <span className="text-sm font-bold text-foreground">Valor líquido</span>
+                <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(Number(tx.net_amount))}</span>
               </div>
             </div>
 
-            {/* Transaction info */}
+            {/* Transaction details */}
             <div className="rounded-xl border border-border/30 p-4 space-y-3">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Detalhes</p>
               <div className="grid grid-cols-2 gap-3">
@@ -398,13 +393,13 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
                 } />
                 <InfoCell label="Data" value={<span className="text-sm font-medium text-foreground">{fmtDate(tx.created_at)}</span>} />
                 <InfoCell label="Horário" value={<span className="text-sm font-medium text-foreground">{fmtTime(tx.created_at)}</span>} />
-                {tx.product_id && <InfoCell label="Produto" value={<span className="text-sm font-medium text-foreground truncate">{products[tx.product_id] || "—"}</span>} />}
+                {tx.product_id && <InfoCell label="Produto" value={<span className="text-sm font-medium text-foreground truncate block max-w-full" title={products[tx.product_id] || "—"}>{products[tx.product_id] || "—"}</span>} />}
               </div>
               <div className="pt-1">
                 <InfoCell label="ID da Transação" value={
-                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 hover:text-primary transition-colors bg-muted/40 px-2.5 py-1 rounded-lg">
-                    {tx.id.slice(0, 20)}...
-                    {copiedId ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 hover:text-primary transition-colors bg-muted/20 px-2.5 py-1 rounded-lg max-w-full">
+                    <span className="truncate">{tx.id.slice(0, 22)}...</span>
+                    {copiedId ? <Check className="h-3 w-3 text-success shrink-0" /> : <Copy className="h-3 w-3 shrink-0" />}
                   </button>
                 } />
               </div>
@@ -414,30 +409,30 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
             <div className="rounded-xl border border-border/30 p-4 space-y-3">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</p>
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                     <Users className="h-3.5 w-3.5" />
                     <span className="text-sm">Nome</span>
                   </div>
-                  <span className="text-sm font-medium text-foreground">{tx.customer_name || "—"}</span>
+                  <span className="text-sm font-medium text-foreground truncate">{tx.customer_name || "—"}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                     <Mail className="h-3.5 w-3.5" />
                     <span className="text-sm">Email</span>
                   </div>
-                  <span className="text-sm font-medium text-foreground truncate max-w-[180px]">{tx.customer_email || "—"}</span>
+                  <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{tx.customer_email || "—"}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                     <Phone className="h-3.5 w-3.5" />
                     <span className="text-sm">Telefone</span>
                   </div>
                   <span className="text-sm font-medium text-foreground">{tx.customer_phone || "—"}</span>
                 </div>
                 {tx.customer_document && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                       <Hash className="h-3.5 w-3.5" />
                       <span className="text-sm">CPF/CNPJ</span>
                     </div>
@@ -453,9 +448,9 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rastreamento (UTMs)</p>
                 <div className="space-y-2">
                   {Object.entries(utms).map(([key, val]) => (
-                    <div key={key} className="flex items-center justify-between">
+                    <div key={key} className="flex items-center justify-between gap-2">
                       <span className="text-xs text-muted-foreground font-mono">{key}</span>
-                      <span className="text-xs font-medium text-foreground bg-muted/40 px-2 py-0.5 rounded-md max-w-[180px] truncate">{val}</span>
+                      <span className="text-xs font-medium text-foreground bg-muted/20 px-2 py-0.5 rounded-md max-w-[180px] truncate">{val}</span>
                     </div>
                   ))}
                 </div>
@@ -463,10 +458,10 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
             )}
 
             {/* Actions */}
-            <div className="flex gap-2.5 pt-2">
+            <div className="flex gap-2.5 pt-1">
               {tx.customer_phone && (
                 <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-                  <Button variant="outline" className="w-full gap-2 rounded-xl h-11 border-success/20 text-success hover:bg-success/5 font-semibold text-sm">
+                  <Button variant="outline" className="w-full gap-2 rounded-xl h-10 border-success/20 text-success hover:bg-success/5 font-semibold text-[13px]">
                     <MessageCircle className="h-4 w-4" /> WhatsApp
                   </Button>
                 </a>
@@ -474,10 +469,10 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
               {tx.status === "completed" && (
                 <Button
                   variant="outline"
-                  className="flex-1 gap-2 rounded-xl h-11 border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold text-sm"
+                  className="flex-1 gap-2 rounded-xl h-10 border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold text-[13px]"
                   onClick={() => onRefund(tx)}
                 >
-                  <RefreshCw className="h-4 w-4" /> Emitir Reembolso
+                  <RefreshCw className="h-4 w-4" /> Reembolso
                 </Button>
               )}
             </div>
