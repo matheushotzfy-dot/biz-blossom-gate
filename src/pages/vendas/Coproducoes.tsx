@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import {
   Handshake, Plus, CheckCircle2, XCircle, Clock, Users, DollarSign,
-  Mail, Percent, Shield, ArrowUpRight, UserPlus, Search,
+  Mail, Percent, Shield, ArrowUpRight, UserPlus, Search, Trash2,
+  TrendingUp, Zap, BarChart3, Copy, ExternalLink, Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,133 @@ type CoProduction = {
   accepted_at: string | null; created_at: string; updated_at: string;
 };
 
+/* ─── KPI Card ─── */
+function KpiCard({ label, value, sub, icon: Icon, bg, color, delay = 0 }: {
+  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
+  bg: string; color: string; delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="group relative rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5 overflow-hidden hover:border-primary/20 transition-all duration-300"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", bg)}>
+          <Icon className={cn("h-4 w-4", color)} />
+        </div>
+      </div>
+      <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight">{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/50 mt-1">{sub}</p>}
+    </motion.div>
+  );
+}
+
+/* ─── Co-production Card ─── */
+function CoProductionCard({ cp, isSent, productName, productPrice, onAccept, onReject, onCancel, index }: {
+  cp: CoProduction; isSent: boolean; productName: string; productPrice: number;
+  onAccept?: () => void; onReject?: () => void; onCancel?: () => void; index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04 }}
+      className="group rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5 hover:border-primary/15 transition-all duration-300"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Handshake className="h-4 w-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[14px] font-bold text-foreground truncate">{productName}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <Mail className="h-3 w-3 text-muted-foreground/40" />
+                <span className="text-[11px] text-muted-foreground truncate">{cp.co_producer_email}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Split visualization */}
+          <div className="flex items-center gap-3 mt-3">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] text-muted-foreground font-medium">
+                  {isSent ? "Você" : "Produtor"}: {100 - cp.split_percentage}%
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium">
+                  {isSent ? "Co-prod" : "Você"}: {cp.split_percentage}%
+                </span>
+              </div>
+              <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-500"
+                  style={{ width: `${100 - cp.split_percentage}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue per sale */}
+          {productPrice > 0 && (
+            <div className="flex items-center gap-3 mt-2.5 text-[10px] text-muted-foreground/60">
+              <span>Por venda de {fmt(productPrice)}:</span>
+              <span className="text-primary font-bold">{isSent ? fmt(productPrice * (100 - cp.split_percentage) / 100) : fmt(productPrice * cp.split_percentage / 100)}</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 mt-3">
+            <Clock className="h-3 w-3 text-muted-foreground/30" />
+            <span className="text-[10px] text-muted-foreground/40">
+              {new Date(cp.created_at).toLocaleDateString("pt-BR")}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <span className={cn(
+            "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold",
+            cp.status === "accepted" && "bg-success/10 text-success border border-success/15",
+            cp.status === "pending" && "bg-warning/10 text-warning border border-warning/15",
+            cp.status === "rejected" && "bg-destructive/10 text-destructive border border-destructive/15",
+          )}>
+            {cp.status === "accepted" && <CheckCircle2 className="h-3 w-3" />}
+            {cp.status === "pending" && <Clock className="h-3 w-3" />}
+            {cp.status === "rejected" && <XCircle className="h-3 w-3" />}
+            {cp.status === "accepted" ? "Ativa" : cp.status === "pending" ? "Pendente" : "Recusada"}
+          </span>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1.5 mt-1">
+            {isSent && cp.status !== "rejected" && (
+              <Button size="sm" variant="ghost" onClick={onCancel}
+                className="h-8 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg gap-1">
+                <Trash2 className="h-3 w-3" /> Cancelar
+              </Button>
+            )}
+            {!isSent && cp.status === "pending" && (
+              <>
+                <Button size="sm" onClick={onAccept}
+                  className="h-8 text-[11px] bg-success/10 text-success hover:bg-success/20 border border-success/20 gap-1 rounded-lg shadow-none">
+                  <CheckCircle2 className="h-3 w-3" /> Aceitar
+                </Button>
+                <Button size="sm" onClick={onReject}
+                  className="h-8 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-lg shadow-none">
+                  <XCircle className="h-3 w-3" /> Recusar
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Coproducoes() {
   const { user } = useAuth();
   const { data: products = [] } = useProducts();
@@ -33,7 +161,6 @@ export default function Coproducoes() {
   const [coEmail, setCoEmail] = useState("");
   const [coSplit, setCoSplit] = useState("50");
   const [tab, setTab] = useState<"sent" | "received">("sent");
-  const [profiles, setProfiles] = useState<any[]>([]);
 
   const loadData = async () => {
     if (!user) return;
@@ -41,10 +168,6 @@ export default function Coproducoes() {
       `owner_user_id.eq.${user.id},co_producer_email.eq.${user.email}`
     ).order("created_at", { ascending: false });
     if (data) setCoproductions(data as unknown as CoProduction[]);
-
-    // Load profile for current user
-    const { data: pData } = await supabase.from("profiles").select("email,user_id").eq("user_id", user.id);
-    if (pData) setProfiles(pData);
   };
 
   useEffect(() => { loadData(); }, [user?.id]);
@@ -55,7 +178,6 @@ export default function Coproducoes() {
     const split = Number(coSplit);
     if (split < 1 || split > 99) { toast.error("Split deve ser entre 1% e 99%"); return; }
 
-    // Update product co_production settings
     await supabase.from("products").update({
       co_production_enabled: true,
       co_producer_email: coEmail.trim(),
@@ -82,7 +204,7 @@ export default function Coproducoes() {
       accepted_at: new Date().toISOString(),
     }).eq("id", id);
     if (error) { toast.error("Erro ao aceitar"); return; }
-    toast.success("Coprodução aceita! Você receberá sua parte automaticamente.");
+    toast.success("Coprodução aceita!");
     loadData();
   };
 
@@ -120,19 +242,19 @@ export default function Coproducoes() {
   return (
     <PageShell>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageTitle icon={<Handshake className="h-6 w-6" />} title="Coproduções" subtitle="Gerencie parcerias e splits de receita" />
+        <PageTitle icon={<Handshake className="h-6 w-6" />} title="Coproduções" subtitle="Gerencie parcerias e splits de receita com outros produtores" />
         <Dialog open={openCreate} onOpenChange={setOpenCreate}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-lg h-9 text-[12px] font-medium">
-              <Plus className="h-3.5 w-3.5" /> Nova Coprodução
+            <Button className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+              <Plus className="h-4 w-4" /> Nova Coprodução
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl p-0 overflow-hidden">
+          <DialogContent className="max-w-md rounded-2xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/30 dark:border-foreground/[0.05]">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Handshake className="h-4 w-4 text-primary" />
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Handshake className="h-5 w-5 text-primary" />
                   </div>
                   Criar Coprodução
                 </DialogTitle>
@@ -142,7 +264,7 @@ export default function Coproducoes() {
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Produto</Label>
                 <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                  <SelectTrigger className="mt-1.5 rounded-lg"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
+                  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
                   <SelectContent>
                     {products.filter(p => !(p as any).co_production_enabled).map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(Number(p.price))}</SelectItem>
@@ -157,7 +279,7 @@ export default function Coproducoes() {
                   value={coEmail}
                   onChange={e => setCoEmail(e.target.value)}
                   placeholder="parceiro@email.com"
-                  className="mt-1.5 rounded-lg"
+                  className="mt-1.5 rounded-xl h-11"
                 />
               </div>
               <div>
@@ -167,17 +289,20 @@ export default function Coproducoes() {
                   min="1" max="99"
                   value={coSplit}
                   onChange={e => setCoSplit(e.target.value)}
-                  className="mt-1.5 rounded-lg w-28"
+                  className="mt-1.5 rounded-xl w-28 h-11"
                 />
                 {selectedProduct && (
-                  <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/10 space-y-1">
+                  <div className="mt-3 p-4 rounded-xl bg-primary/5 border border-primary/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-muted-foreground">Você receberá</span>
-                      <span className="text-[13px] font-bold text-primary">{100 - Number(coSplit || 0)}%</span>
+                      <span className="text-[14px] font-black text-primary">{100 - Number(coSplit || 0)}%</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-muted-foreground">Co-produtor receberá</span>
-                      <span className="text-[13px] font-bold text-foreground">{coSplit}%</span>
+                      <span className="text-[14px] font-black text-foreground">{coSplit}%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${100 - Number(coSplit || 0)}%` }} />
                     </div>
                     <div className="pt-2 border-t border-primary/10 flex items-center justify-between">
                       <span className="text-[10px] text-muted-foreground">Por venda de {fmt(getProductPrice(selectedProduct))}</span>
@@ -189,7 +314,7 @@ export default function Coproducoes() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleCreate} className="w-full rounded-lg font-medium h-11" disabled={!selectedProduct || !coEmail.trim()}>
+              <Button onClick={handleCreate} className="w-full rounded-xl font-semibold h-11 shadow-lg shadow-primary/20" disabled={!selectedProduct || !coEmail.trim()}>
                 <Mail className="h-4 w-4 mr-2" /> Enviar Convite
               </Button>
             </div>
@@ -198,154 +323,81 @@ export default function Coproducoes() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-medium text-muted-foreground">Coproduções Ativas</span>
-            <Handshake className="h-4 w-4 text-success" />
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{activeCount}</p>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-          className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-medium text-muted-foreground">Convites Pendentes</span>
-            <Clock className="h-4 w-4 text-warning" />
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{pendingCount}</p>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}
-          className="col-span-2 lg:col-span-1 rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-medium text-muted-foreground">Total de Parcerias</span>
-            <Users className="h-4 w-4 text-primary" />
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{coproductions.length}</p>
-        </motion.div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard label="Ativas" value={String(activeCount)} icon={CheckCircle2} bg="bg-success/10" color="text-success" sub="parcerias" delay={0} />
+        <KpiCard label="Pendentes" value={String(pendingCount)} icon={Clock} bg="bg-warning/10" color="text-warning" sub="convites" delay={0.06} />
+        <KpiCard label="Total" value={String(coproductions.length)} icon={Handshake} bg="bg-primary/10" color="text-primary" sub="coproduções" delay={0.12} />
+        <KpiCard label="Enviadas" value={String(sentCoproductions.length)} icon={ArrowUpRight} bg="bg-info/10" color="text-info" sub="por você" delay={0.18} />
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit">
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/40 w-fit">
         {([
           { id: "sent" as const, label: "Convites Enviados", count: sentCoproductions.length },
           { id: "received" as const, label: "Convites Recebidos", count: receivedCoproductions.length },
         ]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+              "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
               tab === t.id ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground"
             )}>
             {t.label}
-            {t.count > 0 && <span className="h-4 min-w-[16px] px-1 rounded-full bg-muted text-[9px] font-bold flex items-center justify-center">{t.count}</span>}
+            {t.count > 0 && <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-muted text-[10px] font-bold flex items-center justify-center">{t.count}</span>}
           </button>
         ))}
       </div>
 
       {/* ─── SENT ─── */}
       {tab === "sent" && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {sentCoproductions.length === 0 ? (
-            <EmptyState icon={<Handshake className="h-7 w-7" />} title="Nenhuma coprodução enviada" subtitle="Crie sua primeira parceria de coprodução" />
+            <EmptyState icon={<Handshake className="h-7 w-7" />} title="Nenhuma coprodução enviada" subtitle="Crie sua primeira parceria de coprodução para dividir receitas" />
           ) : sentCoproductions.map((cp, i) => (
-            <motion.div key={cp.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-bold text-foreground">{getProductName(cp.product_id)}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Mail className="h-3 w-3 text-muted-foreground/50" />
-                    <span className="text-[11px] text-muted-foreground">{cp.co_producer_email}</span>
-                  </div>
-                  <div className="flex items-center gap-4 mt-2">
-                    <div className="flex items-center gap-1">
-                      <Percent className="h-3 w-3 text-primary/50" />
-                      <span className="text-[11px] text-muted-foreground">Você: {100 - cp.split_percentage}%</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <UserPlus className="h-3 w-3 text-muted-foreground/50" />
-                      <span className="text-[11px] text-muted-foreground">Co-prod: {cp.split_percentage}%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium uppercase",
-                    cp.status === "accepted" && "bg-success/10 text-success",
-                    cp.status === "pending" && "bg-warning/10 text-warning",
-                    cp.status === "rejected" && "bg-destructive/10 text-destructive",
-                  )}>
-                    {cp.status === "accepted" && <CheckCircle2 className="h-3 w-3" />}
-                    {cp.status === "pending" && <Clock className="h-3 w-3" />}
-                    {cp.status === "rejected" && <XCircle className="h-3 w-3" />}
-                    {cp.status === "accepted" ? "Ativa" : cp.status === "pending" ? "Pendente" : "Recusada"}
-                  </span>
-                  {cp.status !== "rejected" && (
-                    <Button size="sm" variant="ghost" onClick={() => handleCancel(cp.id)}
-                      className="h-7 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10">
-                      Cancelar
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
+            <CoProductionCard
+              key={cp.id}
+              cp={cp}
+              isSent={true}
+              productName={getProductName(cp.product_id)}
+              productPrice={getProductPrice(cp.product_id)}
+              onCancel={() => handleCancel(cp.id)}
+              index={i}
+            />
           ))}
         </div>
       )}
 
       {/* ─── RECEIVED ─── */}
       {tab === "received" && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {receivedCoproductions.length === 0 ? (
             <EmptyState icon={<Mail className="h-7 w-7" />} title="Nenhum convite recebido" subtitle="Quando alguém te convidar como co-produtor, aparecerá aqui" />
           ) : receivedCoproductions.map((cp, i) => (
-            <motion.div key={cp.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-bold text-foreground">{getProductName(cp.product_id)}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">Você receberá <strong className="text-success">{cp.split_percentage}%</strong> de cada venda</p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                    Convite de {new Date(cp.created_at).toLocaleDateString("pt-BR")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {cp.status === "pending" ? (
-                    <>
-                      <Button size="sm" onClick={() => handleAccept(cp.id)}
-                        className="h-8 text-[11px] bg-success/10 text-success hover:bg-success/20 border border-success/20 gap-1 rounded-lg shadow-none">
-                        <CheckCircle2 className="h-3 w-3" /> Aceitar
-                      </Button>
-                      <Button size="sm" onClick={() => handleReject(cp.id)}
-                        className="h-8 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-lg shadow-none">
-                        <XCircle className="h-3 w-3" /> Recusar
-                      </Button>
-                    </>
-                  ) : (
-                    <span className={cn(
-                      "inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium uppercase",
-                      cp.status === "accepted" && "bg-success/10 text-success",
-                      cp.status === "rejected" && "bg-destructive/10 text-destructive",
-                    )}>
-                      {cp.status === "accepted" ? "Ativa" : "Recusada"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </motion.div>
+            <CoProductionCard
+              key={cp.id}
+              cp={cp}
+              isSent={false}
+              productName={getProductName(cp.product_id)}
+              productPrice={getProductPrice(cp.product_id)}
+              onAccept={() => handleAccept(cp.id)}
+              onReject={() => handleReject(cp.id)}
+              index={i}
+            />
           ))}
         </div>
       )}
 
       {/* Footer */}
-      <div className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
+      <div className="rounded-2xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
         <div className="flex items-center gap-3">
-          <Shield className="h-4 w-4 text-primary shrink-0" />
-          <p className="text-[11px] text-muted-foreground/70">
-            O split de receita é calculado automaticamente no servidor. Cada co-produtor recebe sua porcentagem diretamente no saldo.
-          </p>
+          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Shield className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-[12px] font-bold text-foreground">Split Automático</p>
+            <p className="text-[11px] text-muted-foreground/60">
+              O split de receita é calculado automaticamente no servidor. Cada co-produtor recebe sua porcentagem diretamente no saldo.
+            </p>
+          </div>
         </div>
       </div>
     </PageShell>

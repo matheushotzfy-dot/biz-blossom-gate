@@ -5,7 +5,8 @@ import { useProducts } from "@/hooks/useQueryData";
 import {
   Users, Link2, TrendingUp, DollarSign, Copy, ExternalLink, Eye, Plus,
   BarChart3, CheckCircle2, Clock, XCircle, Search, Percent, Zap, Shield,
-  ArrowUpRight, MousePointerClick, ShoppingCart, UserPlus,
+  ArrowUpRight, MousePointerClick, ShoppingCart, UserPlus, Sparkles,
+  Activity, Target, Award, Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,96 @@ type AffiliateSale = {
   commission_amount: number; commission_pct: number; status: string; created_at: string;
 };
 
+/* ─── KPI Card ─── */
+function KpiCard({ label, value, sub, icon: Icon, bg, color, delay = 0, large }: {
+  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
+  bg: string; color: string; delay?: number; large?: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className={cn(
+        "group relative rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden hover:border-primary/20 transition-all duration-300",
+        large ? "p-6" : "p-5"
+      )}
+    >
+      <div className="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle, hsl(var(--primary) / 0.08), transparent)` }} />
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", bg)}>
+          <Icon className={cn("h-4 w-4", color)} />
+        </div>
+      </div>
+      <p className={cn("font-display font-black text-foreground tracking-tight", large ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl")}>{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/50 mt-1">{sub}</p>}
+    </motion.div>
+  );
+}
+
+/* ─── Affiliate Link Card ─── */
+function AffiliateLinkCard({ link, productName, sales, copiedSlug, onCopy, onToggle, index }: {
+  link: AffiliateLink; productName: string; sales: AffiliateSale[];
+  copiedSlug: string | null; onCopy: () => void; onToggle: () => void; index: number;
+}) {
+  const linkUrl = `${window.location.origin}/pay/${link.slug}`;
+  const linkRevenue = sales.reduce((a, s) => a + s.commission_amount, 0);
+  const convRate = link.clicks > 0 ? ((sales.length / link.clicks) * 100).toFixed(1) : "0.0";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="group rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5 hover:border-primary/15 transition-all duration-300"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Link2 className="h-5 w-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-foreground truncate">{productName}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{link.commission_pct}% comissão</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Switch checked={link.is_active} onCheckedChange={onToggle} />
+          <button onClick={onCopy}
+            className={cn(
+              "h-9 w-9 rounded-xl flex items-center justify-center transition-all",
+              copiedSlug === link.slug ? "bg-success/10 text-success" : "bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+            )}>
+            {copiedSlug === link.slug ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Link URL */}
+      <div className="p-3 rounded-xl bg-muted/15 border border-border/20 mb-4 group-hover:bg-primary/5 group-hover:border-primary/15 transition-all">
+        <p className="font-mono text-[11px] text-muted-foreground truncate">{linkUrl}</p>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { icon: MousePointerClick, label: "Cliques", value: String(link.clicks), color: "text-info" },
+          { icon: ShoppingCart, label: "Vendas", value: String(sales.length), color: "text-success" },
+          { icon: Target, label: "Conv.", value: `${convRate}%`, color: "text-warning" },
+          { icon: DollarSign, label: "Ganho", value: fmt(linkRevenue), color: "text-primary" },
+        ].map(stat => (
+          <div key={stat.label} className="text-center">
+            <stat.icon className={cn("h-3.5 w-3.5 mx-auto mb-1", stat.color)} />
+            <p className="text-[13px] font-bold text-foreground">{stat.value}</p>
+            <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Afiliados() {
   const { user } = useAuth();
   const { data: products = [] } = useProducts();
@@ -41,8 +132,6 @@ export default function Afiliados() {
   const [openCreate, setOpenCreate] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-
-  // Marketplace products (affiliate-enabled products from other sellers)
   const [marketProducts, setMarketProducts] = useState<any[]>([]);
 
   const affiliateProducts = useMemo(
@@ -71,7 +160,6 @@ export default function Afiliados() {
 
   useEffect(() => { loadData(); loadMarketplace(); }, [user?.id]);
 
-  // Generate affiliate link
   const handleCreateLink = async () => {
     if (!user || !selectedProduct) return;
     const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct);
@@ -123,19 +211,19 @@ export default function Afiliados() {
   return (
     <PageShell>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageTitle icon={<Users className="h-6 w-6" />} title="Afiliados" subtitle="Gerencie seu programa de afiliados e comissões" />
+        <PageTitle icon={<Users className="h-6 w-6" />} title="Afiliados" subtitle="Gerencie seu programa de afiliados e maximize suas comissões" />
         <Dialog open={openCreate} onOpenChange={setOpenCreate}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-lg h-9 text-[12px] font-medium">
-              <Plus className="h-3.5 w-3.5" /> Criar Link de Afiliado
+            <Button className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+              <Plus className="h-4 w-4" /> Criar Link de Afiliado
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl p-0 overflow-hidden">
+          <DialogContent className="max-w-md rounded-2xl border border-border/40 dark:border-foreground/[0.06] bg-card/95 dark:bg-card/90 backdrop-blur-xl p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/30 dark:border-foreground/[0.05]">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Link2 className="h-4 w-4 text-primary" />
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Link2 className="h-5 w-5 text-primary" />
                   </div>
                   Criar Link de Afiliado
                 </DialogTitle>
@@ -145,11 +233,11 @@ export default function Afiliados() {
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Produto</Label>
                 <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                  <SelectTrigger className="mt-1.5 rounded-lg"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
+                  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
                   <SelectContent>
                     {affiliateProducts.length > 0 && (
                       <>
-                        <div className="px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Seus Produtos</div>
+                        <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Seus Produtos</div>
                         {affiliateProducts.map(p => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.name} — {fmt(Number(p.price))} ({(p as any).affiliate_commission || 30}% comissão)
@@ -161,13 +249,13 @@ export default function Afiliados() {
                 </Select>
               </div>
               {selectedProduct && (
-                <div className="p-4 rounded-lg bg-success/5 border border-success/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Percent className="h-3.5 w-3.5 text-success" />
-                    <span className="text-[11px] font-bold text-success">Comissão</span>
+                <div className="p-4 rounded-xl bg-success/5 border border-success/10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Percent className="h-4 w-4 text-success" />
+                    <span className="text-[12px] font-bold text-success">Comissão por Venda</span>
                   </div>
                   <p className="text-[12px] text-muted-foreground">
-                    Você receberá <strong className="text-success">{
+                    Você receberá <strong className="text-success text-[14px]">{
                       (() => {
                         const p = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct);
                         return (p as any)?.affiliate_commission || 30;
@@ -176,7 +264,7 @@ export default function Afiliados() {
                   </p>
                 </div>
               )}
-              <Button onClick={handleCreateLink} className="w-full rounded-lg font-medium h-11" disabled={!selectedProduct}>
+              <Button onClick={handleCreateLink} className="w-full rounded-xl font-semibold h-11 shadow-lg shadow-primary/20" disabled={!selectedProduct}>
                 <Link2 className="h-4 w-4 mr-2" /> Gerar Link
               </Button>
             </div>
@@ -185,15 +273,15 @@ export default function Afiliados() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit">
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/40 w-fit">
         {([
           { id: "my-products" as const, label: "Meus Produtos", icon: ShoppingCart },
           { id: "affiliate-of" as const, label: "Sou Afiliado", icon: UserPlus },
-          { id: "marketplace" as const, label: "Marketplace", icon: Search },
+          { id: "marketplace" as const, label: "Marketplace", icon: Globe },
         ]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+              "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
               tab === t.id ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground"
             )}>
             <t.icon className="h-3.5 w-3.5" />{t.label}
@@ -205,67 +293,48 @@ export default function Afiliados() {
       {tab === "my-products" && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-medium text-muted-foreground">Produtos com Afiliados</span>
-                <ShoppingCart className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">{affiliateProducts.length}</p>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.06 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-medium text-muted-foreground">Afiliados Ativos</span>
-                <Users className="h-4 w-4 text-success" />
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">{productLinks.length}</p>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.12 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-medium text-muted-foreground">Vendas via Afiliados</span>
-                <TrendingUp className="h-4 w-4 text-warning" />
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">{fmt(totalProductSalesViaAff)}</p>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.18 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-medium text-muted-foreground">Comissões Pagas</span>
-                <DollarSign className="h-4 w-4 text-destructive" />
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">{fmt(totalProductCommPaid)}</p>
-            </motion.div>
+            <KpiCard label="Produtos Afiliados" value={String(affiliateProducts.length)} icon={ShoppingCart} bg="bg-primary/10" color="text-primary" sub="com programa ativo" delay={0} />
+            <KpiCard label="Afiliados Ativos" value={String(productLinks.length)} icon={Users} bg="bg-success/10" color="text-success" sub="promovendo" delay={0.06} />
+            <KpiCard label="Vendas via Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} bg="bg-warning/10" color="text-warning" sub="faturamento" delay={0.12} />
+            <KpiCard label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} bg="bg-destructive/10" color="text-destructive" sub="aos afiliados" delay={0.18} />
           </div>
 
-          {/* Product affiliate list */}
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-foreground">Produtos com Programa de Afiliados</h3>
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Award className="h-4 w-4 text-primary" /> Produtos com Programa de Afiliados
+            </h3>
             {affiliateProducts.length === 0 ? (
-              <EmptyState icon={<Users className="h-7 w-7" />} title="Nenhum programa ativo" subtitle="Ative afiliados nas configurações do produto" />
+              <EmptyState icon={<Users className="h-7 w-7" />} title="Nenhum programa ativo" subtitle="Ative afiliados nas configurações do produto para começar" />
             ) : affiliateProducts.map((p, i) => (
-              <motion.div key={p.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
+                className="group rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5 hover:border-primary/15 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {p.image_url && (
-                      <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                    {p.image_url ? (
+                      <img src={p.image_url} alt="" className="h-12 w-12 rounded-xl object-cover shadow-sm" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <ShoppingCart className="h-5 w-5 text-primary" />
+                      </div>
                     )}
                     <div>
-                      <p className="text-sm font-bold text-foreground">{p.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{fmt(Number(p.price))} · {(p as any).affiliate_commission || 30}% comissão</p>
+                      <p className="text-[14px] font-bold text-foreground">{p.name}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{fmt(Number(p.price))} · <span className="text-success font-semibold">{(p as any).affiliate_commission || 30}% comissão</span></p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-right">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground">Afiliados</p>
-                      <p className="text-sm font-bold">{productLinks.filter(l => l.product_id === p.id).length}</p>
+                  <div className="flex items-center gap-4 text-right">
+                    <div className="hidden sm:block">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Afiliados</p>
+                      <p className="text-lg font-display font-bold">{productLinks.filter(l => l.product_id === p.id).length}</p>
+                    </div>
+                    <div className="hidden sm:block">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Vendas</p>
+                      <p className="text-lg font-display font-bold">{productSales.filter(s => s.product_id === p.id).length}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-muted-foreground">Vendas</p>
-                      <p className="text-sm font-bold">{productSales.filter(s => s.product_id === p.id).length}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Receita</p>
+                      <p className="text-lg font-display font-bold text-primary">{fmt(productSales.filter(s => s.product_id === p.id).reduce((a, s) => a + s.sale_amount, 0))}</p>
                     </div>
                   </div>
                 </div>
@@ -279,119 +348,70 @@ export default function Afiliados() {
       {tab === "affiliate-of" && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
-              className="col-span-2 rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-6">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-medium text-muted-foreground">Comissões Ganhas</span>
-                <DollarSign className="h-4 w-4 text-success" />
-              </div>
-              <p className="text-4xl font-display font-bold text-foreground tracking-tight">{fmt(totalCommissionEarned)}</p>
-              <p className="text-[11px] text-muted-foreground/70 mt-1">{mySales.filter(s => s.status === "approved").length} vendas aprovadas</p>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.08 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-medium text-muted-foreground">Pendente</span>
-                <Clock className="h-4 w-4 text-warning" />
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">{fmt(totalCommissionPending)}</p>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.16 }}
-              className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-medium text-muted-foreground">Cliques / Conv.</span>
-                <MousePointerClick className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">{totalClicks}</p>
-              <p className="text-[11px] text-muted-foreground/70">{conversionRate.toFixed(1)}% conversão</p>
-            </motion.div>
+            <KpiCard label="Comissões Ganhas" value={fmt(totalCommissionEarned)} icon={DollarSign} bg="bg-success/10" color="text-success" sub={`${mySales.filter(s => s.status === "approved").length} vendas aprovadas`} delay={0} large />
+            <KpiCard label="Pendente" value={fmt(totalCommissionPending)} icon={Clock} bg="bg-warning/10" color="text-warning" sub="aguardando" delay={0.06} large />
+            <KpiCard label="Cliques Totais" value={String(totalClicks)} icon={MousePointerClick} bg="bg-info/10" color="text-info" sub={`${conversionRate.toFixed(1)}% conversão`} delay={0.12} />
+            <KpiCard label="Links Ativos" value={String(myLinks.filter(l => l.is_active).length)} icon={Link2} bg="bg-primary/10" color="text-primary" sub={`de ${myLinks.length} total`} delay={0.18} />
           </div>
 
-          {/* My affiliate links */}
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-foreground">Meus Links de Afiliado</h3>
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Link2 className="h-4 w-4 text-primary" /> Meus Links de Afiliado
+            </h3>
             {myLinks.length === 0 ? (
-              <EmptyState icon={<Link2 className="h-7 w-7" />} title="Nenhum link" subtitle="Crie seu primeiro link de afiliado" />
-            ) : myLinks.map((link, i) => {
-              const linkUrl = `${window.location.origin}/pay/${link.slug}`;
-              const linkSales = mySales.filter(s => s.affiliate_link_id === link.id);
-              const linkRevenue = linkSales.reduce((a, s) => a + s.commission_amount, 0);
-              return (
-                <motion.div key={link.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="text-sm font-bold text-foreground">{getProductName(link.product_id)}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{link.commission_pct}% comissão</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch checked={link.is_active} onCheckedChange={() => toggleLinkActive(link)} />
-                      <button onClick={() => copyLink(link.slug)}
-                        className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
-                          copiedSlug === link.slug ? "bg-success/10 text-success" : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                        )}>
-                        {copiedSlug === link.slug ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-muted/20 border border-border/20 mb-3">
-                    <p className="font-mono text-[10px] text-muted-foreground truncate">{linkUrl}</p>
-                  </div>
-                  <div className="flex items-center gap-5">
-                    <div className="flex items-center gap-1.5">
-                      <MousePointerClick className="h-3 w-3 text-muted-foreground/50" />
-                      <span className="text-[11px] text-muted-foreground">{link.clicks} cliques</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <ShoppingCart className="h-3 w-3 text-muted-foreground/50" />
-                      <span className="text-[11px] text-muted-foreground">{linkSales.length} vendas</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <DollarSign className="h-3 w-3 text-success/50" />
-                      <span className="text-[11px] font-bold text-success">{fmt(linkRevenue)}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+              <EmptyState icon={<Link2 className="h-7 w-7" />} title="Nenhum link" subtitle="Crie seu primeiro link de afiliado para começar a ganhar comissões" />
+            ) : myLinks.map((link, i) => (
+              <AffiliateLinkCard
+                key={link.id}
+                link={link}
+                productName={getProductName(link.product_id)}
+                sales={mySales.filter(s => s.affiliate_link_id === link.id)}
+                copiedSlug={copiedSlug}
+                onCopy={() => copyLink(link.slug)}
+                onToggle={() => toggleLinkActive(link)}
+                index={i}
+              />
+            ))}
           </div>
 
           {/* Sales history */}
           {mySales.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-foreground">Histórico de Comissões</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border/30">
-                      {["Produto", "Venda", "Comissão", "Status", "Data"].map(h => (
-                        <th key={h} className="text-left p-3 text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/20">
-                    {mySales.map(s => (
-                      <tr key={s.id} className="hover:bg-muted/20 transition-colors">
-                        <td className="p-3 text-[12px] font-medium">{getProductName(s.product_id)}</td>
-                        <td className="p-3 text-[12px]">{fmt(s.sale_amount)}</td>
-                        <td className="p-3 text-[12px] font-bold text-success">{fmt(s.commission_amount)}</td>
-                        <td className="p-3">
-                          <span className={cn(
-                            "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium uppercase",
-                            s.status === "approved" && "bg-success/10 text-success",
-                            s.status === "pending" && "bg-warning/10 text-warning",
-                            s.status === "rejected" && "bg-destructive/10 text-destructive",
-                          )}>
-                            {s.status === "approved" ? "Pago" : s.status === "pending" ? "Pendente" : "Recusado"}
-                          </span>
-                        </td>
-                        <td className="p-3 text-[11px] text-muted-foreground">{new Date(s.created_at).toLocaleDateString("pt-BR")}</td>
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4 text-success" /> Histórico de Comissões
+              </h3>
+              <div className="rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border/30">
+                        {["Produto", "Venda", "Comissão", "Status", "Data"].map(h => (
+                          <th key={h} className="text-left p-4 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-border/20">
+                      {mySales.map(s => (
+                        <tr key={s.id} className="hover:bg-muted/10 transition-colors">
+                          <td className="p-4 text-[13px] font-semibold">{getProductName(s.product_id)}</td>
+                          <td className="p-4 text-[13px] text-muted-foreground">{fmt(s.sale_amount)}</td>
+                          <td className="p-4 text-[13px] font-bold text-success">{fmt(s.commission_amount)}</td>
+                          <td className="p-4">
+                            <span className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold",
+                              s.status === "approved" && "bg-success/10 text-success border border-success/15",
+                              s.status === "pending" && "bg-warning/10 text-warning border border-warning/15",
+                              s.status === "rejected" && "bg-destructive/10 text-destructive border border-destructive/15",
+                            )}>
+                              {s.status === "approved" ? "Pago" : s.status === "pending" ? "Pendente" : "Recusado"}
+                            </span>
+                          </td>
+                          <td className="p-4 text-[12px] text-muted-foreground">{new Date(s.created_at).toLocaleDateString("pt-BR")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -402,41 +422,48 @@ export default function Afiliados() {
       {tab === "marketplace" && (
         <>
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <Input
               placeholder="Buscar produtos para afiliar..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-10 rounded-lg"
+              className="pl-10 rounded-xl h-10"
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).map((p, i) => (
-              <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden">
-                {p.image_url && (
-                  <img src={p.image_url} alt="" className="w-full h-32 object-cover" />
+              <motion.div key={p.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className="group rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500">
+                {p.image_url ? (
+                  <div className="relative h-36 overflow-hidden">
+                    <img src={p.image_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="h-36 flex items-center justify-center bg-gradient-to-br from-primary/8 to-transparent">
+                    <ShoppingCart className="h-12 w-12 text-primary/15" />
+                  </div>
                 )}
-                <div className="p-4">
-                  <h4 className="text-sm font-bold text-foreground">{p.name}</h4>
-                  <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{p.description || "Sem descrição"}</p>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-lg font-display font-bold text-foreground">{fmt(Number(p.price))}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-success/10 text-success text-[10px] font-bold">
-                      {(p as any).affiliate_commission || 30}% comissão
+                <div className="p-5">
+                  <h4 className="text-[14px] font-bold text-foreground line-clamp-1">{p.name}</h4>
+                  <p className="text-[11px] text-muted-foreground/60 mt-1 line-clamp-2">{p.description || "Sem descrição"}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="text-xl font-display font-black text-foreground">{fmt(Number(p.price))}</span>
+                    <span className="px-3 py-1 rounded-full bg-success/10 text-success text-[11px] font-bold border border-success/15">
+                      {(p as any).affiliate_commission || 30}%
                     </span>
                   </div>
-                  <Button size="sm" className="w-full mt-3 rounded-lg text-[11px] h-8 gap-1.5"
+                  <Button size="sm" className="w-full mt-4 rounded-xl text-[12px] h-10 gap-2 font-semibold shadow-lg shadow-primary/20"
                     onClick={() => { setSelectedProduct(p.id); setOpenCreate(true); }}>
-                    <Link2 className="h-3 w-3" /> Afiliar-se
+                    <Link2 className="h-3.5 w-3.5" /> Afiliar-se
                   </Button>
                 </div>
               </motion.div>
             ))}
             {affiliateProducts.length === 0 && (
               <div className="col-span-full">
-                <EmptyState icon={<Search className="h-7 w-7" />} title="Nenhum produto disponível" subtitle="Ainda não há produtos com programa de afiliados ativo" />
+                <EmptyState icon={<Globe className="h-7 w-7" />} title="Nenhum produto disponível" subtitle="Ainda não há produtos com programa de afiliados ativo" />
               </div>
             )}
           </div>
@@ -444,12 +471,17 @@ export default function Afiliados() {
       )}
 
       {/* Footer */}
-      <div className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4">
+      <div className="rounded-2xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5">
         <div className="flex items-center gap-3">
-          <Shield className="h-4 w-4 text-primary shrink-0" />
-          <p className="text-[11px] text-muted-foreground/70">
-            Comissões são creditadas automaticamente após a confirmação do pagamento. Split calculado no servidor.
-          </p>
+          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Shield className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-[12px] font-bold text-foreground">Comissões Automáticas</p>
+            <p className="text-[11px] text-muted-foreground/60">
+              Comissões são creditadas automaticamente após a confirmação do pagamento. Split calculado no servidor.
+            </p>
+          </div>
         </div>
       </div>
     </PageShell>

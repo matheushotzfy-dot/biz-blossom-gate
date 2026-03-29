@@ -221,7 +221,7 @@ export function AppSidebar() {
             {/* Section divider line instead of label */}
             {idx > 0 && <div className="mx-3 mb-2 border-t border-sidebar-border/40 group-data-[collapsible=icon]:mx-1" />}
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-1.5 px-1">
+              <SidebarMenu className="space-y-0.5 px-1">
                 {section.items.map((item) => {
                   const isActive = item.url === "/dashboard" || item.url === "/vendas"
                     ? location.pathname === item.url
