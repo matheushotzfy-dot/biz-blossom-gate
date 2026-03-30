@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Puzzle, Settings2, Trash2, Power, Zap, Check, ChevronRight, Shield, Sparkles, ExternalLink, Radio, CheckCircle2 } from "lucide-react";
+import { Puzzle, Settings2, Trash2, Zap, Check, ChevronRight, Shield, Sparkles, ExternalLink, CheckCircle2 } from "lucide-react";
 import { PageShell, PageTitle, GlowPanel, SectionHeader } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -142,26 +142,6 @@ interface AppIntegration {
   events: string[]; is_active: boolean; config: Record<string, unknown>; created_at: string;
 }
 
-const eventColor = (e: string) => {
-  if (e === "Purchase") return "bg-success/10 text-success border-success/20";
-  if (e === "Refund" || e === "Chargeback") return "bg-destructive/10 text-destructive border-destructive/20";
-  if (e.includes("Pix") || e.includes("Boleto")) return "bg-warning/10 text-warning border-warning/20";
-  if (e === "Lead") return "bg-info/10 text-info border-info/20";
-  return "bg-muted/60 text-muted-foreground border-border/40";
-};
-
-const categoryColor = (cat: string) => {
-  switch (cat) {
-    case "Comunicação": return "text-info";
-    case "Analytics": return "text-warning";
-    case "Marketing": return "text-primary";
-    case "Fiscal": return "text-success";
-    case "Membros": return "text-accent-foreground";
-    case "Logística": return "text-warning";
-    case "Avançado": return "text-primary";
-    default: return "text-muted-foreground";
-  }
-};
 
 export default function Apps() {
   const { user } = useAuth();
