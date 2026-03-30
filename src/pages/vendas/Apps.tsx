@@ -492,6 +492,14 @@ export default function Apps() {
                       <div className="max-h-52 overflow-y-auto p-2 space-y-0.5">
                         {dialogApp.events.map(event => {
                           const selected = formSelectedEvents.includes(event);
+                          const eventTone = event.includes("Refund") || event.includes("Chargeback")
+                            ? "border-destructive/20 bg-destructive/10 text-destructive"
+                            : event.includes("Pix") || event.includes("Boleto")
+                              ? "border-warning/20 bg-warning/10 text-warning"
+                              : event === "Lead"
+                                ? "border-info/20 bg-info/10 text-info"
+                                : "border-primary/20 bg-primary/10 text-primary";
+
                           return (
                             <label
                               key={event}
@@ -506,7 +514,7 @@ export default function Apps() {
                                 className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                               />
                               <span className="font-medium flex-1">{event}</span>
-                              <span className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider", eventColor(event))}>
+                              <span className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider", eventTone)}>
                                 {event.includes("Refund") || event.includes("Chargeback") ? "reversal" : "trigger"}
                               </span>
                             </label>
