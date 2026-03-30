@@ -66,46 +66,46 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 220 18% 11%;
-    --foreground: 210 18% 92%;
-    --card: 220 16% 13%;
-    --card-foreground: 210 18% 92%;
-    --popover: 220 16% 14%;
-    --popover-foreground: 210 18% 92%;
-    --primary: 162 60% 45%;
+    --background: 220 14% 14%;
+    --foreground: 210 20% 93%;
+    --card: 220 12% 17%;
+    --card-foreground: 210 20% 93%;
+    --popover: 220 12% 18%;
+    --popover-foreground: 210 20% 93%;
+    --primary: 162 58% 44%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 17%;
-    --secondary-foreground: 210 14% 85%;
-    --muted: 220 12% 15%;
-    --muted-foreground: 210 10% 58%;
-    --accent: 162 18% 18%;
+    --secondary: 220 10% 21%;
+    --secondary-foreground: 210 14% 88%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 162 16% 20%;
     --accent-foreground: 162 48% 72%;
     --destructive: 0 70% 54%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 12% 20%;
-    --input: 220 12% 20%;
-    --ring: 162 60% 45%;
+    --border: 220 10% 24%;
+    --input: 220 10% 24%;
+    --ring: 162 58% 44%;
 
-    --sidebar-background: 220 18% 11%;
-    --sidebar-foreground: 210 12% 65%;
-    --sidebar-primary: 162 60% 45%;
+    --sidebar-background: 220 16% 13%;
+    --sidebar-foreground: 210 12% 68%;
+    --sidebar-primary: 162 58% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 15%;
-    --sidebar-accent-foreground: 210 16% 90%;
-    --sidebar-border: 220 12% 18%;
-    --sidebar-ring: 162 60% 45%;
+    --sidebar-accent: 220 12% 19%;
+    --sidebar-accent-foreground: 210 16% 92%;
+    --sidebar-border: 220 10% 22%;
+    --sidebar-ring: 162 58% 44%;
 
-    --success: 162 58% 46%;
+    --success: 162 56% 46%;
     --success-foreground: 0 0% 5%;
     --warning: 38 90% 55%;
     --warning-foreground: 0 0% 100%;
     --info: 210 70% 58%;
     --info-foreground: 0 0% 100%;
 
-    --tooltip-bg: rgba(12, 15, 22, 0.98);
-    --tooltip-border: rgba(45, 200, 155, 0.16);
-    --tooltip-text: #e5e5e5;
-    --card-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 14px 36px rgba(0,0,0,0.25), 0 30px 70px rgba(0,0,0,0.2);
+    --tooltip-bg: rgba(20, 24, 36, 0.98);
+    --tooltip-border: rgba(45, 200, 155, 0.14);
+    --tooltip-text: #e8e8e8;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.22), 0 12px 32px rgba(0,0,0,0.18), 0 24px 56px rgba(0,0,0,0.14);
   }
 }
 
