@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
@@ -208,35 +208,13 @@ export default function Produtos() {
         </motion.div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards — GlassKpi with accent bars */}
       {products.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: "Produtos", value: String(products.length), icon: Layers, tone: "primary" },
-            { label: "Ativos", value: String(activeProducts), icon: Zap, tone: "success" },
-            { label: "Ticket Médio", value: `R$ ${(totalValue / (products.length || 1)).toFixed(0)}`, icon: TrendingUp, tone: "info" },
-            { label: "Catálogo Total", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: BarChart3, tone: "warning" },
-          ].map((kpi, i) => (
-            <motion.div
-              key={kpi.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 p-4 md:p-5 overflow-hidden hover:border-primary/20 transition-all duration-300"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{kpi.label}</span>
-                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center",
-                  kpi.tone === "primary" ? "bg-primary/10" : kpi.tone === "success" ? "bg-success/10" : kpi.tone === "info" ? "bg-info/10" : "bg-warning/10"
-                )}>
-                  <kpi.icon className={cn("h-3.5 w-3.5",
-                    kpi.tone === "primary" ? "text-primary" : kpi.tone === "success" ? "text-success" : kpi.tone === "info" ? "text-info" : "text-warning"
-                  )} />
-                </div>
-              </div>
-              <p className="text-xl md:text-2xl font-display font-black text-foreground tracking-tight">{kpi.value}</p>
-            </motion.div>
-          ))}
+          <GlassKpi label="Produtos" value={String(products.length)} icon={Layers} tone="primary" delay={0} />
+          <GlassKpi label="Ativos" value={String(activeProducts)} icon={Zap} tone="success" delay={1} />
+          <GlassKpi label="Ticket Médio" value={`R$ ${(totalValue / (products.length || 1)).toFixed(0)}`} icon={TrendingUp} tone="info" delay={2} />
+          <GlassKpi label="Catálogo Total" value={`R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} icon={BarChart3} tone="warning" delay={3} />
         </div>
       )}
 
@@ -259,7 +237,10 @@ export default function Produtos() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.06, 0.4) }}
-              className="group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden flex flex-col hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+              className={cn(
+                "group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden flex flex-col hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 border-l-[3px]",
+                p.status === "active" ? "border-l-success" : p.status === "inactive" ? "border-l-destructive" : "border-l-warning"
+              )}
             >
               {/* Image */}
               <div className="relative h-44 overflow-hidden bg-gradient-to-br from-muted/20 to-muted/5">
@@ -272,10 +253,10 @@ export default function Produtos() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
 
-                {/* Status */}
+                {/* Status dot with glow */}
                 <div className="absolute top-3 right-3">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md shadow-sm", statusColor(p.status))}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md shadow-sm border border-border/20 bg-card/80", statusColor(p.status))}>
+                    <span className={cn("h-2 w-2 rounded-full animate-pulse shadow-[0_0_6px_currentColor]", statusDot(p.status))} />
                     {statusLabel(p.status)}
                   </span>
                 </div>
