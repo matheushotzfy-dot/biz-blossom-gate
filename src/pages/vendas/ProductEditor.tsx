@@ -650,7 +650,7 @@ export default function ProductEditor() {
                             {orderBumps.map(bump => {
                               const prod = allProducts.find(p => p.id === bump.bump_product_id);
                               return (
-                                <div key={bump.id} className="flex items-center justify-between panel-enterprise-subtle p-4">
+                                <div key={bump.id} className="flex items-center justify-between rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4">
                                   <div className="flex items-center gap-3 min-w-0 flex-1">
                                     {prod?.image_url ? (
                                       <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-lg object-cover shrink-0" />
@@ -738,7 +738,7 @@ export default function ProductEditor() {
                       <EmptyCard icon={ShoppingCart} message="Salve o produto primeiro para personalizar o checkout." />
                     ) : (
                       <>
-                        <div className="panel-enterprise-subtle overflow-hidden">
+                        <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden">
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
@@ -869,7 +869,7 @@ export default function ProductEditor() {
                           </Button>
                         </div>
 
-                        <div className="panel-enterprise-subtle overflow-hidden">
+                        <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden">
                           <table className="w-full text-sm">
                             <thead>
                                <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
@@ -901,7 +901,7 @@ export default function ProductEditor() {
                     ) : (
                       <>
                         {coupons.length > 0 ? (
-                          <div className="panel-enterprise-subtle overflow-hidden">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden">
                             <table className="w-full text-sm">
                               <thead>
                                  <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
@@ -999,7 +999,7 @@ export default function ProductEditor() {
                         </div>
 
                         {!isNew && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><UserPlus className="h-4 w-4 text-primary" /> Convidar afiliados</h4>
                             <p className="text-xs text-muted-foreground/60">Compartilhe esse link para convidar os seus afiliados:</p>
                             <div className="flex items-center gap-2">
@@ -1024,7 +1024,7 @@ export default function ProductEditor() {
                     ) : (
                       <div className="space-y-4">
                         {product?.checkout_url && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={getCheckoutLink()} className="h-9 font-mono text-xs bg-muted/10" />
@@ -1039,7 +1039,7 @@ export default function ProductEditor() {
                         )}
 
                         {pageUrl && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={pageUrl} className="h-9 font-mono text-xs bg-muted/10" />
@@ -1051,7 +1051,7 @@ export default function ProductEditor() {
                         )}
 
                         {affiliateEnabled && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><Users className="h-4 w-4 text-success" /> Link de Afiliado</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10" />
