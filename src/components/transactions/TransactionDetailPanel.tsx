@@ -327,6 +327,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
           </motion.div>
         </div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
