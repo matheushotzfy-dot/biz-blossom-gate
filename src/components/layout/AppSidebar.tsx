@@ -156,7 +156,7 @@ export function AppSidebar() {
         </div>
 
         <div className="mt-4 group-data-[collapsible=icon]:hidden cursor-pointer" onClick={() => navigate("/premiacoes")}>
-          <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone hover:border-sidebar-primary/40 hover:shadow-lg hover:shadow-sidebar-primary/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
+          <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone hover:border-sidebar-primary/35 hover:shadow-lg hover:shadow-sidebar-primary/8 active:scale-[0.985] transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
             {/* Ambient glow */}
             <div className="absolute -top-8 -right-8 w-24 h-24 bg-sidebar-primary/15 rounded-full blur-2xl group-hover/milestone:bg-sidebar-primary/25 transition-all duration-700" />
             <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-sidebar-primary/10 rounded-full blur-xl" />
@@ -234,10 +234,10 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
                               ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
-                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/50 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
@@ -246,10 +246,10 @@ export function AppSidebar() {
 
                           <span
                             className={cn(
-                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
                               isActive
                                 ? "bg-sidebar-primary/12 text-sidebar-primary"
-                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover/nav:bg-sidebar-accent/70 group-hover/nav:text-sidebar-accent-foreground",
+                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover/nav:bg-sidebar-accent/60 group-hover/nav:text-sidebar-accent-foreground",
                             )}
                           >
                             <item.icon className="h-5 w-5" />
@@ -278,7 +278,7 @@ export function AppSidebar() {
       <SidebarFooter className="relative p-3 border-t border-sidebar-border/80">
         <button
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all hover:bg-sidebar-primary/[0.15] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
+          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-sidebar-primary/[0.14] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
         >
           <div className="h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center shrink-0">
             <Headphones className="h-4 w-4 text-sidebar-primary" />
@@ -291,7 +291,7 @@ export function AppSidebar() {
 
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-semibold text-sidebar-foreground/85 transition-all hover:bg-destructive/[0.1] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-semibold text-sidebar-foreground/85 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-destructive/[0.08] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <LogOut className="h-4.5 w-4.5" />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
