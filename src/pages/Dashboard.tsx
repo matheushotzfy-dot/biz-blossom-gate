@@ -657,7 +657,7 @@ export default function Dashboard() {
           </div>
 
           {/* List */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 space-y-px">
+          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1.5">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
                 <p className="text-sm text-muted-foreground">Sem movimentações ainda</p>
@@ -688,36 +688,65 @@ export default function Dashboard() {
                 // Find full transaction data for detail view
                 const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) : null;
 
+                const borderColor: Record<string, string> = {
+                  completed: "border-l-success",
+                  pending: "border-l-warning",
+                  failed: "border-l-destructive",
+                  refunded: "border-l-info",
+                  chargeback: "border-l-destructive",
+                  approved: "border-l-success",
+                  rejected: "border-l-destructive",
+                };
+
+                const glowBg: Record<string, string> = {
+                  completed: "bg-success/[0.04] hover:bg-success/[0.08]",
+                  pending: "bg-warning/[0.04] hover:bg-warning/[0.08]",
+                  failed: "bg-destructive/[0.04] hover:bg-destructive/[0.08]",
+                  refunded: "bg-info/[0.04] hover:bg-info/[0.08]",
+                  chargeback: "bg-destructive/[0.04] hover:bg-destructive/[0.08]",
+                  approved: "bg-success/[0.04] hover:bg-success/[0.08]",
+                  rejected: "bg-destructive/[0.04] hover:bg-destructive/[0.08]",
+                };
+
                 return (
                   <div
                     key={item.id}
-                    className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 animate-fade-in ${
+                    className={`group relative flex items-center gap-3 rounded-xl border-l-[3px] ${borderColor[item.status] || "border-l-muted-foreground"} ${glowBg[item.status] || "hover:bg-muted/10"} px-3.5 py-3 transition-all duration-200 animate-fade-in ${
                       STAGGER_CLASSES[i + 1] || ""
                     }`}
                   >
-                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${styles.iconBg} ${styles.iconText}`}>
-                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
+                    {/* Icon */}
+                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${styles.iconBg} ${styles.iconText} ring-1 ring-border/10 shadow-sm`}>
+                      {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
                     </div>
 
+                    {/* Content */}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-foreground tabular-nums">{fmt(item.amount)}</p>
-                        <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${styles.pill}`}>{styles.label}</span>
+                      <div className="flex items-center gap-2.5">
+                        <p className="text-[14px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">
+                          {privacy.hidden ? CENSORED : fmt(item.amount)}
+                        </p>
+                        <span className={`rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${styles.pill} ring-1 ring-current/10`}>
+                          {styles.label}
+                        </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5 font-medium">
+                        {item.kind === "transaction" ? `Venda • ${item.label}` : item.label}
+                      </p>
                     </div>
 
+                    {/* Actions + time */}
                     <div className="flex items-center gap-2 shrink-0">
                       {fullTx && (
                         <button
                           onClick={() => setDetailTx(fullTx)}
-                          className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-all"
+                          className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-150"
                           title="Ver detalhes"
                         >
                           <Eye className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <span className="text-[10px] text-muted-foreground/40 tabular-nums">{timeAgo(item.createdAt)}</span>
+                      <span className="text-[10px] text-muted-foreground/40 font-semibold tabular-nums min-w-[28px] text-right">{timeAgo(item.createdAt)}</span>
                     </div>
                   </div>
                 );
