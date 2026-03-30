@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Puzzle, Settings2, Trash2, Zap, Check, ChevronRight, Shield, Sparkles, ExternalLink, CheckCircle2 } from "lucide-react";
-import { PageShell, PageTitle, GlowPanel, SectionHeader } from "@/components/PageShell";
+import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2 } from "lucide-react";
+import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts, useAppIntegrations, useInvalidateAll } from "@/hooks/useQueryData";
@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -210,178 +209,70 @@ export default function Apps() {
     else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso!`); closeDialog(); invalidateAll(["app_integrations"]); }
   };
 
-  const toggleActive = async (int_: AppIntegration) => {
-    if (!user) return;
-    await supabase.from("app_integrations").update({ is_active: !int_.is_active }).eq("id", int_.id).eq("user_id", user.id);
-    invalidateAll(["app_integrations"]);
-  };
-
-  const deleteIntegration = async (id: string) => {
-    if (!user) return;
-    if (!window.confirm("Tem certeza que deseja remover esta integração?")) return;
-    const { error } = await supabase.from("app_integrations").delete().eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error("Erro ao remover integração"); return; }
-    toast.success("Integração removida"); invalidateAll(["app_integrations"]);
-  };
-
   const toggleEvent = (event: string) => {
     setFormSelectedEvents(prev => prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event]);
   };
 
-  const hasIntegration = (appId: string) => integrations.some(i => i.app_name === appId);
   const getIntegration = (appId: string) => integrations.find(i => i.app_name === appId);
-  const getProductName = (id: string | null) => products.find(p => p.id === id)?.name || "—";
 
   return (
     <PageShell>
-      <PageTitle icon={<Puzzle className="h-6 w-6" />} title="Apps & Integrações" subtitle="Conecte ferramentas ao seu ecossistema de vendas" />
-
-      <GlowPanel glow="primary" className="surface-glow overflow-hidden p-4 md:p-5">
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.16] [mask-image:linear-gradient(180deg,hsl(var(--foreground)),transparent)]" />
-
-        <div className="relative z-[1] mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="kicker text-muted-foreground/70">Integrações disponíveis</p>
-            <h2 className="mt-2 font-display text-lg font-black tracking-tight text-foreground md:text-xl">
-              Escolha a vitrine do seu ecossistema
-            </h2>
+      <section className="space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/50 bg-card/80 text-primary shadow-[0_10px_30px_hsl(var(--foreground)/0.06)] backdrop-blur-xl">
+              <Puzzle className="h-5 w-5" />
+            </div>
+            <h1 className="font-display text-2xl font-black tracking-tight text-foreground md:text-3xl">Apps</h1>
+            <p className="text-sm text-muted-foreground/70">Clique no logo para configurar a integração.</p>
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-1.5 text-[11px] font-bold text-muted-foreground/80 backdrop-blur-xl">
-            <span className="h-2 w-2 rounded-full bg-primary" />
-            {APPS.length} integrações
+          <div className="hidden rounded-full border border-border/50 bg-card/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 backdrop-blur-xl md:inline-flex">
+            {integrations.length} ativas
           </div>
         </div>
 
-        <div className="relative z-[1] grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {APPS.map((app, idx) => {
-            const active = hasIntegration(app.id);
             const integration = getIntegration(app.id);
-            const aura = ["bg-primary/14", "bg-info/14", "bg-warning/14", "bg-success/14"][idx % 4];
+            const active = Boolean(integration?.is_active);
 
             return (
               <button
                 key={app.id}
                 onClick={() => openDialog(app, integration || undefined)}
                 className={cn(
-                  "group relative aspect-[1.04/1] overflow-hidden rounded-[28px] border text-left backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in active:scale-[0.98]",
+                  "group relative flex h-32 items-center overflow-hidden rounded-[26px] border px-7 text-left backdrop-blur-xl transition-all duration-300 ease-out animate-fade-in active:scale-[0.985] md:h-[8.5rem] md:px-8",
                   active
-                    ? "border-primary/30 bg-card/95 shadow-[0_20px_50px_hsl(var(--primary)/0.10)] hover:-translate-y-1 hover:shadow-[0_28px_64px_hsl(var(--primary)/0.14)]"
-                    : "border-border/60 bg-card/88 hover:-translate-y-1 hover:border-border/80 hover:bg-card/95 hover:shadow-[0_20px_50px_hsl(var(--foreground)/0.08)]"
+                    ? "border-primary/30 bg-card shadow-[0_18px_40px_hsl(var(--primary)/0.10)] hover:border-primary/40 hover:shadow-[0_24px_52px_hsl(var(--primary)/0.14)]"
+                    : "border-border/50 bg-card/95 shadow-[0_14px_32px_hsl(var(--foreground)/0.06)] hover:-translate-y-0.5 hover:border-border/70 hover:shadow-[0_22px_46px_hsl(var(--foreground)/0.10)]"
                 )}
                 style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
               >
                 <div className="pointer-events-none absolute inset-0">
-                  <div className={cn("absolute left-1/2 top-[-14%] h-28 w-28 -translate-x-1/2 rounded-full blur-3xl transition-all duration-500 group-hover:scale-125", aura)} />
-                  <div className="absolute inset-x-5 bottom-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-background/10 opacity-70" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-background/35 via-transparent to-background/20" />
+                  <div className={cn(
+                    "absolute inset-y-0 left-0 w-[3px] transition-opacity duration-300",
+                    active ? "bg-primary opacity-100" : "bg-border opacity-0 group-hover:opacity-100"
+                  )} />
+                  <div className={cn(
+                    "absolute -right-10 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full blur-3xl transition-opacity duration-300",
+                    active ? "bg-primary/15 opacity-100" : "bg-muted opacity-0 group-hover:opacity-60"
+                  )} />
                 </div>
 
-                {active && (
-                  <div className="absolute right-4 top-4 z-[1] flex h-8 w-8 items-center justify-center rounded-full border border-success/20 bg-success/10 text-success shadow-[0_10px_24px_hsl(var(--success)/0.18)]">
-                    <Check className="h-4 w-4" />
-                  </div>
-                )}
-
-                <div className="relative z-[1] flex h-full flex-col items-center justify-center px-5 py-6">
-                  <div className={cn(
-                    "flex h-[5.75rem] w-[5.75rem] items-center justify-center rounded-[24px] border px-4 shadow-sm transition-all duration-500 group-hover:scale-[1.05]",
-                    active
-                      ? "border-primary/20 bg-background/92 shadow-[0_10px_34px_hsl(var(--primary)/0.08)]"
-                      : "border-border/50 bg-background/84 group-hover:border-border/70"
-                  )}>
-                    <img
-                      src={app.logo}
-                      alt={app.name}
-                      className="max-h-10 max-w-[4.75rem] object-contain transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </div>
-
-                  <div className="mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 backdrop-blur-xl">
-                    <span className={cn("h-2 w-2 rounded-full", active ? "bg-success" : "bg-muted-foreground/25")} />
-                    <span className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-foreground/82">
-                      {app.name}
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-4 right-4 flex h-8 w-8 items-center justify-center rounded-full border border-border/50 bg-background/75 text-muted-foreground/55 transition-all duration-300 group-hover:border-primary/30 group-hover:text-primary">
-                    {app.id === "webhooks" ? <ExternalLink className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                  </div>
+                <div className="relative z-[1] flex h-full w-full items-center justify-center">
+                  <img
+                    src={app.logo}
+                    alt={app.name}
+                    className="max-h-12 w-auto max-w-[13rem] object-contain transition-transform duration-300 group-hover:scale-[1.03] md:max-h-14"
+                  />
                 </div>
               </button>
             );
           })}
         </div>
-      </GlowPanel>
-
-      {integrations.length > 0 && (
-        <div className="pt-2 space-y-4">
-          <SectionHeader icon={<Settings2 className="h-4.5 w-4.5" />} title="Integrações Ativas" subtitle={`${integrations.length} integração${integrations.length > 1 ? "ões" : ""} conectada${integrations.length > 1 ? "s" : ""}`} />
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {integrations.map((int_, idx) => {
-              const appDef = APPS.find(a => a.id === int_.app_name);
-              if (!appDef) return null;
-
-              return (
-                <div
-                  key={int_.id}
-                  className={cn(
-                    "panel-enterprise-subtle relative overflow-hidden p-4 animate-fade-in",
-                    int_.is_active ? "" : "opacity-70"
-                  )}
-                  style={{ animationDelay: `${idx * 45}ms`, animationFillMode: "backwards" }}
-                >
-                  <div className={cn(
-                    "pointer-events-none absolute inset-0 bg-gradient-to-br",
-                    int_.is_active ? "from-primary/[0.06] via-transparent to-transparent" : "from-muted/20 via-transparent to-transparent"
-                  )} />
-
-                  <div className="relative z-[1] flex items-start gap-3.5">
-                    <div className={cn(
-                      "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border p-3",
-                      int_.is_active ? "border-primary/15 bg-background/92" : "border-border/40 bg-background/75"
-                    )}>
-                      <img src={appDef.logo} alt={appDef.name} className="h-full w-full object-contain" />
-                    </div>
-
-                    <div className="min-w-0 flex-1 pt-1">
-                      <div className="flex items-center gap-2">
-                        <p className="truncate text-[14px] font-black tracking-tight text-foreground">{appDef.name}</p>
-                        <span className={cn("h-2 w-2 shrink-0 rounded-full", int_.is_active ? "bg-success" : "bg-muted-foreground/30")} />
-                      </div>
-                      <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/70">
-                        {getProductName(int_.product_id)}
-                      </p>
-                    </div>
-
-                    <Switch checked={int_.is_active} onCheckedChange={() => toggleActive(int_)} />
-                  </div>
-
-                  <div className="relative z-[1] mt-4 flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-10 flex-1 rounded-xl border-border/50 bg-background/70 text-[11px] font-bold hover:border-primary/25 hover:bg-primary/5 hover:text-primary"
-                      onClick={() => openDialog(appDef, int_)}
-                    >
-                      <Settings2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-10 rounded-xl px-3 text-destructive/45 hover:bg-destructive/5 hover:text-destructive"
-                      onClick={() => deleteIntegration(int_.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      </section>
 
       {/* ─── Premium Integration Dialog ─── */}
       {dialogApp && dialogApp.id !== "webhooks" && (
