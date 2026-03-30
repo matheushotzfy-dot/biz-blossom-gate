@@ -304,18 +304,22 @@ export default function ProductEditor() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ───── Top Bar ───── */}
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-          <button onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Voltar
+          <button onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2.5 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 transition-all">
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </div>
+            <span className="hidden sm:inline">Voltar aos Produtos</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {!isNew && (
-              <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold">
-                <Trash2 className="h-3.5 w-3.5" /> Excluir Produto
+              <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold rounded-xl">
+                <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Excluir</span>
               </Button>
             )}
-            <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl text-sm font-display font-black h-9 px-5 shadow-lg shadow-primary/20">
+            <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl text-sm font-display font-black h-9 px-6 shadow-lg shadow-primary/20">
               <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : "Salvar Produto"}
             </Button>
           </div>
@@ -323,25 +327,40 @@ export default function ProductEditor() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="flex gap-6">
-          <nav className="hidden lg:flex flex-col gap-1 w-56 shrink-0 sticky top-20 self-start">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-display font-bold transition-all duration-200 text-left tracking-[-0.01em]",
-                  activeTab === tab.key
-                    ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
-                )}
-              >
-                <tab.icon className="h-4 w-4 shrink-0" />
-                {tab.label}
-              </button>
-            ))}
+        <div className="flex gap-7">
+          {/* ───── Premium Sidebar Tabs ───── */}
+          <nav className="hidden lg:block w-60 shrink-0 sticky top-20 self-start">
+            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
+              <p className="px-3 pt-1 pb-2 text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
+              {TABS.map((tab, i) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-left tracking-[-0.01em] relative overflow-hidden",
+                    activeTab === tab.key
+                      ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/15 border border-transparent"
+                  )}
+                >
+                  {activeTab === tab.key && (
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
+                  )}
+                  <div className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all",
+                    activeTab === tab.key
+                      ? "bg-primary/15 ring-1 ring-primary/20"
+                      : "bg-muted/15 ring-1 ring-border/20"
+                  )}>
+                    <tab.icon className={cn("h-3.5 w-3.5", activeTab === tab.key ? "text-primary" : "text-muted-foreground/60")} />
+                  </div>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </nav>
 
+          {/* ───── Mobile Bottom Tabs ───── */}
           <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/40 px-2 py-2 flex gap-1 overflow-x-auto safe-area-bottom">
             {TABS.map((tab) => (
               <button
@@ -349,7 +368,7 @@ export default function ProductEditor() {
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all",
-                  activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                  activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
                 )}
               >
                 <tab.icon className="h-3.5 w-3.5" />
@@ -358,6 +377,7 @@ export default function ProductEditor() {
             ))}
           </div>
 
+          {/* ───── Content Area ───── */}
           <div className="flex-1 min-w-0 pb-20 lg:pb-0">
             <AnimatePresence mode="wait">
               <motion.div
@@ -365,13 +385,14 @@ export default function ProductEditor() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               >
                 {activeTab === "geral" && (
                   <div className="space-y-6">
                     <SectionHeader title="Informações do Produto" subtitle="Dados principais que serão exibidos na área de membros e programa de afiliados." />
 
-                    <div className="panel-enterprise-subtle p-0 overflow-hidden">
+                    {/* ── Image Upload Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl overflow-hidden shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
                       <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
                       <div className="p-4 border-b border-border/30">
                         <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
@@ -397,57 +418,64 @@ export default function ProductEditor() {
                             <Upload className="h-6 w-6" />
                           </div>
                           <div className="text-center">
-                            <span className="block text-xs font-semibold">Arraste ou selecione o arquivo</span>
+                            <span className="block text-xs font-display font-bold">Arraste ou selecione o arquivo</span>
                             <span className="block text-[10px] text-muted-foreground/30 mt-0.5">Solte os arquivos aqui ou clique para buscar</span>
                           </div>
                         </button>
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-                        <Package className="h-3.5 w-3.5" /> Nome do produto
-                      </Label>
-                      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11" required maxLength={200} />
-                    </div>
+                    {/* ── Details Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
 
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Descrição</Label>
-                      <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none" maxLength={2000} />
-                      <p className="text-[10px] text-muted-foreground/40 text-right">{description.length}/2000</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Categoria</Label>
-                        <Select value={category} onValueChange={setCategory}>
-                          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="infoproduto">Infoproduto</SelectItem>
-                            <SelectItem value="curso">Curso Online</SelectItem>
-                            <SelectItem value="ebook">E-book</SelectItem>
-                            <SelectItem value="mentoria">Mentoria</SelectItem>
-                            <SelectItem value="software">Software / SaaS</SelectItem>
-                            <SelectItem value="servico">Serviço</SelectItem>
-                            <SelectItem value="comunidade">Comunidade</SelectItem>
-                            <SelectItem value="outro">Outro</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
+                          <Package className="h-3.5 w-3.5" /> Nome do produto
+                        </Label>
+                        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 bg-card/80 border-border/40 focus-visible:border-primary/40" required maxLength={200} />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Tipo de pagamento</Label>
-                        <Select value={paymentType} onValueChange={setPaymentType}>
-                          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unico">Único</SelectItem>
-                            <SelectItem value="assinatura">Assinatura</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Descrição</Label>
+                        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none bg-card/80 border-border/40" maxLength={2000} />
+                        <p className="text-[10px] text-muted-foreground/40 text-right font-numbers tabular-nums">{description.length}/2000</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Categoria</Label>
+                          <Select value={category} onValueChange={setCategory}>
+                            <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="infoproduto">Infoproduto</SelectItem>
+                              <SelectItem value="curso">Curso Online</SelectItem>
+                              <SelectItem value="ebook">E-book</SelectItem>
+                              <SelectItem value="mentoria">Mentoria</SelectItem>
+                              <SelectItem value="software">Software / SaaS</SelectItem>
+                              <SelectItem value="servico">Serviço</SelectItem>
+                              <SelectItem value="comunidade">Comunidade</SelectItem>
+                              <SelectItem value="outro">Outro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Tipo de pagamento</Label>
+                          <Select value={paymentType} onValueChange={setPaymentType}>
+                            <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="unico">Único</SelectItem>
+                              <SelectItem value="assinatura">Assinatura</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    {/* ── Pricing Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
                       <div className="flex items-center justify-between">
                         <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                           <DollarSign className="h-3.5 w-3.5" /> Preços
@@ -457,7 +485,7 @@ export default function ProductEditor() {
                             <Shield className="h-3.5 w-3.5" /> Garantia
                           </Label>
                           <Select value={warrantyDays} onValueChange={setWarrantyDays}>
-                            <SelectTrigger className="h-8 w-24 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 w-24 text-xs bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="7">7 dias</SelectItem>
                               <SelectItem value="14">14 dias</SelectItem>
@@ -466,10 +494,10 @@ export default function ProductEditor() {
                           </Select>
                         </div>
                       </div>
-                      <div className="panel-enterprise-subtle overflow-hidden">
+                      <div className="rounded-xl border border-border/40 overflow-hidden bg-card/30">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
+                            <tr className="border-b border-border/30 text-muted-foreground text-[10px] bg-muted/10">
                               <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Nome</th>
                               <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Preço</th>
                               <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Tipo</th>
@@ -480,11 +508,11 @@ export default function ProductEditor() {
                             <tr className="border-b border-border/10">
                               <td className="px-4 py-3 font-display font-bold text-foreground tracking-[-0.01em]">{name || "—"}</td>
                               <td className="px-4 py-3">
-                                <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e) => setPrice(e.target.value)} className="h-8 w-28 text-sm font-numbers font-black tracking-[-0.03em]" placeholder="0.00" />
+                                <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e) => setPrice(e.target.value)} className="h-8 w-28 text-sm font-numbers font-black tracking-[-0.03em] bg-card/80 border-border/40" placeholder="0.00" />
                               </td>
                               <td className="px-4 py-3 text-muted-foreground capitalize font-display font-medium">{paymentType}</td>
                               <td className="px-4 py-3 text-center">
-                                <span className="text-[10px] text-muted-foreground/40">1/10</span>
+                                <span className="text-[10px] text-muted-foreground/40 font-numbers">1/10</span>
                               </td>
                             </tr>
                           </tbody>
@@ -492,41 +520,55 @@ export default function ProductEditor() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-                          <ExternalLink className="h-3.5 w-3.5" /> Página de vendas
-                        </Label>
-                        <Input value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11" />
+                    {/* ── Links & Support Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
+                            <ExternalLink className="h-3.5 w-3.5" /> Página de vendas
+                          </Label>
+                          <Input value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
+                            <Mail className="h-3.5 w-3.5" /> E-mail de suporte
+                          </Label>
+                          <Input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-card/80 border-border/40" />
+                        </div>
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-                          <Mail className="h-3.5 w-3.5" /> E-mail de suporte
-                        </Label>
-                        <Input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11" />
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Nome de exibição do produtor</Label>
+                        <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome ou marca" className="h-11 bg-card/80 border-border/40" />
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Nome de exibição do produtor</Label>
-                      <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome ou marca" className="h-11" />
-                    </div>
-
-                    <div className="flex items-center justify-between panel-enterprise-subtle p-4">
-                      <div className="flex items-center gap-3">
-                        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", status === "active" ? "bg-success/10" : "bg-muted/10")}>
-                          <Zap className={cn("h-4 w-4", status === "active" ? "text-success" : "text-muted-foreground/40")} />
+                    {/* ── Status Toggle Card ── */}
+                    <div className={cn(
+                      "rounded-2xl border bg-card/50 backdrop-blur-xl p-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden transition-all duration-300",
+                      status === "active" ? "border-success/30" : "border-border/50"
+                    )}>
+                      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", status === "active" ? "bg-success" : "bg-muted-foreground/20")} />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all",
+                            status === "active" ? "bg-success/10 ring-success/20" : "bg-muted/10 ring-border/20"
+                          )}>
+                            <Zap className={cn("h-4 w-4", status === "active" ? "text-success" : "text-muted-foreground/40")} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-display font-black tracking-[-0.02em]">Status do produto</p>
+                            <p className="text-[10px] text-muted-foreground/50 font-medium">Ative para começar a vender</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-display font-black tracking-[-0.02em]">Status do produto</p>
-                          <p className="text-[10px] text-muted-foreground/50 font-medium">Ative para começar a vender</p>
+                        <div className="flex items-center gap-3">
+                          <span className={cn("text-xs font-display font-black", status === "active" ? "text-success" : "text-muted-foreground/50")}>
+                            {status === "active" ? "Ativo" : "Inativo"}
+                          </span>
+                          <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={cn("text-xs font-display font-black", status === "active" ? "text-success" : "text-muted-foreground/50")}>
-                          {status === "active" ? "Ativo" : "Inativo"}
-                        </span>
-                        <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
                       </div>
                     </div>
                   </div>
@@ -608,7 +650,7 @@ export default function ProductEditor() {
                             {orderBumps.map(bump => {
                               const prod = allProducts.find(p => p.id === bump.bump_product_id);
                               return (
-                                <div key={bump.id} className="flex items-center justify-between panel-enterprise-subtle p-4">
+                                <div key={bump.id} className="flex items-center justify-between rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4">
                                   <div className="flex items-center gap-3 min-w-0 flex-1">
                                     {prod?.image_url ? (
                                       <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-lg object-cover shrink-0" />
@@ -696,7 +738,7 @@ export default function ProductEditor() {
                       <EmptyCard icon={ShoppingCart} message="Salve o produto primeiro para personalizar o checkout." />
                     ) : (
                       <>
-                        <div className="panel-enterprise-subtle overflow-hidden">
+                        <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden">
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
@@ -827,7 +869,7 @@ export default function ProductEditor() {
                           </Button>
                         </div>
 
-                        <div className="panel-enterprise-subtle overflow-hidden">
+                        <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden">
                           <table className="w-full text-sm">
                             <thead>
                                <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
@@ -859,7 +901,7 @@ export default function ProductEditor() {
                     ) : (
                       <>
                         {coupons.length > 0 ? (
-                          <div className="panel-enterprise-subtle overflow-hidden">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden">
                             <table className="w-full text-sm">
                               <thead>
                                  <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
@@ -957,7 +999,7 @@ export default function ProductEditor() {
                         </div>
 
                         {!isNew && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><UserPlus className="h-4 w-4 text-primary" /> Convidar afiliados</h4>
                             <p className="text-xs text-muted-foreground/60">Compartilhe esse link para convidar os seus afiliados:</p>
                             <div className="flex items-center gap-2">
@@ -982,7 +1024,7 @@ export default function ProductEditor() {
                     ) : (
                       <div className="space-y-4">
                         {product?.checkout_url && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={getCheckoutLink()} className="h-9 font-mono text-xs bg-muted/10" />
@@ -997,7 +1039,7 @@ export default function ProductEditor() {
                         )}
 
                         {pageUrl && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={pageUrl} className="h-9 font-mono text-xs bg-muted/10" />
@@ -1009,7 +1051,7 @@ export default function ProductEditor() {
                         )}
 
                         {affiliateEnabled && (
-                          <div className="panel-enterprise-subtle p-4 space-y-3">
+                          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 space-y-3">
                             <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><Users className="h-4 w-4 text-success" /> Link de Afiliado</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10" />
@@ -1047,18 +1089,23 @@ export default function ProductEditor() {
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-2">
-      <h2 className="text-xl font-display font-black text-foreground tracking-[-0.03em]">{title}</h2>
-      <p className="text-sm text-muted-foreground/60 mt-1">{subtitle}</p>
+    <div className="flex items-center gap-3.5 mb-5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card/45 backdrop-blur-xl">
+        <Sparkles className="h-4 w-4 text-primary" />
+      </div>
+      <div>
+        <h2 className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
+        <p className="text-[11px] text-muted-foreground/60 mt-0.5">{subtitle}</p>
+      </div>
     </div>
   );
 }
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <div className="panel-enterprise-subtle flex flex-col items-center justify-center py-12 gap-3">
-      <div className="h-12 w-12 rounded-2xl bg-muted/10 flex items-center justify-center">
-        <Icon className="h-5 w-5 text-muted-foreground/30" />
+    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl flex flex-col items-center justify-center py-14 gap-3 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
+      <div className="h-14 w-14 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/20">
+        <Icon className="h-6 w-6 text-muted-foreground/25" />
       </div>
       <p className="text-sm font-display font-bold text-muted-foreground/50">{message}</p>
     </div>
@@ -1069,12 +1116,25 @@ function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }:
   icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/20 bg-card/20 hover:border-border/40 transition-all">
+    <div className={cn(
+      "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
+      checked
+        ? "border-primary/20 bg-card/60 shadow-sm"
+        : "border-border/30 bg-card/20 hover:border-border/50"
+    )}>
+      {checked && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
       <div className="flex items-center gap-3 flex-1">
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
+        {Icon && (
+          <div className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all",
+            checked ? "bg-primary/10 ring-1 ring-primary/20" : "bg-muted/10 ring-1 ring-border/20"
+          )}>
+            <Icon className={cn("h-3.5 w-3.5", checked ? "text-primary" : "text-muted-foreground/50")} />
+          </div>
+        )}
         <div>
           <p className="text-sm font-display font-bold text-foreground tracking-[-0.01em]">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 font-medium">{sublabel}</p>}
+          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">{sublabel}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -1089,12 +1149,24 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
   icon: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; color: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   return (
-    <div className={cn("flex items-center justify-between p-4 rounded-xl border transition-all", checked ? "bg-card/40 border-border/30" : "bg-muted/5 border-border/10 opacity-60")}>
+    <div className={cn(
+      "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
+      checked
+        ? "bg-card/60 border-border/40 shadow-sm"
+        : "bg-card/15 border-border/15 opacity-50"
+    )}>
+      {checked && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info")} />}
       <div className="flex items-center gap-3">
-        <Icon className={cn("h-5 w-5", color)} />
+        <div className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
+          checked ? "ring-1 ring-border/30" : "ring-1 ring-border/10",
+          color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10"
+        )}>
+          <Icon className={cn("h-4 w-4", color)} />
+        </div>
         <div>
           <p className="text-sm font-display font-bold tracking-[-0.01em]">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 font-medium">{sublabel}</p>}
+          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-numbers">{sublabel}</p>}
         </div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
@@ -1110,7 +1182,7 @@ function BannerUpload({ label, preview, inputRef, onFile, onClear }: {
       <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">{label}</Label>
       <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden border border-border/30">
+        <div className="relative rounded-xl overflow-hidden border border-border/40 shadow-sm">
           <img src={preview} alt={label} className="w-full h-28 object-cover" />
           <button type="button" onClick={onClear} className="absolute top-2 right-2 h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-destructive">
             <X className="h-3 w-3" />
