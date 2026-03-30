@@ -255,7 +255,7 @@ function TxCard({ tx, products, onClick, index }: {
             <p className="text-muted-foreground text-[11px] mt-0.5 truncate">{tx.customer_email || ""}</p>
           </div>
         </div>
-        <StatusBadge status={tx.status} />
+        <StatusDot status={tx.status} />
       </div>
       <div className="flex items-end justify-between">
         <div>
