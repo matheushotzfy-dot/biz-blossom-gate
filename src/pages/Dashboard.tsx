@@ -381,7 +381,7 @@ export default function Dashboard() {
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Ativado</span>
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight">
+              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight tracking-[-0.04em]">
                 MODO ESCALA<br />
                 <span className="text-gradient">ATIVADO!</span>
               </h2>
@@ -438,7 +438,7 @@ export default function Dashboard() {
           {/* Title row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1.5 md:space-y-2">
-              <h1 className="text-xl md:text-4xl lg:text-5xl font-display font-black tracking-tight leading-[1.1] text-foreground">
+              <h1 className="text-xl md:text-4xl lg:text-5xl font-display font-black tracking-[-0.04em] leading-[1.05] text-foreground">
                 {nickname ? (
                   <>Bem Vindo, <span className="text-gradient">{nickname}</span></>
                 ) : (
@@ -852,7 +852,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
           </div>
           <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
         </div>
-        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-tight text-foreground tabular-nums">{value}</p>
+        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums">{value}</p>
       </div>
     </div>
   );
@@ -878,7 +878,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
             <span className={toneMap[tone].text}>{icon}</span>
           </div>
         </div>
-        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-tight text-foreground tabular-nums">{value}</p>
+        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums">{value}</p>
         <p className="mt-1.5 md:mt-2 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
       </div>
     </div>

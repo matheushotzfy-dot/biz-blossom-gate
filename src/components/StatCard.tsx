@@ -15,8 +15,8 @@ export function StatCard({ title, value, icon: Icon, change, changeType = "neutr
     <div className={cn("glass-card-hover rounded-2xl p-5 animate-slide-up", className)}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">{title}</p>
-          <p className="text-2xl font-extrabold mt-2 tracking-tight text-foreground font-display">{value}</p>
+          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">{title}</p>
+          <p className="text-2xl font-black mt-2 tracking-tight text-foreground font-display tabular-nums">{value}</p>
           {change && (
             <p className={cn(
               "text-xs font-semibold mt-2",
