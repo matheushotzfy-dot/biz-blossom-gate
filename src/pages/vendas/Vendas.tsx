@@ -105,24 +105,37 @@ function TxRow({ tx, products, onClick, index }: {
     }
   };
 
+  const statusAccent: Record<string, { border: string; bg: string }> = {
+    completed: { border: "border-l-success", bg: "hover:bg-success/[0.04]" },
+    pending: { border: "border-l-warning", bg: "hover:bg-warning/[0.04]" },
+    failed: { border: "border-l-destructive", bg: "hover:bg-destructive/[0.04]" },
+    refunded: { border: "border-l-info", bg: "hover:bg-info/[0.04]" },
+    chargeback: { border: "border-l-destructive", bg: "hover:bg-destructive/[0.04]" },
+  };
+  const accent = statusAccent[tx.status] || { border: "border-l-muted-foreground", bg: "hover:bg-muted/10" };
+
   return (
     <motion.tr
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.4) }}
       onClick={onClick}
-      className="border-b border-border/30 dark:border-foreground/[0.04] hover:bg-muted/20 dark:hover:bg-foreground/[0.02] transition-colors cursor-pointer group"
+      className={cn(
+        "border-b border-border/20 dark:border-foreground/[0.03] transition-all cursor-pointer group border-l-[3px]",
+        accent.border,
+        accent.bg
+      )}
     >
       <td className="p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
+          <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/20">
             <AvatarFallback className={cn("text-[11px] font-bold", avatarColor)}>
               {getInitials(customerName)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-foreground font-medium text-[13px] leading-tight truncate">{customerName}</p>
-            {tx.customer_email && <p className="text-muted-foreground text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
+            <p className="text-foreground font-semibold text-[13px] leading-tight truncate">{customerName}</p>
+            {tx.customer_email && <p className="text-muted-foreground/60 text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
@@ -131,25 +144,27 @@ function TxRow({ tx, products, onClick, index }: {
       </td>
       <td className="p-4">
         <div>
-          <span className="font-display font-bold text-foreground text-[15px] block">
+          <span className="font-display font-black text-foreground text-[15px] block tracking-[-0.02em] tabular-nums">
             {fmt(Number(tx.net_amount))}
           </span>
           {Number(tx.fee_amount) > 0 && (
-            <span className="text-[10px] text-muted-foreground">taxa: {fmt(Number(tx.fee_amount))}</span>
+            <span className="text-[10px] text-muted-foreground/50 font-medium">taxa: {fmt(Number(tx.fee_amount))}</span>
           )}
         </div>
       </td>
       <td className="p-4">
-        <span className={cn("inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md", method.color)}>
+        <span className={cn("inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-lg", method.color)}>
           {method.icon}
           {method.label}
         </span>
       </td>
-      <td className="p-4"><StatusBadge status={tx.status} /></td>
+      <td className="p-4">
+        <StatusDot status={tx.status} />
+      </td>
       <td className="p-4">
         <div>
-          <p className="text-foreground/70 text-[12px] font-medium">{fmtDate(tx.created_at)}</p>
-          <p className="text-muted-foreground text-[10px]">{fmtTime(tx.created_at)}</p>
+          <p className="text-foreground/70 text-[12px] font-medium tabular-nums">{fmtDate(tx.created_at)}</p>
+          <p className="text-muted-foreground/40 text-[10px] tabular-nums">{fmtTime(tx.created_at)}</p>
         </div>
       </td>
       <td className="p-4">
