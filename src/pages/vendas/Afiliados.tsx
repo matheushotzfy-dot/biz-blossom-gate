@@ -335,10 +335,10 @@ export default function Afiliados() {
       {tab === "affiliate-of" && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiCard label="Comissões Ganhas" value={fmt(totalCommissionEarned)} icon={DollarSign} bg="bg-success/10" color="text-success" sub={`${mySales.filter(s => s.status === "approved").length} vendas aprovadas`} delay={0} large />
-            <KpiCard label="Pendente" value={fmt(totalCommissionPending)} icon={Clock} bg="bg-warning/10" color="text-warning" sub="aguardando" delay={0.06} large />
-            <KpiCard label="Cliques Totais" value={String(totalClicks)} icon={MousePointerClick} bg="bg-info/10" color="text-info" sub={`${conversionRate.toFixed(1)}% conversão`} delay={0.12} />
-            <KpiCard label="Links Ativos" value={String(myLinks.filter(l => l.is_active).length)} icon={Link2} bg="bg-primary/10" color="text-primary" sub={`de ${myLinks.length} total`} delay={0.18} />
+            <GlassKpi label="Comissões Ganhas" value={fmt(totalCommissionEarned)} icon={DollarSign} tone="success" sub={`${mySales.filter(s => s.status === "approved").length} vendas aprovadas`} delay={0} large />
+            <GlassKpi label="Pendente" value={fmt(totalCommissionPending)} icon={Clock} tone="warning" sub="aguardando" delay={1} large />
+            <GlassKpi label="Cliques Totais" value={String(totalClicks)} icon={MousePointerClick} tone="info" sub={`${conversionRate.toFixed(1)}% conversão`} delay={2} />
+            <GlassKpi label="Links Ativos" value={String(myLinks.filter(l => l.is_active).length)} icon={Link2} tone="primary" sub={`de ${myLinks.length} total`} delay={3} />
           </div>
 
           <div className="space-y-3">
