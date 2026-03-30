@@ -45,7 +45,7 @@ import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
-const NAV_SECTIONS = [
+const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: string; icon: any; employeeAccess: boolean }[] }[] = [
   {
     id: "core", label: "OPERACIONAL",
     items: [
@@ -94,7 +94,7 @@ const NAV_SECTIONS = [
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
-] as const;
+];
 
 type TabId = string;
 
