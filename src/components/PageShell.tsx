@@ -167,6 +167,14 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
   };
   const t = toneStyles[tone] || toneStyles.primary;
 
+  const accentBar: Record<string, string> = {
+    primary: "bg-primary",
+    info: "bg-info",
+    warning: "bg-warning",
+    success: "bg-success",
+    destructive: "bg-destructive",
+  };
+
   return (
     <div
       className={cn(
@@ -176,17 +184,21 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
       )}
       style={{ animationDelay: `${delay * 60}ms` }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", t.bg)}>
-          <Icon className={cn("h-4 w-4", t.color)} />
+      {/* Accent bar */}
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBar[tone] || accentBar.primary)} />
+      <div className="pl-1.5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
+            <Icon className={cn("h-4 w-4", t.color)} />
+          </div>
         </div>
+        <p className={cn(
+          "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
+          large ? "text-3xl md:text-4xl" : "text-[22px] md:text-2xl"
+        )}>{value}</p>
+        {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
       </div>
-      <p className={cn(
-        "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
-        large ? "text-3xl md:text-4xl" : "text-[22px] md:text-2xl"
-      )}>{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
     </div>
   );
 }
