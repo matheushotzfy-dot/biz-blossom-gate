@@ -746,7 +746,7 @@ export default function CourseBuilder() {
 
               {/* ─── Attachments ─── */}
               <div className="relative rounded-2xl bg-card/80 backdrop-blur-sm border border-border/40 p-5 sm:p-6 shadow-sm overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-[hsl(var(--primary))]" style={{ background: 'hsl(280 60% 55%)' }} />
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-accent" />
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-violet-500/10 ring-1 ring-violet-500/20 flex items-center justify-center">
