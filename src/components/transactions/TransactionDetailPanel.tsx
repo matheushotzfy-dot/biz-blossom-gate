@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Package,
   Phone,
+  Receipt,
   RefreshCw,
   Smartphone,
   Users,
@@ -83,7 +84,7 @@ const getAvatarTone = (name: string) => {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border/40 bg-muted/[0.035] p-4 sm:p-5">
+    <section className="rounded-[24px] border border-border/40 bg-muted/[0.04] p-4 shadow-sm sm:p-5">
       <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/70">{title}</p>
       {children}
     </section>
@@ -107,7 +108,7 @@ function DataRow({
         {icon}
         <span>{label}</span>
       </div>
-      <div className={cn("min-w-0 max-w-[62%] text-right text-[13px] font-semibold text-foreground break-words", valueClassName)}>
+      <div className={cn("min-w-0 max-w-[72%] text-right text-[13px] font-semibold text-foreground break-words", valueClassName)}>
         {value}
       </div>
     </div>
@@ -163,7 +164,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.99 }}
             transition={{ type: "spring", duration: 0.42, bounce: 0.06 }}
-            className="pointer-events-auto flex max-h-[90vh] w-full max-w-[560px] flex-col overflow-hidden rounded-[28px] border border-border/50 bg-card shadow-2xl"
+            className="pointer-events-auto flex max-h-[92vh] w-full max-w-[760px] flex-col overflow-hidden rounded-[30px] border border-border/50 bg-card/98 shadow-2xl"
           >
             <div className="relative shrink-0 border-b border-border/40 bg-card px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
               <button
@@ -195,76 +196,103 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-border/40 bg-muted/[0.04] p-4">
-                <p className="text-[11px] font-semibold text-muted-foreground/75">Valor bruto</p>
-                <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-                  <p className="text-[30px] font-black leading-none tracking-tight text-foreground sm:text-[34px]">{formatCurrency(Number(tx.amount))}</p>
-                  <p className="text-[12px] font-medium text-muted-foreground">{formatDateTime(tx.created_at)}</p>
+              <div className="mt-5 rounded-[24px] border border-border/40 bg-muted/[0.05] p-4 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground/75">Valor bruto</p>
+                    <p className="mt-2 text-[30px] font-black leading-none tracking-tight text-foreground sm:text-[36px]">{formatCurrency(Number(tx.amount))}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border/35 bg-background/35 px-3 py-2 text-right">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">Data</p>
+                    <p className="mt-1 text-[12px] font-semibold text-foreground">{formatDateTime(tx.created_at)}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto overscroll-contain">
-              <div className="space-y-4 px-5 py-5 sm:px-6 sm:py-6">
-                <section className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-border/40 bg-muted/[0.03] p-4">
+              <div className="grid gap-4 px-5 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+                <div className="space-y-4">
+                  <section className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-[24px] border border-border/40 bg-muted/[0.03] p-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Bruto</p>
                     <p className="mt-2 text-[18px] font-black text-foreground">{formatCurrency(Number(tx.amount))}</p>
-                  </div>
-                  <div className="rounded-2xl border border-border/40 bg-muted/[0.03] p-4">
+                    </div>
+                    <div className="rounded-[24px] border border-border/40 bg-muted/[0.03] p-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Taxa</p>
                     <p className="mt-2 text-[18px] font-black text-destructive">- {formatCurrency(Number(tx.fee_amount))}</p>
-                  </div>
-                  <div className="rounded-2xl border border-primary/20 bg-primary/[0.05] p-4">
+                    </div>
+                    <div className="rounded-[24px] border border-primary/20 bg-primary/[0.05] p-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80">Líquido</p>
                     <p className="mt-2 text-[18px] font-black text-primary">{formatCurrency(Number(tx.net_amount))}</p>
-                  </div>
-                </section>
-
-                <SectionCard title="Transação">
-                  <DataRow label="Produto" value={<span className="block break-words text-right">{productName}</span>} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />
-                  <DataRow label="Método" value={methodLabel} icon={<CreditCard className="h-3.5 w-3.5 shrink-0" />} />
-                  <DataRow label="Data" value={formatDateTime(tx.created_at)} icon={<Zap className="h-3.5 w-3.5 shrink-0" />} />
-                  {Number(tx.retained_amount) > 0 && (
-                    <DataRow
-                      label="Valor retido"
-                      value={`- ${formatCurrency(Number(tx.retained_amount))}`}
-                      icon={<ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
-                      valueClassName="text-warning"
-                    />
-                  )}
-                  <div className="mt-3 rounded-xl border border-border/40 bg-background/40 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">ID da transação</p>
-                        <p className="mt-2 break-all font-mono text-[12px] text-foreground/90">{tx.id}</p>
-                      </div>
-                      <Button variant="outline" size="sm" className="h-9 shrink-0 rounded-xl" onClick={handleCopyId}>
-                        {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
-                      </Button>
                     </div>
-                  </div>
-                </SectionCard>
+                  </section>
 
-                <SectionCard title="Cliente">
-                  <DataRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
-                  <DataRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
-                  <DataRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3.5 w-3.5 shrink-0" />} />
-                  {tx.customer_document && <DataRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />}
-                </SectionCard>
-
-                {trackingItems.length > 0 && (
-                  <SectionCard title="Rastreamento">
-                    <div className="space-y-2">
-                      {trackingItems.map(([key, value]) => (
-                        <div key={key} className="flex items-start justify-between gap-4 rounded-xl border border-border/30 bg-background/35 px-3 py-2.5">
-                          <span className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">{key}</span>
-                          <span className="min-w-0 break-words text-right text-[12px] font-semibold text-foreground">{value}</span>
+                  <SectionCard title="Transação">
+                    <DataRow label="Produto" value={<span className="block break-words text-right">{productName}</span>} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />
+                    <DataRow label="Método" value={methodLabel} icon={<CreditCard className="h-3.5 w-3.5 shrink-0" />} />
+                    <DataRow label="Data" value={formatDateTime(tx.created_at)} icon={<Zap className="h-3.5 w-3.5 shrink-0" />} />
+                    {Number(tx.retained_amount) > 0 && (
+                      <DataRow
+                        label="Valor retido"
+                        value={`- ${formatCurrency(Number(tx.retained_amount))}`}
+                        icon={<ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
+                        valueClassName="text-warning"
+                      />
+                    )}
+                    <div className="mt-3 rounded-2xl border border-border/40 bg-background/40 p-3 sm:p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">ID da transação</p>
+                          <p className="mt-2 break-all font-mono text-[12px] text-foreground/90">{tx.id}</p>
                         </div>
-                      ))}
+                        <Button variant="outline" size="sm" className="h-9 shrink-0 rounded-xl" onClick={handleCopyId}>
+                          {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </div>
                   </SectionCard>
-                )}
+                </div>
+
+                <div className="space-y-4">
+                  <SectionCard title="Cliente">
+                    <DataRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
+                    <DataRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
+                    <DataRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3.5 w-3.5 shrink-0" />} />
+                    {tx.customer_document && <DataRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />}
+                  </SectionCard>
+
+                  <SectionCard title="Resumo rápido">
+                    <div className="space-y-3">
+                      <div className="rounded-2xl border border-border/30 bg-background/35 p-3">
+                        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">
+                          <Receipt className="h-3.5 w-3.5" /> Status atual
+                        </div>
+                        <div className="mt-2">
+                          <StatusBadge status={tx.status} />
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-border/30 bg-background/35 p-3">
+                        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">Produto vinculado</p>
+                        <p className="mt-2 break-words text-[13px] font-semibold text-foreground">{productName}</p>
+                      </div>
+                    </div>
+                  </SectionCard>
+
+                  {trackingItems.length > 0 && (
+                    <SectionCard title="Rastreamento">
+                      <div className="space-y-2">
+                        {trackingItems.map(([key, value]) => (
+                          <div key={key} className="flex items-start justify-between gap-4 rounded-2xl border border-border/30 bg-background/35 px-3 py-2.5">
+                            <span className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">{key}</span>
+                            <span className="min-w-0 break-words text-right text-[12px] font-semibold text-foreground">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </SectionCard>
+                  )}
+                </div>
               </div>
             </div>
 
