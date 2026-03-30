@@ -235,12 +235,23 @@ function TxCard({ tx, products, onClick, index }: {
   const customerName = tx.customer_name || "Cliente";
   const avatarColor = getAvatarColor(customerName);
 
+  const statusBorderMobile: Record<string, string> = {
+    completed: "border-l-success",
+    pending: "border-l-warning",
+    failed: "border-l-destructive",
+    refunded: "border-l-info",
+    chargeback: "border-l-destructive",
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 cursor-pointer active:scale-[0.99] transition-transform"
+      className={cn(
+        "rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 cursor-pointer active:scale-[0.99] transition-all border-l-[3px]",
+        statusBorderMobile[tx.status] || "border-l-muted-foreground"
+      )}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
