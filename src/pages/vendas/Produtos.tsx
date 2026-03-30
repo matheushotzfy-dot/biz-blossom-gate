@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
@@ -259,7 +259,10 @@ export default function Produtos() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.06, 0.4) }}
-              className="group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden flex flex-col hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+              className={cn(
+                "group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden flex flex-col hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 border-l-[3px]",
+                p.status === "active" ? "border-l-success" : p.status === "inactive" ? "border-l-destructive" : "border-l-warning"
+              )}
             >
               {/* Image */}
               <div className="relative h-44 overflow-hidden bg-gradient-to-br from-muted/20 to-muted/5">
