@@ -1094,12 +1094,25 @@ function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }:
   icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/20 bg-card/20 hover:border-border/40 transition-all">
+    <div className={cn(
+      "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
+      checked
+        ? "border-primary/20 bg-card/60 shadow-sm"
+        : "border-border/30 bg-card/20 hover:border-border/50"
+    )}>
+      {checked && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
       <div className="flex items-center gap-3 flex-1">
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
+        {Icon && (
+          <div className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all",
+            checked ? "bg-primary/10 ring-1 ring-primary/20" : "bg-muted/10 ring-1 ring-border/20"
+          )}>
+            <Icon className={cn("h-3.5 w-3.5", checked ? "text-primary" : "text-muted-foreground/50")} />
+          </div>
+        )}
         <div>
           <p className="text-sm font-display font-bold text-foreground tracking-[-0.01em]">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 font-medium">{sublabel}</p>}
+          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">{sublabel}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
