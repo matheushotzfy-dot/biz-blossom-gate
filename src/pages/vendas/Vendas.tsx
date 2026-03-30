@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
-import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
