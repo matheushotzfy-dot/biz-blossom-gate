@@ -126,7 +126,8 @@ app.listen(3000);`,
     id: "python",
     label: "Python",
     icon: "PY",
-    code: `import hmac
+    code: `import os
+import hmac
 import hashlib
 import json
 from flask import Flask, request, jsonify
