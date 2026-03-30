@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import {
-  ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X,
+  ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X, EyeOff,
   Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
   RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
   Download, Smartphone, FileText, BarChart3, ArrowDownRight, Zap, Filter,
@@ -614,6 +614,16 @@ export default function Vendas() {
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [privacyHidden, setPrivacyHidden] = useState(() => {
+    try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
+  });
+  const togglePrivacy = useCallback(() => {
+    setPrivacyHidden(prev => {
+      const next = !prev;
+      try { localStorage.setItem("privacy_mode", String(next)); } catch {}
+      return next;
+    });
+  }, []);
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, datePreset]);
 
@@ -719,17 +729,26 @@ export default function Vendas() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle icon={<Receipt className="h-6 w-6" />} title="Minhas Vendas" subtitle="Acompanhe todas as suas transações" />
-        <Button variant="ghost" size="sm" onClick={() => setShowExportDialog(true)} className="gap-2 rounded-lg h-9 font-medium text-[12px] text-muted-foreground hover:text-foreground">
-          <Download className="h-3.5 w-3.5" /> Exportar CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={togglePrivacy}
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3 text-xs font-semibold text-foreground shadow-sm transition-all hover:border-primary/25"
+            title={privacyHidden ? "Mostrar valores" : "Ocultar valores"}
+          >
+            {privacyHidden ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-primary" />}
+          </button>
+          <Button variant="ghost" size="sm" onClick={() => setShowExportDialog(true)} className="gap-2 rounded-lg h-9 font-medium text-[12px] text-muted-foreground hover:text-foreground">
+            <Download className="h-3.5 w-3.5" /> Exportar CSV
+          </Button>
+        </div>
       </div>
 
       {/* KPIs — Glass cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <VendasKpi label="Receita Líquida" value={fmt(totalSales)} sub={`${approved.length} aprovadas`} icon={DollarSign} iconBg="bg-primary/10" iconColor="text-primary" />
-        <VendasKpi label="Faturamento Bruto" value={fmt(totalGross)} sub="antes das taxas" icon={BarChart3} iconBg="bg-info/10" iconColor="text-info" />
-        <VendasKpi label="Ticket Médio" value={fmt(avgTicket)} sub="por venda aprovada" icon={TrendingUp} iconBg="bg-warning/10" iconColor="text-warning" />
-        <VendasKpi label="Total Transações" value={String(dateFiltered.length)} sub={`${conversion.toFixed(0)}% conversão`} icon={Users} iconBg="bg-accent" iconColor="text-accent-foreground" />
+        <VendasKpi label="Receita Líquida" value={privacyHidden ? "••••••" : fmt(totalSales)} sub={privacyHidden ? "••••" : `${approved.length} aprovadas`} icon={DollarSign} iconBg="bg-primary/10" iconColor="text-primary" />
+        <VendasKpi label="Faturamento Bruto" value={privacyHidden ? "••••••" : fmt(totalGross)} sub="antes das taxas" icon={BarChart3} iconBg="bg-info/10" iconColor="text-info" />
+        <VendasKpi label="Ticket Médio" value={privacyHidden ? "••••••" : fmt(avgTicket)} sub="por venda aprovada" icon={TrendingUp} iconBg="bg-warning/10" iconColor="text-warning" />
+        <VendasKpi label="Total Transações" value={privacyHidden ? "••••••" : String(dateFiltered.length)} sub={privacyHidden ? "••••" : `${conversion.toFixed(0)}% conversão`} icon={Users} iconBg="bg-accent" iconColor="text-accent-foreground" />
       </div>
 
       {/* Controls */}
