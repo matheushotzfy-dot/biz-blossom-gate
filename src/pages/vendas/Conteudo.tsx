@@ -10,6 +10,7 @@ import {
   Users, TrendingUp, Clock,
   GraduationCap, Video, DollarSign, BarChart3,
   ArrowUpRight, PlayCircle, Settings, ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,21 @@ interface Product { id: string; name: string; price: number; }
 
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+// ─── Premium Section Card ─────────────────────────────────────────
+function SectionCard({ children, accentColor = "primary", className }: {
+  children: React.ReactNode; accentColor?: string; className?: string;
+}) {
+  return (
+    <div className={cn(
+      "relative rounded-2xl bg-card/80 backdrop-blur-sm border border-border/40 overflow-hidden shadow-sm",
+      className
+    )}>
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${accentColor}`)} />
+      {children}
+    </div>
+  );
+}
 
 // ─── Image Upload ─────────────────────────────────────────────────
 function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
@@ -56,12 +72,12 @@ function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
 
   return (
     <div>
-      <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">{label}</Label>
+      <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] mb-2 block">{label}</Label>
       <div
         onClick={() => inputRef.current?.click()}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-        className={cn("relative rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors cursor-pointer overflow-hidden group/img", height, value ? "p-0" : "flex flex-col items-center justify-center")}
+        className={cn("relative rounded-xl border-2 border-dashed border-border/50 hover:border-primary/40 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer overflow-hidden group/img", height, value ? "p-0" : "flex flex-col items-center justify-center bg-muted/10")}
       >
         {value ? (
           <>
@@ -77,13 +93,33 @@ function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
           </>
         ) : (
           <>
-            <ImageIcon className="h-6 w-6 text-muted-foreground/40 mb-1.5" />
-            <p className="text-[11px] text-muted-foreground">{uploading ? "Enviando..." : "Clique ou arraste"}</p>
-            <p className="text-[10px] text-muted-foreground/60">PNG, JPG até 5MB</p>
+            <div className="h-12 w-12 rounded-xl bg-muted/30 flex items-center justify-center mb-2">
+              <ImageIcon className="h-5 w-5 text-muted-foreground/30" />
+            </div>
+            <p className="text-[11px] font-medium text-muted-foreground/60">{uploading ? "Enviando..." : "Clique ou arraste"}</p>
+            <p className="text-[10px] text-muted-foreground/40">PNG, JPG até 5MB</p>
           </>
         )}
       </div>
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+    </div>
+  );
+}
+
+// ─── Premium KPI Card ─────────────────────────────────────────────
+function ContentKpi({ icon, label, value, accentBg, accentText }: {
+  icon: React.ReactNode; label: string; value: string; accentBg: string; accentText: string;
+}) {
+  return (
+    <div className="relative rounded-2xl bg-card/80 backdrop-blur-sm border border-border/40 p-5 overflow-hidden hover:border-primary/20 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] group">
+      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `hsl(var(--${accentText === 'text-primary' ? 'primary' : accentText === 'text-success' ? 'success' : accentText === 'text-info' ? 'info' : 'warning'}))` }} />
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+        <div className={cn("h-9 w-9 rounded-xl ring-1 flex items-center justify-center", accentBg, `ring-${accentText.replace('text-', '')}/20`)}>
+          {icon}
+        </div>
+      </div>
+      <p className="text-2xl font-display font-black text-foreground tracking-tight">{value}</p>
     </div>
   );
 }
@@ -96,7 +132,13 @@ function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTog
   getMemberLink: string;
 }) {
   return (
-    <div className="group relative rounded-2xl bg-card border border-border/50 overflow-hidden flex flex-col hover:border-primary/25 transition-all duration-300">
+    <div className="group relative rounded-2xl bg-card/80 backdrop-blur-sm border border-border/40 overflow-hidden flex flex-col hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
+      {/* Accent bar */}
+      <div className={cn(
+        "absolute left-0 top-0 bottom-0 w-[3px] rounded-full z-10 transition-opacity",
+        course.is_published ? "bg-success opacity-100" : "bg-muted-foreground/20 opacity-50"
+      )} />
+
       {/* Thumbnail */}
       <div className="relative h-44 overflow-hidden cursor-pointer" onClick={onNavigate}>
         {course.thumbnail_url ? (
@@ -134,7 +176,7 @@ function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTog
 
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <div className="h-12 w-12 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl">
+          <div className="h-12 w-12 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl shadow-primary/20">
             <FolderOpen className="h-5 w-5 text-primary-foreground" />
           </div>
         </div>
@@ -152,7 +194,7 @@ function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTog
 
       {/* Content */}
       <div className="p-5 flex flex-1 flex-col">
-        <h3 className="text-[15px] font-bold text-foreground leading-snug line-clamp-1 mb-1">{course.title}</h3>
+        <h3 className="text-[15px] font-display font-black text-foreground leading-snug line-clamp-1 mb-1 tracking-tight">{course.title}</h3>
         {course.description ? (
           <p className="text-[12px] text-muted-foreground/70 line-clamp-2 mb-3 leading-relaxed">{course.description}</p>
         ) : (
@@ -162,16 +204,16 @@ function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTog
         {/* Product + Revenue */}
         <div className="space-y-2 mb-4">
           {product && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
               <LinkIcon className="h-3 w-3 text-primary shrink-0" />
               <span className="text-[11px] font-semibold text-primary truncate flex-1">{product.name}</span>
-              <span className="text-[10px] font-bold text-primary/70">{fmt(product.price)}</span>
+              <span className="text-[10px] font-numbers font-bold text-primary/70">{fmt(product.price)}</span>
             </div>
           )}
           {revenue > 0 && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/5 border border-success/10">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-success/5 border border-success/10">
               <DollarSign className="h-3 w-3 text-success shrink-0" />
-              <span className="text-[11px] font-semibold text-success">{fmt(revenue)} em vendas</span>
+              <span className="text-[11px] font-numbers font-semibold text-success">{fmt(revenue)} em vendas</span>
             </div>
           )}
         </div>
@@ -188,7 +230,7 @@ function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTog
         <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/30">
           <Button
             variant="ghost" size="sm"
-            className="gap-1.5 rounded-xl text-[11px] h-9 font-semibold text-primary hover:text-primary hover:bg-primary/10 flex-1 justify-center"
+            className="gap-1.5 rounded-xl text-[11px] h-9 font-bold text-primary hover:text-primary hover:bg-primary/10 flex-1 justify-center"
             onClick={onNavigate}
           >
             <FolderOpen className="h-3.5 w-3.5" /> Gerenciar
@@ -246,7 +288,7 @@ function CourseRow({ course, stats, product, revenue, onEdit, onNavigate, onTogg
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-foreground truncate max-w-[220px]">{course.title}</p>
+            <p className="text-[13px] font-display font-bold text-foreground truncate max-w-[220px]">{course.title}</p>
             {course.description && <p className="text-[11px] text-muted-foreground/60 truncate max-w-[220px]">{course.description}</p>}
           </div>
         </div>
@@ -276,7 +318,7 @@ function CourseRow({ course, stats, product, revenue, onEdit, onNavigate, onTogg
         )}
       </td>
       <td className="p-4">
-        <span className="text-[13px] font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
+        <span className="text-[13px] font-numbers font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
       </td>
       <td className="p-4">
         <span className="text-[11px] text-muted-foreground">{new Date(course.created_at).toLocaleDateString("pt-BR")}</span>
@@ -447,30 +489,18 @@ export default function AdminConteudo() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<BookOpen className="h-6 w-6" />} title="Conteúdo" subtitle="Gerencie cursos, módulos e aulas da sua área de membros" />
-        <Button onClick={openNew} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+        <Button onClick={openNew} className="gap-2 rounded-xl text-sm font-bold h-10 px-5 shadow-lg shadow-primary/20">
           <Plus className="h-4 w-4" /> Novo Curso
         </Button>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {[
-          { label: "Total Cursos", value: String(totalCourses), icon: GraduationCap, bg: "bg-primary/10", color: "text-primary" },
-          { label: "Publicados", value: String(publishedCourses), icon: Globe, bg: "bg-success/10", color: "text-success" },
-          { label: "Módulos", value: String(totalModules), icon: Layers, bg: "bg-info/10", color: "text-info" },
-          { label: "Aulas", value: String(totalLessons), icon: Video, bg: "bg-warning/10", color: "text-warning" },
-          { label: "Receita Cursos", value: fmt(totalRevenue), icon: DollarSign, bg: "bg-primary/10", color: "text-primary" },
-        ].map(kpi => (
-          <div key={kpi.label} className="rounded-2xl bg-card border border-border/50 p-5 hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{kpi.label}</span>
-              <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", kpi.bg)}>
-                <kpi.icon className={cn("h-4 w-4", kpi.color)} />
-              </div>
-            </div>
-            <p className="text-2xl font-display font-black text-foreground tracking-tight">{kpi.value}</p>
-          </div>
-        ))}
+        <ContentKpi icon={<GraduationCap className="h-4 w-4 text-primary" />} label="Total Cursos" value={String(totalCourses)} accentBg="bg-primary/10" accentText="text-primary" />
+        <ContentKpi icon={<Globe className="h-4 w-4 text-success" />} label="Publicados" value={String(publishedCourses)} accentBg="bg-success/10" accentText="text-success" />
+        <ContentKpi icon={<Layers className="h-4 w-4 text-info" />} label="Módulos" value={String(totalModules)} accentBg="bg-info/10" accentText="text-info" />
+        <ContentKpi icon={<Video className="h-4 w-4 text-warning" />} label="Aulas" value={String(totalLessons)} accentBg="bg-warning/10" accentText="text-warning" />
+        <ContentKpi icon={<DollarSign className="h-4 w-4 text-primary" />} label="Receita Cursos" value={fmt(totalRevenue)} accentBg="bg-primary/10" accentText="text-primary" />
       </div>
 
       {/* Filters bar */}
@@ -482,10 +512,10 @@ export default function AdminConteudo() {
               placeholder="Buscar cursos..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-10 h-10 rounded-xl"
+              className="pl-10 h-10 rounded-xl bg-card/80"
             />
           </div>
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/40 w-fit">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-card/60 backdrop-blur-sm border border-border/40 w-fit">
             {([
               { id: "all" as const, label: "Todos", count: totalCourses },
               { id: "published" as const, label: "Publicados", count: publishedCourses },
@@ -495,8 +525,8 @@ export default function AdminConteudo() {
                 key={f.id}
                 onClick={() => setFilter(f.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                  filter === f.id ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground"
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                  filter === f.id ? "bg-primary/10 text-primary border border-primary/20 shadow-sm" : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {f.label}
@@ -507,11 +537,11 @@ export default function AdminConteudo() {
         </div>
 
         {/* View toggle */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/30 border border-border/40">
-          <button onClick={() => setViewMode("grid")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === "grid" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-card/60 backdrop-blur-sm border border-border/40">
+          <button onClick={() => setViewMode("grid")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === "grid" ? "bg-primary/10 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}>
             <BarChart3 className="h-3.5 w-3.5 rotate-90" />
           </button>
-          <button onClick={() => setViewMode("list")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === "list" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>
+          <button onClick={() => setViewMode("list")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === "list" ? "bg-primary/10 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}>
             <PlayCircle className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -556,13 +586,13 @@ export default function AdminConteudo() {
         </div>
       ) : (
         /* List View */
-        <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+        <SectionCard accentColor="primary">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/40">
+                <tr className="border-b border-border/40 bg-muted/5">
                   {["Curso", "Status", "Conteúdo", "Produto", "Receita", "Criado", ""].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-[0.14em]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -589,49 +619,54 @@ export default function AdminConteudo() {
               </tbody>
             </table>
           </div>
-        </div>
+        </SectionCard>
       )}
 
       {/* Results count */}
       {!isLoading && filtered.length > 0 && (
         <div className="flex items-center justify-between px-1">
           <p className="text-[12px] text-muted-foreground/60">{filtered.length} curso{filtered.length > 1 ? "s" : ""} encontrado{filtered.length > 1 ? "s" : ""}</p>
-          {totalRevenue > 0 && <p className="text-[12px] text-primary font-medium">{fmt(totalRevenue)} de receita total</p>}
+          {totalRevenue > 0 && <p className="text-[12px] font-numbers text-primary font-bold">{fmt(totalRevenue)} de receita total</p>}
         </div>
       )}
 
       {/* ═══ Course Create/Edit Sheet ═══ */}
       <Sheet open={sheetOpen} onOpenChange={v => { setSheetOpen(v); if (!v) setEditCourseId(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card/95 backdrop-blur-xl">
           <SheetHeader className="mb-6">
-            <SheetTitle className="flex items-center gap-3 text-lg">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                {editCourseId ? <Edit className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4 text-primary" />}
+            <SheetTitle className="flex items-center gap-3 text-lg font-display font-black tracking-tight">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+                {editCourseId ? <Edit className="h-4 w-4 text-primary" /> : <Sparkles className="h-4 w-4 text-primary" />}
               </div>
               {editCourseId ? "Editar Curso" : "Novo Curso"}
             </SheetTitle>
           </SheetHeader>
 
           <form onSubmit={e => { e.preventDefault(); saveCourse(); }} className="space-y-5">
-            <div>
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nome do Curso *</Label>
-              <Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Marketing Digital Avançado" className="mt-1.5 h-11 rounded-xl" required />
+            {/* Title field with accent card */}
+            <div className="relative rounded-xl bg-muted/10 border border-border/40 p-4 overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Nome do Curso *</Label>
+              <Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Marketing Digital Avançado" className="mt-1.5 h-11 rounded-xl bg-card/80 border-border/40" required />
             </div>
 
-            <div>
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Descrição</Label>
-              <Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} placeholder="O que os alunos vão aprender..." className="mt-1.5 rounded-xl" rows={3} />
+            <div className="relative rounded-xl bg-muted/10 border border-border/40 p-4 overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Descrição</Label>
+              <Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} placeholder="O que os alunos vão aprender..." className="mt-1.5 rounded-xl bg-card/80 border-border/40" rows={3} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Categoria</Label>
-                <Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex: Marketing" className="mt-1.5 h-11 rounded-xl" />
+              <div className="relative rounded-xl bg-muted/10 border border-border/40 p-4 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-warning" />
+                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Categoria</Label>
+                <Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex: Marketing" className="mt-1.5 h-11 rounded-xl bg-card/80 border-border/40" />
               </div>
-              <div>
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Produto Vinculado</Label>
+              <div className="relative rounded-xl bg-muted/10 border border-border/40 p-4 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
+                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Produto Vinculado</Label>
                 <Select value={courseForm.product_id} onValueChange={v => setCourseForm(p => ({ ...p, product_id: v }))}>
-                  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectTrigger className="mt-1.5 rounded-xl h-11 bg-card/80 border-border/40"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
                     {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</SelectItem>)}
@@ -642,7 +677,7 @@ export default function AdminConteudo() {
 
             <ImageUploadZone value={courseForm.thumbnail_url} onChange={url => setCourseForm(p => ({ ...p, thumbnail_url: url }))} label="Thumbnail do Curso" height="h-36" />
 
-            <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-sm gap-2 shadow-lg shadow-primary/20">
+            <Button type="submit" className="w-full h-11 rounded-xl font-bold text-sm gap-2 shadow-lg shadow-primary/20">
               <Check className="h-4 w-4" />
               {editCourseId ? "Salvar Alterações" : "Criar Curso"}
             </Button>
