@@ -257,7 +257,7 @@ export default function Apps() {
       <PageTitle icon={<Puzzle className="h-6 w-6" />} title="Apps & Integrações" subtitle="Conecte ferramentas ao seu ecossistema de vendas" />
 
       {/* ─── App Grid ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {APPS.map((app, idx) => {
           const active = hasIntegration(app.id);
           const integration = getIntegration(app.id);
@@ -266,34 +266,38 @@ export default function Apps() {
               key={app.id}
               onClick={() => openDialog(app, integration || undefined)}
               className={cn(
-                "group relative overflow-hidden rounded-2xl border text-left transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in active:scale-[0.98]",
+                "group relative overflow-hidden rounded-2xl border text-left transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in active:scale-[0.97]",
                 active
                   ? "border-primary/25 bg-card shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40"
                   : "border-border/40 bg-card hover:border-border/70 hover:shadow-lg hover:shadow-black/5"
               )}
-              style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
+              style={{ animationDelay: `${idx * 30}ms`, animationFillMode: "backwards" }}
             >
-              {/* Hover glow effect */}
+              {/* Hover glow */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent" />
               </div>
 
-              {/* Top: Logo area */}
-              <div className={cn(
-                "relative h-[100px] flex items-center justify-center px-8 border-b transition-colors duration-300",
-                active
-                  ? "border-primary/10 bg-primary/[0.02]"
-                  : "border-border/20 bg-muted/15 group-hover:bg-muted/25"
-              )}>
-                <img
-                  src={app.logo}
-                  alt={app.name}
-                  className="max-h-12 max-w-[160px] object-contain drop-shadow-sm transition-transform duration-500 ease-out group-hover:scale-105"
-                />
+              {/* Logo area */}
+              <div className="relative flex flex-col items-center justify-center px-4 py-6 gap-3">
+                <div className={cn(
+                  "h-14 w-14 rounded-xl border flex items-center justify-center overflow-hidden p-2.5 transition-all duration-300 group-hover:scale-105",
+                  active
+                    ? "bg-primary/5 border-primary/15 shadow-sm shadow-primary/5"
+                    : "bg-muted/10 border-border/30 group-hover:bg-muted/20"
+                )}>
+                  <img
+                    src={app.logo}
+                    alt={app.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
 
-                {/* Status badge */}
+                <span className="text-[13px] font-bold text-foreground tracking-tight text-center leading-tight">{app.name}</span>
+
+                {/* Active indicator */}
                 {active && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 border border-success/20">
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10 border border-success/20">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
@@ -302,59 +306,11 @@ export default function Apps() {
                   </div>
                 )}
 
-              </div>
-
-              {/* Bottom: Info */}
-              <div className="relative p-4 space-y-3">
-                <div>
-                  <h3 className="text-[14px] font-bold text-foreground tracking-tight">{app.name}</h3>
-                  <p className="text-[12px] text-muted-foreground/70 leading-relaxed mt-0.5 line-clamp-2">{app.desc}</p>
-                </div>
-
-                {/* Events count & fields info */}
-                <div className="flex items-center gap-3">
-                  {app.events.length > 0 && (
-                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
-                      <Radio className="h-3 w-3" />
-                      {app.events.length} eventos
-                    </span>
-                  )}
-                  {app.fields.length > 0 && (
-                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
-                      <Shield className="h-3 w-3" />
-                      {app.fields.length} {app.fields.length === 1 ? "credencial" : "credenciais"}
-                    </span>
-                  )}
-                </div>
-
-                {/* Footer CTA */}
-                <div className={cn(
-                  "flex items-center justify-between pt-3 border-t transition-colors duration-300",
-                  active ? "border-primary/10" : "border-border/20"
-                )}>
-                  <span className={cn(
-                    "text-[12px] font-semibold transition-colors duration-300",
-                    active
-                      ? "text-primary"
-                      : "text-muted-foreground/60 group-hover:text-foreground"
-                  )}>
-                    {app.id === "webhooks"
-                      ? "Gerenciar Webhooks"
-                      : active ? "Gerenciar" : "Conectar"}
+                {!active && (
+                  <span className="text-[10px] font-semibold text-muted-foreground/40 group-hover:text-primary transition-colors">
+                    {app.id === "webhooks" ? "Gerenciar" : "Conectar"}
                   </span>
-                  <div className={cn(
-                    "h-7 w-7 rounded-lg flex items-center justify-center transition-all duration-300",
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted/20 text-muted-foreground/30 group-hover:bg-primary/10 group-hover:text-primary"
-                  )}>
-                    {app.id === "webhooks" ? (
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    ) : (
-                      <ChevronRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
             </button>
           );
