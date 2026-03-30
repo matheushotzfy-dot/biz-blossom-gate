@@ -22,12 +22,12 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const CATEGORIES = [
-  { value: "anuncios", label: "Anúncios", color: "hsl(0 72% 51%)", icon: Target },
-  { value: "ferramentas", label: "Ferramentas", color: "hsl(210 75% 50%)", icon: Layers },
-  { value: "equipe", label: "Equipe", color: "hsl(280 65% 55%)", icon: Activity },
-  { value: "infra", label: "Infraestrutura", color: "hsl(38 95% 50%)", icon: Zap },
-  { value: "conteudo", label: "Conteúdo", color: "hsl(152 68% 46%)", icon: BarChart3 },
-  { value: "outros", label: "Outros", color: "hsl(220 10% 50%)", icon: Filter },
+  { value: "anuncios", label: "Anúncios", color: "hsl(var(--destructive))", icon: Target },
+  { value: "ferramentas", label: "Ferramentas", color: "hsl(var(--info))", icon: Layers },
+  { value: "equipe", label: "Equipe", color: "hsl(var(--primary))", icon: Activity },
+  { value: "infra", label: "Infraestrutura", color: "hsl(var(--warning))", icon: Zap },
+  { value: "conteudo", label: "Conteúdo", color: "hsl(var(--success))", icon: BarChart3 },
+  { value: "outros", label: "Outros", color: "hsl(var(--muted-foreground))", icon: Filter },
 ];
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
