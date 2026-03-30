@@ -10,6 +10,7 @@ import {
   MoreHorizontal, Receipt,
 } from "lucide-react";
 import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -251,94 +252,7 @@ function TxCard({ tx, products, onClick, index }: {
 function TxDetailModal({ tx, products, onClose }: {
   tx: Tables<"transactions">; products: Record<string, string>; onClose: () => void;
 }) {
-  const [copiedId, setCopiedId] = useState(false);
-  const handleCopyId = (id: string) => {
-    navigator.clipboard.writeText(id);
-    setCopiedId(true);
-    toast.success("ID copiado!");
-    setTimeout(() => setCopiedId(false), 2000);
-  };
-
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/80"
-          style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
-          onClick={onClose}
-        />
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 8 }}
-          transition={{ type: "spring", duration: 0.4 }}
-          className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border/60 dark:border-foreground/[0.08] bg-card shadow-2xl shadow-black/20"
-        >
-          <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-border/40 dark:border-foreground/[0.06] bg-card rounded-t-2xl">
-            <div>
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Detalhes da Transação</p>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={tx.status} />
-                <span className="text-2xl font-display font-bold text-foreground">{fmt(Number(tx.amount))}</span>
-              </div>
-            </div>
-            <button onClick={onClose} className="h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted/40 transition-colors border border-border/30">
-              <X className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-5">
-            <div className="rounded-lg border border-primary/15 bg-primary/[0.04] p-4">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Resumo Financeiro</p>
-              <div className="space-y-2.5">
-                <DetailRow label="Valor bruto" value={fmt(Number(tx.amount))} icon={<DollarSign className="h-3 w-3" />} />
-                <DetailRow label="Taxa da plataforma" value={`- ${fmt(Number(tx.fee_amount))}`} className="text-destructive" icon={<ArrowDownRight className="h-3 w-3" />} />
-                <div className="border-t border-border/30 dark:border-foreground/[0.04] pt-2.5 mt-2.5">
-                  <DetailRow label="Valor líquido (seu)" value={fmt(Number(tx.net_amount))} className="text-primary" bold icon={<Zap className="h-3 w-3" />} />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2.5">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Informações</p>
-              <div className="rounded-lg border border-border/30 dark:border-foreground/[0.04] p-4 space-y-2.5">
-                <DetailRow label="ID" value={
-                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 hover:text-primary transition-colors bg-muted/40 px-2 py-1 rounded">
-                    {tx.id.slice(0, 16)}...
-                    {copiedId ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
-                  </button>
-                } icon={<Hash className="h-3 w-3" />} />
-                <DetailRow label="Método" value={tx.payment_method === "credit_card" ? "Cartão de crédito" : tx.payment_method === "pix" ? "PIX" : tx.payment_method || "—"} icon={<CreditCard className="h-3 w-3" />} />
-                <DetailRow label="Data" value={fmtFull(tx.created_at)} icon={<CalendarIcon className="h-3 w-3" />} />
-                {tx.product_id && <DetailRow label="Produto" value={products[tx.product_id] || tx.product_id.slice(0, 12)} icon={<Package className="h-3 w-3" />} />}
-              </div>
-            </div>
-
-            <div className="space-y-2.5">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Cliente</p>
-              <div className="rounded-lg border border-border/30 dark:border-foreground/[0.04] p-4 space-y-2.5">
-                <DetailRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3 w-3" />} />
-                <DetailRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3 w-3" />} />
-                <DetailRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3 w-3" />} />
-                {tx.customer_document && <DetailRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3 w-3" />} />}
-              </div>
-            </div>
-
-            {tx.customer_phone && (
-              <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="w-full gap-2 rounded-lg h-10 border-success/20 text-success hover:bg-success/5 font-medium text-[12px]">
-                  <MessageCircle className="h-4 w-4" /> Abrir WhatsApp
-                </Button>
-              </a>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
-  );
+  return <TransactionDetailPanel tx={tx} products={products} onClose={onClose} />;
 }
 
 function DetailRow({ label, value, icon, className = "", bold = false }: { label: string; value: React.ReactNode; icon?: React.ReactNode; className?: string; bold?: boolean }) {
