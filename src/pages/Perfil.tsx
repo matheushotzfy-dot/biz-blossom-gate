@@ -116,29 +116,29 @@ export default function Perfil() {
     <PageShell>
       <PageTitle icon={<User className="h-6 w-6" />} title="Meu Perfil" subtitle="Gerencie suas informações pessoais" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Avatar + Info Card */}
         <GlowPanel className="relative">
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-4">
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
-              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/20 shadow-xl shadow-primary/10" onClick={() => fileRef.current?.click()}>
+              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/15 shadow-xl shadow-primary/10 active:scale-[0.97] transition-transform" onClick={() => fileRef.current?.click()}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-3xl font-display font-black text-primary">
+                  <div className="w-full h-full bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center text-3xl font-display font-black text-primary">
                     {(profile?.full_name || "U").charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="h-5 w-5 text-white" />
+                <div className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Camera className="h-5 w-5 text-foreground" />
                 </div>
               </div>
               {uploading && <div className="absolute inset-0 flex items-center justify-center"><div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}
             </div>
-            <h2 className="text-lg font-display font-black text-foreground">{profile?.full_name || "Usuário"}</h2>
-            <p className="text-[12px] text-muted-foreground/50 mt-0.5">{profile?.email || ""}</p>
-            <div className={`flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-[11px] font-bold border ${accStatus.cls}`}>
+            <h2 className="text-lg font-display font-black text-foreground tracking-[-0.02em]">{profile?.full_name || "Usuário"}</h2>
+            <p className="text-[11px] text-muted-foreground/40 mt-0.5">{profile?.email || ""}</p>
+            <div className={`flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-[10px] font-bold border ${accStatus.cls}`}>
               <Shield className="h-3 w-3" /> {accStatus.label}
             </div>
           </div>
@@ -149,18 +149,18 @@ export default function Perfil() {
           <SectionHeader icon={<User className="h-4.5 w-4.5" />} title="Dados Pessoais" />
           <form onSubmit={handleSave} className="space-y-3.5 mt-5">
             <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Nome completo {profile?.full_name && <span className="text-primary/50 normal-case tracking-normal">(KYC bloqueado)</span>}</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" disabled={!!profile?.full_name} />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em] font-bold">Nome completo {profile?.full_name && <span className="text-primary/40 normal-case tracking-normal text-[9px]">(bloqueado)</span>}</Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl" disabled={!!profile?.full_name} />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">E-mail {profile?.email && <span className="text-primary/50 normal-case tracking-normal">(KYC bloqueado)</span>}</Label>
-              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" type="email" disabled={!!profile?.email} />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em] font-bold">E-mail {profile?.email && <span className="text-primary/40 normal-case tracking-normal text-[9px]">(bloqueado)</span>}</Label>
+              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl" type="email" disabled={!!profile?.email} />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Telefone {profile?.phone && <span className="text-primary/50 normal-case tracking-normal">(KYC bloqueado)</span>}</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl border-border/50" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
+              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em] font-bold">Telefone {profile?.phone && <span className="text-primary/40 normal-case tracking-normal text-[9px]">(bloqueado)</span>}</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
             </div>
-            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all" disabled={saving}>
+            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 transition-all" disabled={saving}>
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
           </form>
