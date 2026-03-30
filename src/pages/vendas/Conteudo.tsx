@@ -2,26 +2,25 @@ import { useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useInvalidateAll } from "@/hooks/useQueryData";
+import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useTransactions, useInvalidateAll } from "@/hooks/useQueryData";
 import {
-  Plus, BookOpen, Layers, PlayCircle, Trash2, Edit, Eye, EyeOff,
+  Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
   Link as LinkIcon, Search, Copy, MoreVertical,
-  Globe, Lock, FolderOpen, Image as ImageIcon, X, FileText, Check,
-  Users, TrendingUp, Zap, Star, BarChart3, Clock, ArrowUpRight,
-  Sparkles, GraduationCap, Video, Award,
+  Globe, Lock, FolderOpen, Image as ImageIcon, X, Check,
+  Users, TrendingUp, Clock,
+  GraduationCap, Video, DollarSign, BarChart3,
+  ArrowUpRight, PlayCircle, Settings, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────
 interface Course {
@@ -29,7 +28,10 @@ interface Course {
   thumbnail_url: string | null; product_id: string | null; is_published: boolean;
   sort_order: number | null; user_id: string; created_at: string;
 }
-interface Product { id: string; name: string; }
+interface Product { id: string; name: string; price: number; }
+
+const fmt = (v: number) =>
+  v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 // ─── Image Upload ─────────────────────────────────────────────────
 function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
@@ -87,39 +89,31 @@ function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
 }
 
 // ─── Course Card ──────────────────────────────────────────────────
-function CourseCard({ course, stats, product, index, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink }: {
+function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink }: {
   course: Course; stats: { modules: number; lessons: number }; product?: Product;
-  index: number; onEdit: () => void; onNavigate: () => void;
+  revenue: number; onEdit: () => void; onNavigate: () => void;
   onTogglePublish: () => void; onDelete: () => void; onCopyLink: () => void;
   getMemberLink: string;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: Math.min(index * 0.06, 0.3) }}
-      className="group relative rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden flex flex-col hover:border-primary/25 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500"
-    >
-      {/* Thumbnail with overlay */}
+    <div className="group relative rounded-2xl bg-card border border-border/50 overflow-hidden flex flex-col hover:border-primary/25 transition-all duration-300">
+      {/* Thumbnail */}
       <div className="relative h-44 overflow-hidden cursor-pointer" onClick={onNavigate}>
         {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/8 via-primary/4 to-transparent">
-            <div className="relative">
-              <BookOpen className="h-16 w-16 text-primary/15" />
-              <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-primary/30 animate-pulse" />
-            </div>
+            <BookOpen className="h-14 w-14 text-primary/15" />
           </div>
         )}
-        
+
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent opacity-60" />
-        
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-70" />
+
         {/* Status badge */}
         <div className="absolute top-3 right-3">
           <span className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold backdrop-blur-xl shadow-lg",
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-xl",
             course.is_published
               ? "bg-success/20 text-success border border-success/20"
               : "bg-card/80 text-muted-foreground border border-border/40"
@@ -129,64 +123,71 @@ function CourseCard({ course, stats, product, index, onEdit, onNavigate, onToggl
           </span>
         </div>
 
-        {/* Category badge */}
+        {/* Category */}
         {course.category && (
           <div className="absolute top-3 left-3">
-            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest bg-card/70 backdrop-blur-xl text-muted-foreground border border-border/30">
+            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest bg-card/70 backdrop-blur-xl text-muted-foreground border border-border/30">
               {course.category}
             </span>
           </div>
         )}
 
-        {/* Hover play button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="h-14 w-14 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-2xl shadow-primary/30 group-hover:scale-110 transition-transform duration-300">
-            <FolderOpen className="h-6 w-6 text-primary-foreground" />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="h-12 w-12 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl">
+            <FolderOpen className="h-5 w-5 text-primary-foreground" />
           </div>
         </div>
 
-        {/* Stats overlay at bottom */}
+        {/* Stats at bottom */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 px-2.5 py-1.5 text-[11px] font-bold text-foreground shadow-sm">
-            <Layers className="h-3 w-3 text-primary" /> {stats.modules}
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 px-2.5 py-1 text-[10px] font-bold text-foreground">
+            <Layers className="h-3 w-3 text-primary" /> {stats.modules} módulos
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 px-2.5 py-1.5 text-[11px] font-bold text-foreground shadow-sm">
-            <Video className="h-3 w-3 text-info" /> {stats.lessons}
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 px-2.5 py-1 text-[10px] font-bold text-foreground">
+            <Video className="h-3 w-3 text-info" /> {stats.lessons} aulas
           </span>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-5 flex flex-1 flex-col">
-        <h3 className="text-[15px] font-bold text-foreground leading-snug line-clamp-1 mb-1 group-hover:text-primary transition-colors duration-300">{course.title}</h3>
+        <h3 className="text-[15px] font-bold text-foreground leading-snug line-clamp-1 mb-1">{course.title}</h3>
         {course.description ? (
-          <p className="text-[12px] text-muted-foreground/70 line-clamp-2 mb-4 leading-relaxed">{course.description}</p>
+          <p className="text-[12px] text-muted-foreground/70 line-clamp-2 mb-3 leading-relaxed">{course.description}</p>
         ) : (
-          <p className="text-[12px] text-muted-foreground/30 italic mb-4">Adicione uma descrição...</p>
+          <p className="text-[12px] text-muted-foreground/30 italic mb-3">Sem descrição</p>
         )}
 
-        {/* Product link */}
-        {product && (
-          <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
-            <LinkIcon className="h-3 w-3 text-primary shrink-0" />
-            <span className="text-[11px] font-semibold text-primary truncate">{product.name}</span>
-            <ArrowUpRight className="h-3 w-3 text-primary/50 ml-auto shrink-0" />
-          </div>
-        )}
+        {/* Product + Revenue */}
+        <div className="space-y-2 mb-4">
+          {product && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
+              <LinkIcon className="h-3 w-3 text-primary shrink-0" />
+              <span className="text-[11px] font-semibold text-primary truncate flex-1">{product.name}</span>
+              <span className="text-[10px] font-bold text-primary/70">{fmt(product.price)}</span>
+            </div>
+          )}
+          {revenue > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/5 border border-success/10">
+              <DollarSign className="h-3 w-3 text-success shrink-0" />
+              <span className="text-[11px] font-semibold text-success">{fmt(revenue)} em vendas</span>
+            </div>
+          )}
+        </div>
 
         {/* Date */}
-        <div className="flex items-center gap-1.5 mb-4">
+        <div className="flex items-center gap-1.5 mb-3">
           <Clock className="h-3 w-3 text-muted-foreground/40" />
           <span className="text-[10px] text-muted-foreground/50">
-            Criado em {new Date(course.created_at).toLocaleDateString("pt-BR")}
+            {new Date(course.created_at).toLocaleDateString("pt-BR")}
           </span>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/30">
           <Button
-            variant="ghost"
-            size="sm"
+            variant="ghost" size="sm"
             className="gap-1.5 rounded-xl text-[11px] h-9 font-semibold text-primary hover:text-primary hover:bg-primary/10 flex-1 justify-center"
             onClick={onNavigate}
           >
@@ -207,7 +208,7 @@ function CourseCard({ course, stats, product, index, onEdit, onNavigate, onToggl
               </DropdownMenuItem>
               {course.is_published && (
                 <DropdownMenuItem onClick={() => window.open(getMemberLink, "_blank")} className="gap-2 text-[12px] cursor-pointer">
-                  <Eye className="h-3.5 w-3.5" /> Visualizar
+                  <ExternalLink className="h-3.5 w-3.5" /> Visualizar
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={onCopyLink} className="gap-2 text-[12px] cursor-pointer">
@@ -221,7 +222,93 @@ function CourseCard({ course, stats, product, index, onEdit, onNavigate, onToggl
           </DropdownMenu>
         </div>
       </div>
-    </motion.div>
+    </div>
+  );
+}
+
+// ─── List Row View ────────────────────────────────────────────────
+function CourseRow({ course, stats, product, revenue, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink }: {
+  course: Course; stats: { modules: number; lessons: number }; product?: Product;
+  revenue: number; onEdit: () => void; onNavigate: () => void;
+  onTogglePublish: () => void; onDelete: () => void; onCopyLink: () => void;
+}) {
+  return (
+    <tr className="border-b border-border/30 hover:bg-muted/20 transition-colors cursor-pointer group" onClick={onNavigate}>
+      <td className="p-4">
+        <div className="flex items-center gap-3.5">
+          <div className="h-12 w-20 rounded-lg overflow-hidden shrink-0 bg-muted/30 border border-border/30">
+            {course.thumbnail_url ? (
+              <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <BookOpen className="h-5 w-5 text-muted-foreground/20" />
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-semibold text-foreground truncate max-w-[220px]">{course.title}</p>
+            {course.description && <p className="text-[11px] text-muted-foreground/60 truncate max-w-[220px]">{course.description}</p>}
+          </div>
+        </div>
+      </td>
+      <td className="p-4">
+        <span className={cn(
+          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold",
+          course.is_published
+            ? "bg-success/10 text-success"
+            : "bg-muted text-muted-foreground"
+        )}>
+          {course.is_published ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+          {course.is_published ? "Publicado" : "Rascunho"}
+        </span>
+      </td>
+      <td className="p-4">
+        <div className="flex items-center gap-3 text-[12px] text-muted-foreground">
+          <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {stats.modules}</span>
+          <span className="flex items-center gap-1"><Video className="h-3 w-3" /> {stats.lessons}</span>
+        </div>
+      </td>
+      <td className="p-4">
+        {product ? (
+          <span className="text-[11px] font-medium text-primary truncate max-w-[140px] block">{product.name}</span>
+        ) : (
+          <span className="text-[11px] text-muted-foreground/40">—</span>
+        )}
+      </td>
+      <td className="p-4">
+        <span className="text-[13px] font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
+      </td>
+      <td className="p-4">
+        <span className="text-[11px] text-muted-foreground">{new Date(course.created_at).toLocaleDateString("pt-BR")}</span>
+      </td>
+      <td className="p-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+            <button className="h-8 w-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50">
+              <MoreVertical className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[180px]">
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onNavigate(); }} className="gap-2 text-[12px] cursor-pointer">
+              <FolderOpen className="h-3.5 w-3.5" /> Gerenciar Conteúdo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onEdit(); }} className="gap-2 text-[12px] cursor-pointer">
+              <Settings className="h-3.5 w-3.5" /> Configurações
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onTogglePublish(); }} className="gap-2 text-[12px] cursor-pointer">
+              {course.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onCopyLink(); }} className="gap-2 text-[12px] cursor-pointer">
+              <Copy className="h-3.5 w-3.5" /> Copiar Link
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="gap-2 text-[12px] cursor-pointer text-destructive focus:text-destructive">
+              <Trash2 className="h-3.5 w-3.5" /> Excluir
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </td>
+    </tr>
   );
 }
 
@@ -229,12 +316,13 @@ function CourseCard({ course, stats, product, index, onEdit, onNavigate, onToggl
 export default function AdminConteudo() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: coursesRaw = [] } = useCoursesQuery();
+  const { data: coursesRaw = [], isLoading } = useCoursesQuery();
   const { data: productsRaw = [] } = useProductsQuery();
+  const { data: transactions = [] } = useTransactions();
   const invalidateAll = useInvalidateAll();
 
   const courses = useMemo(() => coursesRaw.map((c: any) => { const { modules: _, ...rest } = c; return rest; }) as Course[], [coursesRaw]);
-  const products = useMemo(() => productsRaw.map(p => ({ id: p.id, name: p.name })) as Product[], [productsRaw]);
+  const products = useMemo(() => productsRaw.map((p: any) => ({ id: p.id, name: p.name, price: Number(p.price) })) as Product[], [productsRaw]);
 
   const courseStats = useMemo(() => {
     const stats: Record<string, { modules: number; lessons: number }> = {};
@@ -245,8 +333,20 @@ export default function AdminConteudo() {
     return stats;
   }, [coursesRaw]);
 
+  // Revenue per product (linked to course)
+  const revenueByProduct = useMemo(() => {
+    const map: Record<string, number> = {};
+    transactions.filter(t => t.status === "completed" && t.product_id).forEach(t => {
+      map[t.product_id!] = (map[t.product_id!] || 0) + Number(t.net_amount);
+    });
+    return map;
+  }, [transactions]);
+
+  const getCourseRevenue = (c: Course) => c.product_id ? (revenueByProduct[c.product_id] || 0) : 0;
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editCourseId, setEditCourseId] = useState<string | null>(null);
   const [courseForm, setCourseForm] = useState({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" });
@@ -288,6 +388,23 @@ export default function AdminConteudo() {
     reloadCourses();
   };
 
+  const duplicateCourse = async (c: Course) => {
+    if (!user) return;
+    const { data } = await supabase.from("courses").insert({
+      title: `${c.title} (cópia)`,
+      description: c.description,
+      category: c.category,
+      thumbnail_url: c.thumbnail_url,
+      product_id: null,
+      user_id: user.id,
+      is_published: false,
+    }).select().single();
+    if (data) {
+      toast.success("Curso duplicado!");
+      reloadCourses();
+    }
+  };
+
   const togglePublish = async (id: string, cur: boolean) => {
     if (!user) return;
     await supabase.from("courses").update({ is_published: !cur }).eq("id", id).eq("user_id", user.id);
@@ -309,11 +426,13 @@ export default function AdminConteudo() {
     toast.success("Curso excluído!");
   };
 
-  const filtered = courses.filter(c => {
-    const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "all" || (filter === "published" ? c.is_published : !c.is_published);
-    return matchSearch && matchFilter;
-  });
+  const filtered = useMemo(() => {
+    return courses.filter(c => {
+      const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
+      const matchFilter = filter === "all" || (filter === "published" ? c.is_published : !c.is_published);
+      return matchSearch && matchFilter;
+    });
+  }, [courses, search, filter]);
 
   const getMemberLink = (courseId: string) => `${window.location.origin}/membros-area/curso/${courseId}`;
 
@@ -321,99 +440,110 @@ export default function AdminConteudo() {
   const publishedCourses = courses.filter(c => c.is_published).length;
   const totalModules = Object.values(courseStats).reduce((a, s) => a + s.modules, 0);
   const totalLessons = Object.values(courseStats).reduce((a, s) => a + s.lessons, 0);
+  const totalRevenue = courses.reduce((a, c) => a + getCourseRevenue(c), 0);
 
   return (
     <PageShell>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<BookOpen className="h-6 w-6" />} title="Conteúdo" subtitle="Gerencie cursos, módulos e aulas da sua área de membros" />
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <Button onClick={openNew} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
-            <Plus className="h-4 w-4" /> Novo Curso
-          </Button>
-        </motion.div>
+        <Button onClick={openNew} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+          <Plus className="h-4 w-4" /> Novo Curso
+        </Button>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: "Total Cursos", value: String(totalCourses), icon: GraduationCap, bg: "bg-primary/10", color: "text-primary", sub: "criados" },
-          { label: "Publicados", value: String(publishedCourses), icon: Globe, bg: "bg-success/10", color: "text-success", sub: `de ${totalCourses}` },
-          { label: "Módulos", value: String(totalModules), icon: Layers, bg: "bg-info/10", color: "text-info", sub: "organizados" },
-          { label: "Aulas", value: String(totalLessons), icon: Video, bg: "bg-warning/10", color: "text-warning", sub: "gravadas" },
-        ].map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06 }}
-            className="group relative rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5 overflow-hidden hover:border-primary/20 transition-all duration-300"
-          >
-            <div className="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle, hsl(var(--primary) / 0.08), transparent)` }} />
+          { label: "Total Cursos", value: String(totalCourses), icon: GraduationCap, bg: "bg-primary/10", color: "text-primary" },
+          { label: "Publicados", value: String(publishedCourses), icon: Globe, bg: "bg-success/10", color: "text-success" },
+          { label: "Módulos", value: String(totalModules), icon: Layers, bg: "bg-info/10", color: "text-info" },
+          { label: "Aulas", value: String(totalLessons), icon: Video, bg: "bg-warning/10", color: "text-warning" },
+          { label: "Receita Cursos", value: fmt(totalRevenue), icon: DollarSign, bg: "bg-primary/10", color: "text-primary" },
+        ].map(kpi => (
+          <div key={kpi.label} className="rounded-2xl bg-card border border-border/50 p-5 hover:border-primary/20 transition-colors">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{kpi.label}</span>
               <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", kpi.bg)}>
                 <kpi.icon className={cn("h-4 w-4", kpi.color)} />
               </div>
             </div>
-            <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight">{kpi.value}</p>
-            <p className="text-[11px] text-muted-foreground/50 mt-1">{kpi.sub}</p>
-          </motion.div>
+            <p className="text-2xl font-display font-black text-foreground tracking-tight">{kpi.value}</p>
+          </div>
         ))}
       </div>
 
       {/* Filters bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-          <Input
-            placeholder="Buscar cursos..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-10 h-10 rounded-xl"
-          />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+            <Input
+              placeholder="Buscar cursos..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 h-10 rounded-xl"
+            />
+          </div>
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/40 w-fit">
+            {([
+              { id: "all" as const, label: "Todos", count: totalCourses },
+              { id: "published" as const, label: "Publicados", count: publishedCourses },
+              { id: "draft" as const, label: "Rascunhos", count: totalCourses - publishedCourses },
+            ]).map(f => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  filter === f.id ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {f.label}
+                {f.count > 0 && <span className="h-4 min-w-[16px] px-1 rounded-full bg-muted text-[9px] font-bold flex items-center justify-center">{f.count}</span>}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/40 w-fit">
-          {([
-            { id: "all" as const, label: "Todos", count: totalCourses },
-            { id: "published" as const, label: "Publicados", count: publishedCourses },
-            { id: "draft" as const, label: "Rascunhos", count: totalCourses - publishedCourses },
-          ]).map(f => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                filter === f.id ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {f.label}
-              {f.count > 0 && <span className="h-4 min-w-[16px] px-1 rounded-full bg-muted text-[9px] font-bold flex items-center justify-center">{f.count}</span>}
-            </button>
-          ))}
+
+        {/* View toggle */}
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/30 border border-border/40">
+          <button onClick={() => setViewMode("grid")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === "grid" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>
+            <BarChart3 className="h-3.5 w-3.5 rotate-90" />
+          </button>
+          <button onClick={() => setViewMode("list")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === "list" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>
+            <PlayCircle className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Course Grid */}
-      {filtered.length === 0 ? (
+      {/* Loading */}
+      {isLoading ? (
+        <div className="p-16 text-center">
+          <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-[13px] text-muted-foreground">Carregando cursos...</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon={<BookOpen className="h-7 w-7" />}
           title={search || filter !== "all" ? "Nenhum curso encontrado" : "Nenhum curso criado"}
           subtitle={search || filter !== "all" ? "Tente alterar os filtros de busca" : "Crie seu primeiro curso para entregar conteúdo aos seus alunos"}
           action={!search && filter === "all" ? <Button onClick={openNew} size="sm" className="gap-2 rounded-xl shadow-lg shadow-primary/20"><Plus className="h-3.5 w-3.5" /> Criar Curso</Button> : undefined}
         />
-      ) : (
+      ) : viewMode === "grid" ? (
+        /* Grid View */
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map((c, i) => {
+          {filtered.map(c => {
             const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
             const product = products.find(p => p.id === c.product_id);
+            const revenue = getCourseRevenue(c);
             return (
               <CourseCard
                 key={c.id}
                 course={c}
                 stats={stats}
                 product={product}
-                index={i}
+                revenue={revenue}
                 onEdit={() => openEdit(c)}
                 onNavigate={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
                 onTogglePublish={() => togglePublish(c.id, c.is_published ?? false)}
@@ -424,31 +554,51 @@ export default function AdminConteudo() {
             );
           })}
         </div>
+      ) : (
+        /* List View */
+        <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/40">
+                  {["Curso", "Status", "Conteúdo", "Produto", "Receita", "Criado", ""].map(h => (
+                    <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(c => {
+                  const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
+                  const product = products.find(p => p.id === c.product_id);
+                  const revenue = getCourseRevenue(c);
+                  return (
+                    <CourseRow
+                      key={c.id}
+                      course={c}
+                      stats={stats}
+                      product={product}
+                      revenue={revenue}
+                      onEdit={() => openEdit(c)}
+                      onNavigate={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                      onTogglePublish={() => togglePublish(c.id, c.is_published ?? false)}
+                      onDelete={() => deleteCourse(c.id)}
+                      onCopyLink={() => { navigator.clipboard.writeText(getMemberLink(c.id)); toast.success("Link copiado!"); }}
+                    />
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
-      {/* Quick tips */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { icon: Sparkles, title: "Dica: Thumbnail", desc: "Cursos com thumbnail convertem 3x mais", color: "text-primary", bg: "bg-primary/10" },
-          { icon: Award, title: "Dica: Módulos", desc: "Organize em módulos curtos para melhor retenção", color: "text-info", bg: "bg-info/10" },
-          { icon: TrendingUp, title: "Dica: Publicação", desc: "Vincule a um produto para vender automaticamente", color: "text-success", bg: "bg-success/10" },
-        ].map(tip => (
-          <motion.div
-            key={tip.title}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="rounded-xl bg-card/30 dark:bg-foreground/[0.01] border border-border/30 dark:border-foreground/[0.04] p-4 flex items-start gap-3"
-          >
-            <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", tip.bg)}>
-              <tip.icon className={cn("h-4 w-4", tip.color)} />
-            </div>
-            <div>
-              <p className="text-[12px] font-bold text-foreground">{tip.title}</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">{tip.desc}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* Results count */}
+      {!isLoading && filtered.length > 0 && (
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[12px] text-muted-foreground/60">{filtered.length} curso{filtered.length > 1 ? "s" : ""} encontrado{filtered.length > 1 ? "s" : ""}</p>
+          {totalRevenue > 0 && <p className="text-[12px] text-primary font-medium">{fmt(totalRevenue)} de receita total</p>}
+        </div>
+      )}
 
       {/* ═══ Course Create/Edit Sheet ═══ */}
       <Sheet open={sheetOpen} onOpenChange={v => { setSheetOpen(v); if (!v) setEditCourseId(null); }}>
@@ -456,7 +606,7 @@ export default function AdminConteudo() {
           <SheetHeader className="mb-6">
             <SheetTitle className="flex items-center gap-3 text-lg">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                {editCourseId ? <Edit className="h-4.5 w-4.5 text-primary" /> : <Plus className="h-4.5 w-4.5 text-primary" />}
+                {editCourseId ? <Edit className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4 text-primary" />}
               </div>
               {editCourseId ? "Editar Curso" : "Novo Curso"}
             </SheetTitle>
@@ -484,7 +634,7 @@ export default function AdminConteudo() {
                   <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
-                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
