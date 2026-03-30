@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -31,33 +31,7 @@ type AffiliateSale = {
   commission_amount: number; commission_pct: number; status: string; created_at: string;
 };
 
-/* ─── KPI Card ─── */
-function KpiCard({ label, value, sub, icon: Icon, bg, color, delay = 0, large }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
-  bg: string; color: string; delay?: number; large?: boolean;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className={cn(
-        "group relative rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] overflow-hidden hover:border-primary/20 transition-all duration-300",
-        large ? "p-6" : "p-5"
-      )}
-    >
-      <div className="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle, hsl(var(--primary) / 0.08), transparent)` }} />
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", bg)}>
-          <Icon className={cn("h-4 w-4", color)} />
-        </div>
-      </div>
-      <p className={cn("font-display font-black text-foreground tracking-tight", large ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl")}>{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground/50 mt-1">{sub}</p>}
-    </motion.div>
-  );
-}
+/* KpiCard uses shared GlassKpi */
 
 /* ─── Affiliate Link Card ─── */
 function AffiliateLinkCard({ link, productName, sales, copiedSlug, onCopy, onToggle, index }: {
@@ -306,10 +280,10 @@ export default function Afiliados() {
       {tab === "my-products" && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiCard label="Produtos Afiliados" value={String(affiliateProducts.length)} icon={ShoppingCart} bg="bg-primary/10" color="text-primary" sub="com programa ativo" delay={0} />
-            <KpiCard label="Afiliados Ativos" value={String(productLinks.length)} icon={Users} bg="bg-success/10" color="text-success" sub="promovendo" delay={0.06} />
-            <KpiCard label="Vendas via Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} bg="bg-warning/10" color="text-warning" sub="faturamento" delay={0.12} />
-            <KpiCard label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} bg="bg-destructive/10" color="text-destructive" sub="aos afiliados" delay={0.18} />
+            <GlassKpi label="Produtos Afiliados" value={String(affiliateProducts.length)} icon={ShoppingCart} tone="primary" sub="com programa ativo" delay={0} />
+            <GlassKpi label="Afiliados Ativos" value={String(productLinks.length)} icon={Users} tone="success" sub="promovendo" delay={1} />
+            <GlassKpi label="Vendas via Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} tone="warning" sub="faturamento" delay={2} />
+            <GlassKpi label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} tone="destructive" sub="aos afiliados" delay={3} />
           </div>
 
           <div className="space-y-3">
@@ -361,10 +335,10 @@ export default function Afiliados() {
       {tab === "affiliate-of" && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiCard label="Comissões Ganhas" value={fmt(totalCommissionEarned)} icon={DollarSign} bg="bg-success/10" color="text-success" sub={`${mySales.filter(s => s.status === "approved").length} vendas aprovadas`} delay={0} large />
-            <KpiCard label="Pendente" value={fmt(totalCommissionPending)} icon={Clock} bg="bg-warning/10" color="text-warning" sub="aguardando" delay={0.06} large />
-            <KpiCard label="Cliques Totais" value={String(totalClicks)} icon={MousePointerClick} bg="bg-info/10" color="text-info" sub={`${conversionRate.toFixed(1)}% conversão`} delay={0.12} />
-            <KpiCard label="Links Ativos" value={String(myLinks.filter(l => l.is_active).length)} icon={Link2} bg="bg-primary/10" color="text-primary" sub={`de ${myLinks.length} total`} delay={0.18} />
+            <GlassKpi label="Comissões Ganhas" value={fmt(totalCommissionEarned)} icon={DollarSign} tone="success" sub={`${mySales.filter(s => s.status === "approved").length} vendas aprovadas`} delay={0} large />
+            <GlassKpi label="Pendente" value={fmt(totalCommissionPending)} icon={Clock} tone="warning" sub="aguardando" delay={1} large />
+            <GlassKpi label="Cliques Totais" value={String(totalClicks)} icon={MousePointerClick} tone="info" sub={`${conversionRate.toFixed(1)}% conversão`} delay={2} />
+            <GlassKpi label="Links Ativos" value={String(myLinks.filter(l => l.is_active).length)} icon={Link2} tone="primary" sub={`de ${myLinks.length} total`} delay={3} />
           </div>
 
           <div className="space-y-3">

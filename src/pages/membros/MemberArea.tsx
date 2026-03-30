@@ -99,7 +99,7 @@ export default function MemberArea() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-card to-muted/30 border border-border p-6 md:p-8">
         <div className="relative z-10">

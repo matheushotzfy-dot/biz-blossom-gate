@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -25,29 +25,7 @@ type CoProduction = {
   accepted_at: string | null; created_at: string; updated_at: string;
 };
 
-/* ─── KPI Card ─── */
-function KpiCard({ label, value, sub, icon: Icon, bg, color, delay = 0 }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
-  bg: string; color: string; delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="group relative rounded-2xl bg-card/60 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5 overflow-hidden hover:border-primary/20 transition-all duration-300"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", bg)}>
-          <Icon className={cn("h-4 w-4", color)} />
-        </div>
-      </div>
-      <p className="text-2xl md:text-3xl font-display font-black text-foreground tracking-tight">{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground/50 mt-1">{sub}</p>}
-    </motion.div>
-  );
-}
+/* KpiCard uses shared GlassKpi */
 
 /* ─── Co-production Card ─── */
 function CoProductionCard({ cp, isSent, productName, productPrice, onAccept, onReject, onCancel, index }: {
@@ -324,10 +302,10 @@ export default function Coproducoes() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="Ativas" value={String(activeCount)} icon={CheckCircle2} bg="bg-success/10" color="text-success" sub="parcerias" delay={0} />
-        <KpiCard label="Pendentes" value={String(pendingCount)} icon={Clock} bg="bg-warning/10" color="text-warning" sub="convites" delay={0.06} />
-        <KpiCard label="Total" value={String(coproductions.length)} icon={Handshake} bg="bg-primary/10" color="text-primary" sub="coproduções" delay={0.12} />
-        <KpiCard label="Enviadas" value={String(sentCoproductions.length)} icon={ArrowUpRight} bg="bg-info/10" color="text-info" sub="por você" delay={0.18} />
+        <GlassKpi label="Ativas" value={String(activeCount)} icon={CheckCircle2} tone="success" sub="parcerias" delay={0} />
+        <GlassKpi label="Pendentes" value={String(pendingCount)} icon={Clock} tone="warning" sub="convites" delay={1} />
+        <GlassKpi label="Total" value={String(coproductions.length)} icon={Handshake} tone="primary" sub="coproduções" delay={2} />
+        <GlassKpi label="Enviadas" value={String(sentCoproductions.length)} icon={ArrowUpRight} tone="info" sub="por você" delay={3} />
       </div>
 
       {/* Tabs */}

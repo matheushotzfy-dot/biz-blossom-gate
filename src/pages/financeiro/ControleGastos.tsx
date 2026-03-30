@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, Panel as SharedPanel, GlassKpi } from "@/components/PageShell";
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area, LineChart, Line,
@@ -22,12 +22,12 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const CATEGORIES = [
-  { value: "anuncios", label: "Anúncios", color: "hsl(0 72% 51%)", icon: Target },
-  { value: "ferramentas", label: "Ferramentas", color: "hsl(210 75% 50%)", icon: Layers },
-  { value: "equipe", label: "Equipe", color: "hsl(280 65% 55%)", icon: Activity },
-  { value: "infra", label: "Infraestrutura", color: "hsl(38 95% 50%)", icon: Zap },
-  { value: "conteudo", label: "Conteúdo", color: "hsl(152 68% 46%)", icon: BarChart3 },
-  { value: "outros", label: "Outros", color: "hsl(220 10% 50%)", icon: Filter },
+  { value: "anuncios", label: "Anúncios", color: "hsl(var(--destructive))", icon: Target },
+  { value: "ferramentas", label: "Ferramentas", color: "hsl(var(--info))", icon: Layers },
+  { value: "equipe", label: "Equipe", color: "hsl(var(--primary))", icon: Activity },
+  { value: "infra", label: "Infraestrutura", color: "hsl(var(--warning))", icon: Zap },
+  { value: "conteudo", label: "Conteúdo", color: "hsl(var(--success))", icon: BarChart3 },
+  { value: "outros", label: "Outros", color: "hsl(var(--muted-foreground))", icon: Filter },
 ];
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -41,13 +41,9 @@ type Expense = {
   amount: number; expense_date: string; created_at: string;
 };
 
-// ─── Panel component ──────────────────────────────────────────────
+// ─── Panel + PanelHeader (using shared Panel) ────────────────────
 function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cn("rounded-2xl bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/40 dark:border-border/20 shadow-sm", className)}>
-      {children}
-    </div>
-  );
+  return <SharedPanel className={className}>{children}</SharedPanel>;
 }
 
 function PanelHeader({ title, icon: Icon, action }: { title: string; icon: React.ComponentType<{ className?: string }>; action?: React.ReactNode }) {
@@ -61,39 +57,6 @@ function PanelHeader({ title, icon: Icon, action }: { title: string; icon: React
       </div>
       {action}
     </div>
-  );
-}
-
-// ─── Metric card ──────────────────────────────────────────────────
-function MetricCard({ label, value, sub, icon: Icon, tone = "primary", delay = 0 }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; tone?: string; delay?: number;
-}) {
-  const toneMap: Record<string, { bg: string; text: string; glow: string }> = {
-    primary: { bg: "bg-primary/10", text: "text-primary", glow: "shadow-primary/5" },
-    destructive: { bg: "bg-destructive/10", text: "text-destructive", glow: "shadow-destructive/5" },
-    success: { bg: "bg-emerald-500/10", text: "text-emerald-500", glow: "shadow-emerald-500/5" },
-    warning: { bg: "bg-amber-500/10", text: "text-amber-500", glow: "shadow-amber-500/5" },
-    info: { bg: "bg-blue-500/10", text: "text-blue-500", glow: "shadow-blue-500/5" },
-    violet: { bg: "bg-violet-500/10", text: "text-violet-500", glow: "shadow-violet-500/5" },
-  };
-  const t = toneMap[tone] || toneMap.primary;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
-      className={cn("rounded-2xl bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/40 dark:border-border/20 p-5 shadow-sm", t.glow)}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
-        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", t.bg)}>
-          <Icon className={cn("h-4 w-4", t.text)} />
-        </div>
-      </div>
-      <p className="text-2xl md:text-[28px] font-black text-foreground leading-none tracking-tight tabular-nums">{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground mt-2 font-medium">{sub}</p>}
-    </motion.div>
   );
 }
 
@@ -291,15 +254,15 @@ export default function ControleGastos() {
 
       {/* ═══ KPIs Row 1: Financial ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard label="Total Gastos" value={fmt(totalExpenses)} sub={`${filtered.length} registros no período`} icon={TrendingDown} tone="destructive" delay={0} />
-        <MetricCard label="Receita do Mês" value={fmt(monthRevenue)} sub="Transações aprovadas" icon={DollarSign} tone="primary" delay={0.05} />
-        <MetricCard label="Lucro Líquido" value={fmt(lucro)} sub={lucro >= 0 ? "Saldo positivo" : "Saldo negativo"} icon={lucro >= 0 ? TrendingUp : TrendingDown} tone={lucro >= 0 ? "success" : "destructive"} delay={0.1} />
-        <MetricCard label="Margem" value={`${margin.toFixed(1)}%`} sub={margin >= 30 ? "Saudável" : margin >= 0 ? "Moderada" : "Crítica"} icon={Percent} tone={margin >= 30 ? "success" : margin >= 0 ? "warning" : "destructive"} delay={0.15} />
+        <GlassKpi label="Total Gastos" value={fmt(totalExpenses)} sub={`${filtered.length} registros no período`} icon={TrendingDown} tone="destructive" delay={0} />
+        <GlassKpi label="Receita do Mês" value={fmt(monthRevenue)} sub="Transações aprovadas" icon={DollarSign} tone="primary" delay={1} />
+        <GlassKpi label="Lucro Líquido" value={fmt(lucro)} sub={lucro >= 0 ? "Saldo positivo" : "Saldo negativo"} icon={lucro >= 0 ? TrendingUp : TrendingDown} tone={lucro >= 0 ? "success" : "destructive"} delay={2} />
+        <GlassKpi label="Margem" value={`${margin.toFixed(1)}%`} sub={margin >= 30 ? "Saudável" : margin >= 0 ? "Moderada" : "Crítica"} icon={Percent} tone={margin >= 30 ? "success" : margin >= 0 ? "warning" : "destructive"} delay={3} />
       </div>
 
       {/* ═══ KPIs Row 2: ROI / ROAS ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard
+        <GlassKpi
           label="ROI"
           value={`${roi.toFixed(1)}%`}
           sub={roi > 0 ? `${fmt(Math.abs(lucro))} de retorno` : "Investimento sem retorno"}
@@ -307,15 +270,15 @@ export default function ControleGastos() {
           tone={roi >= 100 ? "success" : roi >= 0 ? "warning" : "destructive"}
           delay={0}
         />
-        <MetricCard
+        <GlassKpi
           label="ROAS"
           value={roas > 0 ? `${roas.toFixed(2)}x` : "—"}
           sub={adSpend > 0 ? `${fmt(adSpend)} em anúncios` : "Sem gastos com ads"}
           icon={Target}
           tone={roas >= 3 ? "success" : roas >= 1 ? "warning" : "destructive"}
-          delay={0.05}
+          delay={1}
         />
-        <MetricCard
+        <GlassKpi
           label="Custo por Venda"
           value={(() => {
             const salesCount = txData.filter(t => t.status === "completed" && t.created_at.startsWith(filterMonth)).length;
@@ -324,9 +287,9 @@ export default function ControleGastos() {
           sub={`${txData.filter(t => t.status === "completed" && t.created_at.startsWith(filterMonth)).length} vendas no mês`}
           icon={Wallet}
           tone="info"
-          delay={0.1}
+          delay={2}
         />
-        <MetricCard
+        <GlassKpi
           label="Ticket Médio Líq."
           value={(() => {
             const completed = txData.filter(t => t.status === "completed" && t.created_at.startsWith(filterMonth));
@@ -334,8 +297,8 @@ export default function ControleGastos() {
           })()}
           sub="Por transação aprovada"
           icon={BarChart3}
-          tone="violet"
-          delay={0.15}
+          tone="info"
+          delay={3}
         />
       </div>
 
