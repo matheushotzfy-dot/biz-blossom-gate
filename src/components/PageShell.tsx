@@ -147,3 +147,46 @@ export function EmptyState({ icon, title, subtitle, action }: { icon: React.Reac
     </div>
   );
 }
+
+/**
+ * GlassKpi — Unified KPI card used across all pages.
+ * Replaces VendasKpi, ExtratoKpi, and inline KPI cards for consistency.
+ */
+export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", large, delay = 0 }: {
+  label: string; value: string; sub?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "primary" | "info" | "warning" | "success" | "destructive";
+  large?: boolean; delay?: number;
+}) {
+  const toneStyles: Record<string, { bg: string; color: string }> = {
+    primary: { bg: "bg-primary/10", color: "text-primary" },
+    info: { bg: "bg-info/10", color: "text-info" },
+    warning: { bg: "bg-warning/10", color: "text-warning" },
+    success: { bg: "bg-success/10", color: "text-success" },
+    destructive: { bg: "bg-destructive/10", color: "text-destructive" },
+  };
+  const t = toneStyles[tone] || toneStyles.primary;
+
+  return (
+    <div
+      className={cn(
+        "group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
+        "hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300",
+        large ? "p-6" : "p-4 md:p-5"
+      )}
+      style={{ animationDelay: `${delay * 60}ms` }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", t.bg)}>
+          <Icon className={cn("h-4 w-4", t.color)} />
+        </div>
+      </div>
+      <p className={cn(
+        "font-display font-black text-foreground tracking-tight tabular-nums",
+        large ? "text-3xl md:text-4xl" : "text-[22px] md:text-2xl"
+      )}>{value}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
+    </div>
+  );
+}
