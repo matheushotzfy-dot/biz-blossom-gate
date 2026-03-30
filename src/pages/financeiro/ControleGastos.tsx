@@ -297,8 +297,8 @@ export default function ControleGastos() {
           })()}
           sub="Por transação aprovada"
           icon={BarChart3}
-          tone="violet"
-          delay={0.15}
+          tone="info"
+          delay={3}
         />
       </div>
 
