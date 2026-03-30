@@ -39,7 +39,7 @@ export function MobileRevenueBar() {
         {/* Revenue chip */}
         <div className="flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/8 px-2.5 py-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-          <span className="text-[12px] font-bold text-primary">{fmtCompact(revenue)}</span>
+          <span className="text-[12px] font-black font-numbers text-primary tracking-[-0.02em]">{fmtCompact(revenue)}</span>
         </div>
 
         {/* Notification */}
