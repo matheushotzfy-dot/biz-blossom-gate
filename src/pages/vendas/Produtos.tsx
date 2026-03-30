@@ -202,7 +202,7 @@ export default function Produtos() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Gerencie seu catálogo de infoprodutos" />
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <Button onClick={() => setOpen(true)} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+          <Button onClick={() => navigate("/vendas/produtos/novo/editar")} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
             <Plus className="h-4 w-4" /> Novo Produto
           </Button>
         </motion.div>
@@ -246,7 +246,7 @@ export default function Produtos() {
           title="Nenhum produto criado"
           subtitle="Crie seu primeiro infoproduto para começar a vender."
           action={
-            <Button onClick={() => setOpen(true)} size="sm" className="gap-2 rounded-xl shadow-lg shadow-primary/20">
+             <Button onClick={() => navigate("/vendas/produtos/novo/editar")} size="sm" className="gap-2 rounded-xl shadow-lg shadow-primary/20">
               <Plus className="h-3.5 w-3.5" /> Criar Produto
             </Button>
           }
@@ -289,7 +289,7 @@ export default function Produtos() {
 
                 {/* Quick actions overlay */}
                 <div className="absolute top-3 left-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <button onClick={() => handleEdit(p)} className="h-7 w-7 rounded-lg bg-card/90 backdrop-blur-md border border-border/20 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shadow-sm">
+                  <button onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="h-7 w-7 rounded-lg bg-card/90 backdrop-blur-md border border-border/20 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shadow-sm">
                     <Edit className="h-3 w-3" />
                   </button>
                   <button onClick={() => setPixelProduct(p)} className="h-7 w-7 rounded-lg bg-card/90 backdrop-blur-md border border-border/20 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shadow-sm">
@@ -343,7 +343,7 @@ export default function Produtos() {
                   <Button
                     variant="ghost" size="sm"
                     className="gap-1.5 rounded-lg text-[11px] h-8 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors flex-1"
-                    onClick={() => handleEdit(p)}
+                    onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
                   >
                     <Settings2 className="h-3 w-3" /> Configurar
                   </Button>
@@ -384,7 +384,7 @@ export default function Produtos() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: Math.min(products.length * 0.06, 0.4) }}
-            onClick={() => setOpen(true)}
+            onClick={() => navigate("/vendas/produtos/novo/editar")}
             className="rounded-2xl border-2 border-dashed border-border/20 hover:border-primary/30 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-3 min-h-[320px] transition-all duration-300 group/add"
           >
             <div className="h-14 w-14 rounded-2xl bg-primary/5 group-hover/add:bg-primary/10 flex items-center justify-center transition-colors">
