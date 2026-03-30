@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
-import { StatusBadge } from "@/components/StatusBadge";
 import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
@@ -82,6 +81,24 @@ const getInitials = (name: string) => {
   return (parts[0]?.[0] || "?").toUpperCase();
 };
 
+/* ─── Status Dot (color-only, no text) ─── */
+const STATUS_DOT_STYLES: Record<string, { dot: string; glow: string }> = {
+  completed: { dot: "bg-success", glow: "shadow-[0_0_8px_hsl(var(--success)/0.6)]" },
+  pending: { dot: "bg-warning", glow: "shadow-[0_0_8px_hsl(var(--warning)/0.6)]" },
+  failed: { dot: "bg-destructive", glow: "shadow-[0_0_8px_hsl(var(--destructive)/0.6)]" },
+  refunded: { dot: "bg-info", glow: "shadow-[0_0_8px_hsl(var(--info)/0.6)]" },
+  chargeback: { dot: "bg-destructive", glow: "shadow-[0_0_8px_hsl(var(--destructive)/0.6)]" },
+};
+
+function StatusDot({ status }: { status: string }) {
+  const s = STATUS_DOT_STYLES[status] || { dot: "bg-muted-foreground", glow: "" };
+  return (
+    <span className="flex items-center justify-center h-5 w-5">
+      <span className={cn("h-2.5 w-2.5 rounded-full animate-pulse", s.dot, s.glow)} />
+    </span>
+  );
+}
+
 /* VendasKpi is now GlassKpi from PageShell — removed duplicate */
 
 /* ─── Transaction Row (Desktop) ─── */
@@ -105,24 +122,37 @@ function TxRow({ tx, products, onClick, index }: {
     }
   };
 
+  const statusAccent: Record<string, { border: string; bg: string }> = {
+    completed: { border: "border-l-success", bg: "hover:bg-success/[0.04]" },
+    pending: { border: "border-l-warning", bg: "hover:bg-warning/[0.04]" },
+    failed: { border: "border-l-destructive", bg: "hover:bg-destructive/[0.04]" },
+    refunded: { border: "border-l-info", bg: "hover:bg-info/[0.04]" },
+    chargeback: { border: "border-l-destructive", bg: "hover:bg-destructive/[0.04]" },
+  };
+  const accent = statusAccent[tx.status] || { border: "border-l-muted-foreground", bg: "hover:bg-muted/10" };
+
   return (
     <motion.tr
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.4) }}
       onClick={onClick}
-      className="border-b border-border/30 dark:border-foreground/[0.04] hover:bg-muted/20 dark:hover:bg-foreground/[0.02] transition-colors cursor-pointer group"
+      className={cn(
+        "border-b border-border/20 dark:border-foreground/[0.03] transition-all cursor-pointer group border-l-[3px]",
+        accent.border,
+        accent.bg
+      )}
     >
       <td className="p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
+          <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/20">
             <AvatarFallback className={cn("text-[11px] font-bold", avatarColor)}>
               {getInitials(customerName)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-foreground font-medium text-[13px] leading-tight truncate">{customerName}</p>
-            {tx.customer_email && <p className="text-muted-foreground text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
+            <p className="text-foreground font-semibold text-[13px] leading-tight truncate">{customerName}</p>
+            {tx.customer_email && <p className="text-muted-foreground/60 text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
@@ -131,25 +161,27 @@ function TxRow({ tx, products, onClick, index }: {
       </td>
       <td className="p-4">
         <div>
-          <span className="font-display font-bold text-foreground text-[15px] block">
+          <span className="font-display font-black text-foreground text-[15px] block tracking-[-0.02em] tabular-nums">
             {fmt(Number(tx.net_amount))}
           </span>
           {Number(tx.fee_amount) > 0 && (
-            <span className="text-[10px] text-muted-foreground">taxa: {fmt(Number(tx.fee_amount))}</span>
+            <span className="text-[10px] text-muted-foreground/50 font-medium">taxa: {fmt(Number(tx.fee_amount))}</span>
           )}
         </div>
       </td>
       <td className="p-4">
-        <span className={cn("inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md", method.color)}>
+        <span className={cn("inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-lg", method.color)}>
           {method.icon}
           {method.label}
         </span>
       </td>
-      <td className="p-4"><StatusBadge status={tx.status} /></td>
+      <td className="p-4">
+        <StatusDot status={tx.status} />
+      </td>
       <td className="p-4">
         <div>
-          <p className="text-foreground/70 text-[12px] font-medium">{fmtDate(tx.created_at)}</p>
-          <p className="text-muted-foreground text-[10px]">{fmtTime(tx.created_at)}</p>
+          <p className="text-foreground/70 text-[12px] font-medium tabular-nums">{fmtDate(tx.created_at)}</p>
+          <p className="text-muted-foreground/40 text-[10px] tabular-nums">{fmtTime(tx.created_at)}</p>
         </div>
       </td>
       <td className="p-4">
@@ -203,12 +235,23 @@ function TxCard({ tx, products, onClick, index }: {
   const customerName = tx.customer_name || "Cliente";
   const avatarColor = getAvatarColor(customerName);
 
+  const statusBorderMobile: Record<string, string> = {
+    completed: "border-l-success",
+    pending: "border-l-warning",
+    failed: "border-l-destructive",
+    refunded: "border-l-info",
+    chargeback: "border-l-destructive",
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 cursor-pointer active:scale-[0.99] transition-transform"
+      className={cn(
+        "rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 cursor-pointer active:scale-[0.99] transition-all border-l-[3px]",
+        statusBorderMobile[tx.status] || "border-l-muted-foreground"
+      )}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -223,7 +266,7 @@ function TxCard({ tx, products, onClick, index }: {
             <p className="text-muted-foreground text-[11px] mt-0.5 truncate">{tx.customer_email || ""}</p>
           </div>
         </div>
-        <StatusBadge status={tx.status} />
+        <StatusDot status={tx.status} />
       </div>
       <div className="flex items-end justify-between">
         <div>
@@ -760,7 +803,7 @@ export default function Vendas() {
           </div>
         </div>
 
-        {/* Status Pills — subtle, no heavy borders */}
+        {/* Status Pills — premium with glow dots */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {statusFilters.map((f) => {
             const isActive = statusFilter === f.value;
@@ -770,17 +813,20 @@ export default function Vendas() {
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
                 className={cn(
-                  "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all",
+                  "shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 border",
                   isActive
-                    ? style.active
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                    ? cn(style.active, "border-current/15 shadow-sm")
+                    : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/20"
                 )}
               >
-                {isActive && <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />}
+                <span className={cn(
+                  "h-2 w-2 rounded-full transition-all",
+                  isActive ? cn(style.dot, "shadow-[0_0_6px_currentColor] animate-pulse") : "bg-muted-foreground/20"
+                )} />
                 {f.label}
                 <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded font-medium min-w-[20px] text-center",
-                  isActive ? "bg-foreground/10" : "text-muted-foreground/60"
+                  "text-[10px] px-1.5 py-0.5 rounded-md font-bold min-w-[20px] text-center tabular-nums",
+                  isActive ? "bg-foreground/10" : "text-muted-foreground/40"
                 )}>{f.count}</span>
               </button>
             );
@@ -810,11 +856,11 @@ export default function Vendas() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border/40">
+                  <tr className="border-b border-border/30 bg-muted/10">
                     {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left px-5 py-3.5 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">{h}</th>
                     ))}
                   </tr>
                 </thead>
