@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Play, Clock, CheckCircle2, Lock, Search, BookOpen, TrendingUp, ShoppingBag, Layers } from "lucide-react";
+import { Play, Clock, CheckCircle2, Lock, Search, BookOpen, TrendingUp, ShoppingBag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { PageShell, PageTitle, GlowPanel, Panel } from "@/components/PageShell";
 
+// ── Types ──
 type ModuleInfo = {
   id: string;
   title: string;
@@ -27,6 +29,7 @@ type CourseWithProgress = {
   modules: ModuleInfo[];
 };
 
+// ── Main Component ──
 export default function MemberArea() {
   const { user } = useAuth();
   const [courses, setCourses] = useState<CourseWithProgress[]>([]);
@@ -95,60 +98,46 @@ export default function MemberArea() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Hero Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-card/80 backdrop-blur-xl border border-border/30 p-6 md:p-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent pointer-events-none" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="h-10 w-10 rounded-2xl bg-primary/8 flex items-center justify-center">
-              <ShoppingBag className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-display font-black tracking-[-0.03em] text-foreground">
-                Minhas Compras
-              </h1>
-              <p className="text-muted-foreground/50 text-xs">Cursos e conteúdos que você adquiriu</p>
-            </div>
+    <PageShell>
+      <PageTitle icon={<ShoppingBag className="h-6 w-6" />} title="Minhas Compras" subtitle="Cursos e conteúdos que você adquiriu" />
+
+      {/* Progress Bar */}
+      {courses.length > 0 && (
+        <GlowPanel>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] text-muted-foreground/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <TrendingUp className="h-3 w-3 text-primary" /> Progresso geral
+            </span>
+            <span className="text-sm font-display font-black text-primary font-numbers">{overallPct}%</span>
           </div>
-
-          {courses.length > 0 && (
-            <div className="mt-5 max-w-md">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] text-muted-foreground/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <TrendingUp className="h-3 w-3 text-primary" /> Progresso geral
-                </span>
-                <span className="text-xs font-display font-black text-primary font-numbers">{overallPct}%</span>
-              </div>
-              <div className="h-2 rounded-full bg-muted/20 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${overallPct}%` }}
-                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                  className="h-full rounded-full bg-primary"
-                  style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.3)" }}
-                />
-              </div>
-              <p className="text-[10px] text-muted-foreground/40 mt-1.5 font-numbers">
-                {totalCompleted} de {totalLessons} aulas concluídas
-              </p>
-            </div>
-          )}
-
-          <div className="mt-4 relative max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
-            <Input
-              placeholder="Buscar cursos..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pl-9 rounded-xl h-10 bg-muted/10 border-border/20"
+          <div className="h-2.5 rounded-full bg-muted/20 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${overallPct}%` }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="h-full rounded-full bg-primary"
+              style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.3)" }}
             />
           </div>
-        </div>
+          <p className="text-[10px] text-muted-foreground/40 mt-2 font-numbers">
+            {totalCompleted} de {totalLessons} aulas concluídas
+          </p>
+        </GlowPanel>
+      )}
+
+      {/* Search */}
+      <div className="relative max-w-xs">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+        <Input
+          placeholder="Buscar cursos..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="pl-9 rounded-xl h-10 bg-muted/10 border-border/20"
+        />
       </div>
 
       {courses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Panel className="flex flex-col items-center justify-center py-16 text-center">
           <div className="h-20 w-20 rounded-2xl bg-muted/10 border border-border/20 flex items-center justify-center mb-5">
             <Lock className="h-10 w-10 text-muted-foreground/15" />
           </div>
@@ -156,7 +145,7 @@ export default function MemberArea() {
           <p className="text-muted-foreground/40 text-sm max-w-md">
             Adquira um produto para ter acesso aos cursos e conteúdos exclusivos.
           </p>
-        </div>
+        </Panel>
       ) : (
         <>
           {/* Continue Watching */}
@@ -208,31 +197,7 @@ export default function MemberArea() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: mi * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <Link
-                      to={`/membros/curso/${course.id}?module=${mod.id}`}
-                      className="group shrink-0 w-[200px] md:w-[240px] block"
-                    >
-                      <div className="aspect-video rounded-xl overflow-hidden bg-muted/10 relative border border-border/20 group-hover:border-primary/20 transition-all duration-300">
-                        {mod.banner_url ? (
-                          <img src={mod.banner_url} alt={mod.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/[0.05] to-muted/10">
-                            <BookOpen className="h-8 w-8 text-primary/15" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <p className="text-foreground text-xs font-display font-bold line-clamp-1 tracking-[-0.01em]">{mod.title}</p>
-                          <p className="text-muted-foreground/50 text-[10px] mt-0.5 font-numbers">{mod.lessonCount} aulas</p>
-                        </div>
-                        {/* Hover Play */}
-                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                          <div className="h-10 w-10 rounded-full bg-primary/90 flex items-center justify-center shadow-xl shadow-primary/30">
-                            <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                    <ModuleCard courseId={course.id} mod={mod} />
                   </motion.div>
                 ))}
                 {course.modules.length === 0 && (
@@ -258,10 +223,41 @@ export default function MemberArea() {
           ))}
         </>
       )}
-    </div>
+    </PageShell>
   );
 }
 
+// ── Module Card ──
+function ModuleCard({ courseId, mod }: { courseId: string; mod: ModuleInfo }) {
+  return (
+    <Link
+      to={`/membros/curso/${courseId}?module=${mod.id}`}
+      className="group shrink-0 w-[200px] md:w-[240px] block"
+    >
+      <div className="aspect-video rounded-xl overflow-hidden bg-muted/10 relative border border-border/20 group-hover:border-primary/20 transition-all duration-300">
+        {mod.banner_url ? (
+          <img src={mod.banner_url} alt={mod.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/[0.05] to-muted/10">
+            <BookOpen className="h-8 w-8 text-primary/15" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <p className="text-foreground text-xs font-display font-bold line-clamp-1 tracking-[-0.01em]">{mod.title}</p>
+          <p className="text-muted-foreground/50 text-[10px] mt-0.5 font-numbers">{mod.lessonCount} aulas</p>
+        </div>
+        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-primary/90 flex items-center justify-center shadow-xl shadow-primary/30">
+            <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ── Continue Watching Card ──
 function ContinueCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
 
