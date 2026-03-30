@@ -147,7 +147,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
     window.setTimeout(() => setCopiedId(false), 1800);
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-[70] overflow-hidden">
         <motion.div
