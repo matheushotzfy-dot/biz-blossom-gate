@@ -96,7 +96,7 @@ const NAV_SECTIONS = [
   },
 ] as const;
 
-type TabId = typeof NAV_SECTIONS[number]["items"][number]["id"];
+type TabId = string;
 
 const DATE_PRESETS = [
   { label: "Hoje", days: 0 },
