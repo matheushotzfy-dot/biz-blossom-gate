@@ -803,7 +803,7 @@ export default function Vendas() {
           </div>
         </div>
 
-        {/* Status Pills — subtle, no heavy borders */}
+        {/* Status Pills — premium with glow dots */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {statusFilters.map((f) => {
             const isActive = statusFilter === f.value;
@@ -813,17 +813,20 @@ export default function Vendas() {
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
                 className={cn(
-                  "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all",
+                  "shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 border",
                   isActive
-                    ? style.active
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                    ? cn(style.active, "border-current/15 shadow-sm")
+                    : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/20"
                 )}
               >
-                {isActive && <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />}
+                <span className={cn(
+                  "h-2 w-2 rounded-full transition-all",
+                  isActive ? cn(style.dot, "shadow-[0_0_6px_currentColor] animate-pulse") : "bg-muted-foreground/20"
+                )} />
                 {f.label}
                 <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded font-medium min-w-[20px] text-center",
-                  isActive ? "bg-foreground/10" : "text-muted-foreground/60"
+                  "text-[10px] px-1.5 py-0.5 rounded-md font-bold min-w-[20px] text-center tabular-nums",
+                  isActive ? "bg-foreground/10" : "text-muted-foreground/40"
                 )}>{f.count}</span>
               </button>
             );
