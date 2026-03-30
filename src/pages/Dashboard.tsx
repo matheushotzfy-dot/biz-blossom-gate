@@ -128,6 +128,7 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
+  const privacy = usePrivacyMode();
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
