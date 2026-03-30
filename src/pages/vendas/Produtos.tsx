@@ -208,35 +208,13 @@ export default function Produtos() {
         </motion.div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards — GlassKpi with accent bars */}
       {products.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: "Produtos", value: String(products.length), icon: Layers, tone: "primary" },
-            { label: "Ativos", value: String(activeProducts), icon: Zap, tone: "success" },
-            { label: "Ticket Médio", value: `R$ ${(totalValue / (products.length || 1)).toFixed(0)}`, icon: TrendingUp, tone: "info" },
-            { label: "Catálogo Total", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: BarChart3, tone: "warning" },
-          ].map((kpi, i) => (
-            <motion.div
-              key={kpi.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 p-4 md:p-5 overflow-hidden hover:border-primary/20 transition-all duration-300"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{kpi.label}</span>
-                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center",
-                  kpi.tone === "primary" ? "bg-primary/10" : kpi.tone === "success" ? "bg-success/10" : kpi.tone === "info" ? "bg-info/10" : "bg-warning/10"
-                )}>
-                  <kpi.icon className={cn("h-3.5 w-3.5",
-                    kpi.tone === "primary" ? "text-primary" : kpi.tone === "success" ? "text-success" : kpi.tone === "info" ? "text-info" : "text-warning"
-                  )} />
-                </div>
-              </div>
-              <p className="text-xl md:text-2xl font-display font-black text-foreground tracking-tight">{kpi.value}</p>
-            </motion.div>
-          ))}
+          <GlassKpi label="Produtos" value={String(products.length)} icon={Layers} tone="primary" delay={0} />
+          <GlassKpi label="Ativos" value={String(activeProducts)} icon={Zap} tone="success" delay={1} />
+          <GlassKpi label="Ticket Médio" value={`R$ ${(totalValue / (products.length || 1)).toFixed(0)}`} icon={TrendingUp} tone="info" delay={2} />
+          <GlassKpi label="Catálogo Total" value={`R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} icon={BarChart3} tone="warning" delay={3} />
         </div>
       )}
 
