@@ -314,149 +314,154 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[70] overflow-hidden">
-        {/* Backdrop — full coverage, no gaps */}
+        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="absolute inset-0 bg-background/60 backdrop-blur-sm"
           onClick={onClose}
         />
 
-        {/* Modal — true center */}
+        {/* Modal — centered */}
         <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
           <motion.div
-            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
-            className="pointer-events-auto w-full max-w-[440px] max-h-[82vh] overflow-y-auto rounded-2xl border border-border/60 bg-card shadow-2xl"
+            exit={{ opacity: 0, y: 6, scale: 0.99 }}
+            transition={{ type: "spring", duration: 0.45, bounce: 0.08 }}
+            className="pointer-events-auto w-full max-w-[500px] rounded-2xl border border-border/50 bg-card shadow-2xl flex flex-col max-h-[88vh]"
           >
-            {/* Close */}
-            <button onClick={onClose} className="absolute top-4 right-4 z-20 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors">
-              <X className="h-4 w-4" />
-            </button>
+            {/* Sticky header */}
+            <div className="px-6 pt-6 pb-5 border-b border-border/30 shrink-0 relative">
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 z-20 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
 
-            {/* Header */}
-            <div className="px-6 pt-6 pb-5">
-              <div className="flex items-center gap-3 pr-10">
-                <Avatar className="h-10 w-10 shrink-0">
+              <div className="flex items-center gap-3.5 pr-10">
+                <Avatar className="h-11 w-11 shrink-0">
                   <AvatarFallback className={cn("text-xs font-bold", avatarColor)}>
                     {getInitials(customerName)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{customerName}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{tx.customer_email || "—"}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold text-foreground truncate">{customerName}</p>
+                  <p className="text-[12px] text-muted-foreground truncate">{tx.customer_email || "—"}</p>
                 </div>
               </div>
 
               <div className="mt-5 flex items-end justify-between">
                 <div>
-                  <p className="text-[28px] font-display font-black tracking-tight text-foreground tabular-nums leading-none">{fmt(Number(tx.amount))}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">Valor bruto da transação</p>
+                  <p className="text-[30px] font-display font-black tracking-tight text-foreground tabular-nums leading-none">{fmt(Number(tx.amount))}</p>
+                  <p className="text-[11px] text-muted-foreground/70 mt-1.5">Valor bruto da transação</p>
                 </div>
                 <StatusBadge status={tx.status} />
               </div>
             </div>
 
-            {/* Content sections */}
-            <div className="px-6 pb-6 space-y-3">
-              {/* Financial */}
-              <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-2.5">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Resumo Financeiro</p>
-                <div className="flex justify-between text-[13px]">
-                  <span className="text-muted-foreground">Valor bruto</span>
-                  <span className="font-semibold text-foreground tabular-nums">{fmt(Number(tx.amount))}</span>
-                </div>
-                <div className="flex justify-between text-[13px]">
-                  <span className="text-muted-foreground">Taxa da plataforma</span>
-                  <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(tx.fee_amount))}</span>
-                </div>
-                {Number(tx.retained_amount) > 0 && (
-                  <div className="flex justify-between text-[13px]">
-                    <span className="text-muted-foreground">Retido</span>
-                    <span className="font-semibold text-warning tabular-nums">- {fmt(Number(tx.retained_amount))}</span>
-                  </div>
-                )}
-                <div className="border-t border-border/30 pt-2.5 flex justify-between">
-                  <span className="text-[13px] font-bold text-foreground">Valor líquido</span>
-                  <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(Number(tx.net_amount))}</span>
-                </div>
-              </div>
-
-              {/* Details */}
-              <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-3">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Detalhes</p>
-                <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Método</p>
-                    <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-md", methodStyle)}>
-                      {methodLabel}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Data</p>
-                    <p className="text-[13px] font-medium text-foreground">{fmtDate(tx.created_at)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Horário</p>
-                    <p className="text-[13px] font-medium text-foreground">{fmtTime(tx.created_at)}</p>
-                  </div>
-                  {tx.product_id && (
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Produto</p>
-                      <p className="text-[13px] font-medium text-foreground truncate" title={products[tx.product_id] || "—"}>{products[tx.product_id] || "—"}</p>
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1 overscroll-contain">
+              <div className="px-6 py-5 space-y-4">
+                {/* Financial summary */}
+                <div className="rounded-xl border border-border/30 bg-muted/[0.03] p-4 space-y-3">
+                  <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">Resumo Financeiro</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[13px]">
+                      <span className="text-muted-foreground">Valor bruto</span>
+                      <span className="font-semibold text-foreground tabular-nums">{fmt(Number(tx.amount))}</span>
                     </div>
-                  )}
-                </div>
-                <div className="pt-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">ID da Transação</p>
-                  <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground hover:text-primary transition-colors bg-muted/15 px-2.5 py-1 rounded-lg max-w-full">
-                    <span className="truncate">{tx.id.slice(0, 24)} ...</span>
-                    {copiedId ? <Check className="h-3 w-3 text-success shrink-0" /> : <Copy className="h-3 w-3 shrink-0" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Client */}
-              <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-3">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Cliente</p>
-                <div className="space-y-2">
-                  {[
-                    { icon: Users, label: "Nome", val: tx.customer_name || "—" },
-                    { icon: Mail, label: "Email", val: tx.customer_email || "—" },
-                    { icon: Phone, label: "Telefone", val: tx.customer_phone || "—" },
-                    ...(tx.customer_document ? [{ icon: Hash, label: "CPF/CNPJ", val: tx.customer_document }] : []),
-                  ].map(({ icon: Ico, label, val }) => (
-                    <div key={label} className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                        <Ico className="h-3.5 w-3.5" />
-                        <span className="text-[12px]">{label}</span>
+                    <div className="flex justify-between text-[13px]">
+                      <span className="text-muted-foreground">Taxa da plataforma</span>
+                      <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(tx.fee_amount))}</span>
+                    </div>
+                    {Number(tx.retained_amount) > 0 && (
+                      <div className="flex justify-between text-[13px]">
+                        <span className="text-muted-foreground">Retido</span>
+                        <span className="font-semibold text-warning tabular-nums">- {fmt(Number(tx.retained_amount))}</span>
                       </div>
-                      <span className="text-[12px] font-medium text-foreground truncate max-w-[200px] text-right">{val}</span>
-                    </div>
-                  ))}
+                    )}
+                  </div>
+                  <div className="border-t border-border/20 pt-3 flex justify-between items-center">
+                    <span className="text-[13px] font-bold text-foreground">Valor líquido</span>
+                    <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(Number(tx.net_amount))}</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* UTMs */}
-              {Object.keys(utms).length > 0 && (
-                <div className="rounded-xl border border-border/40 bg-muted/5 p-4 space-y-3">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rastreamento (UTMs)</p>
-                  <div className="space-y-1.5">
-                    {Object.entries(utms).map(([key, val]) => (
-                      <div key={key} className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] text-muted-foreground font-mono">{key}</span>
-                        <span className="text-[11px] font-medium text-foreground bg-muted/15 px-2 py-0.5 rounded-md max-w-[180px] truncate">{val}</span>
+                {/* Details grid */}
+                <div className="rounded-xl border border-border/30 bg-muted/[0.03] p-4 space-y-3.5">
+                  <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">Detalhes</p>
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider mb-1.5">Método</p>
+                      <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-md", methodStyle)}>
+                        {methodLabel}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider mb-1.5">Data</p>
+                      <p className="text-[13px] font-medium text-foreground">{fmtFull(tx.created_at)}</p>
+                    </div>
+                    {tx.product_id && (
+                      <div className="col-span-2 min-w-0">
+                        <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider mb-1.5">Produto</p>
+                        <p className="text-[13px] font-medium text-foreground" title={products[tx.product_id] || "—"}>{products[tx.product_id] || "—"}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-1">
+                    <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider mb-1.5">ID da Transação</p>
+                    <button onClick={() => handleCopyId(tx.id)} className="inline-flex items-center gap-2 font-mono text-[11px] text-muted-foreground hover:text-primary transition-colors bg-muted/10 px-3 py-1.5 rounded-lg w-full">
+                      <span className="truncate flex-1 text-left">{tx.id}</span>
+                      {copiedId ? <Check className="h-3.5 w-3.5 text-success shrink-0" /> : <Copy className="h-3.5 w-3.5 shrink-0" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Client info */}
+                <div className="rounded-xl border border-border/30 bg-muted/[0.03] p-4 space-y-3.5">
+                  <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">Cliente</p>
+                  <div className="space-y-2.5">
+                    {[
+                      { icon: Users, label: "Nome", val: tx.customer_name || "—" },
+                      { icon: Mail, label: "Email", val: tx.customer_email || "—" },
+                      { icon: Phone, label: "Telefone", val: tx.customer_phone || "—" },
+                      ...(tx.customer_document ? [{ icon: Hash, label: "CPF/CNPJ", val: tx.customer_document }] : []),
+                    ].map(({ icon: Ico, label, val }) => (
+                      <div key={label} className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2.5 text-muted-foreground/70 shrink-0">
+                          <Ico className="h-3.5 w-3.5" />
+                          <span className="text-[12px]">{label}</span>
+                        </div>
+                        <span className="text-[12px] font-medium text-foreground truncate text-right">{val}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Actions */}
-              <div className="flex gap-2.5 pt-1">
+                {/* UTMs */}
+                {Object.keys(utms).length > 0 && (
+                  <div className="rounded-xl border border-border/30 bg-muted/[0.03] p-4 space-y-3">
+                    <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">Rastreamento (UTMs)</p>
+                    <div className="space-y-2">
+                      {Object.entries(utms).map(([key, val]) => (
+                        <div key={key} className="flex items-center justify-between gap-3">
+                          <span className="text-[11px] text-muted-foreground font-mono shrink-0">{key}</span>
+                          <span className="text-[11px] font-medium text-foreground bg-muted/10 px-2.5 py-0.5 rounded-md truncate">{val}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sticky footer actions */}
+            {(tx.customer_phone || tx.status === "completed") && (
+              <div className="px-6 py-4 border-t border-border/30 shrink-0 flex gap-2.5">
                 {tx.customer_phone && (
                   <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
                     <Button variant="outline" className="w-full gap-2 rounded-xl h-10 border-success/20 text-success hover:bg-success/5 font-semibold text-[12px]">
@@ -474,7 +479,7 @@ function TxDetailModal({ tx, products, onClose, onRefund }: {
                   </Button>
                 )}
               </div>
-            </div>
+            )}
           </motion.div>
         </div>
       </div>
