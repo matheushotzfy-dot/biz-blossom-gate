@@ -253,10 +253,10 @@ export default function Produtos() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
 
-                {/* Status */}
+                {/* Status dot with glow */}
                 <div className="absolute top-3 right-3">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md shadow-sm", statusColor(p.status))}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md shadow-sm border border-border/20 bg-card/80", statusColor(p.status))}>
+                    <span className={cn("h-2 w-2 rounded-full animate-pulse shadow-[0_0_6px_currentColor]", statusDot(p.status))} />
                     {statusLabel(p.status)}
                   </span>
                 </div>
