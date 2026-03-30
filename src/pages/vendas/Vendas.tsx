@@ -81,6 +81,24 @@ const getInitials = (name: string) => {
   return (parts[0]?.[0] || "?").toUpperCase();
 };
 
+/* ─── Status Dot (color-only, no text) ─── */
+const STATUS_DOT_STYLES: Record<string, { dot: string; glow: string }> = {
+  completed: { dot: "bg-success", glow: "shadow-[0_0_8px_hsl(var(--success)/0.6)]" },
+  pending: { dot: "bg-warning", glow: "shadow-[0_0_8px_hsl(var(--warning)/0.6)]" },
+  failed: { dot: "bg-destructive", glow: "shadow-[0_0_8px_hsl(var(--destructive)/0.6)]" },
+  refunded: { dot: "bg-info", glow: "shadow-[0_0_8px_hsl(var(--info)/0.6)]" },
+  chargeback: { dot: "bg-destructive", glow: "shadow-[0_0_8px_hsl(var(--destructive)/0.6)]" },
+};
+
+function StatusDot({ status }: { status: string }) {
+  const s = STATUS_DOT_STYLES[status] || { dot: "bg-muted-foreground", glow: "" };
+  return (
+    <span className="flex items-center justify-center h-5 w-5">
+      <span className={cn("h-2.5 w-2.5 rounded-full animate-pulse", s.dot, s.glow)} />
+    </span>
+  );
+}
+
 /* VendasKpi is now GlassKpi from PageShell — removed duplicate */
 
 /* ─── Transaction Row (Desktop) ─── */
