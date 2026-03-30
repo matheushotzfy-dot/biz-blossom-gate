@@ -856,11 +856,11 @@ export default function Vendas() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border/40">
+                  <tr className="border-b border-border/30 bg-muted/10">
                     {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left px-5 py-3.5 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">{h}</th>
                     ))}
                   </tr>
                 </thead>
