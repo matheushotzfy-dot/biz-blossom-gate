@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { StatusBadge } from "@/components/StatusBadge";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -82,29 +82,7 @@ const getInitials = (name: string) => {
   return (parts[0]?.[0] || "?").toUpperCase();
 };
 
-/* ─── Glass KPI Card ─── */
-function VendasKpi({ label, value, sub, icon: Icon, iconBg, iconColor }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
-  iconBg: string; iconColor: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl p-5 relative overflow-hidden group hover:border-border/70 transition-colors"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <span className="text-[11px] font-medium text-muted-foreground tracking-wide">{label}</span>
-        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", iconBg)}>
-          <Icon className={cn("h-4 w-4", iconColor)} />
-        </div>
-      </div>
-      <p className="text-[22px] font-display font-bold text-foreground leading-none tracking-tight tabular-nums">{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground/60 mt-2">{sub}</p>}
-    </motion.div>
-  );
-}
+/* VendasKpi is now GlassKpi from PageShell — removed duplicate */
 
 /* ─── Transaction Row (Desktop) ─── */
 function TxRow({ tx, products, onClick, index }: {
@@ -743,12 +721,12 @@ export default function Vendas() {
         </div>
       </div>
 
-      {/* KPIs — Glass cards */}
+      {/* KPIs — Unified GlassKpi */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <VendasKpi label="Receita Líquida" value={privacyHidden ? "••••••" : fmt(totalSales)} sub={privacyHidden ? "••••" : `${approved.length} aprovadas`} icon={DollarSign} iconBg="bg-primary/10" iconColor="text-primary" />
-        <VendasKpi label="Faturamento Bruto" value={privacyHidden ? "••••••" : fmt(totalGross)} sub="antes das taxas" icon={BarChart3} iconBg="bg-info/10" iconColor="text-info" />
-        <VendasKpi label="Ticket Médio" value={privacyHidden ? "••••••" : fmt(avgTicket)} sub="por venda aprovada" icon={TrendingUp} iconBg="bg-warning/10" iconColor="text-warning" />
-        <VendasKpi label="Total Transações" value={privacyHidden ? "••••••" : String(dateFiltered.length)} sub={privacyHidden ? "••••" : `${conversion.toFixed(0)}% conversão`} icon={Users} iconBg="bg-accent" iconColor="text-accent-foreground" />
+        <GlassKpi label="Receita Líquida" value={privacyHidden ? "••••••" : fmt(totalSales)} sub={privacyHidden ? "••••" : `${approved.length} aprovadas`} icon={DollarSign} tone="primary" delay={0} />
+        <GlassKpi label="Faturamento Bruto" value={privacyHidden ? "••••••" : fmt(totalGross)} sub="antes das taxas" icon={BarChart3} tone="info" delay={1} />
+        <GlassKpi label="Ticket Médio" value={privacyHidden ? "••••••" : fmt(avgTicket)} sub="por venda aprovada" icon={TrendingUp} tone="warning" delay={2} />
+        <GlassKpi label="Total Transações" value={privacyHidden ? "••••••" : String(dateFiltered.length)} sub={privacyHidden ? "••••" : `${conversion.toFixed(0)}% conversão`} icon={Users} tone="success" delay={3} />
       </div>
 
       {/* Controls */}

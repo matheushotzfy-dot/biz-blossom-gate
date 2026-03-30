@@ -9,7 +9,7 @@ import {
   Download, Smartphone, BarChart3, ArrowDownRight, Zap,
   MoreHorizontal, Receipt,
 } from "lucide-react";
-import { PageShell, PageTitle, EmptyState } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
@@ -79,29 +79,7 @@ const getInitials = (name: string) => {
   return (parts[0]?.[0] || "?").toUpperCase();
 };
 
-/* ─── KPI Card (Glassmorphism) ─── */
-function ExtratoKpi({ label, value, sub, icon: Icon, iconBg, iconColor }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>;
-  iconBg: string; iconColor: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-5"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
-        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", iconBg)}>
-          <Icon className={cn("h-4 w-4", iconColor)} />
-        </div>
-      </div>
-      <p className="text-2xl font-display font-bold text-foreground leading-none tracking-tight">{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground/70 mt-1.5 font-medium">{sub}</p>}
-    </motion.div>
-  );
-}
+/* ExtratoKpi is now GlassKpi from PageShell — removed duplicate */
 
 /* ─── Transaction Row (Desktop) ─── */
 function TxRow({ tx, products, onClick, index }: {
@@ -460,12 +438,12 @@ export default function Extrato() {
         </Button>
       </div>
 
-      {/* KPIs */}
+      {/* KPIs — Unified GlassKpi */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <ExtratoKpi label="Receita Líquida" value={fmt(totalNet)} sub={`${approved.length} aprovadas`} icon={DollarSign} iconBg="bg-primary/10" iconColor="text-primary" />
-        <ExtratoKpi label="Faturamento Bruto" value={fmt(totalGross)} sub="antes das taxas" icon={BarChart3} iconBg="bg-info/10" iconColor="text-info" />
-        <ExtratoKpi label="Ticket Médio" value={fmt(avgTicket)} sub="por venda aprovada" icon={TrendingUp} iconBg="bg-warning/10" iconColor="text-warning" />
-        <ExtratoKpi label="Total Transações" value={String(dateFiltered.length)} sub={`${approved.length} completadas`} icon={Users} iconBg="bg-accent" iconColor="text-accent-foreground" />
+        <GlassKpi label="Receita Líquida" value={fmt(totalNet)} sub={`${approved.length} aprovadas`} icon={DollarSign} tone="primary" delay={0} />
+        <GlassKpi label="Faturamento Bruto" value={fmt(totalGross)} sub="antes das taxas" icon={BarChart3} tone="info" delay={1} />
+        <GlassKpi label="Ticket Médio" value={fmt(avgTicket)} sub="por venda aprovada" icon={TrendingUp} tone="warning" delay={2} />
+        <GlassKpi label="Total Transações" value={String(dateFiltered.length)} sub={`${approved.length} completadas`} icon={Users} tone="success" delay={3} />
       </div>
 
       {/* Controls */}
