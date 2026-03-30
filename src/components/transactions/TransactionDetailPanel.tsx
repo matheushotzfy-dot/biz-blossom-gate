@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDownRight,
@@ -146,7 +147,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
     window.setTimeout(() => setCopiedId(false), 1800);
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-[70] overflow-hidden">
         <motion.div
@@ -326,6 +327,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
           </motion.div>
         </div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
