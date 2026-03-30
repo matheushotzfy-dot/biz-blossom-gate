@@ -84,7 +84,7 @@ export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; ti
         <span className="text-primary">{icon}</span>
       </div>
       <div className="space-y-1">
-        <h1 className="font-display text-xl font-black leading-none tracking-tight text-foreground md:text-2xl">{title}</h1>
+        <h1 className="font-display text-xl font-black leading-none tracking-[-0.03em] text-foreground md:text-2xl">{title}</h1>
         <p className="text-[13px] text-muted-foreground/80">{subtitle}</p>
       </div>
     </div>
@@ -105,7 +105,7 @@ export function KpiCard({ label, value, sub, icon, color, bg, accent }: {
             <Icon className={cn("h-[18px] w-[18px]", color)} />
           </div>
         </div>
-        <p className="font-display text-[22px] font-black leading-none text-foreground md:text-2xl">{value}</p>
+        <p className="font-display text-[22px] font-black leading-none text-foreground md:text-2xl tabular-nums tracking-[-0.03em]">{value}</p>
         {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
       </div>
     </GlowPanel>
@@ -183,7 +183,7 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
         </div>
       </div>
       <p className={cn(
-        "font-display font-black text-foreground tracking-tight tabular-nums",
+        "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
         large ? "text-3xl md:text-4xl" : "text-[22px] md:text-2xl"
       )}>{value}</p>
       {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
