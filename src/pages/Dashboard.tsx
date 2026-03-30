@@ -726,7 +726,8 @@ export default function Dashboard() {
                         <p className="text-[14px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">
                           {privacy.hidden ? CENSORED : fmt(item.amount)}
                         </p>
-                        <span className={`rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${styles.pill} ring-1 ring-current/10`}>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-[3px] text-[9px] font-extrabold uppercase tracking-wider ${styles.pill} backdrop-blur-sm shadow-sm`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${styles.iconBg} ring-1 ring-current/20 animate-pulse`} />
                           {styles.label}
                         </span>
                       </div>
