@@ -306,16 +306,16 @@ export default function ProductEditor() {
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-          <button onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Voltar
           </button>
           <div className="flex items-center gap-2">
             {!isNew && (
-              <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs">
+              <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold">
                 <Trash2 className="h-3.5 w-3.5" /> Excluir Produto
               </Button>
             )}
-            <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl text-sm font-semibold h-9 px-5 shadow-lg shadow-primary/20">
+            <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl text-sm font-display font-black h-9 px-5 shadow-lg shadow-primary/20">
               <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : "Salvar Produto"}
             </Button>
           </div>
@@ -330,7 +330,7 @@ export default function ProductEditor() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left",
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-display font-bold transition-all duration-200 text-left tracking-[-0.01em]",
                   activeTab === tab.key
                     ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
@@ -348,7 +348,7 @@ export default function ProductEditor() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all",
                   activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground"
                 )}
               >
@@ -374,7 +374,7 @@ export default function ProductEditor() {
                     <div className="panel-enterprise-subtle p-0 overflow-hidden">
                       <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
                       <div className="p-4 border-b border-border/30">
-                        <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                           <ImagePlus className="h-3.5 w-3.5" /> Imagem do Produto
                         </Label>
                         <p className="text-[10px] text-muted-foreground/50 mt-0.5">Formatos aceitos: JPG, PNG, WebP, GIF. Máx: 10MB. Recomendado: 300×250px</p>
@@ -405,21 +405,21 @@ export default function ProductEditor() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                         <Package className="h-3.5 w-3.5" /> Nome do produto
                       </Label>
                       <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11" required maxLength={200} />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-muted-foreground">Descrição</Label>
+                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Descrição</Label>
                       <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none" maxLength={2000} />
                       <p className="text-[10px] text-muted-foreground/40 text-right">{description.length}/2000</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground">Categoria</Label>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Categoria</Label>
                         <Select value={category} onValueChange={setCategory}>
                           <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -436,7 +436,7 @@ export default function ProductEditor() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground">Tipo de pagamento</Label>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Tipo de pagamento</Label>
                         <Select value={paymentType} onValueChange={setPaymentType}>
                           <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -449,11 +449,11 @@ export default function ProductEditor() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                           <DollarSign className="h-3.5 w-3.5" /> Preços
                         </Label>
                         <div className="flex items-center gap-2">
-                          <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                             <Shield className="h-3.5 w-3.5" /> Garantia
                           </Label>
                           <Select value={warrantyDays} onValueChange={setWarrantyDays}>
@@ -469,20 +469,20 @@ export default function ProductEditor() {
                       <div className="panel-enterprise-subtle overflow-hidden">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-border/30 text-muted-foreground text-xs">
-                              <th className="text-left px-4 py-2.5 font-semibold">Nome</th>
-                              <th className="text-left px-4 py-2.5 font-semibold">Preço</th>
-                              <th className="text-left px-4 py-2.5 font-semibold">Tipo</th>
+                            <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
+                              <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Nome</th>
+                              <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Preço</th>
+                              <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Tipo</th>
                               <th className="px-4 py-2.5 w-12"></th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr className="border-b border-border/10">
-                              <td className="px-4 py-3 font-medium text-foreground">{name || "—"}</td>
+                              <td className="px-4 py-3 font-display font-bold text-foreground tracking-[-0.01em]">{name || "—"}</td>
                               <td className="px-4 py-3">
-                                <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e) => setPrice(e.target.value)} className="h-8 w-28 text-sm font-semibold" placeholder="0.00" />
+                                <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e) => setPrice(e.target.value)} className="h-8 w-28 text-sm font-numbers font-black tracking-[-0.03em]" placeholder="0.00" />
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground capitalize">{paymentType}</td>
+                              <td className="px-4 py-3 text-muted-foreground capitalize font-display font-medium">{paymentType}</td>
                               <td className="px-4 py-3 text-center">
                                 <span className="text-[10px] text-muted-foreground/40">1/10</span>
                               </td>
@@ -494,13 +494,13 @@ export default function ProductEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                           <ExternalLink className="h-3.5 w-3.5" /> Página de vendas
                         </Label>
                         <Input value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                           <Mail className="h-3.5 w-3.5" /> E-mail de suporte
                         </Label>
                         <Input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11" />
@@ -508,7 +508,7 @@ export default function ProductEditor() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-muted-foreground">Nome de exibição do produtor</Label>
+                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Nome de exibição do produtor</Label>
                       <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome ou marca" className="h-11" />
                     </div>
 
@@ -518,12 +518,12 @@ export default function ProductEditor() {
                           <Zap className={cn("h-4 w-4", status === "active" ? "text-success" : "text-muted-foreground/40")} />
                         </div>
                         <div>
-                          <p className="text-sm font-bold">Status do produto</p>
-                          <p className="text-[10px] text-muted-foreground/50">Ative para começar a vender</p>
+                          <p className="text-sm font-display font-black tracking-[-0.02em]">Status do produto</p>
+                          <p className="text-[10px] text-muted-foreground/50 font-medium">Ative para começar a vender</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={cn("text-xs font-bold", status === "active" ? "text-success" : "text-muted-foreground/50")}>
+                        <span className={cn("text-xs font-display font-black", status === "active" ? "text-success" : "text-muted-foreground/50")}>
                           {status === "active" ? "Ativo" : "Inativo"}
                         </span>
                         <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
@@ -537,7 +537,7 @@ export default function ProductEditor() {
                     <SectionHeader title="Configurações" subtitle="Pagamento, métodos aceitos e entrega de conteúdo." />
 
                     <div className="space-y-3">
-                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Métodos de pagamento</h3>
+                      <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]"><CreditCard className="h-4 w-4 text-primary" /> Métodos de pagamento</h3>
                       <p className="text-xs text-muted-foreground/60">Selecione os métodos de pagamento disponíveis no checkout.</p>
                       <div className="space-y-2">
                         <PaymentMethodRow icon={QrCode} label="PIX" sublabel={price ? `Valor líquido: R$ ${(parseFloat(price) * 0.9751).toFixed(2)}` : ""} color="text-success" checked={pixEnabled} onChange={setPixEnabled} />
@@ -547,14 +547,14 @@ export default function ProductEditor() {
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-sm font-bold text-foreground">Configurações do formulário</h3>
+                      <h3 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Configurações do formulário</h3>
                       <ToggleRow label="Pedir para o comprador repetir o e-mail" checked={emailConfirm} onChange={setEmailConfirm} />
                       <ToggleRow label="Exibir campo de cupom de desconto" checked={showCouponField} onChange={setShowCouponField} />
                       <ToggleRow label="Solicitar endereço do comprador" sublabel="CEP com preenchimento automático" checked={addressRequired} onChange={setAddressRequired} />
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Entrega de conteúdo</h3>
+                      <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-primary" /> Entrega de conteúdo</h3>
                       <p className="text-xs text-muted-foreground/60">Selecione como o conteúdo será entregue ao comprador.</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
@@ -580,7 +580,7 @@ export default function ProductEditor() {
                               <opt.icon className={cn("h-4 w-4", deliveryType === opt.value ? "text-primary" : "text-muted-foreground/40")} />
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-foreground">{opt.label}</p>
+                              <p className="text-sm font-display font-bold text-foreground tracking-[-0.01em]">{opt.label}</p>
                               <p className="text-[10px] text-muted-foreground/50 mt-0.5">{opt.desc}</p>
                             </div>
                           </button>
@@ -589,7 +589,7 @@ export default function ProductEditor() {
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Crosshair className="h-4 w-4 text-primary" /> Pixels de conversão</h3>
+                      <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]"><Crosshair className="h-4 w-4 text-primary" /> Pixels de conversão</h3>
                       <p className="text-xs text-muted-foreground/60">Configure os pixels diretamente na página de Produtos usando o botão "Pixels".</p>
                     </div>
                   </div>
@@ -618,7 +618,7 @@ export default function ProductEditor() {
                                       </div>
                                     )}
                                     <div className="min-w-0">
-                                      <p className="text-sm font-semibold truncate">{prod?.name || "Produto"}</p>
+                                      <p className="text-sm font-display font-bold truncate tracking-[-0.01em]">{prod?.name || "Produto"}</p>
                                       <p className="text-xs text-muted-foreground">R$ {Number(prod?.price || 0).toFixed(2)}</p>
                                     </div>
                                   </div>
