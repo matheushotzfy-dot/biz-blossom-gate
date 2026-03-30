@@ -25,6 +25,7 @@ import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
 import CheckoutBuilder from "./pages/vendas/CheckoutBuilder";
+import ProductEditor from "./pages/vendas/ProductEditor";
 
 import Webhooks from "./pages/vendas/Webhooks";
 import Documentacao from "./pages/vendas/Documentacao";
@@ -96,6 +97,7 @@ const App = () => (
 
               {/* Standalone full-screen pages (outside dashboard layout) */}
               <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
+              <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
 
               {/* User Dashboard */}
               <Route
