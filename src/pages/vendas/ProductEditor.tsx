@@ -619,7 +619,7 @@ export default function ProductEditor() {
                                     )}
                                     <div className="min-w-0">
                                       <p className="text-sm font-display font-bold truncate tracking-[-0.01em]">{prod?.name || "Produto"}</p>
-                                      <p className="text-xs text-muted-foreground">R$ {Number(prod?.price || 0).toFixed(2)}</p>
+                                      <p className="text-xs text-muted-foreground font-numbers">R$ {Number(prod?.price || 0).toFixed(2)}</p>
                                     </div>
                                   </div>
                                   <Button variant="ghost" size="sm" onClick={() => removeBump(bump.id)} className="text-destructive hover:text-destructive h-8 w-8 p-0">
@@ -663,7 +663,7 @@ export default function ProductEditor() {
 
                     {hasCustomThankYou && (
                       <div className="space-y-2 pl-4 border-l-2 border-primary/20">
-                        <Label className="text-xs font-bold text-muted-foreground">URL da página de obrigado / upsell</Label>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">URL da página de obrigado / upsell</Label>
                         <Input value={thankYouUrl} onChange={(e) => setThankYouUrl(e.target.value)} placeholder="https://..." type="url" className="h-11" />
                       </div>
                     )}
@@ -675,11 +675,11 @@ export default function ProductEditor() {
                           <div className="flex flex-col gap-2">
                             <label className="flex items-center gap-2 cursor-pointer">
                               <input type="radio" name="emailTiming" checked={emailTiming === "immediate"} onChange={() => setEmailTiming("immediate")} className="accent-primary" />
-                              <span className="text-sm">Enviar imediatamente após o pagamento</span>
+                              <span className="text-sm font-display font-medium">Enviar imediatamente após o pagamento</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
                               <input type="radio" name="emailTiming" checked={emailTiming === "after_upsell"} onChange={() => setEmailTiming("after_upsell")} className="accent-primary" />
-                              <span className="text-sm">Enviar após concluir as ofertas de upsell</span>
+                              <span className="text-sm font-display font-medium">Enviar após concluir as ofertas de upsell</span>
                             </label>
                           </div>
                         </div>
@@ -699,18 +699,18 @@ export default function ProductEditor() {
                         <div className="panel-enterprise-subtle overflow-hidden">
                           <table className="w-full text-sm">
                             <thead>
-                              <tr className="border-b border-border/30 text-muted-foreground text-xs">
-                                <th className="text-left px-4 py-2.5 font-semibold">Nome</th>
-                                <th className="text-left px-4 py-2.5 font-semibold">Preço</th>
-                                <th className="text-left px-4 py-2.5 font-semibold">Oferta</th>
-                                <th className="px-4 py-2.5 font-semibold text-right">Ações</th>
+                              <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Nome</th>
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Preço</th>
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Oferta</th>
+                                <th className="px-4 py-2.5 font-display font-black uppercase tracking-[0.15em] text-right">Ações</th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="px-4 py-3 font-medium text-foreground">Checkout Principal Padrão</td>
-                                <td className="px-4 py-3 text-muted-foreground">R$ {Number(price || 0).toFixed(2)}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{name}</td>
+                                <td className="px-4 py-3 font-display font-bold text-foreground tracking-[-0.01em]">Checkout Principal Padrão</td>
+                                <td className="px-4 py-3 text-foreground font-numbers font-black tracking-[-0.03em]">R$ {Number(price || 0).toFixed(2)}</td>
+                                <td className="px-4 py-3 text-muted-foreground font-display font-medium">{name}</td>
                                 <td className="px-4 py-3 text-right">
                                   <div className="flex items-center gap-1 justify-end">
                                     <Button variant="ghost" size="sm" onClick={() => navigate(`/vendas/produtos/${productId}/checkout-builder`)} className="h-7 text-[10px] gap-1">
@@ -727,16 +727,16 @@ export default function ProductEditor() {
                         </div>
 
                         <div className="space-y-4">
-                          <h3 className="text-sm font-bold text-foreground">Personalização visual</h3>
+                          <h3 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Personalização visual</h3>
 
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                               <Palette className="h-3.5 w-3.5" /> Cor do botão de compra
                             </Label>
                             <div className="flex items-center gap-3">
                               <input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="w-10 h-10 rounded-lg border border-border cursor-pointer" />
                               <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm" />
-                              <div className="h-10 px-6 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ backgroundColor: buttonColor }}>
+                              <div className="h-10 px-6 rounded-lg flex items-center justify-center text-sm font-display font-black" style={{ backgroundColor: buttonColor, color: '#fff' }}>
                                 Comprar
                               </div>
                             </div>
@@ -772,11 +772,11 @@ export default function ProductEditor() {
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-xs font-bold text-muted-foreground">E-mail do co-produtor</Label>
+                              <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">E-mail do co-produtor</Label>
                               <Input value={coProducerEmail} onChange={(e) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" className="h-11" />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-xs font-bold text-muted-foreground">Tempo de duração</Label>
+                              <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Tempo de duração</Label>
                               <Select value={coProductionDuration} onValueChange={setCoProductionDuration}>
                                 <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -792,26 +792,26 @@ export default function ProductEditor() {
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                               <Percent className="h-3.5 w-3.5" /> Comissão do co-produtor
                             </Label>
                             <div className="flex items-center gap-3">
-                              <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-bold text-lg" />
-                              <span className="text-lg font-bold text-muted-foreground">%</span>
+                              <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg tracking-[-0.03em]" />
+                              <span className="text-lg font-display font-black text-muted-foreground">%</span>
                               <div className="flex-1">
                                 <div className="h-3 rounded-full bg-muted/20 overflow-hidden">
                                   <div className="h-full rounded-full bg-gradient-to-r from-primary to-info transition-all duration-500" style={{ width: `${Math.min(Number(coProductionSplit), 100)}%` }} />
                                 </div>
                                 <div className="flex justify-between mt-1">
-                                  <span className="text-[10px] text-muted-foreground/50">Co-produtor: {coProductionSplit}%</span>
-                                  <span className="text-[10px] text-muted-foreground/50">Você: {100 - Number(coProductionSplit)}%</span>
+                                  <span className="text-[10px] font-display font-bold text-muted-foreground/50">Co-produtor: {coProductionSplit}%</span>
+                                  <span className="text-[10px] font-display font-bold text-muted-foreground/50">Você: {100 - Number(coProductionSplit)}%</span>
                                 </div>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground">Deve receber comissões de quais vendas?</Label>
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Deve receber comissões de quais vendas?</Label>
                             <Select value={coProductionSalesType} onValueChange={setCoProductionSalesType}>
                               <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                               <SelectContent>
@@ -822,7 +822,7 @@ export default function ProductEditor() {
                             </Select>
                           </div>
 
-                          <Button className="gap-2 rounded-xl" disabled={!coProducerEmail}>
+                          <Button className="gap-2 rounded-xl font-display font-bold" disabled={!coProducerEmail}>
                             <UserPlus className="h-4 w-4" /> Convidar Co-Produtor
                           </Button>
                         </div>
@@ -830,12 +830,12 @@ export default function ProductEditor() {
                         <div className="panel-enterprise-subtle overflow-hidden">
                           <table className="w-full text-sm">
                             <thead>
-                              <tr className="border-b border-border/30 text-muted-foreground text-xs">
-                                <th className="text-left px-4 py-2.5 font-semibold">Data</th>
-                                <th className="text-left px-4 py-2.5 font-semibold">Nome</th>
-                                <th className="text-left px-4 py-2.5 font-semibold">Comissão</th>
-                                <th className="text-left px-4 py-2.5 font-semibold">Validade</th>
-                                <th className="text-left px-4 py-2.5 font-semibold">Status</th>
+                               <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Data</th>
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Nome</th>
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Comissão</th>
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Validade</th>
+                                <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Status</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -862,21 +862,21 @@ export default function ProductEditor() {
                           <div className="panel-enterprise-subtle overflow-hidden">
                             <table className="w-full text-sm">
                               <thead>
-                                <tr className="border-b border-border/30 text-muted-foreground text-xs">
-                                  <th className="text-left px-4 py-2.5 font-semibold">Código</th>
-                                  <th className="text-left px-4 py-2.5 font-semibold">Desconto</th>
-                                  <th className="text-left px-4 py-2.5 font-semibold">Usos</th>
-                                  <th className="text-left px-4 py-2.5 font-semibold">Status</th>
+                                 <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
+                                  <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Código</th>
+                                  <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Desconto</th>
+                                  <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Usos</th>
+                                  <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Status</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {coupons.map(c => (
                                   <tr key={c.id} className="border-b border-border/10">
-                                    <td className="px-4 py-3 font-mono font-semibold text-primary">{c.code}</td>
-                                    <td className="px-4 py-3">{c.discount_type === "percentage" ? `${c.discount_value}%` : `R$ ${c.discount_value.toFixed(2)}`}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : ""}</td>
+                                    <td className="px-4 py-3 font-mono font-black text-primary tracking-wide">{c.code}</td>
+                                    <td className="px-4 py-3 font-numbers font-bold">{c.discount_type === "percentage" ? `${c.discount_value}%` : `R$ ${c.discount_value.toFixed(2)}`}</td>
+                                    <td className="px-4 py-3 text-muted-foreground font-numbers">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : ""}</td>
                                     <td className="px-4 py-3">
-                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold", c.is_active ? "bg-success/10 text-success" : "bg-muted/10 text-muted-foreground")}>
+                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-display font-black", c.is_active ? "bg-success/10 text-success" : "bg-muted/10 text-muted-foreground")}>
                                         {c.is_active ? "Ativo" : "Inativo"}
                                       </span>
                                     </td>
@@ -889,7 +889,7 @@ export default function ProductEditor() {
                           <EmptyCard icon={Tag} message="Nenhum cupom criado para este produto" />
                         )}
 
-                        <p className="text-xs text-muted-foreground/50">Gerencie todos os seus cupons em <button onClick={() => navigate("/vendas/checkout")} className="text-primary hover:underline font-semibold">Checkout → Cupons</button>.</p>
+                        <p className="text-xs text-muted-foreground/50">Gerencie todos os seus cupons em <button onClick={() => navigate("/vendas/checkout")} className="text-primary hover:underline font-display font-bold">Checkout → Cupons</button>.</p>
                       </>
                     )}
                   </div>
@@ -905,14 +905,14 @@ export default function ProductEditor() {
                       <div className="space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground">Comissão (%)</Label>
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Comissão (%)</Label>
                             <div className="flex items-center gap-2">
-                              <Input type="number" min="1" max="80" value={affiliateCommission} onChange={(e) => setAffiliateCommission(e.target.value)} className="w-24 h-11 text-center font-bold text-lg" />
-                              <span className="text-lg font-bold text-muted-foreground">%</span>
+                              <Input type="number" min="1" max="80" value={affiliateCommission} onChange={(e) => setAffiliateCommission(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg tracking-[-0.03em]" />
+                              <span className="text-lg font-display font-black text-muted-foreground">%</span>
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground">Atribuição</Label>
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Atribuição</Label>
                             <Select value={affiliateAttribution} onValueChange={setAffiliateAttribution}>
                               <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                               <SelectContent>
@@ -924,7 +924,7 @@ export default function ProductEditor() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold text-muted-foreground">Duração dos cookies</Label>
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Duração dos cookies</Label>
                           <Select value={affiliateCookieDays} onValueChange={setAffiliateCookieDays}>
                             <SelectTrigger className="h-11 w-40"><SelectValue /></SelectTrigger>
                             <SelectContent>
@@ -947,18 +947,18 @@ export default function ProductEditor() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground">E-mail de suporte para afiliados</Label>
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">E-mail de suporte para afiliados</Label>
                             <Input value={affiliateSupportEmail} onChange={(e) => setAffiliateSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11" />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-xs font-bold text-muted-foreground">Descrição para afiliados</Label>
+                            <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Descrição para afiliados</Label>
                             <Textarea value={affiliateDescription} onChange={(e) => setAffiliateDescription(e.target.value)} rows={2} placeholder="Descreva os benefícios para afiliados..." className="resize-none" />
                           </div>
                         </div>
 
                         {!isNew && (
                           <div className="panel-enterprise-subtle p-4 space-y-3">
-                            <h4 className="text-sm font-bold flex items-center gap-2"><UserPlus className="h-4 w-4 text-primary" /> Convidar afiliados</h4>
+                            <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><UserPlus className="h-4 w-4 text-primary" /> Convidar afiliados</h4>
                             <p className="text-xs text-muted-foreground/60">Compartilhe esse link para convidar os seus afiliados:</p>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10" />
@@ -983,7 +983,7 @@ export default function ProductEditor() {
                       <div className="space-y-4">
                         {product?.checkout_url && (
                           <div className="panel-enterprise-subtle p-4 space-y-3">
-                            <h4 className="text-sm font-bold flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
+                            <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={getCheckoutLink()} className="h-9 font-mono text-xs bg-muted/10" />
                               <Button variant="outline" size="sm" onClick={() => copyLink(getCheckoutLink())} className="gap-1.5 h-9 shrink-0">
@@ -998,7 +998,7 @@ export default function ProductEditor() {
 
                         {pageUrl && (
                           <div className="panel-enterprise-subtle p-4 space-y-3">
-                            <h4 className="text-sm font-bold flex items-center gap-2"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
+                            <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={pageUrl} className="h-9 font-mono text-xs bg-muted/10" />
                               <Button variant="outline" size="sm" onClick={() => copyLink(pageUrl)} className="gap-1.5 h-9 shrink-0">
@@ -1010,7 +1010,7 @@ export default function ProductEditor() {
 
                         {affiliateEnabled && (
                           <div className="panel-enterprise-subtle p-4 space-y-3">
-                            <h4 className="text-sm font-bold flex items-center gap-2"><Users className="h-4 w-4 text-success" /> Link de Afiliado</h4>
+                            <h4 className="text-[15px] font-display font-black flex items-center gap-2 tracking-[-0.02em]"><Users className="h-4 w-4 text-success" /> Link de Afiliado</h4>
                             <div className="flex items-center gap-2">
                               <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10" />
                               <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-9 shrink-0">
