@@ -391,7 +391,8 @@ export default function ProductEditor() {
                   <div className="space-y-6">
                     <SectionHeader title="Informações do Produto" subtitle="Dados principais que serão exibidos na área de membros e programa de afiliados." />
 
-                    <div className="panel-enterprise-subtle p-0 overflow-hidden">
+                    {/* ── Image Upload Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl overflow-hidden shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
                       <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
                       <div className="p-4 border-b border-border/30">
                         <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
@@ -417,57 +418,64 @@ export default function ProductEditor() {
                             <Upload className="h-6 w-6" />
                           </div>
                           <div className="text-center">
-                            <span className="block text-xs font-semibold">Arraste ou selecione o arquivo</span>
+                            <span className="block text-xs font-display font-bold">Arraste ou selecione o arquivo</span>
                             <span className="block text-[10px] text-muted-foreground/30 mt-0.5">Solte os arquivos aqui ou clique para buscar</span>
                           </div>
                         </button>
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-                        <Package className="h-3.5 w-3.5" /> Nome do produto
-                      </Label>
-                      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11" required maxLength={200} />
-                    </div>
+                    {/* ── Details Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
 
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Descrição</Label>
-                      <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none" maxLength={2000} />
-                      <p className="text-[10px] text-muted-foreground/40 text-right">{description.length}/2000</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Categoria</Label>
-                        <Select value={category} onValueChange={setCategory}>
-                          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="infoproduto">Infoproduto</SelectItem>
-                            <SelectItem value="curso">Curso Online</SelectItem>
-                            <SelectItem value="ebook">E-book</SelectItem>
-                            <SelectItem value="mentoria">Mentoria</SelectItem>
-                            <SelectItem value="software">Software / SaaS</SelectItem>
-                            <SelectItem value="servico">Serviço</SelectItem>
-                            <SelectItem value="comunidade">Comunidade</SelectItem>
-                            <SelectItem value="outro">Outro</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
+                          <Package className="h-3.5 w-3.5" /> Nome do produto
+                        </Label>
+                        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 bg-card/80 border-border/40 focus-visible:border-primary/40" required maxLength={200} />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Tipo de pagamento</Label>
-                        <Select value={paymentType} onValueChange={setPaymentType}>
-                          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unico">Único</SelectItem>
-                            <SelectItem value="assinatura">Assinatura</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Descrição</Label>
+                        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none bg-card/80 border-border/40" maxLength={2000} />
+                        <p className="text-[10px] text-muted-foreground/40 text-right font-numbers tabular-nums">{description.length}/2000</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Categoria</Label>
+                          <Select value={category} onValueChange={setCategory}>
+                            <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="infoproduto">Infoproduto</SelectItem>
+                              <SelectItem value="curso">Curso Online</SelectItem>
+                              <SelectItem value="ebook">E-book</SelectItem>
+                              <SelectItem value="mentoria">Mentoria</SelectItem>
+                              <SelectItem value="software">Software / SaaS</SelectItem>
+                              <SelectItem value="servico">Serviço</SelectItem>
+                              <SelectItem value="comunidade">Comunidade</SelectItem>
+                              <SelectItem value="outro">Outro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Tipo de pagamento</Label>
+                          <Select value={paymentType} onValueChange={setPaymentType}>
+                            <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="unico">Único</SelectItem>
+                              <SelectItem value="assinatura">Assinatura</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    {/* ── Pricing Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
                       <div className="flex items-center justify-between">
                         <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
                           <DollarSign className="h-3.5 w-3.5" /> Preços
@@ -477,7 +485,7 @@ export default function ProductEditor() {
                             <Shield className="h-3.5 w-3.5" /> Garantia
                           </Label>
                           <Select value={warrantyDays} onValueChange={setWarrantyDays}>
-                            <SelectTrigger className="h-8 w-24 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 w-24 text-xs bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="7">7 dias</SelectItem>
                               <SelectItem value="14">14 dias</SelectItem>
@@ -486,10 +494,10 @@ export default function ProductEditor() {
                           </Select>
                         </div>
                       </div>
-                      <div className="panel-enterprise-subtle overflow-hidden">
+                      <div className="rounded-xl border border-border/40 overflow-hidden bg-card/30">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-border/30 text-muted-foreground text-[10px]">
+                            <tr className="border-b border-border/30 text-muted-foreground text-[10px] bg-muted/10">
                               <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Nome</th>
                               <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Preço</th>
                               <th className="text-left px-4 py-2.5 font-display font-black uppercase tracking-[0.15em]">Tipo</th>
@@ -500,11 +508,11 @@ export default function ProductEditor() {
                             <tr className="border-b border-border/10">
                               <td className="px-4 py-3 font-display font-bold text-foreground tracking-[-0.01em]">{name || "—"}</td>
                               <td className="px-4 py-3">
-                                <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e) => setPrice(e.target.value)} className="h-8 w-28 text-sm font-numbers font-black tracking-[-0.03em]" placeholder="0.00" />
+                                <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e) => setPrice(e.target.value)} className="h-8 w-28 text-sm font-numbers font-black tracking-[-0.03em] bg-card/80 border-border/40" placeholder="0.00" />
                               </td>
                               <td className="px-4 py-3 text-muted-foreground capitalize font-display font-medium">{paymentType}</td>
                               <td className="px-4 py-3 text-center">
-                                <span className="text-[10px] text-muted-foreground/40">1/10</span>
+                                <span className="text-[10px] text-muted-foreground/40 font-numbers">1/10</span>
                               </td>
                             </tr>
                           </tbody>
@@ -512,41 +520,55 @@ export default function ProductEditor() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-                          <ExternalLink className="h-3.5 w-3.5" /> Página de vendas
-                        </Label>
-                        <Input value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11" />
+                    {/* ── Links & Support Card ── */}
+                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
+                            <ExternalLink className="h-3.5 w-3.5" /> Página de vendas
+                          </Label>
+                          <Input value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
+                            <Mail className="h-3.5 w-3.5" /> E-mail de suporte
+                          </Label>
+                          <Input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-card/80 border-border/40" />
+                        </div>
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-                          <Mail className="h-3.5 w-3.5" /> E-mail de suporte
-                        </Label>
-                        <Input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11" />
+                        <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Nome de exibição do produtor</Label>
+                        <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome ou marca" className="h-11 bg-card/80 border-border/40" />
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">Nome de exibição do produtor</Label>
-                      <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Seu nome ou marca" className="h-11" />
-                    </div>
-
-                    <div className="flex items-center justify-between panel-enterprise-subtle p-4">
-                      <div className="flex items-center gap-3">
-                        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", status === "active" ? "bg-success/10" : "bg-muted/10")}>
-                          <Zap className={cn("h-4 w-4", status === "active" ? "text-success" : "text-muted-foreground/40")} />
+                    {/* ── Status Toggle Card ── */}
+                    <div className={cn(
+                      "rounded-2xl border bg-card/50 backdrop-blur-xl p-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden transition-all duration-300",
+                      status === "active" ? "border-success/30" : "border-border/50"
+                    )}>
+                      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", status === "active" ? "bg-success" : "bg-muted-foreground/20")} />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all",
+                            status === "active" ? "bg-success/10 ring-success/20" : "bg-muted/10 ring-border/20"
+                          )}>
+                            <Zap className={cn("h-4 w-4", status === "active" ? "text-success" : "text-muted-foreground/40")} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-display font-black tracking-[-0.02em]">Status do produto</p>
+                            <p className="text-[10px] text-muted-foreground/50 font-medium">Ative para começar a vender</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-display font-black tracking-[-0.02em]">Status do produto</p>
-                          <p className="text-[10px] text-muted-foreground/50 font-medium">Ative para começar a vender</p>
+                        <div className="flex items-center gap-3">
+                          <span className={cn("text-xs font-display font-black", status === "active" ? "text-success" : "text-muted-foreground/50")}>
+                            {status === "active" ? "Ativo" : "Inativo"}
+                          </span>
+                          <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={cn("text-xs font-display font-black", status === "active" ? "text-success" : "text-muted-foreground/50")}>
-                          {status === "active" ? "Ativo" : "Inativo"}
-                        </span>
-                        <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
                       </div>
                     </div>
                   </div>
