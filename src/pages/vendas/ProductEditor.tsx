@@ -1032,10 +1032,10 @@ export default function ProductEditor() {
       {!isNew && (
         <div className="hidden lg:block fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/40 z-40">
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
-            <Button variant="ghost" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs">
+            <Button variant="ghost" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold">
               <Trash2 className="h-3.5 w-3.5" /> Excluir Produto
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl text-sm font-semibold h-9 px-6 shadow-lg shadow-primary/20">
+            <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl text-sm font-display font-black h-9 px-6 shadow-lg shadow-primary/20">
               <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : "Salvar Produto"}
             </Button>
           </div>
@@ -1048,7 +1048,7 @@ export default function ProductEditor() {
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="mb-2">
-      <h2 className="text-xl font-bold text-foreground font-display">{title}</h2>
+      <h2 className="text-xl font-display font-black text-foreground tracking-[-0.03em]">{title}</h2>
       <p className="text-sm text-muted-foreground/60 mt-1">{subtitle}</p>
     </div>
   );
@@ -1060,7 +1060,7 @@ function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ classN
       <div className="h-12 w-12 rounded-2xl bg-muted/10 flex items-center justify-center">
         <Icon className="h-5 w-5 text-muted-foreground/30" />
       </div>
-      <p className="text-sm text-muted-foreground/50">{message}</p>
+      <p className="text-sm font-display font-bold text-muted-foreground/50">{message}</p>
     </div>
   );
 }
@@ -1073,8 +1073,8 @@ function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }:
       <div className="flex items-center gap-3 flex-1">
         {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
         <div>
-          <p className="text-sm font-medium text-foreground">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50">{sublabel}</p>}
+          <p className="text-sm font-display font-bold text-foreground tracking-[-0.01em]">{label}</p>
+          {sublabel && <p className="text-[10px] text-muted-foreground/50 font-medium">{sublabel}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -1093,8 +1093,8 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
       <div className="flex items-center gap-3">
         <Icon className={cn("h-5 w-5", color)} />
         <div>
-          <p className="text-sm font-semibold">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50">{sublabel}</p>}
+          <p className="text-sm font-display font-bold tracking-[-0.01em]">{label}</p>
+          {sublabel && <p className="text-[10px] text-muted-foreground/50 font-medium">{sublabel}</p>}
         </div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
@@ -1107,7 +1107,7 @@ function BannerUpload({ label, preview, inputRef, onFile, onClear }: {
 }) {
   return (
     <div className="space-y-2">
-      <Label className="text-xs font-bold text-muted-foreground">{label}</Label>
+      <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">{label}</Label>
       <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
       {preview ? (
         <div className="relative rounded-xl overflow-hidden border border-border/30">
