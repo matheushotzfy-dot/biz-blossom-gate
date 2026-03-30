@@ -1067,18 +1067,23 @@ export default function ProductEditor() {
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-2">
-      <h2 className="text-xl font-display font-black text-foreground tracking-[-0.03em]">{title}</h2>
-      <p className="text-sm text-muted-foreground/60 mt-1">{subtitle}</p>
+    <div className="flex items-center gap-3.5 mb-5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card/45 backdrop-blur-xl">
+        <Sparkles className="h-4 w-4 text-primary" />
+      </div>
+      <div>
+        <h2 className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
+        <p className="text-[11px] text-muted-foreground/60 mt-0.5">{subtitle}</p>
+      </div>
     </div>
   );
 }
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <div className="panel-enterprise-subtle flex flex-col items-center justify-center py-12 gap-3">
-      <div className="h-12 w-12 rounded-2xl bg-muted/10 flex items-center justify-center">
-        <Icon className="h-5 w-5 text-muted-foreground/30" />
+    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl flex flex-col items-center justify-center py-14 gap-3 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
+      <div className="h-14 w-14 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/20">
+        <Icon className="h-6 w-6 text-muted-foreground/25" />
       </div>
       <p className="text-sm font-display font-bold text-muted-foreground/50">{message}</p>
     </div>
@@ -1109,12 +1114,24 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
   icon: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; color: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   return (
-    <div className={cn("flex items-center justify-between p-4 rounded-xl border transition-all", checked ? "bg-card/40 border-border/30" : "bg-muted/5 border-border/10 opacity-60")}>
+    <div className={cn(
+      "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
+      checked
+        ? "bg-card/60 border-border/40 shadow-sm"
+        : "bg-card/15 border-border/15 opacity-50"
+    )}>
+      {checked && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info")} />}
       <div className="flex items-center gap-3">
-        <Icon className={cn("h-5 w-5", color)} />
+        <div className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
+          checked ? "ring-1 ring-border/30" : "ring-1 ring-border/10",
+          color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10"
+        )}>
+          <Icon className={cn("h-4 w-4", color)} />
+        </div>
         <div>
           <p className="text-sm font-display font-bold tracking-[-0.01em]">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 font-medium">{sublabel}</p>}
+          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-numbers">{sublabel}</p>}
         </div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
@@ -1130,7 +1147,7 @@ function BannerUpload({ label, preview, inputRef, onFile, onClear }: {
       <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70">{label}</Label>
       <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden border border-border/30">
+        <div className="relative rounded-xl overflow-hidden border border-border/40 shadow-sm">
           <img src={preview} alt={label} className="w-full h-28 object-cover" />
           <button type="button" onClick={onClear} className="absolute top-2 right-2 h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-destructive">
             <X className="h-3 w-3" />
