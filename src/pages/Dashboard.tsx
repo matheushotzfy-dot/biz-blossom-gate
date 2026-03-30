@@ -423,13 +423,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <button
-              onClick={privacy.toggle}
-              className="inline-flex h-9 md:h-10 items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3 text-xs font-semibold text-foreground shadow-sm transition-all hover:border-primary/25"
-              title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-            >
-              {privacy.hidden ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-primary" />}
-            </button>
           </div>
         </div>
       )}
@@ -527,6 +520,14 @@ export default function Dashboard() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <button
+                onClick={privacy.toggle}
+                className="inline-flex h-9 md:h-10 items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3 text-xs font-semibold text-foreground shadow-sm transition-all hover:border-primary/25"
+                title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+              >
+                {privacy.hidden ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-primary" />}
+              </button>
             </div>
           </div>
 
