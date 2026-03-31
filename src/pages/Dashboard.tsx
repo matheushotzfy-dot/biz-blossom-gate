@@ -129,7 +129,10 @@ export default function Dashboard() {
   const { data: withdrawals = [] } = useWithdrawals(10);
   const { data: productsData } = useProductsQuery();
   const products = productsData?.length ?? 0;
-  const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [isCustom, setIsCustom] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const privacy = usePrivacyMode();
