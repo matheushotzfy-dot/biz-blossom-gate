@@ -291,18 +291,45 @@ export default function ProductEditor() {
       if (isNew) {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any);
-        if (error) { toast.error("Erro ao criar produto"); return; }
+        const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("id").single();
+        if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
+
+        // Auto-create course linked to product when delivery = Área de Membros
+        if (deliveryType === "digital") {
+          await supabase.from("courses").insert({
+            user_id: user.id,
+            product_id: newProduct.id,
+            title: name.trim(),
+            description: description.trim() || null,
+            is_published: false,
+          } as any);
+        }
+
         toast.success("Produto criado com sucesso!");
-        invalidateAll(["products"]);
+        invalidateAll(["products", "courses"]);
         navigate("/vendas/produtos");
       } else {
         const { error } = await supabase.from("products").update(productData).eq("id", productId!).eq("user_id", user.id);
         if (error) { toast.error("Erro ao salvar"); return; }
+
+        // Auto-create course if switching to digital and no course exists
+        if (deliveryType === "digital") {
+          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).single();
+          if (!existingCourse) {
+            await supabase.from("courses").insert({
+              user_id: user.id,
+              product_id: productId!,
+              title: name.trim(),
+              description: description.trim() || null,
+              is_published: false,
+            } as any);
+          }
+        }
+
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
         toast.success("Produto salvo!");
-        invalidateAll(["products"]);
+        invalidateAll(["products", "courses"]);
       }
     } finally { setSaving(false); }
   };
