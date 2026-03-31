@@ -852,10 +852,8 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
         <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-success" /> Entrega de conteúdo</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { value: "digital", label: "Área de Membros", desc: "Plataforma integrada", icon: Star },
-            { value: "email", label: "Acesso por e-mail", desc: "Links e arquivos por e-mail", icon: Mail },
-            { value: "telegram", label: "Telegram", desc: "Grupo ou canal privado", icon: Globe },
-            { value: "discord", label: "Discord", desc: "Monetize seu servidor", icon: Users },
+            { value: "digital", label: "Área de Membros", desc: "Plataforma integrada com player e módulos", icon: Star },
+            { value: "email", label: "Acesso por e-mail", desc: "Links e arquivos enviados por e-mail", icon: Mail },
             { value: "link", label: "Link de pagamento", desc: "Apenas receba pagamentos", icon: Link2 },
             { value: "external", label: "Área externa", desc: "Plataforma de terceiros", icon: ExternalLink },
           ].map((opt) => (
