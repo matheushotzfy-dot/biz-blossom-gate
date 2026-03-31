@@ -37,8 +37,8 @@ interface Props {
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0C0C12]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-2xl shadow-black/60">
-      <p className="text-[10px] text-white/30 font-medium mb-1">{label}</p>
+    <div className="pointer-events-none select-none rounded-xl border border-border/70 bg-card/95 px-3.5 py-2.5 shadow-[0_18px_40px_hsl(220_30%_4%_/_0.32)]">
+      <p className="mb-1 text-[10px] font-medium text-muted-foreground">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-[11px] font-bold" style={{ color: p.color }}>
           {p.name}: {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
@@ -50,7 +50,7 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 
 /* ═══ Stagger animation ═══ */
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+const fadeUp = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.24 } } };
 
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
