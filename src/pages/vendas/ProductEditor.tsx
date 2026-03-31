@@ -638,15 +638,24 @@ export default function ProductEditor() {
             {TABS.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  if (tab.key !== "geral" && tabsLocked) {
+                    toast.error("Preencha e salve a aba Geral primeiro");
+                    return;
+                  }
+                  setActiveTab(tab.key);
+                }}
+                disabled={tab.key !== "geral" && tabsLocked}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all relative",
-                  activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
+                  tab.key !== "geral" && tabsLocked
+                    ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
+                    : activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
                 )}
               >
-                <tab.icon className="h-3.5 w-3.5" />
+                {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
                 {tab.label}
-                {tabCompleted(tab.key) && activeTab !== tab.key && (
+                {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
                   <div className="h-1.5 w-1.5 rounded-full bg-success absolute top-1 right-1" />
                 )}
               </button>
