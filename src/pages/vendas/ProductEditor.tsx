@@ -267,6 +267,7 @@ export default function ProductEditor() {
         image_url: imageUrl,
         support_email: supportEmail.trim() || null,
         display_name: displayName.trim() || null,
+        delivery_type: deliveryType,
         affiliate_enabled: affiliateEnabled,
         affiliate_commission: Number(affiliateCommission) || 30,
         co_production_enabled: coProductionEnabled,
