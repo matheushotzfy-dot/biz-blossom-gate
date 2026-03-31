@@ -148,12 +148,15 @@ export default function ProductEditor() {
 
   // Completion percentage
   const completionPercent = (() => {
-    let score = 0, total = 5;
+    let score = 0, total = 8;
     if (name.trim()) score++;
     if (price && parseFloat(price) > 0) score++;
-    if (description.trim()) score++;
+    if (description.trim().length >= 50) score++;
     if (imagePreview) score++;
     if (pageUrl) score++;
+    if (supportEmail.trim()) score++;
+    if (displayName.trim()) score++;
+    if (status === "active") score++;
     return Math.round((score / total) * 100);
   })();
 
