@@ -240,14 +240,14 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.985] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
+                              ? "border-sidebar-primary/25 bg-sidebar-primary/[0.08] text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/5"
                               : "border-transparent text-sidebar-foreground hover:border-sidebar-border/50 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_1px] shadow-sidebar-primary/40 group-data-[collapsible=icon]:hidden" />
                           )}
 
                           <span
