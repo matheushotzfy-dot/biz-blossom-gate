@@ -37,8 +37,8 @@ interface Props {
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0C0C12]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-2xl shadow-black/60">
-      <p className="text-[10px] text-white/30 font-medium mb-1">{label}</p>
+    <div className="pointer-events-none select-none rounded-xl border border-border/70 bg-card/95 px-3.5 py-2.5 shadow-[0_18px_40px_hsl(220_30%_4%_/_0.32)]">
+      <p className="mb-1 text-[10px] font-medium text-muted-foreground">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-[11px] font-bold" style={{ color: p.color }}>
           {p.name}: {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
@@ -50,7 +50,7 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 
 /* ═══ Stagger animation ═══ */
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+const fadeUp = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.24 } } };
 
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -276,16 +276,16 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="tpvGradGod2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--chart-4))" stopOpacity={0.22} />
+                  <stop offset="100%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-              <XAxis dataKey="name" stroke="rgba(255,255,255,0.12)" fontSize={9} tickLine={false} axisLine={false} />
-              <YAxis stroke="rgba(255,255,255,0.12)" fontSize={9} tickLine={false} axisLine={false} />
-              <Tooltip content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" stroke="#6366f1" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} name="TPV" />
-              <Area type="monotone" dataKey="takeRate" stroke="#f59e0b" fillOpacity={0} strokeWidth={1.5} dot={false} strokeDasharray="4 2" name="Take Rate" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.32)" vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.6)" fontSize={9} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground) / 0.6)" fontSize={9} tickLine={false} axisLine={false} />
+              <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="tpv" stroke="hsl(var(--chart-4))" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
+              <Area type="monotone" dataKey="takeRate" stroke="hsl(var(--warning))" fillOpacity={0} strokeWidth={1.5} dot={false} activeDot={false} strokeDasharray="4 2" name="Take Rate" isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </GlassPanel>
@@ -408,12 +408,12 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Devoluções (7d)</GlassPanelTitle>
             <ResponsiveContainer width="100%" height={200} className="mt-3">
               <LineChart data={refundTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.1)" fontSize={9} tickLine={false} axisLine={false} />
-                <YAxis stroke="rgba(255,255,255,0.1)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-                <Line type="monotone" dataKey="chargebacks" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} name="Chargebacks" />
-                <Line type="monotone" dataKey="refunds" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: "#f59e0b" }} name="Reembolsos" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.32)" vertical={false} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.55)" fontSize={9} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(var(--muted-foreground) / 0.55)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+                <Line type="monotone" dataKey="chargebacks" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--destructive))" }} activeDot={false} name="Chargebacks" isAnimationActive={false} />
+                <Line type="monotone" dataKey="refunds" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--warning))" }} activeDot={false} name="Reembolsos" isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
             <div className="flex items-center gap-4 mt-2">
@@ -557,42 +557,35 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
    ═══════════════════════════════════════════════ */
 
 /* ── Hero KPI Card ── */
-function HeroKpi({ icon, label, value, sub, gradient, metallic, alert, pulse }: {
+function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
   icon: React.ReactNode; label: string; value: string; sub?: string;
   gradient: string; metallic?: boolean; alert?: boolean; pulse?: boolean;
 }) {
   return (
     <motion.div variants={fadeUp} className="relative group">
       <div className={cn(
-        "relative rounded-2xl p-6 overflow-hidden transition-all duration-300",
-        "bg-gradient-to-b from-white/[0.04] to-white/[0.015] backdrop-blur-2xl border border-white/[0.07]",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_32px_rgba(0,0,0,0.35)]",
-        "hover:border-white/[0.14] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_16px_48px_rgba(0,0,0,0.45)]",
-        "hover:-translate-y-0.5",
-        alert && "border-red-500/25 ring-1 ring-red-500/15",
-        pulse && "animate-pulse"
+        "relative isolate overflow-hidden rounded-2xl border border-border/70 bg-card/95 p-6 transition-all duration-300",
+        "shadow-[0_14px_40px_hsl(220_30%_4%_/_0.28),inset_0_1px_0_hsl(var(--foreground)_/_0.04)]",
+        "hover:border-primary/20 hover:shadow-[0_18px_48px_hsl(220_30%_4%_/_0.34),0_0_0_1px_hsl(var(--primary)_/_0.08)]",
+        alert && "border-destructive/30 ring-1 ring-destructive/10"
       )}>
-        {/* Gradient glow */}
-        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-20 group-hover:opacity-35 transition-opacity duration-500 bg-gradient-to-br", gradient)} />
-        {/* Bottom accent line */}
-        <div className={cn("absolute bottom-0 left-4 right-4 h-[1px] bg-gradient-to-r opacity-20", gradient)} />
+        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-20 group-hover:opacity-30 transition-opacity duration-500 bg-gradient-to-br", gradient)} />
+        <div className={cn("absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r opacity-25", gradient)} />
 
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/25">{label}</span>
-            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.12]", gradient)}>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
+            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-primary-foreground shadow-lg ring-1 ring-border/60", gradient)}>
               {icon}
             </div>
           </div>
           <p className={cn(
-            "text-[32px] font-extrabold tracking-tight leading-none",
-            metallic
-              ? "bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent"
-              : alert ? "text-red-400" : "text-white"
+            "text-[32px] font-extrabold leading-none tracking-tight",
+            metallic ? "bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent" : alert ? "text-destructive" : "text-foreground"
           )}>
             {value}
           </p>
-          {sub && <p className="text-[11px] text-white/25 mt-2 font-medium">{sub}</p>}
+          {sub && <p className="mt-2 text-[11px] font-medium text-muted-foreground">{sub}</p>}
         </div>
       </div>
     </motion.div>
@@ -604,14 +597,12 @@ function GlassKpi({ label, value, icon, iconColor }: {
   label: string; value: string; icon: React.ReactNode; iconColor?: string;
 }) {
   return (
-    <div className="rounded-xl bg-gradient-to-b from-white/[0.035] to-white/[0.015] backdrop-blur-2xl border border-white/[0.06] p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:border-white/[0.1] transition-all group">
-      <div className="flex items-center justify-between mb-2.5">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/25 font-bold">{label}</span>
-        <div className={cn("h-7 w-7 rounded-lg bg-white/[0.05] flex items-center justify-center border border-white/[0.04]", iconColor || "text-white/30")}>
-          {icon}
-        </div>
+    <div className="rounded-xl border border-border/70 bg-card/95 p-4 shadow-[0_10px_24px_hsl(220_30%_4%_/_0.18),inset_0_1px_0_hsl(var(--foreground)_/_0.04)] transition-all hover:border-primary/15 group">
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</span>
+        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-secondary/50", iconColor || "text-muted-foreground")}>{icon}</div>
       </div>
-      <p className="text-lg font-extrabold tracking-tight text-white">{value}</p>
+      <p className="text-lg font-extrabold tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
@@ -620,9 +611,9 @@ function GlassKpi({ label, value, icon, iconColor }: {
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "rounded-2xl bg-gradient-to-b from-white/[0.035] to-white/[0.01] backdrop-blur-2xl border border-white/[0.06] p-5",
-      "shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_24px_rgba(0,0,0,0.25)]",
-      "hover:border-white/[0.09] transition-all duration-300",
+      "relative isolate overflow-hidden rounded-2xl border border-border/70 bg-card/95 p-5",
+      "shadow-[0_12px_32px_hsl(220_30%_4%_/_0.24),inset_0_1px_0_hsl(var(--foreground)_/_0.04)]",
+      "transition-[border-color,box-shadow] duration-300 hover:border-primary/15 hover:shadow-[0_16px_40px_hsl(220_30%_4%_/_0.28),0_0_0_1px_hsl(var(--primary)_/_0.08)]",
       className
     )}>
       {children}
