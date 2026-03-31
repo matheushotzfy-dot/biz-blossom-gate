@@ -25,6 +25,8 @@ type Product = {
   checkout_credit_card_enabled: boolean | null; checkout_address_required: boolean | null;
   checkout_email_confirm: boolean | null;
   checkout_theme?: string | null;
+  support_email?: string | null;
+  display_name?: string | null;
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
 type PaymentMethod = "pix" | "credit_card" | "boleto";
