@@ -160,6 +160,9 @@ export default function ProductEditor() {
     return Math.round((score / total) * 100);
   })();
 
+  // Other tabs locked until product is saved (geral filled)
+  const tabsLocked = isNew;
+
   // Tab completion status
   const tabCompleted = useCallback((key: TabKey): boolean => {
     switch (key) {
@@ -550,12 +553,21 @@ export default function ProductEditor() {
                 return (
                   <button
                     key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
+                    onClick={() => {
+                      if (tab.key !== "geral" && tabsLocked) {
+                        toast.error("Preencha e salve a aba Geral primeiro");
+                        return;
+                      }
+                      setActiveTab(tab.key);
+                    }}
+                    disabled={tab.key !== "geral" && tabsLocked}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-left tracking-[-0.01em] relative overflow-hidden group/tab",
-                      isActive
-                        ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/15 border border-transparent"
+                      tab.key !== "geral" && tabsLocked
+                        ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
+                        : isActive
+                          ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/15 border border-transparent"
                     )}
                   >
                     {isActive && (
@@ -567,15 +579,20 @@ export default function ProductEditor() {
                         ? "bg-primary/15 ring-1 ring-primary/20"
                         : "bg-muted/15 ring-1 ring-border/20 group-hover/tab:ring-border/40"
                     )}>
-                      <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/60")} />
-                      {completed && !isActive && (
+                      {tab.key !== "geral" && tabsLocked ? (
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground/40" />
+                      ) : (
+                        <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/60")} />
+                      )}
+                      {completed && !isActive && !(tab.key !== "geral" && tabsLocked) && (
                         <div className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-success flex items-center justify-center ring-2 ring-card">
                           <Check className="h-2 w-2 text-success-foreground" />
                         </div>
                       )}
                     </div>
                     <span className="flex-1">{tab.label}</span>
-                    {isActive && <ChevronRight className="h-3 w-3 text-primary/40" />}
+                    {tab.key !== "geral" && tabsLocked && <Lock className="h-3 w-3 text-muted-foreground/30" />}
+                    {isActive && !(tab.key !== "geral" && tabsLocked) && <ChevronRight className="h-3 w-3 text-primary/40" />}
                   </button>
                 );
               })}
@@ -621,15 +638,24 @@ export default function ProductEditor() {
             {TABS.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  if (tab.key !== "geral" && tabsLocked) {
+                    toast.error("Preencha e salve a aba Geral primeiro");
+                    return;
+                  }
+                  setActiveTab(tab.key);
+                }}
+                disabled={tab.key !== "geral" && tabsLocked}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all relative",
-                  activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
+                  tab.key !== "geral" && tabsLocked
+                    ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
+                    : activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
                 )}
               >
-                <tab.icon className="h-3.5 w-3.5" />
+                {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
                 {tab.label}
-                {tabCompleted(tab.key) && activeTab !== tab.key && (
+                {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
                   <div className="h-1.5 w-1.5 rounded-full bg-success absolute top-1 right-1" />
                 )}
               </button>
