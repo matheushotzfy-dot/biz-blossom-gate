@@ -243,6 +243,24 @@ input[type="number"]::-webkit-inner-spin-button {
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08), 0 0 0 1px hsl(var(--primary) / 0.07);
   }
 
+  .recharts-responsive-container,
+  .recharts-wrapper {
+    isolation: isolate;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .recharts-tooltip-wrapper {
+    pointer-events: none !important;
+    transition: none !important;
+    z-index: 30;
+  }
+
+  .recharts-tooltip-cursor,
+  .recharts-active-dot {
+    transition: none !important;
+  }
+
   .h-13 { height: 3.25rem; }
   .w-13 { width: 3.25rem; }
 
