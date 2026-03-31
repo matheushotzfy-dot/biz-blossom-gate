@@ -64,6 +64,7 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [nickname, setNickname] = useState("");
+  const [phone, setPhone] = useState("");
   const [document, setDocument] = useState("");
   const [documentError, setDocumentError] = useState("");
   const [referralSource, setReferralSource] = useState("");
