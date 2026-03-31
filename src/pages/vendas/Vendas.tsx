@@ -687,17 +687,18 @@ export default function Vendas() {
   return (
     <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative animate-fade-in">
       {/* ─── HERO SECTION (matches Dashboard) ─── */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 shadow-[0_4px_24px_hsl(var(--foreground)/0.04)] backdrop-blur-2xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
-          <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
+          <div className="absolute -left-20 -top-20 h-52 md:h-80 w-52 md:w-80 rounded-full bg-primary/12 blur-[80px] md:blur-[120px]" />
+          <div className="absolute -right-12 bottom-0 h-44 md:h-60 w-44 md:w-60 rounded-full bg-primary/6 blur-[80px] md:blur-[120px]" />
+          <div className="absolute left-1/2 top-0 h-32 w-64 -translate-x-1/2 bg-gradient-to-b from-primary/5 to-transparent blur-[60px]" />
         </div>
 
         <div className="relative z-10 space-y-4 md:space-y-6">
           {/* Title row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/8 backdrop-blur-xl shadow-lg shadow-primary/10">
                 <Receipt className="h-6 w-6 text-primary" />
               </div>
               <div className="space-y-1">
