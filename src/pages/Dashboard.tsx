@@ -528,28 +528,89 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger asChild>
                   <button className="inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl border border-border/80 bg-card px-3 md:px-3.5 text-xs md:text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
                     <CalendarDays className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
-                    {selectedPeriod.label}
+                    {isCustom && customRange?.from
+                      ? customRange.to
+                        ? `${format(customRange.from, "dd/MM", { locale: ptBR })} - ${format(customRange.to, "dd/MM", { locale: ptBR })}`
+                        : format(customRange.from, "dd/MM/yyyy", { locale: ptBR })
+                      : selectedPeriod.label}
                     <ChevronDown className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground" />
                   </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[150px] rounded-xl p-1.5">
-                  {PERIOD_OPTIONS.map((option) => (
-                    <DropdownMenuItem
-                      key={option.label}
-                      onClick={() => setSelectedPeriod(option)}
-                      className={`rounded-lg py-2 text-sm cursor-pointer ${
-                        selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""
-                      }`}
-                    >
-                      {option.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-auto p-0 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-xl overflow-hidden">
+                  <div className="flex">
+                    {/* Presets sidebar */}
+                    <div className="border-r border-border/30 p-2 space-y-0.5 min-w-[130px]">
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] px-2.5 py-1.5">Período</p>
+                      {PERIOD_PRESETS.map((option) => (
+                        <button
+                          key={option.label}
+                          onClick={() => {
+                            setSelectedPeriod(option);
+                            setIsCustom(false);
+                            setCustomRange(undefined);
+                            setDatePickerOpen(false);
+                          }}
+                          className={cn(
+                            "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                            !isCustom && selectedPeriod.label === option.label
+                              ? "bg-primary/10 text-primary font-bold"
+                              : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                      <div className="my-1.5 border-t border-border/20" />
+                      <button
+                        onClick={() => setIsCustom(true)}
+                        className={cn(
+                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all",
+                          isCustom
+                            ? "bg-primary/10 text-primary font-bold"
+                            : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
+                        )}
+                      >
+                        Personalizado
+                      </button>
+                    </div>
+                    {/* Calendar */}
+                    <div className="p-3">
+                      <Calendar
+                        mode="range"
+                        selected={customRange}
+                        onSelect={(range) => {
+                          setCustomRange(range);
+                          setIsCustom(true);
+                          if (range?.from && range?.to) {
+                            setTimeout(() => setDatePickerOpen(false), 300);
+                          }
+                        }}
+                        numberOfMonths={1}
+                        locale={ptBR}
+                        disabled={(date) => date > new Date()}
+                        className={cn("p-3 pointer-events-auto")}
+                        classNames={{
+                          day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
+                          day_range_middle: "bg-primary/10 text-foreground",
+                          day_range_end: "bg-primary text-primary-foreground",
+                        }}
+                      />
+                      {isCustom && customRange?.from && (
+                        <div className="px-3 pb-2 pt-1 border-t border-border/20 mt-1">
+                          <p className="text-[11px] text-muted-foreground font-medium text-center">
+                            {format(customRange.from, "dd MMM yyyy", { locale: ptBR })}
+                            {customRange.to && ` — ${format(customRange.to, "dd MMM yyyy", { locale: ptBR })}`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <button
                 onClick={privacy.toggle}
