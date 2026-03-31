@@ -438,9 +438,9 @@ export default function Webhooks() {
           </Panel>
         ) : (
           webhooks.map((wh, i) => (
-            <div
+            <Panel
               key={wh.id}
-              className="panel-enterprise p-5 animate-fade-in"
+              className="p-5 animate-fade-in"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-center justify-between mb-4">
