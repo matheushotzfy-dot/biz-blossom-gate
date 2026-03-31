@@ -528,7 +528,7 @@ export default function Webhooks() {
                   </button>
                 </div>
               )}
-            </div>
+            </Panel>
           ))
         )}
       </div>
