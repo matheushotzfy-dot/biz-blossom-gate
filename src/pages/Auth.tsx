@@ -225,8 +225,24 @@ export default function Auth() {
                     />
                     {documentError && <p className="text-[11px] text-destructive mt-1">{documentError}</p>}
                   </div>
-                </>
-              )}
+                  <div>
+                    <Label htmlFor="phone" className="text-sm font-medium">Telefone (WhatsApp)</Label>
+                    <Input
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                        let formatted = digits;
+                        if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+                        if (digits.length > 7) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+                        setPhone(formatted);
+                      }}
+                      placeholder="(11) 99999-9999"
+                      inputMode="tel"
+                      className="mt-1"
+                      required={!isLogin}
+                    />
+                  </div>
               <div>
                 <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1" required />
