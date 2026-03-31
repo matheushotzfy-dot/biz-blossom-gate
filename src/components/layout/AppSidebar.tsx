@@ -144,12 +144,12 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-sidebar-primary/10 to-transparent" />
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/40 bg-sidebar/98 backdrop-blur-2xl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-sidebar-primary/8 to-transparent" />
 
-      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
+      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/50">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
-          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0 bg-card">
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/20 ring-2 ring-sidebar-primary/20 shrink-0 bg-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
 
