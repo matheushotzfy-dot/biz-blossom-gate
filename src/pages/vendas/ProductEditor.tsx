@@ -317,7 +317,7 @@ export default function ProductEditor() {
 
         // Auto-create course if switching to digital and no course exists
         if (deliveryType === "digital") {
-          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).single();
+          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).maybeSingle();
           if (!existingCourse) {
             await supabase.from("courses").insert({
               user_id: user.id,

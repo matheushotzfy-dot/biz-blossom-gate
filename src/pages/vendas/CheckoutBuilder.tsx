@@ -165,7 +165,7 @@ export default function CheckoutBuilder() {
   useEffect(() => {
     if (!user?.id || !productId) return;
     setLoading(true);
-    supabase.from("products").select("*").eq("id", productId).eq("user_id", user.id).single()
+    supabase.from("products").select("*").eq("id", productId).eq("user_id", user.id).maybeSingle()
       .then(({ data, error }) => {
         if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
         setProduct(data);
