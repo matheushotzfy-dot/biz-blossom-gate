@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useProfile } from "@/hooks/useProfile";
 import { Sun, Moon, Bell } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 
 const fmtCompact = (v: number) => {
@@ -14,14 +17,17 @@ const fmtCompact = (v: number) => {
 export function MobileRevenueBar() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const [revenue, setRevenue] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    // msDev's — only fetch the column we need, not entire rows
     supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed").limit(1000)
       .then(({ data }) => {
         if (data) setRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
+        setLoading(false);
       });
   }, [user]);
 
@@ -39,21 +45,29 @@ export function MobileRevenueBar() {
         {/* Revenue chip */}
         <div className="flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/8 px-2.5 py-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-          <span className="text-[12px] font-black font-numbers text-primary tracking-[-0.02em]">{fmtCompact(revenue)}</span>
+          {loading ? (
+            <span className="h-3 w-12 rounded bg-primary/20 animate-pulse" />
+          ) : (
+            <span className="text-[12px] font-black font-numbers text-primary tracking-[-0.02em]">{fmtCompact(revenue)}</span>
+          )}
         </div>
 
-        {/* Notification */}
-        <button className="relative h-9 w-9 rounded-xl flex items-center justify-center border border-border/80 bg-muted/40">
-          <Bell className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full ring-2 ring-card" />
+        {/* Avatar */}
+        <button onClick={() => navigate("/perfil")} className="shrink-0">
+          <Avatar className="h-8 w-8 ring-1 ring-border/40">
+            <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
+            <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+              {(profile?.full_name || "U").charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         </button>
 
         {/* Theme */}
         <button
           onClick={toggleTheme}
-          className="h-9 w-9 rounded-xl flex items-center justify-center border border-border/80 bg-muted/40"
+          className="h-8 w-8 rounded-xl flex items-center justify-center border border-border/60 bg-muted/30"
         >
-          {theme === "dark" ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
+          {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-warning" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
       </div>
     </div>
