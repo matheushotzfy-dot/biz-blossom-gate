@@ -157,7 +157,7 @@ export default function Produtos() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: Math.min(i * 0.06, 0.4), ease: [0.16, 1, 0.3, 1] }}
-              className="group relative rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30 overflow-hidden flex flex-col hover:border-primary/25 hover:shadow-2xl hover:shadow-primary/[0.06] transition-all duration-300 active:scale-[0.985]"
+              className="group relative rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden flex flex-col hover:border-primary/20 hover:shadow-[0_12px_40px_hsl(var(--primary)/0.08)] transition-all duration-300 active:scale-[0.985]"
             >
               {/* Image area */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-muted/30 to-muted/5">
