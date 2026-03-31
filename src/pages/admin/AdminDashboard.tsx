@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
+// Theme is forced dark locally via className — no global toggle needed
 import { useNavigate } from "react-router-dom";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
@@ -107,7 +107,6 @@ const DATE_PRESETS = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
@@ -125,12 +124,6 @@ export default function AdminDashboard() {
   });
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
-
-  useEffect(() => {
-    const prevTheme = theme;
-    setTheme("dark");
-    return () => { setTheme(prevTheme as "light" | "dark"); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user) return;
