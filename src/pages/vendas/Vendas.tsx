@@ -101,12 +101,13 @@ function StatusDot({ status }: { status: string }) {
   );
 }
 
-/* ─── MiniHeroCard (same as Dashboard) ─── */
+/* ─── MiniHeroCard — uses GlassKpi style ─── */
 function MiniHeroCard({ icon, label, value, tone, idx }: {
   icon: React.ReactNode; label: string; value: string;
   tone: "primary" | "info" | "success" | "warning";
   idx: number;
 }) {
+  const Icon = () => <>{icon}</>;
   const toneMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
     primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
     info: { accent: "bg-info", iconBg: "bg-info/10", iconText: "text-info", ring: "ring-info/20" },
