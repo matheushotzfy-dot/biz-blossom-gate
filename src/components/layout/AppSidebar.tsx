@@ -100,7 +100,6 @@ const sections = [
   {
     label: "SISTEMA",
     items: [
-      { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
       { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
       { title: "Integrações", url: "/integracoes/apps", icon: Puzzle },
       { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
