@@ -429,13 +429,13 @@ export default function Webhooks() {
       {/* Webhooks List */}
       <div className="space-y-3">
         {webhooks.length === 0 ? (
-          <div className="panel-enterprise p-0">
+          <Panel className="p-0">
             <EmptyState
               icon={<Webhook className="h-8 w-8" />}
               title="Nenhum webhook configurado"
               subtitle="Crie seu primeiro webhook para receber notificações em tempo real"
             />
-          </div>
+          </Panel>
         ) : (
           webhooks.map((wh, i) => (
             <div
