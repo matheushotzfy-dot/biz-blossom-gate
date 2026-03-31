@@ -46,20 +46,24 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, differenceInDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
-const PERIOD_OPTIONS = [
+const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
   { label: "Ontem", days: 1 },
   { label: "7 dias", days: 7 },
   { label: "15 dias", days: 15 },
   { label: "30 dias", days: 30 },
+  { label: "60 dias", days: 60 },
+  { label: "90 dias", days: 90 },
 ] as const;
+
+type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
 const STAGGER_CLASSES = ["", "stagger-1", "stagger-2", "stagger-3", "stagger-4", "stagger-5", "stagger-6"];
 
