@@ -762,7 +762,13 @@ export default function Dashboard() {
       {/* ─── ACTIONS + ACTIVITY ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex flex-col">
+        <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-5 animate-fade-in stagger-3 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Zap className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="text-[11px] font-display font-bold text-foreground">Ações Rápidas</span>
+          </div>
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
@@ -779,16 +785,16 @@ export default function Dashboard() {
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/40 bg-muted/10 p-2.5 md:p-3.5 transition-all duration-200 hover:border-primary/20 hover:bg-muted/30 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
+                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/30 bg-muted/5 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/15 hover:bg-primary/[0.03] hover:shadow-sm animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10">
-                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10 shadow-sm shadow-primary/5 group-hover:bg-primary/12 group-hover:shadow-md group-hover:shadow-primary/8 transition-all">
+                  <action.icon className="h-4 w-4 md:h-[18px] md:w-[18px]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] md:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] md:text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
+                  <p className="text-[11px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[10px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/30 hidden md:block group-hover:text-muted-foreground/60 transition-colors" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-primary/40 group-hover:translate-x-0.5 transition-all" />
               </Link>
             ))}
           </div>
