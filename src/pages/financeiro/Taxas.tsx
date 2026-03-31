@@ -23,7 +23,7 @@ export default function Taxas() {
   return (
     <PageShell>
       <PageTitle icon={<Percent className="h-6 w-6" />} title="Taxas e Tarifas" subtitle="Taxas aplicadas às suas transações e operações" />
-      <hr className="accent-divider" />
+
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <GlassKpi
@@ -121,33 +121,31 @@ export default function Taxas() {
       )}
 
       {/* How it works */}
-      <GlowPanel className="brand-mesh">
-        <div className="relative z-[1]">
-          <div className="flex items-center gap-3.5 mb-5">
-            <div className="h-10 w-10 rounded-xl bg-info/10 ring-1 ring-info/20 flex items-center justify-center">
-              <Info className="h-4.5 w-4.5 text-info" />
-            </div>
-            <div>
-              <h3 className="text-[15px] font-display font-bold text-foreground">Como as taxas funcionam</h3>
-              <p className="text-[11px] text-muted-foreground/60">Entenda como os valores são calculados</p>
-            </div>
+      <GlowPanel>
+        <div className="flex items-center gap-3.5 mb-5">
+          <div className="h-10 w-10 rounded-xl bg-info/10 ring-1 ring-info/20 flex items-center justify-center">
+            <Info className="h-4.5 w-4.5 text-info" />
           </div>
-          <div className="space-y-3">
-            {[
-              { label: "Taxas percentuais", desc: "Calculadas sobre o valor bruto de cada transação aprovada.", accent: "bg-info" },
-              { label: "Taxas fixas", desc: "Cobradas por operação realizada (ex: saque, transferência).", accent: "bg-warning" },
-              { label: "Cálculo do líquido", desc: "Valor bruto − taxas percentuais − taxas fixas = valor líquido creditado.", accent: "bg-primary" },
-              { label: "Transparência total", desc: "Todas as taxas são exibidas antes da confirmação de cada operação.", accent: "bg-success" },
-            ].map((item) => (
-              <div key={item.label} className="relative flex items-start gap-3 p-3.5 rounded-xl bg-muted/10 border border-border/30 overflow-hidden">
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", item.accent)} />
-                <div className="pl-1.5">
-                  <p className="text-[13px] font-bold text-foreground/80">{item.label}</p>
-                  <p className="text-[11px] text-muted-foreground/60 mt-0.5">{item.desc}</p>
-                </div>
+          <div>
+            <h3 className="text-[15px] font-display font-bold text-foreground">Como as taxas funcionam</h3>
+            <p className="text-[11px] text-muted-foreground/60">Entenda como os valores são calculados</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {[
+            { label: "Taxas percentuais", desc: "Calculadas sobre o valor bruto de cada transação aprovada.", accent: "bg-info" },
+            { label: "Taxas fixas", desc: "Cobradas por operação realizada (ex: saque, transferência).", accent: "bg-warning" },
+            { label: "Cálculo do líquido", desc: "Valor bruto − taxas percentuais − taxas fixas = valor líquido creditado.", accent: "bg-primary" },
+            { label: "Transparência total", desc: "Todas as taxas são exibidas antes da confirmação de cada operação.", accent: "bg-success" },
+          ].map((item) => (
+            <div key={item.label} className="relative flex items-start gap-3 p-3.5 rounded-xl bg-muted/10 border border-border/30 overflow-hidden">
+              <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", item.accent)} />
+              <div className="pl-1.5">
+                <p className="text-[13px] font-bold text-foreground/80">{item.label}</p>
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">{item.desc}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </GlowPanel>
     </PageShell>

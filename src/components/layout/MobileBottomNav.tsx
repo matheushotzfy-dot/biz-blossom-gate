@@ -63,18 +63,18 @@ export function MobileBottomNav() {
       {/* More sheet */}
       {moreOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-xl" onClick={() => setMoreOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-border/30 rounded-t-3xl max-h-[80vh] overflow-y-auto animate-slide-up shadow-[0_-12px_48px_hsl(var(--foreground)/0.08)]">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setMoreOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-3xl max-h-[80vh] overflow-y-auto animate-slide-up shadow-2xl">
             {/* Handle bar */}
             <div className="flex justify-center pt-3 pb-1">
-              <div className="h-1 w-10 rounded-full bg-border/40" />
+              <div className="h-1 w-10 rounded-full bg-border" />
             </div>
 
             <div className="flex items-center justify-between px-5 pt-2 pb-3">
               <h2 className="text-lg font-display font-black text-foreground">Navegação</h2>
               <button
                 onClick={() => setMoreOpen(false)}
-                className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/40 border border-border/30"
+                className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/60 border border-border/80"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -126,7 +126,7 @@ export function MobileBottomNav() {
 
       {/* Bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="bg-card/90 backdrop-blur-2xl border-t border-border/25 shadow-[0_-4px_24px_hsl(var(--foreground)/0.04)]">
+        <div className="bg-card/95 backdrop-blur-xl border-t border-border/80">
           <div className="flex items-center justify-around px-2 py-1 safe-area-bottom">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";
@@ -147,25 +147,22 @@ export function MobileBottomNav() {
                     }
                   }}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-300 min-w-[56px]",
-                    isActive ? "text-primary" : "text-muted-foreground/50"
+                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
+                    isActive ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   <div className={cn(
-                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-300",
-                    isActive && "bg-primary/12 scale-110 shadow-sm shadow-primary/15"
+                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-200",
+                    isActive && "bg-primary/12 scale-105"
                   )}>
                     <tab.icon className="h-[18px] w-[18px]" />
                   </div>
                   <span className={cn(
-                    "text-[10px] font-display transition-all duration-300",
-                    isActive ? "font-black text-primary" : "font-medium"
+                    "text-[10px] font-semibold",
+                    isActive && "font-bold text-primary"
                   )}>
                     {tab.label}
                   </span>
-                  {isActive && (
-                    <span className="h-[3px] w-3 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)] mt-0.5" />
-                  )}
                 </button>
               );
             })}
