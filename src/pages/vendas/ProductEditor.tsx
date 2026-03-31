@@ -260,6 +260,8 @@ export default function ProductEditor() {
         status,
         page_url: pageUrl || null,
         image_url: imageUrl,
+        support_email: supportEmail.trim() || null,
+        display_name: displayName.trim() || null,
         affiliate_enabled: affiliateEnabled,
         affiliate_commission: Number(affiliateCommission) || 30,
         co_production_enabled: coProductionEnabled,
