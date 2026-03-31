@@ -59,8 +59,6 @@ const PERIOD_PRESETS = [
   { label: "7 dias", days: 7 },
   { label: "15 dias", days: 15 },
   { label: "30 dias", days: 30 },
-  { label: "60 dias", days: 60 },
-  { label: "90 dias", days: 90 },
 ] as const;
 
 type PeriodPreset = (typeof PERIOD_PRESETS)[number];
