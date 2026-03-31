@@ -107,7 +107,6 @@ const DATE_PRESETS = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
@@ -125,12 +124,6 @@ export default function AdminDashboard() {
   });
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
-
-  useEffect(() => {
-    const prevTheme = theme;
-    setTheme("dark");
-    return () => { setTheme(prevTheme as "light" | "dark"); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user) return;
