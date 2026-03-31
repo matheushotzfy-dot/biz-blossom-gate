@@ -25,6 +25,8 @@ type Product = {
   checkout_credit_card_enabled: boolean | null; checkout_address_required: boolean | null;
   checkout_email_confirm: boolean | null;
   checkout_theme?: string | null;
+  support_email?: string | null;
+  display_name?: string | null;
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
 type PaymentMethod = "pix" | "credit_card" | "boleto";
@@ -1032,6 +1034,19 @@ export default function PublicCheckout() {
                 <span className="text-[10px] font-semibold">Dados protegidos</span>
               </div>
             </div>
+            {/* ─── Producer Info ─── */}
+            {(product.display_name || product.support_email) && (
+              <div className="flex flex-col items-center gap-1 py-2 border-t border-gray-100">
+                {product.display_name && (
+                  <span className="text-[11px] font-semibold text-gray-400">{product.display_name}</span>
+                )}
+                {product.support_email && (
+                  <a href={`mailto:${product.support_email}`} className="text-[10px] text-gray-300 hover:text-gray-500 underline transition-colors">
+                    {product.support_email}
+                  </a>
+                )}
+              </div>
+            )}
             <p className="text-center text-[10px] text-gray-300 leading-relaxed px-6">
               Ao clicar em "Finalizar compra", declaro que li e concordo com os{" "}
               <span className="underline cursor-pointer hover:text-gray-300">Termos de Uso</span> e{" "}

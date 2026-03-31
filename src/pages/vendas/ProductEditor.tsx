@@ -148,12 +148,15 @@ export default function ProductEditor() {
 
   // Completion percentage
   const completionPercent = (() => {
-    let score = 0, total = 5;
+    let score = 0, total = 8;
     if (name.trim()) score++;
     if (price && parseFloat(price) > 0) score++;
-    if (description.trim()) score++;
+    if (description.trim().length >= 50) score++;
     if (imagePreview) score++;
     if (pageUrl) score++;
+    if (supportEmail.trim()) score++;
+    if (displayName.trim()) score++;
+    if (status === "active") score++;
     return Math.round((score / total) * 100);
   })();
 
@@ -201,6 +204,8 @@ export default function ProductEditor() {
       setCoProductionEnabled(data.co_production_enabled || false);
       setCoProducerEmail(data.co_producer_email || "");
       setCoProductionSplit(String(data.co_production_split || 50));
+      setSupportEmail((data as any).support_email || "");
+      setDisplayName((data as any).display_name || "");
       setLoading(false);
     })();
   }, [productId, user?.id, isNew]);
@@ -226,8 +231,12 @@ export default function ProductEditor() {
     if (!user) return;
     const priceNum = parseFloat(price);
     if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
+    if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
     if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
     if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
+    if (!pageUrl.trim()) { toast.error("Página de vendas é obrigatória"); setActiveTab("geral"); return; }
+    if (!supportEmail.trim()) { toast.error("E-mail de suporte é obrigatório"); setActiveTab("geral"); return; }
+    if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
 
     setSaving(true);
     try {
@@ -256,6 +265,8 @@ export default function ProductEditor() {
         status,
         page_url: pageUrl || null,
         image_url: imageUrl,
+        support_email: supportEmail.trim() || null,
+        display_name: displayName.trim() || null,
         affiliate_enabled: affiliateEnabled,
         affiliate_commission: Number(affiliateCommission) || 30,
         co_production_enabled: coProductionEnabled,
@@ -655,10 +666,7 @@ export default function ProductEditor() {
    ═══════════════════════════════════════════════ */
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
-  const priceNum = parseFloat(price) || 0;
-  const pixNet = priceNum * 0.9751;
-  const cardNet = priceNum * 0.9362;
-  const maxNet = Math.max(pixNet, cardNet, 0.01);
+
 
   return (
     <div className="space-y-6">
@@ -721,10 +729,12 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         </div>
 
         <div className="space-y-2">
-          <EditorLabel>Descrição</EditorLabel>
-          <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none bg-card/80 border-border/40" maxLength={2000} />
+          <EditorLabel>Descrição <span className="text-destructive">*</span></EditorLabel>
+          <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes (mínimo 50 caracteres)..." className={cn("resize-none bg-card/80 border-border/40", description.length > 0 && description.length < 50 && "border-destructive/40")} maxLength={2000} />
           <div className="flex items-center justify-between">
-            <p className="text-[10px] text-muted-foreground/30">{description.length > 0 ? "✓ Descrição adicionada" : "Opcional, mas recomendada"}</p>
+            <p className={cn("text-[10px]", description.length >= 50 ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/30")}>
+              {description.length >= 50 ? "✓ Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres (mín. 50)` : "Obrigatório • Mínimo 50 caracteres"}
+            </p>
             <p className="text-[10px] text-muted-foreground/40 text-right font-numbers tabular-nums">{description.length}/2000</p>
           </div>
         </div>
@@ -785,51 +795,28 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </div>
 
-          {priceNum > 0 && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
-              {/* Visual bar comparison */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-success/15 bg-success/[0.03] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-display font-bold text-success/70 flex items-center gap-1.5 uppercase tracking-wider"><QrCode className="h-3.5 w-3.5" /> PIX</span>
-                    <span className="text-[10px] font-numbers font-bold text-success/50">-2,49%</span>
-                  </div>
-                  <p className="text-xl font-numbers font-black text-success tabular-nums">R$ {pixNet.toFixed(2)}</p>
-                  <div className="h-2 rounded-full bg-success/10 overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${(pixNet / priceNum) * 100}%` }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-success/50" />
-                  </div>
-                </div>
-                <div className="rounded-xl border border-info/15 bg-info/[0.03] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-display font-bold text-info/70 flex items-center gap-1.5 uppercase tracking-wider"><CreditCard className="h-3.5 w-3.5" /> Cartão</span>
-                    <span className="text-[10px] font-numbers font-bold text-info/50">-6,38%</span>
-                  </div>
-                  <p className="text-xl font-numbers font-black text-info tabular-nums">R$ {cardNet.toFixed(2)}</p>
-                  <div className="h-2 rounded-full bg-info/10 overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${(cardNet / priceNum) * 100}%` }} transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-info/50" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </div>
       </EditorCard>
 
-      {/* ─── Links & Support ─── */}
+      {/* ─── Links & Support (Required) ─── */}
       <EditorCard accentColor="bg-info">
+        <SectionHeader icon={Globe} title="Informações do Produtor" subtitle="Esses dados são obrigatórios e serão exibidos no checkout." />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <EditorLabel icon={ExternalLink}>Página de vendas</EditorLabel>
-            <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
+            <EditorLabel icon={ExternalLink}>Página de vendas <span className="text-destructive">*</span></EditorLabel>
+            <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" required />
+            <p className={cn("text-[10px]", pageUrl.trim() ? "text-success" : "text-muted-foreground/30")}>{pageUrl.trim() ? "✓ Página preenchida" : "Obrigatório"}</p>
           </div>
           <div className="space-y-2">
-            <EditorLabel icon={Mail}>E-mail de suporte</EditorLabel>
-            <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-card/80 border-border/40" />
+            <EditorLabel icon={Mail}>E-mail de suporte <span className="text-destructive">*</span></EditorLabel>
+            <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-card/80 border-border/40" required />
+            <p className={cn("text-[10px]", supportEmail.trim() ? "text-success" : "text-muted-foreground/30")}>{supportEmail.trim() ? "✓ E-mail preenchido" : "Obrigatório"}</p>
           </div>
         </div>
         <div className="space-y-2">
-          <EditorLabel>Nome de exibição</EditorLabel>
-          <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador" className="h-11 bg-card/80 border-border/40" />
+          <EditorLabel icon={Users}>Nome de exibição do produtor <span className="text-destructive">*</span></EditorLabel>
+          <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador no checkout" className="h-11 bg-card/80 border-border/40" required />
+          <p className={cn("text-[10px]", displayName.trim() ? "text-success" : "text-muted-foreground/30")}>{displayName.trim() ? "✓ Nome preenchido" : "Obrigatório • Aparecerá no rodapé do checkout"}</p>
         </div>
       </EditorCard>
     </div>
