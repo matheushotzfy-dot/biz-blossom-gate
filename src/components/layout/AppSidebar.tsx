@@ -8,7 +8,7 @@ import {
   Handshake,
   Users,
   Layers,
-  
+  Trophy,
   FileText,
   ArrowDownToLine,
   Building2,
@@ -92,12 +92,14 @@ const sections = [
       { title: "Saques PIX", url: "/financeiro/saques", icon: ArrowDownToLine },
       { title: "Saques Crypto", url: "/financeiro/saques-crypto", icon: Bitcoin },
       { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
+      { title: "Taxas", url: "/financeiro/taxas", icon: Zap },
       { title: "Controle de Gastos", url: "/financeiro/gastos", icon: PieChart },
     ],
   },
   {
     label: "SISTEMA",
     items: [
+      { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
       { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
       { title: "Integrações", url: "/integracoes/apps", icon: Puzzle },
       { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
@@ -109,6 +111,7 @@ const sections = [
     label: "COMPRAS",
     items: [
       { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
+      { title: "Premiações", url: "/premiacoes", icon: Trophy },
     ],
   },
 ] as const;

@@ -35,6 +35,7 @@ import CourseBuilder from "./pages/vendas/CourseBuilder";
 import Apps from "./pages/vendas/Apps";
 import Afiliados from "./pages/vendas/Afiliados";
 import Coproducoes from "./pages/vendas/Coproducoes";
+import Cupons from "./pages/vendas/Cupons";
 import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -118,6 +119,7 @@ const App = () => (
                 <Route path="/financeiro/saques-crypto" element={<SaquesCrypto />} />
                 <Route path="/financeiro/taxas" element={<Taxas />} />
                 <Route path="/financeiro/gastos" element={<ControleGastos />} />
+                <Route path="/financeiro/taxas" element={<Taxas />} />
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
@@ -129,6 +131,7 @@ const App = () => (
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes/apps" element={<Apps />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
+                <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
