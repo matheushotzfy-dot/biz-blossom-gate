@@ -160,6 +160,9 @@ export default function ProductEditor() {
     return Math.round((score / total) * 100);
   })();
 
+  // Other tabs locked until product is saved (geral filled)
+  const tabsLocked = isNew;
+
   // Tab completion status
   const tabCompleted = useCallback((key: TabKey): boolean => {
     switch (key) {
