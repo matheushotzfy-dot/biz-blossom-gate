@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
+// Theme is forced dark locally via className — no global toggle needed
 import { useNavigate } from "react-router-dom";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
