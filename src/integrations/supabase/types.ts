@@ -1342,6 +1342,7 @@ export type Database = {
           co_production_enabled: boolean
           co_production_split: number
           created_at: string
+          delivery_type: string
           description: string | null
           display_name: string | null
           id: string
@@ -1376,6 +1377,7 @@ export type Database = {
           co_production_enabled?: boolean
           co_production_split?: number
           created_at?: string
+          delivery_type?: string
           description?: string | null
           display_name?: string | null
           id?: string
@@ -1410,6 +1412,7 @@ export type Database = {
           co_production_enabled?: boolean
           co_production_split?: number
           created_at?: string
+          delivery_type?: string
           description?: string | null
           display_name?: string | null
           id?: string
@@ -2067,6 +2070,7 @@ export type Database = {
           checkout_timer_minutes: number | null
           checkout_url: string | null
           created_at: string | null
+          delivery_type: string | null
           description: string | null
           display_name: string | null
           id: string | null
@@ -2091,6 +2095,7 @@ export type Database = {
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
           created_at?: string | null
+          delivery_type?: string | null
           description?: string | null
           display_name?: string | null
           id?: string | null
@@ -2115,6 +2120,7 @@ export type Database = {
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
           created_at?: string | null
+          delivery_type?: string | null
           description?: string | null
           display_name?: string | null
           id?: string | null
