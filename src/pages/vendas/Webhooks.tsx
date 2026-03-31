@@ -537,7 +537,7 @@ export default function Webhooks() {
       <div className="space-y-4">
         <button
           onClick={() => setShowDocs(!showDocs)}
-          className="w-full flex items-center justify-between px-5 py-4 panel-enterprise hover:bg-muted/5 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl hover:bg-muted/5 transition-colors"
         >
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
