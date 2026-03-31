@@ -118,8 +118,8 @@ export default function Perfil() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Avatar + Info Card */}
-        <GlowPanel className="relative">
-          <div className="flex flex-col items-center text-center">
+        <GlowPanel className="relative hero-shine brand-mesh">
+          <div className="relative z-[1] flex flex-col items-center text-center">
             <div className="relative group mb-4">
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
               <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/20 shadow-xl shadow-primary/15 ring-4 ring-primary/5 active:scale-[0.97] transition-transform" onClick={() => fileRef.current?.click()}>
@@ -178,52 +178,59 @@ export default function Perfil() {
       </div>
 
       {/* Progress */}
-      <GlowPanel>
-        <div className="flex items-center gap-3.5 mb-6">
-          <div className="relative h-11 w-11 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
-            <Trophy className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h3 className="text-[15px] font-display font-bold text-foreground">Progresso de Faturamento</h3>
-            <p className="text-[11px] text-muted-foreground/60">Acompanhe sua evolução</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div>
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Total faturado</p>
-            <p className="text-[22px] font-display font-black text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Meta atual</p>
-            <p className="text-[22px] font-display font-black mt-1 text-primary">{milestone.next.label}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Falta</p>
-            <p className="text-[22px] font-display font-black text-foreground/50 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex justify-between mb-2.5">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-              <span className="text-[10px] font-bold text-muted-foreground/60">{milestone.pct.toFixed(0)}%</span>
+      <GlowPanel className="hero-shine brand-mesh">
+        <div className="relative z-[1]">
+          <div className="flex items-center gap-3.5 mb-6">
+            <div className="relative h-11 w-11 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
+              <Trophy className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-[10px] font-bold text-muted-foreground/60">{milestone.next.label}</span>
-          </div>
-          <div className="w-full rounded-full h-3.5 overflow-hidden bg-muted/30 border border-border/20">
-            <div className="h-full rounded-full relative transition-all duration-1000 gradient-primary" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div>
+              <h3 className="text-[15px] font-display font-bold text-foreground">Progresso de Faturamento</h3>
+              <p className="text-[11px] text-muted-foreground/60">Acompanhe sua evolução como produtor</p>
+            </div>
+            <div className="ml-auto hidden sm:block">
+              <span className="brand-chip">
+                <Flame className="h-3 w-3" /> Nível {milestone.tier + 1}
+              </span>
             </div>
           </div>
-          <div className="flex justify-between mt-4">
-            {MILESTONES.slice(1).map((m) => (
-              <div key={m.label} className="text-center">
-                <div className="h-2.5 w-2.5 rounded-full mx-auto mb-1.5 border border-border/30" style={{ background: allTimeRevenue >= m.value ? "hsl(var(--primary))" : "hsl(var(--muted))", boxShadow: allTimeRevenue >= m.value ? "0 0 10px hsl(var(--primary) / 0.5)" : "none" }} />
-                <span className="text-[9px] text-muted-foreground/50 font-bold">{m.label}</span>
+
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div>
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Total faturado</p>
+              <p className="text-[22px] font-display font-black text-foreground mt-1">{fmtCurrency(allTimeRevenue)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Meta atual</p>
+              <p className="text-[22px] font-display font-black mt-1 text-gradient">{milestone.next.label}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Falta</p>
+              <p className="text-[22px] font-display font-black text-foreground/50 mt-1">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between mb-2.5">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                <span className="text-[10px] font-bold text-muted-foreground/60">{milestone.pct.toFixed(0)}%</span>
               </div>
-            ))}
+              <span className="text-[10px] font-bold text-muted-foreground/60">{milestone.next.label}</span>
+            </div>
+            <div className="w-full rounded-full h-3.5 overflow-hidden bg-muted/30 border border-border/20">
+              <div className="h-full rounded-full relative transition-all duration-1000 gradient-primary" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" }}>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+              </div>
+            </div>
+            <div className="flex justify-between mt-4">
+              {MILESTONES.slice(1).map((m) => (
+                <div key={m.label} className="text-center">
+                  <div className="h-2.5 w-2.5 rounded-full mx-auto mb-1.5 border border-border/30 transition-all duration-500" style={{ background: allTimeRevenue >= m.value ? "hsl(var(--primary))" : "hsl(var(--muted))", boxShadow: allTimeRevenue >= m.value ? "0 0 10px hsl(var(--primary) / 0.5)" : "none" }} />
+                  <span className="text-[9px] text-muted-foreground/50 font-bold">{m.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </GlowPanel>

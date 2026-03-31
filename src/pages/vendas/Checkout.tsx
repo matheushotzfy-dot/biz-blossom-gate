@@ -135,17 +135,17 @@ export default function Checkout() {
           {activeProducts.map((p, i) => {
             const productCoupons = getProductCouponCount(p.id);
             return (
-              <div key={p.id} className="panel-enterprise overflow-hidden group animate-fade-in flex flex-col" style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}>
-                <div className="relative h-44 bg-muted/30 overflow-hidden">
+              <Panel key={p.id} className="overflow-hidden p-0 group flex flex-col animate-fade-in hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-500" style={{ animationDelay: `${Math.min(i, 5) * 60}ms` } as React.CSSProperties}>
+                <div className="relative h-44 bg-muted/30 overflow-hidden brand-mesh">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-[1]" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/[0.03] to-muted/10 relative z-[1]">
                       <Package className="h-12 w-12 text-muted-foreground/20" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 flex-wrap">
+                  <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none z-[2]" />
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 flex-wrap z-[3]">
                     {getPaymentMethods(p).map((m) => (
                       <span key={m} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-card/80 backdrop-blur-sm border border-border/30 text-muted-foreground/80 uppercase tracking-wider">{m}</span>
                     ))}
@@ -171,8 +171,8 @@ export default function Checkout() {
                   )}
                   {productCoupons > 0 && (
                     <div className="mb-3">
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-warning/10 border border-warning/15 text-warning">
-                        <Ticket className="h-3 w-3 inline mr-1" />{productCoupons} cupom{productCoupons > 1 ? "s" : ""} ativo{productCoupons > 1 ? "s" : ""}
+                      <span className="brand-chip">
+                        <Ticket className="h-3 w-3" />{productCoupons} cupom{productCoupons > 1 ? "s" : ""} ativo{productCoupons > 1 ? "s" : ""}
                       </span>
                     </div>
                   )}
@@ -187,7 +187,7 @@ export default function Checkout() {
                     )}
                   </div>
                 </div>
-              </div>
+              </Panel>
             );
           })}
         </div>
