@@ -206,6 +206,7 @@ export default function ProductEditor() {
       setCoProductionSplit(String(data.co_production_split || 50));
       setSupportEmail((data as any).support_email || "");
       setDisplayName((data as any).display_name || "");
+      setDeliveryType((data as any).delivery_type || "digital");
       setLoading(false);
     })();
   }, [productId, user?.id, isNew]);
@@ -267,6 +268,7 @@ export default function ProductEditor() {
         image_url: imageUrl,
         support_email: supportEmail.trim() || null,
         display_name: displayName.trim() || null,
+        delivery_type: deliveryType,
         affiliate_enabled: affiliateEnabled,
         affiliate_commission: Number(affiliateCommission) || 30,
         co_production_enabled: coProductionEnabled,
@@ -289,18 +291,45 @@ export default function ProductEditor() {
       if (isNew) {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any);
-        if (error) { toast.error("Erro ao criar produto"); return; }
+        const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("id").single();
+        if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
+
+        // Auto-create course linked to product when delivery = Área de Membros
+        if (deliveryType === "digital") {
+          await supabase.from("courses").insert({
+            user_id: user.id,
+            product_id: newProduct.id,
+            title: name.trim(),
+            description: description.trim() || null,
+            is_published: false,
+          } as any);
+        }
+
         toast.success("Produto criado com sucesso!");
-        invalidateAll(["products"]);
+        invalidateAll(["products", "courses"]);
         navigate("/vendas/produtos");
       } else {
         const { error } = await supabase.from("products").update(productData).eq("id", productId!).eq("user_id", user.id);
         if (error) { toast.error("Erro ao salvar"); return; }
+
+        // Auto-create course if switching to digital and no course exists
+        if (deliveryType === "digital") {
+          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).single();
+          if (!existingCourse) {
+            await supabase.from("courses").insert({
+              user_id: user.id,
+              product_id: productId!,
+              title: name.trim(),
+              description: description.trim() || null,
+              is_published: false,
+            } as any);
+          }
+        }
+
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
         toast.success("Produto salvo!");
-        invalidateAll(["products"]);
+        invalidateAll(["products", "courses"]);
       }
     } finally { setSaving(false); }
   };
@@ -852,10 +881,8 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
         <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-success" /> Entrega de conteúdo</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { value: "digital", label: "Área de Membros", desc: "Plataforma integrada", icon: Star },
-            { value: "email", label: "Acesso por e-mail", desc: "Links e arquivos por e-mail", icon: Mail },
-            { value: "telegram", label: "Telegram", desc: "Grupo ou canal privado", icon: Globe },
-            { value: "discord", label: "Discord", desc: "Monetize seu servidor", icon: Users },
+            { value: "digital", label: "Área de Membros", desc: "Plataforma integrada com player e módulos", icon: Star },
+            { value: "email", label: "Acesso por e-mail", desc: "Links e arquivos enviados por e-mail", icon: Mail },
             { value: "link", label: "Link de pagamento", desc: "Apenas receba pagamentos", icon: Link2 },
             { value: "external", label: "Área externa", desc: "Plataforma de terceiros", icon: ExternalLink },
           ].map((opt) => (
