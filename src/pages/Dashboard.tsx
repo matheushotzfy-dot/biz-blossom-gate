@@ -46,20 +46,24 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, differenceInDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
-const PERIOD_OPTIONS = [
+const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
   { label: "Ontem", days: 1 },
   { label: "7 dias", days: 7 },
   { label: "15 dias", days: 15 },
   { label: "30 dias", days: 30 },
+  { label: "60 dias", days: 60 },
+  { label: "90 dias", days: 90 },
 ] as const;
+
+type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
 const STAGGER_CLASSES = ["", "stagger-1", "stagger-2", "stagger-3", "stagger-4", "stagger-5", "stagger-6"];
 
@@ -125,7 +129,10 @@ export default function Dashboard() {
   const { data: withdrawals = [] } = useWithdrawals(10);
   const { data: productsData } = useProductsQuery();
   const products = productsData?.length ?? 0;
-  const [selectedPeriod, setSelectedPeriod] = useState<(typeof PERIOD_OPTIONS)[number]>(PERIOD_OPTIONS[0]);
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [isCustom, setIsCustom] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const privacy = usePrivacyMode();
@@ -154,6 +161,18 @@ export default function Dashboard() {
   }, [user?.id, refetchTx]);
 
   const filteredTx = useMemo(() => {
+    // Custom date range
+    if (isCustom && customRange?.from) {
+      const start = new Date(customRange.from);
+      start.setHours(0, 0, 0, 0);
+      const end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
+      end.setHours(23, 59, 59, 999);
+      return transactions.filter((t) => {
+        const d = new Date(t.created_at);
+        return d >= start && d <= end;
+      });
+    }
+
     const today = brasiliaToday();
 
     if (selectedPeriod.days === 0) {
@@ -173,7 +192,7 @@ export default function Dashboard() {
     start.setHours(0, 0, 0, 0);
 
     return transactions.filter((t) => new Date(t.created_at) >= start);
-  }, [transactions, selectedPeriod]);
+  }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
@@ -237,7 +256,18 @@ export default function Dashboard() {
 
   // Optimized chart: pre-index transactions by date to avoid O(N*M)
   const chartData = useMemo(() => {
-    const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
+    let days: number;
+    let startDate: Date;
+
+    if (isCustom && customRange?.from) {
+      const end = customRange.to || customRange.from;
+      days = Math.max(differenceInDays(end, customRange.from) + 1, 1);
+      startDate = new Date(customRange.from);
+    } else {
+      days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
+      startDate = new Date(brasiliaToday());
+      startDate.setDate(startDate.getDate() - (days - 1));
+    }
 
     // Pre-index completed transactions by date string
     const revenueByDate = new Map<string, number>();
@@ -248,15 +278,15 @@ export default function Dashboard() {
     }
 
     return Array.from({ length: days }, (_, i) => {
-      const d = new Date(brasiliaToday());
-      d.setDate(d.getDate() - (days - 1 - i));
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
 
       const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
       const compare = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
       return { name: label, vendas: revenueByDate.get(compare) || 0 };
     });
-  }, [transactions, selectedPeriod.days]);
+  }, [transactions, selectedPeriod.days, isCustom, customRange]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 8).map((t) => ({
@@ -498,28 +528,89 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger asChild>
                   <button className="inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl border border-border/80 bg-card px-3 md:px-3.5 text-xs md:text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
                     <CalendarDays className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
-                    {selectedPeriod.label}
+                    {isCustom && customRange?.from
+                      ? customRange.to
+                        ? `${format(customRange.from, "dd/MM", { locale: ptBR })} - ${format(customRange.to, "dd/MM", { locale: ptBR })}`
+                        : format(customRange.from, "dd/MM/yyyy", { locale: ptBR })
+                      : selectedPeriod.label}
                     <ChevronDown className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground" />
                   </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[150px] rounded-xl p-1.5">
-                  {PERIOD_OPTIONS.map((option) => (
-                    <DropdownMenuItem
-                      key={option.label}
-                      onClick={() => setSelectedPeriod(option)}
-                      className={`rounded-lg py-2 text-sm cursor-pointer ${
-                        selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-semibold" : ""
-                      }`}
-                    >
-                      {option.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-auto p-0 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-xl overflow-hidden">
+                  <div className="flex">
+                    {/* Presets sidebar */}
+                    <div className="border-r border-border/30 p-2 space-y-0.5 min-w-[130px]">
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] px-2.5 py-1.5">Período</p>
+                      {PERIOD_PRESETS.map((option) => (
+                        <button
+                          key={option.label}
+                          onClick={() => {
+                            setSelectedPeriod(option);
+                            setIsCustom(false);
+                            setCustomRange(undefined);
+                            setDatePickerOpen(false);
+                          }}
+                          className={cn(
+                            "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                            !isCustom && selectedPeriod.label === option.label
+                              ? "bg-primary/10 text-primary font-bold"
+                              : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                      <div className="my-1.5 border-t border-border/20" />
+                      <button
+                        onClick={() => setIsCustom(true)}
+                        className={cn(
+                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all",
+                          isCustom
+                            ? "bg-primary/10 text-primary font-bold"
+                            : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
+                        )}
+                      >
+                        Personalizado
+                      </button>
+                    </div>
+                    {/* Calendar */}
+                    <div className="p-3">
+                      <Calendar
+                        mode="range"
+                        selected={customRange}
+                        onSelect={(range) => {
+                          setCustomRange(range);
+                          setIsCustom(true);
+                          if (range?.from && range?.to) {
+                            setTimeout(() => setDatePickerOpen(false), 300);
+                          }
+                        }}
+                        numberOfMonths={1}
+                        locale={ptBR}
+                        disabled={(date) => date > new Date()}
+                        className={cn("p-3 pointer-events-auto")}
+                        classNames={{
+                          day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
+                          day_range_middle: "bg-primary/10 text-foreground",
+                          day_range_end: "bg-primary text-primary-foreground",
+                        }}
+                      />
+                      {isCustom && customRange?.from && (
+                        <div className="px-3 pb-2 pt-1 border-t border-border/20 mt-1">
+                          <p className="text-[11px] text-muted-foreground font-medium text-center">
+                            {format(customRange.from, "dd MMM yyyy", { locale: ptBR })}
+                            {customRange.to && ` — ${format(customRange.to, "dd MMM yyyy", { locale: ptBR })}`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <button
                 onClick={privacy.toggle}
