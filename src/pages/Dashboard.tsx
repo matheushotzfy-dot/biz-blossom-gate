@@ -256,7 +256,18 @@ export default function Dashboard() {
 
   // Optimized chart: pre-index transactions by date to avoid O(N*M)
   const chartData = useMemo(() => {
-    const days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
+    let days: number;
+    let startDate: Date;
+
+    if (isCustom && customRange?.from) {
+      const end = customRange.to || customRange.from;
+      days = Math.max(differenceInDays(end, customRange.from) + 1, 1);
+      startDate = new Date(customRange.from);
+    } else {
+      days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
+      startDate = new Date(brasiliaToday());
+      startDate.setDate(startDate.getDate() - (days - 1));
+    }
 
     // Pre-index completed transactions by date string
     const revenueByDate = new Map<string, number>();
@@ -267,15 +278,15 @@ export default function Dashboard() {
     }
 
     return Array.from({ length: days }, (_, i) => {
-      const d = new Date(brasiliaToday());
-      d.setDate(d.getDate() - (days - 1 - i));
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
 
       const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
       const compare = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
       return { name: label, vendas: revenueByDate.get(compare) || 0 };
     });
-  }, [transactions, selectedPeriod.days]);
+  }, [transactions, selectedPeriod.days, isCustom, customRange]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 8).map((t) => ({
