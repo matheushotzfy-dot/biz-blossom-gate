@@ -222,6 +222,9 @@ export function AppSidebar() {
         {sections.map((section, idx) => (
           <SidebarGroup key={section.label} className="px-0 py-0">
             {idx > 0 && <div className="mx-3 my-2.5 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1" />}
+            <SidebarGroupLabel className="px-4 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/35 group-data-[collapsible=icon]:hidden">
+              {section.label}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5 px-1">
                 {section.items.map((item) => {
