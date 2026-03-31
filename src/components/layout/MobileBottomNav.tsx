@@ -74,7 +74,7 @@ export function MobileBottomNav() {
               <h2 className="text-lg font-display font-black text-foreground">Navegação</h2>
               <button
                 onClick={() => setMoreOpen(false)}
-                className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/60 border border-border/80"
+                className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/40 border border-border/30"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
