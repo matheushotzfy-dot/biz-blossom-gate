@@ -669,35 +669,48 @@ export default function Dashboard() {
 
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="xl:col-span-8 rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_16px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-[13px] font-display font-bold text-foreground">Receita</span>
+            </div>
+            <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.12em]">
+              {isCustom && customRange?.from ? "Personalizado" : selectedPeriod.label}
+            </span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                  <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
                   <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-              <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
+              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} fontFamily="Space Grotesk" interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+              <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} fontFamily="Space Grotesk" tickFormatter={(v) => `R$${v}`} />
               <Tooltip
                 contentStyle={{
                   background: "var(--tooltip-bg)",
                   border: "1px solid var(--tooltip-border)",
-                  borderRadius: "12px",
-                  fontSize: "13px",
+                  borderRadius: "14px",
+                  fontSize: "12px",
+                  fontFamily: "Space Grotesk",
                   color: "var(--tooltip-text)",
                   padding: "10px 14px",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
                 }}
                 formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-                cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
+                cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }}
               />
               <Area
                 type="monotone"
                 dataKey="vendas"
                 stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
+                strokeWidth={2}
                 fill="url(#dashboardRevenue)"
                 dot={false}
                 activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
