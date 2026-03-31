@@ -19,9 +19,9 @@ import {
   UserCircle,
   User,
   LogOut,
-  ChevronRight,
   Headphones,
   Zap,
+  TrendingUp,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
@@ -29,7 +29,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState, useMemo } from "react";
-import type { Tables } from "@/integrations/supabase/types";
 import {
   Sidebar,
   SidebarContent,
@@ -72,7 +71,7 @@ const sections = [
   {
     label: "COMANDO",
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, badge: "Live" },
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
       { title: "Minhas Vendas", url: "/vendas", icon: BarChart3 },
     ],
   },
@@ -143,88 +142,64 @@ export function AppSidebar() {
     navigate("/auth");
   };
 
-  return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/40 bg-sidebar/98 backdrop-blur-2xl">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-sidebar-primary/8 to-transparent" />
+  const fmtRevenue = (v: number) => {
+    if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(2).replace('.', ',')}M`;
+    if (v >= 1000) return `R$ ${(v / 1000).toFixed(1).replace('.', ',')}K`;
+    return `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  };
 
-      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/50">
-        <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
-          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/20 ring-2 ring-sidebar-primary/20 shrink-0 bg-card">
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/30 bg-sidebar">
+      <SidebarHeader className="relative px-3 pt-4 pb-3">
+        {/* Logo */}
+        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
+          <div className="h-10 w-10 rounded-xl overflow-hidden shadow-md ring-1 ring-sidebar-border/40 shrink-0 bg-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
-
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
+            <h1 className="text-lg leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">HOTZFY</h1>
+            <p className="text-[9px] font-semibold text-sidebar-foreground/40 mt-0.5 uppercase tracking-[0.15em]">Gateway</p>
           </div>
         </div>
 
-        <div className="mt-4 group-data-[collapsible=icon]:hidden cursor-pointer" onClick={() => navigate("/premiacoes")}>
-          <div className="relative rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] to-sidebar-accent/30 px-4 py-3.5 overflow-hidden group/milestone hover:border-sidebar-primary/35 hover:shadow-lg hover:shadow-sidebar-primary/8 active:scale-[0.985] transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
-            {/* Ambient glow */}
-            <div className="absolute -top-8 -right-8 w-24 h-24 bg-sidebar-primary/15 rounded-full blur-2xl group-hover/milestone:bg-sidebar-primary/25 transition-all duration-700" />
-            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-sidebar-primary/10 rounded-full blur-xl" />
-
-            {/* Flame icon */}
-            <div className="relative flex items-center gap-2 mb-3">
-              <div className="relative h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-sidebar-primary animate-pulse" />
-                <div className="absolute inset-0 rounded-xl bg-sidebar-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/50">Faturamento</p>
-                <p className="text-[18px] font-black text-sidebar-accent-foreground leading-tight tracking-tight">
-                  {revenue >= 1000000
-                    ? `R$ ${(revenue / 1000000).toFixed(2).replace('.', ',')}M`
-                    : revenue >= 1000
-                    ? `R$ ${(revenue / 1000).toFixed(1).replace('.', ',')}K`
-                    : `R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                </p>
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="relative">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[9px] font-bold text-sidebar-primary/80">{milestone.current.label}</span>
-                <span className="text-[9px] font-bold text-sidebar-foreground/40">Meta: {milestone.next.label}</span>
-              </div>
-              <div className="relative h-2.5 w-full rounded-full bg-sidebar-accent/60 overflow-hidden">
-                {/* Glow track */}
-                <div
-                  className="absolute h-full rounded-full bg-gradient-to-r from-sidebar-primary via-sidebar-primary to-sidebar-primary/70 transition-all duration-1000 ease-out"
-                  style={{ width: `${milestone.pct}%` }}
-                >
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-[shimmer_2s_infinite]" />
+        {/* Revenue Card */}
+        <div className="mt-3 group-data-[collapsible=icon]:hidden cursor-pointer" onClick={() => navigate("/premiacoes")}>
+          <div className="relative rounded-xl border border-sidebar-primary/15 bg-sidebar-primary/[0.05] px-3.5 py-3 overflow-hidden group/m hover:border-sidebar-primary/25 active:scale-[0.985] transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-lg bg-sidebar-primary/12 flex items-center justify-center">
+                  <TrendingUp className="h-3 w-3 text-sidebar-primary" />
                 </div>
-                {/* Glow dot at end */}
-                {milestone.pct > 3 && (
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full bg-sidebar-primary shadow-[0_0_10px_2px] shadow-sidebar-primary/50 border-2 border-sidebar/80 transition-all duration-1000"
-                    style={{ left: `calc(${milestone.pct}% - 7px)` }}
-                  />
-                )}
+                <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-sidebar-foreground/40">Faturamento</span>
               </div>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[11px] font-extrabold text-sidebar-primary">
-                  {milestone.pct.toFixed(0)}%
-                </span>
-              </div>
-              <p className="text-center text-[9px] font-bold text-sidebar-primary/40 group-hover/milestone:text-sidebar-primary/70 mt-2.5 transition-colors">
-                Ver Premiações
-              </p>
+              <span className="text-[14px] font-display font-black text-sidebar-accent-foreground tracking-tight">
+                {fmtRevenue(revenue)}
+              </span>
+            </div>
+            {/* Progress */}
+            <div className="relative h-1.5 w-full rounded-full bg-sidebar-accent/40 overflow-hidden">
+              <div
+                className="absolute h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/60 transition-all duration-700"
+                style={{ width: `${milestone.pct}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-[8px] font-bold text-sidebar-primary/60">{milestone.current.label}</span>
+              <span className="text-[8px] font-bold text-sidebar-foreground/30">{milestone.next.label}</span>
             </div>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 px-2.5 py-2 overflow-y-auto">
+      <SidebarContent className="relative gap-0 px-2 py-1 overflow-y-auto">
         {sections.map((section, idx) => (
           <SidebarGroup key={section.label} className="px-0 py-0">
-            {idx > 0 && <div className="mx-3 my-3 border-t border-sidebar-border/20 group-data-[collapsible=icon]:mx-1" />}
-            <SidebarGroupLabel className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/30 group-data-[collapsible=icon]:hidden">{section.label}</SidebarGroupLabel>
+            {idx > 0 && <div className="mx-3 my-2 border-t border-sidebar-border/15 group-data-[collapsible=icon]:mx-1" />}
+            <SidebarGroupLabel className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/25 group-data-[collapsible=icon]:hidden">
+              {section.label}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5 px-1">
+              <SidebarMenu className="gap-0.5 px-0.5">
                 {section.items.map((item) => {
                   const isActive = item.url === "/dashboard" || item.url === "/vendas"
                     ? location.pathname === item.url
@@ -238,36 +213,22 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[13px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] font-medium leading-none transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "border-sidebar-primary/15 bg-sidebar-primary/8 text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/5"
-                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/40 hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground",
+                              ? "bg-sidebar-primary/10 text-sidebar-primary font-semibold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.4)] group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-5 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                           )}
 
-                          <span
-                            className={cn(
-                              "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                              isActive
-                                ? "bg-sidebar-primary/15 text-sidebar-primary shadow-sm shadow-sidebar-primary/10"
-                                : "bg-sidebar-accent/30 text-sidebar-foreground/70 group-hover/nav:bg-sidebar-accent/50 group-hover/nav:text-sidebar-accent-foreground",
-                            )}
-                          >
-                            <item.icon className="h-4 w-4" />
-                          </span>
+                          <item.icon className={cn(
+                            "h-[16px] w-[16px] shrink-0 transition-colors",
+                            isActive ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover/nav:text-sidebar-accent-foreground"
+                          )} />
 
                           <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
-
-                          {item.badge && (
-                            <span className="ml-auto rounded-md bg-sidebar-primary/12 px-2 py-0.5 text-[9px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden animate-pulse">
-                              {item.badge}
-                            </span>
-                          )}
-
-                          {isActive && <ChevronRight className="h-3.5 w-3.5 text-sidebar-primary/50 group-data-[collapsible=icon]:hidden" />}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -279,29 +240,26 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative p-3 border-t border-sidebar-border/30">
+      <SidebarFooter className="p-2.5 border-t border-sidebar-border/20">
         <button
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/15 bg-gradient-to-r from-sidebar-primary/[0.06] to-sidebar-accent/20 p-3.5 text-left transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:from-sidebar-primary/[0.12] hover:border-sidebar-primary/25 hover:shadow-md hover:shadow-sidebar-primary/5 group-data-[collapsible=icon]:hidden"
+          className="mb-1 w-full flex items-center gap-2.5 rounded-lg border border-sidebar-border/20 bg-sidebar-accent/20 p-2.5 text-left transition-all duration-200 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:hidden"
         >
-          <div className="h-8 w-8 rounded-xl bg-sidebar-primary/12 flex items-center justify-center shrink-0 shadow-sm shadow-sidebar-primary/10">
-            <Headphones className="h-4 w-4 text-sidebar-primary" />
-          </div>
+          <Headphones className="h-4 w-4 text-sidebar-primary shrink-0" />
           <div>
-            <span className="text-[12px] font-black text-sidebar-accent-foreground block">Solicitar Suporte</span>
-            <span className="text-[10px] text-sidebar-foreground/60">Para escalar seu negócio</span>
+            <span className="text-[11px] font-bold text-sidebar-accent-foreground block">Suporte</span>
+            <span className="text-[9px] text-sidebar-foreground/40">WhatsApp</span>
           </div>
         </button>
 
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-sidebar-foreground/70 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-destructive/[0.06] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-sidebar-foreground/50 transition-all duration-200 hover:bg-destructive/8 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <LogOut className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
+          <span className="group-data-[collapsible=icon]:hidden">Sair</span>
         </button>
       </SidebarFooter>
     </Sidebar>
   );
 }
-
