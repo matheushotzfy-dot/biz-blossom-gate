@@ -107,7 +107,7 @@ export default function Produtos() {
           {/* Title row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/8 backdrop-blur-xl shadow-lg shadow-primary/10">
                 <Package className="h-6 w-6 text-primary" />
               </div>
               <div className="space-y-1">
