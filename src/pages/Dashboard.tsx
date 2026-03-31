@@ -801,14 +801,17 @@ export default function Dashboard() {
         </div>
 
         {/* Activity feed */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
+        <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
           {/* Top bar */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-[12px] font-medium text-muted-foreground">Tempo real</p>
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/20">
+            <div className="flex items-center gap-2.5">
+              <div className="relative h-2 w-2">
+                <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40" />
+                <span className="relative block h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]" />
+              </div>
+              <p className="text-[12px] font-display font-bold text-foreground">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/financeiro/extrato" className="text-[11px] font-display font-bold text-primary/60 hover:text-primary transition-colors">
               Ver tudo
             </Link>
           </div>
