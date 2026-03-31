@@ -59,45 +59,48 @@ function DashboardLayoutInner() {
           <AppSidebar />
 
           <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 overflow-hidden">
-            <div className="absolute left-1/2 top-[-150px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] opacity-45" />
+          {/* Ambient gradient */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-72 overflow-hidden">
+            <div className="absolute left-1/2 top-[-170px] h-80 w-[48rem] -translate-x-1/2 rounded-full bg-primary/8 blur-[140px] opacity-40" />
           </div>
 
-          <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/30 bg-background/80 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
-            <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
+          <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/25 bg-card/60 backdrop-blur-2xl px-4 lg:px-6 sticky top-0">
+            <SidebarTrigger className="h-9 w-9 rounded-xl hover:bg-muted/30 transition-colors flex items-center justify-center">
               <Menu className="h-4 w-4 text-muted-foreground" />
             </SidebarTrigger>
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
+              className="h-9 px-3.5 rounded-xl border border-border/30 bg-muted/10 hover:bg-muted/20 transition-all flex items-center gap-2 text-muted-foreground/50"
             >
-              <Search className="h-4 w-4 text-muted-foreground" />
+              <Search className="h-3.5 w-3.5" />
+              <span className="text-[12px] font-medium hidden lg:inline">Buscar...</span>
+              <kbd className="hidden lg:inline text-[10px] font-mono bg-muted/30 rounded px-1.5 py-0.5 text-muted-foreground/40 border border-border/20">⌘K</kbd>
             </button>
 
             <div className="flex-1" />
 
             <button
               onClick={toggleTheme}
-              className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
+              className="h-9 w-9 rounded-xl hover:bg-muted/30 transition-colors flex items-center justify-center"
             >
               {theme === "dark" ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
             </button>
 
             <button
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
+              className="relative h-9 w-9 rounded-xl hover:bg-muted/30 transition-colors flex items-center justify-center"
             >
               <Bell className="h-4 w-4 text-muted-foreground" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-background flex items-center justify-center text-[9px] font-bold text-primary-foreground">{unreadCount}</span>
+                <span className="absolute top-1 right-1 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-card flex items-center justify-center text-[9px] font-bold text-primary-foreground">{unreadCount}</span>
               )}
             </button>
 
             <button onClick={() => navigate("/perfil")} className="ml-1">
-              <Avatar className="h-8 w-8 ring-1 ring-border/40 hover:ring-primary/30 transition-all cursor-pointer">
+              <Avatar className="h-8 w-8 ring-2 ring-border/30 hover:ring-primary/25 transition-all cursor-pointer shadow-sm">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-display font-black">
                   {(profile?.full_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

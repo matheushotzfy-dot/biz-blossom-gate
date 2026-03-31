@@ -492,10 +492,11 @@ export default function Dashboard() {
       )}
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 shadow-[0_4px_24px_hsl(var(--foreground)/0.04)] backdrop-blur-2xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
-          <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
+          <div className="absolute -left-20 -top-20 h-52 md:h-80 w-52 md:w-80 rounded-full bg-primary/12 blur-[80px] md:blur-[120px]" />
+          <div className="absolute -right-12 bottom-0 h-44 md:h-60 w-44 md:w-60 rounded-full bg-primary/6 blur-[80px] md:blur-[120px]" />
+          <div className="absolute left-1/2 top-0 h-32 w-64 -translate-x-1/2 bg-gradient-to-b from-primary/5 to-transparent blur-[60px]" />
         </div>
 
         <div className="relative z-10 space-y-4 md:space-y-6">
@@ -668,35 +669,48 @@ export default function Dashboard() {
 
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="xl:col-span-8 rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_16px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-[13px] font-display font-bold text-foreground">Receita</span>
+            </div>
+            <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.12em]">
+              {isCustom && customRange?.from ? "Personalizado" : selectedPeriod.label}
+            </span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                  <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
                   <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-              <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
+              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} fontFamily="Space Grotesk" interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+              <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} fontFamily="Space Grotesk" tickFormatter={(v) => `R$${v}`} />
               <Tooltip
                 contentStyle={{
                   background: "var(--tooltip-bg)",
                   border: "1px solid var(--tooltip-border)",
-                  borderRadius: "12px",
-                  fontSize: "13px",
+                  borderRadius: "14px",
+                  fontSize: "12px",
+                  fontFamily: "Space Grotesk",
                   color: "var(--tooltip-text)",
                   padding: "10px 14px",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
                 }}
                 formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-                cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
+                cursor={{ stroke: "hsl(var(--primary) / 0.12)", strokeDasharray: "4 4" }}
               />
               <Area
                 type="monotone"
                 dataKey="vendas"
                 stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
+                strokeWidth={2}
                 fill="url(#dashboardRevenue)"
                 dot={false}
                 activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
@@ -707,7 +721,13 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Health */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+          <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-5 animate-fade-in stagger-2">
+            <div className="flex items-center gap-2 mb-3.5">
+              <div className="h-7 w-7 rounded-lg bg-success/10 flex items-center justify-center">
+                <ShieldCheck className="h-3.5 w-3.5 text-success" />
+              </div>
+              <span className="text-[11px] font-display font-bold text-foreground">Saúde</span>
+            </div>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
@@ -715,7 +735,13 @@ export default function Dashboard() {
           </div>
 
           {/* Conversions */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+          <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+            <div className="flex items-center gap-2 mb-3.5">
+              <div className="h-7 w-7 rounded-lg bg-info/10 flex items-center justify-center">
+                <Target className="h-3.5 w-3.5 text-info" />
+              </div>
+              <span className="text-[11px] font-display font-bold text-foreground">Conversões</span>
+            </div>
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -736,7 +762,13 @@ export default function Dashboard() {
       {/* ─── ACTIONS + ACTIVITY ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex flex-col">
+        <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-5 animate-fade-in stagger-3 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Zap className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="text-[11px] font-display font-bold text-foreground">Ações Rápidas</span>
+          </div>
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
@@ -753,30 +785,33 @@ export default function Dashboard() {
               <Link
                 key={action.href}
                 to={action.href}
-                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/40 bg-muted/10 p-2.5 md:p-3.5 transition-all duration-200 hover:border-primary/20 hover:bg-muted/30 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
+                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/30 bg-muted/5 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/15 hover:bg-primary/[0.03] hover:shadow-sm animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
               >
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10">
-                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10 shadow-sm shadow-primary/5 group-hover:bg-primary/12 group-hover:shadow-md group-hover:shadow-primary/8 transition-all">
+                  <action.icon className="h-4 w-4 md:h-[18px] md:w-[18px]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] md:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] md:text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
+                  <p className="text-[11px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[10px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/30 hidden md:block group-hover:text-muted-foreground/60 transition-colors" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-primary/40 group-hover:translate-x-0.5 transition-all" />
               </Link>
             ))}
           </div>
         </div>
 
         {/* Activity feed */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
+        <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
           {/* Top bar */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-[12px] font-medium text-muted-foreground">Tempo real</p>
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/20">
+            <div className="flex items-center gap-2.5">
+              <div className="relative h-2 w-2">
+                <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40" />
+                <span className="relative block h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]" />
+              </div>
+              <p className="text-[12px] font-display font-bold text-foreground">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/financeiro/extrato" className="text-[11px] font-display font-bold text-primary/60 hover:text-primary transition-colors">
               Ver tudo
             </Link>
           </div>

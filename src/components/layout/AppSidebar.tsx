@@ -144,12 +144,12 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/60 bg-sidebar/95 backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-sidebar-primary/10 to-transparent" />
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/40 bg-sidebar/98 backdrop-blur-2xl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-sidebar-primary/8 to-transparent" />
 
-      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/80">
+      <SidebarHeader className="relative px-4 pt-5 pb-4 border-b border-sidebar-border/50">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center") }>
-          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/25 ring-1 ring-sidebar-primary/30 shrink-0 bg-card">
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-sidebar-primary/20 ring-2 ring-sidebar-primary/20 shrink-0 bg-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
 
@@ -221,7 +221,8 @@ export function AppSidebar() {
       <SidebarContent className="relative gap-0 px-2.5 py-2 overflow-y-auto">
         {sections.map((section, idx) => (
           <SidebarGroup key={section.label} className="px-0 py-0">
-            {idx > 0 && <div className="mx-3 my-2.5 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1" />}
+            {idx > 0 && <div className="mx-3 my-3 border-t border-sidebar-border/20 group-data-[collapsible=icon]:mx-1" />}
+            <SidebarGroupLabel className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/30 group-data-[collapsible=icon]:hidden">{section.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5 px-1">
                 {section.items.map((item) => {
@@ -237,36 +238,36 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[13px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
-                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/50 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                              ? "border-sidebar-primary/15 bg-sidebar-primary/8 text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/5"
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/40 hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.4)] group-data-[collapsible=icon]:hidden" />
                           )}
 
                           <span
                             className={cn(
-                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                              "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
                               isActive
-                                ? "bg-sidebar-primary/12 text-sidebar-primary"
-                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover/nav:bg-sidebar-accent/60 group-hover/nav:text-sidebar-accent-foreground",
+                                ? "bg-sidebar-primary/15 text-sidebar-primary shadow-sm shadow-sidebar-primary/10"
+                                : "bg-sidebar-accent/30 text-sidebar-foreground/70 group-hover/nav:bg-sidebar-accent/50 group-hover/nav:text-sidebar-accent-foreground",
                             )}
                           >
-                            <item.icon className="h-5 w-5" />
+                            <item.icon className="h-4 w-4" />
                           </span>
 
                           <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
 
                           {item.badge && (
-                            <span className="ml-auto rounded-md bg-sidebar-primary/15 px-2 py-0.5 text-[10px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                            <span className="ml-auto rounded-md bg-sidebar-primary/12 px-2 py-0.5 text-[9px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden animate-pulse">
                               {item.badge}
                             </span>
                           )}
 
-                          {isActive && <ChevronRight className="h-4 w-4 text-sidebar-primary/65 group-data-[collapsible=icon]:hidden" />}
+                          {isActive && <ChevronRight className="h-3.5 w-3.5 text-sidebar-primary/50 group-data-[collapsible=icon]:hidden" />}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -278,25 +279,25 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative p-3 border-t border-sidebar-border/80">
+      <SidebarFooter className="relative p-3 border-t border-sidebar-border/30">
         <button
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/20 bg-sidebar-primary/[0.09] p-3.5 text-left transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-sidebar-primary/[0.14] hover:border-sidebar-primary/30 group-data-[collapsible=icon]:hidden"
+          className="mb-2 w-full flex items-center gap-2.5 rounded-2xl border border-sidebar-primary/15 bg-gradient-to-r from-sidebar-primary/[0.06] to-sidebar-accent/20 p-3.5 text-left transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:from-sidebar-primary/[0.12] hover:border-sidebar-primary/25 hover:shadow-md hover:shadow-sidebar-primary/5 group-data-[collapsible=icon]:hidden"
         >
-          <div className="h-8 w-8 rounded-xl bg-sidebar-primary/15 flex items-center justify-center shrink-0">
+          <div className="h-8 w-8 rounded-xl bg-sidebar-primary/12 flex items-center justify-center shrink-0 shadow-sm shadow-sidebar-primary/10">
             <Headphones className="h-4 w-4 text-sidebar-primary" />
           </div>
           <div>
             <span className="text-[12px] font-black text-sidebar-accent-foreground block">Solicitar Suporte</span>
-            <span className="text-[10px] text-sidebar-foreground/70">Para escalar seu negócio</span>
+            <span className="text-[10px] text-sidebar-foreground/60">Para escalar seu negócio</span>
           </div>
         </button>
 
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-semibold text-sidebar-foreground/85 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-destructive/[0.08] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-sidebar-foreground/70 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-destructive/[0.06] hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4.5 w-4.5" />
+          <LogOut className="h-4 w-4" />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
         </button>
       </SidebarFooter>
