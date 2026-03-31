@@ -161,6 +161,18 @@ export default function Dashboard() {
   }, [user?.id, refetchTx]);
 
   const filteredTx = useMemo(() => {
+    // Custom date range
+    if (isCustom && customRange?.from) {
+      const start = new Date(customRange.from);
+      start.setHours(0, 0, 0, 0);
+      const end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
+      end.setHours(23, 59, 59, 999);
+      return transactions.filter((t) => {
+        const d = new Date(t.created_at);
+        return d >= start && d <= end;
+      });
+    }
+
     const today = brasiliaToday();
 
     if (selectedPeriod.days === 0) {
@@ -180,7 +192,7 @@ export default function Dashboard() {
     start.setHours(0, 0, 0, 0);
 
     return transactions.filter((t) => new Date(t.created_at) >= start);
-  }, [transactions, selectedPeriod]);
+  }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
