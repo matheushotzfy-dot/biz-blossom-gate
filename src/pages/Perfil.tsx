@@ -118,8 +118,8 @@ export default function Perfil() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Avatar + Info Card */}
-        <GlowPanel className="relative">
-          <div className="flex flex-col items-center text-center">
+        <GlowPanel className="relative hero-shine brand-mesh">
+          <div className="relative z-[1] flex flex-col items-center text-center">
             <div className="relative group mb-4">
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
               <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/20 shadow-xl shadow-primary/15 ring-4 ring-primary/5 active:scale-[0.97] transition-transform" onClick={() => fileRef.current?.click()}>
