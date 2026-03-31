@@ -23,7 +23,7 @@ export default function Taxas() {
   return (
     <PageShell>
       <PageTitle icon={<Percent className="h-6 w-6" />} title="Taxas e Tarifas" subtitle="Taxas aplicadas às suas transações e operações" />
-
+      <hr className="accent-divider" />
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <GlassKpi
