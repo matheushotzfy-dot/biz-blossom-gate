@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Rocket, Eye, EyeOff, Zap, Shield, GraduationCap, BarChart2, CreditCard } from "lucide-react";
+import { Rocket, Eye, EyeOff, Zap, Shield, GraduationCap, BarChart2, CreditCard, Users, TrendingUp, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 function formatDocument(value: string): string {
@@ -90,7 +90,6 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // FIX: Rate limiting - lock after 5 failed attempts for 60s
     if (isLogin && Date.now() < lockoutUntil) {
       const secsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
       toast.error(`Muitas tentativas. Aguarde ${secsLeft}s.`);
@@ -118,7 +117,6 @@ export default function Auth() {
           setLoading(false);
           return;
         }
-        // Strong password validation
         const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!PASSWORD_REGEX.test(password)) {
           toast.error("Senha deve ter no mínimo 8 caracteres, incluindo maiúscula, minúscula e número");
@@ -179,159 +177,248 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex bg-background text-foreground overflow-y-auto">
-      {/* Left — Form */}
+      {/* ─── Left — Form ─── */}
       <div className="flex-1 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+        {/* Ambient glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-primary/8 blur-[120px]" />
+          <div className="absolute -right-20 bottom-0 h-64 w-64 rounded-full bg-info/6 blur-[100px]" />
+        </div>
+
         <div className="w-full max-w-md relative z-10">
+          {/* Brand */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center">
-              <Rocket className="h-5 w-5 text-primary-foreground" />
+            <div className="h-12 w-12 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
+              <Rocket className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-display font-extrabold tracking-tight text-foreground">HOTZFY</h1>
-              <p className="text-[10px] text-muted-foreground">Plataforma de Infoprodutos</p>
+              <h1 className="text-2xl font-display font-black tracking-[-0.04em] text-foreground">HOTZFY</h1>
+              <p className="text-[11px] text-muted-foreground/60 font-medium">Plataforma de Infoprodutos</p>
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-1 text-foreground">
-              {isLogin ? "Entrar na sua conta" : "Criar nova conta"}
-            </h2>
-            <p className="text-sm text-muted-foreground mb-5">
-              {isLogin ? "Acesse seu painel de infoprodutor" : "Comece a vender seus infoprodutos"}
-            </p>
+          {/* Card */}
+          <div className="relative rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-6 md:p-8 shadow-[0_4px_24px_hsl(var(--foreground)/0.06)]">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent rounded-2xl" />
 
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              {!isLogin && (
-                <>
-                  <div>
-                    <Label htmlFor="name" className="text-sm font-medium">Nome completo</Label>
-                    <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className="mt-1" required={!isLogin} />
-                  </div>
-                  <div>
-                    <Label htmlFor="nickname" className="text-sm font-medium">Como quer ser chamado?</Label>
-                    <Input id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="Ex: João, Mari..." className="mt-1" required={!isLogin} />
-                  </div>
-                  <div>
-                    <Label htmlFor="document" className="text-sm font-medium">CPF ou CNPJ</Label>
-                    <Input
-                      id="document"
-                      value={document}
-                      onChange={(e) => handleDocumentChange(e.target.value)}
-                      placeholder="000.000.000-00"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      className={`mt-1 ${documentError ? "border-destructive" : ""}`}
-                      required={!isLogin}
-                    />
-                    {documentError && <p className="text-[11px] text-destructive mt-1">{documentError}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="phone" className="text-sm font-medium">Telefone (WhatsApp)</Label>
-                    <Input
-                      id="phone"
-                      value={phone}
-                      onChange={(e) => {
-                        const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
-                        let formatted = digits;
-                        if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-                        if (digits.length > 7) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-                        setPhone(formatted);
-                      }}
-                      placeholder="(11) 99999-9999"
-                      inputMode="tel"
-                      className="mt-1"
-                      required={!isLogin}
-                    />
-                  </div>
-                </>
-              )}
-              <div>
-                <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1" required />
-              </div>
-              <div>
-                <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
-                <div className="relative mt-1">
-                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={8} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+            <div className="relative z-[1]">
+              <h2 className="text-xl font-display font-black tracking-[-0.03em] mb-1 text-foreground">
+                {isLogin ? "Entrar na sua conta" : "Criar nova conta"}
+              </h2>
+              <p className="text-[13px] text-muted-foreground/70 mb-6">
+                {isLogin ? "Acesse seu painel de infoprodutor" : "Comece a vender seus infoprodutos"}
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {!isLogin && (
+                  <>
+                    <div>
+                      <Label htmlFor="name" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">Nome completo</Label>
+                      <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className="mt-1.5 h-11 rounded-xl border-border/40 bg-card/60" required={!isLogin} />
+                    </div>
+                    <div>
+                      <Label htmlFor="nickname" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">Como quer ser chamado?</Label>
+                      <Input id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="Ex: João, Mari..." className="mt-1.5 h-11 rounded-xl border-border/40 bg-card/60" required={!isLogin} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="document" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">CPF ou CNPJ</Label>
+                        <Input
+                          id="document"
+                          value={document}
+                          onChange={(e) => handleDocumentChange(e.target.value)}
+                          placeholder="000.000.000-00"
+                          inputMode="numeric"
+                          autoComplete="off"
+                          className={`mt-1.5 h-11 rounded-xl border-border/40 bg-card/60 ${documentError ? "border-destructive ring-1 ring-destructive/20" : ""}`}
+                          required={!isLogin}
+                        />
+                        {documentError && <p className="text-[10px] text-destructive mt-1 font-medium">{documentError}</p>}
+                      </div>
+                      <div>
+                        <Label htmlFor="phone" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">WhatsApp</Label>
+                        <Input
+                          id="phone"
+                          value={phone}
+                          onChange={(e) => {
+                            const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                            let formatted = digits;
+                            if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+                            if (digits.length > 7) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+                            setPhone(formatted);
+                          }}
+                          placeholder="(11) 99999-9999"
+                          inputMode="tel"
+                          className="mt-1.5 h-11 rounded-xl border-border/40 bg-card/60"
+                          required={!isLogin}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+                <div>
+                  <Label htmlFor="email" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">E-mail</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1.5 h-11 rounded-xl border-border/40 bg-card/60" required />
                 </div>
+                <div>
+                  <Label htmlFor="password" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">Senha</Label>
+                  <div className="relative mt-1.5">
+                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-11 rounded-xl border-border/40 bg-card/60 pr-10" required minLength={8} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {!isLogin && (
+                    <p className="text-[9px] text-muted-foreground/40 mt-1.5">Mín. 8 caracteres, maiúscula, minúscula e número</p>
+                  )}
+                </div>
+                {!isLogin && (
+                  <>
+                    <div>
+                      <Label htmlFor="confirmPassword" className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">Confirmar Senha</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className={`mt-1.5 h-11 rounded-xl border-border/40 bg-card/60 ${confirmPassword && password !== confirmPassword ? "border-destructive ring-1 ring-destructive/20" : ""}`}
+                        required={!isLogin}
+                        minLength={6}
+                      />
+                      {confirmPassword && password !== confirmPassword && (
+                        <p className="text-[10px] text-destructive mt-1 font-medium">As senhas não coincidem</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em]">Onde conheceu a plataforma?</Label>
+                      <Select value={referralSource} onValueChange={setReferralSource}>
+                        <SelectTrigger className="mt-1.5 h-11 rounded-xl border-border/40 bg-card/60">
+                          <SelectValue placeholder="Selecione..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="instagram">Instagram</SelectItem>
+                          <SelectItem value="indicacao">Indicação</SelectItem>
+                          <SelectItem value="youtube">YouTube</SelectItem>
+                          <SelectItem value="pesquisa">Pesquisa (Google)</SelectItem>
+                          <SelectItem value="tiktok">TikTok</SelectItem>
+                          <SelectItem value="outro">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl text-sm shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all gap-2" disabled={loading}>
+                  {loading ? (
+                    <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      {isLogin ? "Entrar" : "Criar conta grátis"}
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <button onClick={() => setIsLogin(!isLogin)} className="text-[13px] text-primary hover:text-primary/80 font-bold transition-colors">
+                  {isLogin ? "Não tem conta? Cadastre-se grátis" : "Já tem conta? Entrar"}
+                </button>
               </div>
-              {!isLogin && (
-                <>
-                  <div>
-                    <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmar Senha</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className={`mt-1 ${confirmPassword && password !== confirmPassword ? "border-destructive" : ""}`}
-                      required={!isLogin}
-                      minLength={6}
-                    />
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-[11px] text-destructive mt-1">As senhas não coincidem</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Onde conheceu a plataforma?</Label>
-                    <Select value={referralSource} onValueChange={setReferralSource}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="instagram">Instagram</SelectItem>
-                        <SelectItem value="indicacao">Indicação</SelectItem>
-                        <SelectItem value="youtube">YouTube</SelectItem>
-                        <SelectItem value="pesquisa">Pesquisa (Google)</SelectItem>
-                        <SelectItem value="outro">Outro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
+
+              {/* Trust badges */}
+              {isLogin && (
+                <div className="mt-6 flex items-center justify-center gap-4 pt-5 border-t border-border/20">
+                  {[
+                    { icon: Shield, label: "SSL Seguro" },
+                    { icon: Zap, label: "Acesso Rápido" },
+                    { icon: CheckCircle2, label: "LGPD" },
+                  ].map(b => (
+                    <div key={b.label} className="flex items-center gap-1.5 text-muted-foreground/30">
+                      <b.icon className="h-3 w-3" />
+                      <span className="text-[9px] font-bold uppercase tracking-wider">{b.label}</span>
+                    </div>
+                  ))}
+                </div>
               )}
-
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-semibold h-11" disabled={loading}>
-                {loading ? "Processando..." : isLogin ? "Entrar" : "Criar conta grátis"}
-              </Button>
-            </form>
-
-            <div className="mt-5 text-center">
-              <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline font-medium">
-                {isLogin ? "Não tem conta? Cadastre-se grátis" : "Já tem conta? Entrar"}
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right — Features */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden bg-muted/30 border-l border-border">
+      {/* ─── Right — Features (Desktop) ─── */}
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03]" />
+          <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" />
+          <div className="absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-info/8 blur-[100px]" />
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "60px 60px"
+          }} />
+        </div>
+
         <div className="max-w-sm relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/15 text-primary text-xs font-semibold mb-6">
-            <Zap className="h-3 w-3" /> Plataforma #1 de Infoprodutos
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-8 shadow-lg shadow-primary/5">
+            <Sparkles className="h-3.5 w-3.5" />
+            Plataforma #1 de Infoprodutos
           </div>
-          <h2 className="text-3xl font-display font-extrabold mb-3 text-foreground leading-tight">Tudo que você precisa para vender online</h2>
-          <p className="text-sm text-muted-foreground mb-8">Checkout otimizado, área de membros, processamento de pagamentos e muito mais.</p>
+
+          <h2 className="text-4xl font-display font-black mb-4 text-foreground leading-[1.1] tracking-[-0.04em]">
+            Tudo que você precisa para{" "}
+            <span className="text-gradient">vender online</span>
+          </h2>
+          <p className="text-[15px] text-muted-foreground/70 mb-10 leading-relaxed">
+            Checkout otimizado, área de membros, processamento de pagamentos e ferramentas avançadas de analytics.
+          </p>
           
           <div className="space-y-3">
             {[
-              { icon: CreditCard, title: "Checkout de Alta Conversão", desc: "PIX, Cartão e Boleto com 1-click" },
-              { icon: GraduationCap, title: "Área de Membros", desc: "Entregue cursos e conteúdos premium" },
-              { icon: BarChart2, title: "Analytics Completo", desc: "Métricas em tempo real das suas vendas" },
-              { icon: Shield, title: "Anti-fraude Integrado", desc: "Proteja seu negócio automaticamente" },
-            ].map((f) => (
-              <div key={f.title} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <f.icon className="h-4 w-4 text-primary" />
+              { icon: CreditCard, title: "Checkout de Alta Conversão", desc: "PIX, Cartão e Boleto com 1-click", tone: "primary" },
+              { icon: GraduationCap, title: "Área de Membros Netflix", desc: "Entregue cursos e conteúdos premium", tone: "info" },
+              { icon: BarChart2, title: "Analytics em Tempo Real", desc: "Métricas completas das suas vendas", tone: "warning" },
+              { icon: Shield, title: "Anti-fraude Integrado", desc: "Blacklist, velocity check e proteção total", tone: "success" },
+            ].map((f) => {
+              const toneBg: Record<string, string> = {
+                primary: "bg-primary/10 ring-primary/15",
+                info: "bg-info/10 ring-info/15",
+                warning: "bg-warning/10 ring-warning/15",
+                success: "bg-success/10 ring-success/15",
+              };
+              const toneText: Record<string, string> = {
+                primary: "text-primary",
+                info: "text-info",
+                warning: "text-warning",
+                success: "text-success",
+              };
+              return (
+                <div key={f.title} className="group flex items-center gap-4 p-4 rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 hover:border-border/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center ring-1 shrink-0 ${toneBg[f.tone]}`}>
+                    <f.icon className={`h-5 w-5 ${toneText[f.tone]}`} />
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-display font-bold text-foreground tracking-[-0.02em]">{f.title}</p>
+                    <p className="text-[11px] text-muted-foreground/60 mt-0.5">{f.desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{f.title}</p>
-                  <p className="text-[11px] text-muted-foreground">{f.desc}</p>
-                </div>
+              );
+            })}
+          </div>
+
+          {/* Stats */}
+          <div className="mt-10 grid grid-cols-3 gap-3">
+            {[
+              { value: "10K+", label: "Produtores", icon: Users },
+              { value: "R$50M+", label: "Processados", icon: TrendingUp },
+              { value: "99.9%", label: "Uptime", icon: Zap },
+            ].map(s => (
+              <div key={s.label} className="text-center p-3 rounded-xl bg-card/30 backdrop-blur-sm border border-border/20">
+                <s.icon className="h-4 w-4 mx-auto mb-1.5 text-primary/60" />
+                <p className="text-[16px] font-display font-black text-foreground tracking-[-0.03em]">{s.value}</p>
+                <p className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
           </div>
