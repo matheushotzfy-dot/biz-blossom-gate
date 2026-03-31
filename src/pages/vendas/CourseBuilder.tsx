@@ -103,7 +103,7 @@ export default function CourseBuilder() {
   const loadAll = useCallback(async () => {
     if (!courseId) return;
     const [courseRes, modsRes] = await Promise.all([
-      supabase.from("courses").select("*").eq("id", courseId).single(),
+      supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
       supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order"),
     ]);
     if (courseRes.data) setCourse(courseRes.data as Course);

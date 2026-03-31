@@ -72,7 +72,7 @@ export default function CoursePage() {
     if (!courseId || !user) return;
 
     const { data: courseData } = await supabase
-      .from("courses").select("id, title, description, thumbnail_url").eq("id", courseId).single();
+      .from("courses").select("id, title, description, thumbnail_url").eq("id", courseId).maybeSingle();
     if (!courseData) { setLoading(false); return; }
     setCourse(courseData);
 

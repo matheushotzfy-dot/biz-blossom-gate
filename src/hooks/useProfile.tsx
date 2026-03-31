@@ -28,7 +28,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       .from("profiles")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
     if (data) setProfile(data);
     setLoading(false);
   }, [user?.id]);

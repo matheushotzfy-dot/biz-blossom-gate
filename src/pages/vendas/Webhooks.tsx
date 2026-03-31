@@ -105,7 +105,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   }
 
   const event = JSON.parse(req.body);
-  console.log('Evento recebido:', event.type);
+  // Evento recebido - processe abaixo
 
   // Processe o evento aqui
   switch (event.type) {
