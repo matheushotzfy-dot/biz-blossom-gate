@@ -8,7 +8,7 @@ import {
   Handshake,
   Users,
   Layers,
-  
+  Trophy,
   FileText,
   ArrowDownToLine,
   Building2,
