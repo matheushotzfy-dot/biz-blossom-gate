@@ -202,3 +202,49 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
     </div>
   );
 }
+
+/**
+ * PageSkeleton — Loading skeleton for page content
+ */
+export function PageSkeleton({ rows = 3, kpis = 4 }: { rows?: number; kpis?: number }) {
+  return (
+    <div className="space-y-6 animate-pulse">
+      {/* Title skeleton */}
+      <div className="flex items-center gap-4">
+        <div className="h-13 w-13 rounded-2xl bg-muted/30" />
+        <div className="space-y-2">
+          <div className="h-6 w-48 rounded-lg bg-muted/30" />
+          <div className="h-4 w-32 rounded-lg bg-muted/20" />
+        </div>
+      </div>
+      {/* KPI skeletons */}
+      {kpis > 0 && (
+        <div className={cn("grid gap-3", kpis <= 2 ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4")}>
+          {Array.from({ length: kpis }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-border/30 bg-card/30 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-3 w-20 rounded bg-muted/30" />
+                <div className="h-9 w-9 rounded-xl bg-muted/20" />
+              </div>
+              <div className="h-7 w-28 rounded-lg bg-muted/30" />
+              <div className="h-3 w-16 rounded bg-muted/20 mt-2" />
+            </div>
+          ))}
+        </div>
+      )}
+      {/* Row skeletons */}
+      <div className="rounded-2xl border border-border/30 bg-card/30 p-5 space-y-4">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-muted/20 shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-3/4 rounded bg-muted/30" />
+              <div className="h-3 w-1/2 rounded bg-muted/20" />
+            </div>
+            <div className="h-6 w-20 rounded-lg bg-muted/20" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
