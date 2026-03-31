@@ -206,6 +206,7 @@ export default function ProductEditor() {
       setCoProductionSplit(String(data.co_production_split || 50));
       setSupportEmail((data as any).support_email || "");
       setDisplayName((data as any).display_name || "");
+      setDeliveryType((data as any).delivery_type || "digital");
       setLoading(false);
     })();
   }, [productId, user?.id, isNew]);
