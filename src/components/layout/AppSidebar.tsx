@@ -111,6 +111,7 @@ const sections = [
     label: "COMPRAS",
     items: [
       { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
+      { title: "Premiações", url: "/premiacoes", icon: Trophy },
     ],
   },
 ] as const;
