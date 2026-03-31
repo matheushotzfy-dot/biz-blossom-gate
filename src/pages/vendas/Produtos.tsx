@@ -10,13 +10,46 @@ import {
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
+import { EmptyState } from "@/components/PageShell";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+
+/* ─── MiniHeroCard (same as Dashboard) ─── */
+function MiniHeroCard({ icon, label, value, tone, idx }: {
+  icon: React.ReactNode; label: string; value: string;
+  tone: "primary" | "info" | "success" | "warning";
+  idx: number;
+}) {
+  const toneMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
+    primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
+    info: { accent: "bg-info", iconBg: "bg-info/10", iconText: "text-info", ring: "ring-info/20" },
+    success: { accent: "bg-success", iconBg: "bg-success/10", iconText: "text-success", ring: "ring-success/20" },
+    warning: { accent: "bg-warning", iconBg: "bg-warning/10", iconText: "text-warning", ring: "ring-warning/20" },
+  };
+  const t = toneMap[tone] || toneMap.primary;
+
+  return (
+    <div
+      className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-4 md:p-5 animate-fade-in"
+      style={{ animationDelay: `${idx * 60}ms` }}
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", t.accent)} />
+      <div className="pl-1.5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", t.iconBg, t.ring)}>
+            <span className={t.iconText}>{icon}</span>
+          </div>
+        </div>
+        <p className="font-display font-black text-foreground text-[22px] md:text-2xl tracking-[-0.03em] tabular-nums">{value}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Produtos() {
   const { user } = useAuth();
@@ -61,27 +94,49 @@ export default function Produtos() {
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
   return (
-    <PageShell>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <PageTitle icon={<Package className="h-6 w-6" />} title="Meus Produtos" subtitle="Gerencie seu catálogo de infoprodutos" />
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <Button onClick={() => navigate("/vendas/produtos/novo/editar")} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
-            <Plus className="h-4 w-4" /> Novo Produto
-          </Button>
-        </motion.div>
-      </div>
-
-      {/* KPI Cards */}
-      {products.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <GlassKpi label="Produtos" value={String(products.length)} icon={Layers} tone="primary" delay={0} />
-          <GlassKpi label="Ativos" value={String(activeProducts)} icon={Zap} tone="success" delay={1} />
-          <GlassKpi label="Ticket Médio" value={fmtPrice(totalValue / (products.length || 1))} icon={TrendingUp} tone="info" delay={2} />
-          <GlassKpi label="Catálogo Total" value={fmtPrice(totalValue)} icon={BarChart3} tone="warning" delay={3} />
+    <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative animate-fade-in">
+      {/* ─── HERO SECTION ─── */}
+      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
+          <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
         </div>
-      )}
 
+        <div className="relative z-10 space-y-4 md:space-y-6">
+          {/* Title row */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
+                <Package className="h-6 w-6 text-primary" />
+              </div>
+              <div className="space-y-1">
+                <h1 className="text-xl md:text-3xl font-display font-black tracking-[-0.04em] leading-[1.05] text-foreground">
+                  Meus <span className="text-gradient">Produtos</span>
+                </h1>
+                <p className="text-[13px] text-muted-foreground/80">Gerencie seu catálogo de infoprodutos</p>
+              </div>
+            </div>
+
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
+              <Button onClick={() => navigate("/vendas/produtos/novo/editar")} className="gap-2 rounded-xl text-sm font-semibold h-10 px-5 shadow-lg shadow-primary/20">
+                <Plus className="h-4 w-4" /> Novo Produto
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* Hero metrics */}
+          {products.length > 0 && (
+            <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
+              <MiniHeroCard icon={<Layers className="h-4 w-4" />} label="Produtos" value={String(products.length)} tone="primary" idx={0} />
+              <MiniHeroCard icon={<Zap className="h-4 w-4" />} label="Ativos" value={String(activeProducts)} tone="success" idx={1} />
+              <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Ticket Médio" value={fmtPrice(totalValue / (products.length || 1))} tone="info" idx={2} />
+              <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Catálogo Total" value={fmtPrice(totalValue)} tone="warning" idx={3} />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ─── PRODUCT GRID ─── */}
       {products.length === 0 ? (
         <EmptyState
           icon={<Package className="h-7 w-7" />}
@@ -123,7 +178,7 @@ export default function Produtos() {
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent opacity-80" />
 
-                {/* Status badge - top right */}
+                {/* Status badge */}
                 <div className="absolute top-3 right-3 z-10">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-xl border shadow-lg",
@@ -134,7 +189,7 @@ export default function Produtos() {
                   </span>
                 </div>
 
-                {/* Dropdown - top left */}
+                {/* Dropdown */}
                 <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -165,7 +220,7 @@ export default function Produtos() {
                   </DropdownMenu>
                 </div>
 
-                {/* Price tag - bottom right, floating */}
+                {/* Price tag */}
                 <div className="absolute bottom-3 right-3 z-10">
                   <span className="inline-flex items-center gap-1 rounded-xl bg-card/90 backdrop-blur-xl border border-border/30 px-3 py-1.5 shadow-xl">
                     <span className="text-[10px] text-muted-foreground/60 font-semibold">R$</span>
@@ -176,7 +231,6 @@ export default function Produtos() {
 
               {/* Content body */}
               <div className="p-5 flex flex-1 flex-col gap-3">
-                {/* Title & description */}
                 <div className="space-y-1">
                   <h3 className="text-[15px] font-display font-black text-foreground leading-snug tracking-[-0.02em] line-clamp-1">
                     {p.name}
@@ -206,7 +260,6 @@ export default function Produtos() {
                   </button>
                 )}
 
-                {/* Spacer */}
                 <div className="flex-1" />
 
                 {/* Action buttons */}
@@ -262,6 +315,6 @@ export default function Produtos() {
       )}
 
       {pixelProduct && <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(v) => { if (!v) setPixelProduct(null); }} />}
-    </PageShell>
+    </div>
   );
 }
