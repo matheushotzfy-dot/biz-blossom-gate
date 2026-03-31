@@ -126,7 +126,7 @@ export function MobileBottomNav() {
 
       {/* Bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="bg-card/95 backdrop-blur-xl border-t border-border/80">
+        <div className="bg-card/90 backdrop-blur-2xl border-t border-border/25 shadow-[0_-4px_24px_hsl(var(--foreground)/0.04)]">
           <div className="flex items-center justify-around px-2 py-1 safe-area-bottom">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";
@@ -147,22 +147,25 @@ export function MobileBottomNav() {
                     }
                   }}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-300 min-w-[56px]",
+                    isActive ? "text-primary" : "text-muted-foreground/50"
                   )}
                 >
                   <div className={cn(
-                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-200",
-                    isActive && "bg-primary/12 scale-105"
+                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-300",
+                    isActive && "bg-primary/12 scale-110 shadow-sm shadow-primary/15"
                   )}>
                     <tab.icon className="h-[18px] w-[18px]" />
                   </div>
                   <span className={cn(
-                    "text-[10px] font-semibold",
-                    isActive && "font-bold text-primary"
+                    "text-[10px] font-display transition-all duration-300",
+                    isActive ? "font-black text-primary" : "font-medium"
                   )}>
                     {tab.label}
                   </span>
+                  {isActive && (
+                    <span className="h-[3px] w-3 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)] mt-0.5" />
+                  )}
                 </button>
               );
             })}
