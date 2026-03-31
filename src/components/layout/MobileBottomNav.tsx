@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
-  CreditCard, Layers, Webhook, BookOpen,
+  CreditCard, Layers, Webhook, BookOpen, Trophy, Bitcoin, Zap,
   Building2, UserCircle, ArrowDownToLine, GraduationCap, User, LogOut, X, PieChart, Puzzle, FileText,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
