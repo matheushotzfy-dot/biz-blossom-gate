@@ -729,10 +729,12 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         </div>
 
         <div className="space-y-2">
-          <EditorLabel>Descrição</EditorLabel>
-          <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes..." className="resize-none bg-card/80 border-border/40" maxLength={2000} />
+          <EditorLabel>Descrição <span className="text-destructive">*</span></EditorLabel>
+          <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes (mínimo 50 caracteres)..." className={cn("resize-none bg-card/80 border-border/40", description.length > 0 && description.length < 50 && "border-destructive/40")} maxLength={2000} />
           <div className="flex items-center justify-between">
-            <p className="text-[10px] text-muted-foreground/30">{description.length > 0 ? "✓ Descrição adicionada" : "Opcional, mas recomendada"}</p>
+            <p className={cn("text-[10px]", description.length >= 50 ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/30")}>
+              {description.length >= 50 ? "✓ Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres (mín. 50)` : "Obrigatório • Mínimo 50 caracteres"}
+            </p>
             <p className="text-[10px] text-muted-foreground/40 text-right font-numbers tabular-nums">{description.length}/2000</p>
           </div>
         </div>
