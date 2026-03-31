@@ -243,6 +243,8 @@ export default function Auth() {
                       required={!isLogin}
                     />
                   </div>
+                </>
+              )}
               <div>
                 <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1" required />
