@@ -721,7 +721,13 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Health */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+          <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-5 animate-fade-in stagger-2">
+            <div className="flex items-center gap-2 mb-3.5">
+              <div className="h-7 w-7 rounded-lg bg-success/10 flex items-center justify-center">
+                <ShieldCheck className="h-3.5 w-3.5 text-success" />
+              </div>
+              <span className="text-[11px] font-display font-bold text-foreground">Saúde</span>
+            </div>
             <div className="space-y-2">
               <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
               <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
@@ -729,7 +735,13 @@ export default function Dashboard() {
           </div>
 
           {/* Conversions */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+          <div className="rounded-2xl border border-border/50 bg-card/60 shadow-[0_2px_12px_hsl(var(--foreground)/0.03)] backdrop-blur-2xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+            <div className="flex items-center gap-2 mb-3.5">
+              <div className="h-7 w-7 rounded-lg bg-info/10 flex items-center justify-center">
+                <Target className="h-3.5 w-3.5 text-info" />
+              </div>
+              <span className="text-[11px] font-display font-bold text-foreground">Conversões</span>
+            </div>
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
