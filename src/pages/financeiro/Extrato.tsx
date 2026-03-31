@@ -4,12 +4,11 @@ import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   FileText, DollarSign, TrendingUp, CreditCard, Search, X,
-  Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package,
-  Copy, Check, Users, Eye, MessageCircle, ChevronDown,
-  Download, Smartphone, BarChart3, ArrowDownRight, Zap,
-  MoreHorizontal, Receipt,
+  Calendar as CalendarIcon, Clock, Users, Eye, MessageCircle, ChevronDown,
+  Download, Smartphone, BarChart3,
+  MoreHorizontal, Receipt, ArrowUpRight, Zap,
 } from "lucide-react";
-import { PageShell, PageTitle, EmptyState, GlassKpi } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, GlassKpi, Panel, SectionHeader } from "@/components/PageShell";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
@@ -44,7 +43,6 @@ const fmtTime = (d: string) => {
   if (!v) { v = _timeFmt.format(new Date(d)); _timeCache.set(d, v); }
   return v;
 };
-const fmtFull = (d: string) => `${fmtDate(d)} às ${fmtTime(d)}`;
 
 type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
 type DatePreset = "today" | "yesterday" | "7d" | "15d" | "30d" | "custom" | "all";
@@ -79,18 +77,27 @@ const getInitials = (name: string) => {
   return (parts[0]?.[0] || "?").toUpperCase();
 };
 
-/* ExtratoKpi is now GlassKpi from PageShell — removed duplicate */
+/* ─── Status config ─── */
+const STATUS_CONFIG: Record<string, { label: string; dot: string; active: string }> = {
+  all:        { label: "Todas",       dot: "bg-primary",     active: "bg-primary/10 text-primary ring-primary/15" },
+  completed:  { label: "Aprovadas",   dot: "bg-success",     active: "bg-success/10 text-success ring-success/15" },
+  pending:    { label: "Pendentes",   dot: "bg-warning",     active: "bg-warning/10 text-warning ring-warning/15" },
+  failed:     { label: "Falhas",      dot: "bg-destructive", active: "bg-destructive/10 text-destructive ring-destructive/15" },
+  refunded:   { label: "Reembolsos",  dot: "bg-info",        active: "bg-info/10 text-info ring-info/15" },
+  chargeback: { label: "Chargebacks", dot: "bg-destructive", active: "bg-destructive/10 text-destructive ring-destructive/15" },
+};
+
+const METHOD_CONFIG: Record<string, { icon: React.ReactNode; label: string; accent: string; bg: string }> = {
+  pix:         { icon: <Smartphone className="h-3 w-3" />, label: "PIX",    accent: "text-success", bg: "bg-success/8 ring-success/10" },
+  credit_card: { icon: <CreditCard className="h-3 w-3" />, label: "Cartão", accent: "text-info",    bg: "bg-info/8 ring-info/10" },
+  boleto:      { icon: <FileText className="h-3 w-3" />,   label: "Boleto", accent: "text-warning", bg: "bg-warning/8 ring-warning/10" },
+};
 
 /* ─── Transaction Row (Desktop) ─── */
 function TxRow({ tx, products, onClick, index }: {
   tx: Tables<"transactions">; products: Record<string, string>; onClick: () => void; index: number;
 }) {
-  const methodConfig: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-    pix: { icon: <Smartphone className="h-3 w-3" />, label: "PIX", color: "text-success bg-success/10" },
-    credit_card: { icon: <CreditCard className="h-3 w-3" />, label: "Cartão", color: "text-info bg-info/10" },
-    boleto: { icon: <FileText className="h-3 w-3" />, label: "Boleto", color: "text-warning bg-warning/10" },
-  };
-  const method = methodConfig[tx.payment_method || ""] || { icon: null, label: tx.payment_method || "—", color: "text-muted-foreground bg-muted/50" };
+  const method = METHOD_CONFIG[tx.payment_method || ""] || { icon: null, label: tx.payment_method || "—", accent: "text-muted-foreground", bg: "bg-muted/10 ring-border/10" };
   const customerName = tx.customer_name || "Cliente";
   const avatarColor = getAvatarColor(customerName);
 
@@ -100,29 +107,31 @@ function TxRow({ tx, products, onClick, index }: {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.4) }}
       onClick={onClick}
-      className="border-b border-border/30 dark:border-foreground/[0.04] hover:bg-muted/20 dark:hover:bg-foreground/[0.02] transition-colors cursor-pointer group"
+      className="border-b border-border/20 hover:bg-muted/8 transition-all duration-300 cursor-pointer group"
     >
       <td className="p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarFallback className={cn("text-[11px] font-bold", avatarColor)}>
+          <Avatar className="h-8 w-8 shrink-0 ring-1 ring-border/15">
+            <AvatarFallback className={cn("text-[10px] font-display font-black", avatarColor)}>
               {getInitials(customerName)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-foreground font-medium text-[13px] leading-tight truncate">{customerName}</p>
-            {tx.customer_email && <p className="text-muted-foreground/60 text-[11px] mt-0.5 truncate">{tx.customer_email}</p>}
+            <p className="text-foreground font-display font-bold text-[12px] leading-tight truncate">{customerName}</p>
+            {tx.customer_email && <p className="text-muted-foreground/40 text-[10px] mt-0.5 truncate font-medium">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
       <td className="p-4">
-        <span className="text-muted-foreground text-[12px] font-medium max-w-[130px] truncate block">{tx.product_id ? (products[tx.product_id] || tx.product_id.slice(0, 8)) : "—"}</span>
+        <span className="text-muted-foreground/60 text-[11px] font-display font-semibold max-w-[130px] truncate block">
+          {tx.product_id ? (products[tx.product_id] || tx.product_id.slice(0, 8)) : "—"}
+        </span>
       </td>
       <td className="p-4">
-        <span className="font-display font-bold text-foreground text-[15px]">{fmt(Number(tx.net_amount))}</span>
+        <span className="font-display font-black text-foreground text-[14px] tabular-nums tracking-[-0.02em]">{fmt(Number(tx.net_amount))}</span>
       </td>
       <td className="p-4">
-        <span className={cn("inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md", method.color)}>
+        <span className={cn("inline-flex items-center gap-1.5 text-[9px] font-display font-bold uppercase tracking-[0.12em] px-2 py-1 rounded-lg ring-1", method.bg, method.accent)}>
           {method.icon}
           {method.label}
         </span>
@@ -130,19 +139,19 @@ function TxRow({ tx, products, onClick, index }: {
       <td className="p-4"><StatusBadge status={tx.status} /></td>
       <td className="p-4">
         <div>
-          <p className="text-foreground/70 text-[12px] font-medium">{fmtDate(tx.created_at)}</p>
-          <p className="text-muted-foreground/50 text-[10px]">{fmtTime(tx.created_at)}</p>
+          <p className="text-foreground/50 text-[11px] font-display font-semibold tabular-nums">{fmtDate(tx.created_at)}</p>
+          <p className="text-muted-foreground/30 text-[9px] font-display tabular-nums">{fmtTime(tx.created_at)}</p>
         </div>
       </td>
       <td className="p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button className="h-8 w-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50">
-              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+            <button className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-muted/20">
+              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px]">
+          <DropdownMenuContent align="end" className="w-48 rounded-xl">
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-display font-semibold rounded-lg">
               <Eye className="h-3.5 w-3.5" /> Ver Detalhes
             </DropdownMenuItem>
             {tx.customer_phone && (
@@ -151,7 +160,7 @@ function TxRow({ tx, products, onClick, index }: {
                   href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
                   target="_blank" rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="gap-2 text-[12px]"
+                  className="gap-2 text-[11px] font-display font-semibold rounded-lg"
                 >
                   <MessageCircle className="h-3.5 w-3.5" /> Abrir WhatsApp
                 </a>
@@ -174,48 +183,59 @@ function TxCard({ tx, products, onClick, index }: {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-      className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/40 dark:border-foreground/[0.05] p-4 cursor-pointer active:scale-[0.99] transition-transform"
+      transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3), ease: [0.16, 1, 0.3, 1] }}
+      className={cn(
+        "relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 p-4 cursor-pointer",
+        "hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
+        "active:scale-[0.985] transition-all duration-300 overflow-hidden"
+      )}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
+      {/* Accent bar */}
+      <div className={cn(
+        "absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
+        tx.status === "completed" ? "bg-success" : tx.status === "pending" ? "bg-warning" : tx.status === "failed" ? "bg-destructive" : "bg-info"
+      )} />
+
+      <div className="flex items-start justify-between gap-3 mb-3 pl-1.5">
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 shrink-0">
-            <AvatarFallback className={cn("text-xs font-bold", avatarColor)}>
+          <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/15">
+            <AvatarFallback className={cn("text-[10px] font-display font-black", avatarColor)}>
               {getInitials(customerName)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-foreground font-medium text-[13px] leading-tight truncate">{customerName}</p>
-            <p className="text-muted-foreground/60 text-[11px] mt-0.5 truncate">{tx.customer_email || ""}</p>
+            <p className="text-foreground font-display font-bold text-[12px] leading-tight truncate">{customerName}</p>
+            <p className="text-muted-foreground/40 text-[10px] mt-0.5 truncate font-medium">{tx.customer_email || ""}</p>
           </div>
         </div>
         <StatusBadge status={tx.status} />
       </div>
-      <div className="flex items-end justify-between">
+
+      <div className="flex items-end justify-between pl-1.5">
         <div>
-          <p className="text-foreground font-display font-bold text-xl leading-none">
+          <p className="text-foreground font-display font-black text-xl leading-none tabular-nums tracking-[-0.03em]">
             {fmt(Number(tx.net_amount))}
           </p>
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-muted-foreground text-[10px] bg-muted/50 px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+            <span className="text-[9px] font-display font-bold text-muted-foreground/40 bg-muted/15 px-2 py-0.5 rounded-md ring-1 ring-border/10 uppercase tracking-[0.1em]">
               {methodLabels[tx.payment_method || ""] || tx.payment_method || "—"}
             </span>
-            <span className="text-muted-foreground/60 text-[10px] truncate max-w-[100px]">
+            <span className="text-muted-foreground/30 text-[10px] font-display font-semibold truncate max-w-[100px]">
               {tx.product_id ? products[tx.product_id] || "Produto" : "—"}
             </span>
           </div>
         </div>
         <div className="text-right flex flex-col items-end gap-2">
-          <p className="text-muted-foreground/60 text-[11px]">{fmtDate(tx.created_at)}</p>
+          <p className="text-muted-foreground/30 text-[10px] font-display tabular-nums">{fmtDate(tx.created_at)}</p>
           {tx.customer_phone && (
             <a
               href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`}
               target="_blank" rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success hover:bg-success/15 transition-colors"
+              className="h-8 w-8 rounded-xl bg-success/8 ring-1 ring-success/10 flex items-center justify-center text-success hover:bg-success/15 transition-all duration-300"
             >
               <MessageCircle className="h-3.5 w-3.5" />
             </a>
@@ -225,95 +245,6 @@ function TxCard({ tx, products, onClick, index }: {
     </motion.div>
   );
 }
-
-/* ─── Detail Modal ─── */
-function TxDetailModal({ tx, products, onClose }: {
-  tx: Tables<"transactions">; products: Record<string, string>; onClose: () => void;
-}) {
-  return <TransactionDetailPanel tx={tx} products={products} onClose={onClose} />;
-}
-
-function DetailRow({ label, value, icon, className = "", bold = false }: { label: string; value: React.ReactNode; icon?: React.ReactNode; className?: string; bold?: boolean }) {
-  return (
-    <div className="flex items-center justify-between py-0.5">
-      <div className="flex items-center gap-2 text-muted-foreground/70 text-[12px]">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <span className={`text-[13px] ${bold ? "font-bold text-base" : "font-medium"} ${className || "text-foreground"}`}>{value}</span>
-    </div>
-  );
-}
-
-/* ─── Date Segmented Control (iOS style) ─── */
-function DateSegmentedControl({ datePreset, setDatePreset, customFrom, setCustomFrom, customTo, setCustomTo }: {
-  datePreset: DatePreset; setDatePreset: (v: DatePreset) => void;
-  customFrom: Date | undefined; setCustomFrom: (v: Date | undefined) => void;
-  customTo: Date | undefined; setCustomTo: (v: Date | undefined) => void;
-}) {
-  return (
-    <div className="flex items-center gap-3 flex-wrap">
-      <div className="inline-flex items-center rounded-lg bg-muted/30 dark:bg-foreground/[0.04] p-1">
-        {DATE_PRESETS.map((p) => (
-          <button
-            key={p.value}
-            onClick={() => setDatePreset(p.value)}
-            className={cn(
-              "px-3 py-1.5 rounded-md text-[11px] font-medium transition-all",
-              datePreset === p.value
-                ? "bg-card dark:bg-foreground/[0.08] text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className={cn(
-            "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border inline-flex items-center gap-1.5",
-            datePreset === "custom"
-              ? "bg-primary/10 text-primary border-primary/20"
-              : "bg-transparent text-muted-foreground border-border/40 dark:border-foreground/[0.06] hover:text-foreground"
-          )}>
-            <CalendarIcon className="h-3 w-3" />
-            {datePreset === "custom" && customFrom && customTo
-              ? `${format(customFrom, "dd/MM", { locale: ptBR })} - ${format(customTo, "dd/MM", { locale: ptBR })}`
-              : "Personalizado"
-            }
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="p-3 border-b border-border/30 dark:border-foreground/[0.04]">
-            <p className="text-xs font-medium text-foreground mb-1">Selecionar período</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-0 sm:gap-2">
-            <div>
-              <p className="text-[10px] font-medium text-muted-foreground px-3 pt-2">De:</p>
-              <Calendar mode="single" selected={customFrom} onSelect={(d) => { setCustomFrom(d); setDatePreset("custom"); }} locale={ptBR} className="p-3 pointer-events-auto" />
-            </div>
-            <div>
-              <p className="text-[10px] font-medium text-muted-foreground px-3 pt-2">Até:</p>
-              <Calendar mode="single" selected={customTo} onSelect={(d) => { setCustomTo(d); setDatePreset("custom"); }} locale={ptBR} disabled={(date) => customFrom ? date < customFrom : false} className="p-3 pointer-events-auto" />
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-}
-
-/* ─── Status pill config ─── */
-const STATUS_PILL_STYLES: Record<string, { active: string; dot: string }> = {
-  all: { active: "bg-primary/10 text-primary", dot: "bg-primary" },
-  completed: { active: "bg-success/10 text-success", dot: "bg-success" },
-  pending: { active: "bg-warning/10 text-warning", dot: "bg-warning" },
-  failed: { active: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
-  refunded: { active: "bg-info/10 text-info", dot: "bg-info" },
-  chargeback: { active: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
-};
 
 /* ═══════════════════════════════════ MAIN ═══════════════════════════════════ */
 
@@ -383,12 +314,12 @@ export default function Extrato() {
       if (t.status in counts) counts[t.status]++;
     }
     return [
-      { label: "Todas", value: "all" as StatusFilter, count: counts.all },
-      { label: "Aprovadas", value: "completed" as StatusFilter, count: counts.completed },
-      { label: "Pendentes", value: "pending" as StatusFilter, count: counts.pending },
-      { label: "Falhas", value: "failed" as StatusFilter, count: counts.failed },
-      { label: "Reembolsos", value: "refunded" as StatusFilter, count: counts.refunded },
-      { label: "Chargebacks", value: "chargeback" as StatusFilter, count: counts.chargeback },
+      { value: "all" as StatusFilter, count: counts.all },
+      { value: "completed" as StatusFilter, count: counts.completed },
+      { value: "pending" as StatusFilter, count: counts.pending },
+      { value: "failed" as StatusFilter, count: counts.failed },
+      { value: "refunded" as StatusFilter, count: counts.refunded },
+      { value: "chargeback" as StatusFilter, count: counts.chargeback },
     ];
   }, [dateFiltered]);
 
@@ -430,15 +361,23 @@ export default function Extrato() {
 
   return (
     <PageShell>
-      {/* Header */}
+      {/* ─── Header ─── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle icon={<Receipt className="h-6 w-6" />} title="Extrato" subtitle="Histórico completo de transações" />
-        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2 rounded-lg h-9 font-medium text-[12px] border-border/40 dark:border-foreground/[0.06]">
+        <button
+          onClick={handleExportCSV}
+          className={cn(
+            "h-9 px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-2",
+            "bg-card/50 backdrop-blur-xl border border-border/30 text-muted-foreground/60",
+            "hover:text-foreground hover:border-border/50 hover:shadow-[0_4px_12px_hsl(var(--foreground)/0.04)]",
+            "active:scale-[0.985] transition-all duration-300"
+          )}
+        >
           <Download className="h-3.5 w-3.5" /> Exportar CSV
-        </Button>
+        </button>
       </div>
 
-      {/* KPIs — Unified GlassKpi */}
+      {/* ─── KPIs ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <GlassKpi label="Receita Líquida" value={fmt(totalNet)} sub={`${approved.length} aprovadas`} icon={DollarSign} tone="primary" delay={0} />
         <GlassKpi label="Faturamento Bruto" value={fmt(totalGross)} sub="antes das taxas" icon={BarChart3} tone="info" delay={1} />
@@ -446,124 +385,200 @@ export default function Extrato() {
         <GlassKpi label="Total Transações" value={String(dateFiltered.length)} sub={`${approved.length} completadas`} icon={Users} tone="success" delay={3} />
       </div>
 
-      {/* Controls */}
-      <div className="space-y-3">
-        <div className="flex flex-col lg:flex-row gap-3">
-          <DateSegmentedControl
-            datePreset={datePreset} setDatePreset={setDatePreset}
-            customFrom={customFrom} setCustomFrom={setCustomFrom}
-            customTo={customTo} setCustomTo={setCustomTo}
-          />
-          <div className="relative flex-1 min-w-[280px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-            <input
-              id="extrato-search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar nome, e-mail, WhatsApp ou ID..."
-              className="w-full h-9 pl-10 pr-16 rounded-lg bg-muted/20 dark:bg-foreground/[0.03] border border-border/40 dark:border-foreground/[0.05] text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/30 transition-all"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              {search ? (
-                <button onClick={() => setSearch("")} className="p-1">
-                  <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
-                </button>
-              ) : (
-                <kbd className="hidden md:inline-flex items-center gap-0.5 text-[9px] font-medium text-muted-foreground/50 bg-muted/30 border border-border/30 px-1.5 py-0.5 rounded">
-                  ⌘K
-                </kbd>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Status Pills */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {statusFilters.map((f) => {
-            const isActive = statusFilter === f.value;
-            const style = STATUS_PILL_STYLES[f.value];
-            return (
-              <button
-                key={f.value}
-                onClick={() => setStatusFilter(f.value)}
-                className={cn(
-                  "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all",
-                  isActive
-                    ? style.active
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
-                )}
-              >
-                {isActive && <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />}
-                {f.label}
-                <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded font-medium min-w-[20px] text-center",
-                  isActive ? "bg-foreground/10" : "bg-muted/40 text-muted-foreground/60"
-                )}>{f.count}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Results summary */}
-      <div className="flex items-center justify-between px-1">
-        <p className="text-[12px] text-muted-foreground/60">
-          {filtered.length === 0
-            ? "Nenhuma transação encontrada"
-            : `Mostrando ${Math.min(visibleCount, filtered.length)} de ${filtered.length} transações`}
-        </p>
-        {filtered.length > 0 && (
-          <p className="text-[12px] text-primary font-medium">{fmt(filtered.reduce((a, t) => a + Number(t.net_amount), 0))} no período</p>
-        )}
-      </div>
-
-      {/* Desktop table */}
-      <div className="hidden md:block rounded-xl bg-card/40 dark:bg-foreground/[0.015] backdrop-blur-xl border border-border/30 dark:border-foreground/[0.04] overflow-hidden">
-        {loading ? (
-          <div className="p-16 text-center">
-            <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-[13px] text-muted-foreground/60">Carregando transações...</p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border/30 dark:border-foreground/[0.04]">
-                    {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left p-4 text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleItems.length === 0 ? (
-                    <tr><td colSpan={7}>
-                      <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação encontrada" subtitle="Tente ajustar os filtros ou período" />
-                    </td></tr>
-                  ) : visibleItems.map((tx, i) => (
-                    <TxRow key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {visibleCount < filtered.length && (
-              <div className="p-3 border-t border-border/20 dark:border-foreground/[0.03] text-center">
-                <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground/60 hover:text-foreground font-medium">
-                  <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
-                </Button>
+      {/* ─── Filters Panel ─── */}
+      <Panel className="p-0 overflow-visible">
+        <div className="p-4 space-y-3.5">
+          {/* Date presets + Search */}
+          <div className="flex flex-col lg:flex-row gap-3">
+            {/* Date pills */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="inline-flex items-center rounded-xl bg-muted/10 p-0.5 ring-1 ring-border/15">
+                {DATE_PRESETS.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => setDatePreset(p.value)}
+                    className={cn(
+                      "relative px-3 py-1.5 rounded-[10px] text-[10px] font-display font-bold transition-all duration-300",
+                      datePreset === p.value
+                        ? "text-foreground"
+                        : "text-muted-foreground/40 hover:text-muted-foreground/70"
+                    )}
+                  >
+                    {datePreset === p.value && (
+                      <motion.div
+                        layoutId="date-pill-bg"
+                        className="absolute inset-0 rounded-[10px] bg-card shadow-sm ring-1 ring-border/20"
+                        transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+                      />
+                    )}
+                    <span className="relative z-[1]">{p.label}</span>
+                  </button>
+                ))}
               </div>
-            )}
-          </>
-        )}
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "h-8 px-3 rounded-xl text-[10px] font-display font-bold transition-all duration-300 border inline-flex items-center gap-1.5",
+                    datePreset === "custom"
+                      ? "bg-primary/8 text-primary border-primary/15 ring-1 ring-primary/10"
+                      : "bg-transparent text-muted-foreground/40 border-border/15 hover:text-muted-foreground/70 hover:border-border/30"
+                  )}>
+                    <CalendarIcon className="h-3 w-3" />
+                    {datePreset === "custom" && customFrom && customTo
+                      ? `${format(customFrom, "dd/MM", { locale: ptBR })} - ${format(customTo, "dd/MM", { locale: ptBR })}`
+                      : "Personalizado"
+                    }
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-2xl border-border/20 shadow-xl" align="start">
+                  <div className="p-3.5 border-b border-border/10">
+                    <p className="text-[11px] font-display font-black text-foreground">Selecionar período</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-0 sm:gap-2">
+                    <div>
+                      <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em] px-3 pt-2">De:</p>
+                      <Calendar mode="single" selected={customFrom} onSelect={(d) => { setCustomFrom(d); setDatePreset("custom"); }} locale={ptBR} className="p-3 pointer-events-auto" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em] px-3 pt-2">Até:</p>
+                      <Calendar mode="single" selected={customTo} onSelect={(d) => { setCustomTo(d); setDatePreset("custom"); }} locale={ptBR} disabled={(date) => customFrom ? date < customFrom : false} className="p-3 pointer-events-auto" />
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Search */}
+            <div className="relative flex-1 min-w-[250px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/20" />
+              <input
+                id="extrato-search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar nome, e-mail, WhatsApp ou ID..."
+                className={cn(
+                  "w-full h-9 pl-10 pr-16 rounded-xl bg-muted/5 border border-border/15",
+                  "text-[12px] font-display text-foreground placeholder:text-muted-foreground/25",
+                  "focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/15",
+                  "transition-all duration-300"
+                )}
+              />
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {search ? (
+                  <button onClick={() => setSearch("")} className="p-0.5 hover:bg-muted/15 rounded-md transition-colors">
+                    <X className="h-3 w-3 text-muted-foreground/30 hover:text-foreground transition-colors" />
+                  </button>
+                ) : (
+                  <kbd className="hidden md:inline-flex items-center gap-0.5 text-[8px] font-display font-bold text-muted-foreground/20 bg-muted/8 border border-border/10 px-1.5 py-0.5 rounded-md">
+                    ⌘K
+                  </kbd>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Status Pills with animated indicator */}
+          <div className="flex gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+            {statusFilters.map((f) => {
+              const isActive = statusFilter === f.value;
+              const config = STATUS_CONFIG[f.value];
+              return (
+                <button
+                  key={f.value}
+                  onClick={() => setStatusFilter(f.value)}
+                  className={cn(
+                    "relative shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-display font-bold transition-all duration-300",
+                    isActive
+                      ? config.active + " ring-1"
+                      : "text-muted-foreground/30 hover:text-muted-foreground/60 hover:bg-muted/5"
+                  )}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="status-dot"
+                      className={cn("h-1.5 w-1.5 rounded-full", config.dot)}
+                      transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+                    />
+                  )}
+                  {config.label}
+                  <span className={cn(
+                    "text-[9px] px-1.5 py-0.5 rounded-md font-display font-bold min-w-[20px] text-center tabular-nums",
+                    isActive ? "bg-foreground/5" : "bg-muted/10 text-muted-foreground/20"
+                  )}>{f.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Results summary */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/10">
+          <p className="text-[10px] font-display font-bold text-muted-foreground/30">
+            {filtered.length === 0
+              ? "Nenhuma transação encontrada"
+              : `Mostrando ${Math.min(visibleCount, filtered.length)} de ${filtered.length} transações`}
+          </p>
+          {filtered.length > 0 && (
+            <p className="text-[10px] font-display font-bold text-primary/60 tabular-nums">
+              {fmt(filtered.reduce((a, t) => a + Number(t.net_amount), 0))} no período
+            </p>
+          )}
+        </div>
+      </Panel>
+
+      {/* ─── Desktop Table ─── */}
+      <div className="hidden md:block">
+        <Panel className="p-0 overflow-hidden">
+          {loading ? (
+            <div className="py-20 text-center">
+              <div className="h-8 w-8 border-2 border-primary/15 border-t-primary rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-[11px] font-display font-bold text-muted-foreground/30">Carregando transações...</p>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/15">
+                      {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
+                        <th key={h} className="text-left p-4 text-[9px] font-display font-bold text-muted-foreground/25 uppercase tracking-[0.18em]">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleItems.length === 0 ? (
+                      <tr><td colSpan={7}>
+                        <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação encontrada" subtitle="Tente ajustar os filtros ou período" />
+                      </td></tr>
+                    ) : visibleItems.map((tx, i) => (
+                      <TxRow key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {visibleCount < filtered.length && (
+                <div className="p-3 border-t border-border/10 text-center">
+                  <button
+                    onClick={loadMore}
+                    className="inline-flex items-center gap-2 h-8 px-4 rounded-xl text-[10px] font-display font-bold text-muted-foreground/30 hover:text-foreground hover:bg-muted/8 transition-all duration-300"
+                  >
+                    <ChevronDown className="h-3 w-3" /> Carregar mais ({filtered.length - visibleCount} restantes)
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </Panel>
       </div>
 
-      {/* Mobile cards */}
-      <div className="md:hidden space-y-2.5">
+      {/* ─── Mobile Cards ─── */}
+      <div className="md:hidden space-y-2">
         {loading ? (
-          <div className="rounded-xl bg-card/40 dark:bg-foreground/[0.02] backdrop-blur-xl border border-border/30 dark:border-foreground/[0.04] p-12 text-center">
-            <div className="h-7 w-7 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-[13px] text-muted-foreground/60">Carregando...</p>
-          </div>
+          <Panel className="py-16 text-center">
+            <div className="h-8 w-8 border-2 border-primary/15 border-t-primary rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-[11px] font-display font-bold text-muted-foreground/30">Carregando...</p>
+          </Panel>
         ) : visibleItems.length === 0 ? (
           <EmptyState icon={<FileText className="h-7 w-7" />} title="Nenhuma transação" subtitle="Tente ajustar os filtros" />
         ) : (
@@ -572,9 +587,12 @@ export default function Extrato() {
               <TxCard key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
             ))}
             {visibleCount < filtered.length && (
-              <Button variant="ghost" size="sm" onClick={loadMore} className="w-full gap-2 text-xs text-muted-foreground/60 font-medium">
-                <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
-              </Button>
+              <button
+                onClick={loadMore}
+                className="w-full h-10 rounded-2xl border border-dashed border-border/15 flex items-center justify-center gap-2 text-[10px] font-display font-bold text-muted-foreground/20 hover:text-muted-foreground/50 hover:border-border/30 transition-all duration-300"
+              >
+                <ChevronDown className="h-3 w-3" /> Carregar mais ({filtered.length - visibleCount} restantes)
+              </button>
             )}
           </>
         )}
@@ -582,7 +600,7 @@ export default function Extrato() {
 
       {/* Detail modal */}
       {selectedTx && (
-        <TxDetailModal tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} />
+        <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} />
       )}
     </PageShell>
   );
