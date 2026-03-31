@@ -59,8 +59,6 @@ const PERIOD_PRESETS = [
   { label: "7 dias", days: 7 },
   { label: "15 dias", days: 15 },
   { label: "30 dias", days: 30 },
-  { label: "60 dias", days: 60 },
-  { label: "90 dias", days: 90 },
 ] as const;
 
 type PeriodPreset = (typeof PERIOD_PRESETS)[number];
@@ -541,73 +539,73 @@ export default function Dashboard() {
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-auto p-0 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-xl overflow-hidden">
-                  <div className="flex">
-                    {/* Presets sidebar */}
-                    <div className="border-r border-border/30 p-2 space-y-0.5 min-w-[130px]">
-                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] px-2.5 py-1.5">Período</p>
-                      {PERIOD_PRESETS.map((option) => (
-                        <button
-                          key={option.label}
-                          onClick={() => {
-                            setSelectedPeriod(option);
-                            setIsCustom(false);
-                            setCustomRange(undefined);
-                            setDatePickerOpen(false);
-                          }}
-                          className={cn(
-                            "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                            !isCustom && selectedPeriod.label === option.label
-                              ? "bg-primary/10 text-primary font-bold"
-                              : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
-                          )}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                      <div className="my-1.5 border-t border-border/20" />
+                  <div className="p-2 space-y-0.5 min-w-[150px]">
+                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] px-2.5 py-1.5">Período</p>
+                    {PERIOD_PRESETS.map((option) => (
                       <button
-                        onClick={() => setIsCustom(true)}
+                        key={option.label}
+                        onClick={() => {
+                          setSelectedPeriod(option);
+                          setIsCustom(false);
+                          setCustomRange(undefined);
+                          setDatePickerOpen(false);
+                        }}
                         className={cn(
-                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all",
-                          isCustom
+                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                          !isCustom && selectedPeriod.label === option.label
                             ? "bg-primary/10 text-primary font-bold"
                             : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
                         )}
                       >
-                        Personalizado
+                        {option.label}
                       </button>
-                    </div>
-                    {/* Calendar */}
-                    <div className="p-3">
-                      <Calendar
-                        mode="range"
-                        selected={customRange}
-                        onSelect={(range) => {
-                          setCustomRange(range);
-                          setIsCustom(true);
-                          if (range?.from && range?.to) {
-                            setTimeout(() => setDatePickerOpen(false), 300);
-                          }
-                        }}
-                        numberOfMonths={1}
-                        locale={ptBR}
-                        disabled={(date) => date > new Date()}
-                        className={cn("p-3 pointer-events-auto")}
-                        classNames={{
-                          day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
-                          day_range_middle: "bg-primary/10 text-foreground",
-                          day_range_end: "bg-primary text-primary-foreground",
-                        }}
-                      />
-                      {isCustom && customRange?.from && (
-                        <div className="px-3 pb-2 pt-1 border-t border-border/20 mt-1">
-                          <p className="text-[11px] text-muted-foreground font-medium text-center">
-                            {format(customRange.from, "dd MMM yyyy", { locale: ptBR })}
-                            {customRange.to && ` — ${format(customRange.to, "dd MMM yyyy", { locale: ptBR })}`}
-                          </p>
-                        </div>
+                    ))}
+                    <div className="my-1.5 border-t border-border/20" />
+                    <button
+                      onClick={() => setIsCustom(true)}
+                      className={cn(
+                        "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all flex items-center gap-2",
+                        isCustom
+                          ? "bg-primary/10 text-primary font-bold"
+                          : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
                       )}
-                    </div>
+                    >
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      Personalizado
+                    </button>
+                    {/* Calendar — only visible when "Personalizado" is selected */}
+                    {isCustom && (
+                      <div className="border-t border-border/20 mt-1.5 pt-1">
+                        <Calendar
+                          mode="range"
+                          selected={customRange}
+                          onSelect={(range) => {
+                            setCustomRange(range);
+                            setIsCustom(true);
+                            if (range?.from && range?.to) {
+                              setTimeout(() => setDatePickerOpen(false), 300);
+                            }
+                          }}
+                          numberOfMonths={1}
+                          locale={ptBR}
+                          disabled={(date) => date > new Date()}
+                          className={cn("p-3 pointer-events-auto")}
+                          classNames={{
+                            day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
+                            day_range_middle: "bg-primary/10 text-foreground",
+                            day_range_end: "bg-primary text-primary-foreground",
+                          }}
+                        />
+                        {customRange?.from && (
+                          <div className="px-3 pb-2 pt-1 border-t border-border/20 mt-1">
+                            <p className="text-[11px] text-muted-foreground font-medium text-center">
+                              {format(customRange.from, "dd MMM yyyy", { locale: ptBR })}
+                              {customRange.to && ` — ${format(customRange.to, "dd MMM yyyy", { locale: ptBR })}`}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>
