@@ -795,51 +795,28 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </div>
 
-          {priceNum > 0 && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
-              {/* Visual bar comparison */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-success/15 bg-success/[0.03] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-display font-bold text-success/70 flex items-center gap-1.5 uppercase tracking-wider"><QrCode className="h-3.5 w-3.5" /> PIX</span>
-                    <span className="text-[10px] font-numbers font-bold text-success/50">-2,49%</span>
-                  </div>
-                  <p className="text-xl font-numbers font-black text-success tabular-nums">R$ {pixNet.toFixed(2)}</p>
-                  <div className="h-2 rounded-full bg-success/10 overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${(pixNet / priceNum) * 100}%` }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-success/50" />
-                  </div>
-                </div>
-                <div className="rounded-xl border border-info/15 bg-info/[0.03] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-display font-bold text-info/70 flex items-center gap-1.5 uppercase tracking-wider"><CreditCard className="h-3.5 w-3.5" /> Cartão</span>
-                    <span className="text-[10px] font-numbers font-bold text-info/50">-6,38%</span>
-                  </div>
-                  <p className="text-xl font-numbers font-black text-info tabular-nums">R$ {cardNet.toFixed(2)}</p>
-                  <div className="h-2 rounded-full bg-info/10 overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${(cardNet / priceNum) * 100}%` }} transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-info/50" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </div>
       </EditorCard>
 
-      {/* ─── Links & Support ─── */}
+      {/* ─── Links & Support (Required) ─── */}
       <EditorCard accentColor="bg-info">
+        <SectionHeader icon={Globe} title="Informações do Produtor" subtitle="Esses dados são obrigatórios e serão exibidos no checkout." />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <EditorLabel icon={ExternalLink}>Página de vendas</EditorLabel>
-            <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
+            <EditorLabel icon={ExternalLink}>Página de vendas <span className="text-destructive">*</span></EditorLabel>
+            <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" required />
+            <p className={cn("text-[10px]", pageUrl.trim() ? "text-success" : "text-muted-foreground/30")}>{pageUrl.trim() ? "✓ Página preenchida" : "Obrigatório"}</p>
           </div>
           <div className="space-y-2">
-            <EditorLabel icon={Mail}>E-mail de suporte</EditorLabel>
-            <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-card/80 border-border/40" />
+            <EditorLabel icon={Mail}>E-mail de suporte <span className="text-destructive">*</span></EditorLabel>
+            <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-card/80 border-border/40" required />
+            <p className={cn("text-[10px]", supportEmail.trim() ? "text-success" : "text-muted-foreground/30")}>{supportEmail.trim() ? "✓ E-mail preenchido" : "Obrigatório"}</p>
           </div>
         </div>
         <div className="space-y-2">
-          <EditorLabel>Nome de exibição</EditorLabel>
-          <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador" className="h-11 bg-card/80 border-border/40" />
+          <EditorLabel icon={Users}>Nome de exibição do produtor <span className="text-destructive">*</span></EditorLabel>
+          <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador no checkout" className="h-11 bg-card/80 border-border/40" required />
+          <p className={cn("text-[10px]", displayName.trim() ? "text-success" : "text-muted-foreground/30")}>{displayName.trim() ? "✓ Nome preenchido" : "Obrigatório • Aparecerá no rodapé do checkout"}</p>
         </div>
       </EditorCard>
     </div>
