@@ -557,42 +557,35 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
    ═══════════════════════════════════════════════ */
 
 /* ── Hero KPI Card ── */
-function HeroKpi({ icon, label, value, sub, gradient, metallic, alert, pulse }: {
+function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
   icon: React.ReactNode; label: string; value: string; sub?: string;
   gradient: string; metallic?: boolean; alert?: boolean; pulse?: boolean;
 }) {
   return (
     <motion.div variants={fadeUp} className="relative group">
       <div className={cn(
-        "relative rounded-2xl p-6 overflow-hidden transition-all duration-300",
-        "bg-gradient-to-b from-white/[0.04] to-white/[0.015] backdrop-blur-2xl border border-white/[0.07]",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_32px_rgba(0,0,0,0.35)]",
-        "hover:border-white/[0.14] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_16px_48px_rgba(0,0,0,0.45)]",
-        "hover:-translate-y-0.5",
-        alert && "border-red-500/25 ring-1 ring-red-500/15",
-        pulse && "animate-pulse"
+        "relative isolate overflow-hidden rounded-2xl border border-border/70 bg-card/95 p-6 transition-all duration-300",
+        "shadow-[0_14px_40px_hsl(220_30%_4%_/_0.28),inset_0_1px_0_hsl(var(--foreground)_/_0.04)]",
+        "hover:border-primary/20 hover:shadow-[0_18px_48px_hsl(220_30%_4%_/_0.34),0_0_0_1px_hsl(var(--primary)_/_0.08)]",
+        alert && "border-destructive/30 ring-1 ring-destructive/10"
       )}>
-        {/* Gradient glow */}
-        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-20 group-hover:opacity-35 transition-opacity duration-500 bg-gradient-to-br", gradient)} />
-        {/* Bottom accent line */}
-        <div className={cn("absolute bottom-0 left-4 right-4 h-[1px] bg-gradient-to-r opacity-20", gradient)} />
+        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-20 group-hover:opacity-30 transition-opacity duration-500 bg-gradient-to-br", gradient)} />
+        <div className={cn("absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r opacity-25", gradient)} />
 
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/25">{label}</span>
-            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.12]", gradient)}>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
+            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-primary-foreground shadow-lg ring-1 ring-border/60", gradient)}>
               {icon}
             </div>
           </div>
           <p className={cn(
-            "text-[32px] font-extrabold tracking-tight leading-none",
-            metallic
-              ? "bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent"
-              : alert ? "text-red-400" : "text-white"
+            "text-[32px] font-extrabold leading-none tracking-tight",
+            metallic ? "bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent" : alert ? "text-destructive" : "text-foreground"
           )}>
             {value}
           </p>
-          {sub && <p className="text-[11px] text-white/25 mt-2 font-medium">{sub}</p>}
+          {sub && <p className="mt-2 text-[11px] font-medium text-muted-foreground">{sub}</p>}
         </div>
       </div>
     </motion.div>
@@ -604,14 +597,12 @@ function GlassKpi({ label, value, icon, iconColor }: {
   label: string; value: string; icon: React.ReactNode; iconColor?: string;
 }) {
   return (
-    <div className="rounded-xl bg-gradient-to-b from-white/[0.035] to-white/[0.015] backdrop-blur-2xl border border-white/[0.06] p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:border-white/[0.1] transition-all group">
-      <div className="flex items-center justify-between mb-2.5">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/25 font-bold">{label}</span>
-        <div className={cn("h-7 w-7 rounded-lg bg-white/[0.05] flex items-center justify-center border border-white/[0.04]", iconColor || "text-white/30")}>
-          {icon}
-        </div>
+    <div className="rounded-xl border border-border/70 bg-card/95 p-4 shadow-[0_10px_24px_hsl(220_30%_4%_/_0.18),inset_0_1px_0_hsl(var(--foreground)_/_0.04)] transition-all hover:border-primary/15 group">
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</span>
+        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-secondary/50", iconColor || "text-muted-foreground")}>{icon}</div>
       </div>
-      <p className="text-lg font-extrabold tracking-tight text-white">{value}</p>
+      <p className="text-lg font-extrabold tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
