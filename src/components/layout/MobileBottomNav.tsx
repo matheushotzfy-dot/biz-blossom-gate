@@ -63,11 +63,11 @@ export function MobileBottomNav() {
       {/* More sheet */}
       {moreOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setMoreOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-3xl max-h-[80vh] overflow-y-auto animate-slide-up shadow-2xl">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-xl" onClick={() => setMoreOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-border/30 rounded-t-3xl max-h-[80vh] overflow-y-auto animate-slide-up shadow-[0_-12px_48px_hsl(var(--foreground)/0.08)]">
             {/* Handle bar */}
             <div className="flex justify-center pt-3 pb-1">
-              <div className="h-1 w-10 rounded-full bg-border" />
+              <div className="h-1 w-10 rounded-full bg-border/40" />
             </div>
 
             <div className="flex items-center justify-between px-5 pt-2 pb-3">
