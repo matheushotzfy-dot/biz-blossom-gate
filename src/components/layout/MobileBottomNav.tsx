@@ -21,9 +21,9 @@ const moreGroups = [
     label: "Infoprodutos",
     items: [
       { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
-      { title: "Compras", url: "/membros", icon: GraduationCap },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
-      { title: "Premiações", url: "/premiacoes", icon: Trophy },
+      { title: "Afiliados", url: "/vendas/afiliados", icon: GraduationCap },
+      { title: "Coproduções", url: "/vendas/coproducoes", icon: Package },
     ],
   },
   {
@@ -44,6 +44,8 @@ const moreGroups = [
       { title: "Apps", url: "/integracoes/apps", icon: Puzzle },
       { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
       { title: "Perfil", url: "/perfil", icon: User },
+      { title: "Compras", url: "/membros", icon: GraduationCap },
+      { title: "Premiações", url: "/premiacoes", icon: Trophy },
     ],
   },
 ];
