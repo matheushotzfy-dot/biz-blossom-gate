@@ -23,6 +23,7 @@ const moreGroups = [
       { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
       { title: "Compras", url: "/membros", icon: GraduationCap },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
+      { title: "Premiações", url: "/premiacoes", icon: Trophy },
     ],
   },
   {
@@ -30,6 +31,8 @@ const moreGroups = [
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
       { title: "Banco", url: "/financeiro/dados-bancarios", icon: Building2 },
+      { title: "Crypto", url: "/financeiro/saques-crypto", icon: Bitcoin },
+      { title: "Taxas", url: "/financeiro/taxas", icon: Zap },
       { title: "Gastos", url: "/financeiro/gastos", icon: PieChart },
       { title: "KYC", url: "/financeiro/identidade", icon: UserCircle },
     ],
