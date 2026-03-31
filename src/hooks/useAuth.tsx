@@ -8,6 +8,12 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Set up auth listener FIRST to avoid missing events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
     // Check for impersonation tokens (localStorage with tight 15s window + immediate cleanup)
     const impersonateData = localStorage.getItem("impersonate_session");
     if (impersonateData) {
@@ -16,23 +22,19 @@ export function useAuth() {
         // Immediate cleanup BEFORE using - one-time use
         localStorage.removeItem("impersonate_session");
         if (Date.now() - timestamp < 15000 && access_token && refresh_token) {
-          supabase.auth.setSession({ access_token, refresh_token }).then(({ data: { session }, error }) => {
-            if (!error && session) {
-              setUser(session.user);
-              setLoading(false);
+          supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
+            if (error) {
+              // Fallback to normal flow
+              initNormalSession();
+            } else {
               // Clean URL param
               const url = new URL(window.location.href);
               url.searchParams.delete("impersonate");
               window.history.replaceState({}, "", url.toString());
-              return;
             }
-            // Fallback to normal flow
-            initNormalSession();
           });
-          return;
-      } else {
-        localStorage.removeItem("impersonate_session");
-      }
+          return () => subscription.unsubscribe();
+        }
       } catch {
         localStorage.removeItem("impersonate_session");
       }
@@ -46,11 +48,6 @@ export function useAuth() {
         setLoading(false);
       });
     }
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
