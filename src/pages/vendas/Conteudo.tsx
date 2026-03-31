@@ -362,14 +362,6 @@ export default function AdminConteudo() {
         </Button>
       </div>
 
-      {/* ─── KPIs ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <GlassKpi label="Total Cursos" value={String(totalCourses)} icon={GraduationCap} tone="primary" sub="criados" delay={0} />
-        <GlassKpi label="Publicados" value={String(publishedCourses)} icon={Globe} tone="success" sub="disponíveis" delay={1} />
-        <GlassKpi label="Módulos" value={String(totalModules)} icon={Layers} tone="info" sub="organizados" delay={2} />
-        <GlassKpi label="Aulas" value={String(totalLessons)} icon={Video} tone="warning" sub="cadastradas" delay={3} />
-        <GlassKpi label="Receita Cursos" value={fmt(totalRevenue)} icon={DollarSign} tone="primary" sub="faturamento" delay={4} />
-      </div>
 
       {/* ─── Filters — enterprise pill style with layoutId ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

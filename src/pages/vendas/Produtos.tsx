@@ -124,15 +124,6 @@ export default function Produtos() {
             </motion.div>
           </div>
 
-          {/* Hero metrics */}
-          {products.length > 0 && (
-            <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-              <MiniHeroCard icon={<Layers className="h-4 w-4" />} label="Produtos" value={String(products.length)} tone="primary" idx={0} />
-              <MiniHeroCard icon={<Zap className="h-4 w-4" />} label="Ativos" value={String(activeProducts)} tone="success" idx={1} />
-              <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Ticket Médio" value={fmtPrice(totalValue / (products.length || 1))} tone="info" idx={2} />
-              <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Catálogo Total" value={fmtPrice(totalValue)} tone="warning" idx={3} />
-            </div>
-          )}
         </div>
       </section>
 
