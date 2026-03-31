@@ -221,7 +221,8 @@ export function AppSidebar() {
       <SidebarContent className="relative gap-0 px-2.5 py-2 overflow-y-auto">
         {sections.map((section, idx) => (
           <SidebarGroup key={section.label} className="px-0 py-0">
-            {idx > 0 && <div className="mx-3 my-2.5 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1" />}
+            {idx > 0 && <div className="mx-3 my-3 border-t border-sidebar-border/20 group-data-[collapsible=icon]:mx-1" />}
+            <SidebarGroupLabel className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/30 group-data-[collapsible=icon]:hidden">{section.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5 px-1">
                 {section.items.map((item) => {
@@ -237,36 +238,36 @@ export function AppSidebar() {
                           end={item.url === "/dashboard" || item.url === "/vendas"}
                           activeClassName=""
                           className={cn(
-                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[14px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                            "group/nav relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[13px] font-medium leading-none transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                             isActive
-                              ? "border-sidebar-border bg-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm"
-                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/50 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                              ? "border-sidebar-primary/15 bg-sidebar-primary/8 text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/5"
+                              : "border-transparent text-sidebar-foreground hover:border-sidebar-border/40 hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground",
                           )}
                         >
                           {isActive && (
-                            <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                            <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.4)] group-data-[collapsible=icon]:hidden" />
                           )}
 
                           <span
                             className={cn(
-                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                              "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
                               isActive
-                                ? "bg-sidebar-primary/12 text-sidebar-primary"
-                                : "bg-sidebar-accent/40 text-sidebar-foreground group-hover/nav:bg-sidebar-accent/60 group-hover/nav:text-sidebar-accent-foreground",
+                                ? "bg-sidebar-primary/15 text-sidebar-primary shadow-sm shadow-sidebar-primary/10"
+                                : "bg-sidebar-accent/30 text-sidebar-foreground/70 group-hover/nav:bg-sidebar-accent/50 group-hover/nav:text-sidebar-accent-foreground",
                             )}
                           >
-                            <item.icon className="h-5 w-5" />
+                            <item.icon className="h-4 w-4" />
                           </span>
 
                           <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
 
                           {item.badge && (
-                            <span className="ml-auto rounded-md bg-sidebar-primary/15 px-2 py-0.5 text-[10px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                            <span className="ml-auto rounded-md bg-sidebar-primary/12 px-2 py-0.5 text-[9px] font-bold text-sidebar-primary group-data-[collapsible=icon]:hidden animate-pulse">
                               {item.badge}
                             </span>
                           )}
 
-                          {isActive && <ChevronRight className="h-4 w-4 text-sidebar-primary/65 group-data-[collapsible=icon]:hidden" />}
+                          {isActive && <ChevronRight className="h-3.5 w-3.5 text-sidebar-primary/50 group-data-[collapsible=icon]:hidden" />}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
