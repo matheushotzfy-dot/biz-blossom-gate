@@ -408,12 +408,12 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Devoluções (7d)</GlassPanelTitle>
             <ResponsiveContainer width="100%" height={200} className="mt-3">
               <LineChart data={refundTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.1)" fontSize={9} tickLine={false} axisLine={false} />
-                <YAxis stroke="rgba(255,255,255,0.1)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-                <Line type="monotone" dataKey="chargebacks" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} name="Chargebacks" />
-                <Line type="monotone" dataKey="refunds" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: "#f59e0b" }} name="Reembolsos" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.32)" vertical={false} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.55)" fontSize={9} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(var(--muted-foreground) / 0.55)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+                <Line type="monotone" dataKey="chargebacks" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--destructive))" }} activeDot={false} name="Chargebacks" isAnimationActive={false} />
+                <Line type="monotone" dataKey="refunds" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--warning))" }} activeDot={false} name="Reembolsos" isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
             <div className="flex items-center gap-4 mt-2">
