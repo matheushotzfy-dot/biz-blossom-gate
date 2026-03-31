@@ -181,7 +181,7 @@ export default function ProductEditor() {
   useEffect(() => {
     if (isNew || !user?.id) { setLoading(false); return; }
     (async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", productId!).eq("user_id", user.id).single();
+      const { data, error } = await supabase.from("products").select("*").eq("id", productId!).eq("user_id", user.id).maybeSingle();
       if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
       setProduct(data);
       setName(data.name);
