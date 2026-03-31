@@ -141,8 +141,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     try {
       const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
       if (kycFiles && kycFiles.length > 0) {
-        const urls = kycFiles.map(f => supabase.storage.from("kyc-documents").getPublicUrl(`${profile.user_id}/${f.name}`).data.publicUrl);
-        setKycImages(urls);
+        const signedUrls = await Promise.all(
+          kycFiles.map(async (f) => {
+            const { data } = await supabase.storage.from("kyc-documents").createSignedUrl(`${profile.user_id}/${f.name}`, 3600);
+            return data?.signedUrl || null;
+          })
+        );
+        setKycImages(signedUrls.filter(Boolean) as string[]);
       } else setKycImages([]);
     } catch { setKycImages([]); }
     setLoading(false);
