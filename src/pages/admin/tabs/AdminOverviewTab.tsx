@@ -276,16 +276,16 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="tpvGradGod2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--chart-4))" stopOpacity={0.22} />
+                  <stop offset="100%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-              <XAxis dataKey="name" stroke="rgba(255,255,255,0.12)" fontSize={9} tickLine={false} axisLine={false} />
-              <YAxis stroke="rgba(255,255,255,0.12)" fontSize={9} tickLine={false} axisLine={false} />
-              <Tooltip content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" stroke="#6366f1" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} name="TPV" />
-              <Area type="monotone" dataKey="takeRate" stroke="#f59e0b" fillOpacity={0} strokeWidth={1.5} dot={false} strokeDasharray="4 2" name="Take Rate" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.32)" vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.6)" fontSize={9} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground) / 0.6)" fontSize={9} tickLine={false} axisLine={false} />
+              <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="tpv" stroke="hsl(var(--chart-4))" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
+              <Area type="monotone" dataKey="takeRate" stroke="hsl(var(--warning))" fillOpacity={0} strokeWidth={1.5} dot={false} activeDot={false} strokeDasharray="4 2" name="Take Rate" isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </GlassPanel>
