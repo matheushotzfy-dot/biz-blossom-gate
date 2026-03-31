@@ -1002,18 +1002,18 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
 }
 
 function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
-  const styles: Record<string, { bg: string; text: string }> = {
-    success: { bg: "bg-success/10", text: "text-success" },
-    warning: { bg: "bg-warning/10", text: "text-warning" },
-    destructive: { bg: "bg-destructive/10", text: "text-destructive" },
-    info: { bg: "bg-info/10", text: "text-info" },
+  const styles: Record<string, { bg: string; text: string; ring: string }> = {
+    success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/20" },
+    warning: { bg: "bg-warning/10", text: "text-warning", ring: "ring-warning/20" },
+    destructive: { bg: "bg-destructive/10", text: "text-destructive", ring: "ring-destructive/20" },
+    info: { bg: "bg-info/10", text: "text-info", ring: "ring-info/20" },
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-muted/10 px-3.5 py-3 transition-all duration-200 hover:bg-muted/20">
-      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${styles[tone].bg} ${styles[tone].text}`}>{icon}</div>
-      <span className="flex-1 text-[12px] font-medium text-muted-foreground">{label}</span>
-      <span className="text-sm font-display font-bold text-foreground tabular-nums">{value}</span>
+    <div className="flex items-center gap-3.5 rounded-xl border border-border/40 bg-muted/10 px-4 py-3.5 transition-all duration-200 hover:bg-muted/20 hover:border-border/60">
+      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ring-1 ${styles[tone].bg} ${styles[tone].text} ${styles[tone].ring}`}>{icon}</div>
+      <span className="flex-1 text-[13px] font-semibold text-foreground/80">{label}</span>
+      <span className="text-base font-display font-black text-foreground tabular-nums tracking-tight">{value}</span>
     </div>
   );
 }
