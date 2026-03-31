@@ -35,6 +35,7 @@ import CourseBuilder from "./pages/vendas/CourseBuilder";
 import Apps from "./pages/vendas/Apps";
 import Afiliados from "./pages/vendas/Afiliados";
 import Coproducoes from "./pages/vendas/Coproducoes";
+import Cupons from "./pages/vendas/Cupons";
 import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
