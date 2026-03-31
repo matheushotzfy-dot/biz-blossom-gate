@@ -136,10 +136,7 @@ input[type="number"]::-webkit-inner-spin-button {
     text-rendering: optimizeLegibility;
     letter-spacing: -0.01em;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-image:
-      radial-gradient(circle at top left, hsl(var(--primary) / 0.06), transparent 32%),
-      radial-gradient(circle at bottom right, hsl(var(--info) / 0.04), transparent 28%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+    background-image: var(--ambient-glow), linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
     background-attachment: fixed;
   }
 
