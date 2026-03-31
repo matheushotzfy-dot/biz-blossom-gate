@@ -455,6 +455,42 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ─── ONBOARDING FOR NEW USERS ─── */}
+      {transactions.length === 0 && products === 0 && (
+        <section className="relative overflow-hidden rounded-2xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/[0.04] to-transparent p-6 md:p-8 animate-fade-in">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-[80px]" />
+          <div className="relative z-10 text-center max-w-lg mx-auto">
+            <div className="mx-auto mb-5 h-16 w-16 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
+              <Sparkles className="h-8 w-8 text-primary-foreground" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-display font-black tracking-[-0.04em] text-foreground mb-3">
+              Bem-vindo à <span className="text-gradient">HOTZFY</span>!
+            </h2>
+            <p className="text-[14px] text-muted-foreground/70 mb-6 leading-relaxed">
+              Sua plataforma está pronta. Crie seu primeiro produto, configure o checkout e comece a vender hoje mesmo!
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              {[
+                { step: "1", label: "Criar Produto", desc: "Cadastre seu infoproduto", href: "/vendas/produtos" },
+                { step: "2", label: "Verificar Conta", desc: "Envie seus documentos", href: "/financeiro/identidade" },
+                { step: "3", label: "Primeira Venda", desc: "Compartilhe seu link", href: "/vendas/checkout" },
+              ].map(s => (
+                <Link key={s.step} to={s.href} className="group p-4 rounded-xl border border-border/40 bg-card/60 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 text-left">
+                  <div className="h-8 w-8 rounded-lg gradient-primary text-primary-foreground text-sm font-black flex items-center justify-center mb-2.5 shadow-lg shadow-primary/15 group-hover:scale-110 transition-transform">
+                    {s.step}
+                  </div>
+                  <p className="text-[13px] font-display font-bold text-foreground">{s.label}</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-0.5">{s.desc}</p>
+                </Link>
+              ))}
+            </div>
+            <Link to="/vendas/produtos" className="inline-flex items-center gap-2 h-11 px-6 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
+              <Rocket className="h-4 w-4" /> Começar Agora
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
