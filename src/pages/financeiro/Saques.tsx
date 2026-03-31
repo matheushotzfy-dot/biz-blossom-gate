@@ -223,7 +223,7 @@ export default function Saques() {
       {/* ─── KPIs ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <GlassKpi label="Total Aprovado" value={fmt(totalApproved)} sub={`${approved.length} saques aprovados`} icon={TrendingUp} tone="primary" delay={0} large />
-        <GlassKpi label="Total Aprovado" value={fmt(totalApproved)} sub={`${withdrawals.length} total`} icon={CheckCircle2} tone="success" delay={1} large />
+        <GlassKpi label="Total Solicitado" value={fmt(withdrawals.reduce((a, w) => a + Number(w.amount), 0))} sub={`${withdrawals.length} saques totais`} icon={CheckCircle2} tone="success" delay={1} large />
         <GlassKpi label="Pendente" value={fmt(totalPending)} sub={`${pending.length} saques`} icon={Clock} tone="warning" delay={2} />
         <GlassKpi label="Recusados" value={String(rejected.length)} sub="saques recusados" icon={XCircle} tone="destructive" delay={3} />
       </div>

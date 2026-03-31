@@ -32,13 +32,21 @@ const PAGES = [
   { label: "Produtos", href: "/vendas/produtos", icon: Package },
   { label: "Checkout", href: "/vendas/checkout", icon: CreditCard },
   { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers },
+  { label: "Afiliados", href: "/vendas/afiliados", icon: Users },
+  { label: "Coproduções", href: "/vendas/coproducoes", icon: Users },
   { label: "Extrato", href: "/financeiro/extrato", icon: FileText },
-  { label: "Saques", href: "/financeiro/saques", icon: ArrowDownToLine },
+  { label: "Saques PIX", href: "/financeiro/saques", icon: ArrowDownToLine },
+  { label: "Saques Crypto", href: "/financeiro/saques-crypto", icon: DollarSign },
   { label: "Dados Bancários", href: "/financeiro/dados-bancarios", icon: Building2 },
+  { label: "Taxas", href: "/financeiro/taxas", icon: DollarSign },
+  { label: "Controle de Gastos", href: "/financeiro/gastos", icon: DollarSign },
+  { label: "Identidade & KYC", href: "/financeiro/identidade", icon: User },
   { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook },
+  { label: "Integrações", href: "/integracoes/apps", icon: Package },
   { label: "Meu Perfil", href: "/perfil", icon: User },
   { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen },
   { label: "Minhas Compras", href: "/membros", icon: GraduationCap },
+  { label: "Premiações", href: "/premiacoes", icon: DollarSign },
 ];
 
 interface SearchResult {

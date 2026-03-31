@@ -20,11 +20,11 @@ type Notification = {
 };
 
 const typeConfig: Record<string, { icon: typeof Bell; color: string; bg: string }> = {
-  withdrawal: { icon: ArrowDownToLine, color: "text-violet-400", bg: "bg-violet-500/10" },
-  info: { icon: Info, color: "text-blue-400", bg: "bg-blue-500/10" },
-  success: { icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-  warning: { icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
-  alert: { icon: XCircle, color: "text-red-400", bg: "bg-red-500/10" },
+  withdrawal: { icon: ArrowDownToLine, color: "text-primary", bg: "bg-primary/10" },
+  info: { icon: Info, color: "text-info", bg: "bg-info/10" },
+  success: { icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
+  warning: { icon: Clock, color: "text-warning", bg: "bg-warning/10" },
+  alert: { icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
   announcement: { icon: Megaphone, color: "text-primary", bg: "bg-primary/10" },
 };
 
