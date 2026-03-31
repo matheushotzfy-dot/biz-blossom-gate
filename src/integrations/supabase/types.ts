@@ -1343,6 +1343,7 @@ export type Database = {
           co_production_split: number
           created_at: string
           description: string | null
+          display_name: string | null
           id: string
           image_url: string | null
           name: string
@@ -1350,6 +1351,7 @@ export type Database = {
           price: number
           rejection_reason: string | null
           status: string
+          support_email: string | null
           updated_at: string
           user_id: string
         }
@@ -1375,6 +1377,7 @@ export type Database = {
           co_production_split?: number
           created_at?: string
           description?: string | null
+          display_name?: string | null
           id?: string
           image_url?: string | null
           name: string
@@ -1382,6 +1385,7 @@ export type Database = {
           price?: number
           rejection_reason?: string | null
           status?: string
+          support_email?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1407,6 +1411,7 @@ export type Database = {
           co_production_split?: number
           created_at?: string
           description?: string | null
+          display_name?: string | null
           id?: string
           image_url?: string | null
           name?: string
@@ -1414,6 +1419,7 @@ export type Database = {
           price?: number
           rejection_reason?: string | null
           status?: string
+          support_email?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -2062,11 +2068,13 @@ export type Database = {
           checkout_url: string | null
           created_at: string | null
           description: string | null
+          display_name: string | null
           id: string | null
           image_url: string | null
           name: string | null
           price: number | null
           status: string | null
+          support_email: string | null
         }
         Insert: {
           checkout_address_required?: boolean | null
@@ -2084,11 +2092,13 @@ export type Database = {
           checkout_url?: string | null
           created_at?: string | null
           description?: string | null
+          display_name?: string | null
           id?: string | null
           image_url?: string | null
           name?: string | null
           price?: number | null
           status?: string | null
+          support_email?: string | null
         }
         Update: {
           checkout_address_required?: boolean | null
@@ -2106,11 +2116,13 @@ export type Database = {
           checkout_url?: string | null
           created_at?: string | null
           description?: string | null
+          display_name?: string | null
           id?: string | null
           image_url?: string | null
           name?: string | null
           price?: number | null
           status?: string | null
+          support_email?: string | null
         }
         Relationships: []
       }
