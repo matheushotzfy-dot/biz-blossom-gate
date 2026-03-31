@@ -666,10 +666,7 @@ export default function ProductEditor() {
    ═══════════════════════════════════════════════ */
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
-  const priceNum = parseFloat(price) || 0;
-  const pixNet = priceNum * 0.9751;
-  const cardNet = priceNum * 0.9362;
-  const maxNet = Math.max(pixNet, cardNet, 0.01);
+
 
   return (
     <div className="space-y-6">
