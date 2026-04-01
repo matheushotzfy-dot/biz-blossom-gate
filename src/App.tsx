@@ -53,6 +53,8 @@ import TermosDeUso from "./pages/TermosDeUso";
 import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import ThankYou from "./pages/ThankYou";
 import StatusPage from "./pages/StatusPage";
+import Analytics from "./pages/Analytics";
+import Indicacoes from "./pages/Indicacoes";
 // Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
@@ -146,6 +148,8 @@ const App = () => (
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                 <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/indicacoes" element={<Indicacoes />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
