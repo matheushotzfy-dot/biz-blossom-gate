@@ -397,40 +397,25 @@ export default function AdminConteudo() {
 
   return (
     <div className="relative animate-fade-in">
-      {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-80 overflow-hidden">
-        <div className="absolute left-1/2 top-[-180px] h-96 w-[50rem] -translate-x-1/2 rounded-full bg-primary/8 blur-[140px] opacity-50" />
-        <div className="absolute right-[-10%] top-[-100px] h-64 w-64 rounded-full bg-info/6 blur-[100px] opacity-40" />
-      </div>
+      <div className="relative z-[1] mx-auto w-full max-w-[1200px] space-y-8 pb-12">
+        {/* ═══ Header ═══ */}
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-display font-black tracking-[-0.04em] text-foreground">Conteúdo</h1>
+              <p className="text-sm font-display text-muted-foreground mt-1">Gerencie cursos, módulos e aulas da área de membros</p>
+            </div>
 
-      <div className="relative z-[1] mx-auto w-full max-w-[1200px] space-y-10 pb-12">
-        {/* ═══ Hero Header ═══ */}
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div className="flex items-center gap-4 mb-2">
-                <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl shadow-primary/20 ring-2 ring-primary/10">
-                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-display font-black tracking-[-0.04em] text-foreground">Conteúdo</h1>
-                  <p className="text-sm font-display text-muted-foreground mt-1">Gerencie cursos, módulos e aulas da sua área de membros</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
-              <Button onClick={openNew} className="gap-2.5 rounded-2xl text-base font-display font-bold h-12 px-7 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 active:scale-[0.985] transition-all duration-300">
-                <Plus className="h-5 w-5" /> Novo Curso
-              </Button>
-            </motion.div>
+            <Button onClick={openNew} className="gap-2 rounded-xl text-sm font-display font-bold h-10 px-5 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.985] transition-all duration-300">
+              <Plus className="h-4 w-4" /> Novo Curso
+            </Button>
           </div>
 
           {/* ── Stats Row ── */}
           {totalCourses > 0 && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <StatPill icon={BookOpen} label="Total de cursos" value={totalCourses} color="primary" />
-              <StatPill icon={Flame} label="Cursos publicados" value={publishedCourses} color="success" trend={publishedCourses > 0 ? "Live" : undefined} />
+              <StatPill icon={Flame} label="Publicados" value={publishedCourses} color="success" trend={publishedCourses > 0 ? "Live" : undefined} />
               <StatPill icon={Video} label="Total de aulas" value={totalLessons} color="info" />
               <StatPill icon={DollarSign} label="Receita total" value={fmt(totalRevenue)} color="warning" />
             </div>
