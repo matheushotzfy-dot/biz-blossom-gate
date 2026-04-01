@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Building2, Zap, PieChart, Banknote, FileText, Landmark } from "lucide-react";
+import { Building2, Landmark, Zap, PieChart, Banknote, FileText } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
-import DadosBancarios from "./DadosBancarios";
-import Taxas from "./Taxas";
-import ControleGastos from "./ControleGastos";
-import Antecipacao from "./Antecipacao";
-import NotasFiscais from "./NotasFiscais";
-import Adquirente from "./Adquirente";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+const DadosBancarios = lazy(() => import("./DadosBancarios"));
+const Adquirente = lazy(() => import("./Adquirente"));
+const Taxas = lazy(() => import("./Taxas"));
+const ControleGastos = lazy(() => import("./ControleGastos"));
+const Antecipacao = lazy(() => import("./Antecipacao"));
+const NotasFiscais = lazy(() => import("./NotasFiscais"));
 
 const TABS: HubTab[] = [
   { id: "dados", label: "Dados Bancários", icon: Building2 },
@@ -17,7 +20,7 @@ const TABS: HubTab[] = [
   { id: "nfe", label: "Notas Fiscais", icon: FileText },
 ];
 
-const COMPONENTS: Record<string, React.FC> = {
+const COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   dados: DadosBancarios,
   adquirente: Adquirente,
   taxas: Taxas,
@@ -26,6 +29,12 @@ const COMPONENTS: Record<string, React.FC> = {
   nfe: NotasFiscais,
 };
 
+const Loading = () => (
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  </div>
+);
+
 export default function ConfigFinanceiro() {
   const [tab, setTab] = useState("dados");
   const ActiveComponent = COMPONENTS[tab];
@@ -33,7 +42,9 @@ export default function ConfigFinanceiro() {
   return (
     <>
       <HubTabs tabs={TABS} active={tab} onChange={setTab} />
-      <ActiveComponent />
+      <Suspense fallback={<Loading />}>
+        <ActiveComponent />
+      </Suspense>
     </>
   );
 }

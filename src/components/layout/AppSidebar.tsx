@@ -19,6 +19,8 @@ import {
   FlaskConical,
   MessageSquare,
   Store,
+  Repeat,
+  Ticket,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -65,19 +67,11 @@ type SidebarSection = {
 
 function getMilestone(revenue: number) {
   const lastMilestone = MILESTONES[MILESTONES.length - 1];
-
   if (revenue >= lastMilestone.value) {
-    return {
-      current: lastMilestone,
-      next: lastMilestone,
-      pct: 100,
-      tier: MILESTONES.length - 1,
-    };
+    return { current: lastMilestone, next: lastMilestone, pct: 100, tier: MILESTONES.length - 1 };
   }
-
   let current = MILESTONES[0];
   let next = MILESTONES[1];
-
   for (let i = 0; i < MILESTONES.length - 1; i++) {
     if (revenue >= MILESTONES[i].value && revenue < MILESTONES[i + 1].value) {
       current = MILESTONES[i];
@@ -85,26 +79,15 @@ function getMilestone(revenue: number) {
       break;
     }
   }
-
   const range = next.value - current.value;
   const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
-
   return { current, next, pct, tier: MILESTONES.indexOf(current) };
 }
 
 function formatRevenue(revenue: number) {
-  if (revenue >= 1000000) {
-    return `R$ ${(revenue / 1000000).toFixed(2).replace(".", ",")}M`;
-  }
-
-  if (revenue >= 1000) {
-    return `R$ ${(revenue / 1000).toFixed(1).replace(".", ",")}K`;
-  }
-
-  return `R$ ${revenue.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  if (revenue >= 1000000) return `R$ ${(revenue / 1000000).toFixed(2).replace(".", ",")}M`;
+  if (revenue >= 1000) return `R$ ${(revenue / 1000).toFixed(1).replace(".", ",")}K`;
+  return `R$ ${revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function isItemActive(pathname: string, item: SidebarItem) {
@@ -124,9 +107,11 @@ const sections: SidebarSection[] = [
     label: "INFOPRODUTOS",
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
-      { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
-      { title: "Marketplace", url: "/marketplace", icon: Store, exact: true },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
+      { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
+      { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
+      { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat },
+      { title: "Marketplace", url: "/marketplace", icon: Store, exact: true },
     ],
   },
   {
@@ -138,19 +123,19 @@ const sections: SidebarSection[] = [
     ],
   },
   {
-    label: "SISTEMA",
+    label: "FERRAMENTAS",
     items: [
-      { title: "Integrações", url: "/integracoes", icon: Puzzle },
       { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
-      { title: "Suporte", url: "/suporte", icon: MessageSquare },
-      { title: "Meu Perfil", url: "/perfil", icon: User },
+      { title: "Integrações", url: "/integracoes", icon: Puzzle },
     ],
   },
   {
-    label: "COMPRAS",
+    label: "CONTA",
     items: [
+      { title: "Meu Perfil", url: "/perfil", icon: User },
       { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
       { title: "Premiações", url: "/premiacoes", icon: Trophy },
+      { title: "Suporte", url: "/suporte", icon: MessageSquare },
     ],
   },
 ];
@@ -163,9 +148,7 @@ type RevenueCardProps = {
 };
 
 function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
-  if (collapsed) {
-    return null;
-  }
+  if (collapsed) return null;
 
   return (
     <button type="button" className="mt-5 block w-full text-left" onClick={onOpenRewards}>
@@ -174,7 +157,6 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sidebar-primary/15 bg-sidebar-primary/10">
             <Zap className="h-4.5 w-4.5 text-sidebar-primary" />
           </div>
-
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/55">Faturamento</p>
             <p className="mt-1 text-[18px] font-black leading-none tracking-tight text-sidebar-accent-foreground">
@@ -182,20 +164,17 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
             </p>
           </div>
         </div>
-
         <div className="space-y-2.5">
           <div className="flex items-center justify-between text-[11px] font-semibold">
             <span className="text-sidebar-primary">{milestone.current.label}</span>
             <span className="text-sidebar-foreground/35">Meta: {milestone.next.label}</span>
           </div>
-
           <div className="h-2.5 rounded-full bg-sidebar-border/45">
             <div
               className="h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/75 transition-[width] duration-700 ease-out"
               style={{ width: `${milestone.pct}%` }}
             />
           </div>
-
           <div className="pt-0.5">
             <p className="text-[12px] font-black text-sidebar-primary">{milestone.pct.toFixed(0)}%</p>
             <p className="mt-2 text-center text-[11px] font-semibold text-sidebar-primary/75">Ver Premiações</p>
@@ -218,7 +197,6 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
         <SidebarMenu className="gap-1.5 px-0">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
-
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild className="h-auto rounded-[20px] p-0 hover:bg-transparent active:bg-transparent">
@@ -236,7 +214,6 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     {isActive && (
                       <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
-
                     <span
                       className={cn(
                         "flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border transition-all duration-200",
@@ -247,17 +224,14 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     >
                       <item.icon className="h-[18px] w-[18px]" />
                     </span>
-
                     <span className={cn("truncate group-data-[collapsible=icon]:hidden", isActive && "font-black")}>
                       {item.title}
                     </span>
-
                     {item.badge && (
                       <span className="ml-auto rounded-full bg-sidebar-primary/12 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
                         {item.badge}
                       </span>
                     )}
-
                     {isActive && (
                       <ChevronRight className="ml-1 h-4 w-4 text-sidebar-primary/55 group-data-[collapsible=icon]:hidden" />
                     )}
@@ -282,29 +256,19 @@ export function AppSidebar() {
 
   useEffect(() => {
     let ignore = false;
-
-    if (!user?.id) {
-      setRevenue(0);
-      return;
-    }
-
+    if (!user?.id) { setRevenue(0); return; }
     const loadRevenue = async () => {
       const { data } = await supabase
         .from("transactions")
         .select("net_amount")
         .eq("user_id", user.id)
         .eq("status", "completed");
-
       if (!ignore && data) {
-        setRevenue(data.reduce((sum, transaction) => sum + Number(transaction.net_amount ?? 0), 0));
+        setRevenue(data.reduce((sum, t) => sum + Number(t.net_amount ?? 0), 0));
       }
     };
-
     void loadRevenue();
-
-    return () => {
-      ignore = true;
-    };
+    return () => { ignore = true; };
   }, [user?.id]);
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
@@ -323,20 +287,13 @@ export function AppSidebar() {
           <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[22px] border border-sidebar-primary/15 bg-card ring-1 ring-sidebar-primary/20 shadow-lg">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
-
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
               HOTZFY
             </h1>
           </div>
         </div>
-
-        <RevenueCard
-          collapsed={collapsed}
-          revenue={revenue}
-          milestone={milestone}
-          onOpenRewards={() => navigate("/premiacoes")}
-        />
+        <RevenueCard collapsed={collapsed} revenue={revenue} milestone={milestone} onOpenRewards={() => navigate("/premiacoes")} />
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3">

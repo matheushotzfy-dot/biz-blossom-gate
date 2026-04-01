@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
-  CreditCard, Layers, Webhook, BookOpen, Trophy, Bitcoin, Zap,
-  Building2, UserCircle, ArrowDownToLine, GraduationCap, User, LogOut, X, PieChart, Puzzle, FileText,
+  Layers, Trophy, Zap, Users, Ticket, Repeat,
+  Building2, ArrowDownToLine, GraduationCap, User, LogOut, X,
+  FileText, Puzzle, FlaskConical, MessageSquare, Store, TrendingUp,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -20,32 +21,35 @@ const moreGroups = [
   {
     label: "Infoprodutos",
     items: [
-      { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
-      { title: "Afiliados", url: "/vendas/afiliados", icon: GraduationCap },
-      { title: "Coproduções", url: "/vendas/coproducoes", icon: Package },
+      { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
+      { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
+      { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat },
+      { title: "Marketplace", url: "/marketplace", icon: Store },
     ],
   },
   {
     label: "Financeiro",
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
-      { title: "Banco", url: "/financeiro/dados-bancarios", icon: Building2 },
-      { title: "Crypto", url: "/financeiro/saques-crypto", icon: Bitcoin },
-      { title: "Taxas", url: "/financeiro/taxas", icon: Zap },
-      { title: "Gastos", url: "/financeiro/gastos", icon: PieChart },
-      { title: "KYC", url: "/financeiro/identidade", icon: UserCircle },
+      { title: "Config", url: "/financeiro/config", icon: Building2 },
+      { title: "Analytics", url: "/analytics", icon: TrendingUp },
     ],
   },
   {
-    label: "Sistema",
+    label: "Ferramentas",
     items: [
-      { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
-      { title: "Apps", url: "/integracoes/apps", icon: Puzzle },
-      { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
+      { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
+      { title: "Integrações", url: "/integracoes", icon: Puzzle },
+    ],
+  },
+  {
+    label: "Conta",
+    items: [
       { title: "Perfil", url: "/perfil", icon: User },
       { title: "Compras", url: "/membros", icon: GraduationCap },
       { title: "Premiações", url: "/premiacoes", icon: Trophy },
+      { title: "Suporte", url: "/suporte", icon: MessageSquare },
     ],
   },
 ];
@@ -62,16 +66,13 @@ export function MobileBottomNav() {
 
   return (
     <>
-      {/* More sheet */}
       {moreOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setMoreOpen(false)} />
           <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-3xl max-h-[80vh] overflow-y-auto animate-slide-up shadow-2xl">
-            {/* Handle bar */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="h-1 w-10 rounded-full bg-border" />
             </div>
-
             <div className="flex items-center justify-between px-5 pt-2 pb-3">
               <h2 className="text-lg font-display font-black text-foreground">Navegação</h2>
               <button
@@ -81,7 +82,6 @@ export function MobileBottomNav() {
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
-
             <div className="px-4 pb-8 space-y-5">
               {moreGroups.map((group) => (
                 <div key={group.label}>
@@ -114,7 +114,6 @@ export function MobileBottomNav() {
                   </div>
                 </div>
               ))}
-
               <button
                 onClick={handleLogout}
                 className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl text-destructive bg-destructive/8 border border-destructive/15 text-sm font-bold mt-3"
@@ -126,7 +125,6 @@ export function MobileBottomNav() {
         </div>
       )}
 
-      {/* Bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
         <div className="bg-card/95 backdrop-blur-xl border-t border-border/80">
           <div className="flex items-center justify-around px-2 py-1 safe-area-bottom">
@@ -136,17 +134,12 @@ export function MobileBottomNav() {
                 ? moreOpen
                 : location.pathname === tab.path ||
                   (tab.path !== "/dashboard" && location.pathname.startsWith(tab.path));
-
               return (
                 <button
                   key={tab.path}
                   onClick={() => {
-                    if (isMore) {
-                      setMoreOpen(!moreOpen);
-                    } else {
-                      setMoreOpen(false);
-                      navigate(tab.path);
-                    }
+                    if (isMore) { setMoreOpen(!moreOpen); }
+                    else { setMoreOpen(false); navigate(tab.path); }
                   }}
                   className={cn(
                     "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
@@ -159,10 +152,7 @@ export function MobileBottomNav() {
                   )}>
                     <tab.icon className="h-[18px] w-[18px]" />
                   </div>
-                  <span className={cn(
-                    "text-[10px] font-semibold",
-                    isActive && "font-bold text-primary"
-                  )}>
+                  <span className={cn("text-[10px] font-semibold", isActive && "font-bold text-primary")}>
                     {tab.label}
                   </span>
                 </button>
