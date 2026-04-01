@@ -368,10 +368,9 @@ export default function Extrato() {
           <button
             onClick={async () => {
               const now = new Date();
-              const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
               const { data: { session } } = await (await import("@/integrations/supabase/client")).supabase.auth.getSession();
               if (!session) { toast.error("Faça login primeiro"); return; }
-              const url = `https://${projectId}.supabase.co/functions/v1/export-report?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
+              const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-report?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
               const res = await fetch(url, { headers: { authorization: `Bearer ${session.access_token}` } });
               if (!res.ok) { toast.error("Erro ao gerar relatório"); return; }
               const blob = await res.blob();
