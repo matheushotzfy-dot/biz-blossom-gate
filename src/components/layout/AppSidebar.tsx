@@ -53,7 +53,7 @@ const MILESTONES = [
 ];
 
 type SidebarItem = {
-  title: string;
+  title: string | React.ReactNode;
   url: string;
   icon: LucideIcon;
   badge?: string;
@@ -106,12 +106,12 @@ const sections: SidebarSection[] = [
   {
     label: "INFOPRODUTOS",
     items: [
-      { title: "Produtos", url: "/vendas/produtos", icon: Package },
-      { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
+      { title: "Meus Produtos", url: "/vendas/produtos", icon: Package },
+      { title: "Área De Membros", url: "/vendas/conteudo", icon: Layers },
       { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
       { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
       { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat },
-      { title: "Marketplace", url: "/marketplace", icon: Store, exact: true },
+      { title: (<span>Vitrine De Produtos<br /></span>), url: "/marketplace", icon: Store, exact: true },
     ],
   },
   {
@@ -119,14 +119,14 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
       { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },
-      { title: "Configurações", url: "/financeiro/config", icon: Building2 },
+      { title: (<span>Financeiro<br /></span>), url: "/financeiro/config", icon: Building2 },
     ],
   },
   {
     label: "FERRAMENTAS",
     items: [
       // { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
-      { title: "Integrações", url: "/integracoes", icon: Puzzle },
+      { title: "Apps & Integrações", url: "/integracoes", icon: Puzzle },
     ],
   },
   {
@@ -158,7 +158,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
             <Zap className="h-4.5 w-4.5 text-sidebar-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/55">Faturamento</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/55">FATURAMENTO TOTAL</p>
             <p className="mt-1 text-[18px] font-black leading-none tracking-tight text-sidebar-accent-foreground">
               {formatRevenue(revenue)}
             </p>
@@ -167,7 +167,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
         <div className="space-y-2.5">
           <div className="flex items-center justify-between text-[11px] font-semibold">
             <span className="text-sidebar-primary">{milestone.current.label}</span>
-            <span className="text-sidebar-foreground/35">Meta: {milestone.next.label}</span>
+            <span className="text-sidebar-foreground/35">Meta Atual: {milestone.next.label}</span>
           </div>
           <div className="h-2.5 rounded-full bg-sidebar-border/45">
             <div
@@ -198,7 +198,7 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.url}>
                 <SidebarMenuButton asChild className="h-auto rounded-[20px] p-0 hover:bg-transparent active:bg-transparent">
                   <NavLink
                     to={item.url}
@@ -318,7 +318,7 @@ export function AppSidebar() {
           </div>
           <div>
             <span className="block text-[13px] font-black text-sidebar-accent-foreground">Solicitar Suporte</span>
-            <span className="text-[11px] text-sidebar-foreground/70">Para escalar seu negócio</span>
+            <span className="text-[11px] text-sidebar-foreground/70">24/07 ao seu dispor!</span>
           </div>
         </button>
 
