@@ -15,6 +15,80 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
   console.log(`[podpay-postback] ${message}`, JSON.stringify(safe));
 }
 
+/**
+ * Auto-split: when a transaction completes, check if the product has an active
+ * co-production and credit the co-producer's ledger with their share.
+ */
+async function processCoProductionSplit(supabase: any, transactionId: string) {
+  try {
+    // Get the completed transaction
+    const { data: tx } = await supabase
+      .from('transactions')
+      .select('id, product_id, net_amount, user_id')
+      .eq('id', transactionId)
+      .single();
+
+    if (!tx?.product_id) return;
+
+    // Check for active co-production on this product
+    const { data: coProd } = await supabase
+      .from('co_productions')
+      .select('id, co_producer_user_id, split_percentage, owner_user_id')
+      .eq('product_id', tx.product_id)
+      .eq('status', 'accepted')
+      .maybeSingle();
+
+    if (!coProd || !coProd.co_producer_user_id) return;
+
+    const splitAmount = Math.round(tx.net_amount * coProd.split_percentage) / 100;
+    if (splitAmount <= 0) return;
+
+    const idemKey = `split_${transactionId}_${coProd.id}`;
+
+    // Check idempotency
+    const { data: existing } = await supabase
+      .from('financial_ledger')
+      .select('id')
+      .eq('idempotency_key', idemKey)
+      .maybeSingle();
+
+    if (existing) return; // Already processed
+
+    // Get co-producer's current balance
+    const { data: balanceResult } = await supabase.rpc('get_ledger_balance', { _user_id: coProd.co_producer_user_id });
+    const coProducerBalance = Number(balanceResult) || 0;
+
+    // Credit co-producer
+    await supabase.from('financial_ledger').insert({
+      user_id: coProd.co_producer_user_id,
+      transaction_id: transactionId,
+      entry_type: 'credit',
+      amount: splitAmount,
+      balance_after: coProducerBalance + splitAmount,
+      description: `Coprodução: ${coProd.split_percentage}% da venda`,
+      idempotency_key: idemKey,
+    });
+
+    // Debit owner (adjust their balance down by the split amount)
+    const { data: ownerBalance } = await supabase.rpc('get_ledger_balance', { _user_id: coProd.owner_user_id });
+    const ownerBal = Number(ownerBalance) || 0;
+
+    await supabase.from('financial_ledger').insert({
+      user_id: coProd.owner_user_id,
+      transaction_id: transactionId,
+      entry_type: 'split_debit',
+      amount: splitAmount,
+      balance_after: ownerBal - splitAmount,
+      description: `Split coprodução: ${coProd.split_percentage}% para co-produtor`,
+      idempotency_key: `split_debit_${transactionId}_${coProd.id}`,
+    });
+
+    safeLog('Co-production split processed', { transactionId, status: `split ${coProd.split_percentage}%` });
+  } catch (err) {
+    safeLog('Co-production split error', { error: err instanceof Error ? err.message : 'unknown' });
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
