@@ -231,8 +231,14 @@ function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit,
           </div>
 
           {/* Product + Revenue pills */}
-          {(product || revenue > 0) && (
+          {(product || revenue > 0 || studentCount > 0) && (
             <div className="flex flex-wrap gap-2">
+              {studentCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-info/5 border border-info/10">
+                  <Users className="h-3 w-3 text-info" />
+                  <span className="text-[10px] font-display font-bold text-info tabular-nums">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
+                </div>
+              )}
               {product && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
                   <LinkIcon className="h-3 w-3 text-primary" />
