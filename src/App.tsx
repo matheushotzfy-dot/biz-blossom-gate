@@ -128,7 +128,7 @@ const App = () => (
                 <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
-                <Route path="/otimizacao" element={<VendasHub />} />
+                {/* <Route path="/otimizacao" element={<VendasHub />} /> */}
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />

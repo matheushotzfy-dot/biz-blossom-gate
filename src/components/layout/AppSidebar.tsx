@@ -125,7 +125,7 @@ const sections: SidebarSection[] = [
   {
     label: "FERRAMENTAS",
     items: [
-      { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
+      // { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
       { title: "Integrações", url: "/integracoes", icon: Puzzle },
     ],
   },
