@@ -628,10 +628,10 @@ export default function Dashboard() {
 
           {/* Hero metrics */}
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Realizadas" value={privacy.hidden ? CENSORED : fmt(revenue)} tone="primary" idx={0} />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Qtd. de Vendas" value={privacy.hidden ? CENSORED : String(approved.length)} tone="info" idx={1} />
+            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Total Faturado" value={privacy.hidden ? CENSORED : fmt(revenue)} tone="primary" idx={0} />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Vendas Realizadas" value={privacy.hidden ? CENSORED : String(approved.length)} tone="info" idx={1} />
             <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} tone="success" idx={2} />
-            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={privacy.hidden ? CENSORED : `${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
+            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo Disponível" value={privacy.hidden ? CENSORED : `${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
           </div>
         </div>
       </section>
