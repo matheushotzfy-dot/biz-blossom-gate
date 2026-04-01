@@ -126,9 +126,9 @@ function StatPill({ icon: Icon, label, value, color = "primary", trend }: {
 }
 
 // ─── Course Card (Cinematic) ─────────────────────────────────────
-function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink, index }: {
+function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink, index }: {
   course: Course; stats: { modules: number; lessons: number }; product?: Product;
-  revenue: number; onEdit: () => void; onNavigate: () => void;
+  revenue: number; studentCount?: number; onEdit: () => void; onNavigate: () => void;
   onTogglePublish: () => void; onDelete: () => void; onCopyLink: () => void;
   getMemberLink: string; index: number;
 }) {
