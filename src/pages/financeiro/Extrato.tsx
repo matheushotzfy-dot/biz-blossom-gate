@@ -364,17 +364,42 @@ export default function Extrato() {
       {/* ─── Header ─── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <PageTitle icon={<Receipt className="h-6 w-6" />} title="Extrato" subtitle="Histórico completo de transações" />
-        <button
-          onClick={handleExportCSV}
-          className={cn(
-            "h-9 px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-2",
-            "bg-card/50 backdrop-blur-xl border border-border/30 text-muted-foreground/60",
-            "hover:text-foreground hover:border-border/50 hover:shadow-[0_4px_12px_hsl(var(--foreground)/0.04)]",
-            "active:scale-[0.985] transition-all duration-300"
-          )}
-        >
-          <Download className="h-3.5 w-3.5" /> Exportar CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              const now = new Date();
+              const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+              const { data: { session } } = await (await import("@/integrations/supabase/client")).supabase.auth.getSession();
+              if (!session) { toast.error("Faça login primeiro"); return; }
+              const url = `https://${projectId}.supabase.co/functions/v1/export-report?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
+              const res = await fetch(url, { headers: { authorization: `Bearer ${session.access_token}` } });
+              if (!res.ok) { toast.error("Erro ao gerar relatório"); return; }
+              const blob = await res.blob();
+              const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+              a.download = `relatorio_mensal_${now.getFullYear()}.csv`; a.click();
+              toast.success("Relatório exportado!");
+            }}
+            className={cn(
+              "h-9 px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-2",
+              "bg-primary/10 border border-primary/20 text-primary",
+              "hover:bg-primary/15 hover:border-primary/30 hover:shadow-[0_4px_12px_hsl(var(--primary)/0.1)]",
+              "active:scale-[0.985] transition-all duration-300"
+            )}
+          >
+            <FileText className="h-3.5 w-3.5" /> Relatório Mensal
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className={cn(
+              "h-9 px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-2",
+              "bg-card/50 backdrop-blur-xl border border-border/30 text-muted-foreground/60",
+              "hover:text-foreground hover:border-border/50 hover:shadow-[0_4px_12px_hsl(var(--foreground)/0.04)]",
+              "active:scale-[0.985] transition-all duration-300"
+            )}
+          >
+            <Download className="h-3.5 w-3.5" /> Exportar CSV
+          </button>
+        </div>
       </div>
 
       {/* ─── KPIs ─── */}
