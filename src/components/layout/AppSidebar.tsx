@@ -318,7 +318,7 @@ export function AppSidebar() {
           </div>
           <div>
             <span className="block text-[13px] font-black text-sidebar-accent-foreground">Solicitar Suporte</span>
-            <span className="text-[11px] text-sidebar-foreground/70">Para escalar seu negócio</span>
+            <span className="text-[11px] text-sidebar-foreground/70">24/07 ao seu dispor!</span>
           </div>
         </button>
 

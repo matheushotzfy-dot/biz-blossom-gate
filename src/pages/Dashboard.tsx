@@ -701,7 +701,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
-              { label: "Conteúdo", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
+              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
               { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
               { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
               { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
