@@ -86,12 +86,12 @@ export default function DashboardAfiliado() {
 
   return (
     <PageShell>
-      <PageTitle icon={Award}>Painel do Afiliado</PageTitle>
+      <PageTitle icon={<Award className="h-6 w-6" />} title="Painel do Afiliado" subtitle="Suas métricas de afiliado" />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-        <GlassKpi icon={MousePointerClick} label="Cliques" value={stats.totalClicks} />
-        <GlassKpi icon={ShoppingCart} label="Vendas" value={stats.totalSales} />
+        <GlassKpi icon={MousePointerClick} label="Cliques" value={String(stats.totalClicks)} />
+        <GlassKpi icon={ShoppingCart} label="Vendas" value={String(stats.totalSales)} />
         <GlassKpi icon={Target} label="Conversão" value={`${stats.conversionRate.toFixed(1)}%`} />
         <GlassKpi icon={DollarSign} label="Comissões Pagas" value={fmt(stats.totalCommission)} />
         <GlassKpi icon={TrendingUp} label="Comissões Pendentes" value={fmt(stats.pendingCommission)} />

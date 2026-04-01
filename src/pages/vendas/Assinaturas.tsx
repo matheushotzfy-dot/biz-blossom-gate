@@ -233,7 +233,7 @@ export default function Assinaturas() {
       {tab === "subscribers" && (
         <Panel>
           {subs.length === 0 && !loading ? (
-            <EmptyState icon={Users} title="Nenhum assinante" description="Seus assinantes aparecerão aqui quando começarem a assinar seus planos." />
+            <EmptyState icon={<Users className="h-10 w-10" />} title="Nenhum assinante" subtitle="Seus assinantes aparecerão aqui quando começarem a assinar seus planos." />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
