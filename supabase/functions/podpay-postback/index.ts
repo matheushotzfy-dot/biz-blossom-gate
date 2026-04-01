@@ -171,6 +171,10 @@ Deno.serve(async (req) => {
           safeLog('Error updating transaction', { transactionId: tx.id, error: error.message });
         } else {
           safeLog('Transaction updated', { transactionId: tx.id, status: ourStatus });
+          // === AUTO SPLIT: process co-production split on completed payment ===
+          if (ourStatus === 'completed') {
+            await processCoProductionSplit(supabase, tx.id);
+          }
         }
       }
     }
