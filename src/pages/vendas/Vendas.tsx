@@ -7,7 +7,7 @@ import {
   RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
   Download, Smartphone, FileText, BarChart3, ArrowDownRight, Zap, Filter,
   MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
-  Wallet, Target,
+  Wallet, Target, PieChart, Award, Activity, TrendingDown,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,7 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { format, subDays, startOfDay, endOfDay, isWithinInterval } from "date-fns";
+import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DateRange } from "react-day-picker";
@@ -101,35 +101,45 @@ function StatusDot({ status }: { status: string }) {
   );
 }
 
-/* ─── MiniHeroCard (same as Dashboard) ─── */
-function MiniHeroCard({ icon, label, value, tone, idx }: {
-  icon: React.ReactNode; label: string; value: string;
-  tone: "primary" | "info" | "success" | "warning";
-  idx: number;
-}) {
-  const toneMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
-    primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
-    info: { accent: "bg-info", iconBg: "bg-info/10", iconText: "text-info", ring: "ring-info/20" },
-    success: { accent: "bg-success", iconBg: "bg-success/10", iconText: "text-success", ring: "ring-success/20" },
-    warning: { accent: "bg-warning", iconBg: "bg-warning/10", iconText: "text-warning", ring: "ring-warning/20" },
-  };
-  const t = toneMap[tone] || toneMap.primary;
-
+/* ─── Revenue Bar (inline mini chart) ─── */
+function RevenueBar({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
+  const pct = total > 0 ? (value / total) * 100 : 0;
   return (
-    <div
-      className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-4 md:p-5 animate-fade-in"
-      style={{ animationDelay: `${idx * 60}ms` }}
-    >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", t.accent)} />
-      <div className="pl-1.5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", t.iconBg, t.ring)}>
-            <span className={t.iconText}>{icon}</span>
-          </div>
-        </div>
-        <p className="font-display font-black text-foreground text-[22px] md:text-2xl tracking-[-0.03em] tabular-nums">{value}</p>
+    <div className="flex items-center gap-3">
+      <span className="text-[11px] font-semibold text-muted-foreground w-[52px] shrink-0">{label}</span>
+      <div className="flex-1 h-2.5 rounded-full bg-muted/30 overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className={cn("h-full rounded-full", color)}
+        />
       </div>
+      <span className="text-[11px] font-bold text-foreground tabular-nums w-[70px] text-right">{fmt(value)}</span>
+      <span className="text-[9px] text-muted-foreground/50 w-[36px] text-right tabular-nums">{pct.toFixed(0)}%</span>
+    </div>
+  );
+}
+
+/* ─── Top Product Row ─── */
+function TopProductRow({ rank, name, revenue, sales, maxRevenue }: { rank: number; name: string; revenue: number; sales: number; maxRevenue: number }) {
+  const pct = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
+  const medalColors = ["text-warning", "text-muted-foreground/60", "text-[#cd7f32]"];
+  return (
+    <div className="flex items-center gap-3 py-2">
+      <span className={cn("text-[13px] font-black tabular-nums w-5 text-center", rank <= 3 ? medalColors[rank - 1] : "text-muted-foreground/30")}>
+        {rank}
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[12px] font-semibold text-foreground truncate">{name}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="flex-1 h-1.5 rounded-full bg-muted/20 overflow-hidden">
+            <div className="h-full rounded-full bg-primary/60" style={{ width: `${pct}%` }} />
+          </div>
+          <span className="text-[10px] text-muted-foreground/60 tabular-nums shrink-0">{sales} vendas</span>
+        </div>
+      </div>
+      <span className="text-[12px] font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
     </div>
   );
 }
@@ -195,11 +205,14 @@ function TxRow({ tx, products, onClick, index }: {
       <td className="p-4">
         <div>
           <span className="font-display font-black text-foreground text-[15px] block tracking-[-0.02em] tabular-nums">
-            {fmt(Number(tx.net_amount))}
+            {fmt(Number(tx.amount))}
           </span>
-          {Number(tx.fee_amount) > 0 && (
-            <span className="text-[10px] text-muted-foreground/50 font-medium">taxa: {fmt(Number(tx.fee_amount))}</span>
-          )}
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-muted-foreground/50 font-medium">líq: {fmt(Number(tx.net_amount))}</span>
+            {Number(tx.fee_amount) > 0 && (
+              <span className="text-[10px] text-destructive/50 font-medium">-{fmt(Number(tx.fee_amount))}</span>
+            )}
+          </div>
         </div>
       </td>
       <td className="p-4">
@@ -304,8 +317,9 @@ function TxCard({ tx, products, onClick, index }: {
       <div className="flex items-end justify-between">
         <div>
           <p className="text-foreground font-display font-bold text-xl leading-none">
-            {fmt(Number(tx.net_amount))}
+            {fmt(Number(tx.amount))}
           </p>
+          <p className="text-[10px] text-muted-foreground/50 mt-0.5">líq: {fmt(Number(tx.net_amount))}</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-muted-foreground text-[10px] bg-muted/50 px-2 py-0.5 rounded font-semibold uppercase tracking-wider">
               {methodLabels[tx.payment_method || ""] || tx.payment_method || "—"}
@@ -544,7 +558,6 @@ export default function Vendas() {
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, selectedPeriod, isCustom, customRange]);
 
-  // Brasilia date helpers
   const brasiliaToday = useCallback(() => {
     const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" });
     const parts = f.formatToParts(new Date());
@@ -596,21 +609,45 @@ export default function Vendas() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod, isCustom, customRange, brasiliaToday, toBrasiliaDate]);
 
-  const { approved, pending, refunded, chargebacks, totalSales, totalGross, avgTicket, conversion } = useMemo(() => {
+  const { approved, pending, refunded, chargebacks, totalSales, totalGross, avgTicket, conversion, totalFees, pixRevenue, cardRevenue, boletoRevenue, topProducts } = useMemo(() => {
     const _approved = dateFiltered.filter((t) => t.status === "completed");
     const _pending = dateFiltered.filter((t) => t.status === "pending");
     const _refunded = dateFiltered.filter((t) => t.status === "refunded");
     const _chargebacks = dateFiltered.filter((t) => t.status === "chargeback");
     const _totalSales = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const _totalGross = _approved.reduce((acc, t) => acc + Number(t.amount), 0);
+    const _totalFees = _approved.reduce((acc, t) => acc + Number(t.fee_amount), 0);
     const _avgTicket = _approved.length > 0 ? _totalSales / _approved.length : 0;
     const _conversion = dateFiltered.length > 0 ? (_approved.length / dateFiltered.length) * 100 : 0;
+
+    // Revenue by method
+    const _pixRevenue = _approved.filter(t => t.payment_method === 'pix').reduce((a, t) => a + Number(t.net_amount), 0);
+    const _cardRevenue = _approved.filter(t => t.payment_method === 'credit_card').reduce((a, t) => a + Number(t.net_amount), 0);
+    const _boletoRevenue = _approved.filter(t => t.payment_method === 'boleto').reduce((a, t) => a + Number(t.net_amount), 0);
+
+    // Top products
+    const productRevMap: Record<string, { revenue: number; sales: number; name: string }> = {};
+    for (const t of _approved) {
+      if (t.product_id) {
+        if (!productRevMap[t.product_id]) {
+          productRevMap[t.product_id] = { revenue: 0, sales: 0, name: products[t.product_id] || t.product_id.slice(0, 8) };
+        }
+        productRevMap[t.product_id].revenue += Number(t.net_amount);
+        productRevMap[t.product_id].sales += 1;
+      }
+    }
+    const _topProducts = Object.entries(productRevMap)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
 
     return {
       approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
       totalSales: _totalSales, totalGross: _totalGross, avgTicket: _avgTicket, conversion: _conversion,
+      totalFees: _totalFees, pixRevenue: _pixRevenue, cardRevenue: _cardRevenue, boletoRevenue: _boletoRevenue,
+      topProducts: _topProducts,
     };
-  }, [dateFiltered]);
+  }, [dateFiltered, products]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -686,7 +723,7 @@ export default function Vendas() {
 
   return (
     <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative animate-fade-in">
-      {/* ─── HERO SECTION (matches Dashboard) ─── */}
+      {/* ─── HERO SECTION ─── */}
       <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
@@ -704,12 +741,11 @@ export default function Vendas() {
                 <h1 className="text-xl md:text-3xl font-display font-black tracking-[-0.04em] leading-[1.05] text-foreground">
                   Minhas <span className="text-gradient">Vendas</span>
                 </h1>
-                <p className="text-[13px] text-muted-foreground/80">Acompanhe todas as suas transações</p>
+                <p className="text-[13px] text-muted-foreground/80">Acompanhe todas as suas transações em detalhe</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
-              {/* Date Picker (same as Dashboard) */}
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button className="inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl border border-border/80 bg-card px-3 md:px-3.5 text-xs md:text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
@@ -728,17 +764,10 @@ export default function Vendas() {
                     {PERIOD_PRESETS.map((option) => (
                       <button
                         key={option.label}
-                        onClick={() => {
-                          setSelectedPeriod(option);
-                          setIsCustom(false);
-                          setCustomRange(undefined);
-                          setDatePickerOpen(false);
-                        }}
+                        onClick={() => { setSelectedPeriod(option); setIsCustom(false); setCustomRange(undefined); setDatePickerOpen(false); }}
                         className={cn(
-                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                          !isCustom && selectedPeriod.label === option.label
-                            ? "bg-primary/10 text-primary font-bold"
-                            : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
+                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all",
+                          !isCustom && selectedPeriod.label === option.label ? "bg-primary/10 text-primary font-bold" : "text-foreground/70 hover:bg-muted/40"
                         )}
                       >
                         {option.label}
@@ -749,35 +778,19 @@ export default function Vendas() {
                       onClick={() => setIsCustom(true)}
                       className={cn(
                         "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all flex items-center gap-2",
-                        isCustom
-                          ? "bg-primary/10 text-primary font-bold"
-                          : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
+                        isCustom ? "bg-primary/10 text-primary font-bold" : "text-foreground/70 hover:bg-muted/40"
                       )}
                     >
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      Personalizado
+                      <CalendarDays className="h-3.5 w-3.5" /> Personalizado
                     </button>
                     {isCustom && (
                       <div className="border-t border-border/20 mt-1.5 pt-1">
                         <Calendar
-                          mode="range"
-                          selected={customRange}
-                          onSelect={(range) => {
-                            setCustomRange(range);
-                            setIsCustom(true);
-                            if (range?.from && range?.to) {
-                              setTimeout(() => setDatePickerOpen(false), 300);
-                            }
-                          }}
-                          numberOfMonths={1}
-                          locale={ptBR}
-                          disabled={(date) => date > new Date()}
-                          className={cn("p-3 pointer-events-auto")}
-                          classNames={{
-                            day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
-                            day_range_middle: "bg-primary/10 text-foreground",
-                            day_range_end: "bg-primary text-primary-foreground",
-                          }}
+                          mode="range" selected={customRange}
+                          onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }}
+                          numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()}
+                          className="p-3 pointer-events-auto"
+                          classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }}
                         />
                         {customRange?.from && (
                           <div className="px-3 pb-2 pt-1 border-t border-border/20 mt-1">
@@ -807,7 +820,7 @@ export default function Vendas() {
             </div>
           </div>
 
-          {/* Hero metrics (same style as Dashboard) */}
+          {/* Hero metrics — Bento Grid */}
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
             <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita Líquida" value={privacyHidden ? CENSORED : fmt(totalSales)} tone="primary" idx={0} />
             <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Faturamento Bruto" value={privacyHidden ? CENSORED : fmt(totalGross)} tone="info" idx={1} />
@@ -817,18 +830,64 @@ export default function Vendas() {
         </div>
       </section>
 
-      {/* ─── HEALTH CARDS (Aprovadas + Pendentes — matches Dashboard) ─── */}
-      <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={privacyHidden ? CENSORED : String(approved.length)} tone="success" />
-        <QualityLine icon={<Clock className="h-4 w-4" />} label="Pendentes" value={privacyHidden ? CENSORED : String(pending.length)} tone="warning" />
-        <QualityLine icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={privacyHidden ? CENSORED : String(refunded.length)} tone="info" />
-        <QualityLine icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={privacyHidden ? CENSORED : String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "success"} />
+      {/* ─── INSIGHTS ROW: Revenue by Method + Top Products + Health ─── */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        {/* Revenue by Payment Method */}
+        <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-4">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+              <PieChart className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-[13px] font-bold text-foreground">Receita por Método</p>
+              <p className="text-[10px] text-muted-foreground/60">Distribuição no período</p>
+            </div>
+          </div>
+          <div className="space-y-2.5">
+            <RevenueBar label="PIX" value={privacyHidden ? 0 : pixRevenue} total={totalSales} color="bg-success" />
+            <RevenueBar label="Cartão" value={privacyHidden ? 0 : cardRevenue} total={totalSales} color="bg-info" />
+            <RevenueBar label="Boleto" value={privacyHidden ? 0 : boletoRevenue} total={totalSales} color="bg-warning" />
+          </div>
+          <div className="pt-2 border-t border-border/20 flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-bold">Total Taxas</span>
+            <span className="text-[12px] font-bold text-destructive/70 tabular-nums">{privacyHidden ? CENSORED : `-${fmt(totalFees)}`}</span>
+          </div>
+        </div>
+
+        {/* Top Products */}
+        <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-warning/10 flex items-center justify-center">
+              <Award className="h-4 w-4 text-warning" />
+            </div>
+            <div>
+              <p className="text-[13px] font-bold text-foreground">Top Produtos</p>
+              <p className="text-[10px] text-muted-foreground/60">Ranking por receita</p>
+            </div>
+          </div>
+          {topProducts.length === 0 ? (
+            <p className="text-[12px] text-muted-foreground/50 py-4 text-center">Sem dados no período</p>
+          ) : (
+            <div className="divide-y divide-border/10">
+              {topProducts.map((p, i) => (
+                <TopProductRow key={p.id} rank={i + 1} name={p.name} revenue={privacyHidden ? 0 : p.revenue} sales={p.sales} maxRevenue={topProducts[0]?.revenue || 1} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Health Status */}
+        <div className="lg:col-span-4 grid grid-cols-2 gap-2.5">
+          <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={privacyHidden ? CENSORED : String(approved.length)} tone="success" />
+          <QualityLine icon={<Clock className="h-4 w-4" />} label="Pendentes" value={privacyHidden ? CENSORED : String(pending.length)} tone="warning" />
+          <QualityLine icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={privacyHidden ? CENSORED : String(refunded.length)} tone="info" />
+          <QualityLine icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={privacyHidden ? CENSORED : String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "success"} />
+        </div>
       </section>
 
       {/* ─── FILTERS ─── */}
       <section className="space-y-3">
         <div className="flex flex-col lg:flex-row gap-3">
-          {/* Search */}
           <div className="relative flex-1 min-w-[280px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
@@ -863,20 +922,12 @@ export default function Vendas() {
                 onClick={() => setStatusFilter(f.value)}
                 className={cn(
                   "shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 border",
-                  isActive
-                    ? cn(style.active, "border-current/15 shadow-sm")
-                    : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/20"
+                  isActive ? cn(style.active, "border-current/15 shadow-sm") : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/20"
                 )}
               >
-                <span className={cn(
-                  "h-2 w-2 rounded-full transition-all",
-                  isActive ? cn(style.dot, "shadow-[0_0_6px_currentColor] animate-pulse") : "bg-muted-foreground/20"
-                )} />
+                <span className={cn("h-2 w-2 rounded-full transition-all", isActive ? cn(style.dot, "shadow-[0_0_6px_currentColor] animate-pulse") : "bg-muted-foreground/20")} />
                 {f.label}
-                <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-md font-bold min-w-[20px] text-center tabular-nums",
-                  isActive ? "bg-foreground/10" : "text-muted-foreground/40"
-                )}>{f.count}</span>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md font-bold min-w-[20px] text-center tabular-nums", isActive ? "bg-foreground/10" : "text-muted-foreground/40")}>{f.count}</span>
               </button>
             );
           })}
@@ -886,9 +937,7 @@ export default function Vendas() {
       {/* Results summary */}
       <div className="flex items-center justify-between px-1">
         <p className="text-[12px] text-muted-foreground/70">
-          {filtered.length === 0
-            ? "Nenhuma transação encontrada"
-            : `Mostrando ${Math.min(visibleCount, filtered.length)} de ${filtered.length} transações`}
+          {filtered.length === 0 ? "Nenhuma transação encontrada" : `Mostrando ${Math.min(visibleCount, filtered.length)} de ${filtered.length} transações`}
         </p>
         {filtered.length > 0 && (
           <p className="text-[12px] text-primary font-medium">{fmt(filtered.reduce((a, t) => a + Number(t.net_amount), 0))} no período</p>
@@ -908,7 +957,7 @@ export default function Vendas() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/30 bg-muted/10">
-                    {["Cliente", "Produto", "Líquido", "Método", "Status", "Data", ""].map((h) => (
+                    {["Cliente", "Produto", "Valor", "Método", "Status", "Data", ""].map((h) => (
                       <th key={h} className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">{h}</th>
                     ))}
                   </tr>
@@ -962,7 +1011,6 @@ export default function Vendas() {
       {selectedTx && (
         <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={handleRefund} />
       )}
-      {/* Export Dialog */}
       <ExportDialog
         open={showExportDialog}
         onOpenChange={setShowExportDialog}
@@ -975,7 +1023,36 @@ export default function Vendas() {
   );
 }
 
-/* ─── QualityLine (same as Dashboard) ─── */
+/* ─── Shared Components ─── */
+
+function MiniHeroCard({ icon, label, value, tone, idx }: {
+  icon: React.ReactNode; label: string; value: string;
+  tone: "primary" | "info" | "success" | "warning"; idx: number;
+}) {
+  const toneMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
+    primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
+    info: { accent: "bg-info", iconBg: "bg-info/10", iconText: "text-info", ring: "ring-info/20" },
+    success: { accent: "bg-success", iconBg: "bg-success/10", iconText: "text-success", ring: "ring-success/20" },
+    warning: { accent: "bg-warning", iconBg: "bg-warning/10", iconText: "text-warning", ring: "ring-warning/20" },
+  };
+  const t = toneMap[tone] || toneMap.primary;
+
+  return (
+    <div className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-4 md:p-5 animate-fade-in" style={{ animationDelay: `${idx * 60}ms` }}>
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", t.accent)} />
+      <div className="pl-1.5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", t.iconBg, t.ring)}>
+            <span className={t.iconText}>{icon}</span>
+          </div>
+        </div>
+        <p className="font-display font-black text-foreground text-[22px] md:text-2xl tracking-[-0.03em] tabular-nums">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
   const styles: Record<string, { bg: string; text: string; ring: string }> = {
     success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/20" },
@@ -985,9 +1062,9 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
   };
 
   return (
-    <div className="flex items-center gap-3.5 rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl px-4 py-3.5 transition-all duration-200 hover:bg-card hover:border-border/80">
-      <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1", styles[tone].bg, styles[tone].text, styles[tone].ring)}>{icon}</div>
-      <span className="flex-1 text-[13px] font-semibold text-foreground/80">{label}</span>
+    <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl px-4 py-3.5 transition-all duration-200 hover:bg-card hover:border-border/80">
+      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 shrink-0", styles[tone].bg, styles[tone].text, styles[tone].ring)}>{icon}</div>
+      <span className="flex-1 text-[12px] font-semibold text-foreground/80">{label}</span>
       <span className="text-base font-display font-black text-foreground tabular-nums tracking-tight">{value}</span>
     </div>
   );
