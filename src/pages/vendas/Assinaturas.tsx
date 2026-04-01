@@ -201,7 +201,7 @@ export default function Assinaturas() {
       {tab === "plans" && (
         <Panel>
           {plans.length === 0 && !loading ? (
-            <EmptyState icon={Zap} title="Nenhum plano criado" description="Crie seu primeiro plano de assinatura para cobranças recorrentes." />
+            <EmptyState icon={<Zap className="h-10 w-10" />} title="Nenhum plano criado" subtitle="Crie seu primeiro plano de assinatura para cobranças recorrentes." />
           ) : (
             <div className="grid gap-3">
               {(filtered as Plan[]).map(plan => (
