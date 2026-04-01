@@ -676,23 +676,22 @@ export default function Dashboard() {
         </div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          {/* Conversions */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2 flex-1">
+          {/* Conversions + KPIs */}
+          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
               <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ─── KPI TILES ─── */}
-      <section className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
-        <KpiTile icon={<Zap className="h-4 w-4" />} label="Vendas no Pix" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% de conversão · ${pixApprovedCount} de ${pixTotalCount} pedidos`} tone="success" delay="stagger-3" />
-        <KpiTile icon={<CreditCard className="h-4 w-4" />} label="Vendas no Cartão" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% de conversão · ${cardApprovedCount} de ${cardTotalCount} pedidos`} tone="info" delay="stagger-4" />
-        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
-        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
+          <div className="grid grid-cols-2 gap-2.5">
+            <KpiTile icon={<Zap className="h-4 w-4" />} label="Vendas no Pix" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`} tone="success" delay="stagger-3" />
+            <KpiTile icon={<CreditCard className="h-4 w-4" />} label="Vendas no Cartão" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`} tone="info" delay="stagger-4" />
+            <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
+            <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
+          </div>
+        </div>
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
