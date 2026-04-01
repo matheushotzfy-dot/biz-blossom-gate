@@ -142,6 +142,8 @@ const App = () => (
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
+                <Route path="/vendas/assinaturas" element={<Assinaturas />} />
+                <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
