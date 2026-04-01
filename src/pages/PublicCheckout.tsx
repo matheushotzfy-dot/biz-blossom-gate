@@ -480,35 +480,46 @@ export default function PublicCheckout() {
   /* ══════════════════════════════════════════════════════ */
   /* ═══ TELA: APROVADO ═══════════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
-  if (checkoutState === "approved") return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 text-white">
-      <div className="text-center animate-fade-in max-w-md w-full">
-        {/* Confetti-like effect */}
-        <div className="relative mx-auto mb-8 w-28 h-28">
-          <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ backgroundColor: btnColor + "30" }} />
-          <div className="absolute inset-2 rounded-full blur-xl animate-pulse" style={{ backgroundColor: btnColor + "20", animationDelay: "0.5s" }} />
-          <div className="relative h-28 w-28 rounded-full flex items-center justify-center shadow-2xl" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}cc)` }}>
-            <CheckCircle2 className="h-14 w-14 text-white" />
+  if (checkoutState === "approved") {
+    // Redirect to thank you page after a brief celebration
+    const txParam = transactionId ? `?tx=${transactionId}` : "";
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 text-white">
+        <div className="text-center animate-fade-in max-w-md w-full">
+          {/* Confetti-like effect */}
+          <div className="relative mx-auto mb-8 w-28 h-28">
+            <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ backgroundColor: btnColor + "30" }} />
+            <div className="absolute inset-2 rounded-full blur-xl animate-pulse" style={{ backgroundColor: btnColor + "20", animationDelay: "0.5s" }} />
+            <div className="relative h-28 w-28 rounded-full flex items-center justify-center shadow-2xl" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}cc)` }}>
+              <CheckCircle2 className="h-14 w-14 text-white" />
+            </div>
           </div>
+          <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado!</h1>
+          <p className="text-gray-400 mb-8 text-base">
+            Seu acesso foi liberado com sucesso.
+          </p>
+          <div className="rounded-2xl p-6 bg-gray-50 border border-gray-200 mb-6 text-left space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Produto</span>
+              <span className="font-bold">{product.name}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Valor</span>
+              <span className="font-extrabold text-lg" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mb-6">Confirmação enviada para <strong className="text-gray-400">{email}</strong></p>
+          <a
+            href={`/obrigado${txParam}`}
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl text-white font-bold text-sm transition-opacity hover:opacity-90 shadow-xl"
+            style={{ backgroundColor: btnColor }}
+          >
+            Ver detalhes da compra <ArrowRight className="h-4 w-4" />
+          </a>
         </div>
-        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado!</h1>
-        <p className="text-gray-400 mb-8 text-base">
-          Seu acesso foi liberado com sucesso.
-        </p>
-        <div className="rounded-2xl p-6 bg-gray-50 border border-gray-200 mb-6 text-left space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">Produto</span>
-            <span className="font-bold">{product.name}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">Valor</span>
-            <span className="font-extrabold text-lg" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
-          </div>
-        </div>
-        <p className="text-xs text-gray-400">Confirmação enviada para <strong className="text-gray-400">{email}</strong></p>
       </div>
-    </div>
-  );
+    );
+  }
 
   /* ══════════════════════════════════════════════════════ */
   /* ═══ TELA: FALHA ══════════════════════════════════════ */
