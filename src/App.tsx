@@ -21,6 +21,7 @@ import Saques from "./pages/financeiro/Saques";
 import SaquesCrypto from "./pages/financeiro/SaquesCrypto";
 import Taxas from "./pages/financeiro/Taxas";
 import ControleGastos from "./pages/financeiro/ControleGastos";
+import Antecipacao from "./pages/financeiro/Antecipacao";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
