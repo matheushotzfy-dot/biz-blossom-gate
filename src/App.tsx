@@ -80,6 +80,9 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
+              <Route path="/obrigado" element={<ThankYou />} />
+              <Route path="/termos-de-uso" element={<TermosDeUso />} />
+              <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
               {/* Public Member Area (standalone, Netflix-style) */}
