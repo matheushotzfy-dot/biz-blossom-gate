@@ -1,0 +1,24 @@
+{
+  "name": "HOTZFY",
+  "short_name": "HOTZFY",
+  "description": "Plataforma #1 de Infoprodutos do Brasil",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#0fa968",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "finance"],
+  "lang": "pt-BR"
+}
