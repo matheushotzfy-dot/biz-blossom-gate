@@ -274,6 +274,48 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          public_key: string
+          secret_key_hash: string
+          secret_key_prefix: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          public_key: string
+          secret_key_hash: string
+          secret_key_prefix: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          public_key?: string
+          secret_key_hash?: string
+          secret_key_prefix?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_integrations: {
         Row: {
           api_key: string | null
