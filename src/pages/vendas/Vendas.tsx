@@ -8,7 +8,8 @@ import {
   Download, Smartphone, FileText, BarChart3, ArrowDownRight, Zap, Filter,
   MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
   Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
-  Percent, UserCheck, Layers, ArrowUp, ArrowDown,
+  Percent, UserCheck, Layers, ArrowUp, ArrowDown, ChevronUp, Radio, Flame,
+  ArrowUpDown, SortAsc, SortDesc,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,11 +26,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { format, subDays } from "date-fns";
+import { format, subDays, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DateRange } from "react-day-picker";
-import { AreaChart, Area, ResponsiveContainer, Tooltip as ReTooltip, XAxis, YAxis } from "recharts";
+import { AreaChart, Area, ResponsiveContainer, Tooltip as ReTooltip, XAxis, YAxis, Line, ComposedChart, Bar } from "recharts";
 
 /* ─── Formatters ─── */
 const fmt = (v: number) =>
@@ -57,6 +58,8 @@ const fmtTime = (d: string) => {
 };
 
 type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
+type SortField = "date" | "amount" | "net" | "customer";
+type SortDir = "asc" | "desc";
 
 const CENSORED = "••••••";
 
@@ -109,23 +112,98 @@ function StatusDot({ status }: { status: string }) {
   );
 }
 
+/* ─── Sparkline (pure SVG) ─── */
+function Sparkline({ data, color = "hsl(var(--primary))", className }: { data: number[]; color?: string; className?: string }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const h = 24;
+  const w = 60;
+  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className={cn("overflow-visible", className)} style={{ width: w, height: h }}>
+      <defs>
+        <linearGradient id={`spark-${color.replace(/[^a-z0-9]/gi, "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <polygon
+        points={`0,${h} ${points} ${w},${h}`}
+        fill={`url(#spark-${color.replace(/[^a-z0-9]/gi, "")})`}
+      />
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* ─── Hourly Heatmap ─── */
+function HourlyHeatmap({ transactions }: { transactions: Tables<"transactions">[] }) {
+  const hourData = useMemo(() => {
+    const hours = Array(24).fill(0);
+    transactions.filter(t => t.status === "completed").forEach(t => {
+      const h = new Date(t.created_at).getHours();
+      hours[h]++;
+    });
+    const max = Math.max(...hours, 1);
+    return hours.map((count, hour) => ({ hour, count, intensity: count / max }));
+  }, [transactions]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-[3px]">
+        {hourData.map(({ hour, count, intensity }) => (
+          <div key={hour} className="flex-1 group relative">
+            <div
+              className="h-6 rounded-[3px] transition-all duration-300 cursor-default"
+              style={{
+                backgroundColor: intensity > 0
+                  ? `hsl(var(--primary) / ${0.1 + intensity * 0.7})`
+                  : "hsl(var(--muted) / 0.15)",
+              }}
+            />
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+              <div className="bg-popover border border-border rounded-lg px-2 py-1 text-[10px] font-semibold text-foreground whitespace-nowrap shadow-lg">
+                {hour}h: {count} vendas
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between text-[8px] text-muted-foreground/40 font-bold tracking-wider">
+        <span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Revenue Bar (inline mini chart) ─── */
-function RevenueBar({ label, value, total, color, count }: { label: string; value: number; total: number; color: string; count: number }) {
+function RevenueBar({ label, value, total, color, count, icon }: { label: string; value: number; total: number; color: string; count: number; icon: React.ReactNode }) {
   const pct = total > 0 ? (value / total) * 100 : 0;
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-[11px] font-semibold text-muted-foreground w-[52px] shrink-0">{label}</span>
-      <div className="flex-1 h-2.5 rounded-full bg-muted/30 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className={cn("h-full rounded-full", color)}
-        />
+    <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-muted/10 transition-colors -mx-2">
+      <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center shrink-0", color.replace("bg-", "bg-") + "/10")}>
+        <span className={cn("h-3.5 w-3.5", color.replace("bg-", "text-"))}>{icon}</span>
       </div>
-      <span className="text-[11px] font-bold text-foreground tabular-nums w-[70px] text-right">{fmt(value)}</span>
-      <span className="text-[9px] text-muted-foreground/50 w-[28px] text-right tabular-nums">{count}</span>
-      <span className="text-[9px] text-muted-foreground/50 w-[36px] text-right tabular-nums">{pct.toFixed(0)}%</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[11px] font-semibold text-foreground">{label}</span>
+          <span className="text-[11px] font-bold text-foreground tabular-nums">{fmt(value)}</span>
+        </div>
+        <div className="h-2 rounded-full bg-muted/20 overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className={cn("h-full rounded-full", color)}
+          />
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-[9px] text-muted-foreground/50 tabular-nums">{count} transações</span>
+          <span className="text-[9px] text-muted-foreground/50 tabular-nums font-bold">{pct.toFixed(1)}%</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -134,16 +212,22 @@ function RevenueBar({ label, value, total, color, count }: { label: string; valu
 function TopProductRow({ rank, name, revenue, sales, maxRevenue }: { rank: number; name: string; revenue: number; sales: number; maxRevenue: number }) {
   const pct = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
   const medalColors = ["text-warning", "text-muted-foreground/60", "text-[#cd7f32]"];
+  const medalEmoji = ["🥇", "🥈", "🥉"];
   return (
-    <div className="flex items-center gap-3 py-2">
-      <span className={cn("text-[13px] font-black tabular-nums w-5 text-center", rank <= 3 ? medalColors[rank - 1] : "text-muted-foreground/30")}>
-        {rank}
+    <div className="flex items-center gap-3 py-2.5 group hover:bg-muted/5 -mx-2 px-2 rounded-lg transition-colors">
+      <span className="text-[14px] w-6 text-center shrink-0">
+        {rank <= 3 ? medalEmoji[rank - 1] : <span className="text-[12px] font-bold text-muted-foreground/30 tabular-nums">{rank}</span>}
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-[12px] font-semibold text-foreground truncate">{name}</p>
         <div className="flex items-center gap-2 mt-1">
           <div className="flex-1 h-1.5 rounded-full bg-muted/20 overflow-hidden">
-            <div className="h-full rounded-full bg-primary/60" style={{ width: `${pct}%` }} />
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: rank * 0.1 }}
+              className="h-full rounded-full bg-primary/60"
+            />
           </div>
           <span className="text-[10px] text-muted-foreground/60 tabular-nums shrink-0">{sales} vendas</span>
         </div>
@@ -167,6 +251,46 @@ function DeltaBadge({ current, previous }: { current: number; previous: number }
       {isUp ? <ArrowUp className="h-2.5 w-2.5" /> : <ArrowDown className="h-2.5 w-2.5" />}
       {Math.abs(pct).toFixed(0)}%
     </span>
+  );
+}
+
+/* ─── Live Pulse ─── */
+function LivePulse({ lastSaleAt }: { lastSaleAt: string | null }) {
+  if (!lastSaleAt) return null;
+  const timeAgo = formatDistanceToNow(new Date(lastSaleAt), { locale: ptBR, addSuffix: true });
+  return (
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+      </span>
+      <span className="text-[10px] font-semibold text-success">Última venda {timeAgo}</span>
+    </div>
+  );
+}
+
+/* ─── Sortable Column Header ─── */
+function SortableHeader({ label, field, currentSort, onSort }: {
+  label: string; field: SortField; currentSort: { field: SortField; dir: SortDir };
+  onSort: (f: SortField) => void;
+}) {
+  const isActive = currentSort.field === field;
+  return (
+    <th
+      onClick={() => onSort(field)}
+      className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em] cursor-pointer select-none hover:text-muted-foreground transition-colors group"
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {isActive ? (
+          currentSort.dir === "desc"
+            ? <SortDesc className="h-3 w-3 text-primary" />
+            : <SortAsc className="h-3 w-3 text-primary" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />
+        )}
+      </span>
+    </th>
   );
 }
 
@@ -551,18 +675,18 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
   );
 }
 
-/* ─── Mini Revenue Chart ─── */
-function MiniRevenueChart({ data, hidden }: { data: { label: string; value: number }[]; hidden: boolean }) {
+/* ─── Revenue Chart with comparison ─── */
+function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
-      <div className="h-[120px] flex items-center justify-center text-[11px] text-muted-foreground/40">
+      <div className="h-[160px] flex items-center justify-center text-[11px] text-muted-foreground/40">
         {hidden ? "Valores ocultos" : "Dados insuficientes"}
       </div>
     );
   }
   return (
-    <ResponsiveContainer width="100%" height={120}>
-      <AreaChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={160}>
+      <ComposedChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
         <defs>
           <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -573,11 +697,12 @@ function MiniRevenueChart({ data, hidden }: { data: { label: string; value: numb
         <YAxis hide domain={["auto", "auto"]} />
         <ReTooltip
           contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11, padding: "8px 12px" }}
-          formatter={(v: number) => [fmt(v), "Receita"]}
+          formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
           labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}
         />
+        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="4 4" fill="none" opacity={0.3} />
         <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#chartGrad)" />
-      </AreaChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 }
@@ -597,11 +722,12 @@ export default function Vendas() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[2]); // default 7 days
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[2]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [sort, setSort] = useState<{ field: SortField; dir: SortDir }>({ field: "date", dir: "desc" });
   const [privacyHidden, setPrivacyHidden] = useState(() => {
     try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
   });
@@ -611,6 +737,10 @@ export default function Vendas() {
       try { localStorage.setItem("privacy_mode", String(next)); } catch {}
       return next;
     });
+  }, []);
+
+  const handleSort = useCallback((field: SortField) => {
+    setSort(prev => prev.field === field ? { field, dir: prev.dir === "desc" ? "asc" : "desc" } : { field, dir: "desc" });
   }, []);
 
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, selectedPeriod, isCustom, customRange]);
@@ -732,17 +862,48 @@ export default function Vendas() {
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
 
-    // Daily chart data
+    // Daily chart data with comparison
     const dailyMap: Record<string, number> = {};
+    const prevDailyMap: Record<string, number> = {};
     for (const t of current.approved) {
       const day = fmtDate(t.created_at);
       dailyMap[day] = (dailyMap[day] || 0) + Number(t.net_amount);
     }
-    const chartData = Object.entries(dailyMap)
-      .map(([label, value]) => ({ label, value }))
-      .reverse();
+    for (const t of previous.approved) {
+      const day = fmtDate(t.created_at);
+      prevDailyMap[day] = (prevDailyMap[day] || 0) + Number(t.net_amount);
+    }
+    const currentDays = Object.entries(dailyMap).map(([label, value]) => ({ label, value })).reverse();
+    const prevDays = Object.values(prevDailyMap);
+    const chartData = currentDays.map((d, i) => ({
+      ...d,
+      previous: prevDays[i] || 0,
+    }));
 
-    return { current, previous, topProducts, chartData };
+    // Sparkline data per KPI (daily values for current period)
+    const dailyNetArr = currentDays.map(d => d.value);
+    const dailyGrossArr: number[] = [];
+    const dailyTicketArr: number[] = [];
+    const dailyConvArr: number[] = [];
+    const dailyByDay: Record<string, Tables<"transactions">[]> = {};
+    for (const t of dateFiltered) {
+      const day = fmtDate(t.created_at);
+      if (!dailyByDay[day]) dailyByDay[day] = [];
+      dailyByDay[day].push(t);
+    }
+    const dayKeys = Object.keys(dailyByDay).reverse();
+    for (const day of dayKeys) {
+      const dayTxs = dailyByDay[day];
+      const dayApproved = dayTxs.filter(t => t.status === "completed");
+      dailyGrossArr.push(dayApproved.reduce((a, t) => a + Number(t.amount), 0));
+      dailyTicketArr.push(dayApproved.length > 0 ? dayApproved.reduce((a, t) => a + Number(t.net_amount), 0) / dayApproved.length : 0);
+      dailyConvArr.push(dayTxs.length > 0 ? (dayApproved.length / dayTxs.length) * 100 : 0);
+    }
+
+    // Last sale
+    const lastSaleAt = current.approved.length > 0 ? current.approved[0].created_at : null;
+
+    return { current, previous, topProducts, chartData, sparklines: { net: dailyNetArr, gross: dailyGrossArr, ticket: dailyTicketArr, conversion: dailyConvArr }, lastSaleAt };
   }, [dateFiltered, previousPeriodFiltered, products]);
 
   const filtered = useMemo(() => {
@@ -759,7 +920,19 @@ export default function Vendas() {
     });
   }, [dateFiltered, search, statusFilter]);
 
-  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const sortedFiltered = useMemo(() => {
+    const sorted = [...filtered];
+    const dir = sort.dir === "asc" ? 1 : -1;
+    switch (sort.field) {
+      case "date": sorted.sort((a, b) => dir * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime())); break;
+      case "amount": sorted.sort((a, b) => dir * (Number(a.amount) - Number(b.amount))); break;
+      case "net": sorted.sort((a, b) => dir * (Number(a.net_amount) - Number(b.net_amount))); break;
+      case "customer": sorted.sort((a, b) => dir * ((a.customer_name || "").localeCompare(b.customer_name || ""))); break;
+    }
+    return sorted;
+  }, [filtered, sort]);
+
+  const visibleItems = useMemo(() => sortedFiltered.slice(0, visibleCount), [sortedFiltered, visibleCount]);
 
   const handleRefund = async (_tx: Tables<"transactions">) => {
     toast.info("Para solicitar reembolso, entre em contato com o suporte.");
@@ -831,9 +1004,12 @@ export default function Vendas() {
 
         <div className="relative z-10 space-y-5">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <h1 className="text-xl md:text-2xl font-display font-black text-foreground tracking-tight">Minhas Vendas</h1>
-              <p className="text-muted-foreground text-[12px] mt-0.5">{dateFiltered.length} transações no período</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl md:text-2xl font-display font-black text-foreground tracking-tight">Minhas Vendas</h1>
+                <LivePulse lastSaleAt={metrics.lastSaleAt} />
+              </div>
+              <p className="text-muted-foreground text-[12px]">{dateFiltered.length} transações no período</p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -911,12 +1087,12 @@ export default function Vendas() {
             </div>
           </div>
 
-          {/* Hero metrics — 6 KPI cards */}
+          {/* Hero metrics — 6 KPI cards with sparklines */}
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-6 md:gap-3">
-            <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita Líquida" value={privacyHidden ? CENSORED : fmt(m.totalNet)} tone="primary" idx={0} delta={!privacyHidden ? <DeltaBadge current={m.totalNet} previous={p.totalNet} /> : undefined} />
-            <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Faturamento Bruto" value={privacyHidden ? CENSORED : fmt(m.totalGross)} tone="info" idx={1} delta={!privacyHidden ? <DeltaBadge current={m.totalGross} previous={p.totalGross} /> : undefined} />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(m.avgTicket)} tone="warning" idx={2} delta={!privacyHidden ? <DeltaBadge current={m.avgTicket} previous={p.avgTicket} /> : undefined} />
-            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacyHidden ? CENSORED : `${m.conversion.toFixed(1)}%`} tone="success" idx={3} delta={!privacyHidden ? <DeltaBadge current={m.conversion} previous={p.conversion} /> : undefined} />
+            <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita Líquida" value={privacyHidden ? CENSORED : fmt(m.totalNet)} tone="primary" idx={0} delta={!privacyHidden ? <DeltaBadge current={m.totalNet} previous={p.totalNet} /> : undefined} sparkData={metrics.sparklines.net} sparkColor="hsl(var(--primary))" />
+            <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Faturamento Bruto" value={privacyHidden ? CENSORED : fmt(m.totalGross)} tone="info" idx={1} delta={!privacyHidden ? <DeltaBadge current={m.totalGross} previous={p.totalGross} /> : undefined} sparkData={metrics.sparklines.gross} sparkColor="hsl(var(--info))" />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(m.avgTicket)} tone="warning" idx={2} delta={!privacyHidden ? <DeltaBadge current={m.avgTicket} previous={p.avgTicket} /> : undefined} sparkData={metrics.sparklines.ticket} sparkColor="hsl(var(--warning))" />
+            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacyHidden ? CENSORED : `${m.conversion.toFixed(1)}%`} tone="success" idx={3} delta={!privacyHidden ? <DeltaBadge current={m.conversion} previous={p.conversion} /> : undefined} sparkData={metrics.sparklines.conversion} sparkColor="hsl(var(--success))" />
             <MiniHeroCard icon={<UserCheck className="h-4 w-4" />} label="Clientes Únicos" value={privacyHidden ? CENSORED : String(m.uniqueCustomers)} tone="info" idx={4} delta={!privacyHidden ? <DeltaBadge current={m.uniqueCustomers} previous={p.uniqueCustomers} /> : undefined} />
             <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(m.approved.length)} tone="success" idx={5} delta={!privacyHidden ? <DeltaBadge current={m.approved.length} previous={p.approved.length} /> : undefined} />
           </div>
@@ -925,7 +1101,7 @@ export default function Vendas() {
 
       {/* ─── INSIGHTS ROW ─── */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-        {/* Revenue Chart */}
+        {/* Revenue Chart with comparison */}
         <div className="lg:col-span-5 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -934,16 +1110,25 @@ export default function Vendas() {
               </div>
               <div>
                 <p className="text-[13px] font-bold text-foreground">Receita Diária</p>
-                <p className="text-[10px] text-muted-foreground/60">Evolução no período</p>
+                <p className="text-[10px] text-muted-foreground/60">Atual vs. período anterior</p>
               </div>
             </div>
-            <span className="text-[12px] font-bold text-primary font-display tabular-nums">{privacyHidden ? CENSORED : fmtCompact(m.totalNet)}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-4 rounded-full bg-primary" />
+                <span className="text-[9px] text-muted-foreground/60">Atual</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-[1px] w-4 border-t border-dashed border-muted-foreground/40" />
+                <span className="text-[9px] text-muted-foreground/60">Anterior</span>
+              </div>
+            </div>
           </div>
-          <MiniRevenueChart data={metrics.chartData} hidden={privacyHidden} />
+          <RevenueChart data={metrics.chartData} hidden={privacyHidden} />
         </div>
 
         {/* Revenue by Payment Method */}
-        <div className="lg:col-span-3 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-4">
+        <div className="lg:col-span-3 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
           <div className="flex items-center gap-2.5">
             <div className="h-8 w-8 rounded-xl bg-info/10 flex items-center justify-center">
               <PieChart className="h-4 w-4 text-info" />
@@ -953,10 +1138,10 @@ export default function Vendas() {
               <p className="text-[10px] text-muted-foreground/60">Distribuição</p>
             </div>
           </div>
-          <div className="space-y-2.5">
-            <RevenueBar label="PIX" value={privacyHidden ? 0 : m.pixRevenue} total={m.totalNet} color="bg-success" count={m.pixCount} />
-            <RevenueBar label="Cartão" value={privacyHidden ? 0 : m.cardRevenue} total={m.totalNet} color="bg-info" count={m.cardCount} />
-            <RevenueBar label="Boleto" value={privacyHidden ? 0 : m.boletoRevenue} total={m.totalNet} color="bg-warning" count={m.boletoCount} />
+          <div className="space-y-1">
+            <RevenueBar label="PIX" value={privacyHidden ? 0 : m.pixRevenue} total={m.totalNet} color="bg-success" count={m.pixCount} icon={<Smartphone className="h-3.5 w-3.5" />} />
+            <RevenueBar label="Cartão" value={privacyHidden ? 0 : m.cardRevenue} total={m.totalNet} color="bg-info" count={m.cardCount} icon={<CreditCard className="h-3.5 w-3.5" />} />
+            <RevenueBar label="Boleto" value={privacyHidden ? 0 : m.boletoRevenue} total={m.totalNet} color="bg-warning" count={m.boletoCount} icon={<FileText className="h-3.5 w-3.5" />} />
           </div>
           <div className="pt-2 border-t border-border/20 flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-bold">Total Taxas</span>
@@ -964,7 +1149,7 @@ export default function Vendas() {
           </div>
         </div>
 
-        {/* Top Products + Health */}
+        {/* Top Products + Health + Heatmap */}
         <div className="lg:col-span-4 space-y-3">
           {/* Top Products */}
           <div className="rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
@@ -988,14 +1173,28 @@ export default function Vendas() {
             )}
           </div>
 
-          {/* Health Indicators */}
-          <div className="grid grid-cols-2 gap-2">
-            <HealthPill icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Reembolso" value={`${m.refundRate.toFixed(1)}%`} count={m.refunded.length} tone={m.refundRate > 5 ? "destructive" : m.refundRate > 2 ? "warning" : "success"} />
-            <HealthPill icon={<ArrowDownRight className="h-3.5 w-3.5" />} label="Chargeback" value={`${m.chargebackRate.toFixed(1)}%`} count={m.chargebacks.length} tone={m.chargebackRate > 1 ? "destructive" : "success"} />
-            <HealthPill icon={<X className="h-3.5 w-3.5" />} label="Falhas" value={`${m.failedRate.toFixed(1)}%`} count={m.failed.length} tone={m.failedRate > 20 ? "destructive" : m.failedRate > 10 ? "warning" : "success"} />
-            <HealthPill icon={<Clock className="h-3.5 w-3.5" />} label="Pendentes" value={String(m.pending.length)} count={m.pending.length} tone={m.pending.length > 10 ? "warning" : "success"} />
+          {/* Hourly Heatmap */}
+          <div className="rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Flame className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-foreground">Horários de Pico</p>
+                <p className="text-[10px] text-muted-foreground/60">Vendas por hora do dia</p>
+              </div>
+            </div>
+            <HourlyHeatmap transactions={dateFiltered} />
           </div>
         </div>
+      </section>
+
+      {/* ─── Health Indicators ─── */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <HealthPill icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Reembolso" value={`${m.refundRate.toFixed(1)}%`} count={m.refunded.length} tone={m.refundRate > 5 ? "destructive" : m.refundRate > 2 ? "warning" : "success"} />
+        <HealthPill icon={<ArrowDownRight className="h-3.5 w-3.5" />} label="Chargeback" value={`${m.chargebackRate.toFixed(1)}%`} count={m.chargebacks.length} tone={m.chargebackRate > 1 ? "destructive" : "success"} />
+        <HealthPill icon={<X className="h-3.5 w-3.5" />} label="Falhas" value={`${m.failedRate.toFixed(1)}%`} count={m.failed.length} tone={m.failedRate > 20 ? "destructive" : m.failedRate > 10 ? "warning" : "success"} />
+        <HealthPill icon={<Clock className="h-3.5 w-3.5" />} label="Pendentes" value={String(m.pending.length)} count={m.pending.length} tone={m.pending.length > 10 ? "warning" : "success"} />
       </section>
 
       {/* ─── FILTERS ─── */}
@@ -1050,10 +1249,10 @@ export default function Vendas() {
       {/* Results summary */}
       <div className="flex items-center justify-between px-1">
         <p className="text-[12px] text-muted-foreground/70">
-          {filtered.length === 0 ? "Nenhuma transação encontrada" : `Mostrando ${Math.min(visibleCount, filtered.length)} de ${filtered.length} transações`}
+          {sortedFiltered.length === 0 ? "Nenhuma transação encontrada" : `Mostrando ${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length} transações`}
         </p>
-        {filtered.length > 0 && (
-          <p className="text-[12px] text-primary font-medium">{fmt(filtered.reduce((a, t) => a + Number(t.net_amount), 0))} no período</p>
+        {sortedFiltered.length > 0 && (
+          <p className="text-[12px] text-primary font-medium">{fmt(sortedFiltered.reduce((a, t) => a + Number(t.net_amount), 0))} no período</p>
         )}
       </div>
 
@@ -1070,9 +1269,13 @@ export default function Vendas() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/30 bg-muted/10">
-                    {["Cliente", "Produto", "Valor", "Método", "Status", "Data", ""].map((h) => (
-                      <th key={h} className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">{h}</th>
-                    ))}
+                    <SortableHeader label="Cliente" field="customer" currentSort={sort} onSort={handleSort} />
+                    <th className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">Produto</th>
+                    <SortableHeader label="Valor" field="amount" currentSort={sort} onSort={handleSort} />
+                    <th className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">Método</th>
+                    <th className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">Status</th>
+                    <SortableHeader label="Data" field="date" currentSort={sort} onSort={handleSort} />
+                    <th className="text-left px-5 py-4 text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]" />
                   </tr>
                 </thead>
                 <tbody>
@@ -1086,10 +1289,10 @@ export default function Vendas() {
                 </tbody>
               </table>
             </div>
-            {visibleCount < filtered.length && (
+            {visibleCount < sortedFiltered.length && (
               <div className="p-3 text-center border-t border-border/30">
                 <Button variant="ghost" size="sm" onClick={loadMore} className="gap-2 text-xs text-muted-foreground hover:text-foreground font-medium">
-                  <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+                  <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount} restantes)
                 </Button>
               </div>
             )}
@@ -1111,9 +1314,9 @@ export default function Vendas() {
             {visibleItems.map((tx, i) => (
               <TxCard key={tx.id} tx={tx} products={products} onClick={() => setSelectedTx(tx)} index={i} />
             ))}
-            {visibleCount < filtered.length && (
+            {visibleCount < sortedFiltered.length && (
               <Button variant="ghost" size="sm" onClick={loadMore} className="w-full gap-2 text-xs text-muted-foreground font-medium">
-                <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({filtered.length - visibleCount} restantes)
+                <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount} restantes)
               </Button>
             )}
           </>
@@ -1138,10 +1341,12 @@ export default function Vendas() {
 
 /* ─── Shared Components ─── */
 
-function MiniHeroCard({ icon, label, value, tone, idx, delta }: {
+function MiniHeroCard({ icon, label, value, tone, idx, delta, sparkData, sparkColor }: {
   icon: React.ReactNode; label: string; value: string;
   tone: "primary" | "info" | "success" | "warning"; idx: number;
   delta?: React.ReactNode;
+  sparkData?: number[];
+  sparkColor?: string;
 }) {
   const toneMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
     primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
@@ -1154,7 +1359,13 @@ function MiniHeroCard({ icon, label, value, tone, idx, delta }: {
   return (
     <div className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-3.5 md:p-4 animate-fade-in" style={{ animationDelay: `${idx * 60}ms` }}>
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", t.accent)} />
-      <div className="pl-1.5">
+      {/* Sparkline background */}
+      {sparkData && sparkData.length >= 2 && (
+        <div className="absolute bottom-0 right-0 opacity-40 pointer-events-none">
+          <Sparkline data={sparkData} color={sparkColor} className="w-[80px] h-[30px]" />
+        </div>
+      )}
+      <div className="pl-1.5 relative z-10">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] leading-tight">{label}</span>
           <div className={cn("h-7 w-7 md:h-8 md:w-8 rounded-lg md:rounded-xl flex items-center justify-center ring-1", t.iconBg, t.ring)}>
