@@ -53,7 +53,7 @@ const MILESTONES = [
 ];
 
 type SidebarItem = {
-  title: string;
+  title: string | React.ReactNode;
   url: string;
   icon: LucideIcon;
   badge?: string;
