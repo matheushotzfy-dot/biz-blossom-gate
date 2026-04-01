@@ -23,6 +23,7 @@ import {
   Zap,
   RefreshCw,
   Award,
+  Banknote,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -143,6 +144,7 @@ const sections: SidebarSection[] = [
       { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
       { title: "Taxas", url: "/financeiro/taxas", icon: Zap },
       { title: "Controle de Gastos", url: "/financeiro/gastos", icon: PieChart },
+      { title: "Antecipação", url: "/financeiro/antecipacao", icon: Banknote },
     ],
   },
   {

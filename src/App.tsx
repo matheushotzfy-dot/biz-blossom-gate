@@ -21,6 +21,7 @@ import Saques from "./pages/financeiro/Saques";
 import SaquesCrypto from "./pages/financeiro/SaquesCrypto";
 import Taxas from "./pages/financeiro/Taxas";
 import ControleGastos from "./pages/financeiro/ControleGastos";
+import Antecipacao from "./pages/financeiro/Antecipacao";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
@@ -129,6 +130,7 @@ const App = () => (
                 <Route path="/financeiro/saques-crypto" element={<SaquesCrypto />} />
                 <Route path="/financeiro/taxas" element={<Taxas />} />
                 <Route path="/financeiro/gastos" element={<ControleGastos />} />
+                <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
