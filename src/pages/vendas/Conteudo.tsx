@@ -132,165 +132,128 @@ function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit,
   onTogglePublish: () => void; onDelete: () => void; onCopyLink: () => void;
   getMemberLink: string; index: number;
 }) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="group/card relative"
+      className="group/card relative h-full"
     >
-      <div className={cn(
-        "relative overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        hovered
-          ? "border-primary/25 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.15)] scale-[1.015]"
-          : "border-border/25 shadow-lg shadow-foreground/[0.03]"
-      )}>
+      <div className="relative overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-xl border-border/40 hover:border-primary/25 hover:shadow-[0_12px_40px_-10px_hsl(var(--primary)/0.12)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] h-full flex flex-col">
+        {/* ── Accent bar (3px left) ── */}
+        <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full z-10", course.is_published ? "bg-success" : "bg-muted-foreground/20")} />
+
         {/* ── Thumbnail ── */}
-        <div className="relative aspect-[16/9] overflow-hidden cursor-pointer" onClick={onNavigate}>
+        <div className="relative aspect-[16/9] overflow-hidden cursor-pointer shrink-0" onClick={onNavigate}>
           {course.thumbnail_url ? (
-            <motion.img
+            <img
               src={course.thumbnail_url} alt={course.title}
-              className="w-full h-full object-cover"
-              animate={{ scale: hovered ? 1.08 : 1 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full h-full object-cover group-hover/card:scale-[1.04] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/10 via-primary/5 to-info/5 flex items-center justify-center">
-              <motion.div animate={{ scale: hovered ? 1.1 : 1 }} transition={{ duration: 0.5 }}>
-                <GraduationCap className="h-14 w-14 text-primary/15" />
-              </motion.div>
+            <div className="w-full h-full bg-gradient-to-br from-primary/8 via-primary/4 to-info/4 flex items-center justify-center">
+              <GraduationCap className="h-12 w-12 text-primary/12 group-hover/card:scale-110 transition-transform duration-500" />
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
-          <div className={cn("absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent transition-opacity duration-500", hovered ? "opacity-100" : "opacity-0")} />
+          <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent" />
 
           {/* Status badge */}
-          <div className="absolute top-3.5 right-3.5 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <span className={cn(
-              "inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-display font-bold backdrop-blur-2xl border shadow-lg",
+              "inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10px] font-display font-black uppercase tracking-[0.08em] backdrop-blur-2xl border shadow-sm",
               course.is_published
-                ? "bg-success/20 text-success border-success/25 shadow-success/10"
-                : "bg-card/80 text-muted-foreground border-border/30"
+                ? "bg-success/15 text-success border-success/20"
+                : "bg-card/70 text-muted-foreground border-border/30"
             )}>
-              <span className={cn("h-2 w-2 rounded-full", course.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+              <span className={cn("h-2 w-2 rounded-full", course.is_published ? "bg-success animate-pulse shadow-[0_0_6px_hsl(var(--success))]" : "bg-muted-foreground/30")} />
               {course.is_published ? "Live" : "Rascunho"}
             </span>
           </div>
 
-          {/* Category chip */}
-          {course.category && (
-            <div className="absolute top-3.5 left-3.5 z-10">
-              <span className="inline-flex items-center rounded-xl px-3 py-1.5 text-[10px] font-display font-black uppercase tracking-[0.1em] bg-card/80 backdrop-blur-2xl text-foreground/60 border border-border/20 shadow-lg">
-                {course.category}
+          {/* Bottom stats on thumbnail */}
+          <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 z-10">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/85 backdrop-blur-xl border border-border/15 px-2.5 py-1.5 text-[10px] font-display font-bold text-foreground shadow-sm">
+              <Layers className="h-3 w-3 text-primary" /> {stats.modules}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/85 backdrop-blur-xl border border-border/15 px-2.5 py-1.5 text-[10px] font-display font-bold text-foreground shadow-sm">
+              <Video className="h-3 w-3 text-info" /> {stats.lessons}
+            </span>
+            {studentCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-card/85 backdrop-blur-xl border border-border/15 px-2.5 py-1.5 text-[10px] font-display font-bold text-info shadow-sm">
+                <Users className="h-3 w-3" /> {studentCount}
               </span>
-            </div>
-          )}
-
-          {/* Bottom stats */}
-          <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center gap-2.5 z-10">
-            <span className="inline-flex items-center gap-2 rounded-xl bg-card/90 backdrop-blur-2xl border border-border/15 px-3 py-2 text-xs font-display font-bold text-foreground shadow-sm">
-              <Layers className="h-3.5 w-3.5 text-primary" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-xl bg-card/90 backdrop-blur-2xl border border-border/15 px-3 py-2 text-xs font-display font-bold text-foreground shadow-sm">
-              <Video className="h-3.5 w-3.5 text-info" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}
-            </span>
-          </div>
-
-          {/* Hover button */}
-          <AnimatePresence>
-            {hovered && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-center justify-center z-10"
-              >
-                <div className="h-16 w-16 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-2xl shadow-primary/30 ring-4 ring-primary/20">
-                  <ArrowRight className="h-6 w-6 text-primary-foreground ml-0.5" />
-                </div>
-              </motion.div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
 
-        {/* ── Content ── */}
-        <div className="p-6 space-y-4">
-          <div>
-            <h3 className="text-base font-display font-black text-foreground leading-snug line-clamp-1 tracking-[-0.02em] mb-1.5">{course.title}</h3>
-            <p className={cn("text-sm line-clamp-2 leading-relaxed", course.description ? "text-muted-foreground" : "text-muted-foreground/30 italic")}>
+        {/* ── Content (flex-grow to equalize height) ── */}
+        <div className="p-5 flex flex-col flex-1 pl-5">
+          <div className="flex-1">
+            <h3 className="text-sm font-display font-black text-foreground leading-snug line-clamp-1 tracking-[-0.02em] mb-1">{course.title}</h3>
+            <p className={cn("text-xs line-clamp-2 leading-relaxed h-[2.5rem]", course.description ? "text-muted-foreground" : "text-muted-foreground/30 italic")}>
               {course.description || "Sem descrição adicionada"}
             </p>
           </div>
 
-          {/* Tags */}
-          {(product || revenue > 0 || studentCount > 0) && (
-            <div className="flex flex-wrap gap-2">
-              {studentCount > 0 && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-info/8 border border-info/15">
-                  <Users className="h-3.5 w-3.5 text-info" />
-                  <span className="text-xs font-display font-bold text-info tabular-nums">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
-                </div>
-              )}
-              {product && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/8 border border-primary/15">
-                  <LinkIcon className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-xs font-display font-bold text-primary truncate max-w-[130px]">{product.name}</span>
-                </div>
-              )}
-              {revenue > 0 && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-success/8 border border-success/15">
-                  <DollarSign className="h-3.5 w-3.5 text-success" />
-                  <span className="text-xs font-display font-bold text-success tabular-nums">{fmt(revenue)}</span>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Tags row (fixed height) */}
+          <div className="flex flex-wrap items-center gap-1.5 mt-3 min-h-[28px]">
+            {product && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/8 border border-primary/15 text-[10px] font-display font-bold text-primary truncate max-w-[140px]">
+                <LinkIcon className="h-3 w-3 shrink-0" /> {product.name}
+              </span>
+            )}
+            {revenue > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-success/8 border border-success/15 text-[10px] font-display font-bold text-success tabular-nums">
+                <DollarSign className="h-3 w-3" /> {fmt(revenue)}
+              </span>
+            )}
+            {course.category && !product && revenue === 0 && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-muted/8 border border-border/15 text-[10px] font-display font-bold text-muted-foreground">
+                {course.category}
+              </span>
+            )}
+          </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-border/15">
-            <div className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-muted-foreground/30" />
-              <span className="text-xs text-muted-foreground tabular-nums font-display">{new Date(course.created_at).toLocaleDateString("pt-BR")}</span>
-            </div>
-
+          {/* Actions (always at bottom) */}
+          <div className="flex items-center justify-between pt-3.5 mt-3.5 border-t border-border/15">
             <div className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3 text-muted-foreground/25" />
+              <span className="text-[10px] text-muted-foreground/50 tabular-nums font-display">{new Date(course.created_at).toLocaleDateString("pt-BR")}</span>
+            </div>
+
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost" size="sm"
-                className="gap-2 rounded-xl text-sm h-9 px-4 font-display font-bold text-primary hover:text-primary hover:bg-primary/8 active:scale-[0.985]"
+                className="gap-1.5 rounded-lg text-xs h-8 px-3 font-display font-bold text-primary hover:text-primary hover:bg-primary/8 active:scale-[0.985]"
                 onClick={onNavigate}
               >
-                Gerenciar <ChevronRight className="h-3.5 w-3.5" />
+                Gerenciar <ChevronRight className="h-3 w-3" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="rounded-xl h-9 w-9 p-0 text-muted-foreground/40 hover:text-foreground hover:bg-muted/20">
-                    <MoreVertical className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="rounded-lg h-8 w-8 p-0 text-muted-foreground/30 hover:text-foreground hover:bg-muted/15">
+                    <MoreVertical className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[220px] rounded-xl p-1.5">
-                  <DropdownMenuItem onClick={onEdit} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                <DropdownMenuContent align="end" className="min-w-[200px] rounded-xl p-1.5">
+                  <DropdownMenuItem onClick={onEdit} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
                     <Edit className="h-4 w-4" /> Editar curso
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onTogglePublish} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                  <DropdownMenuItem onClick={onTogglePublish} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
                     {course.is_published ? <><EyeOff className="h-4 w-4" /> Despublicar</> : <><Eye className="h-4 w-4" /> Publicar</>}
                   </DropdownMenuItem>
                   {course.is_published && (
-                    <DropdownMenuItem onClick={() => window.open(getMemberLink, "_blank")} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                    <DropdownMenuItem onClick={() => window.open(getMemberLink, "_blank")} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
                       <PlayCircle className="h-4 w-4" /> Visualizar
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={onCopyLink} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                  <DropdownMenuItem onClick={onCopyLink} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
                     <Copy className="h-4 w-4" /> Copiar link
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onDelete} className="gap-3 text-sm cursor-pointer text-destructive focus:text-destructive rounded-lg py-3 px-3 font-display">
+                  <DropdownMenuItem onClick={onDelete} className="gap-3 text-sm cursor-pointer text-destructive focus:text-destructive rounded-lg py-2.5 px-3 font-display">
                     <Trash2 className="h-4 w-4" /> Excluir curso
                   </DropdownMenuItem>
                 </DropdownMenuContent>
