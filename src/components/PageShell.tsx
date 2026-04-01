@@ -178,26 +178,25 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
   return (
     <div
       className={cn(
-        "group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
+        "group relative rounded-xl md:rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
         "hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300",
-        large ? "p-6" : "p-4 md:p-5"
+        large ? "p-4 md:p-6" : "p-3.5 md:p-5"
       )}
       style={{ animationDelay: `${delay * 60}ms` }}
     >
-      {/* Accent bar */}
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBar[tone] || accentBar.primary)} />
       <div className="pl-1.5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
-            <Icon className={cn("h-4 w-4", t.color)} />
+        <div className="flex items-center justify-between mb-2 md:mb-3">
+          <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+          <div className={cn("h-8 w-8 md:h-9 md:w-9 rounded-lg md:rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
+            <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", t.color)} />
           </div>
         </div>
         <p className={cn(
           "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
-          large ? "text-3xl md:text-4xl" : "text-[22px] md:text-2xl"
+          large ? "text-2xl md:text-4xl" : "text-lg md:text-2xl"
         )}>{value}</p>
-        {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
+        {sub && <p className="text-[10px] md:text-[11px] text-muted-foreground/60 mt-1 md:mt-1.5 font-medium">{sub}</p>}
       </div>
     </div>
   );
