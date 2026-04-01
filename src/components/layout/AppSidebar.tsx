@@ -158,7 +158,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
             <Zap className="h-4.5 w-4.5 text-sidebar-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/55">Faturamento</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/55">FATURAMENTO TOTAL</p>
             <p className="mt-1 text-[18px] font-black leading-none tracking-tight text-sidebar-accent-foreground">
               {formatRevenue(revenue)}
             </p>
