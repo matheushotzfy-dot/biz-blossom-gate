@@ -119,7 +119,7 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
       { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },
-      { title: "Configurações", url: "/financeiro/config", icon: Building2 },
+      { title: (<span>Financeiro<br /></span>) as unknown as string, url: "/financeiro/config", icon: Building2 },
     ],
   },
   {
