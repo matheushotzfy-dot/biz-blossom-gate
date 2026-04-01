@@ -527,7 +527,7 @@ export default function CourseBuilder() {
                                   )}>
                                     {li + 1}
                                   </div>
-                                  <div className="flex-1 min-w-0">
+                                   <div className="flex-1 min-w-0">
                                     <p className={cn("text-[11px] truncate font-display transition-colors", selectedLesson?.id === lesson.id ? "text-primary font-bold" : "text-foreground/55 font-semibold")}>{lesson.title}</p>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                       {lesson.is_free && <span className="text-[7px] bg-success/10 text-success px-1.5 rounded-md font-black leading-[14px]">FREE</span>}
@@ -537,6 +537,9 @@ export default function CourseBuilder() {
                                         <span className="flex items-center gap-0.5 text-[8px] text-warning/40 font-display font-bold"><span className="h-1.5 w-1.5 rounded-full bg-warning/40" /> Pendente</span>
                                       )}
                                       {(lesson.drip_days || 0) > 0 && <span className="text-[8px] text-info/40 font-display font-bold">{lesson.drip_days}d</span>}
+                                      {(lessonStats.get(lesson.id) || 0) > 0 && (
+                                        <span className="text-[8px] text-primary/40 font-display font-bold flex items-center gap-0.5"><Users className="h-2 w-2" />{lessonStats.get(lesson.id)}</span>
+                                      )}
                                     </div>
                                   </div>
                                   <button
