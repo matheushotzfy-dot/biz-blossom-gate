@@ -124,6 +124,7 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, badge: "Live", exact: true },
       { title: "Minhas Vendas", url: "/vendas", icon: BarChart3, exact: true },
+      { title: "Analytics", url: "/analytics", icon: TrendingUp, exact: true },
     ],
   },
   {
