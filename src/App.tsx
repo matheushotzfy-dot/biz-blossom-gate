@@ -11,29 +11,19 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import Perfil from "./pages/Perfil";
-import Premiacoes from "./pages/Premiacoes";
+import PerfilHub from "./pages/PerfilHub";
+import PremiacoesHub from "./pages/PremiacoesHub";
 import Extrato from "./pages/financeiro/Extrato";
-
-import DadosBancarios from "./pages/financeiro/DadosBancarios";
-import Identidade from "./pages/financeiro/Identidade";
-import Saques from "./pages/financeiro/Saques";
-import SaquesCrypto from "./pages/financeiro/SaquesCrypto";
-import Taxas from "./pages/financeiro/Taxas";
-import ControleGastos from "./pages/financeiro/ControleGastos";
-import Antecipacao from "./pages/financeiro/Antecipacao";
+import SaquesHub from "./pages/financeiro/SaquesHub";
+import ConfigFinanceiro from "./pages/financeiro/ConfigFinanceiro";
 import Vendas from "./pages/vendas/Vendas";
 import Produtos from "./pages/vendas/Produtos";
 import Checkout from "./pages/vendas/Checkout";
 import CheckoutBuilder from "./pages/vendas/CheckoutBuilder";
 import ProductEditor from "./pages/vendas/ProductEditor";
-
-import Webhooks from "./pages/vendas/Webhooks";
-import Documentacao from "./pages/vendas/Documentacao";
-import ApiDocsComplete from "./pages/vendas/ApiDocsComplete";
+import IntegracoesHub from "./pages/IntegracoesHub";
 import Conteudo from "./pages/vendas/Conteudo";
 import CourseBuilder from "./pages/vendas/CourseBuilder";
-import Apps from "./pages/vendas/Apps";
 import Afiliados from "./pages/vendas/Afiliados";
 import Coproducoes from "./pages/vendas/Coproducoes";
 import Cupons from "./pages/vendas/Cupons";
@@ -54,7 +44,6 @@ import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import ThankYou from "./pages/ThankYou";
 import StatusPage from "./pages/StatusPage";
 import Analytics from "./pages/Analytics";
-import Indicacoes from "./pages/Indicacoes";
 // Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
@@ -122,34 +111,23 @@ const App = () => (
                 }
               >
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/perfil" element={<Perfil />} />
-                <Route path="/premiacoes" element={<Premiacoes />} />
+                <Route path="/perfil" element={<PerfilHub />} />
+                <Route path="/premiacoes" element={<PremiacoesHub />} />
                 <Route path="/financeiro/extrato" element={<Extrato />} />
-                
-                <Route path="/financeiro/dados-bancarios" element={<DadosBancarios />} />
-                <Route path="/financeiro/identidade" element={<Identidade />} />
-                <Route path="/financeiro/saques" element={<Saques />} />
-                <Route path="/financeiro/saques-crypto" element={<SaquesCrypto />} />
-                <Route path="/financeiro/taxas" element={<Taxas />} />
-                <Route path="/financeiro/gastos" element={<ControleGastos />} />
-                <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
+                <Route path="/financeiro/saques" element={<SaquesHub />} />
+                <Route path="/financeiro/config" element={<ConfigFinanceiro />} />
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
                 <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
-                
-                <Route path="/vendas/webhooks" element={<Webhooks />} />
-                <Route path="/vendas/documentacao" element={<Documentacao />} />
-                <Route path="/vendas/documentacao/completa" element={<Documentacao />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
-                <Route path="/integracoes/apps" element={<Apps />} />
+                <Route path="/integracoes" element={<IntegracoesHub />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                 <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
                 <Route path="/analytics" element={<Analytics />} />
-                <Route path="/indicacoes" element={<Indicacoes />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
