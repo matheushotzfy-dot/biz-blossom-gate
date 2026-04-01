@@ -80,10 +80,9 @@ const sections = [
     label: "INFOPRODUTOS",
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
-      { title: "Checkout", url: "/vendas/checkout", icon: CreditCard },
-      { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
       { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
       { title: "Coproduções", url: "/vendas/coproducoes", icon: Handshake },
+      { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
     ],
   },
   {
