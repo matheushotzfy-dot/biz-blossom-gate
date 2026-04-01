@@ -340,6 +340,7 @@ Deno.serve(async (req) => {
           // === AUTO SPLIT: process co-production split on completed payment ===
           if (ourStatus === 'completed') {
             await processCoProductionSplit(supabase, tx.id);
+            await processAffiliateSplit(supabase, tx.id);
           }
         }
       }
