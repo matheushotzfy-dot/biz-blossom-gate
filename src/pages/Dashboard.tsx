@@ -685,11 +685,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
-            <KpiTile icon={<Zap className="h-4 w-4" />} label="Vendas no Pix" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`} tone="success" delay="stagger-3" />
-            <KpiTile icon={<CreditCard className="h-4 w-4" />} label="Vendas no Cartão" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`} tone="info" delay="stagger-4" />
-            <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
-            <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
+          <div className="grid grid-cols-2 gap-2">
+            <KpiTile icon={<Zap className="h-4 w-4" />} label="PIX" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`} tone="success" delay="stagger-3" />
+            <KpiTile icon={<CreditCard className="h-4 w-4" />} label="CARTÃO" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`} tone="info" delay="stagger-4" />
+            <KpiTile icon={<Wallet className="h-4 w-4" />} label="TICKET MÉDIO" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
+            <KpiTile icon={<DollarSign className="h-4 w-4" />} label="PENDENTE" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
           </div>
         </div>
       </section>
