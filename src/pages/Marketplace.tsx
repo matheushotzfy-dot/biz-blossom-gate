@@ -40,14 +40,14 @@ export default function Marketplace() {
   const [affiliating, setAffiliating] = useState<string | null>(null);
 
   useEffect(() => {
-    // Use products_public view for security - only exposes public fields
+    // Use products table with specific column selection for security
     supabase
-      .from("products_public")
+      .from("products")
       .select("id, name, description, price, image_url, affiliate_commission, affiliate_enabled, display_name, delivery_type")
       .eq("status", "active")
       .eq("affiliate_enabled", true)
       .then(({ data }) => {
-        if (data) setProducts(data as MarketplaceProduct[]);
+        if (data) setProducts(data as unknown as MarketplaceProduct[]);
         setLoading(false);
       });
   }, []);
