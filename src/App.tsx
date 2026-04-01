@@ -32,6 +32,7 @@ import DashboardAfiliado from "./pages/vendas/DashboardAfiliado";
 import Suporte from "./pages/Suporte";
 import VendasHub from "./pages/VendasHub";
 import Gamificacao from "./pages/Gamificacao";
+import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
