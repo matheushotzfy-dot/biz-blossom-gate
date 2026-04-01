@@ -334,25 +334,28 @@ export default function CourseBuilder() {
   return (
     <div className="h-screen w-screen bg-background flex flex-col overflow-hidden">
       {/* ═══ Top Bar ═══ */}
-      <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-4 sm:px-5 shrink-0 z-50">
-        <div className="flex items-center gap-3">
+      <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-5 shrink-0 z-50">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={() => navigate("/vendas/conteudo")}
-            className="h-9 w-9 rounded-xl bg-muted/15 border border-border/15 flex items-center justify-center hover:bg-muted/25 hover:border-border/30 transition-all duration-300 active:scale-[0.985]"
+            className="h-9 w-9 rounded-xl bg-muted/15 border border-border/15 flex items-center justify-center hover:bg-muted/25 hover:border-border/30 transition-all duration-300 active:scale-[0.985] shrink-0"
           >
             <ArrowLeft className="h-4 w-4 text-muted-foreground/50" />
           </button>
 
-          <div className="h-5 w-px bg-border/20 hidden sm:block" />
-
           <div className="hidden sm:flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/15">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/15 shrink-0">
               <GraduationCap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-[14px] font-display font-black text-foreground leading-none truncate max-w-[200px] lg:max-w-[340px] tracking-tight">{course.title}</h1>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-[10px] font-display font-bold text-muted-foreground/30">{modules.length} módulos · {totalLessons} aulas</span>
+                {studentCount > 0 && (
+                  <span className="text-[10px] font-display font-bold text-info/50 flex items-center gap-1">
+                    <Users className="h-2.5 w-2.5" /> {studentCount} aluno{studentCount !== 1 ? "s" : ""}
+                  </span>
+                )}
                 {totalLessons > 0 && (
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-16 rounded-full bg-muted/15 overflow-hidden">
@@ -368,9 +371,14 @@ export default function CourseBuilder() {
               </div>
             </div>
           </div>
+          {/* Mobile title */}
+          <div className="sm:hidden min-w-0">
+            <h1 className="text-xs font-display font-black text-foreground truncate max-w-[140px]">{course.title}</h1>
+            <span className="text-[9px] font-display font-bold text-muted-foreground/30">{totalLessons} aulas · {studentCount} alunos</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* Save status */}
           <AnimatePresence mode="wait">
             <motion.div key={saveStatus} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="hidden sm:flex items-center gap-1.5 mr-1">
@@ -380,19 +388,29 @@ export default function CourseBuilder() {
             </motion.div>
           </AnimatePresence>
 
+          {/* Preview as student */}
+          {course.is_published && (
+            <button
+              onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
+              className="hidden sm:flex h-9 px-3 rounded-xl bg-info/10 border border-info/20 text-[11px] font-display font-bold text-info items-center gap-1.5 hover:bg-info/15 transition-all active:scale-[0.985]"
+            >
+              <Eye className="h-3.5 w-3.5" /> Preview
+            </button>
+          )}
+
           <button
             onClick={togglePublish}
             className={cn(
-              "h-9 px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-2 transition-all duration-300 active:scale-[0.985] border",
+              "h-9 px-3 sm:px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-1.5 sm:gap-2 transition-all duration-300 active:scale-[0.985] border",
               course.is_published
                 ? "bg-success/10 text-success border-success/20 hover:bg-success/15 shadow-sm shadow-success/10"
                 : "bg-muted/15 border-border/20 text-muted-foreground hover:text-foreground hover:border-border/30 hover:bg-muted/25"
             )}
           >
             {course.is_published ? (
-              <><span className="h-2 w-2 rounded-full bg-success animate-pulse" /> Publicado</>
+              <><span className="h-2 w-2 rounded-full bg-success animate-pulse" /> <span className="hidden sm:inline">Publicado</span><span className="sm:hidden">Live</span></>
             ) : (
-              <><EyeOff className="h-3.5 w-3.5" /> Rascunho</>
+              <><EyeOff className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Rascunho</span></>
             )}
           </button>
         </div>
