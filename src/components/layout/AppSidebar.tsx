@@ -128,7 +128,9 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
       { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
+      { title: "Painel Afiliado", url: "/vendas/dashboard-afiliado", icon: Award },
       { title: "Coproduções", url: "/vendas/coproducoes", icon: Handshake },
+      { title: "Assinaturas", url: "/vendas/assinaturas", icon: RefreshCw },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
     ],
   },
