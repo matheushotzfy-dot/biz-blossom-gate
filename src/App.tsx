@@ -32,6 +32,7 @@ import DashboardAfiliado from "./pages/vendas/DashboardAfiliado";
 import Suporte from "./pages/Suporte";
 import VendasHub from "./pages/VendasHub";
 import Gamificacao from "./pages/Gamificacao";
+import Marketplace from "./pages/Marketplace";
 import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -134,6 +135,7 @@ const App = () => (
                 <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                 <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
