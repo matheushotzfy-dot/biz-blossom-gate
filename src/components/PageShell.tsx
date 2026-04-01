@@ -10,7 +10,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-6 pb-10">{children}</div>
+      <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-4 md:space-y-6 pb-6 md:pb-10">{children}</div>
     </div>
   );
 }
