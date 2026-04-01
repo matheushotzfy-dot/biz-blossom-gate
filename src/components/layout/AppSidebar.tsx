@@ -24,6 +24,8 @@ import {
   RefreshCw,
   Award,
   Banknote,
+  TrendingUp,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
