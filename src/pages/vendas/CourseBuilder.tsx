@@ -107,17 +107,27 @@ export default function CourseBuilder() {
   // ─── Load All ───────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
     if (!courseId) return;
-    const [courseRes, modsRes] = await Promise.all([
+    const [courseRes, modsRes, accessRes] = await Promise.all([
       supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
       supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order"),
+      supabase.from("user_access").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("status", "active"),
     ]);
     if (courseRes.data) setCourse(courseRes.data as Course);
+    setStudentCount(accessRes.count || 0);
     const mods = modsRes.data || [];
     const moduleIds = mods.map(m => m.id);
     let lessons: Lesson[] = [];
     if (moduleIds.length > 0) {
       const { data: l } = await supabase.from("lessons").select("*").in("module_id", moduleIds).order("sort_order");
       if (l) lessons = l as Lesson[];
+      // Load progress stats per lesson
+      const lessonIds = lessons.map(le => le.id);
+      if (lessonIds.length > 0) {
+        const { data: progressData } = await supabase.from("user_progress").select("lesson_id").eq("completed", true).in("lesson_id", lessonIds);
+        const statsMap = new Map<string, number>();
+        progressData?.forEach(p => statsMap.set(p.lesson_id, (statsMap.get(p.lesson_id) || 0) + 1));
+        setLessonStats(statsMap);
+      }
     }
     const mapped = mods.map(m => ({ ...m, lessons: lessons.filter(l => l.module_id === m.id) })) as Module[];
     setModules(mapped);
