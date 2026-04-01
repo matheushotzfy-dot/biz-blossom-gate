@@ -306,9 +306,21 @@ export default function AdminConteudo() {
   const { data: productsRaw = [] } = useProductsQuery();
   const { data: transactions = [] } = useTransactions();
   const invalidateAll = useInvalidateAll();
+  const [studentCounts, setStudentCounts] = useState<Record<string, number>>({});
 
   const courses = useMemo(() => coursesRaw.map((c: any) => { const { modules: _, ...rest } = c; return rest; }) as Course[], [coursesRaw]);
   const products = useMemo(() => productsRaw.map((p: any) => ({ id: p.id, name: p.name, price: Number(p.price) })) as Product[], [productsRaw]);
+
+  // Load student counts
+  useEffect(() => {
+    if (courses.length === 0) return;
+    supabase.from("user_access").select("course_id").eq("status", "active").in("course_id", courses.map(c => c.id))
+      .then(({ data }) => {
+        const counts: Record<string, number> = {};
+        data?.forEach(a => { counts[a.course_id] = (counts[a.course_id] || 0) + 1; });
+        setStudentCounts(counts);
+      });
+  }, [courses]);
 
   const courseStats = useMemo(() => {
     const stats: Record<string, { modules: number; lessons: number }> = {};
