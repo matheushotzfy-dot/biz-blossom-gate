@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlaskConical, Ticket, MessageSquare, ArrowUpRight, Link2, UserMinus, HelpCircle, Calculator, Globe, Eye, Filter } from "lucide-react";
+import { FlaskConical, Ticket, MessageSquare, ArrowUpRight, Link2, UserMinus, HelpCircle, Calculator, Globe, Eye, Filter, Phone } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 import ABTesting from "./vendas/ABTesting";
 import AutoCupons from "./vendas/AutoCupons";
@@ -12,12 +12,14 @@ import CalculadoraLucro from "./vendas/CalculadoraLucro";
 import SmartCheckout from "./vendas/SmartCheckout";
 import ProofPopup from "./vendas/ProofPopup";
 import FunilVendas from "./vendas/FunilVendas";
+import CheckoutWhatsApp from "./vendas/CheckoutWhatsApp";
 
 const TABS: HubTab[] = [
   { id: "funil", label: "Funil", icon: Filter },
   { id: "ab", label: "A/B Testing", icon: FlaskConical },
   { id: "cupons", label: "Auto Cupons", icon: Ticket },
   { id: "whatsapp", label: "Recuperação", icon: MessageSquare },
+  { id: "checkout-wpp", label: "Checkout WhatsApp", icon: Phone },
   { id: "upsell", label: "Upsell", icon: ArrowUpRight },
   { id: "links", label: "Links", icon: Link2 },
   { id: "proof", label: "Proof Popup", icon: Eye },
@@ -32,6 +34,7 @@ const COMPONENTS: Record<string, React.FC> = {
   ab: ABTesting,
   cupons: AutoCupons,
   whatsapp: RecuperacaoWhatsApp,
+  "checkout-wpp": CheckoutWhatsApp,
   upsell: UpsellPosPagamento,
   links: LinkPagamento,
   proof: ProofPopup,
