@@ -158,7 +158,7 @@ export default function Apps() {
   const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
 
   const openDialog = (app: AppDef, existing?: AppIntegration) => {
-    if (app.id === "webhooks") { navigate("/vendas/webhooks"); return; }
+    if (app.id === "webhooks") { navigate("/integracoes?tab=webhooks"); return; }
     setDialogApp(app);
     if (existing) {
       setEditId(existing.id);
