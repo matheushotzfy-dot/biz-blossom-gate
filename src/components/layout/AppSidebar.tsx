@@ -106,12 +106,12 @@ const sections: SidebarSection[] = [
   {
     label: "INFOPRODUTOS",
     items: [
-      { title: "Produtos", url: "/vendas/produtos", icon: Package },
-      { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
+      { title: "Meus Produtos", url: "/vendas/produtos", icon: Package },
+      { title: "Área De Membros", url: "/vendas/conteudo", icon: Layers },
       { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
       { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
       { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat },
-      { title: "Marketplace", url: "/marketplace", icon: Store, exact: true },
+      { title: (<span>Vitrine De Produtos<br /></span>) as unknown as string, url: "/marketplace", icon: Store, exact: true },
     ],
   },
   {
