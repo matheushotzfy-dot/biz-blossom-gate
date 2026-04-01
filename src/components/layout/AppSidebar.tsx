@@ -165,6 +165,7 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
       { title: "Premiações", url: "/premiacoes", icon: Trophy },
+      { title: "Indicações", url: "/indicacoes", icon: Gift },
     ],
   },
 ];
