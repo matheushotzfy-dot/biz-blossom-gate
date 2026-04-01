@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
-  Layers, Trophy, Zap, Users, Ticket, Repeat,
-  Building2, ArrowDownToLine, GraduationCap, User, LogOut, X,
+  Layers, Trophy, Users, Ticket, Repeat,
+  Building2, GraduationCap, User, LogOut, X,
   FileText, Puzzle, FlaskConical, MessageSquare, Store, TrendingUp,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -66,27 +66,31 @@ export function MobileBottomNav() {
 
   return (
     <>
+      {/* ═══ "More" bottom sheet ═══ */}
       {moreOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setMoreOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-3xl max-h-[80vh] overflow-y-auto animate-slide-up shadow-2xl">
+          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border/50 rounded-t-[28px] max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up">
+            {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
-              <div className="h-1 w-10 rounded-full bg-border" />
+              <div className="h-1 w-10 rounded-full bg-border/60" />
             </div>
-            <div className="flex items-center justify-between px-5 pt-2 pb-3">
-              <h2 className="text-lg font-display font-black text-foreground">Navegação</h2>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-1 pb-3">
+              <h2 className="text-base font-display font-black text-foreground">Menu</h2>
               <button
                 onClick={() => setMoreOpen(false)}
-                className="h-9 w-9 rounded-xl flex items-center justify-center bg-muted/60 border border-border/80"
+                className="h-8 w-8 rounded-full flex items-center justify-center bg-muted/40 active:scale-95 transition-transform"
               >
-                <X className="h-4 w-4 text-muted-foreground" />
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
             </div>
-            <div className="px-4 pb-8 space-y-5">
+            {/* Groups */}
+            <div className="px-4 pb-8 space-y-4">
               {moreGroups.map((group) => (
                 <div key={group.label}>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold px-1 mb-2">{group.label}</p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60 font-bold px-1 mb-1.5">{group.label}</p>
+                  <div className="grid grid-cols-4 gap-1.5">
                     {group.items.map((item) => {
                       const isActive = location.pathname === item.url;
                       return (
@@ -95,39 +99,41 @@ export function MobileBottomNav() {
                           to={item.url}
                           onClick={() => setMoreOpen(false)}
                           className={cn(
-                            "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all text-center border",
+                            "flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl transition-all text-center active:scale-[0.97]",
                             isActive
-                              ? "bg-primary/10 border-primary/25 text-primary"
-                              : "bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50"
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:bg-muted/30"
                           )}
                         >
                           <div className={cn(
-                            "h-9 w-9 rounded-xl flex items-center justify-center",
-                            isActive ? "bg-primary/15" : "bg-muted/50"
+                            "h-8 w-8 rounded-lg flex items-center justify-center",
+                            isActive ? "bg-primary/15" : "bg-muted/40"
                           )}>
-                            <item.icon className="h-4 w-4" />
+                            <item.icon className="h-3.5 w-3.5" />
                           </div>
-                          <span className="text-[10px] font-semibold leading-tight">{item.title}</span>
+                          <span className="text-[9px] font-semibold leading-tight truncate w-full">{item.title}</span>
                         </NavLink>
                       );
                     })}
                   </div>
                 </div>
               ))}
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl text-destructive bg-destructive/8 border border-destructive/15 text-sm font-bold mt-3"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-destructive bg-destructive/8 border border-destructive/15 text-xs font-bold mt-2 active:scale-[0.98] transition-transform"
               >
-                <LogOut className="h-4 w-4" /> Sair da conta
+                <LogOut className="h-3.5 w-3.5" /> Sair da conta
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* ═══ Bottom Tab Bar ═══ */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="bg-card/95 backdrop-blur-xl border-t border-border/80">
-          <div className="flex items-center justify-around px-2 py-1 safe-area-bottom">
+        <div className="bg-background/90 backdrop-blur-2xl border-t border-border/40">
+          <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";
               const isActive = isMore
@@ -142,17 +148,20 @@ export function MobileBottomNav() {
                     else { setMoreOpen(false); navigate(tab.path); }
                   }}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    "flex flex-col items-center gap-0.5 py-2 px-3 min-w-[52px] active:scale-[0.92] transition-all duration-150",
+                    isActive ? "text-primary" : "text-muted-foreground/60"
                   )}
                 >
                   <div className={cn(
-                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-200",
-                    isActive && "bg-primary/12 scale-105"
+                    "h-7 w-7 rounded-lg flex items-center justify-center transition-all duration-200",
+                    isActive && "bg-primary/12"
                   )}>
-                    <tab.icon className="h-[18px] w-[18px]" />
+                    <tab.icon className={cn("h-[17px] w-[17px]", isActive && "stroke-[2.5]")} />
                   </div>
-                  <span className={cn("text-[10px] font-semibold", isActive && "font-bold text-primary")}>
+                  <span className={cn(
+                    "text-[9px] font-medium",
+                    isActive && "font-bold text-primary"
+                  )}>
                     {tab.label}
                   </span>
                 </button>

@@ -10,7 +10,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-6 pb-10">{children}</div>
+      <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-4 md:space-y-6 pb-6 md:pb-10">{children}</div>
     </div>
   );
 }
@@ -79,13 +79,13 @@ export function SectionHeader({ icon, title, subtitle, action }: { icon: React.R
 
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
+    <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex h-11 w-11 md:h-13 md:w-13 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
         <span className="text-primary">{icon}</span>
       </div>
-      <div className="space-y-1">
-        <h1 className="font-display text-xl font-black leading-none tracking-[-0.03em] text-foreground md:text-2xl">{title}</h1>
-        <p className="text-[13px] text-muted-foreground/80">{subtitle}</p>
+      <div className="space-y-0.5 md:space-y-1 min-w-0">
+        <h1 className="font-display text-lg md:text-2xl font-black leading-none tracking-[-0.03em] text-foreground truncate">{title}</h1>
+        <p className="text-[12px] md:text-[13px] text-muted-foreground/80 truncate">{subtitle}</p>
       </div>
     </div>
   );
@@ -96,17 +96,17 @@ export function KpiCard({ label, value, sub, icon, color, bg, accent }: {
 }) {
   const Icon = icon;
   return (
-    <GlowPanel className="relative overflow-hidden p-4 md:p-5">
+    <GlowPanel className="relative overflow-hidden p-3.5 md:p-5">
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent || "bg-primary")} />
-      <div className="pl-2">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border border-border/30", bg)}>
-            <Icon className={cn("h-[18px] w-[18px]", color)} />
+      <div className="pl-1.5 md:pl-2">
+        <div className="mb-2 md:mb-3 flex items-center justify-between">
+          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+          <div className={cn("flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg md:rounded-xl border border-border/30", bg)}>
+            <Icon className={cn("h-3.5 w-3.5 md:h-[18px] md:w-[18px]", color)} />
           </div>
         </div>
-        <p className="font-display text-[22px] font-black leading-none text-foreground md:text-2xl tabular-nums tracking-[-0.03em]">{value}</p>
-        {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
+        <p className="font-display text-lg md:text-2xl font-black leading-none text-foreground tabular-nums tracking-[-0.03em]">{value}</p>
+        {sub && <p className="mt-1 md:mt-1.5 text-[10px] md:text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
       </div>
     </GlowPanel>
   );
@@ -178,26 +178,25 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
   return (
     <div
       className={cn(
-        "group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
+        "group relative rounded-xl md:rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
         "hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300",
-        large ? "p-6" : "p-4 md:p-5"
+        large ? "p-4 md:p-6" : "p-3.5 md:p-5"
       )}
       style={{ animationDelay: `${delay * 60}ms` }}
     >
-      {/* Accent bar */}
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBar[tone] || accentBar.primary)} />
       <div className="pl-1.5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
-            <Icon className={cn("h-4 w-4", t.color)} />
+        <div className="flex items-center justify-between mb-2 md:mb-3">
+          <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+          <div className={cn("h-8 w-8 md:h-9 md:w-9 rounded-lg md:rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
+            <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", t.color)} />
           </div>
         </div>
         <p className={cn(
           "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
-          large ? "text-3xl md:text-4xl" : "text-[22px] md:text-2xl"
+          large ? "text-2xl md:text-4xl" : "text-lg md:text-2xl"
         )}>{value}</p>
-        {sub && <p className="text-[11px] text-muted-foreground/60 mt-1.5 font-medium">{sub}</p>}
+        {sub && <p className="text-[10px] md:text-[11px] text-muted-foreground/60 mt-1 md:mt-1.5 font-medium">{sub}</p>}
       </div>
     </div>
   );
