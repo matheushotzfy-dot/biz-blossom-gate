@@ -193,7 +193,7 @@ export default function Dashboard() {
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
-  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
+  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _pending = filteredTx.filter((t) => t.status === "pending");
     const _refunded = filteredTx.filter((t) => t.status === "refunded");
@@ -205,10 +205,12 @@ export default function Dashboard() {
     const pixTx = filteredTx.filter(t => t.payment_method === "pix");
     const pixApproved = pixTx.filter(t => t.status === "completed");
     const _pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
+    const _pixRevenue = pixApproved.reduce((acc, t) => acc + Number(t.net_amount), 0);
 
     const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
     const cardApproved = cardTx.filter(t => t.status === "completed");
     const _cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
+    const _cardRevenue = cardApproved.reduce((acc, t) => acc + Number(t.net_amount), 0);
 
     const _chargebackRate = filteredTx.length > 0 ? (_chargebacks.length / filteredTx.length) * 100 : 0;
 
@@ -216,6 +218,9 @@ export default function Dashboard() {
       approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
       revenue: _revenue, conversion: _conversion,
       pixConversion: _pixConversion, cardConversion: _cardConversion, chargebackRate: _chargebackRate,
+      pixRevenue: _pixRevenue, cardRevenue: _cardRevenue,
+      pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
+      cardApprovedCount: cardApproved.length, cardTotalCount: cardTx.length,
     };
   }, [filteredTx]);
 
@@ -623,10 +628,10 @@ export default function Dashboard() {
 
           {/* Hero metrics */}
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Realizadas" value={privacy.hidden ? CENSORED : fmt(revenue)} tone="primary" idx={0} />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Qtd. de Vendas" value={privacy.hidden ? CENSORED : String(approved.length)} tone="info" idx={1} />
+            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Total Faturado" value={privacy.hidden ? CENSORED : fmt(revenue)} tone="primary" idx={0} />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Vendas Realizadas" value={privacy.hidden ? CENSORED : String(approved.length)} tone="info" idx={1} />
             <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} tone="success" idx={2} />
-            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo" value={privacy.hidden ? CENSORED : `${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
+            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo Disponível" value={privacy.hidden ? CENSORED : `${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
           </div>
         </div>
       </section>
@@ -671,16 +676,8 @@ export default function Dashboard() {
         </div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          {/* Health */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
-            <div className="space-y-2">
-              <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={String(approved.length)} tone="success" />
-              <QualityLine icon={<Clock3 className="h-4 w-4" />} label="Pendentes" value={String(pending.length)} tone="warning" />
-            </div>
-          </div>
-
           {/* Conversions */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex-1">
+          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2 flex-1">
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -692,10 +689,10 @@ export default function Dashboard() {
 
       {/* ─── KPI TILES ─── */}
       <section className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
-        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
-        <KpiTile icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={privacy.hidden ? CENSORED : String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
-        <KpiTile icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={privacy.hidden ? CENSORED : String(chargebacks.length)} helper="No período" tone={chargebacks.length > 0 ? "destructive" : "success"} delay="stagger-6" />
+        <KpiTile icon={<Zap className="h-4 w-4" />} label="Vendas no Pix" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% de conversão · ${pixApprovedCount} de ${pixTotalCount} pedidos`} tone="success" delay="stagger-3" />
+        <KpiTile icon={<CreditCard className="h-4 w-4" />} label="Vendas no Cartão" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% de conversão · ${cardApprovedCount} de ${cardTotalCount} pedidos`} tone="info" delay="stagger-4" />
+        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
+        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
