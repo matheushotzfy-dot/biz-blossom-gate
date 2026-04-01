@@ -21,7 +21,6 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
  */
 async function processCoProductionSplit(supabase: any, transactionId: string) {
   try {
-    // Get the completed transaction
     const { data: tx } = await supabase
       .from('transactions')
       .select('id, product_id, net_amount, user_id')
@@ -45,20 +44,17 @@ async function processCoProductionSplit(supabase: any, transactionId: string) {
 
     const idemKey = `split_${transactionId}_${coProd.id}`;
 
-    // Check idempotency
     const { data: existing } = await supabase
       .from('financial_ledger')
       .select('id')
       .eq('idempotency_key', idemKey)
       .maybeSingle();
 
-    if (existing) return; // Already processed
+    if (existing) return;
 
-    // Get co-producer's current balance
     const { data: balanceResult } = await supabase.rpc('get_ledger_balance', { _user_id: coProd.co_producer_user_id });
     const coProducerBalance = Number(balanceResult) || 0;
 
-    // Credit co-producer
     await supabase.from('financial_ledger').insert({
       user_id: coProd.co_producer_user_id,
       transaction_id: transactionId,
@@ -69,7 +65,6 @@ async function processCoProductionSplit(supabase: any, transactionId: string) {
       idempotency_key: idemKey,
     });
 
-    // Debit owner (adjust their balance down by the split amount)
     const { data: ownerBalance } = await supabase.rpc('get_ledger_balance', { _user_id: coProd.owner_user_id });
     const ownerBal = Number(ownerBalance) || 0;
 
@@ -86,6 +81,103 @@ async function processCoProductionSplit(supabase: any, transactionId: string) {
     safeLog('Co-production split processed', { transactionId, status: `split ${coProd.split_percentage}%` });
   } catch (err) {
     safeLog('Co-production split error', { error: err instanceof Error ? err.message : 'unknown' });
+  }
+}
+
+/**
+ * Auto-split: when a transaction completes, check if the sale came through
+ * an affiliate link and credit the affiliate's ledger with their commission.
+ */
+async function processAffiliateSplit(supabase: any, transactionId: string) {
+  try {
+    const { data: tx } = await supabase
+      .from('transactions')
+      .select('id, product_id, net_amount, user_id, amount, checkout_session_id')
+      .eq('id', transactionId)
+      .single();
+
+    if (!tx?.product_id) return;
+
+    // Check if an affiliate sale was already recorded for this transaction
+    const { data: existingSale } = await supabase
+      .from('affiliate_sales')
+      .select('id')
+      .eq('transaction_id', transactionId)
+      .maybeSingle();
+
+    if (existingSale) return; // Already processed
+
+    // Find active affiliate links for this product
+    const { data: affiliateLinks } = await supabase
+      .from('affiliate_links')
+      .select('id, affiliate_user_id, commission_pct, owner_user_id')
+      .eq('product_id', tx.product_id)
+      .eq('is_active', true);
+
+    if (!affiliateLinks || affiliateLinks.length === 0) return;
+
+    // For now, match the first active affiliate link for this product
+    // In production, match via checkout_session_id or UTM tracking
+    const link = affiliateLinks[0];
+    if (link.owner_user_id !== tx.user_id) return; // Link must belong to the product owner
+
+    const commissionAmount = Math.round(tx.amount * link.commission_pct) / 100;
+    if (commissionAmount <= 0) return;
+
+    const idemKey = `affiliate_${transactionId}_${link.id}`;
+
+    const { data: existingLedger } = await supabase
+      .from('financial_ledger')
+      .select('id')
+      .eq('idempotency_key', idemKey)
+      .maybeSingle();
+
+    if (existingLedger) return;
+
+    // Record affiliate sale
+    await supabase.from('affiliate_sales').insert({
+      affiliate_link_id: link.id,
+      affiliate_user_id: link.affiliate_user_id,
+      seller_user_id: tx.user_id,
+      product_id: tx.product_id,
+      transaction_id: transactionId,
+      sale_amount: tx.amount,
+      commission_pct: link.commission_pct,
+      commission_amount: commissionAmount,
+      status: 'approved',
+    });
+
+    // Credit affiliate's ledger
+    const { data: affBalance } = await supabase.rpc('get_ledger_balance', { _user_id: link.affiliate_user_id });
+    const affiliateBalance = Number(affBalance) || 0;
+
+    await supabase.from('financial_ledger').insert({
+      user_id: link.affiliate_user_id,
+      transaction_id: transactionId,
+      entry_type: 'credit',
+      amount: commissionAmount,
+      balance_after: affiliateBalance + commissionAmount,
+      description: `Comissão de afiliado: ${link.commission_pct}% da venda`,
+      idempotency_key: idemKey,
+    });
+
+    // Debit seller
+    const { data: sellerBal } = await supabase.rpc('get_ledger_balance', { _user_id: tx.user_id });
+    const sellerBalance = Number(sellerBal) || 0;
+
+    await supabase.from('financial_ledger').insert({
+      user_id: tx.user_id,
+      transaction_id: transactionId,
+      entry_type: 'affiliate_debit',
+      amount: commissionAmount,
+      balance_after: sellerBalance - commissionAmount,
+      description: `Comissão afiliado: ${link.commission_pct}%`,
+      idempotency_key: `affiliate_debit_${transactionId}_${link.id}`,
+    });
+
+    safeLog('Affiliate split processed', { transactionId, status: `commission ${link.commission_pct}%` });
+  } catch (err) {
+    safeLog('Affiliate split error', { error: err instanceof Error ? err.message : 'unknown' });
   }
 }
 
