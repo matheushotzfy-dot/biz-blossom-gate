@@ -6,12 +6,9 @@ const corsHeaders = {
 };
 
 /**
- * Server-side admin login with REAL rate limiting.
- * - Tracks attempts per email in admin_login_attempts table
- * - Blocks after 5 failed attempts in 15 minutes
- * - Blocks after 20 attempts from same IP in 15 minutes
- * - Verifies admin/employee role server-side
- * - Returns session tokens only if authorized
+ * Server-side admin login with 2FA.
+ * Step 1: Authenticate + role check → generate OTP → store in admin_2fa_codes → return tempToken
+ * Step 2: Verify OTP via admin-2fa-verify function
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -49,7 +46,6 @@ Deno.serve(async (req) => {
     }
 
     // ===== SERVER-SIDE RATE LIMITING =====
-    // Check failed attempts in last 15 minutes for this email
     const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
     const { data: recentAttempts, error: attemptsError } = await adminClient
@@ -60,13 +56,10 @@ Deno.serve(async (req) => {
       .eq("success", false);
 
     if (!attemptsError && recentAttempts && recentAttempts.length >= 5) {
-      // Log the blocked attempt too
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: false,
       });
-
-      console.log(`[admin-login] Rate limited: ${trimmedEmail} (${recentAttempts.length} failed attempts)`);
 
       return new Response(
         JSON.stringify({
@@ -85,13 +78,11 @@ Deno.serve(async (req) => {
     });
 
     if (authError || !authData.user || !authData.session) {
-      // Log failed attempt
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: false,
       });
 
-      // Generic error - prevents user enumeration
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -112,45 +103,58 @@ Deno.serve(async (req) => {
     });
 
     if (!isAdmin && !isEmployee) {
-      // Log failed attempt (valid creds but no role)
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: false,
       });
 
-      // Sign the user out since they don't have admin access
-      // Don't expose that the user exists
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // ===== SUCCESS =====
-    // Log successful attempt
-    await adminClient.from("admin_login_attempts").insert({
+    // ===== 2FA: Generate OTP & store session temporarily =====
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const tempToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+    const role = isAdmin ? "admin" : "employee";
+
+    // Clean old codes
+    await adminClient.from("admin_2fa_codes").delete().eq("email", trimmedEmail);
+
+    // Store OTP + session tokens
+    await adminClient.from("admin_2fa_codes").insert({
       email: trimmedEmail,
-      success: true,
+      code_hash: otp,
+      temp_token: tempToken,
+      access_token: authData.session.access_token,
+      refresh_token: authData.session.refresh_token,
+      role,
+      expires_at: expiresAt,
+      attempts: 0,
     });
 
-    // Audit log
-    await adminClient.from("audit_logs").insert({
-      admin_user_id: userId,
-      action: "admin_login",
-      entity_type: "auth",
-      entity_id: userId,
-      details: {
-        role: isAdmin ? "admin" : "employee",
-        timestamp: new Date().toISOString(),
-      },
+    // Log attempt (pending 2FA)
+    await adminClient.from("admin_login_attempts").insert({
+      email: trimmedEmail,
+      success: false, // Not fully authenticated yet
     });
+
+    console.log(`[admin-login] 2FA OTP generated for ${trimmedEmail}`);
+
+    // Mask email for display
+    const [local, domain] = trimmedEmail.split("@");
+    const maskedEmail = local.slice(0, 2) + "***@" + domain;
 
     return new Response(
       JSON.stringify({
         success: true,
-        access_token: authData.session.access_token,
-        refresh_token: authData.session.refresh_token,
-        role: isAdmin ? "admin" : "employee",
+        requires2FA: true,
+        tempToken,
+        maskedEmail,
+        // DEV ONLY: include OTP for testing
+        ...(Deno.env.get("DENO_DEPLOYMENT_ID") ? {} : { _devOtp: otp }),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
