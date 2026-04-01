@@ -1547,6 +1547,42 @@ export type Database = {
           },
         ]
       }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          paid_at: string | null
+          referred_email: string
+          referred_user_id: string | null
+          referrer_user_id: string
+          reward_amount: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          referred_email: string
+          referred_user_id?: string | null
+          referrer_user_id: string
+          reward_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          referred_email?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          reward_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       retention_settings: {
         Row: {
           card_retention_pct: number
