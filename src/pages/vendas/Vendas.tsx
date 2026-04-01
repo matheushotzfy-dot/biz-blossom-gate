@@ -7,7 +7,8 @@ import {
   RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
   Download, Smartphone, FileText, BarChart3, ArrowDownRight, Zap, Filter,
   MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
-  Wallet, Target, PieChart, Award, Activity, TrendingDown,
+  Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
+  Percent, UserCheck, Layers, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,10 +29,16 @@ import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DateRange } from "react-day-picker";
+import { AreaChart, Area, ResponsiveContainer, Tooltip as ReTooltip, XAxis, YAxis } from "recharts";
 
 /* ─── Formatters ─── */
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmtCompact = (v: number) => {
+  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1).replace(".", ",")}M`;
+  if (v >= 1000) return `R$ ${(v / 1000).toFixed(1).replace(".", ",")}K`;
+  return fmt(v);
+};
 
 const _dateFmt = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo" });
 const _timeFmt = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
@@ -59,6 +66,7 @@ const PERIOD_PRESETS = [
   { label: "7 dias", days: 7 },
   { label: "15 dias", days: 15 },
   { label: "30 dias", days: 30 },
+  { label: "90 dias", days: 90 },
 ] as const;
 type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
@@ -102,7 +110,7 @@ function StatusDot({ status }: { status: string }) {
 }
 
 /* ─── Revenue Bar (inline mini chart) ─── */
-function RevenueBar({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
+function RevenueBar({ label, value, total, color, count }: { label: string; value: number; total: number; color: string; count: number }) {
   const pct = total > 0 ? (value / total) * 100 : 0;
   return (
     <div className="flex items-center gap-3">
@@ -116,6 +124,7 @@ function RevenueBar({ label, value, total, color }: { label: string; value: numb
         />
       </div>
       <span className="text-[11px] font-bold text-foreground tabular-nums w-[70px] text-right">{fmt(value)}</span>
+      <span className="text-[9px] text-muted-foreground/50 w-[28px] text-right tabular-nums">{count}</span>
       <span className="text-[9px] text-muted-foreground/50 w-[36px] text-right tabular-nums">{pct.toFixed(0)}%</span>
     </div>
   );
@@ -141,6 +150,23 @@ function TopProductRow({ rank, name, revenue, sales, maxRevenue }: { rank: numbe
       </div>
       <span className="text-[12px] font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
     </div>
+  );
+}
+
+/* ─── Delta Badge ─── */
+function DeltaBadge({ current, previous }: { current: number; previous: number }) {
+  if (previous === 0 && current === 0) return null;
+  if (previous === 0) return <span className="text-[9px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded-md">NOVO</span>;
+  const pct = ((current - previous) / previous) * 100;
+  const isUp = pct >= 0;
+  return (
+    <span className={cn(
+      "inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-md",
+      isUp ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
+    )}>
+      {isUp ? <ArrowUp className="h-2.5 w-2.5" /> : <ArrowDown className="h-2.5 w-2.5" />}
+      {Math.abs(pct).toFixed(0)}%
+    </span>
   );
 }
 
@@ -525,6 +551,37 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
   );
 }
 
+/* ─── Mini Revenue Chart ─── */
+function MiniRevenueChart({ data, hidden }: { data: { label: string; value: number }[]; hidden: boolean }) {
+  if (data.length < 2 || hidden) {
+    return (
+      <div className="h-[120px] flex items-center justify-center text-[11px] text-muted-foreground/40">
+        {hidden ? "Valores ocultos" : "Dados insuficientes"}
+      </div>
+    );
+  }
+  return (
+    <ResponsiveContainer width="100%" height={120}>
+      <AreaChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+        <YAxis hide domain={["auto", "auto"]} />
+        <ReTooltip
+          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11, padding: "8px 12px" }}
+          formatter={(v: number) => [fmt(v), "Receita"]}
+          labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}
+        />
+        <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#chartGrad)" />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
 /* ═══════════════════════════════════ MAIN ═══════════════════════════════════ */
 
 export default function Vendas() {
@@ -540,7 +597,7 @@ export default function Vendas() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[2]); // default 7 days
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -576,58 +633,92 @@ export default function Vendas() {
     return cached;
   }, []);
 
-  const dateFiltered = useMemo(() => {
+  /* ─── Date filtering ─── */
+  const { dateFiltered, previousPeriodFiltered } = useMemo(() => {
+    const today = brasiliaToday();
+
+    const filterByRange = (txs: Tables<"transactions">[], start: Date, end: Date) =>
+      txs.filter(t => { const d = new Date(t.created_at); return d >= start && d <= end; });
+
     if (isCustom && customRange?.from) {
       const start = new Date(customRange.from);
       start.setHours(0, 0, 0, 0);
       const end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
       end.setHours(23, 59, 59, 999);
-      return transactions.filter((t) => {
-        const d = new Date(t.created_at);
-        return d >= start && d <= end;
-      });
+      const rangeDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+      const prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1); prevEnd.setHours(23, 59, 59, 999);
+      const prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - rangeDays + 1); prevStart.setHours(0, 0, 0, 0);
+      return { dateFiltered: filterByRange(transactions, start, end), previousPeriodFiltered: filterByRange(transactions, prevStart, prevEnd) };
     }
-
-    const today = brasiliaToday();
 
     if (selectedPeriod.days === 0) {
       const todayStr = today.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return transactions.filter((t) => toBrasiliaDate(t.created_at) === todayStr);
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return {
+        dateFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === todayStr),
+        previousPeriodFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === yesterdayStr),
+      };
     }
 
     if (selectedPeriod.days === 1) {
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const dayBefore = new Date(today); dayBefore.setDate(dayBefore.getDate() - 2);
       const yesterdayStr = yesterday.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return transactions.filter((t) => toBrasiliaDate(t.created_at) === yesterdayStr);
+      const dayBeforeStr = dayBefore.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return {
+        dateFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === yesterdayStr),
+        previousPeriodFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === dayBeforeStr),
+      };
     }
 
-    const start = new Date(today);
-    start.setDate(start.getDate() - selectedPeriod.days);
-    start.setHours(0, 0, 0, 0);
-
-    return transactions.filter((t) => new Date(t.created_at) >= start);
+    const start = new Date(today); start.setDate(start.getDate() - selectedPeriod.days); start.setHours(0, 0, 0, 0);
+    const prevStart = new Date(start); prevStart.setDate(prevStart.getDate() - selectedPeriod.days);
+    return {
+      dateFiltered: transactions.filter(t => new Date(t.created_at) >= start),
+      previousPeriodFiltered: transactions.filter(t => { const d = new Date(t.created_at); return d >= prevStart && d < start; }),
+    };
   }, [transactions, selectedPeriod, isCustom, customRange, brasiliaToday, toBrasiliaDate]);
 
-  const { approved, pending, refunded, chargebacks, totalSales, totalGross, avgTicket, conversion, totalFees, pixRevenue, cardRevenue, boletoRevenue, topProducts } = useMemo(() => {
-    const _approved = dateFiltered.filter((t) => t.status === "completed");
-    const _pending = dateFiltered.filter((t) => t.status === "pending");
-    const _refunded = dateFiltered.filter((t) => t.status === "refunded");
-    const _chargebacks = dateFiltered.filter((t) => t.status === "chargeback");
-    const _totalSales = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
-    const _totalGross = _approved.reduce((acc, t) => acc + Number(t.amount), 0);
-    const _totalFees = _approved.reduce((acc, t) => acc + Number(t.fee_amount), 0);
-    const _avgTicket = _approved.length > 0 ? _totalSales / _approved.length : 0;
-    const _conversion = dateFiltered.length > 0 ? (_approved.length / dateFiltered.length) * 100 : 0;
+  /* ─── Current period metrics ─── */
+  const metrics = useMemo(() => {
+    const calc = (txs: Tables<"transactions">[]) => {
+      const _approved = txs.filter(t => t.status === "completed");
+      const _pending = txs.filter(t => t.status === "pending");
+      const _refunded = txs.filter(t => t.status === "refunded");
+      const _chargebacks = txs.filter(t => t.status === "chargeback");
+      const _failed = txs.filter(t => t.status === "failed");
+      const _totalNet = _approved.reduce((a, t) => a + Number(t.net_amount), 0);
+      const _totalGross = _approved.reduce((a, t) => a + Number(t.amount), 0);
+      const _totalFees = _approved.reduce((a, t) => a + Number(t.fee_amount), 0);
+      const _avgTicket = _approved.length > 0 ? _totalNet / _approved.length : 0;
+      const _conversion = txs.length > 0 ? (_approved.length / txs.length) * 100 : 0;
+      const _pixApproved = _approved.filter(t => t.payment_method === "pix");
+      const _cardApproved = _approved.filter(t => t.payment_method === "credit_card");
+      const _boletoApproved = _approved.filter(t => t.payment_method === "boleto");
+      const _pixRevenue = _pixApproved.reduce((a, t) => a + Number(t.net_amount), 0);
+      const _cardRevenue = _cardApproved.reduce((a, t) => a + Number(t.net_amount), 0);
+      const _boletoRevenue = _boletoApproved.reduce((a, t) => a + Number(t.net_amount), 0);
+      const uniqueEmails = new Set(_approved.map(t => t.customer_email).filter(Boolean));
+      const refundRate = _approved.length > 0 ? (_refunded.length / (_approved.length + _refunded.length)) * 100 : 0;
+      const chargebackRate = _approved.length > 0 ? (_chargebacks.length / (_approved.length + _chargebacks.length)) * 100 : 0;
+      const failedRate = txs.length > 0 ? (_failed.length / txs.length) * 100 : 0;
 
-    // Revenue by method
-    const _pixRevenue = _approved.filter(t => t.payment_method === 'pix').reduce((a, t) => a + Number(t.net_amount), 0);
-    const _cardRevenue = _approved.filter(t => t.payment_method === 'credit_card').reduce((a, t) => a + Number(t.net_amount), 0);
-    const _boletoRevenue = _approved.filter(t => t.payment_method === 'boleto').reduce((a, t) => a + Number(t.net_amount), 0);
+      return {
+        approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks, failed: _failed,
+        totalNet: _totalNet, totalGross: _totalGross, totalFees: _totalFees, avgTicket: _avgTicket, conversion: _conversion,
+        pixRevenue: _pixRevenue, cardRevenue: _cardRevenue, boletoRevenue: _boletoRevenue,
+        pixCount: _pixApproved.length, cardCount: _cardApproved.length, boletoCount: _boletoApproved.length,
+        uniqueCustomers: uniqueEmails.size, refundRate, chargebackRate, failedRate,
+      };
+    };
+
+    const current = calc(dateFiltered);
+    const previous = calc(previousPeriodFiltered);
 
     // Top products
     const productRevMap: Record<string, { revenue: number; sales: number; name: string }> = {};
-    for (const t of _approved) {
+    for (const t of current.approved) {
       if (t.product_id) {
         if (!productRevMap[t.product_id]) {
           productRevMap[t.product_id] = { revenue: 0, sales: 0, name: products[t.product_id] || t.product_id.slice(0, 8) };
@@ -636,18 +727,23 @@ export default function Vendas() {
         productRevMap[t.product_id].sales += 1;
       }
     }
-    const _topProducts = Object.entries(productRevMap)
+    const topProducts = Object.entries(productRevMap)
       .map(([id, data]) => ({ id, ...data }))
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
 
-    return {
-      approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
-      totalSales: _totalSales, totalGross: _totalGross, avgTicket: _avgTicket, conversion: _conversion,
-      totalFees: _totalFees, pixRevenue: _pixRevenue, cardRevenue: _cardRevenue, boletoRevenue: _boletoRevenue,
-      topProducts: _topProducts,
-    };
-  }, [dateFiltered, products]);
+    // Daily chart data
+    const dailyMap: Record<string, number> = {};
+    for (const t of current.approved) {
+      const day = fmtDate(t.created_at);
+      dailyMap[day] = (dailyMap[day] || 0) + Number(t.net_amount);
+    }
+    const chartData = Object.entries(dailyMap)
+      .map(([label, value]) => ({ label, value }))
+      .reverse();
+
+    return { current, previous, topProducts, chartData };
+  }, [dateFiltered, previousPeriodFiltered, products]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -721,6 +817,9 @@ export default function Vendas() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  const m = metrics.current;
+  const p = metrics.previous;
+
   return (
     <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative animate-fade-in">
       {/* ─── HERO SECTION ─── */}
@@ -730,22 +829,14 @@ export default function Vendas() {
           <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
         </div>
 
-        <div className="relative z-10 space-y-4 md:space-y-6">
-          {/* Title row */}
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
-                <Receipt className="h-6 w-6 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <h1 className="text-xl md:text-3xl font-display font-black tracking-[-0.04em] leading-[1.05] text-foreground">
-                  Minhas <span className="text-gradient">Vendas</span>
-                </h1>
-                <p className="text-[13px] text-muted-foreground/80">Acompanhe todas as suas transações em detalhe</p>
-              </div>
+        <div className="relative z-10 space-y-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h1 className="text-xl md:text-2xl font-display font-black text-foreground tracking-tight">Minhas Vendas</h1>
+              <p className="text-muted-foreground text-[12px] mt-0.5">{dateFiltered.length} transações no período</p>
             </div>
 
-            <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button className="inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl border border-border/80 bg-card px-3 md:px-3.5 text-xs md:text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
@@ -820,68 +911,90 @@ export default function Vendas() {
             </div>
           </div>
 
-          {/* Hero metrics — Bento Grid */}
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita Líquida" value={privacyHidden ? CENSORED : fmt(totalSales)} tone="primary" idx={0} />
-            <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Faturamento Bruto" value={privacyHidden ? CENSORED : fmt(totalGross)} tone="info" idx={1} />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(avgTicket)} tone="warning" idx={2} />
-            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacyHidden ? CENSORED : `${conversion.toFixed(1)}%`} tone="success" idx={3} />
+          {/* Hero metrics — 6 KPI cards */}
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-6 md:gap-3">
+            <MiniHeroCard icon={<DollarSign className="h-4 w-4" />} label="Receita Líquida" value={privacyHidden ? CENSORED : fmt(m.totalNet)} tone="primary" idx={0} delta={!privacyHidden ? <DeltaBadge current={m.totalNet} previous={p.totalNet} /> : undefined} />
+            <MiniHeroCard icon={<BarChart3 className="h-4 w-4" />} label="Faturamento Bruto" value={privacyHidden ? CENSORED : fmt(m.totalGross)} tone="info" idx={1} delta={!privacyHidden ? <DeltaBadge current={m.totalGross} previous={p.totalGross} /> : undefined} />
+            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(m.avgTicket)} tone="warning" idx={2} delta={!privacyHidden ? <DeltaBadge current={m.avgTicket} previous={p.avgTicket} /> : undefined} />
+            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacyHidden ? CENSORED : `${m.conversion.toFixed(1)}%`} tone="success" idx={3} delta={!privacyHidden ? <DeltaBadge current={m.conversion} previous={p.conversion} /> : undefined} />
+            <MiniHeroCard icon={<UserCheck className="h-4 w-4" />} label="Clientes Únicos" value={privacyHidden ? CENSORED : String(m.uniqueCustomers)} tone="info" idx={4} delta={!privacyHidden ? <DeltaBadge current={m.uniqueCustomers} previous={p.uniqueCustomers} /> : undefined} />
+            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(m.approved.length)} tone="success" idx={5} delta={!privacyHidden ? <DeltaBadge current={m.approved.length} previous={p.approved.length} /> : undefined} />
           </div>
         </div>
       </section>
 
-      {/* ─── INSIGHTS ROW: Revenue by Method + Top Products + Health ─── */}
+      {/* ─── INSIGHTS ROW ─── */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        {/* Revenue Chart */}
+        <div className="lg:col-span-5 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-foreground">Receita Diária</p>
+                <p className="text-[10px] text-muted-foreground/60">Evolução no período</p>
+              </div>
+            </div>
+            <span className="text-[12px] font-bold text-primary font-display tabular-nums">{privacyHidden ? CENSORED : fmtCompact(m.totalNet)}</span>
+          </div>
+          <MiniRevenueChart data={metrics.chartData} hidden={privacyHidden} />
+        </div>
+
         {/* Revenue by Payment Method */}
-        <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-4">
+        <div className="lg:col-span-3 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-4">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-              <PieChart className="h-4 w-4 text-primary" />
+            <div className="h-8 w-8 rounded-xl bg-info/10 flex items-center justify-center">
+              <PieChart className="h-4 w-4 text-info" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-foreground">Receita por Método</p>
-              <p className="text-[10px] text-muted-foreground/60">Distribuição no período</p>
+              <p className="text-[13px] font-bold text-foreground">Por Método</p>
+              <p className="text-[10px] text-muted-foreground/60">Distribuição</p>
             </div>
           </div>
           <div className="space-y-2.5">
-            <RevenueBar label="PIX" value={privacyHidden ? 0 : pixRevenue} total={totalSales} color="bg-success" />
-            <RevenueBar label="Cartão" value={privacyHidden ? 0 : cardRevenue} total={totalSales} color="bg-info" />
-            <RevenueBar label="Boleto" value={privacyHidden ? 0 : boletoRevenue} total={totalSales} color="bg-warning" />
+            <RevenueBar label="PIX" value={privacyHidden ? 0 : m.pixRevenue} total={m.totalNet} color="bg-success" count={m.pixCount} />
+            <RevenueBar label="Cartão" value={privacyHidden ? 0 : m.cardRevenue} total={m.totalNet} color="bg-info" count={m.cardCount} />
+            <RevenueBar label="Boleto" value={privacyHidden ? 0 : m.boletoRevenue} total={m.totalNet} color="bg-warning" count={m.boletoCount} />
           </div>
           <div className="pt-2 border-t border-border/20 flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-bold">Total Taxas</span>
-            <span className="text-[12px] font-bold text-destructive/70 tabular-nums">{privacyHidden ? CENSORED : `-${fmt(totalFees)}`}</span>
+            <span className="text-[12px] font-bold text-destructive/70 tabular-nums">{privacyHidden ? CENSORED : `-${fmt(m.totalFees)}`}</span>
           </div>
         </div>
 
-        {/* Top Products */}
-        <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-warning/10 flex items-center justify-center">
-              <Award className="h-4 w-4 text-warning" />
+        {/* Top Products + Health */}
+        <div className="lg:col-span-4 space-y-3">
+          {/* Top Products */}
+          <div className="rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl p-5 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-warning/10 flex items-center justify-center">
+                <Award className="h-4 w-4 text-warning" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-foreground">Top Produtos</p>
+                <p className="text-[10px] text-muted-foreground/60">Ranking por receita</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[13px] font-bold text-foreground">Top Produtos</p>
-              <p className="text-[10px] text-muted-foreground/60">Ranking por receita</p>
-            </div>
+            {metrics.topProducts.length === 0 ? (
+              <p className="text-[12px] text-muted-foreground/50 py-4 text-center">Sem dados no período</p>
+            ) : (
+              <div className="divide-y divide-border/10">
+                {metrics.topProducts.map((prod, i) => (
+                  <TopProductRow key={prod.id} rank={i + 1} name={prod.name} revenue={privacyHidden ? 0 : prod.revenue} sales={prod.sales} maxRevenue={metrics.topProducts[0]?.revenue || 1} />
+                ))}
+              </div>
+            )}
           </div>
-          {topProducts.length === 0 ? (
-            <p className="text-[12px] text-muted-foreground/50 py-4 text-center">Sem dados no período</p>
-          ) : (
-            <div className="divide-y divide-border/10">
-              {topProducts.map((p, i) => (
-                <TopProductRow key={p.id} rank={i + 1} name={p.name} revenue={privacyHidden ? 0 : p.revenue} sales={p.sales} maxRevenue={topProducts[0]?.revenue || 1} />
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Health Status */}
-        <div className="lg:col-span-4 grid grid-cols-2 gap-2.5">
-          <QualityLine icon={<ShoppingCart className="h-4 w-4" />} label="Aprovadas" value={privacyHidden ? CENSORED : String(approved.length)} tone="success" />
-          <QualityLine icon={<Clock className="h-4 w-4" />} label="Pendentes" value={privacyHidden ? CENSORED : String(pending.length)} tone="warning" />
-          <QualityLine icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={privacyHidden ? CENSORED : String(refunded.length)} tone="info" />
-          <QualityLine icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={privacyHidden ? CENSORED : String(chargebacks.length)} tone={chargebacks.length > 0 ? "destructive" : "success"} />
+          {/* Health Indicators */}
+          <div className="grid grid-cols-2 gap-2">
+            <HealthPill icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Reembolso" value={`${m.refundRate.toFixed(1)}%`} count={m.refunded.length} tone={m.refundRate > 5 ? "destructive" : m.refundRate > 2 ? "warning" : "success"} />
+            <HealthPill icon={<ArrowDownRight className="h-3.5 w-3.5" />} label="Chargeback" value={`${m.chargebackRate.toFixed(1)}%`} count={m.chargebacks.length} tone={m.chargebackRate > 1 ? "destructive" : "success"} />
+            <HealthPill icon={<X className="h-3.5 w-3.5" />} label="Falhas" value={`${m.failedRate.toFixed(1)}%`} count={m.failed.length} tone={m.failedRate > 20 ? "destructive" : m.failedRate > 10 ? "warning" : "success"} />
+            <HealthPill icon={<Clock className="h-3.5 w-3.5" />} label="Pendentes" value={String(m.pending.length)} count={m.pending.length} tone={m.pending.length > 10 ? "warning" : "success"} />
+          </div>
         </div>
       </section>
 
@@ -1025,9 +1138,10 @@ export default function Vendas() {
 
 /* ─── Shared Components ─── */
 
-function MiniHeroCard({ icon, label, value, tone, idx }: {
+function MiniHeroCard({ icon, label, value, tone, idx, delta }: {
   icon: React.ReactNode; label: string; value: string;
   tone: "primary" | "info" | "success" | "warning"; idx: number;
+  delta?: React.ReactNode;
 }) {
   const toneMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
     primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
@@ -1038,34 +1152,46 @@ function MiniHeroCard({ icon, label, value, tone, idx }: {
   const t = toneMap[tone] || toneMap.primary;
 
   return (
-    <div className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-4 md:p-5 animate-fade-in" style={{ animationDelay: `${idx * 60}ms` }}>
+    <div className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-3.5 md:p-4 animate-fade-in" style={{ animationDelay: `${idx * 60}ms` }}>
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", t.accent)} />
       <div className="pl-1.5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", t.iconBg, t.ring)}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] leading-tight">{label}</span>
+          <div className={cn("h-7 w-7 md:h-8 md:w-8 rounded-lg md:rounded-xl flex items-center justify-center ring-1", t.iconBg, t.ring)}>
             <span className={t.iconText}>{icon}</span>
           </div>
         </div>
-        <p className="font-display font-black text-foreground text-[22px] md:text-2xl tracking-[-0.03em] tabular-nums">{value}</p>
+        <p className="font-display font-black text-foreground text-[18px] md:text-xl tracking-[-0.03em] tabular-nums leading-none">{value}</p>
+        {delta && <div className="mt-1.5">{delta}</div>}
       </div>
     </div>
   );
 }
 
-function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
-  const styles: Record<string, { bg: string; text: string; ring: string }> = {
-    success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/20" },
-    warning: { bg: "bg-warning/10", text: "text-warning", ring: "ring-warning/20" },
-    destructive: { bg: "bg-destructive/10", text: "text-destructive", ring: "ring-destructive/20" },
-    info: { bg: "bg-info/10", text: "text-info", ring: "ring-info/20" },
+function HealthPill({ icon, label, value, count, tone }: {
+  icon: React.ReactNode; label: string; value: string; count: number;
+  tone: "success" | "warning" | "destructive";
+}) {
+  const styles: Record<string, { bg: string; text: string; ring: string; indicator: string }> = {
+    success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/20", indicator: "bg-success" },
+    warning: { bg: "bg-warning/10", text: "text-warning", ring: "ring-warning/20", indicator: "bg-warning" },
+    destructive: { bg: "bg-destructive/10", text: "text-destructive", ring: "ring-destructive/20", indicator: "bg-destructive" },
   };
+  const s = styles[tone];
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl px-4 py-3.5 transition-all duration-200 hover:bg-card hover:border-border/80">
-      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 shrink-0", styles[tone].bg, styles[tone].text, styles[tone].ring)}>{icon}</div>
-      <span className="flex-1 text-[12px] font-semibold text-foreground/80">{label}</span>
-      <span className="text-base font-display font-black text-foreground tabular-nums tracking-tight">{value}</span>
+    <div className="rounded-xl border border-border/60 bg-card/90 backdrop-blur-xl px-3.5 py-3 flex items-center gap-2.5 transition-all hover:border-border/80">
+      <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center ring-1 shrink-0", s.bg, s.text, s.ring)}>
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{label}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-[14px] font-display font-black text-foreground tabular-nums">{value}</span>
+          <span className="text-[9px] text-muted-foreground/50">({count})</span>
+        </div>
+      </div>
+      <span className={cn("h-2 w-2 rounded-full shrink-0", s.indicator, count > 0 && tone !== "success" ? "animate-pulse" : "")} />
     </div>
   );
 }
