@@ -46,6 +46,9 @@ import PublicCheckout from "./pages/PublicCheckout";
 import NotFound from "./pages/NotFound";
 import ManagerLogin from "./pages/manager/ManagerLogin";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
+import TermosDeUso from "./pages/TermosDeUso";
+import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
+import ThankYou from "./pages/ThankYou";
 // Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
@@ -77,6 +80,9 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
+              <Route path="/obrigado" element={<ThankYou />} />
+              <Route path="/termos-de-uso" element={<TermosDeUso />} />
+              <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
               {/* Public Member Area (standalone, Netflix-style) */}

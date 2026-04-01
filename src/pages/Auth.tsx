@@ -321,10 +321,15 @@ export default function Auth() {
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
+              <div className="mt-6 text-center space-y-3">
                 <button onClick={() => setIsLogin(!isLogin)} className="text-[13px] text-primary hover:text-primary/80 font-bold transition-colors">
                   {isLogin ? "Não tem conta? Cadastre-se grátis" : "Já tem conta? Entrar"}
                 </button>
+                <p className="text-[10px] text-muted-foreground/40 leading-relaxed">
+                  Ao continuar, você concorda com os{" "}
+                  <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground/60 transition-colors">Termos de Uso</a> e{" "}
+                  <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground/60 transition-colors">Política de Privacidade</a>.
+                </p>
               </div>
 
               {/* Trust badges */}
