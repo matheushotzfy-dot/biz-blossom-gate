@@ -53,6 +53,8 @@ import TermosDeUso from "./pages/TermosDeUso";
 import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import ThankYou from "./pages/ThankYou";
 import StatusPage from "./pages/StatusPage";
+import Analytics from "./pages/Analytics";
+import Indicacoes from "./pages/Indicacoes";
 // Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
