@@ -598,6 +598,7 @@ export default function AdminConteudo() {
                         stats={stats}
                         product={product}
                         revenue={revenue}
+                        studentCount={studentCounts[c.id] || 0}
                         onEdit={() => openEdit(c)}
                         onNavigate={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
                         onTogglePublish={() => togglePublish(c.id, c.is_published ?? false)}
