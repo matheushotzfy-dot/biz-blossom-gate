@@ -64,7 +64,7 @@ export default function Gamificacao() {
 
   return (
     <PageShell>
-      <PageTitle icon={Trophy} title="Ranking & Conquistas" subtitle="Seu progresso e conquistas na plataforma" />
+      <PageTitle icon={<Trophy className="h-6 w-6" />} title="Ranking & Conquistas" subtitle="Seu progresso e conquistas na plataforma" />
 
       {/* Current Level Card */}
       <Panel className="relative overflow-hidden">

@@ -33,7 +33,7 @@ export default function AutoCupons() {
   return (
     <PageShell>
       <div className="flex items-center justify-between">
-        <PageTitle icon={Ticket} title="Cupons Automáticos" subtitle="Gere cupons inteligentes baseados em comportamento" />
+        <PageTitle icon={<Ticket className="h-6 w-6" />} title="Cupons Automáticos" subtitle="Gere cupons inteligentes baseados em comportamento" />
         <button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"

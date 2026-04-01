@@ -53,7 +53,7 @@ export default function ABTesting() {
   return (
     <PageShell>
       <div className="flex items-center justify-between">
-        <PageTitle icon={FlaskConical} title="A/B Testing" subtitle="Teste variações do checkout para otimizar conversões" />
+        <PageTitle icon={<FlaskConical className="h-6 w-6" />} title="A/B Testing" subtitle="Teste variações do checkout para otimizar conversões" />
         <button className="flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90">
           <Plus className="h-4 w-4" />
           Novo Teste

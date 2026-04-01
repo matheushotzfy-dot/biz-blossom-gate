@@ -72,7 +72,7 @@ export default function Suporte() {
   return (
     <PageShell>
       <div className="flex items-center justify-between">
-        <PageTitle icon={MessageSquare} title="Suporte" subtitle="Abra tickets e acompanhe suas solicitações" />
+        <PageTitle icon={<MessageSquare className="h-6 w-6" />} title="Suporte" subtitle="Abra tickets e acompanhe suas solicitações" />
         <button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
