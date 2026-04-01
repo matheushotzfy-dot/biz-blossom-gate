@@ -19,17 +19,18 @@ import {
   CreditCard, QrCode, FileText, Mail, MapPin, Shield, Timer, Eye,
   Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
   Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
-  Check, ChevronRight, TrendingUp, MousePointerClick
+  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2
 } from "lucide-react";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-type TabKey = "geral" | "configuracoes" | "order-bump" | "upsell" | "checkout" | "co-producao" | "cupons" | "afiliados" | "links";
+type TabKey = "geral" | "configuracoes" | "conteudo" | "order-bump" | "upsell" | "checkout" | "co-producao" | "cupons" | "afiliados" | "links";
 
 const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
   { key: "geral", label: "Geral", icon: Package, color: "primary" },
   { key: "configuracoes", label: "Configurações", icon: Settings, color: "info" },
+  { key: "conteudo", label: "Conteúdo", icon: GraduationCap, color: "primary" },
   { key: "order-bump", label: "Order Bump", icon: Layers, color: "warning" },
   { key: "upsell", label: "Upsell / Downsell", icon: ArrowUpRight, color: "success" },
   { key: "checkout", label: "Checkout", icon: ShoppingCart, color: "primary" },
