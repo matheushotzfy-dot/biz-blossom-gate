@@ -685,11 +685,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
-            <KpiTile icon={<Zap className="h-4 w-4" />} label="Vendas no Pix" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`} tone="success" delay="stagger-3" />
-            <KpiTile icon={<CreditCard className="h-4 w-4" />} label="Vendas no Cartão" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`} tone="info" delay="stagger-4" />
-            <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
-            <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
+          <div className="grid grid-cols-2 gap-2">
+            <KpiTile icon={<Zap className="h-4 w-4" />} label="PIX" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`} tone="success" delay="stagger-3" />
+            <KpiTile icon={<CreditCard className="h-4 w-4" />} label="CARTÃO" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`} tone="info" delay="stagger-4" />
+            <KpiTile icon={<Wallet className="h-4 w-4" />} label="TICKET MÉDIO" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
+            <KpiTile icon={<DollarSign className="h-4 w-4" />} label="PENDENTE" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
           </div>
         </div>
       </section>
@@ -981,18 +981,20 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/60 bg-card/95 shadow-sm backdrop-blur-md p-4 md:p-5 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in ${delay || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/60 bg-card/95 shadow-sm backdrop-blur-md p-3.5 md:p-4 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 overflow-hidden animate-fade-in flex flex-col justify-between min-h-[130px] ${delay || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
-      <div className="pl-1.5">
-        <div className="mb-3 md:mb-4 flex items-center justify-between">
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-bold truncate">{label}</span>
-          <div className={`h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
+      <div className="pl-1.5 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-auto">
+          <span className="text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-extrabold">{label}</span>
+          <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
             <span className={toneMap[tone].text}>{icon}</span>
           </div>
         </div>
-        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums">{value}</p>
-        <p className="mt-1.5 md:mt-2 text-[9px] md:text-[11px] text-muted-foreground font-medium truncate">{helper}</p>
+        <div className="mt-auto">
+          <p className="text-[22px] md:text-[26px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums leading-none">{value}</p>
+          <p className="mt-1.5 text-[10px] md:text-[11px] text-muted-foreground/70 font-medium">{helper}</p>
+        </div>
       </div>
     </div>
   );
