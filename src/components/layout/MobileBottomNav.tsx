@@ -39,7 +39,7 @@ const moreGroups = [
   {
     label: "Ferramentas",
     items: [
-      { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
+      // { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
       { title: "Integrações", url: "/integracoes", icon: Puzzle },
     ],
   },
