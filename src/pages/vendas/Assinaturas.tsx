@@ -173,10 +173,10 @@ export default function Assinaturas() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <GlassKpi icon={Zap} label="Planos Ativos" value={plans.filter(p => p.is_active).length} />
-        <GlassKpi icon={Users} label="Assinantes Ativos" value={activeSubs.length} />
+        <GlassKpi icon={Zap} label="Planos Ativos" value={String(plans.filter(p => p.is_active).length)} />
+        <GlassKpi icon={Users} label="Assinantes Ativos" value={String(activeSubs.length)} />
         <GlassKpi icon={DollarSign} label="MRR" value={fmt(mrr)} />
-        <GlassKpi icon={TrendingUp} label="Total Assinaturas" value={subs.length} />
+        <GlassKpi icon={TrendingUp} label="Total Assinaturas" value={String(subs.length)} />
       </div>
 
       {/* Tabs */}
