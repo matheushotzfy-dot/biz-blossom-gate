@@ -332,7 +332,7 @@ export default function CourseBuilder() {
   ];
 
   return (
-    <div className="h-screen w-screen bg-background flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[70] bg-background flex flex-col overflow-hidden">
       {/* ═══ Top Bar ═══ */}
       <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-5 shrink-0 z-50">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
