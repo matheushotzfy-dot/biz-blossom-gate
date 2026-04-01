@@ -21,6 +21,8 @@ import {
   ChevronRight,
   Headphones,
   Zap,
+  RefreshCw,
+  Award,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
