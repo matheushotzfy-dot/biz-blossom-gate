@@ -193,7 +193,7 @@ export default function Dashboard() {
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
-  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate } = useMemo(() => {
+  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _pending = filteredTx.filter((t) => t.status === "pending");
     const _refunded = filteredTx.filter((t) => t.status === "refunded");
@@ -205,10 +205,12 @@ export default function Dashboard() {
     const pixTx = filteredTx.filter(t => t.payment_method === "pix");
     const pixApproved = pixTx.filter(t => t.status === "completed");
     const _pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
+    const _pixRevenue = pixApproved.reduce((acc, t) => acc + Number(t.net_amount), 0);
 
     const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
     const cardApproved = cardTx.filter(t => t.status === "completed");
     const _cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
+    const _cardRevenue = cardApproved.reduce((acc, t) => acc + Number(t.net_amount), 0);
 
     const _chargebackRate = filteredTx.length > 0 ? (_chargebacks.length / filteredTx.length) * 100 : 0;
 
@@ -216,6 +218,9 @@ export default function Dashboard() {
       approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
       revenue: _revenue, conversion: _conversion,
       pixConversion: _pixConversion, cardConversion: _cardConversion, chargebackRate: _chargebackRate,
+      pixRevenue: _pixRevenue, cardRevenue: _cardRevenue,
+      pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
+      cardApprovedCount: cardApproved.length, cardTotalCount: cardTx.length,
     };
   }, [filteredTx]);
 
