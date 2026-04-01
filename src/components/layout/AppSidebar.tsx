@@ -16,6 +16,8 @@ import {
   Headphones,
   Zap,
   TrendingUp,
+  FlaskConical,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
