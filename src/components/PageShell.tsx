@@ -79,13 +79,13 @@ export function SectionHeader({ icon, title, subtitle, action }: { icon: React.R
 
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
+    <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex h-11 w-11 md:h-13 md:w-13 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
         <span className="text-primary">{icon}</span>
       </div>
-      <div className="space-y-1">
-        <h1 className="font-display text-xl font-black leading-none tracking-[-0.03em] text-foreground md:text-2xl">{title}</h1>
-        <p className="text-[13px] text-muted-foreground/80">{subtitle}</p>
+      <div className="space-y-0.5 md:space-y-1 min-w-0">
+        <h1 className="font-display text-lg md:text-2xl font-black leading-none tracking-[-0.03em] text-foreground truncate">{title}</h1>
+        <p className="text-[12px] md:text-[13px] text-muted-foreground/80 truncate">{subtitle}</p>
       </div>
     </div>
   );
