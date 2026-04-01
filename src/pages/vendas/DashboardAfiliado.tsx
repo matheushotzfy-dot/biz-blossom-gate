@@ -72,7 +72,7 @@ export default function DashboardAfiliado() {
   };
 
   if (loading) {
-    return <PageShell><PageTitle icon={Award}>Painel do Afiliado</PageTitle><div className="text-muted-foreground text-sm py-12 text-center">Carregando...</div></PageShell>;
+    return <PageShell><PageTitle icon={<Award className="h-6 w-6" />} title="Painel do Afiliado" subtitle="Suas métricas de afiliado" /><div className="text-muted-foreground text-sm py-12 text-center">Carregando...</div></PageShell>;
   }
 
   if (links.length === 0) {
