@@ -358,10 +358,24 @@ export default function PublicCheckout() {
     setSelectedBumps(prev => { const next = new Set(prev); if (next.has(bumpId)) next.delete(bumpId); else next.add(bumpId); return next; });
   };
 
+  // ─── Rate Limiting (client-side throttle) ───
+  const submitCountRef = useRef<number[]>([]);
+  const RATE_LIMIT_WINDOW = 60_000; // 1 minute
+  const RATE_LIMIT_MAX = 3; // max 3 attempts per minute
+
   // ─── Payment Handler ───
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product || processingRef.current) return;
+
+    // Rate limit check
+    const now = Date.now();
+    submitCountRef.current = submitCountRef.current.filter(t => now - t < RATE_LIMIT_WINDOW);
+    if (submitCountRef.current.length >= RATE_LIMIT_MAX) {
+      toast.error("Muitas tentativas. Aguarde 1 minuto antes de tentar novamente.");
+      return;
+    }
+    submitCountRef.current.push(now);
     const phoneDigits = phone.replace(/\D/g, "");
     if (phoneDigits.length < 10) { toast.error("Informe um WhatsApp válido"); return; }
     const docDigits = document.replace(/\D/g, "");
