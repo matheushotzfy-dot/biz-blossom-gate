@@ -84,6 +84,7 @@ const App = () => (
               <Route path="/obrigado" element={<ThankYou />} />
               <Route path="/termos-de-uso" element={<TermosDeUso />} />
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
+              <Route path="/status" element={<StatusPage />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
               {/* Public Member Area (standalone, Netflix-style) */}
