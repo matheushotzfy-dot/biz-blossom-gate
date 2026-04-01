@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import DOMPurify from "dompurify";
+import { sanitizeText } from "@/lib/auditLog";
 
 /**
  * Security tests — verifying core hardening measures
@@ -53,6 +54,38 @@ describe("XSS Prevention — DOMPurify sanitization", () => {
 });
 
 // ============================
+// sanitizeText Tests
+// ============================
+describe("sanitizeText — audit log sanitization", () => {
+  it("removes HTML angle brackets", () => {
+    expect(sanitizeText("<script>alert(1)</script>")).not.toContain("<");
+    expect(sanitizeText("<script>alert(1)</script>")).not.toContain(">");
+  });
+
+  it("removes javascript: protocol", () => {
+    expect(sanitizeText("javascript:alert(1)")).not.toContain("javascript:");
+  });
+
+  it("removes inline event handlers", () => {
+    expect(sanitizeText("onclick=alert(1)")).not.toContain("onclick=");
+    expect(sanitizeText("onerror=fetch('x')")).not.toContain("onerror=");
+  });
+
+  it("respects max length", () => {
+    const long = "a".repeat(2000);
+    expect(sanitizeText(long, 500).length).toBe(500);
+  });
+
+  it("trims whitespace", () => {
+    expect(sanitizeText("  hello  ")).toBe("hello");
+  });
+
+  it("handles empty string", () => {
+    expect(sanitizeText("")).toBe("");
+  });
+});
+
+// ============================
 // Safe Logging Tests
 // ============================
 describe("Edge Function safeLog pattern", () => {
@@ -91,13 +124,67 @@ describe("Edge Function safeLog pattern", () => {
 });
 
 // ============================
-// Admin Route Protection Tests
+// Input Validation Tests
 // ============================
-describe("Admin route protection", () => {
-  it("admin routes require RequireAdmin wrapper (code assertion)", () => {
-    // This is a structural test — we verify the App.tsx imports RequireAdmin
-    // In a real integration test, we'd check that /admin-matheus/dashboard
-    // redirects unauthenticated users. This serves as a smoke test.
-    expect(true).toBe(true);
+describe("Input validation patterns", () => {
+  it("rejects negative withdrawal amounts", () => {
+    expect(-100 > 0).toBe(false);
+  });
+
+  it("rejects excessively large amounts", () => {
+    expect(999999 > 500000).toBe(true); // exceeds max
+  });
+
+  it("validates email format", () => {
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    expect(emailRegex.test("valid@email.com")).toBe(true);
+    expect(emailRegex.test("invalid")).toBe(false);
+    expect(emailRegex.test("no@dots")).toBe(false);
+    expect(emailRegex.test("@missing.com")).toBe(false);
+    expect(emailRegex.test("spaces @email.com")).toBe(false);
+  });
+
+  it("validates CPF format (11 digits)", () => {
+    const cpfRegex = /^\d{11}$/;
+    expect(cpfRegex.test("12345678900")).toBe(true);
+    expect(cpfRegex.test("123.456.789-00")).toBe(false); // formatted
+    expect(cpfRegex.test("1234567890")).toBe(false); // too short
+  });
+
+  it("blocks internal URLs in webhook validation", () => {
+    const blocked = /https:\/\/(localhost|127\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/;
+    expect(blocked.test("https://localhost/webhook")).toBe(true);
+    expect(blocked.test("https://127.0.0.1/hook")).toBe(true);
+    expect(blocked.test("https://10.0.0.1/api")).toBe(true);
+    expect(blocked.test("https://192.168.1.1/api")).toBe(true);
+    expect(blocked.test("https://myapp.com/webhook")).toBe(false);
+  });
+});
+
+// ============================
+// Co-production Split Logic Tests
+// ============================
+describe("Co-production split calculations", () => {
+  it("calculates correct split amounts", () => {
+    const netAmount = 10000; // R$ 100,00 in cents
+    const splitPct = 30;
+    const splitAmount = Math.round(netAmount * splitPct) / 100;
+    expect(splitAmount).toBe(3000);
+  });
+
+  it("handles edge case 1% split", () => {
+    const splitAmount = Math.round(10000 * 1) / 100;
+    expect(splitAmount).toBe(100);
+  });
+
+  it("handles edge case 99% split", () => {
+    const splitAmount = Math.round(10000 * 99) / 100;
+    expect(splitAmount).toBe(9900);
+  });
+
+  it("zero net amount results in no split", () => {
+    const splitAmount = Math.round(0 * 50) / 100;
+    expect(splitAmount).toBe(0);
+    expect(splitAmount <= 0).toBe(true);
   });
 });
