@@ -9,7 +9,7 @@ import {
   Globe, Lock, Image as ImageIcon, X, Check,
   Video, DollarSign, PlayCircle, Sparkles, Clock,
   TrendingUp, Users, Zap, ArrowRight, Grid3X3, List,
-  BarChart3, Star, Flame, Crown, ChevronRight,
+  BarChart3, Star, Flame, Crown, ChevronRight, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ const fmt = (v: number) =>
 type FilterId = "all" | "published" | "draft";
 
 // ─── Image Upload ─────────────────────────────────────────────────
-function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
+function ImageUploadZone({ value, onChange, label, height = "h-44" }: {
   value: string; onChange: (url: string) => void; label: string; height?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,28 +58,28 @@ function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
 
   return (
     <div>
-      <Label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider mb-2 block">{label}</Label>
+      <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">{label}</Label>
       <div
         onClick={() => inputRef.current?.click()}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-        className={cn("relative rounded-2xl border-2 border-dashed border-border/20 hover:border-primary/30 transition-all duration-500 cursor-pointer overflow-hidden group/img", height, value ? "p-0" : "flex flex-col items-center justify-center bg-muted/5")}
+        className={cn("relative rounded-2xl border-2 border-dashed border-border/25 hover:border-primary/30 transition-all duration-500 cursor-pointer overflow-hidden group/img", height, value ? "p-0" : "flex flex-col items-center justify-center bg-muted/5")}
       >
         {value ? (
           <>
             <img src={value} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-background/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
-              <button type="button" onClick={e => { e.stopPropagation(); inputRef.current?.click(); }} className="h-8 w-8 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"><ImageIcon className="h-4 w-4 text-foreground" /></button>
-              <button type="button" onClick={e => { e.stopPropagation(); onChange(""); }} className="h-8 w-8 rounded-xl bg-card border border-border flex items-center justify-center text-destructive hover:bg-muted transition-colors"><X className="h-4 w-4" /></button>
+            <div className="absolute inset-0 bg-background/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-3">
+              <button type="button" onClick={e => { e.stopPropagation(); inputRef.current?.click(); }} className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"><ImageIcon className="h-4.5 w-4.5 text-foreground" /></button>
+              <button type="button" onClick={e => { e.stopPropagation(); onChange(""); }} className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center text-destructive hover:bg-muted transition-colors"><X className="h-4.5 w-4.5" /></button>
             </div>
           </>
         ) : (
           <>
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mb-3 border border-primary/10">
-              <ImageIcon className="h-6 w-6 text-primary/30" />
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mb-4 border border-primary/10">
+              <ImageIcon className="h-7 w-7 text-primary/30" />
             </div>
-            <p className="text-[12px] font-display font-bold text-muted-foreground/40">{uploading ? "Enviando..." : "Clique ou arraste uma imagem"}</p>
-            <p className="text-[10px] text-muted-foreground/25 mt-1">PNG, JPG até 5MB</p>
+            <p className="text-sm font-display font-bold text-muted-foreground/50">{uploading ? "Enviando..." : "Clique ou arraste uma imagem"}</p>
+            <p className="text-xs text-muted-foreground/30 mt-1.5">PNG, JPG até 5MB</p>
           </>
         )}
       </div>
@@ -88,15 +88,15 @@ function ImageUploadZone({ value, onChange, label, height = "h-40" }: {
   );
 }
 
-// ─── Stat Pill ────────────────────────────────────────────────────
+// ─── Premium Stat Card ────────────────────────────────────────────
 function StatPill({ icon: Icon, label, value, color = "primary", trend }: {
   icon: any; label: string; value: string | number; color?: string; trend?: string;
 }) {
   const colorMap: Record<string, { bg: string; text: string; ring: string; glow: string }> = {
-    primary: { bg: "bg-primary/8", text: "text-primary", ring: "ring-primary/10", glow: "from-primary/8 to-transparent" },
-    success: { bg: "bg-success/8", text: "text-success", ring: "ring-success/10", glow: "from-success/8 to-transparent" },
-    info: { bg: "bg-info/8", text: "text-info", ring: "ring-info/10", glow: "from-info/8 to-transparent" },
-    warning: { bg: "bg-warning/8", text: "text-warning", ring: "ring-warning/10", glow: "from-warning/8 to-transparent" },
+    primary: { bg: "bg-primary/10", text: "text-primary", ring: "ring-primary/15", glow: "from-primary/8 to-transparent" },
+    success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/15", glow: "from-success/8 to-transparent" },
+    info: { bg: "bg-info/10", text: "text-info", ring: "ring-info/15", glow: "from-info/8 to-transparent" },
+    warning: { bg: "bg-warning/10", text: "text-warning", ring: "ring-warning/15", glow: "from-warning/8 to-transparent" },
   };
   const c = colorMap[color] || colorMap.primary;
 
@@ -104,28 +104,28 @@ function StatPill({ icon: Icon, label, value, color = "primary", trend }: {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/30 bg-card/50 backdrop-blur-xl p-5 hover:border-border/50 hover:shadow-lg hover:shadow-foreground/[0.03] transition-all duration-500"
+      className="group relative overflow-hidden rounded-2xl border border-border/25 bg-card/50 backdrop-blur-xl p-6 hover:border-border/40 hover:shadow-lg hover:shadow-foreground/[0.03] transition-all duration-500"
     >
       <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-40 group-hover:opacity-60 transition-opacity duration-500", c.glow)} />
       <div className="relative z-[1]">
-        <div className="flex items-center justify-between mb-3">
-          <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1", c.bg, c.ring)}>
-            <Icon className={cn("h-[18px] w-[18px]", c.text)} />
+        <div className="flex items-center justify-between mb-4">
+          <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center ring-1", c.bg, c.ring)}>
+            <Icon className={cn("h-5 w-5", c.text)} />
           </div>
           {trend && (
-            <span className="flex items-center gap-1 text-[10px] font-display font-bold text-success bg-success/8 px-2 py-0.5 rounded-lg">
-              <TrendingUp className="h-2.5 w-2.5" /> {trend}
+            <span className="flex items-center gap-1.5 text-xs font-display font-bold text-success bg-success/10 px-2.5 py-1 rounded-lg">
+              <TrendingUp className="h-3 w-3" /> {trend}
             </span>
           )}
         </div>
-        <p className="text-[22px] font-display font-black text-foreground tracking-tight tabular-nums leading-none mb-1">{value}</p>
-        <p className="text-[11px] font-display font-bold text-muted-foreground/40">{label}</p>
+        <p className="text-2xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums leading-none mb-1.5">{value}</p>
+        <p className="text-sm font-display font-semibold text-muted-foreground">{label}</p>
       </div>
     </motion.div>
   );
 }
 
-// ─── Course Card (Cinematic) ─────────────────────────────────────
+// ─── Course Card (Premium) ───────────────────────────────────────
 function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink, index }: {
   course: Course; stats: { modules: number; lessons: number }; product?: Product;
   revenue: number; studentCount?: number; onEdit: () => void; onNavigate: () => void;
@@ -147,7 +147,7 @@ function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit,
         "relative overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
         hovered
           ? "border-primary/25 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.15)] scale-[1.015]"
-          : "border-border/30 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]"
+          : "border-border/25 shadow-lg shadow-foreground/[0.03]"
       )}>
         {/* ── Thumbnail ── */}
         <div className="relative aspect-[16/9] overflow-hidden cursor-pointer" onClick={onNavigate}>
@@ -162,48 +162,47 @@ function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit,
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/10 via-primary/5 to-info/5 flex items-center justify-center">
               <motion.div animate={{ scale: hovered ? 1.1 : 1 }} transition={{ duration: 0.5 }}>
-                <BookOpen className="h-12 w-12 text-primary/15" />
+                <GraduationCap className="h-14 w-14 text-primary/15" />
               </motion.div>
             </div>
           )}
 
-          {/* Cinematic gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
           <div className={cn("absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent transition-opacity duration-500", hovered ? "opacity-100" : "opacity-0")} />
 
           {/* Status badge */}
-          <div className="absolute top-3 right-3 z-10">
+          <div className="absolute top-3.5 right-3.5 z-10">
             <span className={cn(
-              "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[10px] font-display font-black backdrop-blur-2xl border shadow-lg",
+              "inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-display font-bold backdrop-blur-2xl border shadow-lg",
               course.is_published
                 ? "bg-success/20 text-success border-success/25 shadow-success/10"
-                : "bg-card/80 text-muted-foreground/60 border-border/30"
+                : "bg-card/80 text-muted-foreground border-border/30"
             )}>
-              <span className={cn("h-1.5 w-1.5 rounded-full", course.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+              <span className={cn("h-2 w-2 rounded-full", course.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
               {course.is_published ? "Live" : "Rascunho"}
             </span>
           </div>
 
           {/* Category chip */}
           {course.category && (
-            <div className="absolute top-3 left-3 z-10">
-              <span className="inline-flex items-center rounded-xl px-3 py-1.5 text-[9px] font-display font-black uppercase tracking-[0.15em] bg-card/80 backdrop-blur-2xl text-foreground/60 border border-border/20 shadow-lg">
+            <div className="absolute top-3.5 left-3.5 z-10">
+              <span className="inline-flex items-center rounded-xl px-3 py-1.5 text-[10px] font-display font-black uppercase tracking-[0.1em] bg-card/80 backdrop-blur-2xl text-foreground/60 border border-border/20 shadow-lg">
                 {course.category}
               </span>
             </div>
           )}
 
-          {/* Bottom overlay stats */}
-          <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 z-10">
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-card/90 backdrop-blur-2xl border border-border/15 px-2.5 py-1.5 text-[10px] font-display font-bold text-foreground shadow-sm">
-              <Layers className="h-3 w-3 text-primary" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}
+          {/* Bottom stats */}
+          <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center gap-2.5 z-10">
+            <span className="inline-flex items-center gap-2 rounded-xl bg-card/90 backdrop-blur-2xl border border-border/15 px-3 py-2 text-xs font-display font-bold text-foreground shadow-sm">
+              <Layers className="h-3.5 w-3.5 text-primary" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-card/90 backdrop-blur-2xl border border-border/15 px-2.5 py-1.5 text-[10px] font-display font-bold text-foreground shadow-sm">
-              <Video className="h-3 w-3 text-info" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}
+            <span className="inline-flex items-center gap-2 rounded-xl bg-card/90 backdrop-blur-2xl border border-border/15 px-3 py-2 text-xs font-display font-bold text-foreground shadow-sm">
+              <Video className="h-3.5 w-3.5 text-info" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}
             </span>
           </div>
 
-          {/* Hover play button */}
+          {/* Hover button */}
           <AnimatePresence>
             {hovered && (
               <motion.div
@@ -213,8 +212,8 @@ function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit,
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 flex items-center justify-center z-10"
               >
-                <div className="h-14 w-14 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-2xl shadow-primary/30 ring-4 ring-primary/20">
-                  <ArrowRight className="h-5 w-5 text-primary-foreground ml-0.5" />
+                <div className="h-16 w-16 rounded-2xl bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-2xl shadow-primary/30 ring-4 ring-primary/20">
+                  <ArrowRight className="h-6 w-6 text-primary-foreground ml-0.5" />
                 </div>
               </motion.div>
             )}
@@ -222,77 +221,77 @@ function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit,
         </div>
 
         {/* ── Content ── */}
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-4">
           <div>
-            <h3 className="text-[15px] font-display font-black text-foreground leading-snug line-clamp-1 tracking-tight mb-1">{course.title}</h3>
-            <p className={cn("text-[12px] line-clamp-2 leading-relaxed", course.description ? "text-muted-foreground/50" : "text-muted-foreground/20 italic")}>
+            <h3 className="text-base font-display font-black text-foreground leading-snug line-clamp-1 tracking-[-0.02em] mb-1.5">{course.title}</h3>
+            <p className={cn("text-sm line-clamp-2 leading-relaxed", course.description ? "text-muted-foreground" : "text-muted-foreground/30 italic")}>
               {course.description || "Sem descrição adicionada"}
             </p>
           </div>
 
-          {/* Product + Revenue pills */}
+          {/* Tags */}
           {(product || revenue > 0 || studentCount > 0) && (
             <div className="flex flex-wrap gap-2">
               {studentCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-info/5 border border-info/10">
-                  <Users className="h-3 w-3 text-info" />
-                  <span className="text-[10px] font-display font-bold text-info tabular-nums">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-info/8 border border-info/15">
+                  <Users className="h-3.5 w-3.5 text-info" />
+                  <span className="text-xs font-display font-bold text-info tabular-nums">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
                 </div>
               )}
               {product && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
-                  <LinkIcon className="h-3 w-3 text-primary" />
-                  <span className="text-[10px] font-display font-bold text-primary truncate max-w-[120px]">{product.name}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/8 border border-primary/15">
+                  <LinkIcon className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-xs font-display font-bold text-primary truncate max-w-[130px]">{product.name}</span>
                 </div>
               )}
               {revenue > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-success/5 border border-success/10">
-                  <DollarSign className="h-3 w-3 text-success" />
-                  <span className="text-[10px] font-display font-bold text-success tabular-nums">{fmt(revenue)}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-success/8 border border-success/15">
+                  <DollarSign className="h-3.5 w-3.5 text-success" />
+                  <span className="text-xs font-display font-bold text-success tabular-nums">{fmt(revenue)}</span>
                 </div>
               )}
             </div>
           )}
 
-          {/* Date + Actions */}
-          <div className="flex items-center justify-between pt-3 border-t border-border/10">
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-3 w-3 text-muted-foreground/20" />
-              <span className="text-[10px] text-muted-foreground/30 tabular-nums font-display">{new Date(course.created_at).toLocaleDateString("pt-BR")}</span>
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-4 border-t border-border/15">
+            <div className="flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground/30" />
+              <span className="text-xs text-muted-foreground tabular-nums font-display">{new Date(course.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <Button
                 variant="ghost" size="sm"
-                className="gap-1.5 rounded-xl text-[11px] h-8 px-3 font-display font-bold text-primary hover:text-primary hover:bg-primary/8 active:scale-[0.985]"
+                className="gap-2 rounded-xl text-sm h-9 px-4 font-display font-bold text-primary hover:text-primary hover:bg-primary/8 active:scale-[0.985]"
                 onClick={onNavigate}
               >
-                Gerenciar <ChevronRight className="h-3 w-3" />
+                Gerenciar <ChevronRight className="h-3.5 w-3.5" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="rounded-xl h-8 w-8 p-0 text-muted-foreground/30 hover:text-foreground hover:bg-muted/20">
-                    <MoreVertical className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="sm" className="rounded-xl h-9 w-9 p-0 text-muted-foreground/40 hover:text-foreground hover:bg-muted/20">
+                    <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[200px] rounded-xl">
-                  <DropdownMenuItem onClick={onEdit} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                    <Edit className="h-3.5 w-3.5" /> Editar curso
+                <DropdownMenuContent align="end" className="min-w-[220px] rounded-xl p-1.5">
+                  <DropdownMenuItem onClick={onEdit} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                    <Edit className="h-4 w-4" /> Editar curso
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onTogglePublish} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                    {course.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                  <DropdownMenuItem onClick={onTogglePublish} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                    {course.is_published ? <><EyeOff className="h-4 w-4" /> Despublicar</> : <><Eye className="h-4 w-4" /> Publicar</>}
                   </DropdownMenuItem>
                   {course.is_published && (
-                    <DropdownMenuItem onClick={() => window.open(getMemberLink, "_blank")} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                      <PlayCircle className="h-3.5 w-3.5" /> Visualizar
+                    <DropdownMenuItem onClick={() => window.open(getMemberLink, "_blank")} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                      <PlayCircle className="h-4 w-4" /> Visualizar
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={onCopyLink} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                    <Copy className="h-3.5 w-3.5" /> Copiar link
+                  <DropdownMenuItem onClick={onCopyLink} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                    <Copy className="h-4 w-4" /> Copiar link
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onDelete} className="gap-2.5 text-[12px] cursor-pointer text-destructive focus:text-destructive rounded-lg py-2.5">
-                    <Trash2 className="h-3.5 w-3.5" /> Excluir curso
+                  <DropdownMenuItem onClick={onDelete} className="gap-3 text-sm cursor-pointer text-destructive focus:text-destructive rounded-lg py-3 px-3 font-display">
+                    <Trash2 className="h-4 w-4" /> Excluir curso
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -317,7 +316,6 @@ export default function AdminConteudo() {
   const courses = useMemo(() => coursesRaw.map((c: any) => { const { modules: _, ...rest } = c; return rest; }) as Course[], [coursesRaw]);
   const products = useMemo(() => productsRaw.map((p: any) => ({ id: p.id, name: p.name, price: Number(p.price) })) as Product[], [productsRaw]);
 
-  // Load student counts
   useEffect(() => {
     if (courses.length === 0) return;
     supabase.from("user_access").select("course_id").eq("status", "active").in("course_id", courses.map(c => c.id))
@@ -442,32 +440,32 @@ export default function AdminConteudo() {
         <div className="absolute right-[-10%] top-[-100px] h-64 w-64 rounded-full bg-info/6 blur-[100px] opacity-40" />
       </div>
 
-      <div className="relative z-[1] mx-auto w-full max-w-[1200px] space-y-8 pb-10">
+      <div className="relative z-[1] mx-auto w-full max-w-[1200px] space-y-10 pb-12">
         {/* ═══ Hero Header ═══ */}
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20 ring-2 ring-primary/10">
-                  <BookOpen className="h-5 w-5 text-primary-foreground" />
+              <div className="flex items-center gap-4 mb-2">
+                <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl shadow-primary/20 ring-2 ring-primary/10">
+                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-display font-black tracking-[-0.03em] text-foreground">Conteúdo</h1>
-                  <p className="text-[12px] font-display text-muted-foreground/40 mt-0.5">Gerencie cursos, módulos e aulas</p>
+                  <h1 className="text-3xl sm:text-4xl font-display font-black tracking-[-0.04em] text-foreground">Conteúdo</h1>
+                  <p className="text-sm font-display text-muted-foreground mt-1">Gerencie cursos, módulos e aulas da sua área de membros</p>
                 </div>
               </div>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
-              <Button onClick={openNew} className="gap-2.5 rounded-2xl text-sm font-display font-bold h-11 px-6 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 active:scale-[0.985] transition-all duration-300">
-                <Plus className="h-4 w-4" /> Novo Curso
+              <Button onClick={openNew} className="gap-2.5 rounded-2xl text-base font-display font-bold h-12 px-7 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 active:scale-[0.985] transition-all duration-300">
+                <Plus className="h-5 w-5" /> Novo Curso
               </Button>
             </motion.div>
           </div>
 
           {/* ── Stats Row ── */}
           {totalCourses > 0 && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatPill icon={BookOpen} label="Total de cursos" value={totalCourses} color="primary" />
               <StatPill icon={Flame} label="Cursos publicados" value={publishedCourses} color="success" trend={publishedCourses > 0 ? "Live" : undefined} />
               <StatPill icon={Video} label="Total de aulas" value={totalLessons} color="info" />
@@ -477,21 +475,21 @@ export default function AdminConteudo() {
         </div>
 
         {/* ═══ Toolbar ═══ */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1">
             {/* Search */}
-            <div className="relative flex-1 max-w-sm group">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/25 group-focus-within:text-primary/50 transition-colors" />
+            <div className="relative flex-1 max-w-md group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground/30 group-focus-within:text-primary/50 transition-colors" />
               <Input
                 placeholder="Buscar cursos..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-10 h-10 rounded-xl bg-card/50 border-border/20 focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all"
+                className="pl-11 h-11 rounded-xl bg-card/50 border-border/20 focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all text-sm font-display"
               />
             </div>
 
             {/* Filter pills */}
-            <div className="flex items-center gap-1 p-1 rounded-2xl bg-card/40 backdrop-blur-xl border border-border/20">
+            <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-card/40 backdrop-blur-xl border border-border/20">
               {FILTERS.map(f => {
                 const isActive = filter === f.id;
                 return (
@@ -499,8 +497,8 @@ export default function AdminConteudo() {
                     key={f.id}
                     onClick={() => setFilter(f.id)}
                     className={cn(
-                      "relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11px] font-display font-bold transition-all duration-300 active:scale-[0.985]",
-                      isActive ? "text-foreground" : "text-muted-foreground/35 hover:text-muted-foreground/60"
+                      "relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-display font-bold transition-all duration-300 active:scale-[0.985]",
+                      isActive ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60"
                     )}
                   >
                     {isActive && (
@@ -510,12 +508,12 @@ export default function AdminConteudo() {
                         transition={{ type: "spring", bounce: 0.12, duration: 0.4 }}
                       />
                     )}
-                    <f.icon className="h-3.5 w-3.5 relative z-10" />
+                    <f.icon className="h-4 w-4 relative z-10" />
                     <span className="relative z-10 hidden sm:inline">{f.label}</span>
                     {f.count > 0 && (
                       <span className={cn(
-                        "relative z-10 text-[9px] font-black px-1.5 py-0.5 rounded-lg transition-colors",
-                        isActive ? "bg-primary/10 text-primary" : "bg-muted/10 text-muted-foreground/25"
+                        "relative z-10 text-xs font-black px-2 py-0.5 rounded-lg transition-colors",
+                        isActive ? "bg-primary/10 text-primary" : "bg-muted/10 text-muted-foreground/30"
                       )}>{f.count}</span>
                     )}
                   </button>
@@ -525,7 +523,7 @@ export default function AdminConteudo() {
           </div>
 
           {/* View mode */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-card/40 backdrop-blur-xl border border-border/20">
+          <div className="flex items-center gap-1 p-1.5 rounded-xl bg-card/40 backdrop-blur-xl border border-border/20">
             {[
               { id: "grid" as const, icon: Grid3X3 },
               { id: "list" as const, icon: List },
@@ -534,8 +532,8 @@ export default function AdminConteudo() {
                 key={v.id}
                 onClick={() => setViewMode(v.id)}
                 className={cn(
-                  "relative h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300",
-                  viewMode === v.id ? "text-foreground" : "text-muted-foreground/25 hover:text-muted-foreground/50"
+                  "relative h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-300",
+                  viewMode === v.id ? "text-foreground" : "text-muted-foreground/30 hover:text-muted-foreground/50"
                 )}
               >
                 {viewMode === v.id && (
@@ -545,7 +543,7 @@ export default function AdminConteudo() {
                     transition={{ type: "spring", bounce: 0.12, duration: 0.4 }}
                   />
                 )}
-                <v.icon className="h-3.5 w-3.5 relative z-10" />
+                <v.icon className="h-4 w-4 relative z-10" />
               </button>
             ))}
           </div>
@@ -553,31 +551,31 @@ export default function AdminConteudo() {
 
         {/* ═══ Content Grid ═══ */}
         {isLoading ? (
-          <div className="py-20 text-center">
-            <div className="inline-flex flex-col items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="py-24 text-center">
+            <div className="inline-flex flex-col items-center gap-5">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-[13px] text-muted-foreground/40 font-display font-bold">Carregando cursos...</p>
+              <p className="text-base text-muted-foreground font-display font-bold">Carregando cursos...</p>
             </div>
           </div>
         ) : filtered.length === 0 ? (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-20 text-center">
-            <div className="inline-flex flex-col items-center gap-5 max-w-sm">
-              <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-primary/10 to-info/5 border border-border/20 flex items-center justify-center">
-                <BookOpen className="h-9 w-9 text-primary/20" />
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-24 text-center">
+            <div className="inline-flex flex-col items-center gap-6 max-w-sm">
+              <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-info/5 border border-border/20 flex items-center justify-center">
+                <GraduationCap className="h-12 w-12 text-primary/20" />
               </div>
               <div>
-                <h3 className="text-[16px] font-display font-black text-foreground/30 mb-1">
+                <h3 className="text-xl font-display font-black text-foreground/40 mb-2">
                   {search || filter !== "all" ? "Nenhum curso encontrado" : "Crie seu primeiro curso"}
                 </h3>
-                <p className="text-[12px] text-muted-foreground/25 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {search || filter !== "all" ? "Tente alterar os filtros de busca" : "Monte aulas incríveis e entregue conteúdo aos seus alunos com uma área de membros profissional"}
                 </p>
               </div>
               {!search && filter === "all" && (
-                <Button onClick={openNew} className="gap-2.5 rounded-2xl font-display font-bold shadow-xl shadow-primary/20 h-11 px-6">
-                  <Sparkles className="h-4 w-4" /> Criar Curso
+                <Button onClick={openNew} className="gap-2.5 rounded-2xl font-display font-bold shadow-xl shadow-primary/20 h-12 px-7 text-base">
+                  <Sparkles className="h-5 w-5" /> Criar Curso
                 </Button>
               )}
             </div>
@@ -592,7 +590,7 @@ export default function AdminConteudo() {
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filtered.map((c, i) => {
                     const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
                     const product = products.find(p => p.id === c.product_id);
@@ -619,7 +617,7 @@ export default function AdminConteudo() {
               ) : (
                 /* ── List View ── */
                 <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl overflow-hidden">
-                  <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-border/15 text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/30">
+                  <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border/15 text-xs font-display font-bold uppercase tracking-[0.1em] text-muted-foreground/40">
                     <span>Curso</span><span>Status</span><span>Conteúdo</span><span>Produto</span><span>Receita</span><span></span>
                   </div>
                   {filtered.map((c, i) => {
@@ -632,70 +630,70 @@ export default function AdminConteudo() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: i * 0.03 }}
-                        className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 border-b border-border/10 hover:bg-primary/[0.02] transition-all duration-300 cursor-pointer group"
+                        className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 items-center px-6 py-5 border-b border-border/10 hover:bg-primary/[0.02] transition-all duration-300 cursor-pointer group"
                         onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div className="h-12 w-20 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="h-14 w-24 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15">
                             {c.thumbnail_url ? (
                               <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
-                                <BookOpen className="h-5 w-5 text-primary/10" />
+                                <GraduationCap className="h-6 w-6 text-primary/10" />
                               </div>
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[13px] font-display font-bold text-foreground truncate">{c.title}</p>
-                            <p className="text-[10px] text-muted-foreground/30 truncate">{new Date(c.created_at).toLocaleDateString("pt-BR")}</p>
+                            <p className="text-sm font-display font-bold text-foreground truncate">{c.title}</p>
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">{new Date(c.created_at).toLocaleDateString("pt-BR")}</p>
                           </div>
                         </div>
                         <div>
                           <span className={cn(
-                            "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[10px] font-display font-bold border",
-                            c.is_published ? "bg-success/8 text-success border-success/15" : "bg-muted/8 text-muted-foreground/40 border-border/15"
+                            "inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-display font-bold border",
+                            c.is_published ? "bg-success/10 text-success border-success/15" : "bg-muted/8 text-muted-foreground/50 border-border/15"
                           )}>
-                            <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/20")} />
+                            <span className={cn("h-2 w-2 rounded-full", c.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/25")} />
                             {c.is_published ? "Live" : "Rascunho"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-[12px] text-muted-foreground/50">
-                          <span className="flex items-center gap-1"><Layers className="h-3 w-3 text-primary/50" /> {stats.modules}</span>
-                          <span className="flex items-center gap-1"><Video className="h-3 w-3 text-info/50" /> {stats.lessons}</span>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-primary/50" /> {stats.modules}</span>
+                          <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-info/50" /> {stats.lessons}</span>
                         </div>
                         <div>
                           {product ? (
-                            <span className="text-[11px] font-display font-bold text-primary truncate block">{product.name}</span>
+                            <span className="text-sm font-display font-bold text-primary truncate block">{product.name}</span>
                           ) : (
-                            <span className="text-[11px] text-muted-foreground/15">—</span>
+                            <span className="text-sm text-muted-foreground/20">—</span>
                           )}
                         </div>
                         <div>
-                          <span className="text-[13px] font-display font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
+                          <span className="text-sm font-display font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
                         </div>
                         <div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                              <button className="h-8 w-8 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/20">
-                                <MoreVertical className="h-4 w-4 text-muted-foreground/30" />
+                              <button className="h-9 w-9 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/20">
+                                <MoreVertical className="h-4.5 w-4.5 text-muted-foreground/40" />
                               </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="min-w-[200px] rounded-xl">
-                              <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                                <ArrowRight className="h-3.5 w-3.5" /> Gerenciar
+                            <DropdownMenuContent align="end" className="min-w-[220px] rounded-xl p-1.5">
+                              <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                                <ArrowRight className="h-4 w-4" /> Gerenciar
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(c); }} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                                <Edit className="h-3.5 w-3.5" /> Configurações
+                              <DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(c); }} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                                <Edit className="h-4 w-4" /> Configurações
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published ?? false); }} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                                {c.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                              <DropdownMenuItem onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published ?? false); }} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                                {c.is_published ? <><EyeOff className="h-4 w-4" /> Despublicar</> : <><Eye className="h-4 w-4" /> Publicar</>}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(getMemberLink(c.id)); toast.success("Link copiado!"); }} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5">
-                                <Copy className="h-3.5 w-3.5" /> Copiar link
+                              <DropdownMenuItem onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(getMemberLink(c.id)); toast.success("Link copiado!"); }} className="gap-3 text-sm cursor-pointer rounded-lg py-3 px-3 font-display">
+                                <Copy className="h-4 w-4" /> Copiar link
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={e => { e.stopPropagation(); deleteCourse(c.id); }} className="gap-2.5 text-[12px] cursor-pointer text-destructive focus:text-destructive rounded-lg py-2.5">
-                                <Trash2 className="h-3.5 w-3.5" /> Excluir
+                              <DropdownMenuItem onClick={e => { e.stopPropagation(); deleteCourse(c.id); }} className="gap-3 text-sm cursor-pointer text-destructive focus:text-destructive rounded-lg py-3 px-3 font-display">
+                                <Trash2 className="h-4 w-4" /> Excluir
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -712,8 +710,8 @@ export default function AdminConteudo() {
         {/* Results footer */}
         {!isLoading && filtered.length > 0 && (
           <div className="flex items-center justify-between px-1">
-            <p className="text-[11px] text-muted-foreground/30 font-display font-bold">{filtered.length} curso{filtered.length > 1 ? "s" : ""}</p>
-            {totalRevenue > 0 && <p className="text-[11px] font-display font-bold text-primary tabular-nums">{fmt(totalRevenue)} total</p>}
+            <p className="text-sm text-muted-foreground font-display font-semibold">{filtered.length} curso{filtered.length > 1 ? "s" : ""}</p>
+            {totalRevenue > 0 && <p className="text-sm font-display font-bold text-primary tabular-nums">{fmt(totalRevenue)} total</p>}
           </div>
         )}
       </div>
@@ -721,38 +719,38 @@ export default function AdminConteudo() {
       {/* ═══ Course Create/Edit Sheet ═══ */}
       <Sheet open={sheetOpen} onOpenChange={v => { setSheetOpen(v); if (!v) setEditCourseId(null); }}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card/95 backdrop-blur-2xl border-l border-border/20">
-          <SheetHeader className="mb-8">
-            <SheetTitle className="flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-                {editCourseId ? <Edit className="h-5 w-5 text-primary-foreground" /> : <Sparkles className="h-5 w-5 text-primary-foreground" />}
+          <SheetHeader className="mb-10">
+            <SheetTitle className="flex items-center gap-4">
+              <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
+                {editCourseId ? <Edit className="h-6 w-6 text-primary-foreground" /> : <Sparkles className="h-6 w-6 text-primary-foreground" />}
               </div>
               <div>
-                <span className="text-lg font-display font-black tracking-tight">{editCourseId ? "Editar Curso" : "Novo Curso"}</span>
-                <p className="text-[11px] font-display text-muted-foreground/40 mt-0.5">{editCourseId ? "Atualize as informações" : "Crie algo incrível"}</p>
+                <span className="text-xl font-display font-black tracking-[-0.03em]">{editCourseId ? "Editar Curso" : "Novo Curso"}</span>
+                <p className="text-sm font-display text-muted-foreground mt-1">{editCourseId ? "Atualize as informações" : "Crie algo incrível"}</p>
               </div>
             </SheetTitle>
           </SheetHeader>
 
-          <form onSubmit={e => { e.preventDefault(); saveCourse(); }} className="space-y-6">
+          <form onSubmit={e => { e.preventDefault(); saveCourse(); }} className="space-y-7">
             <div>
-              <Label className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Nome do Curso *</Label>
-              <Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Marketing Digital Avançado" className="mt-2 h-12 rounded-xl text-[14px] font-display" required />
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Nome do Curso *</Label>
+              <Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Marketing Digital Avançado" className="mt-2.5 h-13 rounded-xl text-base font-display" required />
             </div>
 
             <div>
-              <Label className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Descrição</Label>
-              <Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} placeholder="O que os alunos vão aprender..." className="mt-2 rounded-xl text-[13px]" rows={3} />
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Descrição</Label>
+              <Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} placeholder="O que os alunos vão aprender..." className="mt-2.5 rounded-xl text-sm font-display" rows={4} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Categoria</Label>
-                <Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex: Marketing" className="mt-2 h-11 rounded-xl" />
+                <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Categoria</Label>
+                <Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex: Marketing" className="mt-2.5 h-12 rounded-xl font-display" />
               </div>
               <div>
-                <Label className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Produto Vinculado</Label>
+                <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Produto Vinculado</Label>
                 <Select value={courseForm.product_id} onValueChange={v => setCourseForm(p => ({ ...p, product_id: v }))}>
-                  <SelectTrigger className="mt-2 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectTrigger className="mt-2.5 rounded-xl h-12 font-display"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
                     {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</SelectItem>)}
@@ -761,10 +759,10 @@ export default function AdminConteudo() {
               </div>
             </div>
 
-            <ImageUploadZone value={courseForm.thumbnail_url} onChange={url => setCourseForm(p => ({ ...p, thumbnail_url: url }))} label="Thumbnail do Curso" height="h-40" />
+            <ImageUploadZone value={courseForm.thumbnail_url} onChange={url => setCourseForm(p => ({ ...p, thumbnail_url: url }))} label="Thumbnail do Curso" height="h-44" />
 
-            <Button type="submit" className="w-full h-12 rounded-xl font-display font-bold text-sm gap-2.5 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all">
-              <Check className="h-4 w-4" />
+            <Button type="submit" className="w-full h-13 rounded-xl font-display font-bold text-base gap-2.5 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all">
+              <Check className="h-5 w-5" />
               {editCourseId ? "Salvar Alterações" : "Criar Curso"}
             </Button>
           </form>
