@@ -1681,6 +1681,122 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          interval: string
+          interval_count: number
+          is_active: boolean
+          name: string
+          price: number
+          product_id: string | null
+          trial_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          interval_count?: number
+          is_active?: boolean
+          name: string
+          price?: number
+          product_id?: string | null
+          trial_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          interval_count?: number
+          is_active?: boolean
+          name?: string
+          price?: number
+          product_id?: string | null
+          trial_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_plans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_plans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string
+          id: string
+          plan_id: string
+          seller_user_id: string
+          status: string
+          subscriber_email: string
+          subscriber_name: string | null
+          subscriber_user_id: string | null
+          trial_end: string | null
+          updated_at: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          plan_id: string
+          seller_user_id: string
+          status?: string
+          subscriber_email: string
+          subscriber_name?: string | null
+          subscriber_user_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          plan_id?: string
+          seller_user_id?: string
+          status?: string
+          subscriber_email?: string
+          subscriber_name?: string | null
+          subscriber_user_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
