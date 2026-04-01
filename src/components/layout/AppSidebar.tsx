@@ -132,9 +132,6 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Produtos", url: "/vendas/produtos", icon: Package },
       { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
-      { title: "Painel Afiliado", url: "/vendas/dashboard-afiliado", icon: Award },
-      { title: "Coproduções", url: "/vendas/coproducoes", icon: Handshake },
-      { title: "Assinaturas", url: "/vendas/assinaturas", icon: RefreshCw },
       { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
     ],
   },
@@ -142,21 +139,14 @@ const sections: SidebarSection[] = [
     label: "FINANCEIRO",
     items: [
       { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
-      { title: "Saques PIX", url: "/financeiro/saques", icon: ArrowDownToLine },
-      { title: "Saques Crypto", url: "/financeiro/saques-crypto", icon: Bitcoin },
-      { title: "Dados Bancários", url: "/financeiro/dados-bancarios", icon: Building2 },
-      { title: "Taxas", url: "/financeiro/taxas", icon: Zap },
-      { title: "Controle de Gastos", url: "/financeiro/gastos", icon: PieChart },
-      { title: "Antecipação", url: "/financeiro/antecipacao", icon: Banknote },
+      { title: "Saques", url: "/financeiro/saques", icon: ArrowDownToLine },
+      { title: "Configurações", url: "/financeiro/config", icon: Building2 },
     ],
   },
   {
     label: "SISTEMA",
     items: [
-      { title: "Webhooks", url: "/vendas/webhooks", icon: Webhook },
-      { title: "Integrações", url: "/integracoes/apps", icon: Puzzle },
-      { title: "API Docs", url: "/vendas/documentacao", icon: BookOpen },
-      { title: "Identidade", url: "/financeiro/identidade", icon: UserCircle },
+      { title: "Integrações", url: "/integracoes", icon: Puzzle },
       { title: "Meu Perfil", url: "/perfil", icon: User },
     ],
   },
@@ -165,7 +155,6 @@ const sections: SidebarSection[] = [
     items: [
       { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
       { title: "Premiações", url: "/premiacoes", icon: Trophy },
-      { title: "Indicações", url: "/indicacoes", icon: Gift },
     ],
   },
 ];
