@@ -167,7 +167,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
         <div className="space-y-2.5">
           <div className="flex items-center justify-between text-[11px] font-semibold">
             <span className="text-sidebar-primary">{milestone.current.label}</span>
-            <span className="text-sidebar-foreground/35">Meta: {milestone.next.label}</span>
+            <span className="text-sidebar-foreground/35">Meta Atual: {milestone.next.label}</span>
           </div>
           <div className="h-2.5 rounded-full bg-sidebar-border/45">
             <div
