@@ -9,7 +9,7 @@ import {
   Globe, Lock, CheckCircle2, Loader2, AlertCircle, Hash,
   Download, File, Sparkles, ChevronDown, MoreHorizontal,
   Zap, Settings, Star, PanelLeftClose, PanelLeft,
-  GraduationCap, Flame, Shield, Copy, ExternalLink,
+  GraduationCap, Flame, Shield, Copy, ExternalLink, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -96,6 +96,8 @@ export default function CourseBuilder() {
   const [editingModuleTitle, setEditingModuleTitle] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
+  const [studentCount, setStudentCount] = useState(0);
+  const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,17 +107,27 @@ export default function CourseBuilder() {
   // ─── Load All ───────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
     if (!courseId) return;
-    const [courseRes, modsRes] = await Promise.all([
+    const [courseRes, modsRes, accessRes] = await Promise.all([
       supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
       supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order"),
+      supabase.from("user_access").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("status", "active"),
     ]);
     if (courseRes.data) setCourse(courseRes.data as Course);
+    setStudentCount(accessRes.count || 0);
     const mods = modsRes.data || [];
     const moduleIds = mods.map(m => m.id);
     let lessons: Lesson[] = [];
     if (moduleIds.length > 0) {
       const { data: l } = await supabase.from("lessons").select("*").in("module_id", moduleIds).order("sort_order");
       if (l) lessons = l as Lesson[];
+      // Load progress stats per lesson
+      const lessonIds = lessons.map(le => le.id);
+      if (lessonIds.length > 0) {
+        const { data: progressData } = await supabase.from("user_progress").select("lesson_id").eq("completed", true).in("lesson_id", lessonIds);
+        const statsMap = new Map<string, number>();
+        progressData?.forEach(p => statsMap.set(p.lesson_id, (statsMap.get(p.lesson_id) || 0) + 1));
+        setLessonStats(statsMap);
+      }
     }
     const mapped = mods.map(m => ({ ...m, lessons: lessons.filter(l => l.module_id === m.id) })) as Module[];
     setModules(mapped);
@@ -320,27 +332,30 @@ export default function CourseBuilder() {
   ];
 
   return (
-    <div className="h-screen w-screen bg-background flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[70] bg-background flex flex-col overflow-hidden">
       {/* ═══ Top Bar ═══ */}
-      <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-4 sm:px-5 shrink-0 z-50">
-        <div className="flex items-center gap-3">
+      <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-5 shrink-0 z-50">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={() => navigate("/vendas/conteudo")}
-            className="h-9 w-9 rounded-xl bg-muted/15 border border-border/15 flex items-center justify-center hover:bg-muted/25 hover:border-border/30 transition-all duration-300 active:scale-[0.985]"
+            className="h-9 w-9 rounded-xl bg-muted/15 border border-border/15 flex items-center justify-center hover:bg-muted/25 hover:border-border/30 transition-all duration-300 active:scale-[0.985] shrink-0"
           >
             <ArrowLeft className="h-4 w-4 text-muted-foreground/50" />
           </button>
 
-          <div className="h-5 w-px bg-border/20 hidden sm:block" />
-
           <div className="hidden sm:flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/15">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/15 shrink-0">
               <GraduationCap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-[14px] font-display font-black text-foreground leading-none truncate max-w-[200px] lg:max-w-[340px] tracking-tight">{course.title}</h1>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-[10px] font-display font-bold text-muted-foreground/30">{modules.length} módulos · {totalLessons} aulas</span>
+                {studentCount > 0 && (
+                  <span className="text-[10px] font-display font-bold text-info/50 flex items-center gap-1">
+                    <Users className="h-2.5 w-2.5" /> {studentCount} aluno{studentCount !== 1 ? "s" : ""}
+                  </span>
+                )}
                 {totalLessons > 0 && (
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-16 rounded-full bg-muted/15 overflow-hidden">
@@ -356,9 +371,14 @@ export default function CourseBuilder() {
               </div>
             </div>
           </div>
+          {/* Mobile title */}
+          <div className="sm:hidden min-w-0">
+            <h1 className="text-xs font-display font-black text-foreground truncate max-w-[140px]">{course.title}</h1>
+            <span className="text-[9px] font-display font-bold text-muted-foreground/30">{totalLessons} aulas · {studentCount} alunos</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* Save status */}
           <AnimatePresence mode="wait">
             <motion.div key={saveStatus} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="hidden sm:flex items-center gap-1.5 mr-1">
@@ -368,19 +388,29 @@ export default function CourseBuilder() {
             </motion.div>
           </AnimatePresence>
 
+          {/* Preview as student */}
+          {course.is_published && (
+            <button
+              onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
+              className="hidden sm:flex h-9 px-3 rounded-xl bg-info/10 border border-info/20 text-[11px] font-display font-bold text-info items-center gap-1.5 hover:bg-info/15 transition-all active:scale-[0.985]"
+            >
+              <Eye className="h-3.5 w-3.5" /> Preview
+            </button>
+          )}
+
           <button
             onClick={togglePublish}
             className={cn(
-              "h-9 px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-2 transition-all duration-300 active:scale-[0.985] border",
+              "h-9 px-3 sm:px-4 rounded-xl text-[11px] font-display font-bold flex items-center gap-1.5 sm:gap-2 transition-all duration-300 active:scale-[0.985] border",
               course.is_published
                 ? "bg-success/10 text-success border-success/20 hover:bg-success/15 shadow-sm shadow-success/10"
                 : "bg-muted/15 border-border/20 text-muted-foreground hover:text-foreground hover:border-border/30 hover:bg-muted/25"
             )}
           >
             {course.is_published ? (
-              <><span className="h-2 w-2 rounded-full bg-success animate-pulse" /> Publicado</>
+              <><span className="h-2 w-2 rounded-full bg-success animate-pulse" /> <span className="hidden sm:inline">Publicado</span><span className="sm:hidden">Live</span></>
             ) : (
-              <><EyeOff className="h-3.5 w-3.5" /> Rascunho</>
+              <><EyeOff className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Rascunho</span></>
             )}
           </button>
         </div>
@@ -497,7 +527,7 @@ export default function CourseBuilder() {
                                   )}>
                                     {li + 1}
                                   </div>
-                                  <div className="flex-1 min-w-0">
+                                   <div className="flex-1 min-w-0">
                                     <p className={cn("text-[11px] truncate font-display transition-colors", selectedLesson?.id === lesson.id ? "text-primary font-bold" : "text-foreground/55 font-semibold")}>{lesson.title}</p>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                       {lesson.is_free && <span className="text-[7px] bg-success/10 text-success px-1.5 rounded-md font-black leading-[14px]">FREE</span>}
@@ -507,6 +537,9 @@ export default function CourseBuilder() {
                                         <span className="flex items-center gap-0.5 text-[8px] text-warning/40 font-display font-bold"><span className="h-1.5 w-1.5 rounded-full bg-warning/40" /> Pendente</span>
                                       )}
                                       {(lesson.drip_days || 0) > 0 && <span className="text-[8px] text-info/40 font-display font-bold">{lesson.drip_days}d</span>}
+                                      {(lessonStats.get(lesson.id) || 0) > 0 && (
+                                        <span className="text-[8px] text-primary/40 font-display font-bold flex items-center gap-0.5"><Users className="h-2 w-2" />{lessonStats.get(lesson.id)}</span>
+                                      )}
                                     </div>
                                   </div>
                                   <button

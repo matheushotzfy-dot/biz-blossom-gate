@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -126,9 +126,9 @@ function StatPill({ icon: Icon, label, value, color = "primary", trend }: {
 }
 
 // ─── Course Card (Cinematic) ─────────────────────────────────────
-function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink, index }: {
+function CourseCard({ course, stats, product, revenue, studentCount = 0, onEdit, onNavigate, onTogglePublish, onDelete, onCopyLink, getMemberLink, index }: {
   course: Course; stats: { modules: number; lessons: number }; product?: Product;
-  revenue: number; onEdit: () => void; onNavigate: () => void;
+  revenue: number; studentCount?: number; onEdit: () => void; onNavigate: () => void;
   onTogglePublish: () => void; onDelete: () => void; onCopyLink: () => void;
   getMemberLink: string; index: number;
 }) {
@@ -231,8 +231,14 @@ function CourseCard({ course, stats, product, revenue, onEdit, onNavigate, onTog
           </div>
 
           {/* Product + Revenue pills */}
-          {(product || revenue > 0) && (
+          {(product || revenue > 0 || studentCount > 0) && (
             <div className="flex flex-wrap gap-2">
+              {studentCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-info/5 border border-info/10">
+                  <Users className="h-3 w-3 text-info" />
+                  <span className="text-[10px] font-display font-bold text-info tabular-nums">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
+                </div>
+              )}
               {product && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
                   <LinkIcon className="h-3 w-3 text-primary" />
@@ -306,9 +312,21 @@ export default function AdminConteudo() {
   const { data: productsRaw = [] } = useProductsQuery();
   const { data: transactions = [] } = useTransactions();
   const invalidateAll = useInvalidateAll();
+  const [studentCounts, setStudentCounts] = useState<Record<string, number>>({});
 
   const courses = useMemo(() => coursesRaw.map((c: any) => { const { modules: _, ...rest } = c; return rest; }) as Course[], [coursesRaw]);
   const products = useMemo(() => productsRaw.map((p: any) => ({ id: p.id, name: p.name, price: Number(p.price) })) as Product[], [productsRaw]);
+
+  // Load student counts
+  useEffect(() => {
+    if (courses.length === 0) return;
+    supabase.from("user_access").select("course_id").eq("status", "active").in("course_id", courses.map(c => c.id))
+      .then(({ data }) => {
+        const counts: Record<string, number> = {};
+        data?.forEach(a => { counts[a.course_id] = (counts[a.course_id] || 0) + 1; });
+        setStudentCounts(counts);
+      });
+  }, [courses]);
 
   const courseStats = useMemo(() => {
     const stats: Record<string, { modules: number; lessons: number }> = {};
@@ -586,6 +604,7 @@ export default function AdminConteudo() {
                         stats={stats}
                         product={product}
                         revenue={revenue}
+                        studentCount={studentCounts[c.id] || 0}
                         onEdit={() => openEdit(c)}
                         onNavigate={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
                         onTogglePublish={() => togglePublish(c.id, c.is_published ?? false)}
