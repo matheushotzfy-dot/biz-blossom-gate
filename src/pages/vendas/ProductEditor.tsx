@@ -19,17 +19,18 @@ import {
   CreditCard, QrCode, FileText, Mail, MapPin, Shield, Timer, Eye,
   Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
   Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
-  Check, ChevronRight, TrendingUp, MousePointerClick
+  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2
 } from "lucide-react";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-type TabKey = "geral" | "configuracoes" | "order-bump" | "upsell" | "checkout" | "co-producao" | "cupons" | "afiliados" | "links";
+type TabKey = "geral" | "configuracoes" | "conteudo" | "order-bump" | "upsell" | "checkout" | "co-producao" | "cupons" | "afiliados" | "links";
 
 const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
   { key: "geral", label: "Geral", icon: Package, color: "primary" },
   { key: "configuracoes", label: "Configurações", icon: Settings, color: "info" },
+  { key: "conteudo", label: "Conteúdo", icon: GraduationCap, color: "primary" },
   { key: "order-bump", label: "Order Bump", icon: Layers, color: "warning" },
   { key: "upsell", label: "Upsell / Downsell", icon: ArrowUpRight, color: "success" },
   { key: "checkout", label: "Checkout", icon: ShoppingCart, color: "primary" },
@@ -679,6 +680,8 @@ export default function ProductEditor() {
                 {activeTab === "configuracoes" && <TabConfiguracoes
                   {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }}
                 />}
+
+                {activeTab === "conteudo" && <TabConteudo productId={productId} isNew={isNew} />}
 
                 {activeTab === "order-bump" && <TabOrderBump
                   {...{ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
@@ -1435,6 +1438,153 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
               </div>
             </EditorCard>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   TAB CONTEUDO (Courses linked to this product)
+   ═══════════════════════════════════════════════ */
+
+function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean }) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [moduleStats, setModuleStats] = useState<Record<string, { modules: number; lessons: number }>>({});
+
+  useEffect(() => {
+    if (isNew || !productId) { setLoading(false); return; }
+    (async () => {
+      const { data: coursesData } = await supabase.from("courses").select("*").eq("product_id", productId).order("created_at", { ascending: false });
+      const courses = coursesData || [];
+      setCourses(courses);
+      if (courses.length > 0) {
+        const courseIds = courses.map(c => c.id);
+        const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
+        const modsData = mods || [];
+        const modIds = modsData.map(m => m.id);
+        let lessonsCount: Record<string, number> = {};
+        if (modIds.length > 0) {
+          const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
+          (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });
+        }
+        const stats: Record<string, { modules: number; lessons: number }> = {};
+        courses.forEach(c => {
+          const courseMods = modsData.filter(m => m.course_id === c.id);
+          stats[c.id] = { modules: courseMods.length, lessons: courseMods.reduce((a, m) => a + (lessonsCount[m.id] || 0), 0) };
+        });
+        setModuleStats(stats);
+      }
+      setLoading(false);
+    })();
+  }, [productId, isNew]);
+
+  if (isNew) {
+    return (
+      <div className="space-y-6">
+        <SectionHeader icon={GraduationCap} title="Conteúdo do Produto" subtitle="Salve o produto primeiro para gerenciar o conteúdo." />
+        <EmptyCard icon={Lock} message="Salve o produto para acessar esta seção" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader icon={GraduationCap} title="Conteúdo do Produto" subtitle="Cursos e aulas vinculados a este produto." />
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : courses.length === 0 ? (
+        <EditorCard accentColor="bg-primary">
+          <div className="flex flex-col items-center py-10 gap-5">
+            <div className="h-16 w-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+              <GraduationCap className="h-7 w-7 text-primary/40" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-display font-bold text-foreground/50 mb-1">Nenhum curso vinculado</p>
+              <p className="text-xs text-muted-foreground/40">Crie um curso para entregar conteúdo aos compradores</p>
+            </div>
+            <Button
+              onClick={async () => {
+                if (!user) return;
+                const { data } = await supabase.from("courses").insert({
+                  user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
+                } as any).select().single();
+                if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+              }}
+              className="gap-2 rounded-xl font-display font-bold text-sm h-10 shadow-lg shadow-primary/15"
+            >
+              <Plus className="h-4 w-4" /> Criar Curso
+            </Button>
+          </div>
+        </EditorCard>
+      ) : (
+        <div className="space-y-3">
+          {courses.map(c => {
+            const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
+            return (
+              <EditorCard key={c.id} accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
+                <div className="flex items-center gap-4">
+                  {/* Thumbnail */}
+                  <div className="h-16 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15">
+                    {c.thumbnail_url ? (
+                      <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
+                        <GraduationCap className="h-6 w-6 text-primary/15" />
+                      </div>
+                    )}
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-sm font-display font-black text-foreground truncate">{c.title}</h3>
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[9px] font-display font-black uppercase tracking-[0.08em] border",
+                        c.is_published
+                          ? "bg-success/10 text-success border-success/20"
+                          : "bg-muted/10 text-muted-foreground/50 border-border/20"
+                      )}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                        {c.is_published ? "Live" : "Rascunho"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Layers className="h-3 w-3 text-primary/50" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
+                      <span className="flex items-center gap-1"><Video className="h-3 w-3 text-info/50" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
+                    </div>
+                  </div>
+                  {/* Actions */}
+                  <Button
+                    variant="ghost" size="sm"
+                    onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                    className="gap-2 rounded-xl text-xs font-display font-bold text-primary hover:text-primary hover:bg-primary/8"
+                  >
+                    Gerenciar <ChevronRight className="h-3 w-3" />
+                  </Button>
+                </div>
+              </EditorCard>
+            );
+          })}
+
+          <Button
+            variant="ghost"
+            onClick={async () => {
+              if (!user) return;
+              const { data } = await supabase.from("courses").insert({
+                user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
+              } as any).select().single();
+              if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+            }}
+            className="w-full gap-2 rounded-xl font-display font-bold text-sm h-10 border-2 border-dashed border-border/20 hover:border-primary/20 hover:bg-primary/[0.02] text-muted-foreground/40 hover:text-primary"
+          >
+            <Plus className="h-4 w-4" /> Adicionar Curso
+          </Button>
         </div>
       )}
     </div>
