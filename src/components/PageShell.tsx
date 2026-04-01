@@ -96,17 +96,17 @@ export function KpiCard({ label, value, sub, icon, color, bg, accent }: {
 }) {
   const Icon = icon;
   return (
-    <GlowPanel className="relative overflow-hidden p-4 md:p-5">
+    <GlowPanel className="relative overflow-hidden p-3.5 md:p-5">
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent || "bg-primary")} />
-      <div className="pl-2">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border border-border/30", bg)}>
-            <Icon className={cn("h-[18px] w-[18px]", color)} />
+      <div className="pl-1.5 md:pl-2">
+        <div className="mb-2 md:mb-3 flex items-center justify-between">
+          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+          <div className={cn("flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg md:rounded-xl border border-border/30", bg)}>
+            <Icon className={cn("h-3.5 w-3.5 md:h-[18px] md:w-[18px]", color)} />
           </div>
         </div>
-        <p className="font-display text-[22px] font-black leading-none text-foreground md:text-2xl tabular-nums tracking-[-0.03em]">{value}</p>
-        {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
+        <p className="font-display text-lg md:text-2xl font-black leading-none text-foreground tabular-nums tracking-[-0.03em]">{value}</p>
+        {sub && <p className="mt-1 md:mt-1.5 text-[10px] md:text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
       </div>
     </GlowPanel>
   );
