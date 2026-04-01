@@ -198,7 +198,7 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.url}>
                 <SidebarMenuButton asChild className="h-auto rounded-[20px] p-0 hover:bg-transparent active:bg-transparent">
                   <NavLink
                     to={item.url}
