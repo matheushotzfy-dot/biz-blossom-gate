@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
+import { useSearchParams } from "react-router-dom";
 import Apps from "./vendas/Apps";
 import Webhooks from "./vendas/Webhooks";
 import Documentacao from "./vendas/Documentacao";
@@ -21,8 +22,18 @@ const COMPONENTS: Record<string, React.FC> = {
 };
 
 export default function IntegracoesHub() {
-  const [tab, setTab] = useState("apps");
-  const ActiveComponent = COMPONENTS[tab];
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get("tab") || "apps");
+
+  useEffect(() => {
+    const paramTab = searchParams.get("tab");
+    if (paramTab && COMPONENTS[paramTab]) {
+      setTab(paramTab);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
+
+  const ActiveComponent = COMPONENTS[tab] || Apps;
 
   return (
     <>
