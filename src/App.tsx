@@ -115,6 +115,8 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<PerfilHub />} />
                 <Route path="/premiacoes" element={<PremiacoesHub />} />
+                <Route path="/gamificacao" element={<Gamificacao />} />
+                <Route path="/suporte" element={<Suporte />} />
                 <Route path="/financeiro/extrato" element={<Extrato />} />
                 <Route path="/financeiro/saques" element={<SaquesHub />} />
                 <Route path="/financeiro/config" element={<ConfigFinanceiro />} />
@@ -124,6 +126,7 @@ const App = () => (
                 <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
+                <Route path="/otimizacao" element={<VendasHub />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
