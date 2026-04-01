@@ -689,10 +689,10 @@ export default function Dashboard() {
 
       {/* ─── KPI TILES ─── */}
       <section className="grid grid-cols-2 gap-2.5 md:gap-3 md:grid-cols-4">
-        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="info" delay="stagger-3" />
-        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-4" />
-        <KpiTile icon={<RefreshCw className="h-4 w-4" />} label="Reembolsos" value={privacy.hidden ? CENSORED : String(refunded.length)} helper="No período" tone="info" delay="stagger-5" />
-        <KpiTile icon={<ArrowDownRight className="h-4 w-4" />} label="Chargebacks" value={privacy.hidden ? CENSORED : String(chargebacks.length)} helper="No período" tone={chargebacks.length > 0 ? "destructive" : "success"} delay="stagger-6" />
+        <KpiTile icon={<Zap className="h-4 w-4" />} label="Vendas no Pix" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% de conversão · ${pixApprovedCount} de ${pixTotalCount} pedidos`} tone="success" delay="stagger-3" />
+        <KpiTile icon={<CreditCard className="h-4 w-4" />} label="Vendas no Cartão" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% de conversão · ${cardApprovedCount} de ${cardTotalCount} pedidos`} tone="info" delay="stagger-4" />
+        <KpiTile icon={<Wallet className="h-4 w-4" />} label="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
+        <KpiTile icon={<DollarSign className="h-4 w-4" />} label="Saldo Pendente" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
       </section>
 
       {/* ─── ACTIONS + ACTIVITY ─── */}
