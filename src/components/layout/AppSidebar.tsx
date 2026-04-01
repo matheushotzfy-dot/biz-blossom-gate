@@ -23,6 +23,7 @@ import {
   Zap,
   RefreshCw,
   Award,
+  Banknote,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
