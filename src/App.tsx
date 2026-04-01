@@ -29,6 +29,9 @@ import Coproducoes from "./pages/vendas/Coproducoes";
 import Cupons from "./pages/vendas/Cupons";
 import Assinaturas from "./pages/vendas/Assinaturas";
 import DashboardAfiliado from "./pages/vendas/DashboardAfiliado";
+import Suporte from "./pages/Suporte";
+import VendasHub from "./pages/VendasHub";
+import Gamificacao from "./pages/Gamificacao";
 import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -113,6 +116,8 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<PerfilHub />} />
                 <Route path="/premiacoes" element={<PremiacoesHub />} />
+                <Route path="/gamificacao" element={<Gamificacao />} />
+                <Route path="/suporte" element={<Suporte />} />
                 <Route path="/financeiro/extrato" element={<Extrato />} />
                 <Route path="/financeiro/saques" element={<SaquesHub />} />
                 <Route path="/financeiro/config" element={<ConfigFinanceiro />} />
@@ -122,6 +127,7 @@ const App = () => (
                 <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
+                <Route path="/otimizacao" element={<VendasHub />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
