@@ -88,40 +88,40 @@ function ImageUploadZone({ value, onChange, label, height = "h-44" }: {
   );
 }
 
-// ─── Premium Stat Card ────────────────────────────────────────────
+// ─── Stat Card (Dashboard-style with 3px accent bar) ─────────────
 function StatPill({ icon: Icon, label, value, color = "primary", trend }: {
   icon: any; label: string; value: string | number; color?: string; trend?: string;
 }) {
-  const colorMap: Record<string, { bg: string; text: string; ring: string; glow: string }> = {
-    primary: { bg: "bg-primary/10", text: "text-primary", ring: "ring-primary/15", glow: "from-primary/8 to-transparent" },
-    success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/15", glow: "from-success/8 to-transparent" },
-    info: { bg: "bg-info/10", text: "text-info", ring: "ring-info/15", glow: "from-info/8 to-transparent" },
-    warning: { bg: "bg-warning/10", text: "text-warning", ring: "ring-warning/15", glow: "from-warning/8 to-transparent" },
+  const colorMap: Record<string, { accent: string; iconBg: string; iconText: string; ring: string }> = {
+    primary: { accent: "bg-primary", iconBg: "bg-primary/10", iconText: "text-primary", ring: "ring-primary/20" },
+    success: { accent: "bg-success", iconBg: "bg-success/10", iconText: "text-success", ring: "ring-success/20" },
+    info: { accent: "bg-info", iconBg: "bg-info/10", iconText: "text-info", ring: "ring-info/20" },
+    warning: { accent: "bg-warning", iconBg: "bg-warning/10", iconText: "text-warning", ring: "ring-warning/20" },
   };
   const c = colorMap[color] || colorMap.primary;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/25 bg-card/50 backdrop-blur-xl p-6 hover:border-border/40 hover:shadow-lg hover:shadow-foreground/[0.03] transition-all duration-500"
+    <div
+      className="group relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300 p-4 md:p-5 animate-fade-in"
     >
-      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-40 group-hover:opacity-60 transition-opacity duration-500", c.glow)} />
-      <div className="relative z-[1]">
-        <div className="flex items-center justify-between mb-4">
-          <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center ring-1", c.bg, c.ring)}>
-            <Icon className={cn("h-5 w-5", c.text)} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", c.accent)} />
+      <div className="pl-1.5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", c.iconBg, c.ring)}>
+            <Icon className={cn("h-4.5 w-4.5", c.iconText)} />
           </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="font-display font-black text-foreground text-[22px] md:text-2xl tracking-[-0.03em] tabular-nums">{value}</p>
           {trend && (
-            <span className="flex items-center gap-1.5 text-xs font-display font-bold text-success bg-success/10 px-2.5 py-1 rounded-lg">
+            <span className="flex items-center gap-1 text-[10px] font-display font-bold text-success bg-success/10 px-2 py-0.5 rounded-lg">
               <TrendingUp className="h-3 w-3" /> {trend}
             </span>
           )}
         </div>
-        <p className="text-2xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums leading-none mb-1.5">{value}</p>
-        <p className="text-sm font-display font-semibold text-muted-foreground">{label}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
