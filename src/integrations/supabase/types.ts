@@ -17,33 +17,39 @@ export type Database = {
       acquirers: {
         Row: {
           api_endpoint: string | null
+          conversion_rate: number
           created_at: string
           description: string | null
           id: string
           is_active: boolean
           name: string
+          seller_visible: boolean
           slug: string
           type: string
           updated_at: string
         }
         Insert: {
           api_endpoint?: string | null
+          conversion_rate?: number
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
           name: string
+          seller_visible?: boolean
           slug: string
           type?: string
           updated_at?: string
         }
         Update: {
           api_endpoint?: string | null
+          conversion_rate?: number
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          seller_visible?: boolean
           slug?: string
           type?: string
           updated_at?: string

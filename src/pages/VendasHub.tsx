@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { FlaskConical, Ticket, MessageSquare, ArrowUpRight, Link2, UserMinus, HelpCircle, Calculator, Globe, Eye, Filter, Phone } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
-import ABTesting from "./vendas/ABTesting";
-import AutoCupons from "./vendas/AutoCupons";
-import RecuperacaoWhatsApp from "./vendas/RecuperacaoWhatsApp";
-import UpsellPosPagamento from "./vendas/UpsellPosPagamento";
-import LinkPagamento from "./vendas/LinkPagamento";
-import RelatorioChurn from "./vendas/RelatorioChurn";
-import CentralAjuda from "./vendas/CentralAjuda";
-import CalculadoraLucro from "./vendas/CalculadoraLucro";
-import SmartCheckout from "./vendas/SmartCheckout";
-import ProofPopup from "./vendas/ProofPopup";
-import FunilVendas from "./vendas/FunilVendas";
-import CheckoutWhatsApp from "./vendas/CheckoutWhatsApp";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+const ABTesting = lazy(() => import("./vendas/ABTesting"));
+const AutoCupons = lazy(() => import("./vendas/AutoCupons"));
+const RecuperacaoWhatsApp = lazy(() => import("./vendas/RecuperacaoWhatsApp"));
+const UpsellPosPagamento = lazy(() => import("./vendas/UpsellPosPagamento"));
+const LinkPagamento = lazy(() => import("./vendas/LinkPagamento"));
+const RelatorioChurn = lazy(() => import("./vendas/RelatorioChurn"));
+const CentralAjuda = lazy(() => import("./vendas/CentralAjuda"));
+const CalculadoraLucro = lazy(() => import("./vendas/CalculadoraLucro"));
+const SmartCheckout = lazy(() => import("./vendas/SmartCheckout"));
+const ProofPopup = lazy(() => import("./vendas/ProofPopup"));
+const FunilVendas = lazy(() => import("./vendas/FunilVendas"));
+const CheckoutWhatsApp = lazy(() => import("./vendas/CheckoutWhatsApp"));
 
 const TABS: HubTab[] = [
   { id: "funil", label: "Funil", icon: Filter },
@@ -29,7 +32,7 @@ const TABS: HubTab[] = [
   { id: "ajuda", label: "Central de Ajuda", icon: HelpCircle },
 ];
 
-const COMPONENTS: Record<string, React.FC> = {
+const COMPONENTS: Record<string, React.LazyExoticComponent<React.FC>> = {
   funil: FunilVendas,
   ab: ABTesting,
   cupons: AutoCupons,
@@ -44,6 +47,12 @@ const COMPONENTS: Record<string, React.FC> = {
   ajuda: CentralAjuda,
 };
 
+const Loading = () => (
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  </div>
+);
+
 export default function VendasHub() {
   const [tab, setTab] = useState("funil");
   const ActiveComponent = COMPONENTS[tab];
@@ -51,7 +60,9 @@ export default function VendasHub() {
   return (
     <>
       <HubTabs tabs={TABS} active={tab} onChange={setTab} />
-      <ActiveComponent />
+      <Suspense fallback={<Loading />}>
+        <ActiveComponent />
+      </Suspense>
     </>
   );
 }
