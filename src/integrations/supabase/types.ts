@@ -2196,9 +2196,38 @@ export type Database = {
       }
     }
     Views: {
+      affiliate_links_public: {
+        Row: {
+          product_id: string | null
+          slug: string | null
+        }
+        Insert: {
+          product_id?: string | null
+          slug?: string | null
+        }
+        Update: {
+          product_id?: string | null
+          slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disputes_seller: {
         Row: {
-          admin_notes: string | null
           amount: number | null
           buyer_email_masked: string | null
           buyer_name_masked: string | null
@@ -2214,7 +2243,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          admin_notes?: string | null
           amount?: number | null
           buyer_email_masked?: never
           buyer_name_masked?: never
@@ -2230,7 +2258,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          admin_notes?: string | null
           amount?: number | null
           buyer_email_masked?: never
           buyer_name_masked?: never
