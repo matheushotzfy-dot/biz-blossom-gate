@@ -125,7 +125,7 @@ export default function Assinaturas() {
   return (
     <PageShell>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <PageTitle icon={RefreshCw}>Assinaturas</PageTitle>
+        <PageTitle icon={<RefreshCw className="h-6 w-6" />} title="Assinaturas" subtitle="Gerencie planos e cobranças recorrentes" />
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground gap-2 shadow-lg shadow-primary/15">
