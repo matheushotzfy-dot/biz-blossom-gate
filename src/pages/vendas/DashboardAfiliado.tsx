@@ -78,8 +78,8 @@ export default function DashboardAfiliado() {
   if (links.length === 0) {
     return (
       <PageShell>
-        <PageTitle icon={Award}>Painel do Afiliado</PageTitle>
-        <EmptyState icon={Link2} title="Nenhum link de afiliado" description="Você ainda não é afiliado de nenhum produto. Acesse a página de Afiliados para se afiliar." />
+        <PageTitle icon={<Award className="h-6 w-6" />} title="Painel do Afiliado" subtitle="Suas métricas de afiliado" />
+        <EmptyState icon={<Link2 className="h-10 w-10" />} title="Nenhum link de afiliado" subtitle="Você ainda não é afiliado de nenhum produto. Acesse a página de Afiliados para se afiliar." />
       </PageShell>
     );
   }
