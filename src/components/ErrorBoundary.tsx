@@ -1,8 +1,37 @@
 import React from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface State {
   hasError: boolean;
   error: Error | null;
+}
+
+async function logErrorToDb(error: Error, context: string) {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    await supabase.from("error_logs").insert({
+      error_type: "client_error",
+      message: error.message?.slice(0, 500) || "Unknown error",
+      stack_trace: error.stack?.slice(0, 2000) || null,
+      user_id: session?.user?.id || null,
+      metadata: { context, url: window.location.href, ua: navigator.userAgent },
+    });
+  } catch {
+    // Silent fail — don't break the app for logging
+  }
+}
+
+// Global error handler for uncaught errors
+if (typeof window !== "undefined") {
+  window.addEventListener("error", (event) => {
+    if (event.error) {
+      logErrorToDb(event.error, "window.onerror");
+    }
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    const err = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+    logErrorToDb(err, "unhandledrejection");
+  });
 }
 
 export class ErrorBoundary extends React.Component<
@@ -19,8 +48,8 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("[ErrorBoundary] Caught:", error.message, error.stack);
-    console.error("[ErrorBoundary] Info:", errorInfo.componentStack);
+    console.error("[ErrorBoundary] Caught:", error.message);
+    logErrorToDb(error, `ErrorBoundary: ${errorInfo.componentStack?.slice(0, 300) || ""}`);
   }
 
   render() {

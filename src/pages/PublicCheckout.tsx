@@ -1049,8 +1049,8 @@ export default function PublicCheckout() {
             )}
             <p className="text-center text-[10px] text-gray-300 leading-relaxed px-6">
               Ao clicar em "Finalizar compra", declaro que li e concordo com os{" "}
-              <span className="underline cursor-pointer hover:text-gray-300">Termos de Uso</span> e{" "}
-              <span className="underline cursor-pointer hover:text-gray-300">Política de Privacidade</span>.
+              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline cursor-pointer hover:text-gray-200 transition-colors">Termos de Uso</a> e{" "}
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline cursor-pointer hover:text-gray-200 transition-colors">Política de Privacidade</a>.
             </p>
           </div>
         </form>
