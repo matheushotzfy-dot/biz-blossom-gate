@@ -96,6 +96,8 @@ export default function CourseBuilder() {
   const [editingModuleTitle, setEditingModuleTitle] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
+  const [studentCount, setStudentCount] = useState(0);
+  const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
