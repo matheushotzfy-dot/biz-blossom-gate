@@ -9,7 +9,7 @@ import {
   Globe, Lock, CheckCircle2, Loader2, AlertCircle, Hash,
   Download, File, Sparkles, ChevronDown, MoreHorizontal,
   Zap, Settings, Star, PanelLeftClose, PanelLeft,
-  GraduationCap, Flame, Shield, Copy, ExternalLink,
+  GraduationCap, Flame, Shield, Copy, ExternalLink, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
