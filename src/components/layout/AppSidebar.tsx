@@ -139,6 +139,8 @@ const sections: SidebarSection[] = [
     label: "SISTEMA",
     items: [
       { title: "Integrações", url: "/integracoes", icon: Puzzle },
+      { title: "Otimização", url: "/otimizacao", icon: FlaskConical },
+      { title: "Suporte", url: "/suporte", icon: MessageSquare },
       { title: "Meu Perfil", url: "/perfil", icon: User },
     ],
   },
