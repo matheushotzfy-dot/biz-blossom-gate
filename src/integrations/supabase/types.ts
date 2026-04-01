@@ -83,6 +83,45 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_2fa_codes: {
+        Row: {
+          access_token: string | null
+          attempts: number | null
+          code_hash: string
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          refresh_token: string | null
+          role: string | null
+          temp_token: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          attempts?: number | null
+          code_hash: string
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          refresh_token?: string | null
+          role?: string | null
+          temp_token?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          attempts?: number | null
+          code_hash?: string
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          refresh_token?: string | null
+          role?: string | null
+          temp_token?: string | null
+        }
+        Relationships: []
+      }
       admin_login_attempts: {
         Row: {
           created_at: string

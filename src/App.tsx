@@ -49,6 +49,7 @@ import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import TermosDeUso from "./pages/TermosDeUso";
 import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import ThankYou from "./pages/ThankYou";
+import StatusPage from "./pages/StatusPage";
 // Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
@@ -83,6 +84,7 @@ const App = () => (
               <Route path="/obrigado" element={<ThankYou />} />
               <Route path="/termos-de-uso" element={<TermosDeUso />} />
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
+              <Route path="/status" element={<StatusPage />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
               {/* Public Member Area (standalone, Netflix-style) */}
