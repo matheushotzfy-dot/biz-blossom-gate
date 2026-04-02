@@ -126,7 +126,7 @@ const App = () => (
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
-                <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
+                
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
                 {/* <Route path="/otimizacao" element={<VendasHub />} /> */}
