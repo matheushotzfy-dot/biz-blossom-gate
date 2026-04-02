@@ -362,7 +362,7 @@ export default function CheckoutBuilder() {
               : "bg-muted/10 border-transparent"
           )}
         >
-          <Icon className={cn("h-4 w-4 transition-colors duration-300", checked ? (iconColor ? `text-${iconColor}` : "text-primary") : "text-muted-foreground/30")} />
+          <Icon className={cn("h-4 w-4 transition-colors duration-300", checked ? "text-primary" : "text-muted-foreground/30")} />
         </motion.div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
