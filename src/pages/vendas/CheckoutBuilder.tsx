@@ -662,9 +662,9 @@ export default function CheckoutBuilder() {
                   {/* Payment method summary */}
                   <div className="grid grid-cols-3 gap-2 mb-1">
                     {[
-                      { enabled: pixEnabled, icon: QrCode, label: "PIX", color: "emerald" },
-                      { enabled: boletoEnabled, icon: FileText, label: "Boleto", color: "amber" },
-                      { enabled: creditCardEnabled, icon: CreditCard, label: "Cartão", color: "blue" },
+                      { enabled: pixEnabled, icon: QrCode, label: "PIX", activeClasses: "border-emerald-500/20 bg-emerald-500/[0.06]", iconActive: "text-emerald-400" },
+                      { enabled: boletoEnabled, icon: FileText, label: "Boleto", activeClasses: "border-amber-500/20 bg-amber-500/[0.06]", iconActive: "text-amber-400" },
+                      { enabled: creditCardEnabled, icon: CreditCard, label: "Cartão", activeClasses: "border-blue-500/20 bg-blue-500/[0.06]", iconActive: "text-blue-400" },
                     ].map(pm => (
                       <motion.div
                         key={pm.label}
@@ -672,11 +672,11 @@ export default function CheckoutBuilder() {
                         className={cn(
                           "rounded-xl p-3 text-center border transition-all duration-300",
                           pm.enabled
-                            ? `border-${pm.color}-500/20 bg-${pm.color}-500/[0.06]`
+                            ? pm.activeClasses
                             : "border-border/10 bg-card/10 opacity-40"
                         )}
                       >
-                        <pm.icon className={cn("h-5 w-5 mx-auto mb-1", pm.enabled ? `text-${pm.color}-400` : "text-muted-foreground/20")} />
+                        <pm.icon className={cn("h-5 w-5 mx-auto mb-1", pm.enabled ? pm.iconActive : "text-muted-foreground/20")} />
                         <p className="text-[9px] font-black uppercase tracking-wider">{pm.label}</p>
                         <p className={cn("text-[8px] mt-0.5 font-bold", pm.enabled ? "text-success" : "text-muted-foreground/20")}>{pm.enabled ? "Ativo" : "Inativo"}</p>
                       </motion.div>
