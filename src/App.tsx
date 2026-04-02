@@ -105,6 +105,7 @@ const App = () => (
               {/* Standalone full-screen pages (outside dashboard layout) */}
               <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
               <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
+              <Route path="/vendas/produtos/:productId/checkout-builder" element={<RequireAuth><CheckoutBuilder /></RequireAuth>} />
 
               {/* User Dashboard */}
               <Route
