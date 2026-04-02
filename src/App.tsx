@@ -105,6 +105,7 @@ const App = () => (
               {/* Standalone full-screen pages (outside dashboard layout) */}
               <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
               <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
+              <Route path="/vendas/produtos/:productId/checkout-builder" element={<RequireAuth><CheckoutBuilder /></RequireAuth>} />
 
               {/* User Dashboard */}
               <Route
@@ -125,7 +126,7 @@ const App = () => (
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
-                <Route path="/vendas/produtos/:productId/checkout-builder" element={<CheckoutBuilder />} />
+                
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
                 {/* <Route path="/otimizacao" element={<VendasHub />} /> */}
