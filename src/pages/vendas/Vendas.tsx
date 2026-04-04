@@ -550,16 +550,28 @@ export default function Vendas() {
     const dailyNetArr = Object.values(dailyMap).reverse();
     const dailyGrossArr: number[] = [];
     const dailyCountArr: number[] = [];
+    const dailyAvgTicketArr: number[] = [];
+    const dailyApprovalRateArr: number[] = [];
     const dailyCountMap: Record<string, number> = {};
     const dailyGrossMap: Record<string, number> = {};
-    for (const t of current.approved) {
+    const dailyAttemptMap: Record<string, number> = {};
+    for (const t of dateFiltered) {
       const day = fmtDate(t.created_at);
-      dailyCountMap[day] = (dailyCountMap[day] || 0) + 1;
-      dailyGrossMap[day] = (dailyGrossMap[day] || 0) + Number(t.amount);
+      dailyAttemptMap[day] = (dailyAttemptMap[day] || 0) + 1;
+      if (t.status === "completed") {
+        dailyCountMap[day] = (dailyCountMap[day] || 0) + 1;
+        dailyGrossMap[day] = (dailyGrossMap[day] || 0) + Number(t.amount);
+      }
     }
-    Object.keys(dailyMap).reverse().forEach(day => {
-      dailyCountArr.push(dailyCountMap[day] || 0);
-      dailyGrossArr.push(dailyGrossMap[day] || 0);
+    const sparklineDays = Array.from(new Set([...Object.keys(dailyAttemptMap), ...Object.keys(dailyMap)])).reverse();
+    sparklineDays.forEach(day => {
+      const approvedCount = dailyCountMap[day] || 0;
+      const gross = dailyGrossMap[day] || 0;
+      const attempts = dailyAttemptMap[day] || 0;
+      dailyCountArr.push(approvedCount);
+      dailyGrossArr.push(gross);
+      dailyAvgTicketArr.push(approvedCount > 0 ? gross / approvedCount : 0);
+      dailyApprovalRateArr.push(attempts > 0 ? (approvedCount / attempts) * 100 : 0);
     });
 
     // Hourly
@@ -567,7 +579,7 @@ export default function Vendas() {
     current.approved.forEach(t => { hours[new Date(t.created_at).getHours()]++; });
 
     const lastSaleAt = current.approved.length > 0 ? current.approved[0].created_at : null;
-    return { current, previous, topProducts, chartData, hours, lastSaleAt, dailyNetArr, dailyGrossArr, dailyCountArr };
+    return { current, previous, topProducts, chartData, hours, lastSaleAt, dailyNetArr, dailyGrossArr, dailyCountArr, dailyAvgTicketArr, dailyApprovalRateArr };
   }, [dateFiltered, previousPeriodFiltered, products]);
 
   const filtered = useMemo(() => {
@@ -684,8 +696,10 @@ export default function Vendas() {
       label: "Faturamento bruto",
       value: hidden ? HIDE : fmt(m.totalGross),
       helper: "antes das taxas",
+      signal: "curva de receita",
       deltaCur: m.totalGross,
       deltaPrev: p.totalGross,
+      sparkline: metrics.dailyGrossArr,
       icon: <Wallet className="h-4 w-4" />,
       tone: "primary" as const,
       className: "xl:col-span-5",
@@ -694,8 +708,10 @@ export default function Vendas() {
       label: "Ticket médio",
       value: hidden ? HIDE : fmt(m.avgTicket),
       helper: "valor por pedido",
+      signal: "qualidade do ticket",
       deltaCur: m.avgTicket,
       deltaPrev: p.avgTicket,
+      sparkline: metrics.dailyAvgTicketArr,
       icon: <Receipt className="h-4 w-4" />,
       tone: "info" as const,
       className: "xl:col-span-2",
@@ -704,8 +720,10 @@ export default function Vendas() {
       label: "Conversão",
       value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
       helper: "aprovadas / total",
+      signal: "eficiência diária",
       deltaCur: m.conversion,
       deltaPrev: p.conversion,
+      sparkline: metrics.dailyApprovalRateArr,
       icon: <Target className="h-4 w-4" />,
       tone: "warning" as const,
       className: "xl:col-span-2",
@@ -714,8 +732,10 @@ export default function Vendas() {
       label: "Vendas aprovadas",
       value: hidden ? HIDE : String(m.approved.length),
       helper: `${topPaymentMethod.label} lidera`,
+      signal: `${topPaymentMethod.count} pedidos dominantes`,
       deltaCur: m.approved.length,
       deltaPrev: p.approved.length,
+      sparkline: metrics.dailyCountArr,
       icon: <CheckSquare className="h-4 w-4" />,
       tone: "success" as const,
       className: "xl:col-span-3",
@@ -834,8 +854,8 @@ export default function Vendas() {
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {commandPills.map((pill) => (
-                <div key={pill.label} className="rounded-2xl border border-border/14 bg-background/14 px-4 py-3 backdrop-blur-sm">
+              {commandPills.map((pill, index) => (
+                <motion.div key={pill.label} whileHover={{ y: -3 }} transition={{ duration: 0.2, delay: index * 0.02 }} className="rounded-2xl border border-border/14 bg-background/14 px-4 py-3 backdrop-blur-sm hover:border-primary/24 hover:bg-background/22">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-[11px] text-muted-foreground/42">{pill.label}</span>
                     <span className="text-muted-foreground/28">{pill.icon}</span>
@@ -846,7 +866,7 @@ export default function Vendas() {
                   <p className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/28" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                     {pill.helper}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -945,7 +965,13 @@ export default function Vendas() {
           }[kpi.tone];
 
           return (
-            <article key={kpi.label} className={cn("rounded-[28px] border border-border/24 bg-card/80 p-5", kpi.className)}>
+            <motion.article
+              key={kpi.label}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.18 }}
+              className={cn("group relative overflow-hidden rounded-[28px] border border-border/24 bg-card/80 p-5 transition-all hover:border-primary/24 hover:shadow-[0_16px_46px_hsl(var(--primary)/0.08)]", kpi.className)}
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/[0.07] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               <div className="mb-5 flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -955,14 +981,20 @@ export default function Vendas() {
                     {kpi.value}
                   </p>
                 </div>
-                <div className={cn("rounded-2xl border p-2.5", toneClass)}>{kpi.icon}</div>
+                <div className="flex items-center gap-3">
+                  {kpi.sparkline?.length > 1 && <Sparkline data={kpi.sparkline} className="opacity-80 transition-opacity duration-300 group-hover:opacity-100" />}
+                  <div className={cn("rounded-2xl border p-2.5", toneClass)}>{kpi.icon}</div>
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[11px] text-muted-foreground/42">{kpi.helper}</p>
+                <div>
+                  <p className="text-[11px] text-muted-foreground/42">{kpi.helper}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/26" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{kpi.signal}</p>
+                </div>
                 {!hidden && <DeltaBadge cur={kpi.deltaCur} prev={kpi.deltaPrev} />}
               </div>
-            </article>
+            </motion.article>
           );
         })}
       </section>

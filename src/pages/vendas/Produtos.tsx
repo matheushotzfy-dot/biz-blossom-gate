@@ -92,6 +92,7 @@ export default function Produtos() {
 
   const fmtPrice = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+  const checkoutThemeLabel = (theme?: string | null) => theme === "white" ? "Branco Premium" : theme === "dark" ? "Cinza Escuro" : "Cinza Suave";
 
   return (
     <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative animate-fade-in">
@@ -250,6 +251,26 @@ export default function Produtos() {
                     }
                   </button>
                 )}
+
+                <div className="rounded-2xl border border-primary/10 bg-gradient-to-r from-primary/[0.08] via-primary/[0.03] to-info/[0.05] p-3.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/75">Checkout Builder</p>
+                      <p className="mt-1 text-[13px] font-display font-black text-foreground">Refine visual, tema e conversão</p>
+                      <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-card/70 px-2.5 py-1 text-[10px] font-bold text-muted-foreground/60">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        Tema atual: {checkoutThemeLabel(p.checkout_theme)}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="gap-1.5 rounded-xl text-[11px] h-9 font-display font-black shadow-lg shadow-primary/15"
+                      onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}
+                    >
+                      <Palette className="h-3.5 w-3.5" /> Abrir
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="flex-1" />
 
