@@ -813,7 +813,7 @@ export default function Vendas() {
                     {
                       label: "Peak hour",
                       value: peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`,
-                      helper: rawPeakSales > 0 ? `${rawPeakSales} vendas` : "sem movimento`,
+                      helper: rawPeakSales > 0 ? `${rawPeakSales} vendas` : "sem movimento",
                       accent: "bg-warning",
                       text: "text-warning",
                     },
