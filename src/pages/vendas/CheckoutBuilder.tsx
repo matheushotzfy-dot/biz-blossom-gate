@@ -101,7 +101,7 @@ export default function CheckoutBuilder() {
 
   // Settings state
   const [buttonColor, setButtonColor] = useState("#10b981");
-  const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white">("gray");
+  const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">("gray");
   const [timerEnabled, setTimerEnabled] = useState(true);
   const [timerMinutes, setTimerMinutes] = useState("15");
   const [socialProof, setSocialProof] = useState(false);
@@ -170,7 +170,7 @@ export default function CheckoutBuilder() {
         if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
         setProduct(data);
         setButtonColor(data.checkout_button_color || "#10b981");
-        setCheckoutTheme((data as any).checkout_theme === "white" ? "white" : "gray");
+        setCheckoutTheme((data as any).checkout_theme === "white" ? "white" : (data as any).checkout_theme === "dark" ? "dark" : "gray");
         setTimerEnabled(data.checkout_timer_enabled ?? true);
         setTimerMinutes(String(data.checkout_timer_minutes ?? 15));
         setSocialProof(data.checkout_social_proof ?? false);
@@ -269,6 +269,7 @@ export default function CheckoutBuilder() {
 
   const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
   const checkoutUrl = product?.checkout_url ? `${window.location.origin}/pay/${product.checkout_url.split("/").pop()}` : "";
+  const themeLabel = checkoutTheme === "white" ? "Branco Premium" : checkoutTheme === "dark" ? "Cinza Escuro" : "Cinza Suave";
 
   // Tab change counts for indicators
   const getTabFeatureCount = (tabId: TabId): number => {
@@ -497,10 +498,11 @@ export default function CheckoutBuilder() {
                   {/* Theme Selector — Interactive cards */}
                   <div className="rounded-2xl border border-border/10 bg-card/15 p-4 space-y-3">
                     <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 block">Tema Visual</Label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-3">
                       {[
                         { key: "gray" as const, name: "Cinza Suave", desc: "Neutro e elegante", gradient: "from-gray-200 to-gray-300", borderColor: "border-gray-300" },
                         { key: "white" as const, name: "Branco Premium", desc: "Limpo com acentos", gradient: "from-white to-gray-50", borderColor: "border-gray-200" },
+                        { key: "dark" as const, name: "Cinza Escuro", desc: "Impacto premium", gradient: "from-[hsl(220_16%_18%)] to-[hsl(220_18%_10%)]", borderColor: "border-[hsl(220_12%_26%)]" },
                       ].map(theme => (
                         <motion.button
                           key={theme.key}
@@ -534,6 +536,9 @@ export default function CheckoutBuilder() {
                                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                                 className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent"
                               />
+                            )}
+                            {theme.key === "dark" && (
+                              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.18),transparent_45%)]" />
                             )}
                             <div className="absolute bottom-0 left-0 right-0 h-2.5 rounded-b-xl" style={{ backgroundColor: buttonColor + "25" }} />
                           </div>
@@ -903,6 +908,10 @@ export default function CheckoutBuilder() {
                 <span className="text-[8px] text-success font-bold">Atualização em tempo real</span>
               </div>
             </div>
+            <div className="rounded-xl border border-border/10 bg-card/60 px-3 py-1.5">
+              <p className="text-[8px] font-black uppercase tracking-[0.22em] text-muted-foreground/25">Tema</p>
+              <p className="mt-1 text-[10px] font-display font-black text-foreground">{themeLabel}</p>
+            </div>
           </div>
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/8 border border-border/8">
             {[
@@ -970,9 +979,9 @@ export default function CheckoutBuilder() {
             </div>
 
             {/* Actual preview content */}
-            <div className={cn(
+            <div data-preview-theme={checkoutTheme} className={cn(
               "rounded-b-2xl border border-border/15 shadow-2xl shadow-black/8 overflow-hidden",
-              checkoutTheme === "white" ? "bg-[#fafbfc]" : "bg-[#f0f1f3]"
+              checkoutTheme === "white" ? "bg-[#fafbfc]" : checkoutTheme === "dark" ? "bg-[hsl(220_18%_11%)]" : "bg-[#f0f1f3]"
             )}>
               {/* Preview: Banner */}
               {(previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview) && (
@@ -1201,6 +1210,30 @@ export default function CheckoutBuilder() {
           </motion.div>
         </div>
       </main>
+      <style>{`
+        [data-preview-theme="dark"] .bg-white,
+        [data-preview-theme="dark"] .bg-gray-50 {
+          background-color: hsl(220 16% 14%) !important;
+        }
+        [data-preview-theme="dark"] .bg-gray-100 {
+          background-color: hsl(220 15% 18%) !important;
+        }
+        [data-preview-theme="dark"] .border-gray-100,
+        [data-preview-theme="dark"] .border-gray-200 {
+          border-color: hsl(220 12% 24%) !important;
+        }
+        [data-preview-theme="dark"] .text-gray-900,
+        [data-preview-theme="dark"] .text-gray-800,
+        [data-preview-theme="dark"] .text-gray-700,
+        [data-preview-theme="dark"] .text-gray-600 {
+          color: hsl(210 20% 96%) !important;
+        }
+        [data-preview-theme="dark"] .text-gray-500,
+        [data-preview-theme="dark"] .text-gray-400,
+        [data-preview-theme="dark"] .text-gray-300 {
+          color: hsl(215 10% 66%) !important;
+        }
+      `}</style>
     </div>
   );
 }
@@ -1210,7 +1243,7 @@ function PreviewField({ label, theme }: { label: string; theme?: string }) {
   return (
     <div>
       <p className="text-[9px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{label}</p>
-      <div className={cn("h-10 rounded-xl border", theme === "white" ? "bg-white border-gray-200" : "bg-white/60 border-gray-200")} />
+      <div className={cn("h-10 rounded-xl border", theme === "white" ? "bg-white border-gray-200" : theme === "dark" ? "bg-[hsl(220_15%_16%)] border-[hsl(220_12%_24%)]" : "bg-white/60 border-gray-200")} />
     </div>
   );
 }

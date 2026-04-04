@@ -101,8 +101,8 @@ function LiveViewers({ color }: { color: string }) {
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
         <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: color }} />
       </span>
-      <span className="text-[11px] font-semibold text-gray-400">
-        <strong className="text-gray-700">{count}</strong> pessoas vendo agora
+      <span className="text-[11px] font-semibold text-[hsl(var(--checkout-text-muted))]">
+        <strong className="text-[hsl(var(--checkout-text))]">{count}</strong> pessoas vendo agora
       </span>
     </div>
   );
@@ -131,13 +131,13 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
   if (!visible) return null;
   return (
     <div className="fixed bottom-4 left-4 z-50 animate-slide-in-left max-w-[320px]">
-      <div className="bg-white border border-gray-200 rounded-2xl p-3.5 shadow-xl shadow-black/10 flex items-center gap-3">
+      <div className="rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] p-3.5 shadow-xl shadow-black/10 flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + "20" }}>
           <Check className="h-5 w-5" style={{ color }} />
         </div>
         <div className="min-w-0">
-          <p className="text-[12px] font-bold text-white truncate">{buyer.name} de {buyer.city}</p>
-          <p className="text-[10px] text-gray-400">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
+          <p className="text-[12px] font-bold text-[hsl(var(--checkout-text))] truncate">{buyer.name} de {buyer.city}</p>
+          <p className="text-[10px] text-[hsl(var(--checkout-text-muted))]">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
         </div>
       </div>
     </div>
@@ -154,7 +154,7 @@ function StepIndicator({ current, total, color }: { current: number; total: numb
         const isDone = step < current;
         return (
           <div key={step} className="flex-1 flex items-center gap-1">
-            <div className="flex-1 h-1 rounded-full overflow-hidden bg-gray-100">
+            <div className="flex-1 h-1 rounded-full overflow-hidden bg-[hsl(var(--checkout-border))]">
               <div
                 className="h-full rounded-full transition-all duration-700 ease-out"
                 style={{
@@ -465,8 +465,58 @@ export default function PublicCheckout() {
   const bumpsTotal = orderBumps.filter(b => selectedBumps.has(b.id)).reduce((s, b) => s + Number(b.bump_product.price), 0);
   const totalPrice = price + bumpsTotal;
   const btnColor = product.checkout_button_color || "#10b981";
-  const theme = product.checkout_theme || "gray";
-  const isWhite = theme === "white";
+  const themeMode = product.checkout_theme === "white" ? "white" : product.checkout_theme === "dark" ? "dark" : "gray";
+  const isWhite = themeMode === "white";
+  const isDark = themeMode === "dark";
+  const checkoutThemeStyle = {
+    "--btn-color": btnColor,
+    "--checkout-bg": isDark ? "220 18% 11%" : isWhite ? "210 20% 98%" : "210 16% 94%",
+    "--checkout-bg-elevated": isDark ? "220 16% 14%" : "0 0% 100%",
+    "--checkout-bg-soft": isDark ? "220 15% 18%" : isWhite ? "210 20% 96%" : "210 18% 97%",
+    "--checkout-border": isDark ? "220 12% 24%" : isWhite ? "215 18% 88%" : "215 16% 84%",
+    "--checkout-text": isDark ? "210 20% 96%" : "220 24% 14%",
+    "--checkout-text-muted": isDark ? "215 12% 68%" : "220 10% 46%",
+  } as React.CSSProperties;
+  const checkoutRuntimeStyles = (
+    <style>{`
+      @keyframes slide-in-left {
+        from { transform: translateX(-120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      .animate-slide-in-left { animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+      @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      .animate-fade-in { animation: fade-in 0.6s ease-out; }
+      [data-checkout-theme="dark"] .bg-white,
+      [data-checkout-theme="dark"] .bg-gray-50 {
+        background-color: hsl(var(--checkout-bg-elevated)) !important;
+      }
+      [data-checkout-theme="dark"] .bg-gray-100 {
+        background-color: hsl(var(--checkout-bg-soft)) !important;
+      }
+      [data-checkout-theme="dark"] .border-gray-100,
+      [data-checkout-theme="dark"] .border-gray-200 {
+        border-color: hsl(var(--checkout-border)) !important;
+      }
+      [data-checkout-theme="dark"] .text-gray-900,
+      [data-checkout-theme="dark"] .text-gray-800,
+      [data-checkout-theme="dark"] .text-gray-700,
+      [data-checkout-theme="dark"] .text-gray-600 {
+        color: hsl(var(--checkout-text)) !important;
+      }
+      [data-checkout-theme="dark"] .text-gray-500,
+      [data-checkout-theme="dark"] .text-gray-400,
+      [data-checkout-theme="dark"] .text-gray-300 {
+        color: hsl(var(--checkout-text-muted)) !important;
+      }
+      [data-checkout-theme="dark"] input::placeholder {
+        color: hsl(215 12% 48%) !important;
+      }
+      [data-checkout-theme="dark"] select option {
+        background: hsl(var(--checkout-bg-elevated));
+        color: hsl(var(--checkout-text));
+      }
+    `}</style>
+  );
   const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
   const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
@@ -484,7 +534,7 @@ export default function PublicCheckout() {
     // Redirect to thank you page after a brief celebration
     const txParam = transactionId ? `?tx=${transactionId}` : "";
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 text-white">
+      <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-gray-50 text-gray-900"}`}>
         <div className="text-center animate-fade-in max-w-md w-full">
           {/* Confetti-like effect */}
           <div className="relative mx-auto mb-8 w-28 h-28">
@@ -517,6 +567,7 @@ export default function PublicCheckout() {
             Ver detalhes da compra <ArrowRight className="h-4 w-4" />
           </a>
         </div>
+        {checkoutRuntimeStyles}
       </div>
     );
   }
@@ -525,7 +576,7 @@ export default function PublicCheckout() {
   /* ═══ TELA: FALHA ══════════════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "failed") return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 text-white">
+    <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-gray-50 text-gray-900"}`}>
       <div className="text-center animate-fade-in max-w-md w-full">
         <div className="relative mx-auto mb-8 w-24 h-24">
           <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl animate-pulse" />
@@ -539,6 +590,7 @@ export default function PublicCheckout() {
           <RefreshCw className="h-4 w-4" /> Tentar novamente
         </Button>
       </div>
+      {checkoutRuntimeStyles}
     </div>
   );
 
@@ -546,7 +598,7 @@ export default function PublicCheckout() {
   /* ═══ TELA: PENDENTE (PIX/BOLETO) ═════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "pending") return (
-    <div className="min-h-screen bg-gray-50 text-white">
+    <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-gray-50 text-gray-900"}`}>
       <div className="max-w-lg mx-auto px-4 py-8 md:py-14">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -634,6 +686,7 @@ export default function PublicCheckout() {
           </button>
         </div>
       </div>
+      {checkoutRuntimeStyles}
     </div>
   );
 
@@ -641,14 +694,14 @@ export default function PublicCheckout() {
   /* ═══ FORMULÁRIO PRINCIPAL ═════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
 
-  const inputClass = `mt-1.5 h-12 rounded-xl border text-gray-900 placeholder:text-gray-300 focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium ${isWhite ? "bg-white border-gray-200" : "bg-gray-100/80 border-gray-200"}`;
-  const sectionClass = `rounded-2xl border bg-white overflow-hidden shadow-sm ${isWhite ? "border-gray-100" : "border-gray-200"}`;
-  const sectionHeaderClass = "px-5 py-4 border-b border-gray-100 flex items-center gap-3";
+  const inputClass = "mt-1.5 h-12 rounded-xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-soft))] text-[hsl(var(--checkout-text))] placeholder:text-[hsl(var(--checkout-text-muted))] focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium";
+  const sectionClass = "rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] overflow-hidden shadow-sm";
+  const sectionHeaderClass = "px-5 py-4 border-b border-[hsl(var(--checkout-border))] flex items-center gap-3";
   const sectionBodyClass = "p-5 space-y-4";
-  const labelClass = "text-[11px] text-gray-400 font-semibold flex items-center gap-1.5 uppercase tracking-wider";
+  const labelClass = "text-[11px] text-[hsl(var(--checkout-text-muted))] font-semibold flex items-center gap-1.5 uppercase tracking-wider";
 
   return (
-    <div className={`min-h-screen text-gray-900 selection:bg-emerald-500/20 ${isWhite ? "bg-[#fafbfc]" : "bg-[#f0f1f3]"}`} style={{ "--btn-color": btnColor } as React.CSSProperties}>
+    <div data-checkout-theme={themeMode} className={`min-h-screen selection:bg-emerald-500/20 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : isWhite ? "bg-[hsl(210_20%_98%)] text-gray-900" : "bg-[hsl(210_16%_94%)] text-gray-900"}`} style={checkoutThemeStyle}>
 
       {/* ═══ Social Proof Toast ═══ */}
       {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
@@ -1081,16 +1134,7 @@ export default function PublicCheckout() {
         </form>
       </div>
 
-      {/* ═══ Slide-in animation ═══ */}
-      <style>{`
-        @keyframes slide-in-left {
-          from { transform: translateX(-120%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        .animate-slide-in-left { animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fade-in 0.6s ease-out; }
-      `}</style>
+      {checkoutRuntimeStyles}
     </div>
   );
 }
