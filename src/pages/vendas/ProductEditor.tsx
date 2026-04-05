@@ -571,6 +571,28 @@ export default function ProductEditor() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* Step indicator - shows current tab position */}
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card/30 border border-border/15">
+              {TABS.map((tab, i) => {
+                const isActive = activeTab === tab.key;
+                const isDone = tabCompleted(tab.key);
+                const locked = tab.key !== "geral" && tabsLocked;
+                return (
+                  <motion.div
+                    key={tab.key}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      isActive ? "w-6 bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" :
+                      isDone ? "w-2 bg-success/60" :
+                      locked ? "w-2 bg-muted-foreground/10" :
+                      "w-2 bg-muted-foreground/20"
+                    )}
+                    title={tab.label}
+                  />
+                );
+              })}
+            </div>
+
             {/* Completion badge */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card/40 border border-border/20">
               <CompletionRing percent={completionPercent} />
@@ -634,7 +656,7 @@ export default function ProductEditor() {
                 <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
                 <span className="text-[9px] font-display font-bold text-muted-foreground/30">{currentTabIdx + 1}/{TABS.length}</span>
               </div>
-              {TABS.map((tab) => {
+              {TABS.map((tab, idx) => {
                 const isActive = activeTab === tab.key;
                 const completed = tabCompleted(tab.key);
                 return (
@@ -711,6 +733,35 @@ export default function ProductEditor() {
               <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
             </motion.div>
 
+            {/* Live Product Card Preview */}
+            <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2.5 overflow-hidden">
+              <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Preview do card</p>
+              <div className="rounded-xl border border-border/25 bg-card/60 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="" className="w-full h-24 object-cover" />
+                ) : (
+                  <div className="w-full h-24 bg-gradient-to-br from-primary/5 via-transparent to-info/5 flex items-center justify-center">
+                    <Package className="h-8 w-8 text-muted-foreground/10" />
+                  </div>
+                )}
+                <div className="p-3 space-y-1.5">
+                  <p className="text-[11px] font-display font-black text-foreground truncate leading-tight">{name || "Nome do produto"}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-numbers font-black text-primary">{price ? `R$ ${Number(price).toFixed(2)}` : "R$ 0,00"}</span>
+                    <span className={cn(
+                      "text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border",
+                      status === "active" ? "text-success bg-success/10 border-success/20" : "text-muted-foreground/50 bg-muted/10 border-border/20"
+                    )}>
+                      {status === "active" ? "Ativo" : "Inativo"}
+                    </span>
+                  </div>
+                  {description && (
+                    <p className="text-[9px] text-muted-foreground/40 line-clamp-2 leading-relaxed">{description}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Quick Actions */}
             {!isNew && (
               <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2">
@@ -729,27 +780,13 @@ export default function ProductEditor() {
                 >
                   <Palette className="h-3.5 w-3.5" /> Checkout Builder
                 </button>
-                <button
-                  onClick={handleDuplicate}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
-                >
-                  <Copy className="h-3.5 w-3.5" /> Duplicar Produto
-                </button>
               </div>
             )}
-
-            {/* Keyboard shortcut hint */}
-            <div className="rounded-xl border border-border/20 bg-card/20 p-3 space-y-2">
-              <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/30">Dica</p>
-              <p className="text-[11px] text-muted-foreground/50 leading-relaxed">
-                Preencha todos os campos da aba <span className="font-bold text-foreground/60">Geral</span> para alcançar 100% de completude.
-              </p>
-            </div>
           </nav>
 
           {/* ───── Mobile Tab Scroll ───── */}
           <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/40 px-2 py-2 flex gap-1 overflow-x-auto safe-area-bottom">
-            {TABS.map((tab) => (
+            {TABS.map((tab, idx) => (
               <button
                 key={tab.key}
                 onClick={() => {
