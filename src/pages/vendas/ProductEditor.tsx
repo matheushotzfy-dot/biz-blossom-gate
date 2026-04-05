@@ -785,32 +785,34 @@ export default function ProductEditor() {
           </nav>
 
           {/* ───── Mobile Tab Scroll ───── */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/40 px-2 py-2 flex gap-1 overflow-x-auto safe-area-bottom">
-            {TABS.map((tab, idx) => (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  if (tab.key !== "geral" && tabsLocked) {
-                    toast.error("Preencha e salve a aba Geral primeiro");
-                    return;
-                  }
-                  setActiveTab(tab.key);
-                }}
-                disabled={tab.key !== "geral" && tabsLocked}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all relative",
-                  tab.key !== "geral" && tabsLocked
-                    ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
-                    : activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
-                )}
-              >
-                {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
-                {tab.label}
-                {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
-                  <div className="h-1.5 w-1.5 rounded-full bg-success absolute top-1 right-1" />
-                )}
-              </button>
-            ))}
+          <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px))] md:bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/30 shadow-[0_-2px_12px_hsl(var(--foreground)/0.05)]">
+            <div className="px-2 py-1.5 flex gap-1 overflow-x-auto scrollbar-none">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    if (tab.key !== "geral" && tabsLocked) {
+                      toast.error("Preencha e salve a aba Geral primeiro");
+                      return;
+                    }
+                    setActiveTab(tab.key);
+                  }}
+                  disabled={tab.key !== "geral" && tabsLocked}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-display font-bold whitespace-nowrap transition-all relative min-w-[52px]",
+                    tab.key !== "geral" && tabsLocked
+                      ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                      : activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
+                  )}
+                >
+                  {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+                  <span className="truncate max-w-[48px]">{tab.label}</span>
+                  {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
+                    <div className="h-1 w-1 rounded-full bg-success absolute top-1 right-1" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ───── Content Area ───── */}
