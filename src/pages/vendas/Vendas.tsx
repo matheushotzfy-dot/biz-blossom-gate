@@ -1202,9 +1202,11 @@ export default function Vendas() {
                       active ? "bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]" : intensity > 0.5 ? "bg-primary/35" : intensity > 0 ? "bg-primary/12 group-hover:bg-primary/25" : "bg-muted/4"
                     )}
                   />
-                  <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <div className="rounded-lg bg-popover/95 backdrop-blur-lg border border-border/15 px-2.5 py-1 text-[9px] font-display font-bold text-foreground shadow-xl whitespace-nowrap">
-                      {String(hour).padStart(2, "0")}h · {count} vendas
+                  <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <div className="rounded-lg bg-popover border border-border/20 px-3 py-1.5 text-[10px] font-display font-bold text-foreground shadow-2xl whitespace-nowrap">
+                      <span className="font-mono text-primary">{String(hour).padStart(2, "0")}h</span>
+                      <span className="text-muted-foreground/40 mx-1.5">·</span>
+                      <span>{count} {count === 1 ? "venda" : "vendas"}</span>
                     </div>
                   </div>
                 </div>
