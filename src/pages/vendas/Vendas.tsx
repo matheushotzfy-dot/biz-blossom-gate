@@ -152,19 +152,23 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 }
 
 /* ─── Glow Card ─── */
-function GlowCard({ children, className, glowColor = "primary", delay = 0 }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number }) {
+function GlowCard({ children, className, glowColor = "primary", delay = 0, animated = false }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number; animated?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-2xl border border-border/8 bg-card/40 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-border/15 hover:shadow-lg",
+        "relative group rounded-2xl glass-panel overflow-hidden transition-all duration-500 hover:shadow-xl",
+        animated && "animated-border",
         className
       )}
     >
-      {/* Ambient glow */}
-      <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl pointer-events-none", `bg-${glowColor}/8`)} />
+      {/* Multi-layer ambient glow */}
+      <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[60px] pointer-events-none", `bg-${glowColor}/10`)} />
+      <div className={cn("absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-1000 blur-[40px] pointer-events-none", `bg-${glowColor}/5`)} />
+      {/* Shimmer line on top */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent" />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
