@@ -573,30 +573,38 @@ export default function ProductEditor() {
             <div className="flex items-center gap-2">
               {!isNew && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-xs font-display font-bold rounded-xl h-9">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-xs font-display font-bold rounded-xl h-9 hover:bg-card/50">
                     <Copy className="h-3.5 w-3.5" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold rounded-xl h-9">
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-xs font-display font-bold rounded-xl h-9">
                     <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Excluir</span>
                   </Button>
                 </>
               )}
-              <Button onClick={handleSave} disabled={saving} className={cn(
-                "gap-2 rounded-xl text-sm font-display font-black h-10 px-6 shadow-lg shadow-primary/20 transition-all duration-300",
-                saved && "bg-success shadow-success/20 hover:bg-success"
-              )}>
-                <AnimatePresence mode="wait">
-                  {saved ? (
-                    <motion.div key="saved" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
-                      <Check className="h-4 w-4" /> Salvo!
-                    </motion.div>
-                  ) : (
-                    <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-2">
-                      <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : isNew ? "Criar Produto" : "Salvar"}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                <Button onClick={handleSave} disabled={saving} className={cn(
+                  "gap-2 rounded-xl text-sm font-display font-black h-10 px-7 shadow-lg transition-all duration-300 relative overflow-hidden",
+                  saved
+                    ? "bg-success shadow-success/25 hover:bg-success"
+                    : "shadow-primary/25 hover:shadow-primary/35"
+                )}>
+                  <AnimatePresence mode="wait">
+                    {saved ? (
+                      <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-2">
+                        <Check className="h-4 w-4" /> Salvo!
+                      </motion.div>
+                    ) : saving ? (
+                      <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Salvando...
+                      </motion.div>
+                    ) : (
+                      <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+                        <Save className="h-3.5 w-3.5" /> {isNew ? "Criar Produto" : "Salvar"}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Button>
+              </motion.div>
             </div>
           </div>
         </div>
