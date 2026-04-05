@@ -894,7 +894,7 @@ export default function CheckoutBuilder() {
       </aside>
 
       {/* ─── RIGHT: Live Preview ─── */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-[60vh] lg:min-h-screen">
         {/* Preview header — Enhanced */}
         <div className="h-14 border-b border-border/10 bg-card/5 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-10">
           <div className="flex items-center gap-3">
