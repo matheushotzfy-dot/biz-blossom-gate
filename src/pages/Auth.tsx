@@ -439,8 +439,8 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* ─── RIGHT: Features (Desktop — fixed, no scroll) ─── */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-10 xl:p-12 relative overflow-hidden border-l border-border/8">
+      {/* ─── RIGHT: Features (Desktop — independent scroll) ─── */}
+      <div className="hidden lg:flex flex-1 items-center justify-center p-10 xl:p-12 relative overflow-y-auto overflow-x-hidden border-l border-border/8">
         <BgEffects side="right" />
 
         {/* Subtle scan-lines */}
