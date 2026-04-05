@@ -315,43 +315,20 @@ export default function Saques() {
             </div>
           </div>
 
-          {/* SALDO DISPONÍVEL */}
+          {/* MAIN FOCAL — Saldo Disponível */}
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="mb-8">
-            <div className="rounded-2xl glass-panel p-6 relative overflow-hidden border border-primary/10">
-              <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary/8 rounded-full blur-[80px] pointer-events-none" />
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-8 w-8 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
-                      <Wallet className="h-4 w-4 text-primary" />
-                    </div>
-                    <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40">Saldo Disponível para Saque</p>
-                  </div>
-                  <span className={cn("text-4xl sm:text-5xl font-heading tabular-nums leading-none", availableBalance > 0 ? "text-primary [text-shadow:0_0_60px_hsl(var(--primary)/0.3)]" : "text-muted-foreground/40")}>
-                    {hidden ? "R$ •••••••" : fmt(availableBalance)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
-                    <Shield className="h-3 w-3 text-primary/50" /> Atualizado em tempo real
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* MAIN FOCAL — Total Sacado */}
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }} className="mb-8">
-            <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40 mb-3">Total Sacado no Período</p>
+            <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40 mb-3">Saldo Disponível para Saque</p>
             <div className="flex items-end gap-4 mb-4">
-              <span className="text-5xl sm:text-6xl lg:text-7xl font-heading tabular-nums text-foreground leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.2)]">
-                {hidden ? "R$ •••••••" : fmt(m.totalApproved)}
+              <span className={cn("text-5xl sm:text-6xl lg:text-7xl font-heading tabular-nums leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.2)]", availableBalance > 0 ? "text-primary" : "text-muted-foreground/40")}>
+                {hidden ? "R$ •••••••" : fmt(availableBalance)}
               </span>
-              {!hidden && m.prevTotalApproved > 0 && <DeltaBadge cur={m.totalApproved} prev={m.prevTotalApproved} />}
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-4">
               <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
-                <CheckCircle2 className="h-3 w-3 text-success" /> {m.approved.length} aprovados
+                <Shield className="h-3 w-3 text-primary/50" /> Atualizado em tempo real
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
+                <CheckCircle2 className="h-3 w-3 text-success" /> {m.approved.length} aprovados · {hidden ? HIDE : fmtCompact(m.totalApproved)} sacado
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
                 <Banknote className="h-3 w-3" /> solicitado {hidden ? HIDE : fmtCompact(m.totalRequested)}
