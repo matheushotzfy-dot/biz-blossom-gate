@@ -33,13 +33,13 @@ const fmtCompact = (v: number) => {
 };
 const HIDE = "•••";
 
-const PERIODS = [
+const PERIODS: { label: string; days: number }[] = [
   { label: "7D", days: 7 },
   { label: "15D", days: 15 },
   { label: "30D", days: 30 },
   { label: "90D", days: 90 },
   { label: "Tudo", days: 9999 },
-] as const;
+];
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
