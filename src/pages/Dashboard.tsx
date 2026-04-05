@@ -564,30 +564,52 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-8 rounded-2xl glass-panel p-4 md:p-6 min-h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-              <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
-              <Tooltip
-                contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "12px", fontSize: "13px", color: "var(--tooltip-text)", padding: "10px 14px", boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}
-                formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-                cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
-              />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
-            </AreaChart>
-          </ResponsiveContainer>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-8">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-8 rounded-2xl glass-panel overflow-hidden">
+          <div className="flex items-center justify-between px-5 md:px-6 pt-5 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Evolução de Receita</p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/5 px-2.5 py-1">
+              <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" /><span className="relative h-1.5 w-1.5 rounded-full bg-success" /></span>
+              <span className="text-[9px] font-heading uppercase tracking-wider text-success">Live</span>
+            </div>
+          </div>
+          <div className="px-4 md:px-5 pb-5 min-h-[260px]">
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
+                <Tooltip
+                  contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "12px", fontSize: "13px", color: "var(--tooltip-text)", padding: "10px 14px", boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}
+                  formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
+                />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl glass-panel p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3.5">
+              <div className="h-7 w-7 rounded-lg bg-info/8 border border-info/10 flex items-center justify-center">
+                <Sparkles className="h-3.5 w-3.5 text-info" />
+              </div>
+              <p className="text-[10px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Saúde Operacional</p>
+            </div>
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -595,7 +617,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {[
               { icon: Zap, label: "PIX", value: privacy.hidden ? CENSORED : fmt(pixRevenue), helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
               { icon: CreditCard, label: "CARTÃO", value: privacy.hidden ? CENSORED : fmt(cardRevenue), helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
@@ -605,16 +627,16 @@ export default function Dashboard() {
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.06 }}
                 className="group relative rounded-2xl glass-panel p-3.5 md:p-4 overflow-hidden card-premium flex flex-col justify-between min-h-[130px]">
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
-                <div className="pl-1.5 flex flex-col h-full">
+                <div className="pl-2 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-auto">
-                    <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground/30">{item.label}</span>
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center ring-1 ring-border/20 transition-all group-hover:scale-110", `bg-${item.color}/8 text-${item.color}/50`)}>
+                    <span className="text-[9px] font-heading uppercase tracking-[0.16em] text-muted-foreground/30">{item.label}</span>
+                    <div className={cn("h-8 w-8 rounded-xl flex items-center justify-center ring-1 ring-border/15 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${item.color}/8 text-${item.color}/50 group-hover:shadow-${item.color}/10`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.helper}</p>
+                    <p className="text-xl md:text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono tabular-nums">{item.helper}</p>
                   </div>
                 </div>
               </motion.div>
