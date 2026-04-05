@@ -1034,7 +1034,7 @@ export default function Vendas() {
             <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
               <PieChart className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-xs font-display font-bold text-foreground/70 uppercase tracking-[0.12em]">Payment Intelligence</h3>
+            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Payment Intelligence</h3>
           </div>
           <div className="space-y-5">
             {paymentMix.map((pm, idx) => {
@@ -1080,7 +1080,7 @@ export default function Vendas() {
           <div className="mt-7 pt-6 border-t border-border/6">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="h-3.5 w-3.5 text-muted-foreground/30" />
-              <h4 className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Saúde Operacional</h4>
+              <h4 className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/30">Saúde Operacional</h4>
             </div>
             <div className="space-y-3">
               {healthItems.map(h => {
@@ -1115,7 +1115,7 @@ export default function Vendas() {
             <div className="h-8 w-8 rounded-xl bg-warning/8 border border-warning/10 flex items-center justify-center">
               <Award className="h-4 w-4 text-warning" />
             </div>
-            <h3 className="text-xs font-display font-bold text-foreground/70 uppercase tracking-[0.12em]">Top Produtos</h3>
+            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Top Produtos</h3>
           </div>
           {metrics.topProducts.length === 0 ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center text-center">
@@ -1171,7 +1171,7 @@ export default function Vendas() {
               <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
                 <Clock className="h-4 w-4 text-info" />
               </div>
-              <h3 className="text-xs font-display font-bold text-foreground/70 uppercase tracking-[0.12em]">Atividade Intraday</h3>
+              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Atividade Intraday</h3>
             </div>
             <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
           </div>
@@ -1236,7 +1236,7 @@ export default function Vendas() {
             <div className="h-8 w-8 rounded-xl bg-card/50 border border-border/10 flex items-center justify-center">
               <Layers className="h-4 w-4 text-muted-foreground/40" />
             </div>
-            <h2 className="text-sm font-display font-bold text-foreground/70 uppercase tracking-[0.1em]">Transações</h2>
+            <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.1em]">Transações</h2>
           </div>
           <div className="relative w-full xl:w-80">
             <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/15" />
