@@ -646,7 +646,7 @@ export default function ProductEditor() {
 
       {/* ───── Main Area ───── */}
       <div className="flex-1 min-h-0 flex">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex gap-7 py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6">
 
           {/* ───── Premium Sidebar ───── */}
           <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
