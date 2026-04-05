@@ -705,6 +705,6 @@ export default function Webhooks() {
           </div>
         )}
       </div>
-    </PageShell>
+    </div>
   );
 }

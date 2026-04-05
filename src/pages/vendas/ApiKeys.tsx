@@ -417,6 +417,6 @@ export default function ApiKeys() {
           </Button>
         </DialogContent>
       </Dialog>
-    </PageShell>
+    </div>
   );
 }
