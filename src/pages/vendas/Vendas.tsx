@@ -916,7 +916,7 @@ export default function Vendas() {
             </div>
           </motion.div>
 
-          {/* Executive Strip — Glassmorphism cards */}
+          {/* Executive Strip — Premium glassmorphism cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
@@ -951,26 +951,26 @@ export default function Vendas() {
             ].map((item, idx) => (
               <motion.div
                 key={item.label}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 + idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl border border-border/8 bg-card/30 backdrop-blur-xl p-5 overflow-hidden hover:border-border/15 transition-all duration-300 hover:shadow-lg"
+                transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden hover:shadow-xl transition-all duration-500"
               >
-                <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl pointer-events-none", `bg-${item.color}/8`)} />
+                <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div>
-                    <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/25 mb-2">{item.label}</p>
-                    <p className={cn("text-2xl font-display font-black tabular-nums tracking-tight leading-none", `text-${item.color === "primary" ? "foreground" : item.color}`)}>{item.value}</p>
-                    <div className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.sub}</div>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
+                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", `text-${item.color === "primary" ? "foreground" : item.color}`)}>{item.value}</p>
+                    <div className="mt-2 text-[10px] text-muted-foreground/25 font-mono">{item.sub}</div>
                   </div>
                   {item.ring ? (
-                    <div className="relative">
-                      <ProgressRing value={item.ring.value} max={item.ring.max} size={48} strokeWidth={3} color={item.color} />
+                    <div className="relative floating">
+                      <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.color} />
                       <item.icon className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4", `text-${item.color}/50`)} />
                     </div>
                   ) : (
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${item.color}/6 border-${item.color}/10 text-${item.color}/50`)}>
-                      <item.icon className="h-4.5 w-4.5" />
+                    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
+                      <item.icon className="h-5 w-5" />
                     </div>
                   )}
                 </div>
