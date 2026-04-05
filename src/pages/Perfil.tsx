@@ -1,7 +1,7 @@
 /**
  * Perfil — Ultra-Premium Profile Page
  * @module Perfil
- * @version 4.0.0 — Fintech Premium Redesign
+ * @version 5.0.0 — Refined Premium Polish
  */
 
 import { useEffect, useState, useRef } from "react";
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -96,9 +96,11 @@ function StatPill({ icon: Icon, label, value, tone = "primary", delay = 0 }: {
       )}
     >
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", c.accent)} />
+      {/* Hover glow */}
+      <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `${c.bg}`)} />
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-3">
-          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", c.bg, c.ring)}>
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 transition-transform duration-300 group-hover:scale-110", c.bg, c.ring)}>
             <Icon className={cn("h-4 w-4", c.text)} />
           </div>
           <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">{label}</span>
@@ -119,6 +121,77 @@ function LivePulse() {
       </div>
       <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Online</span>
     </div>
+  );
+}
+
+/* ─── Copy Button ─── */
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button onClick={handleCopy} className="h-6 w-6 rounded-lg bg-muted/10 hover:bg-primary/10 flex items-center justify-center transition-all duration-200 group/copy">
+      {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground/30 group-hover/copy:text-primary transition-colors" />}
+    </button>
+  );
+}
+
+/* ─── Info Row ─── */
+function InfoRow({ icon: Icon, label, value, color = "info", delay = 0, copyable }: {
+  icon: any; label: string; value: string; color?: string; delay?: number; copyable?: boolean;
+}) {
+  const tones: Record<string, { iconBg: string; iconRing: string; iconColor: string }> = {
+    success: { iconBg: "bg-success/5", iconRing: "ring-success/8", iconColor: "text-success/60" },
+    info: { iconBg: "bg-info/5", iconRing: "ring-info/8", iconColor: "text-info/60" },
+    primary: { iconBg: "bg-primary/5", iconRing: "ring-primary/8", iconColor: "text-primary/60" },
+    warning: { iconBg: "bg-warning/5", iconRing: "ring-warning/8", iconColor: "text-warning/60" },
+  };
+  const t = tones[color] || tones.info;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, ease }}
+      className="flex items-center justify-between py-3 border-b border-border/8 last:border-0 group/item hover:bg-muted/5 rounded-lg px-2 -mx-2 transition-colors"
+    >
+      <div className="flex items-center gap-2.5">
+        <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center ring-1", t.iconBg, t.iconRing)}>
+          <Icon className={cn("h-3 w-3", t.iconColor)} />
+        </div>
+        <span className="text-[11px] text-muted-foreground/50 font-medium">{label}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className={cn(
+          "text-[11px] font-display font-semibold truncate max-w-[140px]",
+          value === "Ilimitado" ? "text-success font-bold" : "text-foreground/60"
+        )}>
+          {value}
+        </span>
+        {copyable && <CopyButton text={value} />}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Section Card ─── */
+function SectionCard({ children, accent, glow, delay = 0 }: {
+  children: React.ReactNode; accent: string; glow: string; delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, ease }}
+      className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300 group"
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />
+      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glow)} />
+      <div className="relative z-10">{children}</div>
+    </motion.div>
   );
 }
 
@@ -198,6 +271,8 @@ export default function Perfil() {
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
+  const tierLabel = milestone.tier === 0 ? "Iniciante" : milestone.tier === 1 ? "Prata" : milestone.tier === 2 ? "Ouro" : milestone.tier === 3 ? "Diamante" : milestone.tier === 4 ? "Platina" : "Lendário";
+
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
       {/* Ambient */}
@@ -213,6 +288,9 @@ export default function Perfil() {
         transition={{ duration: 0.6 }}
         className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
       >
+        {/* Top accent gradient bar */}
+        <div className="h-1 bg-gradient-to-r from-primary via-info to-success" />
+
         {/* Mesh gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/3 pointer-events-none" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/3 to-transparent pointer-events-none" />
@@ -227,7 +305,14 @@ export default function Perfil() {
               </div>
               <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Meu Perfil</span>
             </div>
-            <LivePulse />
+            <div className="flex items-center gap-3">
+              {/* Tier badge */}
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 ring-1 ring-primary/10">
+                <milestone.current.icon className="h-3 w-3 text-primary" />
+                <span className="text-[10px] font-display font-bold text-primary">{tierLabel}</span>
+              </div>
+              <LivePulse />
+            </div>
           </div>
 
           {/* Avatar + Info */}
@@ -242,16 +327,16 @@ export default function Perfil() {
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
               
               {/* Glow ring */}
-              <div className="absolute -inset-1.5 rounded-[22px] bg-gradient-to-br from-primary/20 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+              <div className="absolute -inset-2 rounded-[24px] bg-gradient-to-br from-primary/25 via-info/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
               
               <div
-                className="relative h-[88px] w-[88px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-border/20 group-hover:ring-primary/30 transition-all duration-300 shadow-xl shadow-black/10 active:scale-[0.97]"
+                className="relative h-[96px] w-[96px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-border/20 group-hover:ring-primary/30 transition-all duration-300 shadow-xl shadow-black/10 active:scale-[0.97]"
                 onClick={() => fileRef.current?.click()}
               >
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-primary/15 via-primary/10 to-info/10 flex items-center justify-center">
                     <span className="text-3xl font-display font-black text-primary/60">
                       {(profile?.full_name || "U").charAt(0).toUpperCase()}
                     </span>
@@ -282,7 +367,7 @@ export default function Perfil() {
                   {accStatus.label}
                 </div>
               </div>
-              <p className="text-[12px] text-muted-foreground/40 font-medium mb-3">{profile?.email || ""}</p>
+              <p className="text-[12px] text-muted-foreground/40 font-medium mb-3 font-mono">{profile?.email || ""}</p>
               
               {/* Quick stats */}
               <div className="flex items-center gap-4 flex-wrap">
@@ -304,12 +389,15 @@ export default function Perfil() {
             </div>
 
             {/* Revenue highlight — desktop */}
-            <div className="hidden lg:block text-right shrink-0">
-              <p className="text-[9px] font-display font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mb-1">Receita Líquida</p>
+            <div className="hidden lg:flex flex-col items-end shrink-0 gap-1">
+              <p className="text-[9px] font-display font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Receita Líquida</p>
               <p className="text-3xl font-display font-black text-foreground tracking-[-0.04em] tabular-nums">
                 <AnimatedNumber value={allTimeRevenue} />
               </p>
-              <p className="text-[10px] text-muted-foreground/40 mt-1">{totalSales} vendas aprovadas</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="h-1 w-1 rounded-full bg-success" />
+                <p className="text-[10px] text-muted-foreground/40">{totalSales} vendas aprovadas</p>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -327,165 +415,102 @@ export default function Perfil() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {/* ─── Dados Pessoais ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, ease }}
-          className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300 group"
-        >
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
-                <User className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] font-display font-black text-foreground/70">Dados Pessoais</p>
-                <p className="text-[9px] text-muted-foreground/40">Informações do cadastro</p>
-              </div>
+        <SectionCard accent="bg-primary" glow="from-primary/[0.03] to-transparent" delay={0.3}>
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+              <User className="h-4 w-4 text-primary" />
             </div>
-
-            <form onSubmit={handleSave} className="space-y-3.5">
-              <div>
-                <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
-                  {profile?.full_name ? <Lock className="h-2.5 w-2.5" /> : null} Nome completo
-                </Label>
-                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30" disabled={!!profile?.full_name} />
-              </div>
-              <div>
-                <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
-                  {profile?.email ? <Lock className="h-2.5 w-2.5" /> : null} E-mail
-                </Label>
-                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20" type="email" disabled={!!profile?.email} />
-              </div>
-              <div>
-                <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
-                  {profile?.phone ? <Lock className="h-2.5 w-2.5" /> : null} Telefone
-                </Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-10 rounded-xl text-[12px] font-display font-bold shadow-lg shadow-primary/10 hover:shadow-xl hover:shadow-primary/15 transition-all active:scale-[0.985]"
-                disabled={saving}
-              >
-                {saving ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-3.5 w-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    <span>Salvando...</span>
-                  </div>
-                ) : (
-                  <span>Salvar alterações</span>
-                )}
-              </Button>
-            </form>
+            <div>
+              <p className="text-[11px] font-display font-black text-foreground/70">Dados Pessoais</p>
+              <p className="text-[9px] text-muted-foreground/40">Informações do cadastro</p>
+            </div>
           </div>
-        </motion.div>
+
+          <form onSubmit={handleSave} className="space-y-3.5">
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {profile?.full_name ? <Lock className="h-2.5 w-2.5" /> : null} Nome completo
+              </Label>
+              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30" disabled={!!profile?.full_name} />
+            </div>
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {profile?.email ? <Lock className="h-2.5 w-2.5" /> : null} E-mail
+              </Label>
+              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20" type="email" disabled={!!profile?.email} />
+            </div>
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {profile?.phone ? <Lock className="h-2.5 w-2.5" /> : null} Telefone
+              </Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
+            </div>
+            <Button
+              type="submit"
+              className="w-full h-10 rounded-xl text-[12px] font-display font-bold shadow-lg shadow-primary/10 hover:shadow-xl hover:shadow-primary/15 transition-all active:scale-[0.985]"
+              disabled={saving}
+            >
+              {saving ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-3.5 w-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  <span>Salvando...</span>
+                </div>
+              ) : (
+                <span>Salvar alterações</span>
+              )}
+            </Button>
+          </form>
+        </SectionCard>
 
         {/* ─── Limites ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, ease }}
-          className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300"
-        >
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
-          <div className="absolute inset-0 bg-gradient-to-br from-success/[0.02] to-transparent pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="h-9 w-9 rounded-xl bg-success/8 ring-1 ring-success/15 flex items-center justify-center">
-                <Wallet className="h-4 w-4 text-success" />
-              </div>
-              <div>
-                <p className="text-[11px] font-display font-black text-foreground/70">Limites Operacionais</p>
-                <p className="text-[9px] text-muted-foreground/40">Parâmetros da sua conta</p>
-              </div>
+        <SectionCard accent="bg-success" glow="from-success/[0.03] to-transparent" delay={0.35}>
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-success/8 ring-1 ring-success/15 flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-success" />
             </div>
-
-            <div className="space-y-1">
-              {[
-                { label: "Limite diário PIX", value: "Ilimitado", icon: Zap },
-                { label: "Limite diário Saque", value: "Ilimitado", icon: ArrowUp },
-                { label: "Saques simultâneos", value: "3 pendentes", icon: Wallet },
-                { label: "Chaves PIX", value: "3 máximas", icon: Fingerprint },
-                { label: "Chaves API", value: "5 máximas", icon: Globe },
-              ].map((item, idx) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + idx * 0.04, ease }}
-                  className="flex items-center justify-between py-3 border-b border-border/8 last:border-0 group/item hover:bg-muted/5 rounded-lg px-2 -mx-2 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-7 w-7 rounded-lg bg-success/5 ring-1 ring-success/8 flex items-center justify-center">
-                      <item.icon className="h-3 w-3 text-success/60" />
-                    </div>
-                    <span className="text-[11px] text-muted-foreground/50 font-medium">{item.label}</span>
-                  </div>
-                  <span className={cn(
-                    "text-[11px] font-display font-bold tabular-nums",
-                    item.value === "Ilimitado" ? "text-success" : "text-foreground/60"
-                  )}>
-                    {item.value}
-                  </span>
-                </motion.div>
-              ))}
+            <div>
+              <p className="text-[11px] font-display font-black text-foreground/70">Limites Operacionais</p>
+              <p className="text-[9px] text-muted-foreground/40">Parâmetros da sua conta</p>
             </div>
           </div>
-        </motion.div>
+
+          <div className="space-y-1">
+            {[
+              { label: "Limite diário PIX", value: "Ilimitado", icon: Zap },
+              { label: "Limite diário Saque", value: "Ilimitado", icon: ArrowUp },
+              { label: "Saques simultâneos", value: "3 pendentes", icon: Wallet },
+              { label: "Chaves PIX", value: "3 máximas", icon: Fingerprint },
+              { label: "Chaves API", value: "5 máximas", icon: Globe },
+            ].map((item, idx) => (
+              <InfoRow key={item.label} icon={item.icon} label={item.label} value={item.value} color="success" delay={0.4 + idx * 0.04} />
+            ))}
+          </div>
+        </SectionCard>
 
         {/* ─── Info da Conta ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, ease }}
-          className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300"
-        >
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
-          <div className="absolute inset-0 bg-gradient-to-br from-info/[0.02] to-transparent pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="h-9 w-9 rounded-xl bg-info/8 ring-1 ring-info/15 flex items-center justify-center">
-                <Shield className="h-4 w-4 text-info" />
-              </div>
-              <div>
-                <p className="text-[11px] font-display font-black text-foreground/70">Detalhes da Conta</p>
-                <p className="text-[9px] text-muted-foreground/40">Informações e segurança</p>
-              </div>
+        <SectionCard accent="bg-info" glow="from-info/[0.03] to-transparent" delay={0.4}>
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-info/8 ring-1 ring-info/15 flex items-center justify-center">
+              <Shield className="h-4 w-4 text-info" />
             </div>
-
-            <div className="space-y-1">
-              {[
-                { label: "Tipo de Conta", value: profile?.seller_type === "empresa" ? "Empresa" : "Pessoa Física", icon: User },
-                { label: "Documento", value: profile?.document_number ? `***${profile.document_number.slice(-4)}` : "Não informado", icon: Fingerprint },
-                { label: "Chave PIX", value: profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : "Não cadastrada", icon: Zap },
-                { label: "Membro desde", value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—", icon: Calendar },
-                { label: "Nickname", value: profile?.nickname || "Não definido", icon: Star },
-              ].map((item, idx) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.45 + idx * 0.04, ease }}
-                  className="flex items-center justify-between py-3 border-b border-border/8 last:border-0 group/item hover:bg-muted/5 rounded-lg px-2 -mx-2 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-7 w-7 rounded-lg bg-info/5 ring-1 ring-info/8 flex items-center justify-center">
-                      <item.icon className="h-3 w-3 text-info/60" />
-                    </div>
-                    <span className="text-[11px] text-muted-foreground/50 font-medium">{item.label}</span>
-                  </div>
-                  <span className="text-[11px] font-display font-semibold text-foreground/60 truncate max-w-[140px]">{item.value}</span>
-                </motion.div>
-              ))}
+            <div>
+              <p className="text-[11px] font-display font-black text-foreground/70">Detalhes da Conta</p>
+              <p className="text-[9px] text-muted-foreground/40">Informações e segurança</p>
             </div>
           </div>
-        </motion.div>
+
+          <div className="space-y-1">
+            {[
+              { label: "Tipo de Conta", value: profile?.seller_type === "empresa" ? "Empresa" : "Pessoa Física", icon: User, copyable: false },
+              { label: "Documento", value: profile?.document_number ? `***${profile.document_number.slice(-4)}` : "Não informado", icon: Fingerprint, copyable: false },
+              { label: "Chave PIX", value: profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : "Não cadastrada", icon: Zap, copyable: false },
+              { label: "Membro desde", value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—", icon: Calendar, copyable: false },
+              { label: "Nickname", value: profile?.nickname || "Não definido", icon: Star, copyable: false },
+            ].map((item, idx) => (
+              <InfoRow key={item.label} icon={item.icon} label={item.label} value={item.value} color="info" delay={0.45 + idx * 0.04} copyable={item.copyable} />
+            ))}
+          </div>
+        </SectionCard>
       </div>
 
       {/* ═══ Progresso de Faturamento ═══ */}
@@ -493,10 +518,12 @@ export default function Perfil() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.45, ease }}
-        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-7 overflow-hidden"
+        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-7 overflow-hidden group"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-warning/3 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-warning/3 pointer-events-none opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
         <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-warning" />
+        {/* Top shimmer line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
 
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
@@ -560,6 +587,7 @@ export default function Perfil() {
           {/* Milestone dots */}
           <div className="flex justify-between mt-5 px-1">
             {MILESTONES.slice(1).map((m, idx) => {
+              const MIcon = m.icon;
               const unlocked = allTimeRevenue >= m.value;
               return (
                 <motion.div
@@ -567,18 +595,20 @@ export default function Perfil() {
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 + idx * 0.08, ease }}
-                  className="flex flex-col items-center gap-1.5 group cursor-default"
+                  className="flex flex-col items-center gap-1.5 group/dot cursor-default"
                 >
-                  <div
-                    className={cn(
-                      "h-3 w-3 rounded-full ring-1 transition-all duration-500",
-                      unlocked ? "bg-primary ring-primary/20 shadow-sm shadow-primary/30" : "bg-muted/10 ring-border/10"
-                    )}
-                  />
+                  <div className={cn(
+                    "h-7 w-7 rounded-lg flex items-center justify-center ring-1 transition-all duration-500",
+                    unlocked
+                      ? "bg-primary/10 ring-primary/20 shadow-sm shadow-primary/20"
+                      : "bg-muted/5 ring-border/10"
+                  )}>
+                    <MIcon className={cn("h-3 w-3 transition-colors", unlocked ? "text-primary" : "text-muted-foreground/15")} />
+                  </div>
                   <span className={cn(
                     "text-[8px] font-display font-bold tabular-nums transition-colors",
                     unlocked ? "text-primary/60" : "text-muted-foreground/20",
-                    "group-hover:text-foreground/60"
+                    "group-hover/dot:text-foreground/60"
                   )}>
                     {m.label}
                   </span>
