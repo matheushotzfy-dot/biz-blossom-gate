@@ -774,7 +774,7 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-12 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
       >
         {/* Animated floating orbs — extended beyond bounds for smooth fade */}
         <div className="absolute -inset-16 pointer-events-none">
