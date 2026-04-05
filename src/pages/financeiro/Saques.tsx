@@ -246,8 +246,8 @@ export default function Saques() {
   /* ─── Computed metrics ─── */
   const metrics = useMemo(() => {
     const now = new Date();
-    const cutoff = selectedPeriod.days === 9999 ? new Date(0) : subDays(now, selectedPeriod.days);
-    const prevCutoff = selectedPeriod.days === 9999 ? new Date(0) : subDays(cutoff, selectedPeriod.days);
+    const cutoff = selectedPeriod.days === 9999 ? new Date(0) : selectedPeriod.days === 0 ? new Date(new Date().setHours(0, 0, 0, 0)) : subDays(now, selectedPeriod.days);
+    const prevCutoff = selectedPeriod.days === 9999 ? new Date(0) : selectedPeriod.days === 0 ? subDays(cutoff, 1) : subDays(cutoff, selectedPeriod.days);
 
     const current = withdrawals.filter(w => new Date(w.created_at) >= cutoff);
     const previous = selectedPeriod.days === 9999 ? [] : withdrawals.filter(w => { const d = new Date(w.created_at); return d >= prevCutoff && d < cutoff; });

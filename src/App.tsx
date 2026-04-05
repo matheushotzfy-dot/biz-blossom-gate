@@ -76,6 +76,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
