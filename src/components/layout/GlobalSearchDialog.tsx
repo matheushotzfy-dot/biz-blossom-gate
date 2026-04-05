@@ -130,7 +130,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 shadow-2xl shadow-primary/5 border-border/30 bg-card/98 backdrop-blur-2xl max-w-lg rounded-2xl gap-0">
+      <DialogContent className="overflow-hidden p-0 shadow-2xl shadow-primary/5 border-border/30 bg-card/98 backdrop-blur-2xl max-w-lg rounded-2xl gap-0 [&>button:last-child]:hidden">
         {/* Ambient */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none rounded-2xl" />
         <div className="absolute inset-0 opacity-[0.01] pointer-events-none" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 0.5px, transparent 0.5px)", backgroundSize: "14px 14px" }} />
@@ -146,12 +146,10 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
               placeholder="Buscar produtos, clientes, páginas..."
               className="flex-1 bg-transparent text-[13px] font-medium text-foreground placeholder:text-muted-foreground/40 outline-none"
             />
-            {query && (
-              <button onClick={() => setQuery("")} className="h-6 w-6 rounded-lg bg-muted/10 flex items-center justify-center hover:bg-muted/20 transition-colors">
-                <X className="h-3 w-3 text-muted-foreground/50" />
-              </button>
-            )}
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted/8 ring-1 ring-border/10">
+            <button onClick={() => query ? setQuery("") : onOpenChange(false)} className="h-6 w-6 rounded-lg bg-muted/10 flex items-center justify-center hover:bg-muted/20 transition-colors">
+              <X className="h-3 w-3 text-muted-foreground/50" />
+            </button>
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted/8 ring-1 ring-border/10 cursor-pointer" onClick={() => onOpenChange(false)}>
               <span className="text-[9px] font-display font-bold text-muted-foreground/30">ESC</span>
             </div>
           </div>
