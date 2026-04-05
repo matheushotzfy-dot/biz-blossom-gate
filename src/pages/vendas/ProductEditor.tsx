@@ -46,22 +46,28 @@ const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?
 /* ─── Completion Progress Ring ─── */
 function CompletionRing({ percent }: { percent: number }) {
   const r = 16, c = 2 * Math.PI * r;
+  const getColor = () => {
+    if (percent >= 80) return "hsl(var(--success))";
+    if (percent >= 50) return "hsl(var(--warning))";
+    return "hsl(var(--primary))";
+  };
   return (
-    <div className="relative h-10 w-10 shrink-0">
-      <svg viewBox="0 0 40 40" className="h-10 w-10 -rotate-90">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="hsl(var(--border)/0.2)" strokeWidth="3" />
+    <div className="relative h-11 w-11 shrink-0">
+      <svg viewBox="0 0 40 40" className="h-11 w-11 -rotate-90">
+        <circle cx="20" cy="20" r={r} fill="none" stroke="hsl(var(--border)/0.15)" strokeWidth="2.5" />
         <motion.circle
           cx="20" cy="20" r={r} fill="none"
-          stroke="hsl(var(--primary))"
-          strokeWidth="3" strokeLinecap="round"
+          stroke={getColor()}
+          strokeWidth="2.5" strokeLinecap="round"
           strokeDasharray={c}
           initial={{ strokeDashoffset: c }}
           animate={{ strokeDashoffset: c - (c * percent / 100) }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          style={{ filter: `drop-shadow(0 0 4px ${getColor()})` }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-[9px] font-display font-black text-primary tabular-nums">{percent}%</span>
+        <span className={cn("text-[9px] font-display font-black tabular-nums", percent >= 80 ? "text-success" : percent >= 50 ? "text-warning" : "text-primary")}>{percent}%</span>
       </div>
     </div>
   );
@@ -480,17 +486,33 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
+      <div className="h-screen bg-background flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[150px] animate-pulse" />
+          <div className="absolute bottom-1/3 left-1/3 w-[400px] h-[200px] bg-info/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "0.5s" }} />
+        </div>
+        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center gap-5 relative z-10">
           <div className="relative">
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
-              <Package className="h-6 w-6 text-primary animate-pulse" />
+            <div className="h-16 w-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center shadow-lg shadow-primary/10">
+              <Package className="h-7 w-7 text-primary" />
             </div>
-            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-xl animate-pulse" />
+            <div className="absolute -inset-6 rounded-3xl bg-primary/5 blur-2xl animate-pulse" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="absolute -inset-2"
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary/60" />
+            </motion.div>
           </div>
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-1.5">
             <p className="text-sm font-display font-black text-foreground">Carregando produto</p>
-            <p className="text-[11px] text-muted-foreground/50">Preparando editor...</p>
+            <p className="text-[11px] text-muted-foreground/50 font-display">Preparando editor avançado...</p>
+            <div className="flex items-center justify-center gap-1 mt-2">
+              {[0, 1, 2].map(i => (
+                <motion.div key={i} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>
@@ -503,29 +525,34 @@ export default function ProductEditor() {
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* ───── Premium Top Bar ───── */}
-      <div className="shrink-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div className="shrink-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-[0_1px_8px_hsl(var(--foreground)/0.03)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[68px]">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2.5 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2.5 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
                 <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
               </div>
               <span className="hidden sm:inline">Voltar</span>
-            </button>
+            </motion.button>
 
-            {/* Product identity chip */}
+            {/* Product identity chip — enhanced */}
             {name && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-card/60 border border-border/30 backdrop-blur-xl">
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-4 py-2.5 rounded-xl bg-card/60 border border-border/25 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover ring-1 ring-border/20" />
+                  <img src={imagePreview} alt="" className="h-8 w-8 rounded-lg object-cover ring-1 ring-border/15 shadow-sm" />
                 ) : (
-                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
                     <Package className="h-3.5 w-3.5 text-primary" />
                   </div>
                 )}
                 <div className="flex flex-col">
-                  <span className="text-xs font-display font-black text-foreground truncate max-w-[180px] leading-tight">{name}</span>
-                  {price && <span className="text-[10px] font-numbers font-black text-primary leading-tight">R$ {Number(price).toFixed(2)}</span>}
+                  <span className="text-[12px] font-display font-black text-foreground truncate max-w-[180px] leading-tight">{name}</span>
+                  {price && (
+                    <span className="text-[10px] font-numbers font-black text-primary leading-tight flex items-center gap-1">
+                      R$ {Number(price).toFixed(2)}
+                      <span className={cn("h-1.5 w-1.5 rounded-full ml-0.5", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                    </span>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -546,30 +573,38 @@ export default function ProductEditor() {
             <div className="flex items-center gap-2">
               {!isNew && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-xs font-display font-bold rounded-xl h-9">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-xs font-display font-bold rounded-xl h-9 hover:bg-card/50">
                     <Copy className="h-3.5 w-3.5" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold rounded-xl h-9">
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-xs font-display font-bold rounded-xl h-9">
                     <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Excluir</span>
                   </Button>
                 </>
               )}
-              <Button onClick={handleSave} disabled={saving} className={cn(
-                "gap-2 rounded-xl text-sm font-display font-black h-10 px-6 shadow-lg shadow-primary/20 transition-all duration-300",
-                saved && "bg-success shadow-success/20 hover:bg-success"
-              )}>
-                <AnimatePresence mode="wait">
-                  {saved ? (
-                    <motion.div key="saved" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
-                      <Check className="h-4 w-4" /> Salvo!
-                    </motion.div>
-                  ) : (
-                    <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-2">
-                      <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : isNew ? "Criar Produto" : "Salvar"}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                <Button onClick={handleSave} disabled={saving} className={cn(
+                  "gap-2 rounded-xl text-sm font-display font-black h-10 px-7 shadow-lg transition-all duration-300 relative overflow-hidden",
+                  saved
+                    ? "bg-success shadow-success/25 hover:bg-success"
+                    : "shadow-primary/25 hover:shadow-primary/35"
+                )}>
+                  <AnimatePresence mode="wait">
+                    {saved ? (
+                      <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-2">
+                        <Check className="h-4 w-4" /> Salvo!
+                      </motion.div>
+                    ) : saving ? (
+                      <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Salvando...
+                      </motion.div>
+                    ) : (
+                      <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+                        <Save className="h-3.5 w-3.5" /> {isNew ? "Criar Produto" : "Salvar"}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Button>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -581,8 +616,9 @@ export default function ProductEditor() {
 
           {/* ───── Premium Sidebar ───── */}
           <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
-            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
-              <div className="flex items-center justify-between px-3 pt-1 pb-3">
+            <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_4px_20px_hsl(var(--foreground)/0.05)] relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
+              <div className="flex items-center justify-between px-3 pt-1 pb-3 relative z-10">
                 <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
                 <span className="text-[9px] font-display font-bold text-muted-foreground/30">{currentTabIdx + 1}/{TABS.length}</span>
               </div>
@@ -2000,13 +2036,14 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3.5 mb-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card/45 backdrop-blur-xl ring-1 ring-border/10">
+    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4 mb-6">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/8 backdrop-blur-xl ring-1 ring-primary/10 shadow-lg shadow-primary/5 relative">
         <Icon className="h-5 w-5 text-primary" />
+        <div className="absolute -inset-1 rounded-2xl bg-primary/5 blur-lg opacity-60" />
       </div>
       <div>
-        <h2 className="text-lg font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
-        <p className="text-[11px] text-muted-foreground/60 mt-0.5">{subtitle}</p>
+        <h2 className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
+        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">{subtitle}</p>
       </div>
     </motion.div>
   );
@@ -2014,17 +2051,23 @@ function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentT
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden group/card hover:border-border/60 hover:shadow-[0_4px_16px_hsl(var(--foreground)/0.06)] transition-all duration-300">
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden group/card hover:border-border/60 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.07)] transition-all duration-500"
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-300 group-hover/card:w-[4px]", accentColor)} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-8 rounded-l-2xl blur-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none", accentColor.replace("bg-", "bg-") + "/5")} />
       {children}
-    </div>
+    </motion.div>
   );
 }
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
     <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-      {Icon && <Icon className="h-3.5 w-3.5" />}
+      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />}
       {children}
     </Label>
   );
@@ -2032,9 +2075,11 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl flex flex-col items-center justify-center py-16 gap-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
-      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/20">
-        <Icon className="h-7 w-7 text-muted-foreground/20" />
+    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-xl flex flex-col items-center justify-center py-16 gap-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-info/[0.01]" />
+      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/15 relative">
+        <Icon className="h-7 w-7 text-muted-foreground/15" />
+        <div className="absolute -inset-2 rounded-3xl bg-muted/5 blur-xl" />
       </div>
       <p className="text-sm font-display font-bold text-muted-foreground/40">{message}</p>
     </motion.div>
