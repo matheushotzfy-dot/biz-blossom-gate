@@ -46,22 +46,28 @@ const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?
 /* ─── Completion Progress Ring ─── */
 function CompletionRing({ percent }: { percent: number }) {
   const r = 16, c = 2 * Math.PI * r;
+  const getColor = () => {
+    if (percent >= 80) return "hsl(var(--success))";
+    if (percent >= 50) return "hsl(var(--warning))";
+    return "hsl(var(--primary))";
+  };
   return (
-    <div className="relative h-10 w-10 shrink-0">
-      <svg viewBox="0 0 40 40" className="h-10 w-10 -rotate-90">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="hsl(var(--border)/0.2)" strokeWidth="3" />
+    <div className="relative h-11 w-11 shrink-0">
+      <svg viewBox="0 0 40 40" className="h-11 w-11 -rotate-90">
+        <circle cx="20" cy="20" r={r} fill="none" stroke="hsl(var(--border)/0.15)" strokeWidth="2.5" />
         <motion.circle
           cx="20" cy="20" r={r} fill="none"
-          stroke="hsl(var(--primary))"
-          strokeWidth="3" strokeLinecap="round"
+          stroke={getColor()}
+          strokeWidth="2.5" strokeLinecap="round"
           strokeDasharray={c}
           initial={{ strokeDashoffset: c }}
           animate={{ strokeDashoffset: c - (c * percent / 100) }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          style={{ filter: `drop-shadow(0 0 4px ${getColor()})` }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-[9px] font-display font-black text-primary tabular-nums">{percent}%</span>
+        <span className={cn("text-[9px] font-display font-black tabular-nums", percent >= 80 ? "text-success" : percent >= 50 ? "text-warning" : "text-primary")}>{percent}%</span>
       </div>
     </div>
   );
