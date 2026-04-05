@@ -486,17 +486,33 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
+      <div className="h-screen bg-background flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[150px] animate-pulse" />
+          <div className="absolute bottom-1/3 left-1/3 w-[400px] h-[200px] bg-info/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "0.5s" }} />
+        </div>
+        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center gap-5 relative z-10">
           <div className="relative">
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
-              <Package className="h-6 w-6 text-primary animate-pulse" />
+            <div className="h-16 w-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center shadow-lg shadow-primary/10">
+              <Package className="h-7 w-7 text-primary" />
             </div>
-            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-xl animate-pulse" />
+            <div className="absolute -inset-6 rounded-3xl bg-primary/5 blur-2xl animate-pulse" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="absolute -inset-2"
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary/60" />
+            </motion.div>
           </div>
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-1.5">
             <p className="text-sm font-display font-black text-foreground">Carregando produto</p>
-            <p className="text-[11px] text-muted-foreground/50">Preparando editor...</p>
+            <p className="text-[11px] text-muted-foreground/50 font-display">Preparando editor avançado...</p>
+            <div className="flex items-center justify-center gap-1 mt-2">
+              {[0, 1, 2].map(i => (
+                <motion.div key={i} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>
