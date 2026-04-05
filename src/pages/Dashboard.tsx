@@ -623,7 +623,107 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Transaction Detail Modal */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ACTIONS + ACTIVITY                                               */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
+        {/* Quick actions */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-2xl glass-panel p-4 md:p-5 flex flex-col">
+          <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
+            {[
+              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
+              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
+              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
+              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
+              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
+              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações" },
+              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta" },
+              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação" },
+              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
+            ].map((action) => (
+              <Link key={action.href} to={action.href}
+                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/10 bg-card/30 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/15 hover:bg-primary/[0.03] hover:shadow-lg hover:shadow-primary/5 active:scale-[0.985]">
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10 group-hover:scale-110 transition-transform">
+                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[10px] md:text-[11px] text-muted-foreground/30 hidden md:block">{action.desc}</p>
+                </div>
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/15 hidden md:block group-hover:text-primary/40 transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Activity feed */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-2xl glass-panel flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
+                <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+              </span>
+              <p className="text-[12px] font-heading text-muted-foreground/40">Tempo real</p>
+            </div>
+            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-muted-foreground/25 hover:text-primary transition-colors">Ver tudo</Link>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1.5">
+            {activity.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-14 text-center">
+                <p className="text-sm text-muted-foreground/30 font-display">Sem movimentações ainda</p>
+              </div>
+            ) : (
+              activity.map((item) => {
+                const txStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
+                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", iconBg: "bg-info/10", iconText: "text-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  default: { label: "Status", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
+                };
+                const wdStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
+                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  default: { label: "Saque", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
+                };
+                const styles = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
+                const borderColor: Record<string, string> = { completed: "border-l-success", pending: "border-l-warning", failed: "border-l-destructive", refunded: "border-l-info", chargeback: "border-l-destructive", approved: "border-l-success", rejected: "border-l-destructive" };
+                const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
+
+                return (
+                  <div key={item.id}
+                    className={cn("group relative flex items-center gap-3 rounded-xl border-l-[3px] px-3.5 py-3 transition-all duration-300 hover:bg-primary/[0.03]", borderColor[item.status] || "border-l-muted-foreground")}>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/10 shadow-sm", styles.iconBg, styles.iconText)}>
+                      {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[14px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                        <span className={cn("h-2 w-2 rounded-full shadow-[0_0_6px_currentColor] animate-pulse", styles.iconBg, styles.iconText)} />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 font-display">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {fullTx && (
+                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-muted/20 transition-all" title="Ver detalhes">
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <span className="text-[10px] text-muted-foreground/20 font-mono tabular-nums min-w-[28px] text-right">{timeAgo(item.createdAt)}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </motion.div>
+      </section>
+
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
         <DialogContent className="sm:max-w-md border-border/40 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden">
           {detailTx && (() => {
