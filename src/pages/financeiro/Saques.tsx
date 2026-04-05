@@ -34,6 +34,7 @@ const fmtCompact = (v: number) => {
 const HIDE = "•••";
 
 const PERIODS: { label: string; days: number }[] = [
+  { label: "Hoje", days: 0 },
   { label: "7D", days: 7 },
   { label: "15D", days: 15 },
   { label: "30D", days: 30 },
