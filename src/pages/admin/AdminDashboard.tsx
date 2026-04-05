@@ -164,23 +164,23 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="dark min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #06060f 0%, #080818 30%, #0a0a20 60%, #060612 100%)", fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif" }}>
+    <div className="dark min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)", fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif" }}>
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
         <div className="relative">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_80px_rgba(99,102,241,0.4)] ring-1 ring-white/10">
+          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center shadow-[0_0_80px_rgba(16,185,129,0.4)] ring-1 ring-white/10">
             <Shield className="h-9 w-9 text-white drop-shadow-lg" />
           </div>
-          <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 blur-[40px] animate-pulse" />
+          <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 blur-[40px] animate-pulse" />
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent to-white/10" />
         </div>
         <div className="text-center space-y-2">
           <p className="text-[13px] font-extrabold tracking-[0.3em] uppercase text-white/30" style={{ fontFamily: "'Space Grotesk', monospace" }}>HOTZFY</p>
-          <p className="text-[9px] font-bold tracking-[0.25em] uppercase text-indigo-400/60">Control Center</p>
+          <p className="text-[9px] font-bold tracking-[0.25em] uppercase text-emerald-400/60">Control Center</p>
         </div>
         <div className="flex gap-1">
           {[0, 1, 2].map(i => (
             <motion.div key={i} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-              className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
           ))}
         </div>
       </motion.div>
@@ -238,7 +238,6 @@ export default function AdminDashboard() {
     ? NAV_SECTIONS.map(s => ({ ...s, items: s.items.filter(i => i.employeeAccess) })).filter(s => s.items.length > 0)
     : NAV_SECTIONS;
 
-  // Quick stats for sidebar
   const approvedTx = transactions.filter(t => t.status === "completed" || t.status === "approved");
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
 
@@ -246,19 +245,18 @@ export default function AdminDashboard() {
     <div
       className="dark h-screen text-white flex overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #06060f 0%, #080818 30%, #0a0a20 60%, #060612 100%)",
+        background: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
         fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif",
       }}
     >
       {/* ═══ Ambient Glow ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-200px] left-1/4 w-[900px] h-[600px] bg-indigo-950/20 rounded-full blur-[200px]" />
+          className="absolute top-[-200px] left-1/4 w-[900px] h-[600px] bg-emerald-950/25 rounded-full blur-[200px]" />
         <motion.div animate={{ opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-violet-950/15 rounded-full blur-[160px]" />
+          className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-teal-950/20 rounded-full blur-[160px]" />
         <motion.div animate={{ opacity: [0.03, 0.06, 0.03] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-950/10 rounded-full blur-[150px]" />
-        {/* Noise texture */}
+          className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-emerald-950/15 rounded-full blur-[150px]" />
         <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
       </div>
 
@@ -266,36 +264,36 @@ export default function AdminDashboard() {
       <aside className={cn(
         "relative z-50 h-full flex flex-col shrink-0 border-r border-white/[0.06] transition-all duration-300",
         sidebarCollapsed ? "w-[72px]" : "w-[248px]"
-      )} style={{ background: "linear-gradient(180deg, rgba(12,12,30,0.98) 0%, rgba(8,8,24,0.99) 100%)", backdropFilter: "blur(40px)" }}>
+      )} style={{ background: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)", backdropFilter: "blur(40px)" }}>
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-indigo-500/[0.04] to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-violet-500/[0.03] to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-emerald-500/[0.06] to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-teal-500/[0.04] to-transparent" />
         </div>
 
         {/* Logo */}
         <div className="relative h-[64px] flex items-center px-4 gap-3 border-b border-white/[0.06] shrink-0">
-          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.35)] ring-1 ring-white/15 shrink-0">
+          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.35)] ring-1 ring-white/15 shrink-0">
             <Rocket className="h-4.5 w-4.5 text-white drop-shadow-sm" />
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/[0.12]" />
           </div>
           {!sidebarCollapsed && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="min-w-0">
-              <h1 className="text-[15px] font-black tracking-[-0.02em] bg-gradient-to-r from-white via-white/90 to-indigo-200 bg-clip-text text-transparent" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>HOTZFY</h1>
-              <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-indigo-400/50">
+              <h1 className="text-[15px] font-black tracking-[-0.02em] bg-gradient-to-r from-white via-white/90 to-emerald-200 bg-clip-text text-transparent" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>HOTZFY</h1>
+              <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-emerald-400/50">
                 {isEmployee ? "Staff Panel" : "Control Center"}
               </p>
             </motion.div>
           )}
         </div>
 
-        {/* Quick Stats (collapsed = hidden) */}
+        {/* Quick Stats */}
         {!sidebarCollapsed && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-3 mt-3 mb-1 p-3 rounded-xl border border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.06] to-violet-500/[0.03]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-3 mt-3 mb-1 p-3 rounded-xl border border-emerald-500/10 bg-gradient-to-br from-emerald-500/[0.06] to-teal-500/[0.03]">
             <div className="flex items-center gap-2 mb-2">
-              <Globe className="h-3 w-3 text-indigo-400/60" />
-              <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-indigo-400/50">Volume Total</span>
+              <Globe className="h-3 w-3 text-emerald-400/60" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-400/50">Volume Total</span>
             </div>
             <p className="text-[14px] font-black text-white/90 tracking-tight" style={{ fontFamily: "'Space Grotesk', monospace" }}>
               {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
@@ -331,18 +329,18 @@ export default function AdminDashboard() {
                         "relative w-full flex items-center gap-2.5 rounded-xl transition-all duration-200 group",
                         sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive
-                          ? "bg-gradient-to-r from-indigo-500/[0.12] via-indigo-500/[0.08] to-violet-500/[0.04] text-white shadow-[inset_0_1px_0_rgba(99,102,241,0.12)] border border-indigo-500/[0.18]"
+                          ? "bg-gradient-to-r from-emerald-500/[0.12] via-emerald-500/[0.08] to-teal-500/[0.04] text-white shadow-[inset_0_1px_0_rgba(16,185,129,0.12)] border border-emerald-500/[0.18]"
                           : "text-white/25 hover:text-white/55 hover:bg-white/[0.03] border border-transparent"
                       )}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-indicator"
-                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b from-indigo-400 via-violet-400 to-purple-400 shadow-[0_0_14px_rgba(99,102,241,0.8)]"
+                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b from-emerald-400 via-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(16,185,129,0.8)]"
                           transition={{ type: "spring", stiffness: 500, damping: 35 }}
                         />
                       )}
-                      <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isActive ? "text-indigo-400 drop-shadow-[0_0_6px_rgba(99,102,241,0.6)]" : "opacity-40 group-hover:opacity-70")} />
+                      <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isActive ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" : "opacity-40 group-hover:opacity-70")} />
                       {!sidebarCollapsed && (
                         <span className={cn("text-[12px] truncate transition-all", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
                       )}
@@ -384,22 +382,21 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* ═══ TOP BAR ═══ */}
-        <header className="relative z-40 h-[56px] border-b border-white/[0.06] flex items-center px-5 gap-4 shrink-0" style={{ background: "linear-gradient(90deg, rgba(10,10,28,0.8) 0%, rgba(12,12,32,0.7) 100%)", backdropFilter: "blur(30px)" }}>
-          {/* Page Title */}
+        <header className="relative z-40 h-[56px] border-b border-white/[0.06] flex items-center px-5 gap-4 shrink-0" style={{ background: "linear-gradient(90deg, rgba(6,18,12,0.8) 0%, rgba(8,20,14,0.7) 100%)", backdropFilter: "blur(30px)" }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500/15 to-violet-500/10 flex items-center justify-center border border-indigo-500/10">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/10 flex items-center justify-center border border-emerald-500/10">
                 {(() => {
                   const Icon = NAV_SECTIONS.flatMap(s => s.items).find(i => i.id === activeTab)?.icon || LayoutDashboard;
-                  return <Icon className="h-3.5 w-3.5 text-indigo-400/70" />;
+                  return <Icon className="h-3.5 w-3.5 text-emerald-400/70" />;
                 })()}
               </div>
               <h2 className="text-[14px] font-bold text-white/85 truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{activeTabLabel}</h2>
             </div>
             {syncing && (
-              <div className="flex items-center gap-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/15 px-2.5 py-1">
-                <RefreshCw className="h-2.5 w-2.5 text-indigo-400 animate-spin" />
-                <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-wider">Sync</span>
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/15 px-2.5 py-1">
+                <RefreshCw className="h-2.5 w-2.5 text-emerald-400 animate-spin" />
+                <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">Sync</span>
               </div>
             )}
           </div>
@@ -413,7 +410,7 @@ export default function AdminDashboard() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                   datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
-                    ? "bg-indigo-500/15 text-indigo-400 shadow-sm ring-1 ring-indigo-500/20"
+                    ? "bg-emerald-500/15 text-emerald-400 shadow-sm ring-1 ring-emerald-500/20"
                     : "text-white/20 hover:text-white/45"
                 )}
               >
@@ -426,7 +423,7 @@ export default function AdminDashboard() {
                   <Calendar className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-[#0e0e22]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="end">
+              <PopoverContent className="w-auto p-0 bg-[#061210]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
@@ -452,7 +449,7 @@ export default function AdminDashboard() {
 
             <button className="relative h-8 w-8 rounded-xl flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all group">
               <Bell className="h-3.5 w-3.5 text-white/25 group-hover:text-white/55 transition-colors" />
-              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)] ring-2 ring-[#08081a]" />}
+              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)] ring-2 ring-[#040f08]" />}
             </button>
 
             <button

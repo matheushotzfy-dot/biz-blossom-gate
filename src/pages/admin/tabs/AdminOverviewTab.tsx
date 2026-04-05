@@ -37,7 +37,7 @@ interface Props {
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="pointer-events-none select-none rounded-xl border border-white/[0.08] bg-[#0c0c1e]/95 backdrop-blur-xl px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+    <div className="pointer-events-none select-none rounded-xl border border-white/[0.08] bg-[#061210]/95 backdrop-blur-xl px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
       <p className="mb-1.5 text-[10px] font-bold text-white/30 uppercase tracking-wider">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-[12px] font-bold" style={{ color: p.color }}>
@@ -196,9 +196,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     return (
       <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <HeroKpi icon={<Users className="h-5 w-5" />} label="Sellers" value={String(profiles.length)} sub="Total cadastrados" gradient="from-blue-500 to-indigo-600" />
-          <HeroKpi icon={<Package className="h-5 w-5" />} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} gradient="from-violet-500 to-purple-600" />
-          <HeroKpi icon={<CreditCard className="h-5 w-5" />} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} gradient="from-emerald-500 to-teal-600" />
+          <HeroKpi icon={<Users className="h-5 w-5" />} label="Sellers" value={String(profiles.length)} sub="Total cadastrados" gradient="from-emerald-500 to-teal-600" />
+          <HeroKpi icon={<Package className="h-5 w-5" />} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} gradient="from-teal-500 to-cyan-600" />
+          <HeroKpi icon={<CreditCard className="h-5 w-5" />} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} gradient="from-emerald-400 to-green-600" />
           <HeroKpi icon={<Percent className="h-5 w-5" />} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} gradient="from-amber-500 to-orange-600" />
         </div>
       </motion.div>
@@ -207,54 +207,51 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-      {/* ═══ HERO SECTION — Revenue Command Center ═══ */}
-      <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-white/[0.06] p-6 sm:p-8 lg:p-10"
-        style={{ background: "linear-gradient(135deg, rgba(15,15,40,0.95) 0%, rgba(20,15,50,0.9) 40%, rgba(12,12,35,0.95) 100%)" }}>
+      {/* ═══ HERO SECTION — Lucro da Plataforma ═══ */}
+      <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-emerald-500/[0.08] p-6 sm:p-8 lg:p-10"
+        style={{ background: "linear-gradient(135deg, rgba(6,24,14,0.95) 0%, rgba(8,28,18,0.9) 40%, rgba(4,20,10,0.95) 100%)" }}>
         {/* Ambient glows */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <motion.div animate={{ opacity: [0.15, 0.3, 0.15] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[120px]" />
+            className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px]" />
           <motion.div animate={{ opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-violet-500/15 rounded-full blur-[100px]" />
+            className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-teal-500/15 rounded-full blur-[100px]" />
           <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-400/10 rounded-full blur-[150px]" />
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-400/10 rounded-full blur-[150px]" />
           <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
         </div>
 
         <div className="relative z-10">
-          {/* Header */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-indigo-500/50 to-transparent" />
+            <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-emerald-500/50 to-transparent" />
             <div className="flex items-center gap-2">
-              <Crown className="h-3 w-3 text-indigo-400/60" />
-              <p className="text-[9px] font-black uppercase tracking-[0.35em] bg-gradient-to-r from-indigo-400 via-violet-300 to-purple-400 bg-clip-text text-transparent">
+              <Crown className="h-3 w-3 text-emerald-400/60" />
+              <p className="text-[9px] font-black uppercase tracking-[0.35em] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
                 Lucro da Plataforma
               </p>
             </div>
-            <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-indigo-500/50 to-transparent" />
+            <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-emerald-500/50 to-transparent" />
           </div>
 
-          {/* Main revenue display */}
           <div className="text-center mb-8">
             <p className="text-[52px] sm:text-[68px] lg:text-[88px] font-black leading-[0.85] tracking-[-0.04em] text-white"
-              style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 0 120px rgba(99,102,241,0.25), 0 0 60px rgba(99,102,241,0.1)" }}>
+              style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 0 120px rgba(16,185,129,0.25), 0 0 60px rgba(16,185,129,0.1)" }}>
               {fmtCurrency(takeRateTotal)}
             </p>
             <p className="text-[12px] text-white/25 mt-4 font-medium">
-              Take Rate: <span className="text-indigo-400 font-bold">{takeRatePct}%</span> · TPV: <span className="text-white/50 font-bold">{fmtCurrency(totalVolume)}</span>
+              Take Rate: <span className="text-emerald-400 font-bold">{takeRatePct}%</span> · TPV: <span className="text-white/50 font-bold">{fmtCurrency(totalVolume)}</span>
             </p>
           </div>
 
-          {/* Quick badges */}
           <div className="flex flex-wrap items-center justify-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
               <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {filteredApproved.length} aprovadas
             </span>
             <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
-              <Users className="h-3 w-3 text-blue-400" /> {activeSellersToday} sellers ativos
+              <Users className="h-3 w-3 text-teal-400" /> {activeSellersToday} sellers ativos
             </span>
             <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
-              <Target className="h-3 w-3 text-violet-400" /> {conversionRate}% conversão
+              <Target className="h-3 w-3 text-emerald-400" /> {conversionRate}% conversão
             </span>
             <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
               <span className="relative flex h-1.5 w-1.5">
@@ -267,14 +264,14 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </div>
       </motion.div>
 
-      {/* ═══ 1. HERO METRICS — 4 Massive KPIs ═══ */}
+      {/* ═══ HERO METRICS — 4 KPIs ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <HeroKpi
           icon={<PiggyBank className="h-6 w-6" />}
           label="Lucro Hoje"
           value={fmtCurrency(takeRateToday)}
           sub={`Mês: ${fmtCurrency(takeRateMonth)}`}
-          gradient="from-indigo-500 to-violet-600"
+          gradient="from-emerald-500 to-teal-600"
           metallic
         />
         <HeroKpi
@@ -282,14 +279,14 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           label="TPV Período"
           value={fmtCurrency(totalVolume)}
           sub={`${filteredApproved.length} transações aprovadas`}
-          gradient="from-emerald-400 to-teal-600"
+          gradient="from-teal-400 to-cyan-600"
         />
         <HeroKpi
           icon={<Users className="h-6 w-6" />}
           label="Sellers Ativos Hoje"
           value={String(activeSellersToday)}
           sub={`de ${profiles.length} cadastrados`}
-          gradient="from-blue-500 to-cyan-600"
+          gradient="from-emerald-400 to-green-600"
         />
         <HeroKpi
           icon={<ShieldAlert className="h-6 w-6" />}
@@ -302,26 +299,26 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         />
       </motion.div>
 
-      {/* ═══ 2. SECONDARY KPIs ═══ */}
+      {/* ═══ SECONDARY KPIs ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <GlassKpi label="TPV Hoje" value={fmtCurrency(tpvToday)} icon={<DollarSign className="h-3.5 w-3.5" />} iconColor="text-emerald-400" />
-        <GlassKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} icon={<BarChart3 className="h-3.5 w-3.5" />} iconColor="text-blue-400" />
+        <GlassKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} icon={<BarChart3 className="h-3.5 w-3.5" />} iconColor="text-teal-400" />
         <GlassKpi label="Take Rate Hoje" value={fmtCurrency(takeRateToday)} icon={<TrendingUp className="h-3.5 w-3.5" />} iconColor="text-amber-400" />
-        <GlassKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} icon={<Lock className="h-3.5 w-3.5" />} iconColor="text-violet-400" />
-        <GlassKpi label="Vol. Sacado" value={fmtCurrency(totalWithdrawn)} icon={<ArrowDownToLine className="h-3.5 w-3.5" />} iconColor="text-blue-400" />
+        <GlassKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} icon={<Lock className="h-3.5 w-3.5" />} iconColor="text-emerald-400/70" />
+        <GlassKpi label="Vol. Sacado" value={fmtCurrency(totalWithdrawn)} icon={<ArrowDownToLine className="h-3.5 w-3.5" />} iconColor="text-teal-400" />
         <GlassKpi label="Ticket Médio" value={fmtCurrency(ticketMedio)} icon={<CreditCard className="h-3.5 w-3.5" />} iconColor="text-white/60" />
       </motion.div>
 
-      {/* ═══ 3. VOLUME CHART + ACQUIRER ROUTING + REALTIME FEED ═══ */}
+      {/* ═══ VOLUME CHART + ACQUIRER + REALTIME ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {/* Volume Chart */}
         <GlassPanel className="xl:col-span-2 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <GlassPanelTitle color="indigo">Volume & Take Rate</GlassPanelTitle>
+            <GlassPanelTitle color="emerald">Volume & Take Rate</GlassPanelTitle>
             <div className="flex gap-0.5 bg-white/[0.04] border border-white/[0.06] rounded-lg p-0.5">
               {(["7d", "30d"] as const).map(f => (
                 <button key={f} onClick={() => setChartPeriod(f)}
-                  className={cn("px-2.5 py-1 rounded-md text-[10px] font-bold transition-all", chartPeriod === f ? "bg-indigo-500/15 text-indigo-400" : "text-white/20 hover:text-white/50")}>
+                  className={cn("px-2.5 py-1 rounded-md text-[10px] font-bold transition-all", chartPeriod === f ? "bg-emerald-500/15 text-emerald-400" : "text-white/20 hover:text-white/50")}>
                   {f}
                 </button>
               ))}
@@ -331,15 +328,15 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="tpvGradGod2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
               <XAxis dataKey="name" stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} />
               <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
               <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" stroke="#6366f1" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
+              <Area type="monotone" dataKey="tpv" stroke="#10b981" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
               <Area type="monotone" dataKey="takeRate" stroke="#f59e0b" fillOpacity={0} strokeWidth={1.5} dot={false} activeDot={false} strokeDasharray="4 2" name="Take Rate" isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
@@ -432,7 +429,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </GlassPanel>
       </motion.div>
 
-      {/* ═══ 4. RISK RADAR (Bento Box) ═══ */}
+      {/* ═══ RISK RADAR ═══ */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px flex-1 max-w-[24px] bg-gradient-to-r from-white/10 to-transparent" />
@@ -484,7 +481,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
           {/* Risk Alerts */}
           <GlassPanel>
-            <GlassPanelTitle color="violet" icon={<AlertTriangle className="h-3.5 w-3.5" />}>Alertas de Risco</GlassPanelTitle>
+            <GlassPanelTitle color="emerald" icon={<AlertTriangle className="h-3.5 w-3.5" />}>Alertas de Risco</GlassPanelTitle>
             <div className="space-y-3 mt-4">
               <RiskAlert label="Taxa Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="< 1%" alert={chargebackAlert} />
               <RiskAlert label="Disputas Abertas" value={String(openDisputes)} threshold="< 5" alert={openDisputes > 5} />
@@ -495,7 +492,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </div>
       </motion.div>
 
-      {/* ═══ 5. OPERATIONS: KYC + HIGH-VALUE WITHDRAWALS ═══ */}
+      {/* ═══ OPERATIONS: KYC + WITHDRAWALS ═══ */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px flex-1 max-w-[24px] bg-gradient-to-r from-white/10 to-transparent" />
@@ -506,7 +503,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           {/* KYC Queue */}
           <GlassPanel>
             <div className="flex items-center justify-between mb-3">
-              <GlassPanelTitle color="blue" icon={<UserCheck className="h-3.5 w-3.5" />}>
+              <GlassPanelTitle color="emerald" icon={<UserCheck className="h-3.5 w-3.5" />}>
                 Aprovações KYC Pendentes ({kycPending.length})
               </GlassPanelTitle>
             </div>
@@ -565,7 +562,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                       <div className="flex items-center gap-2">
                         <p className="text-[12px] font-bold text-white/80">{fmtCurrency(Number(w.amount))}</p>
                          {isHigh && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">ALTO</span>}
-                         {isNew && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">NOVO</span>}
+                         {isNew && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-teal-500/15 text-teal-400 border border-teal-500/20">NOVO</span>}
                       </div>
                       <p className="text-[10px] text-white/25 truncate">{sp?.full_name || "—"} • {sp?.email || ""}</p>
                     </div>
@@ -611,7 +608,7 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
         "relative isolate overflow-hidden rounded-2xl border p-6 transition-all duration-300",
         "border-white/[0.07] bg-gradient-to-b from-white/[0.04] to-white/[0.015]",
         "shadow-[0_16px_48px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]",
-        "hover:border-white/[0.12] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(99,102,241,0.08)]",
+        "hover:border-white/[0.12] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(16,185,129,0.08)]",
         alert && "border-red-500/25 ring-1 ring-red-500/10"
       )}>
         <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-15 group-hover:opacity-25 transition-opacity duration-700 bg-gradient-to-br", gradient)} />
@@ -626,7 +623,7 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
           </div>
           <p className={cn(
             "text-[32px] font-extrabold leading-none tracking-[-0.02em]",
-            metallic ? "bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent" : alert ? "text-red-400" : "text-white"
+            metallic ? "bg-gradient-to-r from-white via-emerald-200 to-white bg-clip-text text-transparent" : alert ? "text-red-400" : "text-white"
           )} style={{ fontFamily: "'Space Grotesk', monospace" }}>
             {value}
           </p>
@@ -670,29 +667,33 @@ export function GlassPanel({ children, className }: { children: React.ReactNode;
 /* ── Glass Panel Title ── */
 export function GlassPanelTitle({ children, color, icon }: { children: React.ReactNode; color: string; icon?: React.ReactNode }) {
   const colorMap: Record<string, string> = {
-    indigo: "bg-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.6)]",
-    emerald: "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]",
+    emerald: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
+    indigo: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
     amber: "bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.6)]",
-    blue: "bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.6)]",
+    blue: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]",
     red: "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]",
-    violet: "bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.6)]",
+    violet: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
     cyan: "bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.6)]",
     zinc: "bg-zinc-400/40",
+    teal: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]",
+    green: "bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.6)]",
   };
   const textColorMap: Record<string, string> = {
-    indigo: "text-indigo-400",
     emerald: "text-emerald-400",
+    indigo: "text-emerald-400",
     amber: "text-amber-400",
-    blue: "text-blue-400",
+    blue: "text-teal-400",
     red: "text-red-400",
-    violet: "text-violet-400",
+    violet: "text-emerald-400",
     cyan: "text-cyan-400",
     zinc: "text-zinc-400",
+    teal: "text-teal-400",
+    green: "text-green-400",
   };
   return (
     <h3 className="text-[13px] font-bold flex items-center gap-2.5 text-white/85">
-      <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.indigo)} />
-      {icon && <span className={textColorMap[color] || "text-indigo-400"}>{icon}</span>}
+      <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.emerald)} />
+      {icon && <span className={textColorMap[color] || "text-emerald-400"}>{icon}</span>}
       {children}
     </h3>
   );
@@ -721,7 +722,7 @@ function RiskAlert({ label, value, threshold, alert }: { label: string; value: s
   );
 }
 
-/* ── Legacy exports (backward compat with other tabs) ── */
+/* ── Legacy exports ── */
 export { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle };
 export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor, gradient, glowColor }: {
   icon: React.ReactNode; label: string; value: string; sub?: string;
