@@ -524,31 +524,43 @@ export default function ProductEditor() {
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
+      {/* ───── Progress Bar (Top) ───── */}
+      <div className="shrink-0 h-[3px] bg-border/10 relative z-[60]">
+        <motion.div
+          className="h-full bg-gradient-to-r from-primary via-primary to-primary/70 rounded-full relative"
+          initial={{ width: "0%" }}
+          animate={{ width: `${completionPercent}%` }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-primary/50 blur-sm" />
+        </motion.div>
+      </div>
+
       {/* ───── Premium Top Bar ───── */}
       <div className="shrink-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-[0_1px_8px_hsl(var(--foreground)/0.03)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[68px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[64px]">
           <div className="flex items-center gap-4">
             <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2.5 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
                 <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
               </div>
-              <span className="hidden sm:inline">Voltar</span>
+              <span className="hidden sm:inline text-xs">Voltar</span>
             </motion.button>
 
-            {/* Product identity chip — enhanced */}
+            {/* Product identity chip */}
             {name && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-4 py-2.5 rounded-xl bg-card/60 border border-border/25 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-3.5 py-2 rounded-xl bg-card/60 border border-border/25 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow group/chip">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-8 w-8 rounded-lg object-cover ring-1 ring-border/15 shadow-sm" />
+                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover ring-1 ring-border/15 shadow-sm group-hover/chip:ring-primary/20 transition-all" />
                 ) : (
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
-                    <Package className="h-3.5 w-3.5 text-primary" />
+                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
+                    <Package className="h-3 w-3 text-primary" />
                   </div>
                 )}
                 <div className="flex flex-col">
-                  <span className="text-[12px] font-display font-black text-foreground truncate max-w-[180px] leading-tight">{name}</span>
+                  <span className="text-[11px] font-display font-black text-foreground truncate max-w-[160px] leading-tight">{name}</span>
                   {price && (
-                    <span className="text-[10px] font-numbers font-black text-primary leading-tight flex items-center gap-1">
+                    <span className="text-[9px] font-numbers font-black text-primary leading-tight flex items-center gap-1">
                       R$ {Number(price).toFixed(2)}
                       <span className={cn("h-1.5 w-1.5 rounded-full ml-0.5", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
                     </span>
@@ -558,48 +570,48 @@ export default function ProductEditor() {
             )}
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Completion ring */}
-            <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            {/* Completion badge */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card/40 border border-border/20">
               <CompletionRing percent={completionPercent} />
               <div className="flex flex-col">
-                <span className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/50">Completo</span>
-                <span className="text-[11px] font-display font-bold text-foreground">{completionPercent}% preenchido</span>
+                <span className="text-[8px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Completo</span>
+                <span className="text-[10px] font-numbers font-black text-foreground tabular-nums">{completionPercent}%</span>
               </div>
             </div>
 
-            <div className="h-6 w-px bg-border/30 hidden sm:block" />
+            <div className="h-5 w-px bg-border/20 hidden sm:block" />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {!isNew && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-xs font-display font-bold rounded-xl h-9 hover:bg-card/50">
-                    <Copy className="h-3.5 w-3.5" /> <span className="hidden lg:inline">Duplicar</span>
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50">
+                    <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-xs font-display font-bold rounded-xl h-9">
-                    <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Excluir</span>
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-[11px] font-display font-bold rounded-xl h-8">
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
               )}
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                 <Button onClick={handleSave} disabled={saving} className={cn(
-                  "gap-2 rounded-xl text-sm font-display font-black h-10 px-7 shadow-lg transition-all duration-300 relative overflow-hidden",
+                  "gap-2 rounded-xl text-xs font-display font-black h-9 px-5 shadow-lg transition-all duration-300 relative overflow-hidden",
                   saved
                     ? "bg-success shadow-success/25 hover:bg-success"
                     : "shadow-primary/25 hover:shadow-primary/35"
                 )}>
                   <AnimatePresence mode="wait">
                     {saved ? (
-                      <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-2">
-                        <Check className="h-4 w-4" /> Salvo!
+                      <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5" /> Salvo!
                       </motion.div>
                     ) : saving ? (
-                      <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Salvando...
+                      <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Salvando...
                       </motion.div>
                     ) : (
-                      <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-2">
-                        <Save className="h-3.5 w-3.5" /> {isNew ? "Criar Produto" : "Salvar"}
+                      <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-1.5">
+                        <Save className="h-3 w-3" /> {isNew ? "Criar Produto" : "Salvar"}
                       </motion.div>
                     )}
                   </AnimatePresence>

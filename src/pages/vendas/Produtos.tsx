@@ -35,16 +35,35 @@ function MiniSparkline({ color }: { color: string }) {
     return `${i === 0 ? "M" : "L"}${x},${y}`;
   }).join(" ");
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="opacity-40">
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="opacity-50 group-hover:opacity-80 transition-opacity duration-500">
       <defs>
         <linearGradient id={`spark-${color}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity="0.4" />
+          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity="0.5" />
           <stop offset="100%" stopColor={`hsl(var(--${color}))`} stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={`${path} L${w},${h} L0,${h} Z`} fill={`url(#spark-${color})`} />
       <path d={path} fill="none" stroke={`hsl(var(--${color}))`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+/* ─── Product Card Skeleton ─── */
+function ProductCardSkeleton() {
+  return (
+    <div className="rounded-2xl glass-panel overflow-hidden animate-pulse">
+      <div className="h-48 bg-muted/10" />
+      <div className="p-5 space-y-3">
+        <div className="h-4 bg-muted/10 rounded-lg w-3/4" />
+        <div className="h-3 bg-muted/5 rounded-lg w-full" />
+        <div className="h-10 bg-muted/5 rounded-xl" />
+        <div className="h-10 bg-muted/5 rounded-xl" />
+        <div className="flex gap-2 pt-3 border-t border-border/[0.06]">
+          <div className="h-9 flex-1 bg-muted/5 rounded-xl" />
+          <div className="h-9 flex-1 bg-muted/5 rounded-xl" />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -193,19 +212,20 @@ export default function Produtos() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.25 + idx * 0.08 }}
-                className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative"
+                whileHover={{ y: -2, transition: { duration: 0.25 } }}
+                className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative cursor-default"
               >
                 <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-3">
-                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
+                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50 group-hover:bg-${item.color}/12 group-hover:border-${item.color}/20 group-hover:shadow-${item.color}/10`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     <MiniSparkline color={item.color} />
                   </div>
                   <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-1.5">{item.label}</p>
                   <div className="flex items-end gap-2">
-                    <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
+                    <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none transition-all duration-300", item.color === "primary" ? "text-foreground" : `text-${item.color}`, "group-hover:[text-shadow:0_0_20px_hsl(var(--primary)/0.15)]")}>{item.value}</p>
                     {item.delta && (
                       <span className="text-[9px] font-heading text-success/60 flex items-center gap-0.5 mb-0.5">
                         <TrendingUp className="h-2.5 w-2.5" /> {item.delta}
@@ -312,12 +332,15 @@ export default function Produtos() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.3) }}
+              whileHover={{ y: -3, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
               className="group relative rounded-2xl glass-panel overflow-hidden flex flex-col hover:ring-1 hover:ring-primary/15 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 card-premium"
             >
+              {/* Ambient glow on hover */}
+              <div className="absolute -inset-4 bg-primary/[0.02] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none" />
               {/* Image */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-muted/10 to-muted/5">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <img src={p.image_url} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03]" />
