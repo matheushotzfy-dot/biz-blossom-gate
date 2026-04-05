@@ -561,9 +561,11 @@ export default function Dashboard() {
         </div>
       </motion.section>
 
-      {/* ─── CHART + HEALTH ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8 rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-6 animate-fade-in stagger-1 min-h-[280px]">
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* CHART + KPIs                                                     */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-8 rounded-2xl glass-panel p-4 md:p-6 min-h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -575,192 +577,48 @@ export default function Dashboard() {
               <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
               <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
               <Tooltip
-                contentStyle={{
-                  background: "var(--tooltip-bg)",
-                  border: "1px solid var(--tooltip-border)",
-                  borderRadius: "12px",
-                  fontSize: "13px",
-                  color: "var(--tooltip-text)",
-                  padding: "10px 14px",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                }}
+                contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "12px", fontSize: "13px", color: "var(--tooltip-text)", padding: "10px 14px", boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}
                 formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
                 cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
               />
-              <Area
-                type="monotone"
-                dataKey="vendas"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
-                fill="url(#dashboardRevenue)"
-                dot={false}
-                activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }}
-              />
+              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          {/* Conversions + KPIs */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-2">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl glass-panel p-4 md:p-5">
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
               <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
             </div>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-2 gap-2">
-            <KpiTile icon={<Zap className="h-4 w-4" />} label="PIX" value={privacy.hidden ? CENSORED : fmt(pixRevenue)} helper={privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`} tone="success" delay="stagger-3" />
-            <KpiTile icon={<CreditCard className="h-4 w-4" />} label="CARTÃO" value={privacy.hidden ? CENSORED : fmt(cardRevenue)} helper={privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`} tone="info" delay="stagger-4" />
-            <KpiTile icon={<Wallet className="h-4 w-4" />} label="TICKET MÉDIO" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} helper="Por transação" tone="primary" delay="stagger-5" />
-            <KpiTile icon={<DollarSign className="h-4 w-4" />} label="PENDENTE" value={privacy.hidden ? CENSORED : fmt(withdrawalPending)} helper={privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`} tone="warning" delay="stagger-6" />
-          </div>
-        </div>
-      </section>
-
-      {/* ─── ACTIONS + ACTIVITY ─── */}
-      <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-2">
-        {/* Quick actions */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl p-4 md:p-5 animate-fade-in stagger-3 flex flex-col">
-          <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
             {[
-              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
-              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
-              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
-              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
-              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
-              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
-              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações" },
-              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta" },
-              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação" },
-              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
-            ].map((action, i) => (
-              <Link
-                key={action.href}
-                to={action.href}
-                className={`group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/40 bg-muted/10 p-2.5 md:p-3.5 transition-all duration-200 hover:border-primary/20 hover:bg-muted/30 animate-fade-in ${STAGGER_CLASSES[i % STAGGER_CLASSES.length]}`}
-              >
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10">
-                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] md:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] md:text-[11px] text-muted-foreground hidden md:block">{action.desc}</p>
-                </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/30 hidden md:block group-hover:text-muted-foreground/60 transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Activity feed */}
-        <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm backdrop-blur-xl animate-fade-in stagger-4 flex flex-col overflow-hidden">
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-[12px] font-medium text-muted-foreground">Tempo real</p>
-            </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors">
-              Ver tudo
-            </Link>
-          </div>
-
-          {/* List */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1.5">
-            {activity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-14 text-center">
-                <p className="text-sm text-muted-foreground">Sem movimentações ainda</p>
-              </div>
-            ) : (
-              activity.map((item, i) => {
-                const txStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", iconBg: "bg-info/10", iconText: "text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Status", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
-                };
-
-                const wdStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Saque", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
-                };
-
-                const styles =
-                  item.kind === "transaction"
-                    ? txStyles[item.status] || txStyles.default
-                    : wdStyles[item.status] || wdStyles.default;
-
-                // Find full transaction data for detail view
-                const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) : null;
-
-                const borderColor: Record<string, string> = {
-                  completed: "border-l-success",
-                  pending: "border-l-warning",
-                  failed: "border-l-destructive",
-                  refunded: "border-l-info",
-                  chargeback: "border-l-destructive",
-                  approved: "border-l-success",
-                  rejected: "border-l-destructive",
-                };
-
-                const glowBg: Record<string, string> = {
-                  completed: "bg-success/[0.04] hover:bg-success/[0.08]",
-                  pending: "bg-warning/[0.04] hover:bg-warning/[0.08]",
-                  failed: "bg-destructive/[0.04] hover:bg-destructive/[0.08]",
-                  refunded: "bg-info/[0.04] hover:bg-info/[0.08]",
-                  chargeback: "bg-destructive/[0.04] hover:bg-destructive/[0.08]",
-                  approved: "bg-success/[0.04] hover:bg-success/[0.08]",
-                  rejected: "bg-destructive/[0.04] hover:bg-destructive/[0.08]",
-                };
-
-                return (
-                  <div
-                    key={item.id}
-                    className={`group relative flex items-center gap-3 rounded-xl border-l-[3px] ${borderColor[item.status] || "border-l-muted-foreground"} ${glowBg[item.status] || "hover:bg-muted/10"} px-3.5 py-3 transition-all duration-200 animate-fade-in ${
-                      STAGGER_CLASSES[i + 1] || ""
-                    }`}
-                  >
-                    {/* Icon */}
-                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${styles.iconBg} ${styles.iconText} ring-1 ring-border/10 shadow-sm`}>
-                      {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
-                    </div>
-
-                    {/* Content */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-[14px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">
-                          {privacy.hidden ? CENSORED : fmt(item.amount)}
-                        </p>
-                        <span className={`h-2 w-2 rounded-full ${styles.iconBg} ${styles.iconText} shadow-[0_0_6px_currentColor] animate-pulse`} />
-                      </div>
-                      <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5 font-medium">
-                        {item.kind === "transaction" ? `Venda • ${item.label}` : item.label}
-                      </p>
-                    </div>
-
-                    {/* Actions + time */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      {fullTx && (
-                        <button
-                          onClick={() => setDetailTx(fullTx)}
-                          className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-150"
-                          title="Ver detalhes"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      <span className="text-[10px] text-muted-foreground/40 font-semibold tabular-nums min-w-[28px] text-right">{timeAgo(item.createdAt)}</span>
+              { icon: Zap, label: "PIX", value: privacy.hidden ? CENSORED : fmt(pixRevenue), helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
+              { icon: CreditCard, label: "CARTÃO", value: privacy.hidden ? CENSORED : fmt(cardRevenue), helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
+              { icon: Wallet, label: "TICKET MÉDIO", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), helper: "Por transação", color: "primary" },
+              { icon: DollarSign, label: "PENDENTE", value: privacy.hidden ? CENSORED : fmt(withdrawalPending), helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
+            ].map((item, idx) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.06 }}
+                className="group relative rounded-2xl glass-panel p-3.5 md:p-4 overflow-hidden card-premium flex flex-col justify-between min-h-[130px]">
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
+                <div className="pl-1.5 flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-auto">
+                    <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground/30">{item.label}</span>
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center ring-1 ring-border/20 transition-all group-hover:scale-110", `bg-${item.color}/8 text-${item.color}/50`)}>
+                      <item.icon className="h-4 w-4" />
                     </div>
                   </div>
-                );
-              })
-            )}
+                  <div className="mt-auto">
+                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.helper}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
