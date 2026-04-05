@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anon can view pixels for active products" ON public.product_pixels;
