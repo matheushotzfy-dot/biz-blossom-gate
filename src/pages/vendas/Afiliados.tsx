@@ -394,7 +394,7 @@ export default function Afiliados() {
           return (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
               className={cn(
                 "relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-display font-bold transition-all duration-300",
                 isActive ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/70"

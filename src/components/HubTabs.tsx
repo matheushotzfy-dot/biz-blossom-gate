@@ -23,7 +23,7 @@ export function HubTabs({ tabs, active, onChange }: HubTabsProps) {
             <button
               key={tab.id}
               type="button"
-              onClick={() => onChange(tab.id)}
+              onClick={() => { onChange(tab.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
               className={cn(
                 "flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-[13px] font-bold transition-all duration-200",
                 isActive
