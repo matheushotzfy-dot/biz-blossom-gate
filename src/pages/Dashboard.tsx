@@ -283,8 +283,25 @@ export default function Dashboard() {
     return { withdrawalPending: _withdrawalPending, balance: totalRevenue + balanceAdjustments - totalWithdrawn - totalRetained };
   }, [transactions, withdrawals, balanceAdjustments]);
 
-  // Optimized chart: pre-index transactions by date to avoid O(N*M)
+  // Optimized chart: pre-index transactions by date/hour to avoid O(N*M)
   const chartData = useMemo(() => {
+    const isHourly = !isCustom && selectedPeriod.days <= 1;
+
+    if (isHourly) {
+      // Show 24 hours for today or yesterday
+      const revenueByHour = new Map<number, number>();
+      for (const t of filteredTx) {
+        if (t.status !== "completed") continue;
+        const hour = new Date(t.created_at).toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "America/Sao_Paulo" });
+        const h = parseInt(hour, 10);
+        revenueByHour.set(h, (revenueByHour.get(h) || 0) + Number(t.net_amount));
+      }
+      return Array.from({ length: 24 }, (_, i) => ({
+        name: `${String(i).padStart(2, "0")}:00`,
+        vendas: revenueByHour.get(i) || 0,
+      }));
+    }
+
     let days: number;
     let startDate: Date;
 
@@ -293,7 +310,7 @@ export default function Dashboard() {
       days = Math.max(differenceInDays(end, customRange.from) + 1, 1);
       startDate = new Date(customRange.from);
     } else {
-      days = Math.max(selectedPeriod.days <= 1 ? 7 : selectedPeriod.days, 1);
+      days = Math.max(selectedPeriod.days, 1);
       startDate = new Date(brasiliaToday());
       startDate.setDate(startDate.getDate() - (days - 1));
     }
@@ -315,7 +332,7 @@ export default function Dashboard() {
 
       return { name: label, vendas: revenueByDate.get(compare) || 0 };
     });
-  }, [transactions, selectedPeriod.days, isCustom, customRange]);
+  }, [transactions, filteredTx, selectedPeriod.days, isCustom, customRange]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 8).map((t) => ({
