@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
 import ScrollToTop from "@/components/ScrollToTop";
 import { RequireAuth } from "@/hooks/useAuth";
 import { RequireAdmin } from "@/hooks/useAdminGuard";
@@ -85,7 +86,7 @@ const App = () => (
               <Route path="/termos-de-uso" element={<TermosDeUso />} />
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
               <Route path="/status" element={<StatusPage />} />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Index />} />
               
               {/* Public Member Area (standalone, Netflix-style) */}
               <Route path="/membros-area/login" element={<MemberAuth />} />
