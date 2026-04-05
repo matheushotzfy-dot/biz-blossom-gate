@@ -1022,7 +1022,7 @@ export default function Vendas() {
             <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
         </div>
-        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden">
+        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden scan-line">
           <div className="absolute -top-40 right-0 w-72 h-72 bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute -bottom-32 left-10 w-48 h-48 bg-info/3 rounded-full blur-[80px] pointer-events-none" />
           <div className="relative z-10">
