@@ -148,46 +148,66 @@ export default function ApiKeys() {
   const revokedKeys = keys.filter(k => !k.is_active).length;
 
   return (
-    <PageShell>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 flex items-center justify-center">
-              <KeyRound className="h-5 w-5 text-primary" />
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
+
+      {/* ═══ HERO ═══ */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative mb-8 rounded-3xl p-6 sm:p-8 mesh-gradient-hero noise-overlay scan-line"
+      >
+        <div className="absolute -inset-16 pointer-events-none">
+          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
+          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-warning/6 rounded-full blur-[160px]" />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                <KeyRound className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-[18px] font-heading tracking-tight text-foreground">Credenciais da API</h1>
+                <p className="text-[11px] text-muted-foreground/50">Gerencie suas chaves de acesso à API</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-[18px] font-bold text-foreground tracking-tight font-heading">Credenciais da API</h1>
-              <p className="text-[12px] text-muted-foreground/60">Gerencie suas chaves de acesso à API PodPay</p>
-            </div>
+            <Button onClick={() => setShowCreateDialog(true)} className="gap-2 rounded-full h-9 px-5 text-[10px] font-heading shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all">
+              <Plus className="h-3.5 w-3.5" /> Nova Credencial
+            </Button>
+          </div>
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Total de Chaves", value: keys.length, icon: KeyRound, color: "primary" },
+              { label: "Ativas", value: activeKeys, icon: Shield, color: "success" },
+              { label: "Revogadas", value: revokedKeys, icon: ShieldOff, color: "muted-foreground" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                className="group rounded-2xl glass-panel card-premium p-4 flex items-center gap-3"
+              >
+                <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all group-hover:scale-110", `bg-${s.color}/10 border-${s.color}/12 text-${s.color}`)}>
+                  <s.icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[22px] font-bold font-heading tabular-nums text-foreground">{s.value}</p>
+                  <p className="text-[9px] text-muted-foreground/35 font-heading uppercase tracking-[0.15em]">{s.label}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="gap-2 rounded-xl h-10 px-5 text-[12px] font-semibold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all">
-          <Plus className="h-4 w-4" /> Nova Credencial
-        </Button>
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Total de Chaves", value: keys.length, icon: KeyRound, color: "text-primary" },
-          { label: "Ativas", value: activeKeys, icon: Shield, color: "text-success" },
-          { label: "Revogadas", value: revokedKeys, icon: ShieldOff, color: "text-muted-foreground" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm p-4 flex items-center gap-3">
-            <div className={cn("h-9 w-9 rounded-xl bg-background/80 border border-border/20 flex items-center justify-center", s.color)}>
-              <s.icon className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-[22px] font-bold font-heading tabular-nums text-foreground">{s.value}</p>
-              <p className="text-[10px] text-muted-foreground/50 font-medium">{s.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      </motion.section>
 
       {/* Security Banner */}
-      <div className="rounded-2xl border border-warning/15 bg-warning/[0.03] p-4 flex items-start gap-3.5">
+      <div className="mb-6 rounded-2xl border border-warning/15 bg-warning/[0.03] p-4 flex items-start gap-3.5">
         <div className="h-8 w-8 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
           <Fingerprint className="h-4 w-4 text-warning" />
         </div>
