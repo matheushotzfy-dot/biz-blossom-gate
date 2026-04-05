@@ -1286,7 +1286,7 @@ export default function Vendas() {
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/6 bg-card/25 backdrop-blur-xl">
+        <div className="overflow-hidden rounded-2xl border border-border/6 bg-card/25 backdrop-blur-xl card-premium">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
             <p className="text-[10px] text-muted-foreground/15 font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
