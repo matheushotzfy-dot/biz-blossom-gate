@@ -817,8 +817,7 @@ export default function Vendas() {
                   <Zap className="h-4.5 w-4.5 text-primary" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-muted-foreground/40 block leading-none">Revenue</span>
-                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-gradient-premium block leading-tight mt-0.5">Command Center</span>
+                  <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80 block leading-tight">Minhas Vendas</span>
                 </div>
               </motion.div>
               <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
