@@ -294,6 +294,10 @@ input[type="number"]::-webkit-inner-spin-button {
     box-shadow: 0 0 20px hsl(var(--primary) / 0.15), 0 0 60px hsl(var(--primary) / 0.05);
   }
 
+  .glow-value {
+    text-shadow: 0 0 80px hsl(var(--primary) / 0.25), 0 0 160px hsl(var(--primary) / 0.1);
+  }
+
   .shimmer {
     position: relative;
     overflow: hidden;
@@ -326,6 +330,54 @@ input[type="number"]::-webkit-inner-spin-button {
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
+  }
+
+  /* Dot grid background for hero */
+  .dot-grid {
+    background-image: radial-gradient(circle, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Animated scan line */
+  .scan-line::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, hsl(var(--primary) / 0.03) 50%, transparent 100%);
+    background-size: 100% 200%;
+    animation: scan 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes scan {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 0% 100%; }
+  }
+
+  /* Premium row hover glow */
+  .row-glow:hover {
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.04), transparent 70%) !important;
+  }
+
+  /* Pulse ring animation for live indicators */
+  .pulse-ring {
+    animation: pulse-ring-anim 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  @keyframes pulse-ring-anim {
+    0% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
+  /* Card lift with glow on hover */
+  .card-premium {
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .card-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px hsl(var(--primary) / 0.08), 0 0 0 1px hsl(var(--primary) / 0.06);
+    border-color: hsl(var(--primary) / 0.15);
   }
 
   .noise-overlay {

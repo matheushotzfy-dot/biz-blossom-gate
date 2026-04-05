@@ -159,16 +159,18 @@ function GlowCard({ children, className, glowColor = "primary", delay = 0, anima
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-2xl glass-panel overflow-hidden transition-all duration-500 hover:shadow-xl",
+        "relative group rounded-2xl glass-panel overflow-hidden card-premium",
         animated && "animated-border",
         className
       )}
     >
       {/* Multi-layer ambient glow */}
-      <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[60px] pointer-events-none", `bg-${glowColor}/10`)} />
-      <div className={cn("absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-1000 blur-[40px] pointer-events-none", `bg-${glowColor}/5`)} />
-      {/* Shimmer line on top */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent" />
+      <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[60px] pointer-events-none", `bg-${glowColor}/12`)} />
+      <div className={cn("absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-1000 blur-[40px] pointer-events-none", `bg-${glowColor}/6`)} />
+      {/* Top shimmer line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+      {/* Bottom accent line */}
+      <div className={cn("absolute bottom-0 left-[10%] right-[10%] h-px opacity-0 group-hover:opacity-100 transition-opacity duration-700", `bg-gradient-to-r from-transparent via-${glowColor}/20 to-transparent`)} />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
@@ -179,7 +181,9 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
   label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
 }) {
   return (
-    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer">
+    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer card-premium">
+      {/* Left accent bar */}
+      <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
       <div className="flex items-start justify-between mb-3">
         <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${color}/10 border-${color}/12 text-${color} group-hover:bg-${color}/15`)}>
           <Icon className="h-5 w-5" />
@@ -290,7 +294,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.3), ease: [0.16, 1, 0.3, 1] }}
       onClick={onClick}
-      className="group cursor-pointer border-b border-border/[0.04] hover:bg-primary/[0.03] transition-all duration-200"
+      className="group cursor-pointer border-b border-border/[0.04] row-glow transition-all duration-200"
     >
       <td className="py-4 px-5">
         <div className="flex items-center gap-3">
@@ -759,7 +763,9 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1">
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      {/* Subtle dot grid background */}
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — REVENUE COMMAND CENTER                                   */}
@@ -768,7 +774,7 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-12 overflow-hidden mesh-gradient-hero noise-overlay"
+        className="relative mb-12 overflow-hidden mesh-gradient-hero noise-overlay scan-line"
       >
         {/* Animated floating orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -811,8 +817,9 @@ export default function Vendas() {
               </motion.div>
               <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
+                  <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
                 </span>
                 <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
@@ -877,7 +884,7 @@ export default function Vendas() {
             </div>
             <div className="flex items-end gap-5 mb-3">
               <motion.span
-                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] [text-shadow:0_0_100px_hsl(var(--primary)/0.2),0_4px_24px_hsl(var(--background)/0.5)]"
+                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_100px_hsl(var(--primary)/0.25),0_4px_24px_hsl(var(--background)/0.5)]"
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
@@ -954,7 +961,7 @@ export default function Vendas() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden hover:shadow-xl transition-all duration-500"
+                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
               >
                 <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
@@ -1015,7 +1022,7 @@ export default function Vendas() {
             <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
         </div>
-        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden">
+        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden scan-line">
           <div className="absolute -top-40 right-0 w-72 h-72 bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute -bottom-32 left-10 w-48 h-48 bg-info/3 rounded-full blur-[80px] pointer-events-none" />
           <div className="relative z-10">
@@ -1279,7 +1286,7 @@ export default function Vendas() {
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/6 bg-card/25 backdrop-blur-xl">
+        <div className="overflow-hidden rounded-2xl border border-border/6 bg-card/25 backdrop-blur-xl card-premium">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
             <p className="text-[10px] text-muted-foreground/15 font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
