@@ -1,8 +1,18 @@
+/**
+ * MemberHome — Ultra-Premium Member Dashboard
+ * @module MemberHome
+ * @version 5.0.0 — Fintech Premium Redesign
+ */
+
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Play, Clock, BookOpen, TrendingUp, ChevronRight, Award, Zap, Sparkles, GraduationCap, Flame, Layers, Star, Target, Trophy, BarChart3 } from "lucide-react";
+import {
+  Play, Clock, BookOpen, TrendingUp, ChevronRight, Award, Zap, Sparkles,
+  GraduationCap, Flame, Layers, Star, Target, Trophy, BarChart3, Rocket,
+  CheckCircle2, ArrowUpRight,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +22,8 @@ type CourseWithProgress = {
   category: string; totalLessons: number; completedLessons: number; lastLesson: string | null;
   modules: ModuleInfo[];
 };
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function MemberHome() {
   const { user } = useOutletContext<{ user: User }>();
@@ -58,7 +70,6 @@ export default function MemberHome() {
   const totalLessons = courses.reduce((a, c) => a + c.totalLessons, 0);
   const overallPct = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
   const completedCourses = courses.filter(c => c.totalLessons > 0 && c.completedLessons === c.totalLessons).length;
-  const totalModules = courses.reduce((a, c) => a + c.modules.length, 0);
 
   if (loading) return (
     <div className="min-h-[80vh] flex items-center justify-center">
@@ -76,7 +87,7 @@ export default function MemberHome() {
 
   if (courses.length === 0) return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: [0.16, 1, 0.3, 1] }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ease }}>
         <div className="relative mb-10">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-[120px] w-64 h-64 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2" />
           <div className="relative h-28 w-28 rounded-[2rem] bg-card border border-border/30 flex items-center justify-center shadow-2xl mx-auto">
@@ -102,14 +113,13 @@ export default function MemberHome() {
           <motion.img
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1.02, opacity: 1 }}
-            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.4, ease }}
             src={featured.thumbnail_url} alt={featured.title}
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-background" />
         )}
-        {/* Multi-layer cinematic overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/5" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_40%,hsl(var(--background))_100%)]" />
@@ -118,7 +128,7 @@ export default function MemberHome() {
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.7, delay: 0.15, ease }}
             className="max-w-xl"
           >
             <div className="flex items-center gap-2.5 mb-5">
@@ -141,7 +151,6 @@ export default function MemberHome() {
               <p className="text-sm sm:text-base text-muted-foreground/80 line-clamp-2 mb-6 leading-relaxed max-w-lg font-display">{featured.description}</p>
             )}
 
-            {/* Progress inline */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2.5">
                 <div className="w-32 sm:w-40">
@@ -149,7 +158,7 @@ export default function MemberHome() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${featuredPct}%` }}
-                      transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{ duration: 1, delay: 0.5, ease }}
                       className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full"
                     />
                   </div>
@@ -175,51 +184,79 @@ export default function MemberHome() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10 mt-10">
-        {/* ═══ Stats Strip ═══ */}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 mt-10">
+
+        {/* ═══ Stats Strip — Premium ═══ */}
         {totalLessons > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
-          >
-            <StatPill icon={<BookOpen className="h-4 w-4" />} label="Cursos" value={String(courses.length)} accent="primary" />
-            <StatPill icon={<Target className="h-4 w-4" />} label="Progresso" value={`${overallPct}%`} accent="info" />
-            <StatPill icon={<Flame className="h-4 w-4" />} label="Aulas feitas" value={String(totalCompleted)} accent="warning" />
-            <StatPill icon={<Trophy className="h-4 w-4" />} label="Concluídos" value={String(completedCourses)} accent="success" />
-          </motion.div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { icon: BookOpen, label: "Cursos", value: String(courses.length), tone: "primary" },
+              { icon: Target, label: "Progresso", value: `${overallPct}%`, tone: "info" },
+              { icon: Flame, label: "Aulas feitas", value: String(totalCompleted), tone: "warning" },
+              { icon: Trophy, label: "Concluídos", value: String(completedCourses), tone: "success" },
+            ].map((kpi, i) => (
+              <motion.div
+                key={kpi.label}
+                initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.1 + i * 0.06, duration: 0.5, ease }}
+                className={cn(
+                  "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 overflow-hidden",
+                  "hover:ring-border/40 transition-all duration-300",
+                  `hover:shadow-lg hover:shadow-${kpi.tone}/10`
+                )}
+              >
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${kpi.tone}`)} />
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 transition-all group-hover:scale-110", `bg-${kpi.tone}/8 ring-${kpi.tone}/15`)}>
+                    <kpi.icon className={cn("h-4 w-4", `text-${kpi.tone}`)} />
+                  </div>
+                  <div>
+                    <span className={cn("text-lg font-display font-black tracking-[-0.02em] tabular-nums block leading-tight", `text-${kpi.tone}`)}>{kpi.value}</span>
+                    <span className="text-[9px] text-muted-foreground/40 font-display font-bold uppercase tracking-[0.15em]">{kpi.label}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         )}
 
-        {/* ═══ Overall Progress ═══ */}
+        {/* ═══ Overall Progress — Premium ═══ */}
         {totalLessons > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-2xl p-5 bg-card/40 border border-border/20"
+            transition={{ delay: 0.3, ease }}
+            className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <BarChart3 className="h-4 w-4 text-primary" />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-info" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <span className="text-[12px] font-display font-black text-foreground/70 block">Progresso Geral</span>
+                    <p className="text-[9px] text-muted-foreground/40 font-display tabular-nums">
+                      {totalCompleted}/{totalLessons} aulas · {completedCourses} concluído{completedCourses !== 1 ? "s" : ""}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-sm font-display font-bold text-foreground">Progresso geral</span>
-                  <p className="text-[11px] text-muted-foreground/60 font-display tabular-nums">
-                    {totalCompleted}/{totalLessons} aulas · {completedCourses} concluído{completedCourses !== 1 ? "s" : ""}
-                  </p>
-                </div>
+                <span className="text-xl font-display font-black text-primary tabular-nums">{overallPct}%</span>
               </div>
-              <span className="text-xl font-display font-black text-primary tabular-nums">{overallPct}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-muted/10 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${overallPct}%` }}
-                transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="h-full bg-gradient-to-r from-primary via-primary to-primary/50 rounded-full"
-              />
+              <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${overallPct}%` }}
+                  transition={{ duration: 1.2, delay: 0.5, ease }}
+                  className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 rounded-full relative"
+                  style={{ boxShadow: "0 0 16px hsl(var(--primary) / 0.3)" }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                </motion.div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -230,7 +267,7 @@ export default function MemberHome() {
             <SectionHeader icon={<Play className="h-4 w-4 text-primary fill-primary" />} title="Continue Assistindo" count={continueWatching.length} />
             <div className="flex gap-4 overflow-x-auto pb-3 -mx-2 px-2 scrollbar-hide snap-x snap-mandatory">
               {continueWatching.map((c, i) => (
-                <motion.div key={c.id} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}>
+                <motion.div key={c.id} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08, ease }}>
                   <ContinueCard course={c} />
                 </motion.div>
               ))}
@@ -243,7 +280,7 @@ export default function MemberHome() {
           <SectionHeader icon={<Layers className="h-4 w-4 text-foreground" />} title="Meus Cursos" count={courses.length} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {courses.map((course, i) => (
-              <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}>
+              <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.06, ease }}>
                 <CourseCard course={course} />
               </motion.div>
             ))}
@@ -252,7 +289,7 @@ export default function MemberHome() {
 
         {/* ═══ Module Rows ═══ */}
         {courses.filter(c => c.modules.length > 1).map((course, ci) => (
-          <motion.section key={course.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + ci * 0.08, ease: [0.16, 1, 0.3, 1] }}>
+          <motion.section key={course.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + ci * 0.08, ease }}>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-display font-black text-foreground tracking-[-0.02em]">{course.title}</h3>
@@ -264,11 +301,11 @@ export default function MemberHome() {
             </div>
             <div className="flex gap-4 overflow-x-auto pb-3 -mx-2 px-2 scrollbar-hide snap-x">
               {course.modules.map((mod, mi) => (
-                <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.05, ease: [0.16, 1, 0.3, 1] }}>
+                <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.05, ease }}>
                   <Link to={`/membros-area/curso/${course.id}?module=${mod.id}`} className="group shrink-0 w-[220px] md:w-[260px] snap-start block">
-                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card border border-border/15 group-hover:border-primary/15 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
+                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/15 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
                       {mod.banner_url ? (
-                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
+                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
                           <BookOpen className="h-8 w-8 text-primary/8" />
@@ -279,7 +316,6 @@ export default function MemberHome() {
                         <p className="text-foreground text-xs font-display font-bold line-clamp-1">{mod.title}</p>
                         <p className="text-muted-foreground/50 text-[10px] mt-0.5 font-display tabular-nums">{mod.lessonCount} aulas</p>
                       </div>
-                      {/* Play overlay */}
                       <div className="absolute inset-0 bg-background/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="h-10 w-10 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
                           <Play className="h-4 w-4 text-background ml-0.5 fill-current" />
@@ -302,31 +338,11 @@ export default function MemberHome() {
 function SectionHeader({ icon, title, count }: { icon: React.ReactNode; title: string; count?: number }) {
   return (
     <div className="flex items-center gap-2.5 mb-5">
-      <div className="h-8 w-8 rounded-lg bg-card border border-border/20 flex items-center justify-center">{icon}</div>
+      <div className="h-8 w-8 rounded-xl bg-card/80 ring-1 ring-border/15 flex items-center justify-center">{icon}</div>
       <h2 className="text-base font-display font-black text-foreground tracking-[-0.02em]">{title}</h2>
       {count !== undefined && (
-        <span className="text-[10px] font-display font-bold text-muted-foreground/50 bg-muted/10 px-2 py-0.5 rounded-md border border-border/10 tabular-nums">{count}</span>
+        <span className="text-[10px] font-display font-bold text-muted-foreground/50 bg-muted/8 px-2 py-0.5 rounded-lg ring-1 ring-border/8 tabular-nums">{count}</span>
       )}
-    </div>
-  );
-}
-
-function StatPill({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent: string }) {
-  const colors: Record<string, string> = {
-    primary: "text-primary bg-primary/8 border-primary/10",
-    info: "text-info bg-info/8 border-info/10",
-    warning: "text-warning bg-warning/8 border-warning/10",
-    success: "text-success bg-success/8 border-success/10",
-  };
-  return (
-    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-card/40 border border-border/15 transition-all hover:border-border/25">
-      <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center border shrink-0", colors[accent])}>
-        {icon}
-      </div>
-      <div>
-        <span className="text-lg font-display font-black text-foreground tracking-[-0.02em] tabular-nums block leading-tight">{value}</span>
-        <span className="text-[10px] text-muted-foreground/50 font-display font-bold uppercase tracking-wider">{label}</span>
-      </div>
     </div>
   );
 }
@@ -336,49 +352,48 @@ function CourseCard({ course }: { course: CourseWithProgress }) {
   const isComplete = pct === 100 && course.totalLessons > 0;
   return (
     <Link to={`/membros-area/curso/${course.id}`}
-      className="group rounded-xl overflow-hidden bg-card/40 border border-border/15 hover:border-primary/15 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block h-full">
+      className="group rounded-2xl overflow-hidden bg-card/95 ring-1 ring-border/15 hover:ring-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block h-full">
       <div className="aspect-video relative overflow-hidden">
         {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
+          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
             <BookOpen className="h-12 w-12 text-primary/8" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        {/* Play hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
           <div className="h-12 w-12 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
             <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
           </div>
         </div>
-        {/* Progress bar */}
         {pct > 0 && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/20">
             <div className={cn("h-full rounded-full transition-all", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${pct}%` }} />
           </div>
         )}
-        {/* Badges */}
         {isComplete && (
           <div className="absolute top-2.5 right-2.5 h-7 w-7 rounded-lg bg-success/90 flex items-center justify-center shadow-md">
             <Award className="h-3.5 w-3.5 text-success-foreground" />
           </div>
         )}
         <div className="absolute top-2.5 left-2.5">
-          <span className="text-[9px] font-display font-black uppercase tracking-[0.1em] px-2 py-1 rounded-md bg-background/50 backdrop-blur-xl text-foreground/60 border border-border/10">
+          <span className="text-[9px] font-display font-black uppercase tracking-[0.1em] px-2 py-1 rounded-lg bg-background/50 backdrop-blur-xl text-foreground/60 ring-1 ring-border/10">
             {course.category}
           </span>
         </div>
       </div>
       <div className="p-4">
         <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors tracking-[-0.01em]">{course.title}</h3>
-        {course.description && <p className="text-xs text-muted-foreground/60 line-clamp-2 mt-1.5 leading-relaxed font-display">{course.description}</p>}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/10">
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/50 font-display font-semibold">
+        {course.description && <p className="text-xs text-muted-foreground/50 line-clamp-2 mt-1.5 leading-relaxed font-display">{course.description}</p>}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/8">
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground/40 font-display font-bold">
             <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {course.modules.length}m</span>
             <span className="tabular-nums">{course.totalLessons} aulas</span>
           </div>
-          {pct > 0 && <span className="text-xs font-display font-black text-primary tabular-nums">{pct}%</span>}
+          {pct > 0 && (
+            <span className={cn("text-[11px] font-display font-black tabular-nums", isComplete ? "text-success" : "text-primary")}>{pct}%</span>
+          )}
         </div>
       </div>
     </Link>
@@ -389,10 +404,10 @@ function ContinueCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   return (
     <Link to={`/membros-area/curso/${course.id}`}
-      className="group shrink-0 w-[280px] md:w-[320px] snap-start rounded-xl overflow-hidden bg-card/40 border border-border/15 hover:border-primary/15 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block">
+      className="group shrink-0 w-[280px] md:w-[320px] snap-start rounded-2xl overflow-hidden bg-card/95 ring-1 ring-border/15 hover:ring-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block">
       <div className="aspect-video relative overflow-hidden">
         {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
+          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
             <BookOpen className="h-8 w-8 text-primary/8" />
@@ -409,8 +424,8 @@ function ContinueCard({ course }: { course: CourseWithProgress }) {
       </div>
       <div className="p-4">
         <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 tracking-[-0.01em]">{course.title}</h3>
-        <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground/50 font-display font-semibold">
-          <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3 w-3" /> {pct}%</span>
+        <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground/40 font-display font-bold">
+          <span className="flex items-center gap-1 tabular-nums text-primary"><Rocket className="h-3 w-3" /> {pct}%</span>
           <span className="tabular-nums">{course.completedLessons}/{course.totalLessons} aulas</span>
         </div>
       </div>
