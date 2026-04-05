@@ -149,34 +149,72 @@ type RevenueCardProps = {
 function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
 
+  const pct = milestone.pct;
+  const circ = 2 * Math.PI * 18;
+  const offset = circ - (pct / 100) * circ;
+
   return (
-    <button type="button" className="mt-5 block w-full text-left" onClick={onOpenRewards}>
-      <div className="overflow-hidden rounded-[24px] border border-sidebar-primary/25 bg-gradient-to-br from-sidebar-primary/[0.12] via-sidebar/95 to-sidebar-accent/40 px-4 py-4 shadow-lg transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-sidebar-primary/35 hover:bg-gradient-to-br hover:from-sidebar-primary/[0.14] hover:via-sidebar/95 hover:to-sidebar-accent/50">
-        <div className="mb-4 flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sidebar-primary/15 bg-sidebar-primary/10">
-            <Zap className="h-4.5 w-4.5 text-sidebar-primary" />
+    <button type="button" className="mt-5 block w-full text-left group/rev" onClick={onOpenRewards}>
+      <div className="relative overflow-hidden rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] via-sidebar/95 to-sidebar-accent/30 p-4 shadow-xl shadow-sidebar-primary/5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-sidebar-primary/35 hover:shadow-sidebar-primary/10">
+        {/* Ambient glow */}
+        <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-sidebar-primary/10 blur-[50px] pointer-events-none group-hover/rev:bg-sidebar-primary/15 transition-colors duration-500" />
+        <div className="absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-sidebar-primary/5 blur-[40px] pointer-events-none" />
+        {/* Noise texture */}
+        <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{ backgroundImage: "radial-gradient(hsl(var(--sidebar-foreground)) 0.5px, transparent 0.5px)", backgroundSize: "12px 12px" }} />
+
+        <div className="relative z-10">
+          {/* Header row with ring */}
+          <div className="flex items-center gap-3 mb-3">
+            {/* Mini completion ring */}
+            <div className="relative h-11 w-11 shrink-0">
+              <svg className="h-11 w-11 -rotate-90" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="hsl(var(--sidebar-border) / 0.15)" strokeWidth="2.5" />
+                <circle
+                  cx="22" cy="22" r="18" fill="none"
+                  stroke="hsl(var(--sidebar-primary))"
+                  strokeWidth="2.5" strokeLinecap="round"
+                  strokeDasharray={circ}
+                  strokeDashoffset={offset}
+                  className="transition-[stroke-dashoffset] duration-1000 ease-out"
+                  style={{ filter: "drop-shadow(0 0 4px hsl(var(--sidebar-primary) / 0.4))" }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Zap className="h-3.5 w-3.5 text-sidebar-primary" />
+              </div>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-sidebar-foreground/40">Faturamento Total</p>
+              <p className="mt-0.5 text-[17px] font-display font-black leading-none tracking-[-0.03em] text-sidebar-accent-foreground tabular-nums">
+                {formatRevenue(revenue)}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/55">FATURAMENTO TOTAL</p>
-            <p className="mt-1 text-[18px] font-black leading-none tracking-tight text-sidebar-accent-foreground">
-              {formatRevenue(revenue)}
-            </p>
+
+          {/* Milestone labels */}
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-display font-bold text-sidebar-primary tabular-nums">{milestone.current.label}</span>
+            <span className="text-[9px] font-display font-bold text-sidebar-foreground/30">Meta: {milestone.next.label}</span>
           </div>
-        </div>
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className="text-sidebar-primary">{milestone.current.label}</span>
-            <span className="text-sidebar-foreground/35">Meta Atual: {milestone.next.label}</span>
-          </div>
-          <div className="h-2.5 rounded-full bg-sidebar-border/45">
+
+          {/* Progress bar */}
+          <div className="relative h-2 rounded-full bg-sidebar-border/20 overflow-hidden ring-1 ring-sidebar-border/10">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/75 transition-[width] duration-700 ease-out"
-              style={{ width: `${milestone.pct}%` }}
-            />
+              className="h-full rounded-full bg-gradient-to-r from-sidebar-primary via-sidebar-primary/80 to-sidebar-primary/60 transition-[width] duration-1000 ease-out relative"
+              style={{ width: `${pct}%`, boxShadow: "0 0 8px hsl(var(--sidebar-primary) / 0.35)" }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />
+            </div>
           </div>
-          <div className="pt-0.5">
-            <p className="text-[12px] font-black text-sidebar-primary">{milestone.pct.toFixed(0)}%</p>
-            <p className="mt-2 text-center text-[11px] font-semibold text-sidebar-primary/75">Ver Premiações</p>
+
+          {/* Bottom row */}
+          <div className="flex items-center justify-between mt-2.5">
+            <p className="text-[11px] font-display font-black text-sidebar-primary tabular-nums">{pct.toFixed(0)}%</p>
+            <span className="text-[9px] font-display font-bold text-sidebar-primary/60 flex items-center gap-1 group-hover/rev:text-sidebar-primary transition-colors">
+              Ver Premiações
+              <ChevronRight className="h-3 w-3 group-hover/rev:translate-x-0.5 transition-transform" />
+            </span>
           </div>
         </div>
       </div>
