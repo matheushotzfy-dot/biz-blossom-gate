@@ -345,10 +345,10 @@ export default function Saques() {
           {/* KPI Strip */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
+              { label: "Total Sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), color: "primary", icon: ArrowDownToLine, delta: m.prevTotalApproved > 0 ? m.totalApproved - m.prevTotalApproved : undefined },
               { label: "Taxa de Aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, color: m.approvalRate >= 80 ? "success" : m.approvalRate >= 50 ? "warning" : "destructive", icon: Target },
               { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgAmount), color: "primary", icon: Receipt },
               { label: "Total em Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), color: "warning", icon: Percent },
-              { label: "Pendentes", value: hidden ? HIDE : String(m.pending.length), sub: hidden ? "" : fmtCompact(m.totalPending), color: m.pending.length > 0 ? "warning" : "success", icon: Clock },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 + idx * 0.08 }} className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative">
                 <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
