@@ -761,7 +761,9 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1">
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      {/* Subtle dot grid background */}
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — REVENUE COMMAND CENTER                                   */}
