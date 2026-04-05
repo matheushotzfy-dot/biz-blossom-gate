@@ -616,8 +616,9 @@ export default function ProductEditor() {
 
           {/* ───── Premium Sidebar ───── */}
           <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
-            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
-              <div className="flex items-center justify-between px-3 pt-1 pb-3">
+            <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_4px_20px_hsl(var(--foreground)/0.05)] relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
+              <div className="flex items-center justify-between px-3 pt-1 pb-3 relative z-10">
                 <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
                 <span className="text-[9px] font-display font-bold text-muted-foreground/30">{currentTabIdx + 1}/{TABS.length}</span>
               </div>
