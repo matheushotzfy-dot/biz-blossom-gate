@@ -15,7 +15,7 @@ interface FunnelStage {
 
 export default function FunilVendas() {
   const { user } = useAuth();
-  const [period, setPeriod] = useState("30d");
+  const [period, setPeriod] = useState("today");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, failed: 0, refunded: 0 });
 
@@ -25,9 +25,13 @@ export default function FunilVendas() {
 
   const loadFunnel = async () => {
     setLoading(true);
-    const days = period === "7d" ? 7 : period === "90d" ? 90 : 30;
+    const days = period === "today" ? 0 : period === "7d" ? 7 : period === "90d" ? 90 : 30;
     const since = new Date();
-    since.setDate(since.getDate() - days);
+    if (days === 0) {
+      since.setHours(0, 0, 0, 0);
+    } else {
+      since.setDate(since.getDate() - days);
+    }
 
     const { data } = await supabase
       .from("transactions")
@@ -97,6 +101,7 @@ export default function FunilVendas() {
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-[140px] rounded-xl"><SelectValue /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="today">Hoje</SelectItem>
             <SelectItem value="7d">Últimos 7 dias</SelectItem>
             <SelectItem value="30d">Últimos 30 dias</SelectItem>
             <SelectItem value="90d">Últimos 90 dias</SelectItem>

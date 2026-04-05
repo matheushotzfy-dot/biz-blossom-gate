@@ -34,6 +34,7 @@ const fmtCompact = (v: number) => {
 const HIDE = "•••";
 
 const PERIODS: { label: string; days: number }[] = [
+  { label: "Hoje", days: 0 },
   { label: "7D", days: 7 },
   { label: "15D", days: 15 },
   { label: "30D", days: 30 },
@@ -208,7 +209,7 @@ export default function Saques() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[2]);
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
@@ -245,8 +246,8 @@ export default function Saques() {
   /* ─── Computed metrics ─── */
   const metrics = useMemo(() => {
     const now = new Date();
-    const cutoff = selectedPeriod.days === 9999 ? new Date(0) : subDays(now, selectedPeriod.days);
-    const prevCutoff = selectedPeriod.days === 9999 ? new Date(0) : subDays(cutoff, selectedPeriod.days);
+    const cutoff = selectedPeriod.days === 9999 ? new Date(0) : selectedPeriod.days === 0 ? new Date(new Date().setHours(0, 0, 0, 0)) : subDays(now, selectedPeriod.days);
+    const prevCutoff = selectedPeriod.days === 9999 ? new Date(0) : selectedPeriod.days === 0 ? subDays(cutoff, 1) : subDays(cutoff, selectedPeriod.days);
 
     const current = withdrawals.filter(w => new Date(w.created_at) >= cutoff);
     const previous = selectedPeriod.days === 9999 ? [] : withdrawals.filter(w => { const d = new Date(w.created_at); return d >= prevCutoff && d < cutoff; });

@@ -537,7 +537,7 @@ export default function Vendas() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>(PERIODS[2]);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>(PERIODS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);

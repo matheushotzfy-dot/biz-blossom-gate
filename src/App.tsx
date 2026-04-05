@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import ScrollToTop from "@/components/ScrollToTop";
 import { RequireAuth } from "@/hooks/useAuth";
 import { RequireAdmin } from "@/hooks/useAdminGuard";
 import { RequireManager } from "@/hooks/useManagerGuard";
@@ -75,6 +76,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
