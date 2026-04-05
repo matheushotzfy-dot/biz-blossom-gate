@@ -54,21 +54,20 @@ const HIDE = "•••";
 
 const PERIODS = [
   { label: "Hoje", days: 0 },
-  { label: "Ontem", days: 1 },
-  { label: "7 dias", days: 7 },
-  { label: "15 dias", days: 15 },
-  { label: "30 dias", days: 30 },
-  { label: "90 dias", days: 90 },
+  { label: "7D", days: 7 },
+  { label: "15D", days: 15 },
+  { label: "30D", days: 30 },
+  { label: "90D", days: 90 },
 ] as const;
 type Period = (typeof PERIODS)[number];
 const PAGE_SIZE = 50;
 
 const AVATAR_PALETTE = [
-  "bg-primary/15 text-primary",
-  "bg-info/15 text-info",
-  "bg-warning/15 text-warning",
-  "bg-success/15 text-success",
-  "bg-accent text-accent-foreground",
+  "bg-primary/12 text-primary",
+  "bg-info/12 text-info",
+  "bg-warning/12 text-warning",
+  "bg-success/12 text-success",
+  "bg-accent/80 text-accent-foreground",
 ];
 const avatarColor = (n: string) => {
   let h = 0; for (let i = 0; i < n.length; i++) h = n.charCodeAt(i) + ((h << 5) - h);
@@ -79,56 +78,48 @@ const initials = (n: string) => {
   return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : (p[0]?.[0] || "?").toUpperCase();
 };
 
-const STATUS: Record<string, { label: string; fg: string; dot: string; bg: string }> = {
-  completed: { label: "Aprovada", fg: "text-success", dot: "bg-success", bg: "bg-success/10" },
-  pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/10" },
-  failed: { label: "Falha", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10" },
-  refunded: { label: "Reembolso", fg: "text-info", dot: "bg-info", bg: "bg-info/10" },
-  chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10" },
+const STATUS: Record<string, { label: string; fg: string; dot: string; bg: string; border: string }> = {
+  completed: { label: "Aprovada", fg: "text-success", dot: "bg-success", bg: "bg-success/8", border: "border-success/12" },
+  pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/8", border: "border-warning/12" },
+  failed: { label: "Falha", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/12" },
+  refunded: { label: "Reembolso", fg: "text-info", dot: "bg-info", bg: "bg-info/8", border: "border-info/12" },
+  chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/12" },
 };
-
-const springTransition = { type: "spring" as const, stiffness: 300, damping: 30, mass: 0.8 };
 
 /* ─────────────────────── Micro Components ─────────────────────── */
 
 function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
   if (prev === 0 && cur === 0) return null;
-  if (prev === 0) return <span className="text-[10px] font-bold text-success bg-success/10 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1"><Sparkles className="h-2.5 w-2.5" />novo</span>;
+  if (prev === 0) return <span className="text-[9px] font-display font-bold text-success bg-success/8 px-2 py-0.5 rounded-md inline-flex items-center gap-0.5 border border-success/10"><Sparkles className="h-2.5 w-2.5" />novo</span>;
   const pct = ((cur - prev) / prev) * 100;
   const up = pct >= 0;
   return (
-    <motion.span
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className={cn("inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums px-2.5 py-0.5 rounded-full", up ? "text-success bg-success/10" : "text-destructive bg-destructive/10")}
-    >
+    <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-display font-bold tabular-nums px-2 py-0.5 rounded-md border", up ? "text-success bg-success/6 border-success/10" : "text-destructive bg-destructive/6 border-destructive/10")}>
       {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
       {Math.abs(pct).toFixed(1)}%
-    </motion.span>
+    </span>
   );
 }
 
-/* Animated sparkline with gradient fill */
-function Sparkline({ data, color = "primary", className }: { data: number[]; color?: string; className?: string }) {
+function Sparkline({ data, color = "primary" }: { data: number[]; color?: string }) {
   if (data.length < 2) return null;
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
   const range = max - min || 1;
-  const w = 90;
-  const h = 32;
+  const w = 80; const h = 28;
   const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
   const fillPoints = `0,${h} ${points} ${w},${h}`;
   const id = `spark-${color}-${data.length}`;
   return (
-    <svg width={w} height={h} className={cn("shrink-0", className)} viewBox={`0 0 ${w} ${h}`}>
+    <svg width={w} height={h} className="shrink-0 opacity-50" viewBox={`0 0 ${w} ${h}`}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity={0.3} />
+          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity={0.25} />
           <stop offset="100%" stopColor={`hsl(var(--${color}))`} stopOpacity={0} />
         </linearGradient>
       </defs>
       <polygon points={fillPoints} fill={`url(#${id})`} />
-      <polyline points={points} fill="none" stroke={`hsl(var(--${color}))`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={points} fill="none" stroke={`hsl(var(--${color}))`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -136,12 +127,12 @@ function Sparkline({ data, color = "primary", className }: { data: number[]; col
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
   const active = sort.field === field;
   return (
-    <th onClick={() => onSort(field)} className={cn("text-left py-3.5 px-4 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.08em] cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
+    <th onClick={() => onSort(field)} className={cn("text-left py-3 px-4 text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider cursor-pointer select-none hover:text-foreground/60 transition-colors group", className)}>
       <span className="inline-flex items-center gap-1">
         {label}
         {active
           ? (sort.dir === "desc" ? <ChevronDown className="h-3 w-3 text-primary" /> : <ChevronUp className="h-3 w-3 text-primary" />)
-          : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />}
+          : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-30 transition-opacity" />}
       </span>
     </th>
   );
@@ -151,46 +142,32 @@ function SortHead({ label, field, sort, onSort, className }: { label: string; fi
 function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
-      <div className="h-[220px] flex flex-col items-center justify-center gap-2">
-        {hidden ? <EyeOff className="h-5 w-5 text-muted-foreground/15" /> : <BarChart3 className="h-5 w-5 text-muted-foreground/15" />}
-        <span className="text-[12px] text-muted-foreground/25">{hidden ? "Valores ocultos" : "Dados insuficientes"}</span>
+      <div className="h-[200px] flex flex-col items-center justify-center gap-2">
+        {hidden ? <EyeOff className="h-5 w-5 text-muted-foreground/10" /> : <BarChart3 className="h-5 w-5 text-muted-foreground/10" />}
+        <span className="text-[11px] text-muted-foreground/20 font-display">{hidden ? "Valores ocultos" : "Dados insuficientes"}</span>
       </div>
     );
   }
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <ComposedChart data={data} margin={{ top: 12, right: 8, left: -16, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={200}>
+      <ComposedChart data={data} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="rv-gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.1} vertical={false} />
-        <XAxis
-          dataKey="label"
-          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontFamily: "'JetBrains Mono', monospace" }}
-          axisLine={false} tickLine={false} interval="preserveStartEnd"
-        />
-        <YAxis
-          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontFamily: "'JetBrains Mono', monospace" }}
-          axisLine={false} tickLine={false}
-          tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)}
-        />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.08} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
         <ReTooltip
-          contentStyle={{
-            background: "hsl(var(--popover))",
-            border: "1px solid hsl(var(--border))",
-            borderRadius: 16, fontSize: 12, padding: "12px 16px",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
-          }}
+          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11, padding: "10px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.12)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
-          labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}
+          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" }}
           cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "4 4" }}
         />
-        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="6 4" fill="none" opacity={0.2} dot={false} />
-        <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#rv-gradient)" dot={false} activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
+        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="5 3" fill="none" opacity={0.15} dot={false} />
+        <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#rv-gradient)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -199,76 +176,76 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
   const methods: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-    pix: { label: "PIX", icon: <Smartphone className="h-3.5 w-3.5" />, color: "text-success" },
-    credit_card: { label: "Cartão", icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-info" },
-    boleto: { label: "Boleto", icon: <FileText className="h-3.5 w-3.5" />, color: "text-warning" },
+    pix: { label: "PIX", icon: <Smartphone className="h-3 w-3" />, color: "text-success" },
+    credit_card: { label: "Cartão", icon: <CreditCard className="h-3 w-3" />, color: "text-info" },
+    boleto: { label: "Boleto", icon: <FileText className="h-3 w-3" />, color: "text-warning" },
   };
   const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null, color: "text-muted-foreground" };
   const name = tx.customer_name || "Cliente";
-  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/10" };
+  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
 
   return (
     <motion.tr
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.25) }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2, delay: Math.min(i * 0.01, 0.2) }}
       onClick={onClick}
-      className="group cursor-pointer border-b border-border/[0.06] hover:bg-primary/[0.03] transition-all duration-200"
+      className="group cursor-pointer border-b border-border/[0.05] hover:bg-primary/[0.02] transition-colors duration-150"
     >
-      <td className="py-4 px-5">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 shrink-0 ring-2 ring-border/10">
-            <AvatarFallback className={cn("text-[10px] font-bold tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      <td className="py-3.5 px-5">
+        <div className="flex items-center gap-2.5">
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback className={cn("text-[9px] font-display font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-foreground truncate leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{name}</p>
-            {tx.customer_email && <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 font-mono">{tx.customer_email}</p>}
+            <p className="text-[12px] font-display font-semibold text-foreground truncate leading-tight">{name}</p>
+            {tx.customer_email && <p className="text-[10px] text-muted-foreground/30 truncate mt-0.5 font-mono">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
-      <td className="py-4 px-4">
-        <span className="text-[12px] text-muted-foreground/50 truncate block max-w-[150px]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
+      <td className="py-3.5 px-4">
+        <span className="text-[11px] text-muted-foreground/40 truncate block max-w-[140px] font-display">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
       </td>
-      <td className="py-4 px-4">
+      <td className="py-3.5 px-4">
         <div>
-          <span className="text-[15px] font-bold text-foreground tabular-nums tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmt(Number(tx.amount))}</span>
-          <p className="text-[10px] text-muted-foreground/30 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
+          <span className="text-[13px] font-display font-bold text-foreground tabular-nums tracking-tight">{fmt(Number(tx.amount))}</span>
+          <p className="text-[9px] text-muted-foreground/25 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
         </div>
       </td>
-      <td className="py-4 px-4">
-        <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-semibold", method.color)}>
+      <td className="py-3.5 px-4">
+        <span className={cn("inline-flex items-center gap-1 text-[10px] font-display font-semibold", method.color)}>
           {method.icon}{method.label}
         </span>
       </td>
-      <td className="py-4 px-4">
-        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wide", st.fg, st.bg)}>
+      <td className="py-3.5 px-4">
+        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-display font-bold tracking-wide border", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot, tx.status === "completed" && "animate-pulse")} />
           {st.label}
         </span>
       </td>
-      <td className="py-4 px-4">
+      <td className="py-3.5 px-4">
         <div className="flex flex-col">
-          <span className="text-[12px] text-muted-foreground/45 tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmtDate(tx.created_at)}</span>
-          <span className="text-[10px] text-muted-foreground/25 tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmtTime(tx.created_at)}</span>
+          <span className="text-[11px] text-muted-foreground/35 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
+          <span className="text-[9px] text-muted-foreground/20 tabular-nums font-mono">{fmtTime(tx.created_at)}</span>
         </div>
       </td>
-      <td className="py-4 px-2">
+      <td className="py-3.5 px-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button className="h-8 w-8 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-muted/30 active:scale-95">
-              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+            <button className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-muted/20 active:scale-95">
+              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 rounded-xl">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2.5 text-[12px] rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/20">
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] rounded-lg font-display"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
             {tx.customer_phone && (
               <>
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Copiado!"); }} className="gap-2.5 text-[12px] rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
-                <DropdownMenuItem asChild><a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="gap-2.5 text-[12px] rounded-lg"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a></DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Copiado!"); }} className="gap-2 text-[11px] rounded-lg font-display"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
+                <DropdownMenuItem asChild><a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="gap-2 text-[11px] rounded-lg font-display"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a></DropdownMenuItem>
               </>
             )}
             {tx.status === "completed" && (
-              <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2.5 text-[12px] text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
+              <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] text-destructive focus:text-destructive rounded-lg font-display"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -280,45 +257,45 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
 /* ─── Mobile Card ─── */
 function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
   const name = tx.customer_name || "Cliente";
-  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/10" };
+  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
   const methodLabels: Record<string, string> = { pix: "PIX", credit_card: "Cartão", boleto: "Boleto" };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: Math.min(i * 0.02, 0.15) }}
-      className="rounded-2xl bg-card border border-border/20 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
+      transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.12) }}
+      className="rounded-xl bg-card/60 border border-border/15 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/15"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Avatar className="h-10 w-10 shrink-0 ring-2 ring-border/10">
-            <AvatarFallback className={cn("text-[10px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
+          <Avatar className="h-9 w-9 shrink-0">
+            <AvatarFallback className={cn("text-[9px] font-display font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-[13px] font-bold text-foreground truncate leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{name}</p>
-            <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
+            <p className="text-[12px] font-display font-bold text-foreground truncate leading-tight">{name}</p>
+            <p className="text-[10px] text-muted-foreground/30 truncate mt-0.5 font-display">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
           </div>
         </div>
-        <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold shrink-0 tracking-wide", st.fg, st.bg)}>
+        <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-display font-bold shrink-0 border", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />{st.label}
         </span>
       </div>
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-[24px] font-bold text-foreground tabular-nums tracking-tight leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmt(Number(tx.amount))}</p>
+          <p className="text-xl font-display font-black text-foreground tabular-nums tracking-tight leading-none">{fmt(Number(tx.amount))}</p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[10px] text-muted-foreground/35 font-semibold">{methodLabels[tx.payment_method || ""] || "—"}</span>
-            <span className="text-[10px] text-muted-foreground/15">·</span>
-            <span className="text-[10px] text-muted-foreground/35 truncate max-w-[100px]">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
+            <span className="text-[10px] text-muted-foreground/30 font-display font-semibold">{methodLabels[tx.payment_method || ""] || "—"}</span>
+            <span className="text-[10px] text-muted-foreground/10">·</span>
+            <span className="text-[10px] text-muted-foreground/30 truncate max-w-[100px] font-display">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
           </div>
         </div>
-        <div className="text-right flex flex-col items-end gap-2">
-          <span className="text-[11px] text-muted-foreground/40 tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmtDate(tx.created_at)}</span>
+        <div className="text-right flex flex-col items-end gap-1.5">
+          <span className="text-[10px] text-muted-foreground/30 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
           {tx.customer_phone && (
-            <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center text-success hover:bg-success/20 transition-colors active:scale-95">
-              <MessageCircle className="h-3.5 w-3.5" />
+            <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-7 w-7 rounded-lg bg-success/8 flex items-center justify-center text-success hover:bg-success/15 transition-colors active:scale-95 border border-success/10">
+              <MessageCircle className="h-3 w-3" />
             </a>
           )}
         </div>
@@ -369,35 +346,35 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-border/30 bg-card rounded-3xl">
+      <DialogContent className="sm:max-w-md border-border/20 bg-card rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5 text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}><Download className="h-5 w-5 text-primary" /> Exportar Vendas</DialogTitle>
-          <DialogDescription className="text-muted-foreground text-[13px]">Configure os filtros de exportação</DialogDescription>
+          <DialogTitle className="flex items-center gap-2 text-base font-display font-bold"><Download className="h-4 w-4 text-primary" /> Exportar Vendas</DialogTitle>
+          <DialogDescription className="text-muted-foreground/50 text-xs font-display">Configure os filtros de exportação</DialogDescription>
         </DialogHeader>
-        <div className="space-y-5 py-3">
+        <div className="space-y-4 py-2">
           <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Status</p>
-              <div className="flex gap-3 text-[10px]">
-                <button onClick={() => setSelectedStatuses(new Set())} className="text-muted-foreground/40 hover:text-foreground transition-colors">Limpar</button>
-                <button onClick={() => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)))} className="text-primary font-semibold">Todos</button>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider">Status</p>
+              <div className="flex gap-2.5 text-[9px]">
+                <button onClick={() => setSelectedStatuses(new Set())} className="text-muted-foreground/30 hover:text-foreground transition-colors font-display">Limpar</button>
+                <button onClick={() => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)))} className="text-primary font-display font-bold">Todos</button>
               </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ALL_STATUSES.map(s => (
-                <button key={s.value} onClick={() => toggleStatus(s.value)} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border", selectedStatuses.has(s.value) ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 text-muted-foreground/40 hover:border-border/40")}>
-                  <span className={cn("h-1.5 w-1.5 rounded-full", selectedStatuses.has(s.value) ? s.dot : "bg-muted-foreground/15")} />{s.label}
+                <button key={s.value} onClick={() => toggleStatus(s.value)} className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-display font-semibold transition-all border", selectedStatuses.has(s.value) ? "border-primary/20 bg-primary/6 text-primary" : "border-border/15 text-muted-foreground/30 hover:border-border/30")}>
+                  <span className={cn("h-1.5 w-1.5 rounded-full", selectedStatuses.has(s.value) ? s.dot : "bg-muted-foreground/12")} />{s.label}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-2.5">Método</p>
+            <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-2">Método</p>
             <div className="flex flex-wrap gap-1.5">
               {ALL_METHODS.map(m => {
                 const Icon = m.icon;
                 return (
-                  <button key={m.value} onClick={() => toggleMethod(m.value)} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border", selectedMethods.has(m.value) ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 text-muted-foreground/40 hover:border-border/40")}>
+                  <button key={m.value} onClick={() => toggleMethod(m.value)} className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-display font-semibold transition-all border", selectedMethods.has(m.value) ? "border-primary/20 bg-primary/6 text-primary" : "border-border/15 text-muted-foreground/30 hover:border-border/30")}>
                     <Icon className="h-3 w-3" /> {m.label}
                   </button>
                 );
@@ -406,30 +383,30 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
           </div>
           {txProducts.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-2.5">Produtos</p>
-              <div className="space-y-0.5 max-h-[120px] overflow-y-auto">
-                <button onClick={() => toggleProduct("all")} className={cn("w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium text-left transition-colors", selectedProducts.has("all") ? "bg-primary/8 text-primary" : "text-muted-foreground/50 hover:bg-muted/10")}>
-                  {selectedProducts.has("all") ? <CheckSquare className="h-3.5 w-3.5" /> : <Square className="h-3.5 w-3.5" />} Todos
+              <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-2">Produtos</p>
+              <div className="space-y-0.5 max-h-[100px] overflow-y-auto">
+                <button onClick={() => toggleProduct("all")} className={cn("w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-display text-left transition-colors", selectedProducts.has("all") ? "bg-primary/6 text-primary font-semibold" : "text-muted-foreground/40 hover:bg-muted/8")}>
+                  {selectedProducts.has("all") ? <CheckSquare className="h-3 w-3" /> : <Square className="h-3 w-3" />} Todos
                 </button>
                 {txProducts.map(p => (
-                  <button key={p.id} onClick={() => toggleProduct(p.id)} className={cn("w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium text-left transition-colors", selectedProducts.has(p.id) ? "bg-primary/8 text-primary" : "text-muted-foreground/50 hover:bg-muted/10")}>
-                    {selectedProducts.has(p.id) ? <CheckSquare className="h-3.5 w-3.5" /> : <Square className="h-3.5 w-3.5" />} <span className="truncate">{p.name}</span>
+                  <button key={p.id} onClick={() => toggleProduct(p.id)} className={cn("w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-display text-left transition-colors", selectedProducts.has(p.id) ? "bg-primary/6 text-primary font-semibold" : "text-muted-foreground/40 hover:bg-muted/8")}>
+                    {selectedProducts.has(p.id) ? <CheckSquare className="h-3 w-3" /> : <Square className="h-3 w-3" />} <span className="truncate">{p.name}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
-          <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 flex items-center justify-between">
+          <div className="rounded-xl bg-primary/4 border border-primary/10 p-3.5 flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-bold text-foreground">{exportFiltered.length} transações</p>
-              <p className="text-[10px] text-muted-foreground/40 mt-0.5">serão exportadas</p>
+              <p className="text-xs font-display font-bold text-foreground">{exportFiltered.length} transações</p>
+              <p className="text-[9px] text-muted-foreground/30 font-display mt-0.5">serão exportadas</p>
             </div>
-            <p className="text-[18px] font-bold text-primary tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmt(exportFiltered.reduce((a, t) => a + Number(t.net_amount), 0))}</p>
+            <p className="text-base font-display font-bold text-primary tabular-nums">{fmt(exportFiltered.reduce((a, t) => a + Number(t.net_amount), 0))}</p>
           </div>
         </div>
-        <div className="flex gap-2.5 pt-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-xl h-11 text-[12px] font-semibold">Cancelar</Button>
-          <Button onClick={() => { onExport(exportFiltered); onOpenChange(false); }} disabled={exportFiltered.length === 0} className="flex-1 rounded-xl h-11 gap-2 text-[12px] font-bold">
+        <div className="flex gap-2 pt-1">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-xl h-10 text-[11px] font-display font-semibold border-border/20">Cancelar</Button>
+          <Button onClick={() => { onExport(exportFiltered); onOpenChange(false); }} disabled={exportFiltered.length === 0} className="flex-1 rounded-xl h-10 gap-1.5 text-[11px] font-display font-bold">
             <Download className="h-3.5 w-3.5" /> Exportar{exportFiltered.length > 0 ? ` (${exportFiltered.length})` : ""}
           </Button>
         </div>
@@ -456,14 +433,13 @@ export default function Vendas() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>(PERIODS[2]);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>(PERIODS[1]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [sort, setSort] = useState<{ field: SortField; dir: SortDir }>({ field: "date", dir: "desc" });
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
-  const [activeView, setActiveView] = useState<"overview" | "analytics">("overview");
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
@@ -501,11 +477,6 @@ export default function Vendas() {
       const todayStr = today.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
       return { dateFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === todayStr), previousPeriodFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === yesterday.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })) };
-    }
-    if (selectedPeriod.days === 1) {
-      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-      const dayBefore = new Date(today); dayBefore.setDate(dayBefore.getDate() - 2);
-      return { dateFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === yesterday.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })), previousPeriodFiltered: transactions.filter(t => toBrasiliaDate(t.created_at) === dayBefore.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })) };
     }
     const start = new Date(today); start.setDate(start.getDate() - selectedPeriod.days); start.setHours(0, 0, 0, 0);
     const prevStart = new Date(start); prevStart.setDate(prevStart.getDate() - selectedPeriod.days);
@@ -624,7 +595,6 @@ export default function Vendas() {
       { label: "Pendentes", value: "pending" as StatusFilter, count: c.pending },
       { label: "Falhas", value: "failed" as StatusFilter, count: c.failed },
       { label: "Reembolsos", value: "refunded" as StatusFilter, count: c.refunded },
-      { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback },
     ];
   }, [dateFiltered]);
 
@@ -659,12 +629,11 @@ export default function Vendas() {
   const peakHour = rawPeakSales > 0 ? metrics.hours.findIndex((value) => value === rawPeakSales) : null;
 
   const paymentMix = [
-    { label: "PIX", value: m.pixRev, count: m.pixCount, icon: <Smartphone className="h-4 w-4" />, total: m.totalNet, color: "success" },
-    { label: "Cartão", value: m.cardRev, count: m.cardCount, icon: <CreditCard className="h-4 w-4" />, total: m.totalNet, color: "info" },
-    { label: "Boleto", value: m.boletoRev, count: m.boletoCount, icon: <FileText className="h-4 w-4" />, total: m.totalNet, color: "warning" },
+    { label: "PIX", value: m.pixRev, count: m.pixCount, icon: <Smartphone className="h-3.5 w-3.5" />, total: m.totalNet, color: "success" },
+    { label: "Cartão", value: m.cardRev, count: m.cardCount, icon: <CreditCard className="h-3.5 w-3.5" />, total: m.totalNet, color: "info" },
+    { label: "Boleto", value: m.boletoRev, count: m.boletoCount, icon: <FileText className="h-3.5 w-3.5" />, total: m.totalNet, color: "warning" },
   ];
 
-  const topPaymentMethod = paymentMix.reduce((best, item) => item.value > best.value ? item : best, paymentMix[0]);
   const filteredNetTotal = sortedFiltered.reduce((acc, tx) => acc + Number(tx.net_amount), 0);
   const periodLabel = isCustom
     ? customRange?.from
@@ -676,47 +645,38 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1320px] pb-12 px-1">
+    <div className="mx-auto w-full max-w-[1360px] pb-12 px-1">
       {/* ─── HEADER ─── */}
-      <motion.header
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
-      >
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-lg shadow-primary/10">
-            <BarChart3 className="h-6 w-6" />
+      <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center border border-primary/12">
+            <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-[26px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Minhas Vendas
-              </h1>
-              <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/10 px-3 py-1">
-                <span className="relative flex h-2 w-2">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-display font-black tracking-[-0.03em] text-foreground">Minhas Vendas</h1>
+              <div className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-success/15 bg-success/6 px-2 py-0.5">
+                <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-50" />
-                  <span className="relative h-2 w-2 rounded-full bg-success" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-success">Live</span>
+                <span className="text-[8px] font-display font-bold uppercase tracking-widest text-success">Live</span>
               </div>
             </div>
-            <p className="text-[13px] text-muted-foreground/50" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Performance, analytics e gestão de transações em tempo real
-            </p>
+            <p className="text-[11px] text-muted-foreground/40 font-display">Analytics e gestão em tempo real</p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {PERIODS.map((opt) => (
             <button
               key={opt.label}
               onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
               className={cn(
-                "rounded-xl px-3.5 py-2 text-[11px] font-bold transition-all active:scale-95",
+                "rounded-lg px-3 py-1.5 text-[10px] font-display font-bold transition-all active:scale-95",
                 !isCustom && selectedPeriod.label === opt.label
-                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                  : "bg-card text-muted-foreground/50 hover:text-foreground border border-border/20 hover:border-border/40"
+                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15"
+                  : "bg-card/60 text-muted-foreground/40 hover:text-foreground border border-border/15 hover:border-border/30"
               )}
             >
               {opt.label}
@@ -725,108 +685,75 @@ export default function Vendas() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "h-9 rounded-xl border px-3.5 text-[11px] font-bold transition-all active:scale-95",
-                isCustom ? "border-primary/30 bg-primary/10 text-primary" : "border-border/20 bg-card text-muted-foreground/50 hover:text-foreground"
+                "h-7 rounded-lg border px-2.5 text-[10px] font-display font-bold transition-all active:scale-95",
+                isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/15 bg-card/60 text-muted-foreground/40 hover:text-foreground"
               )}>
-                <span className="inline-flex items-center gap-1.5">
-                  <CalendarDays className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1">
+                  <CalendarDays className="h-3 w-3" />
                   {isCustom && customRange?.from
                     ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
                     : "Período"}
                 </span>
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/25 bg-card p-0 shadow-xl">
+            <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/20 bg-card p-0 shadow-xl">
               <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
             </PopoverContent>
           </Popover>
-          <button onClick={toggleHidden} className={cn("h-9 w-9 rounded-xl border transition-all active:scale-95", hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border/20 bg-card text-muted-foreground/40 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
-            {hidden ? <EyeOff className="mx-auto h-4 w-4" /> : <Eye className="mx-auto h-4 w-4" />}
-          </button>
-          <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-2 rounded-xl border border-border/20 bg-card px-3.5 text-[11px] font-bold text-muted-foreground/50 transition-all hover:text-foreground active:scale-95">
-            <Download className="h-3.5 w-3.5" /> Exportar
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={toggleHidden} className={cn("h-7 w-7 rounded-lg border transition-all active:scale-95", hidden ? "border-primary/20 bg-primary/8 text-primary" : "border-border/15 bg-card/60 text-muted-foreground/30 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+              {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
+            </button>
+            <button onClick={() => setShowExportDialog(true)} className="h-7 rounded-lg border border-border/15 bg-card/60 px-2.5 text-[10px] font-display font-bold text-muted-foreground/40 transition-all hover:text-foreground active:scale-95 inline-flex items-center gap-1">
+              <Download className="h-3 w-3" /> CSV
+            </button>
+          </div>
         </div>
-      </motion.header>
+      </header>
 
-      {/* ─── HERO KPI STRIP ─── */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.05 }}
-        className="mb-6"
-      >
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "Receita Líquida", value: hidden ? "R$ •••••" : fmtCompact(m.totalNet), helper: periodLabel, deltaCur: m.totalNet, deltaPrev: p.totalNet, sparkline: metrics.dailyNetArr, color: "primary", icon: <Banknote className="h-5 w-5" /> },
-            { label: "Faturamento Bruto", value: hidden ? HIDE : fmt(m.totalGross), helper: "antes das taxas", deltaCur: m.totalGross, deltaPrev: p.totalGross, sparkline: metrics.dailyGrossArr, color: "info", icon: <Wallet className="h-5 w-5" /> },
-            { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgTicket), helper: `${m.approved.length} vendas`, deltaCur: m.avgTicket, deltaPrev: p.avgTicket, sparkline: metrics.dailyAvgTicketArr, color: "warning", icon: <Receipt className="h-5 w-5" /> },
-            { label: "Conversão", value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`, helper: `${m.approved.length}/${dateFiltered.length}`, deltaCur: m.conversion, deltaPrev: p.conversion, sparkline: metrics.dailyApprovalRateArr, color: "success", icon: <Target className="h-5 w-5" /> },
-          ].map((kpi, idx) => (
-            <motion.div
-              key={kpi.label}
-              whileHover={{ y: -4, scale: 1.01 }}
-              transition={springTransition}
-              className={cn(
-                "group relative overflow-hidden rounded-2xl border bg-card p-5 transition-all cursor-default",
-                "border-border/20 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/8",
-                idx === 0 && "col-span-2 lg:col-span-1"
-              )}
-            >
-              {/* Glow on hover */}
-              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-3">
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border", `bg-${kpi.color}/10 text-${kpi.color} border-${kpi.color}/20`)}>
-                    {kpi.icon}
-                  </div>
-                  <Sparkline data={kpi.sparkline} color={kpi.color} className="opacity-60 group-hover:opacity-100 transition-opacity" />
-                </div>
-
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/45 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  {kpi.label}
-                </p>
-                <div className="flex items-end gap-2.5">
-                  <span className={cn("text-[28px] font-bold leading-none tracking-tight text-foreground", idx === 0 && "text-[32px]")} style={{ fontFamily: "'Space Grotesk', sans-serif", fontFeatureSettings: "'tnum'" }}>
-                    {kpi.value}
-                  </span>
-                  {!hidden && <DeltaBadge cur={kpi.deltaCur} prev={kpi.deltaPrev} />}
-                </div>
-                <p className="mt-2 text-[11px] text-muted-foreground/40" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{kpi.helper}</p>
+      {/* ─── KPI STRIP ─── */}
+      <section className="mb-5 grid gap-3 grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Receita Líquida", value: hidden ? "R$ •••••" : fmtCompact(m.totalNet), sub: periodLabel, cur: m.totalNet, prev: p.totalNet, spark: metrics.dailyNetArr, color: "primary", icon: <Banknote className="h-4 w-4" /> },
+          { label: "Faturamento", value: hidden ? HIDE : fmt(m.totalGross), sub: "bruto", cur: m.totalGross, prev: p.totalGross, spark: metrics.dailyGrossArr, color: "info", icon: <Wallet className="h-4 w-4" /> },
+          { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgTicket), sub: `${m.approved.length} vendas`, cur: m.avgTicket, prev: p.avgTicket, spark: metrics.dailyAvgTicketArr, color: "warning", icon: <Receipt className="h-4 w-4" /> },
+          { label: "Conversão", value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`, sub: `${m.approved.length}/${dateFiltered.length}`, cur: m.conversion, prev: p.conversion, spark: metrics.dailyApprovalRateArr, color: "success", icon: <Target className="h-4 w-4" /> },
+        ].map((kpi) => (
+          <div key={kpi.label} className="group rounded-xl border border-border/12 bg-card/50 p-4 hover:border-primary/12 transition-all duration-300 relative overflow-hidden">
+            <div className="flex items-start justify-between mb-2.5">
+              <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border", `bg-${kpi.color}/8 text-${kpi.color} border-${kpi.color}/12`)}>
+                {kpi.icon}
               </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
+              <Sparkline data={kpi.spark} color={kpi.color} />
+            </div>
+            <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/35 mb-0.5">{kpi.label}</p>
+            <div className="flex items-end gap-2">
+              <span className="text-[22px] font-display font-black leading-none tracking-tight text-foreground tabular-nums">{kpi.value}</span>
+              {!hidden && <DeltaBadge cur={kpi.cur} prev={kpi.prev} />}
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground/30 font-display">{kpi.sub}</p>
+          </div>
+        ))}
+      </section>
 
       {/* ─── CHART + SIDEBAR ─── */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.1 }}
-        className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12"
-      >
+      <section className="mb-5 grid grid-cols-1 gap-3 xl:grid-cols-12">
         {/* Chart */}
-        <article className="rounded-2xl border border-border/20 bg-card p-5 md:p-6 xl:col-span-8">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <article className="rounded-xl border border-border/12 bg-card/50 p-4 xl:col-span-8">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                Revenue Timeline
-              </p>
-              <h2 className="text-[20px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Receita Diária
-              </h2>
+              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25 mb-0.5">Revenue Timeline</p>
+              <h2 className="text-base font-display font-black tracking-tight text-foreground">Receita Diária</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               {[
                 { label: "Líquido", value: hidden ? HIDE : fmtCompact(m.totalNet), color: "text-primary" },
                 { label: "Bruto", value: hidden ? HIDE : fmtCompact(m.totalGross), color: "text-foreground" },
                 { label: "Taxas", value: hidden ? HIDE : `-${fmtCompact(m.totalFees)}`, color: "text-destructive" },
               ].map(s => (
-                <div key={s.label} className="rounded-xl bg-muted/8 border border-border/10 px-3 py-2 text-center min-w-[80px]">
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</p>
-                  <p className={cn("text-[13px] font-bold mt-0.5 tabular-nums", s.color)} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.value}</p>
+                <div key={s.label} className="rounded-lg bg-muted/6 border border-border/8 px-2.5 py-1.5 text-center min-w-[70px]">
+                  <p className="text-[8px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">{s.label}</p>
+                  <p className={cn("text-[11px] font-display font-bold mt-0.5 tabular-nums", s.color)}>{s.value}</p>
                 </div>
               ))}
             </div>
@@ -835,137 +762,120 @@ export default function Vendas() {
         </article>
 
         {/* Payment Mix + Health */}
-        <div className="xl:col-span-4 space-y-4">
-          <article className="rounded-2xl border border-border/20 bg-card p-5">
-            <div className="flex items-center justify-between mb-4">
+        <div className="xl:col-span-4 space-y-3">
+          <article className="rounded-xl border border-border/12 bg-card/50 p-4">
+            <div className="flex items-center justify-between mb-3.5">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Payment Mix</p>
-                <p className="text-[14px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Métodos</p>
+                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Payment Mix</p>
+                <p className="text-sm font-display font-bold text-foreground mt-0.5">Métodos</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-                <PieChart className="h-4 w-4" />
+              <div className="h-8 w-8 rounded-lg bg-primary/8 text-primary flex items-center justify-center border border-primary/12">
+                <PieChart className="h-3.5 w-3.5" />
               </div>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {paymentMix.map((pm) => {
                 const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                 return (
-                  <div key={pm.label} className="rounded-xl border border-border/10 bg-muted/5 p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                  <div key={pm.label} className="rounded-lg border border-border/8 bg-muted/4 p-2.5">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
                         <span className={cn(`text-${pm.color}`)}>{pm.icon}</span>
-                        <span className="text-[12px] font-bold text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{pm.label}</span>
-                        <span className="text-[10px] text-muted-foreground/35 font-mono">{pm.count}x</span>
+                        <span className="text-[11px] font-display font-bold text-foreground">{pm.label}</span>
+                        <span className="text-[9px] text-muted-foreground/25 font-mono">{pm.count}x</span>
                       </div>
-                      <span className="text-[13px] font-bold tabular-nums text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {hidden ? HIDE : fmtCompact(pm.value)}
-                      </span>
+                      <span className="text-[12px] font-display font-bold tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(pm.value)}</span>
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
+                    <div className="h-1 overflow-hidden rounded-full bg-muted/8">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         className={cn("h-full rounded-full", `bg-${pm.color}`)}
                       />
                     </div>
-                    <p className="text-[10px] text-muted-foreground/30 mt-1 tabular-nums font-mono">{pct.toFixed(1)}% do total</p>
+                    <p className="text-[9px] text-muted-foreground/20 mt-1 tabular-nums font-mono">{pct.toFixed(1)}%</p>
                   </div>
                 );
               })}
             </div>
           </article>
 
-          <article className="rounded-2xl border border-border/20 bg-card p-5">
-            <div className="flex items-center justify-between mb-4">
+          {/* Health Indicators */}
+          <article className="rounded-xl border border-border/12 bg-card/50 p-4">
+            <div className="flex items-center justify-between mb-3.5">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Health Score</p>
-                <p className="text-[14px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Saúde</p>
+                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Health</p>
+                <p className="text-sm font-display font-bold text-foreground mt-0.5">Saúde</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-success/10 text-success flex items-center justify-center border border-success/20">
-                <Shield className="h-4 w-4" />
+              <div className="h-8 w-8 rounded-lg bg-success/8 text-success flex items-center justify-center border border-success/12">
+                <Activity className="h-3.5 w-3.5" />
               </div>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {[
                 { label: "Reembolso", value: m.refundRate, threshold: 5 },
                 { label: "Chargeback", value: m.chargebackRate, threshold: 1 },
-                { label: "Falhas", value: m.failedRate, threshold: 20 },
-              ].map((h) => {
+                { label: "Falhas", value: m.failedRate, threshold: 10 },
+              ].map(h => {
                 const bad = h.value > h.threshold;
                 return (
-                  <div key={h.label} className="flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] font-semibold text-foreground">{h.label}</span>
-                        <span className={cn("text-[12px] font-bold tabular-nums", bad ? "text-destructive" : "text-success")} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          {h.value.toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
-                        <div className={cn("h-full rounded-full transition-all", bad ? "bg-destructive" : "bg-success")} style={{ width: `${Math.min(h.value * (100 / h.threshold), 100)}%` }} />
-                      </div>
-                      <p className="text-[9px] text-muted-foreground/25 mt-0.5 font-mono">limite: {h.threshold}%</p>
+                  <div key={h.label} className="rounded-lg border border-border/8 bg-muted/4 p-2.5">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-display font-semibold text-foreground/70">{h.label}</span>
+                      <span className={cn("text-[11px] font-display font-bold tabular-nums", bad ? "text-destructive" : "text-success")}>{h.value.toFixed(1)}%</span>
                     </div>
+                    <div className="h-1 overflow-hidden rounded-full bg-muted/8">
+                      <div className={cn("h-full rounded-full transition-all", bad ? "bg-destructive" : "bg-success")} style={{ width: `${Math.min(h.value * (100 / h.threshold), 100)}%` }} />
+                    </div>
+                    <p className="text-[8px] text-muted-foreground/15 mt-0.5 font-mono">limite: {h.threshold}%</p>
                   </div>
                 );
               })}
             </div>
           </article>
         </div>
-      </motion.section>
+      </section>
 
       {/* ─── BOTTOM GRID: Top Products + Heatmap + Quick Stats ─── */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.15 }}
-        className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12"
-      >
+      <section className="mb-5 grid grid-cols-1 gap-3 xl:grid-cols-12">
         {/* Top Products */}
-        <article className="rounded-2xl border border-border/20 bg-card p-5 xl:col-span-5">
-          <div className="flex items-center justify-between mb-5">
+        <article className="rounded-xl border border-border/12 bg-card/50 p-4 xl:col-span-5">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Product Ranking</p>
-              <p className="text-[16px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Top Produtos</p>
+              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Ranking</p>
+              <p className="text-sm font-display font-bold text-foreground mt-0.5">Top Produtos</p>
             </div>
-            <span className="text-[11px] font-bold text-muted-foreground/40 bg-muted/10 rounded-lg px-2.5 py-1 tabular-nums">{metrics.topProducts.length} ativos</span>
+            <span className="text-[10px] font-display font-bold text-muted-foreground/30 bg-muted/6 rounded-md px-2 py-0.5 tabular-nums border border-border/8">{metrics.topProducts.length}</span>
           </div>
           {metrics.topProducts.length === 0 ? (
-            <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dashed border-border/15 text-center">
-              <Package className="mb-2 h-6 w-6 text-muted-foreground/15" />
-              <p className="text-[12px] text-muted-foreground/30">Sem produtos neste período</p>
+            <div className="flex min-h-[140px] flex-col items-center justify-center rounded-lg border border-dashed border-border/10 text-center">
+              <Package className="mb-2 h-5 w-5 text-muted-foreground/10" />
+              <p className="text-[11px] text-muted-foreground/20 font-display">Sem produtos neste período</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {metrics.topProducts.map((prod, index) => {
                 const maxRev = metrics.topProducts[0]?.revenue || 1;
                 const pct = (prod.revenue / maxRev) * 100;
                 return (
-                  <motion.div
-                    key={prod.id}
-                    whileHover={{ x: 4 }}
-                    transition={springTransition}
-                    className="rounded-xl border border-border/10 bg-muted/5 p-3.5 hover:border-primary/15 transition-all cursor-default"
-                  >
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          <span className="text-[12px] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>#{index + 1}</span>
+                  <div key={prod.id} className="rounded-lg border border-border/8 bg-muted/4 p-3 hover:border-primary/10 transition-all">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary border border-primary/10">
+                          <span className="text-[9px] font-display font-bold">#{index + 1}</span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[12px] font-bold text-foreground truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{prod.name}</p>
-                          <p className="text-[10px] text-muted-foreground/30 font-mono">{prod.sales} vendas</p>
+                          <p className="text-[11px] font-display font-bold text-foreground truncate">{prod.name}</p>
+                          <p className="text-[9px] text-muted-foreground/25 font-mono">{prod.sales}x</p>
                         </div>
                       </div>
-                      <p className="text-[14px] font-bold text-foreground shrink-0 tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {hidden ? HIDE : fmtCompact(prod.revenue)}
-                      </p>
+                      <p className="text-[12px] font-display font-bold text-foreground shrink-0 tabular-nums">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
                     </div>
-                    <div className="h-1 overflow-hidden rounded-full bg-muted/10">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary/50" />
+                    <div className="h-0.5 overflow-hidden rounded-full bg-muted/8">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary/40" />
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -973,19 +883,19 @@ export default function Vendas() {
         </article>
 
         {/* Heatmap */}
-        <article className="rounded-2xl border border-border/20 bg-card p-5 xl:col-span-4">
-          <div className="flex items-center justify-between mb-5">
+        <article className="rounded-xl border border-border/12 bg-card/50 p-4 xl:col-span-4">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Intraday Pulse</p>
-              <p className="text-[16px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Horários de Pico</p>
+              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Intraday</p>
+              <p className="text-sm font-display font-bold text-foreground mt-0.5">Horários de Pico</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground/30 font-mono">PICO</p>
-              <p className="text-[16px] font-bold text-primary" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`}</p>
+              <p className="text-[8px] text-muted-foreground/20 font-mono uppercase">Pico</p>
+              <p className="text-sm font-display font-bold text-primary">{peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`}</p>
             </div>
           </div>
-          <div className="rounded-xl border border-border/10 bg-muted/5 p-4">
-            <div className="flex h-[160px] items-end gap-[2px]">
+          <div className="rounded-lg border border-border/8 bg-muted/4 p-3">
+            <div className="flex h-[140px] items-end gap-[2px]">
               {metrics.hours.map((count, hour) => {
                 const intensity = count / maxHour;
                 const active = peakHour !== null && hour === peakHour;
@@ -993,15 +903,15 @@ export default function Vendas() {
                   <div key={hour} className="group relative flex h-full flex-1 flex-col items-center justify-end">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${Math.max(intensity * 100, 4)}%` }}
-                      transition={{ duration: 0.5, delay: hour * 0.015, ease: [0.16, 1, 0.3, 1] }}
+                      animate={{ height: `${Math.max(intensity * 100, 3)}%` }}
+                      transition={{ duration: 0.4, delay: hour * 0.012, ease: [0.16, 1, 0.3, 1] }}
                       className={cn(
                         "w-full rounded-t-sm transition-colors",
-                        active ? "bg-primary shadow-sm shadow-primary/30" : intensity > 0 ? "bg-primary/30 group-hover:bg-primary/50" : "bg-muted/8"
+                        active ? "bg-primary shadow-sm shadow-primary/20" : intensity > 0 ? "bg-primary/25 group-hover:bg-primary/40" : "bg-muted/6"
                       )}
                     />
-                    <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <div className="rounded-lg border border-border/20 bg-popover px-2.5 py-1.5 text-[10px] font-bold text-foreground shadow-lg whitespace-nowrap" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                    <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className="rounded-md border border-border/15 bg-popover px-2 py-1 text-[9px] font-display font-bold text-foreground shadow-lg whitespace-nowrap">
                         {String(hour).padStart(2, "0")}h · {count}
                       </div>
                     </div>
@@ -1009,80 +919,62 @@ export default function Vendas() {
                 );
               })}
             </div>
-            <div className="mt-2 flex justify-between text-[9px] text-muted-foreground/25 font-mono">
+            <div className="mt-1.5 flex justify-between text-[8px] text-muted-foreground/15 font-mono">
               <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
             </div>
           </div>
         </article>
 
         {/* Quick Stats */}
-        <div className="xl:col-span-3 space-y-3">
+        <div className="xl:col-span-3 space-y-2">
           {[
-            { label: "Clientes Únicos", value: String(m.uniqueCustomers), icon: <Users className="h-4 w-4" />, color: "primary" },
-            { label: "Pendências", value: String(m.pending.length), icon: <Clock className="h-4 w-4" />, color: "warning" },
-            { label: "Taxas Pagas", value: hidden ? HIDE : fmtCompact(m.totalFees), icon: <Receipt className="h-4 w-4" />, color: "destructive" },
-            { label: "Última Venda", value: lastSaleText ? lastSaleText.replace("há ", "").replace(" atrás", "") : "—", icon: <Zap className="h-4 w-4" />, color: "success" },
+            { label: "Clientes", value: String(m.uniqueCustomers), icon: <Users className="h-3.5 w-3.5" />, color: "primary" },
+            { label: "Pendências", value: String(m.pending.length), icon: <Clock className="h-3.5 w-3.5" />, color: "warning" },
+            { label: "Taxas Pagas", value: hidden ? HIDE : fmtCompact(m.totalFees), icon: <Receipt className="h-3.5 w-3.5" />, color: "destructive" },
+            { label: "Última Venda", value: lastSaleText ? lastSaleText.replace("há ", "").replace(" atrás", "") : "—", icon: <Zap className="h-3.5 w-3.5" />, color: "success" },
           ].map((stat) => (
-            <motion.div
-              key={stat.label}
-              whileHover={{ x: 4 }}
-              transition={springTransition}
-              className="flex items-center gap-3.5 rounded-2xl border border-border/20 bg-card p-4 hover:border-primary/20 transition-all cursor-default"
-            >
-              <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", `bg-${stat.color}/10 text-${stat.color} border-${stat.color}/20`)}>
+            <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-border/12 bg-card/50 p-3.5 hover:border-primary/12 transition-all">
+              <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border", `bg-${stat.color}/8 text-${stat.color} border-${stat.color}/12`)}>
                 {stat.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{stat.label}</p>
-                <p className="text-[18px] font-bold text-foreground leading-tight truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</p>
+                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/30">{stat.label}</p>
+                <p className="text-sm font-display font-bold text-foreground leading-tight truncate tabular-nums">{stat.value}</p>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/15 shrink-0" />
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.section>
+      </section>
 
       {/* ─── TRANSACTION LEDGER ─── */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.2 }}
-        className="overflow-hidden rounded-2xl border border-border/20 bg-card"
-      >
-        <div className="border-b border-border/10 px-6 pt-5 pb-4">
-          <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <section className="overflow-hidden rounded-xl border border-border/12 bg-card/50">
+        <div className="border-b border-border/8 px-5 pt-4 pb-3.5">
+          <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                Transaction Ledger
-              </p>
-              <h2 className="mt-1 text-[20px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Transações
-              </h2>
+              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Transaction Ledger</p>
+              <h2 className="mt-0.5 text-base font-display font-black tracking-tight text-foreground">Transações</h2>
             </div>
 
-            <div className="relative w-full xl:w-80">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/25" />
+            <div className="relative w-full xl:w-72">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/20" />
               <input
                 id="vendas-search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar nome, e-mail ou ID…"
-                className="h-11 w-full rounded-xl border border-border/15 bg-muted/8 pl-10 pr-12 text-[13px] text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/25 transition-all"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                className="h-9 w-full rounded-lg border border-border/12 bg-muted/5 pl-9 pr-10 text-[12px] text-foreground placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 transition-all font-display"
               />
               {search ? (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
-                  <X className="h-4 w-4 text-muted-foreground/30 hover:text-foreground transition-colors" />
+                  <X className="h-3.5 w-3.5 text-muted-foreground/20 hover:text-foreground transition-colors" />
                 </button>
               ) : (
-                <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/10 bg-muted/10 px-1.5 py-0.5 text-[9px] text-muted-foreground/20 md:inline font-mono">
-                  ⌘K
-                </kbd>
+                <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-border/8 bg-muted/8 px-1 py-0.5 text-[8px] text-muted-foreground/15 md:inline font-mono">⌘K</kbd>
               )}
             </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 -mb-1">
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5">
             {statusTabs.map((tab) => {
               const active = statusFilter === tab.value;
               return (
@@ -1090,58 +982,54 @@ export default function Vendas() {
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
-                    "inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[11px] font-bold transition-all active:scale-95",
-                    active ? "bg-primary text-primary-foreground shadow-md shadow-primary/15" : "bg-muted/8 text-muted-foreground/40 hover:text-foreground border border-transparent hover:border-border/20"
+                    "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-display font-bold transition-all active:scale-95",
+                    active ? "bg-primary text-primary-foreground shadow-sm shadow-primary/10" : "bg-muted/5 text-muted-foreground/30 hover:text-foreground border border-transparent hover:border-border/15"
                   )}
                 >
                   {tab.label}
-                  <span className={cn("rounded-lg px-2 py-0.5 text-[10px] font-bold tabular-nums", active ? "bg-primary-foreground/15 text-primary-foreground" : "bg-card text-muted-foreground/30")} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    {tab.count}
-                  </span>
+                  <span className={cn("rounded-md px-1.5 py-0.5 text-[9px] font-display font-bold tabular-nums", active ? "bg-primary-foreground/12 text-primary-foreground" : "bg-card/60 text-muted-foreground/20")}>{tab.count}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="flex items-center justify-between bg-muted/[0.03] px-6 py-2.5 border-b border-border/[0.05]">
-          <p className="text-[11px] text-muted-foreground/30 font-mono">
+        <div className="flex items-center justify-between bg-muted/[0.02] px-5 py-2 border-b border-border/[0.04]">
+          <p className="text-[10px] text-muted-foreground/20 font-mono">
             {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
           </p>
           {!hidden && sortedFiltered.length > 0 && (
-            <p className="text-[12px] font-bold text-primary tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Líquido: {fmt(filteredNetTotal)}
-            </p>
+            <p className="text-[11px] font-display font-bold text-primary tabular-nums">Líquido: {fmt(filteredNetTotal)}</p>
           )}
         </div>
 
         {/* Desktop Table */}
         <div className="hidden md:block">
           {loading ? (
-            <div className="p-20 text-center">
-              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-              <p className="text-[12px] text-muted-foreground/30">Carregando transações…</p>
+            <div className="p-16 text-center">
+              <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+              <p className="text-[11px] text-muted-foreground/20 font-display">Carregando transações…</p>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-border/8">
-                      <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
-                      <th className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35">Produto</th>
+                    <tr className="border-b border-border/6">
+                      <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
+                      <th className="px-4 py-3 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/30">Produto</th>
                       <SortHead label="Valor" field="amount" sort={sort} onSort={handleSort} />
-                      <th className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35">Método</th>
-                      <th className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35">Status</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/30">Método</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/30">Status</th>
                       <SortHead label="Data" field="date" sort={sort} onSort={handleSort} />
-                      <th className="w-10" />
+                      <th className="w-8" />
                     </tr>
                   </thead>
                   <tbody>
                     {visibleItems.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-20">
-                          <EmptyState icon={<ShoppingCart className="h-6 w-6" />} title="Nenhuma venda encontrada" subtitle="Ajuste filtros ou período para encontrar resultados." />
+                        <td colSpan={7} className="py-16">
+                          <EmptyState icon={<ShoppingCart className="h-5 w-5" />} title="Nenhuma venda encontrada" subtitle="Ajuste filtros ou período." />
                         </td>
                       </tr>
                     ) : visibleItems.map((tx, i) => (
@@ -1151,9 +1039,9 @@ export default function Vendas() {
                 </table>
               </div>
               {visibleCount < sortedFiltered.length && (
-                <div className="border-t border-border/8 p-4 text-center">
-                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-2 rounded-xl text-[11px] font-bold text-muted-foreground/40 hover:text-foreground active:scale-95">
-                    <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount} restantes)
+                <div className="border-t border-border/6 p-3 text-center">
+                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-1.5 rounded-lg text-[10px] font-display font-bold text-muted-foreground/30 hover:text-foreground active:scale-95">
+                    <ChevronDown className="h-3 w-3" /> Carregar mais ({sortedFiltered.length - visibleCount})
                   </Button>
                 </div>
               )}
@@ -1162,28 +1050,28 @@ export default function Vendas() {
         </div>
 
         {/* Mobile Cards */}
-        <div className="space-y-2.5 p-4 md:hidden">
+        <div className="space-y-2 p-3 md:hidden">
           {loading ? (
-            <div className="p-14 text-center">
-              <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-              <p className="text-[12px] text-muted-foreground/30">Carregando…</p>
+            <div className="p-12 text-center">
+              <div className="mx-auto mb-2 h-7 w-7 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+              <p className="text-[11px] text-muted-foreground/20 font-display">Carregando…</p>
             </div>
           ) : visibleItems.length === 0 ? (
-            <EmptyState icon={<ShoppingCart className="h-6 w-6" />} title="Nenhuma venda" subtitle="Ajuste filtros ou período" />
+            <EmptyState icon={<ShoppingCart className="h-5 w-5" />} title="Nenhuma venda" subtitle="Ajuste filtros ou período" />
           ) : (
             <>
               {visibleItems.map((tx, i) => (
                 <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
               ))}
               {visibleCount < sortedFiltered.length && (
-                <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-2 rounded-xl text-[11px] font-bold text-muted-foreground/40 hover:text-foreground active:scale-95">
-                  <ChevronDown className="h-3.5 w-3.5" /> Mais {sortedFiltered.length - visibleCount}
+                <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-1.5 rounded-lg text-[10px] font-display font-bold text-muted-foreground/30 hover:text-foreground active:scale-95">
+                  <ChevronDown className="h-3 w-3" /> Mais {sortedFiltered.length - visibleCount}
                 </Button>
               )}
             </>
           )}
         </div>
-      </motion.section>
+      </section>
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} transactions={dateFiltered} products={products} productsRaw={productsRaw} onExport={handleExportCSV} />
