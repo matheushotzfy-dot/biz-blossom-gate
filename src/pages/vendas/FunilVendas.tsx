@@ -15,7 +15,7 @@ interface FunnelStage {
 
 export default function FunilVendas() {
   const { user } = useAuth();
-  const [period, setPeriod] = useState("30d");
+  const [period, setPeriod] = useState("today");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, failed: 0, refunded: 0 });
 
