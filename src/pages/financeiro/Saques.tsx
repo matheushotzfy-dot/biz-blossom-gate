@@ -356,7 +356,7 @@ export default function Saques() {
                   <div>
                     <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-2">{item.label}</p>
                     <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
-                    {item.sub && <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.sub}</p>}
+                    {'delta' in item && item.delta !== undefined && <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.delta >= 0 ? "+" : ""}{fmtCompact(item.delta)}</p>}
                   </div>
                   <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
                     <item.icon className="h-4 w-4" />
