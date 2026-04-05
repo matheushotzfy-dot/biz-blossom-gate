@@ -41,6 +41,9 @@ import {
   Webhook,
   User,
   BookOpen,
+  Banknote,
+  Crown,
+  Check,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -52,6 +55,7 @@ import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
+import { motion } from "framer-motion";
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
