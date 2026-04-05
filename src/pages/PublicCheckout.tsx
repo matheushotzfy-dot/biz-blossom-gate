@@ -86,7 +86,50 @@ const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits:
 const BUYER_NAMES = ["Ana S.", "Carlos M.", "Juliana R.", "Pedro H.", "Mariana L.", "Lucas F.", "Fernanda A.", "Rafael B.", "Camila T.", "Bruno V.", "Patricia O.", "Diego N.", "Isabela C.", "Thiago P.", "Larissa D."];
 const CITIES = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Porto Alegre", "Salvador", "Brasília", "Fortaleza", "Recife", "Goiânia"];
 
-/* ─── Live Viewer Counter Component ─── */
+/* ═══ Premium Loading Screen ═══ */
+function PremiumLoader({ color }: { color?: string }) {
+  const c = color || "#10b981";
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(210_20%_98%)]">
+      <div className="flex flex-col items-center gap-6 animate-fade-in">
+        {/* Animated logo area */}
+        <div className="relative">
+          {/* Outer glow ring */}
+          <div className="absolute -inset-4 rounded-full animate-pulse opacity-30" style={{ background: `radial-gradient(circle, ${c}40, transparent 70%)` }} />
+          {/* Spinning ring */}
+          <div className="h-16 w-16 rounded-2xl relative">
+            <svg className="absolute inset-0 h-16 w-16 animate-spin" style={{ animationDuration: "2.5s" }} viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="none" stroke={c + "15"} strokeWidth="3" />
+              <circle cx="32" cy="32" r="28" fill="none" stroke={c} strokeWidth="3" strokeLinecap="round" strokeDasharray="40 136" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Lock className="h-5 w-5" style={{ color: c }} />
+            </div>
+          </div>
+        </div>
+        <div className="text-center space-y-1.5">
+          <p className="text-sm font-bold text-gray-700">Carregando checkout seguro</p>
+          <div className="flex items-center justify-center gap-1.5">
+            <ShieldCheck className="h-3 w-3 text-gray-300" />
+            <span className="text-[10px] text-gray-400 font-medium">Conexão criptografada</span>
+          </div>
+        </div>
+        {/* Progress dots */}
+        <div className="flex gap-1.5">
+          {[0, 1, 2].map(i => (
+            <div
+              key={i}
+              className="h-1.5 w-1.5 rounded-full animate-pulse"
+              style={{ backgroundColor: c, animationDelay: `${i * 0.3}s` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ Live Viewer Counter ═══ */
 function LiveViewers({ color }: { color: string }) {
   const [count, setCount] = useState(Math.floor(Math.random() * 30) + 15);
   useEffect(() => {
@@ -108,7 +151,7 @@ function LiveViewers({ color }: { color: string }) {
   );
 }
 
-/* ─── Recent Purchase Toast ─── */
+/* ═══ Recent Purchase Toast ═══ */
 function RecentPurchaseToast({ productName, color }: { productName: string; color: string }) {
   const [visible, setVisible] = useState(false);
   const [buyer, setBuyer] = useState({ name: "", city: "", ago: 0 });
@@ -131,8 +174,8 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
   if (!visible) return null;
   return (
     <div className="fixed bottom-4 left-4 z-50 animate-slide-in-left max-w-[320px]">
-      <div className="rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] p-3.5 shadow-xl shadow-black/10 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + "20" }}>
+      <div className="rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] p-3.5 shadow-2xl shadow-black/10 flex items-center gap-3 backdrop-blur-xl">
+        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + "15" }}>
           <Check className="h-5 w-5" style={{ color }} />
         </div>
         <div className="min-w-0">
@@ -144,22 +187,23 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
   );
 }
 
-/* ─── Step Indicator ─── */
+/* ═══ Step Indicator (Premium) ═══ */
 function StepIndicator({ current, total, color }: { current: number; total: number; color: string }) {
   return (
-    <div className="flex items-center gap-1 w-full">
+    <div className="flex items-center gap-2 w-full">
       {Array.from({ length: total }, (_, i) => {
         const step = i + 1;
         const isActive = step === current;
         const isDone = step < current;
         return (
-          <div key={step} className="flex-1 flex items-center gap-1">
-            <div className="flex-1 h-1 rounded-full overflow-hidden bg-[hsl(var(--checkout-border))]">
+          <div key={step} className="flex items-center gap-2 flex-1">
+            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: `${color}10` }}>
               <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
+                className="h-full rounded-full transition-all duration-1000 ease-out"
                 style={{
                   width: isDone ? "100%" : isActive ? "50%" : "0%",
                   backgroundColor: isDone || isActive ? color : "transparent",
+                  boxShadow: isDone || isActive ? `0 0 8px ${color}30` : "none",
                 }}
               />
             </div>
@@ -228,14 +272,12 @@ export default function PublicCheckout() {
   const mins = String(Math.floor(timeLeft / 60)).padStart(2, "0");
   const secs = String(timeLeft % 60).padStart(2, "0");
 
-  // Load product, pixels, and bumps in parallel for minimal latency
+  // Load product, pixels, and bumps
   useEffect(() => {
     if (!slug) return;
     let cancelled = false;
 
     async function loadCheckoutData() {
-      // Step 1: Load product first (required for step 2)
-      // Match slug against full URLs: /pay/SLUG or /checkout/SLUG
       const { data: prod } = await supabase
         .from("products_public")
         .select("*")
@@ -245,13 +287,11 @@ export default function PublicCheckout() {
 
       if (cancelled) return;
       if (!prod) { setLoading(false); return; }
-      // Also fetch checkout_theme from products table (not in the public view)
       const { data: themeData } = await supabase.from("products").select("checkout_theme").eq("id", prod.id).maybeSingle();
       const productWithTheme = { ...prod, checkout_theme: (themeData as any)?.checkout_theme || "gray" };
       if (cancelled) return;
       setProduct(productWithTheme as unknown as Product);
 
-      // Step 2: Load pixels + bumps in parallel (both need product.id)
       const [pixelsRes, bumpsRes] = await Promise.all([
         supabase.from("product_pixels_public" as any).select("*").eq("product_id", prod.id).eq("is_active", true),
         supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", prod.id).eq("is_active", true).order("sort_order"),
@@ -259,7 +299,6 @@ export default function PublicCheckout() {
 
       if (cancelled) return;
 
-      // Process pixels
       if (pixelsRes.data && pixelsRes.data.length > 0) {
         const configs: PixelConfig[] = pixelsRes.data.map((d: any) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] }));
         setProductPixels(configs);
@@ -272,7 +311,6 @@ export default function PublicCheckout() {
         }
       }
 
-      // Process bumps
       if (bumpsRes.data && bumpsRes.data.length > 0) {
         const bumpIds = bumpsRes.data.map(b => b.bump_product_id);
         const { data: bumpProducts } = await supabase.from("products_public").select("id, name, description, price, image_url").in("id", bumpIds);
@@ -291,7 +329,6 @@ export default function PublicCheckout() {
     return () => { cancelled = true; };
   }, [slug]);
 
-  // Set default method
   useEffect(() => {
     if (!product) return;
     if (product.checkout_pix_enabled) setMethod("pix");
@@ -299,7 +336,6 @@ export default function PublicCheckout() {
     else if (product.checkout_boleto_enabled) setMethod("boleto");
   }, [product]);
 
-  // Body overflow — allow scrolling on checkout
   useEffect(() => {
     const prev = window.document.body.style.overflow;
     window.document.body.style.overflow = "auto";
@@ -307,7 +343,7 @@ export default function PublicCheckout() {
     return () => { window.document.body.style.overflow = prev || ""; window.document.body.style.overscrollBehavior = ""; };
   }, []);
 
-  // Poll transaction status with adaptive interval
+  // Poll transaction status
   useEffect(() => {
     if (checkoutState !== "pending" || !transactionId) return;
     let pollCount = 0;
@@ -316,25 +352,21 @@ export default function PublicCheckout() {
     const poll = async () => {
       pollCount++;
       try {
-        // FIX #10: Use secure RPC instead of direct table query
-        // Anon users can't SELECT on transactions (RLS blocks it)
-        // The get_checkout_status RPC is SECURITY DEFINER and returns only the status string
         const { data: status } = await supabase.rpc("get_checkout_status", { _transaction_id: transactionId });
         if (status === "completed") {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
           if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
-          return; // Stop polling
+          return;
         } else if (status === "failed" || status === "cancelled") {
           setCheckoutState("failed"); clearCheckoutSession(slug || "");
-          return; // Stop polling
+          return;
         }
       } catch { /* network error, retry */ }
-      // Adaptive: 5s for first 5min, then 15s
       const delay = pollCount > 60 ? 15000 : 5000;
       timer = setTimeout(poll, delay);
     };
 
-    timer = setTimeout(poll, 3000); // First poll after 3s
+    timer = setTimeout(poll, 3000);
     return () => clearTimeout(timer);
   }, [checkoutState, transactionId, slug]);
 
@@ -358,17 +390,16 @@ export default function PublicCheckout() {
     setSelectedBumps(prev => { const next = new Set(prev); if (next.has(bumpId)) next.delete(bumpId); else next.add(bumpId); return next; });
   };
 
-  // ─── Rate Limiting (client-side throttle) ───
+  // Rate Limiting
   const submitCountRef = useRef<number[]>([]);
-  const RATE_LIMIT_WINDOW = 60_000; // 1 minute
-  const RATE_LIMIT_MAX = 3; // max 3 attempts per minute
+  const RATE_LIMIT_WINDOW = 60_000;
+  const RATE_LIMIT_MAX = 3;
 
-  // ─── Payment Handler ───
+  // Payment Handler
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product || processingRef.current) return;
 
-    // Rate limit check
     const now = Date.now();
     submitCountRef.current = submitCountRef.current.filter(t => now - t < RATE_LIMIT_WINDOW);
     if (submitCountRef.current.length >= RATE_LIMIT_MAX) {
@@ -413,7 +444,6 @@ export default function PublicCheckout() {
           setCheckoutState("approved"); clearCheckoutSession(slug || "");
           firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
         } else if (result.secureUrl) {
-          // Validate redirect URL to prevent open redirect attacks
           try {
             const url = new URL(result.secureUrl);
             if (url.protocol === 'https:' && (url.hostname.endsWith('.podpay.co') || url.hostname.endsWith('.pagar.me'))) {
@@ -428,34 +458,26 @@ export default function PublicCheckout() {
     } catch { toast.error("Instabilidade na rede. Tente novamente."); setCheckoutState("failed"); }
     finally {
       setProcessing(false); processingRef.current = false;
-      // FIX: Clear sensitive card data from memory after submission
       setCardNumber(""); setCardExpiry(""); setCardCvv(""); setCardName("");
     }
   };
 
   const retryPayment = () => { clearCheckoutSession(slug || ""); setCheckoutState("form"); setPixData(null); setBoletoData(null); setTransactionId(null); };
 
-  /* ─── Loading / Not found ─── */
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <div className="h-12 w-12 rounded-2xl bg-emerald-100 animate-pulse" />
-          <Loader2 className="h-6 w-6 animate-spin text-emerald-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-        </div>
-        <p className="text-gray-400 text-sm">Carregando checkout seguro...</p>
-      </div>
-    </div>
-  );
+  /* ─── Loading ─── */
+  if (loading) return <PremiumLoader />;
 
   if (!product) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-900 px-4">
-      <div className="text-center">
-        <div className="h-20 w-20 rounded-3xl bg-gray-50 border border-gray-200 flex items-center justify-center mx-auto mb-6">
-          <AlertCircle className="h-10 w-10 text-gray-300" />
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(210_20%_98%)] px-4">
+      <div className="text-center animate-fade-in">
+        <div className="relative mx-auto mb-6 w-20 h-20">
+          <div className="absolute inset-0 rounded-3xl bg-gray-100 animate-pulse" />
+          <div className="relative h-20 w-20 rounded-3xl bg-white border border-gray-200/80 flex items-center justify-center shadow-lg shadow-black/5">
+            <AlertCircle className="h-8 w-8 text-gray-300" />
+          </div>
         </div>
-        <h1 className="text-xl font-bold mb-2">Produto não encontrado</h1>
-        <p className="text-sm text-gray-400">Verifique o link e tente novamente.</p>
+        <h1 className="text-xl font-extrabold text-gray-800 mb-2">Produto não encontrado</h1>
+        <p className="text-sm text-gray-400 max-w-xs mx-auto">Verifique o link e tente novamente.</p>
       </div>
     </div>
   );
@@ -486,6 +508,27 @@ export default function PublicCheckout() {
       .animate-slide-in-left { animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
       @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       .animate-fade-in { animation: fade-in 0.6s ease-out; }
+      @keyframes shimmer-flow {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+      .checkout-shimmer { animation: shimmer-flow 2s infinite; }
+      @keyframes float-gentle {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+      }
+      .animate-float { animation: float-gentle 3s ease-in-out infinite; }
+      @keyframes confetti-pop {
+        0% { transform: scale(0.5); opacity: 0; }
+        60% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .animate-confetti-pop { animation: confetti-pop 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+      @keyframes checkmark-draw {
+        0% { stroke-dashoffset: 30; }
+        100% { stroke-dashoffset: 0; }
+      }
+      .animate-checkmark { animation: checkmark-draw 0.8s ease-out 0.3s both; }
       [data-checkout-theme="dark"] .bg-white,
       [data-checkout-theme="dark"] .bg-gray-50 {
         background-color: hsl(var(--checkout-bg-elevated)) !important;
@@ -521,9 +564,9 @@ export default function PublicCheckout() {
   const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
   const availableMethods: { id: PaymentMethod; icon: any; label: string; badge?: string }[] = [];
-  if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", badge: "Aprovação instantânea" });
+  if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", badge: "Instantâneo" });
   if (product.checkout_credit_card_enabled) availableMethods.push({ id: "credit_card", icon: CreditCard, label: "Cartão", badge: "Até 12x" });
-  if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", badge: "1-3 dias úteis" });
+  if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", badge: "1-3 dias" });
 
   const totalSteps = product.checkout_address_required ? 3 : 2;
 
@@ -531,40 +574,48 @@ export default function PublicCheckout() {
   /* ═══ TELA: APROVADO ═══════════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "approved") {
-    // Redirect to thank you page after a brief celebration
     const txParam = transactionId ? `?tx=${transactionId}` : "";
     return (
-      <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-gray-50 text-gray-900"}`}>
-        <div className="text-center animate-fade-in max-w-md w-full">
-          {/* Confetti-like effect */}
-          <div className="relative mx-auto mb-8 w-28 h-28">
-            <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ backgroundColor: btnColor + "30" }} />
-            <div className="absolute inset-2 rounded-full blur-xl animate-pulse" style={{ backgroundColor: btnColor + "20", animationDelay: "0.5s" }} />
-            <div className="relative h-28 w-28 rounded-full flex items-center justify-center shadow-2xl" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}cc)` }}>
-              <CheckCircle2 className="h-14 w-14 text-white" />
+      <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-[hsl(210_20%_98%)] text-gray-900"}`}>
+        <div className="text-center animate-confetti-pop max-w-md w-full">
+          {/* Success orb with animated checkmark */}
+          <div className="relative mx-auto mb-8 w-32 h-32">
+            <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ backgroundColor: btnColor + "25" }} />
+            <div className="absolute inset-3 rounded-full blur-xl" style={{ backgroundColor: btnColor + "15" }} />
+            <div className="relative h-32 w-32 rounded-full flex items-center justify-center shadow-2xl animate-float" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}cc)`, boxShadow: `0 20px 60px -15px ${btnColor}50` }}>
+              <svg className="h-16 w-16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" className="animate-checkmark" style={{ strokeDasharray: 30, strokeDashoffset: 0 }} />
+              </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Pagamento Confirmado!</h1>
-          <p className="text-gray-400 mb-8 text-base">
-            Seu acesso foi liberado com sucesso.
-          </p>
-          <div className="rounded-2xl p-6 bg-gray-50 border border-gray-200 mb-6 text-left space-y-3">
+
+          <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Pagamento Confirmado!</h1>
+          <p className="text-gray-400 mb-8 text-base">Seu acesso foi liberado com sucesso</p>
+
+          {/* Summary card */}
+          <div className="rounded-2xl p-6 bg-white border border-gray-200/80 mb-6 text-left space-y-4 shadow-lg shadow-black/5">
             <div className="flex justify-between items-center">
               <span className="text-gray-400 text-sm">Produto</span>
-              <span className="font-bold">{product.name}</span>
+              <span className="font-bold text-gray-800">{product.name}</span>
             </div>
+            <div className="h-px bg-gray-100" />
             <div className="flex justify-between items-center">
-              <span className="text-gray-400 text-sm">Valor</span>
-              <span className="font-extrabold text-lg" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
+              <span className="text-gray-400 text-sm">Valor pago</span>
+              <span className="font-extrabold text-2xl tracking-tight" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</span>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mb-6">Confirmação enviada para <strong className="text-gray-400">{email}</strong></p>
+
+          <div className="flex items-center justify-center gap-2 mb-6 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 mx-auto w-fit">
+            <Mail className="h-3.5 w-3.5 text-gray-400" />
+            <p className="text-xs text-gray-500">Confirmação enviada para <strong>{email}</strong></p>
+          </div>
+
           <a
             href={`/obrigado${txParam}`}
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl text-white font-bold text-sm transition-opacity hover:opacity-90 shadow-xl"
-            style={{ backgroundColor: btnColor }}
+            className="inline-flex items-center gap-2.5 px-10 py-4 rounded-2xl text-white font-bold text-sm transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+            style={{ backgroundColor: btnColor, boxShadow: `0 10px 40px -10px ${btnColor}50` }}
           >
-            Ver detalhes da compra <ArrowRight className="h-4 w-4" />
+            Ver detalhes <ArrowRight className="h-4 w-4" />
           </a>
         </div>
         {checkoutRuntimeStyles}
@@ -576,17 +627,17 @@ export default function PublicCheckout() {
   /* ═══ TELA: FALHA ══════════════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "failed") return (
-    <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-gray-50 text-gray-900"}`}>
+    <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-[hsl(210_20%_98%)] text-gray-900"}`}>
       <div className="text-center animate-fade-in max-w-md w-full">
-        <div className="relative mx-auto mb-8 w-24 h-24">
-          <div className="absolute inset-0 rounded-full bg-red-500/20 blur-2xl animate-pulse" />
-          <div className="relative h-24 w-24 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-2xl">
-            <AlertCircle className="h-12 w-12 text-white" />
+        <div className="relative mx-auto mb-8 w-28 h-28">
+          <div className="absolute inset-0 rounded-full bg-red-500/15 blur-3xl animate-pulse" />
+          <div className="relative h-28 w-28 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-2xl shadow-red-500/20">
+            <AlertCircle className="h-14 w-14 text-white" />
           </div>
         </div>
-        <h1 className="text-2xl font-extrabold mb-2">Pagamento não aprovado</h1>
-        <p className="text-gray-400 mb-8 text-sm">Verifique seus dados ou tente outro método de pagamento.</p>
-        <Button onClick={retryPayment} className="h-13 px-10 rounded-xl text-white font-bold text-base gap-2 hover:opacity-90 shadow-xl" style={{ backgroundColor: btnColor }}>
+        <h1 className="text-2xl font-extrabold mb-3 tracking-tight">Pagamento não aprovado</h1>
+        <p className="text-gray-400 mb-8 text-sm max-w-xs mx-auto">Verifique seus dados ou tente outro método de pagamento.</p>
+        <Button onClick={retryPayment} className="h-14 px-10 rounded-2xl text-white font-bold text-base gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl" style={{ backgroundColor: btnColor, boxShadow: `0 10px 40px -10px ${btnColor}50` }}>
           <RefreshCw className="h-4 w-4" /> Tentar novamente
         </Button>
       </div>
@@ -598,40 +649,43 @@ export default function PublicCheckout() {
   /* ═══ TELA: PENDENTE (PIX/BOLETO) ═════════════════════ */
   /* ══════════════════════════════════════════════════════ */
   if (checkoutState === "pending") return (
-    <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-gray-50 text-gray-900"}`}>
-      <div className="max-w-lg mx-auto px-4 py-8 md:py-14">
+    <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-[hsl(210_20%_98%)] text-gray-900"}`}>
+      <div className="max-w-lg mx-auto px-4 py-8 md:py-14 animate-fade-in">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="h-14 w-14 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
-            {product.image_url ? <img src={product.image_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <Sparkles className="h-6 w-6 text-gray-300" />}
+          <div className="h-16 w-16 rounded-2xl bg-white border border-gray-200/80 flex items-center justify-center shrink-0 overflow-hidden shadow-lg shadow-black/5">
+            {product.image_url ? <img src={product.image_url} alt="" className="h-16 w-16 rounded-2xl object-cover" /> : <Sparkles className="h-6 w-6 text-gray-300" />}
           </div>
           <div>
-            <h2 className="font-bold text-lg">{product.name}</h2>
-            <p className="font-extrabold text-xl" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</p>
+            <h2 className="font-bold text-lg text-gray-800">{product.name}</h2>
+            <p className="font-extrabold text-2xl tracking-tight" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</p>
           </div>
         </div>
 
         {/* Status badge */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl border" style={{ backgroundColor: btnColor + "10", borderColor: btnColor + "25" }}>
-            <Timer className="h-4 w-4 animate-pulse" style={{ color: btnColor }} />
+          <div className="inline-flex items-center gap-3 px-6 py-3.5 rounded-2xl border shadow-lg shadow-black/5" style={{ backgroundColor: btnColor + "08", borderColor: btnColor + "20" }}>
+            <div className="relative">
+              <Timer className="h-5 w-5" style={{ color: btnColor }} />
+              <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full animate-ping" style={{ backgroundColor: btnColor }} />
+            </div>
             <span className="text-sm font-bold" style={{ color: btnColor }}>Aguardando pagamento</span>
           </div>
         </div>
 
         {/* PIX */}
         {pixData && (
-          <div className="rounded-3xl p-6 md:p-8 bg-gray-50 border border-gray-200 mb-6 space-y-6">
+          <div className="rounded-3xl p-6 md:p-8 bg-white border border-gray-200/80 mb-6 space-y-6 shadow-xl shadow-black/5">
             <div className="text-center">
               <h3 className="font-bold text-lg flex items-center justify-center gap-2 mb-1" style={{ color: btnColor }}>
-                <QrCode className="h-5 w-5" /> PIX
+                <QrCode className="h-5 w-5" /> Pague com PIX
               </h3>
-              <p className="text-xs text-gray-400">Escaneie o QR Code ou copie o código</p>
+              <p className="text-xs text-gray-400">Escaneie o QR Code ou copie o código abaixo</p>
             </div>
 
             {(pixData.qrcode || pixData.qrCode || pixData.qrCodeText) && (
               <div className="flex justify-center">
-                <div className="bg-white p-5 rounded-3xl shadow-lg shadow-black/5">
+                <div className="bg-white p-6 rounded-3xl shadow-lg shadow-black/5 border border-gray-100">
                   <QRCodeSVG value={pixData.qrcode || pixData.qrCodeText || pixData.qrCode} size={220} />
                 </div>
               </div>
@@ -645,13 +699,16 @@ export default function PublicCheckout() {
               <button
                 type="button"
                 onClick={() => { navigator.clipboard.writeText(pixData.qrcode || pixData.qrCodeText); setCopiedPix(true); toast.success("Código PIX copiado!"); setTimeout(() => setCopiedPix(false), 3000); }}
-                className="w-full flex items-center justify-center gap-2.5 h-14 rounded-2xl font-bold text-base transition-all"
+                className="w-full flex items-center justify-center gap-2.5 h-14 rounded-2xl font-bold text-base transition-all hover:scale-[1.01] active:scale-[0.99] text-white relative overflow-hidden"
                 style={{
                   backgroundColor: copiedPix ? "#10b981" : btnColor,
-                  color: "white",
+                  boxShadow: `0 8px 30px -8px ${copiedPix ? "#10b981" : btnColor}50`,
                 }}
               >
-                {copiedPix ? <><Check className="h-5 w-5" /> Código copiado!</> : <><Copy className="h-5 w-5" /> Copiar código PIX</>}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent checkout-shimmer" />
+                <span className="relative flex items-center gap-2">
+                  {copiedPix ? <><Check className="h-5 w-5" /> Código copiado!</> : <><Copy className="h-5 w-5" /> Copiar código PIX</>}
+                </span>
               </button>
             )}
           </div>
@@ -659,31 +716,33 @@ export default function PublicCheckout() {
 
         {/* Boleto */}
         {boletoData && (
-          <div className="rounded-3xl p-6 md:p-8 bg-gray-50 border border-gray-200 mb-6 space-y-4">
+          <div className="rounded-3xl p-6 md:p-8 bg-white border border-gray-200/80 mb-6 space-y-4 shadow-xl shadow-black/5">
             <h3 className="text-center font-bold text-lg" style={{ color: btnColor }}>Boleto gerado com sucesso</h3>
             {boletoData.url && (
               <button type="button" onClick={() => window.open(boletoData.url, "_blank")}
-                className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 transition-all"
-                style={{ backgroundColor: btnColor }}>
+                className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                style={{ backgroundColor: btnColor, boxShadow: `0 8px 30px -8px ${btnColor}50` }}>
                 <FileText className="h-5 w-5" /> Visualizar Boleto
               </button>
             )}
             {boletoData.barCode && (
               <button type="button" onClick={() => { navigator.clipboard.writeText(boletoData.barCode); toast.success("Código copiado!"); }}
-                className="w-full h-12 rounded-2xl font-semibold text-sm bg-gray-100 hover:bg-gray-100 border border-gray-200 text-white flex items-center justify-center gap-2">
+                className="w-full h-12 rounded-2xl font-semibold text-sm bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center gap-2 transition-all">
                 <Copy className="h-4 w-4" /> Copiar código de barras
               </button>
             )}
           </div>
         )}
 
-        <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verificando automaticamente...
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 text-xs text-gray-400 px-4 py-2 rounded-xl bg-gray-50 border border-gray-100">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verificando pagamento automaticamente...
           </div>
-          <button className="text-xs text-gray-400 hover:text-gray-500 underline transition-colors" onClick={retryPayment}>
-            Cancelar e tentar outro método
-          </button>
+          <div>
+            <button className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors" onClick={retryPayment}>
+              Cancelar e tentar outro método
+            </button>
+          </div>
         </div>
       </div>
       {checkoutRuntimeStyles}
@@ -694,9 +753,9 @@ export default function PublicCheckout() {
   /* ═══ FORMULÁRIO PRINCIPAL ═════════════════════════════ */
   /* ══════════════════════════════════════════════════════ */
 
-  const inputClass = "mt-1.5 h-12 rounded-xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-soft))] text-[hsl(var(--checkout-text))] placeholder:text-[hsl(var(--checkout-text-muted))] focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all text-[16px] leading-tight font-medium";
-  const sectionClass = "rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] overflow-hidden shadow-sm";
-  const sectionHeaderClass = "px-5 py-4 border-b border-[hsl(var(--checkout-border))] flex items-center gap-3";
+  const inputClass = "mt-1.5 h-12 rounded-xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-soft))] text-[hsl(var(--checkout-text))] placeholder:text-[hsl(var(--checkout-text-muted))]/50 focus:border-[color:var(--btn-color)] focus:ring-2 focus:ring-[color:var(--btn-color)]/15 transition-all duration-300 text-[16px] leading-tight font-medium";
+  const sectionClass = "rounded-2xl border border-[hsl(var(--checkout-border))]/80 bg-[hsl(var(--checkout-bg-elevated))] overflow-hidden shadow-lg shadow-black/[0.03] transition-all duration-300 hover:shadow-xl hover:shadow-black/[0.05]";
+  const sectionHeaderClass = "px-5 py-4 border-b border-[hsl(var(--checkout-border))]/60 flex items-center gap-3";
   const sectionBodyClass = "p-5 space-y-4";
   const labelClass = "text-[11px] text-[hsl(var(--checkout-text-muted))] font-semibold flex items-center gap-1.5 uppercase tracking-wider";
 
@@ -706,21 +765,25 @@ export default function PublicCheckout() {
       {/* ═══ Social Proof Toast ═══ */}
       {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
 
-      {/* ═══ Timer Bar ═══ */}
+      {/* ═══ Timer Bar (Premium) ═══ */}
       {product.checkout_timer_enabled && (
-        <div className="sticky top-0 z-50 backdrop-blur-2xl border-b border-gray-100" style={{ backgroundColor: "rgba(255,255,255,0.95)" }}>
+        <div className="sticky top-0 z-50 backdrop-blur-2xl border-b border-gray-200/50" style={{ backgroundColor: isDark ? "hsla(220, 18%, 11%, 0.95)" : "rgba(255,255,255,0.95)" }}>
           <div className="max-w-[660px] mx-auto px-4 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: btnColor + "15" }}>
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: btnColor + "12" }}>
                 <Zap className="h-3.5 w-3.5" style={{ color: btnColor }} />
               </div>
-              <span className="text-xs font-semibold text-gray-500">Oferta especial expira em</span>
+              <span className="text-xs font-semibold text-gray-500">Oferta expira em</span>
             </div>
             <div className="flex items-center gap-1 font-mono">
-              <span className="bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1 text-base font-extrabold tabular-nums">{mins}</span>
-              <span className="text-gray-300 font-bold mx-0.5 animate-pulse">:</span>
-              <span className="bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1 text-base font-extrabold tabular-nums">{secs}</span>
+              <span className="rounded-lg px-3 py-1.5 text-base font-extrabold tabular-nums bg-gray-100 border border-gray-200/80 shadow-sm">{mins}</span>
+              <span className="text-gray-300 font-bold mx-0.5 animate-pulse text-lg">:</span>
+              <span className="rounded-lg px-3 py-1.5 text-base font-extrabold tabular-nums bg-gray-100 border border-gray-200/80 shadow-sm">{secs}</span>
             </div>
+          </div>
+          {/* Timer progress bar */}
+          <div className="h-0.5 w-full bg-gray-100">
+            <div className="h-full transition-all duration-1000 ease-linear" style={{ width: `${(timeLeft / ((product.checkout_timer_minutes ?? 15) * 60)) * 100}%`, backgroundColor: btnColor + "80" }} />
           </div>
         </div>
       )}
@@ -736,13 +799,13 @@ export default function PublicCheckout() {
 
       <div className="max-w-[660px] mx-auto px-4 py-6 md:py-10">
 
-        {/* ═══ Social Proof Bar ═══ */}
+        {/* ═══ Social Proof Bar (Premium) ═══ */}
         {product.checkout_social_proof && (
-          <div className="mb-5 rounded-2xl border border-gray-200 bg-gray-50 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+          <div className="mb-5 rounded-2xl border border-gray-200/80 bg-white p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 shadow-lg shadow-black/[0.03]">
             <div className="flex items-center gap-3 flex-1">
-              <div className="flex -space-x-2">
+              <div className="flex -space-x-2.5">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold shadow-lg" style={{ backgroundColor: `hsl(${150 + i * 12}, 55%, ${28 + i * 5}%)`, zIndex: 6 - i }}>
+                  <div key={i} className="h-9 w-9 rounded-full border-[2.5px] border-white flex items-center justify-center text-[9px] font-bold shadow-md" style={{ backgroundColor: `hsl(${150 + i * 15}, 55%, ${32 + i * 5}%)`, color: "white", zIndex: 6 - i }}>
                     {["AS", "CM", "JR", "PH", "ML", "LF"][i]}
                   </div>
                 ))}
@@ -760,23 +823,25 @@ export default function PublicCheckout() {
           </div>
         )}
 
-        {/* ═══ Product Card ═══ */}
-        <div className={`rounded-2xl border bg-white p-5 mb-5 shadow-sm ${isWhite ? "border-gray-100" : "border-gray-200"}`}>
+        {/* ═══ Product Card (Premium) ═══ */}
+        <div className={`rounded-2xl border bg-white p-5 mb-5 shadow-lg shadow-black/[0.03] transition-all ${isWhite ? "border-gray-100" : "border-gray-200/80"}`}>
           <div className="flex items-center gap-4">
-            <div className="h-[72px] w-[72px] rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="h-[76px] w-[76px] rounded-2xl bg-gray-50 border border-gray-200/80 flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-black/5">
               {product.image_url ? (
-                <img src={product.image_url} alt={product.name} className="h-[72px] w-[72px] rounded-2xl object-cover" />
+                <img src={product.image_url} alt={product.name} className="h-[76px] w-[76px] rounded-2xl object-cover" />
               ) : (
-                <div className="h-full w-full rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${btnColor}15, ${btnColor}05)` }}>
-                  <Sparkles className="h-8 w-8" style={{ color: btnColor + "60" }} />
+                <div className="h-full w-full rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${btnColor}12, ${btnColor}05)` }}>
+                  <Sparkles className="h-8 w-8" style={{ color: btnColor + "50" }} />
                 </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-gray-50 border border-gray-200 text-gray-400">Acesso imediato</span>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[8px] font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-md bg-gray-50 border border-gray-200/80 text-gray-400 flex items-center gap-1">
+                  <Zap className="h-2.5 w-2.5" /> Acesso imediato
+                </span>
               </div>
-              <h1 className="font-bold text-base md:text-lg leading-tight">{product.name}</h1>
+              <h1 className="font-bold text-base md:text-lg leading-tight text-gray-800">{product.name}</h1>
               {product.description && <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-1">{product.description}</p>}
             </div>
             <div className="text-right shrink-0">
@@ -799,13 +864,14 @@ export default function PublicCheckout() {
           {/* ═══════ DADOS PESSOAIS ═══════ */}
           <section className={sectionClass}>
             <div className={sectionHeaderClass}>
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)` }}>1</div>
+              <div className="h-9 w-9 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shadow-md" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)`, boxShadow: `0 4px 12px -4px ${btnColor}40` }}>1</div>
               <div>
-                <h3 className="text-sm font-bold">Identificação</h3>
+                <h3 className="text-sm font-bold text-gray-800">Identificação</h3>
                 <p className="text-[10px] text-gray-400">Preencha seus dados para continuar</p>
               </div>
-              <div className="ml-auto">
-                <Lock className="h-3.5 w-3.5 text-gray-300" />
+              <div className="ml-auto flex items-center gap-1">
+                <Lock className="h-3 w-3 text-gray-300" />
+                <span className="text-[8px] text-gray-300 font-semibold">SEGURO</span>
               </div>
             </div>
             <div className={sectionBodyClass}>
@@ -842,8 +908,8 @@ export default function PublicCheckout() {
           {product.checkout_address_required && (
             <section className={sectionClass}>
               <div className={sectionHeaderClass}>
-                <div className="h-8 w-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)` }}>2</div>
-                <div><h3 className="text-sm font-bold">Endereço</h3><p className="text-[10px] text-gray-400">Para emissão da nota fiscal</p></div>
+                <div className="h-9 w-9 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shadow-md" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)`, boxShadow: `0 4px 12px -4px ${btnColor}40` }}>2</div>
+                <div><h3 className="text-sm font-bold text-gray-800">Endereço</h3><p className="text-[10px] text-gray-400">Para emissão da nota fiscal</p></div>
               </div>
               <div className={sectionBodyClass}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -881,12 +947,14 @@ export default function PublicCheckout() {
             </section>
           )}
 
-          {/* ═══════ ORDER BUMPS ═══════ */}
+          {/* ═══════ ORDER BUMPS (Premium) ═══════ */}
           {orderBumps.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 px-1">
-                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">Oferta exclusiva</span>
+                <div className="h-5 w-5 rounded-md bg-amber-500/10 flex items-center justify-center">
+                  <Sparkles className="h-3 w-3 text-amber-500" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-500">Oferta exclusiva</span>
                 <div className="flex-1 h-px bg-amber-400/10" />
               </div>
               {orderBumps.map(bump => {
@@ -895,23 +963,23 @@ export default function PublicCheckout() {
                   <button key={bump.id} type="button" onClick={() => toggleBump(bump.id)}
                     className={`w-full rounded-2xl border-2 p-4 md:p-5 text-left transition-all duration-300 relative overflow-hidden ${
                       selected
-                        ? "border-emerald-500/50 bg-emerald-50"
-                        : "border-dashed border-amber-400/40 bg-gradient-to-br from-amber-50 to-transparent hover:border-amber-500/60"
+                        ? "border-emerald-500/50 bg-emerald-50/50 shadow-lg shadow-emerald-500/5"
+                        : "border-dashed border-amber-400/40 bg-gradient-to-br from-amber-50/50 to-transparent hover:border-amber-500/60 hover:shadow-md"
                     }`}>
-                    {selected && <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl" style={{ backgroundColor: "#10b981" }}>ADICIONADO ✓</div>}
-                    {!selected && <div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl animate-pulse">APROVEITE!</div>}
+                    {selected && <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3.5 py-1.5 rounded-bl-xl" style={{ backgroundColor: "#10b981" }}>ADICIONADO ✓</div>}
+                    {!selected && <div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-extrabold px-3.5 py-1.5 rounded-bl-xl animate-pulse">APROVEITE!</div>}
                     <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
-                        {bump.bump_product.image_url ? <img src={bump.bump_product.image_url} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <Package className="h-6 w-6 text-gray-300" />}
+                      <div className="h-16 w-16 rounded-xl bg-white border border-gray-200/80 flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-black/5">
+                        {bump.bump_product.image_url ? <img src={bump.bump_product.image_url} alt="" className="h-16 w-16 rounded-xl object-cover" /> : <Package className="h-6 w-6 text-gray-300" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm leading-tight">{bump.bump_product.name}</p>
+                        <p className="font-bold text-sm leading-tight text-gray-800">{bump.bump_product.name}</p>
                         {bump.bump_product.description && <p className="text-[11px] text-gray-400 mt-1 line-clamp-2">{bump.bump_product.description}</p>}
-                        <p className="font-extrabold text-base mt-1" style={{ color: selected ? "#10b981" : btnColor }}>
+                        <p className="font-extrabold text-base mt-1.5" style={{ color: selected ? "#10b981" : btnColor }}>
                           + R$ {fmtBRL(Number(bump.bump_product.price))}
                         </p>
                       </div>
-                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-gray-50 border border-gray-200 text-gray-300"}`}>
+                      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-110" : "bg-gray-50 border border-gray-200 text-gray-300 hover:border-gray-300"}`}>
                         {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                       </div>
                     </div>
@@ -921,37 +989,37 @@ export default function PublicCheckout() {
             </div>
           )}
 
-          {/* ═══════ PAGAMENTO ═══════ */}
+          {/* ═══════ PAGAMENTO (Premium) ═══════ */}
           <section className={sectionClass}>
             <div className={sectionHeaderClass}>
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)` }}>
+              <div className="h-9 w-9 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shadow-md" style={{ background: `linear-gradient(135deg, ${btnColor}, ${btnColor}bb)`, boxShadow: `0 4px 12px -4px ${btnColor}40` }}>
                 {product.checkout_address_required ? "3" : "2"}
               </div>
               <div>
-                <h3 className="text-sm font-bold">Pagamento</h3>
+                <h3 className="text-sm font-bold text-gray-800">Pagamento</h3>
                 <p className="text-[10px] text-gray-400">Escolha a forma de pagamento</p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
                 <Lock className="h-3 w-3 text-gray-300" />
-                <span className="text-[9px] text-gray-300 font-semibold">SSL</span>
+                <span className="text-[8px] text-gray-300 font-bold tracking-wider">SSL 256-BIT</span>
               </div>
             </div>
 
             <div className={sectionBodyClass}>
-              {/* Method Tabs */}
+              {/* Method Tabs (Premium) */}
               {availableMethods.length > 1 && (
-                <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${availableMethods.length}, 1fr)` }}>
+                <div className="grid gap-2.5 p-1 rounded-xl bg-gray-50 border border-gray-100" style={{ gridTemplateColumns: `repeat(${availableMethods.length}, 1fr)` }}>
                   {availableMethods.map(m => {
                     const active = method === m.id;
                     return (
                       <button key={m.id} type="button" onClick={() => { setMethod(m.id); setPixData(null); setBoletoData(null); }}
-                        className={`flex flex-col items-center gap-1.5 px-3 py-3.5 rounded-xl border-2 text-center transition-all ${
-                          active ? "bg-gray-50 text-white" : "bg-transparent border-transparent text-gray-400 hover:text-gray-400 hover:bg-gray-50"
+                        className={`flex flex-col items-center gap-1.5 px-3 py-3.5 rounded-xl text-center transition-all duration-300 ${
+                          active ? "bg-white shadow-md shadow-black/5 text-gray-800" : "bg-transparent text-gray-400 hover:text-gray-500 hover:bg-white/50"
                         }`}
-                        style={active ? { borderColor: btnColor + "50", boxShadow: `0 0 30px ${btnColor}08` } : { borderColor: "transparent" }}>
-                        <m.icon className={`h-5 w-5 ${active ? "" : "opacity-50"}`} style={active ? { color: btnColor } : undefined} />
+                        style={active ? { boxShadow: `0 2px 12px -2px ${btnColor}15` } : undefined}>
+                        <m.icon className={`h-5 w-5 transition-all ${active ? "" : "opacity-40"}`} style={active ? { color: btnColor } : undefined} />
                         <span className="text-xs font-bold">{m.label}</span>
-                        {m.badge && <span className={`text-[8px] ${active ? "text-gray-400" : "text-gray-300"}`}>{m.badge}</span>}
+                        {m.badge && <span className={`text-[8px] font-medium ${active ? "text-gray-400" : "text-gray-300"}`}>{m.badge}</span>}
                       </button>
                     );
                   })}
@@ -960,12 +1028,12 @@ export default function PublicCheckout() {
 
               {/* PIX indicator */}
               {method === "pix" && (
-                <div className="rounded-xl p-4 border border-gray-100 bg-gray-50 flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: btnColor + "12" }}>
+                <div className="rounded-xl p-4 border border-gray-100 bg-gradient-to-br from-gray-50 to-white flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 shadow-md" style={{ backgroundColor: btnColor + "10", boxShadow: `0 4px 12px -4px ${btnColor}20` }}>
                     <QrCode className="h-6 w-6" style={{ color: btnColor }} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold flex items-center gap-2">Pagamento instantâneo <Zap className="h-3.5 w-3.5" style={{ color: btnColor }} /></p>
+                    <p className="text-sm font-bold text-gray-800 flex items-center gap-2">Pagamento instantâneo <Zap className="h-3.5 w-3.5" style={{ color: btnColor }} /></p>
                     <p className="text-[11px] text-gray-400 mt-0.5">QR Code gerado na hora • Aprovação em segundos</p>
                   </div>
                 </div>
@@ -990,8 +1058,8 @@ export default function PublicCheckout() {
                     <div>
                       <Label className={labelClass}>Parcelas</Label>
                       <div className="relative mt-1.5">
-                        <select value={installments} onChange={e => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-gray-50 border-gray-200 text-white text-[16px] px-3 pr-8 appearance-none focus:outline-none font-medium">
-                          {installmentOptions.map(opt => <option key={opt.n} value={opt.n} className="bg-gray-50">{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
+                        <select value={installments} onChange={e => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-[hsl(var(--checkout-bg-soft))] border-[hsl(var(--checkout-border))] text-[hsl(var(--checkout-text))] text-[16px] px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:border-[color:var(--btn-color)] font-medium transition-all duration-300" >
+                          {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
                       </div>
@@ -1006,12 +1074,12 @@ export default function PublicCheckout() {
 
               {/* Boleto indicator */}
               {method === "boleto" && (
-                <div className="rounded-xl p-4 border border-gray-100 bg-gray-50 flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <FileText className="h-6 w-6 text-amber-400" />
+                <div className="rounded-xl p-4 border border-gray-100 bg-gradient-to-br from-gray-50 to-white flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/10">
+                    <FileText className="h-6 w-6 text-amber-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Boleto Bancário</p>
+                    <p className="text-sm font-bold text-gray-800">Boleto Bancário</p>
                     <p className="text-[11px] text-gray-400 mt-0.5">Compensação em 1-3 dias úteis</p>
                   </div>
                 </div>
@@ -1019,74 +1087,76 @@ export default function PublicCheckout() {
             </div>
           </section>
 
-          {/* ═══════ RESUMO ═══════ */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Resumo do pedido</h3>
-            <div className="space-y-2.5 text-sm">
+          {/* ═══════ RESUMO (Premium) ═══════ */}
+          <div className="rounded-2xl border border-gray-200/80 bg-white p-5 space-y-3 shadow-lg shadow-black/[0.03]">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-3 flex items-center gap-2">
+              <Package className="h-3 w-3" /> Resumo do pedido
+            </h3>
+            <div className="space-y-3 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400 flex items-center gap-2"><Package className="h-3.5 w-3.5" /> {product.name}</span>
-                <span className="text-gray-600 font-semibold">R$ {fmtBRL(price)}</span>
+                <span className="text-gray-400 flex items-center gap-2">{product.name}</span>
+                <span className="text-gray-700 font-semibold tabular-nums">R$ {fmtBRL(price)}</span>
               </div>
               {orderBumps.filter(b => selectedBumps.has(b.id)).map(b => (
                 <div key={b.id} className="flex justify-between items-center">
                   <span className="text-gray-400 flex items-center gap-2"><Plus className="h-3 w-3" style={{ color: btnColor }} /> {b.bump_product.name}</span>
-                  <span className="text-gray-600 font-semibold">R$ {fmtBRL(Number(b.bump_product.price))}</span>
+                  <span className="text-gray-700 font-semibold tabular-nums">R$ {fmtBRL(Number(b.bump_product.price))}</span>
                 </div>
               ))}
-              <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+              <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
                 <span className="font-bold text-gray-800 text-base">Total</span>
                 <div className="text-right">
-                  <span className="font-extrabold text-xl" style={{ color: btnColor }}>
+                  <span className="font-extrabold text-xl tracking-tight tabular-nums" style={{ color: btnColor }}>
                     {method === "credit_card" && installments !== "1"
                       ? `${installments}x R$ ${fmtBRL(selectedInstallment.val)}`
                       : `R$ ${fmtBRL(totalPrice)}`}
                   </span>
                   {method === "credit_card" && installments !== "1" && (
-                    <p className="text-[10px] text-gray-300 mt-0.5">Total: R$ {fmtBRL(selectedInstallment.total)}</p>
+                    <p className="text-[10px] text-gray-300 mt-0.5 tabular-nums">Total: R$ {fmtBRL(selectedInstallment.total)}</p>
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ═══════ GUARANTEE ═══════ */}
+          {/* ═══════ GUARANTEE (Premium) ═══════ */}
           {product.checkout_guarantee_enabled && (
-            <div className="rounded-2xl p-5 border border-gray-200 bg-gray-50 flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: btnColor + "10", border: `1px solid ${btnColor}20` }}>
+            <div className="rounded-2xl p-5 border border-gray-200/80 bg-gradient-to-br from-white to-gray-50 flex items-center gap-4 shadow-lg shadow-black/[0.03]">
+              <div className="h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 shadow-md" style={{ backgroundColor: btnColor + "08", border: `1px solid ${btnColor}15`, boxShadow: `0 4px 12px -4px ${btnColor}15` }}>
                 <ShieldCheck className="h-7 w-7" style={{ color: btnColor }} />
               </div>
               <div>
-                <p className="text-sm font-bold text-white flex items-center gap-2">
+                <p className="text-sm font-bold text-gray-800 flex items-center gap-2">
                   Garantia incondicional de 7 dias
                 </p>
                 <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
-                  Não ficou satisfeito? Devolvemos 100% do valor. Sem burocracia, sem perguntas.
+                  Não ficou satisfeito? Devolvemos 100% do valor. Sem burocracia.
                 </p>
               </div>
             </div>
           )}
 
-          {/* ═══════ CTA BUTTON ═══════ */}
+          {/* ═══════ CTA BUTTON (Ultra Premium) ═══════ */}
           <div className="pt-1">
             <Button
               type="submit"
               disabled={processing}
-              className="w-full h-[60px] text-base font-extrabold rounded-2xl text-white shadow-2xl transition-all duration-300 hover:opacity-95 hover:scale-[1.005] hover:shadow-3xl disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
-              style={{ backgroundColor: btnColor, boxShadow: `0 10px 40px -10px ${btnColor}50` }}
+              className="w-full h-[62px] text-base font-extrabold rounded-2xl text-white transition-all duration-300 hover:opacity-95 hover:scale-[1.008] active:scale-[0.995] disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
+              style={{ backgroundColor: btnColor, boxShadow: `0 12px 40px -12px ${btnColor}60, 0 4px 12px -4px ${btnColor}30` }}
             >
               {/* Shimmer effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               <span className="relative flex items-center gap-2.5">
                 {processing ? (
                   <><Loader2 className="h-5 w-5 animate-spin" /> Processando pagamento...</>
                 ) : (
                   <>
-                    <Lock className="h-4 w-4 opacity-70" />
+                    <Lock className="h-4 w-4 opacity-80" />
                     Finalizar compra
-                    <span className="opacity-70">•</span>
-                    R$ {fmtBRL(totalPrice)}
+                    <span className="opacity-50">•</span>
+                    <span className="tabular-nums">R$ {fmtBRL(totalPrice)}</span>
                     <ArrowRight className="h-4 w-4 opacity-70" />
                   </>
                 )}
@@ -1094,27 +1164,26 @@ export default function PublicCheckout() {
             </Button>
           </div>
 
-          {/* ═══════ TRUST FOOTER ═══════ */}
+          {/* ═══════ TRUST FOOTER (Premium) ═══════ */}
           <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-center gap-6">
+            <div className="flex items-center justify-center gap-5">
               <div className="flex items-center gap-1.5 text-gray-300">
                 <Lock className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-semibold">Criptografia SSL</span>
+                <span className="text-[10px] font-semibold">SSL 256-bit</span>
               </div>
-              <div className="h-3 w-px bg-gray-100" />
+              <div className="h-3 w-px bg-gray-200" />
               <div className="flex items-center gap-1.5 text-gray-300">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-semibold">Compra segura</span>
+                <span className="text-[10px] font-semibold">Compra 100% segura</span>
               </div>
-              <div className="h-3 w-px bg-gray-100" />
+              <div className="h-3 w-px bg-gray-200" />
               <div className="flex items-center gap-1.5 text-gray-300">
                 <Eye className="h-3.5 w-3.5" />
                 <span className="text-[10px] font-semibold">Dados protegidos</span>
               </div>
             </div>
-            {/* ─── Producer Info ─── */}
             {(product.display_name || product.support_email) && (
-              <div className="flex flex-col items-center gap-1 py-2 border-t border-gray-100">
+              <div className="flex flex-col items-center gap-1 py-2.5 border-t border-gray-100">
                 {product.display_name && (
                   <span className="text-[11px] font-semibold text-gray-400">{product.display_name}</span>
                 )}
@@ -1127,8 +1196,8 @@ export default function PublicCheckout() {
             )}
             <p className="text-center text-[10px] text-gray-300 leading-relaxed px-6">
               Ao clicar em "Finalizar compra", declaro que li e concordo com os{" "}
-              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline cursor-pointer hover:text-gray-200 transition-colors">Termos de Uso</a> e{" "}
-              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline cursor-pointer hover:text-gray-200 transition-colors">Política de Privacidade</a>.
+              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline cursor-pointer hover:text-gray-500 transition-colors">Termos de Uso</a> e{" "}
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline cursor-pointer hover:text-gray-500 transition-colors">Política de Privacidade</a>.
             </p>
           </div>
         </form>
