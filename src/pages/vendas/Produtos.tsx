@@ -35,16 +35,35 @@ function MiniSparkline({ color }: { color: string }) {
     return `${i === 0 ? "M" : "L"}${x},${y}`;
   }).join(" ");
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="opacity-40">
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="opacity-50 group-hover:opacity-80 transition-opacity duration-500">
       <defs>
         <linearGradient id={`spark-${color}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity="0.4" />
+          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity="0.5" />
           <stop offset="100%" stopColor={`hsl(var(--${color}))`} stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={`${path} L${w},${h} L0,${h} Z`} fill={`url(#spark-${color})`} />
       <path d={path} fill="none" stroke={`hsl(var(--${color}))`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+/* ─── Product Card Skeleton ─── */
+function ProductCardSkeleton() {
+  return (
+    <div className="rounded-2xl glass-panel overflow-hidden animate-pulse">
+      <div className="h-48 bg-muted/10" />
+      <div className="p-5 space-y-3">
+        <div className="h-4 bg-muted/10 rounded-lg w-3/4" />
+        <div className="h-3 bg-muted/5 rounded-lg w-full" />
+        <div className="h-10 bg-muted/5 rounded-xl" />
+        <div className="h-10 bg-muted/5 rounded-xl" />
+        <div className="flex gap-2 pt-3 border-t border-border/[0.06]">
+          <div className="h-9 flex-1 bg-muted/5 rounded-xl" />
+          <div className="h-9 flex-1 bg-muted/5 rounded-xl" />
+        </div>
+      </div>
+    </div>
   );
 }
 
