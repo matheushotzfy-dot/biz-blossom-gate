@@ -899,7 +899,7 @@ export default function Vendas() {
               </motion.span>
               {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+            <div className="flex flex-wrap items-center gap-2.5 mt-6">
               {[
                 { icon: CalendarDays, text: periodLabel },
                 { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
