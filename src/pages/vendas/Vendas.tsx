@@ -961,7 +961,7 @@ export default function Vendas() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden hover:shadow-xl transition-all duration-500"
+                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
               >
                 <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
