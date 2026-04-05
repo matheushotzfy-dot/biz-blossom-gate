@@ -2536,6 +2536,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_product_active: { Args: { _product_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "employee" | "manager"
