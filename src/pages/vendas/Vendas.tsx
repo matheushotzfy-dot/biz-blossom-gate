@@ -1001,15 +1001,18 @@ export default function Vendas() {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-primary" />
+            <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/12 flex items-center justify-center">
+              <Activity className="h-4.5 w-4.5 text-primary" />
             </div>
-            <h2 className="text-sm font-display font-bold text-foreground/70 uppercase tracking-[0.1em]">Revenue Timeline</h2>
+            <div>
+              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Revenue Timeline</h2>
+              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Evolução da receita ao longo do tempo</p>
+            </div>
           </div>
-          <div className="flex gap-4 text-[11px] font-display tabular-nums">
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span></span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-muted-foreground/20 border border-dashed border-muted-foreground/30" /> Anterior</span>
-            <span className="text-destructive/60">Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
+          <div className="flex gap-5 text-[11px] font-display tabular-nums">
+            <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" /> Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span></span>
+            <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/15 border border-dashed border-muted-foreground/25" /> Anterior</span>
+            <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
         </div>
         <div className="rounded-2xl border border-border/6 bg-card/30 backdrop-blur-xl p-6 relative overflow-hidden">
