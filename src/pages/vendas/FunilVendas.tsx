@@ -27,7 +27,11 @@ export default function FunilVendas() {
     setLoading(true);
     const days = period === "today" ? 0 : period === "7d" ? 7 : period === "90d" ? 90 : 30;
     const since = new Date();
-    since.setDate(since.getDate() - days);
+    if (days === 0) {
+      since.setHours(0, 0, 0, 0);
+    } else {
+      since.setDate(since.getDate() - days);
+    }
 
     const { data } = await supabase
       .from("transactions")
