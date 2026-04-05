@@ -108,11 +108,7 @@ function DashboardLayoutInner() {
           {profile && profile.account_status !== "approved" && (
             <button
               onClick={() => navigate("/financeiro/identidade")}
-              className={`relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b transition-colors cursor-pointer ${
-                profile.document_number
-                  ? "bg-info/8 border-info/20 text-info hover:bg-info/12"
-                  : "bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
-              }`}
+              className="relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b transition-colors cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
             >
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <p className="text-[13px] font-semibold flex-1 text-left">
