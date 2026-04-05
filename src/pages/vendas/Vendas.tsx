@@ -817,8 +817,7 @@ export default function Vendas() {
                   <Zap className="h-4.5 w-4.5 text-primary" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-muted-foreground/40 block leading-none">Revenue</span>
-                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-gradient-premium block leading-tight mt-0.5">Command Center</span>
+                  <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80 block leading-tight">Minhas Vendas</span>
                 </div>
               </motion.div>
               <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
@@ -1018,8 +1017,8 @@ export default function Vendas() {
               <Activity className="h-4.5 w-4.5 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Revenue Timeline</h2>
-              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Evolução da receita ao longo do tempo</p>
+              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Evolução de Receita</h2>
+              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Comparativo com período anterior</p>
             </div>
           </div>
           <div className="flex gap-5 text-[11px] font-display tabular-nums">
@@ -1047,7 +1046,7 @@ export default function Vendas() {
             <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
               <PieChart className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Payment Intelligence</h3>
+            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Meios de Pagamento</h3>
           </div>
           <div className="space-y-5">
             {paymentMix.map((pm, idx) => {
@@ -1184,7 +1183,7 @@ export default function Vendas() {
               <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
                 <Clock className="h-4 w-4 text-info" />
               </div>
-              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Atividade Intraday</h3>
+              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Horário de Pico</h3>
             </div>
             <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
           </div>
@@ -1203,9 +1202,11 @@ export default function Vendas() {
                       active ? "bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]" : intensity > 0.5 ? "bg-primary/35" : intensity > 0 ? "bg-primary/12 group-hover:bg-primary/25" : "bg-muted/4"
                     )}
                   />
-                  <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <div className="rounded-lg bg-popover/95 backdrop-blur-lg border border-border/15 px-2.5 py-1 text-[9px] font-display font-bold text-foreground shadow-xl whitespace-nowrap">
-                      {String(hour).padStart(2, "0")}h · {count} vendas
+                  <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <div className="rounded-lg bg-popover border border-border/20 px-3 py-1.5 text-[10px] font-display font-bold text-foreground shadow-2xl whitespace-nowrap">
+                      <span className="font-mono text-primary">{String(hour).padStart(2, "0")}h</span>
+                      <span className="text-muted-foreground/40 mx-1.5">·</span>
+                      <span>{count} {count === 1 ? "venda" : "vendas"}</span>
                     </div>
                   </div>
                 </div>
