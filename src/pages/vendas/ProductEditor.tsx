@@ -486,7 +486,7 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center relative overflow-hidden">
+      <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[150px] animate-pulse" />
           <div className="absolute bottom-1/3 left-1/3 w-[400px] h-[200px] bg-info/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "0.5s" }} />
