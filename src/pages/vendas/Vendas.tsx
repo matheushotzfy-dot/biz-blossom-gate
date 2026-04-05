@@ -774,27 +774,33 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-12 overflow-hidden mesh-gradient-hero noise-overlay scan-line"
+        className="relative mb-12 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
       >
-        {/* Animated floating orbs */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Animated floating orbs — extended beyond bounds for smooth fade */}
+        <div className="absolute -inset-16 pointer-events-none">
           <motion.div
             animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-primary/6 rounded-full blur-[150px]"
+            className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]"
           />
           <motion.div
             animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-24 -right-32 w-[400px] h-[400px] bg-info/5 rounded-full blur-[130px]"
+            className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]"
           />
           <motion.div
-            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+            animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/3 rounded-full blur-[180px]"
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]"
+          />
+          {/* Bottom green glow — wide and smooth */}
+          <motion.div
+            animate={{ opacity: [0.4, 0.65, 0.4] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-20 left-[10%] right-[10%] h-[200px] bg-primary/6 rounded-full blur-[120px]"
           />
           {/* Decorative grid dots */}
-          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         </div>
 
         <div className="relative z-10">
