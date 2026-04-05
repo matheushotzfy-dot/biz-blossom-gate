@@ -4,6 +4,7 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
+import { KycOnboardingPopup } from "@/components/KycOnboardingPopup";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Menu, Bell, Sun, Moon, Search, AlertTriangle, ArrowRight, X as XIcon, CheckCircle2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
