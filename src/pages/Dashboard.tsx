@@ -725,7 +725,7 @@ export default function Dashboard() {
       </section>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
-        <DialogContent className="sm:max-w-md border-border/30 bg-card/95 backdrop-blur-2xl p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl">
+        <DialogContent className="sm:max-w-md border-border/40 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden">
           {detailTx && (() => {
             const statusMap: Record<string, { label: string; color: string }> = {
               completed: { label: "Aprovada", color: "bg-success/15 text-success" },
