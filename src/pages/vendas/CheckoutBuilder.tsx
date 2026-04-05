@@ -400,9 +400,9 @@ export default function CheckoutBuilder() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       {/* ─── LEFT: Control Panel ─── */}
-      <aside className="w-[440px] shrink-0 border-r border-border/15 bg-gradient-to-b from-card/40 via-card/20 to-background backdrop-blur-2xl flex flex-col h-screen sticky top-0 overflow-hidden">
+      <aside className="w-full lg:w-[440px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/15 bg-gradient-to-b from-card/40 via-card/20 to-background backdrop-blur-2xl flex flex-col lg:h-screen lg:sticky lg:top-0 overflow-hidden">
         {/* Header — Ultra Premium */}
         <div className="p-4 pb-3 border-b border-border/10">
           <div className="flex items-center gap-3">
