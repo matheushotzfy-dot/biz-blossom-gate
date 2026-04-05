@@ -10,6 +10,7 @@ import {
   Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
   Percent, UserCheck, Layers, ArrowUp, ArrowDown, ChevronUp, Radio, Flame,
   ArrowUpDown, SortAsc, SortDesc, CircleDot, Minus, Sparkles, Box,
+  ChevronRight, Star, Shield, Banknote,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -86,33 +87,48 @@ const STATUS: Record<string, { label: string; fg: string; dot: string; bg: strin
   chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10" },
 };
 
+const springTransition = { type: "spring" as const, stiffness: 300, damping: 30, mass: 0.8 };
+
 /* ─────────────────────── Micro Components ─────────────────────── */
 
 function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
   if (prev === 0 && cur === 0) return null;
-  if (prev === 0) return <span className="text-[10px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">novo</span>;
+  if (prev === 0) return <span className="text-[10px] font-bold text-success bg-success/10 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1"><Sparkles className="h-2.5 w-2.5" />novo</span>;
   const pct = ((cur - prev) / prev) * 100;
   const up = pct >= 0;
   return (
-    <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-semibold tabular-nums px-2 py-0.5 rounded-full", up ? "text-success bg-success/10" : "text-destructive bg-destructive/10")}>
+    <motion.span
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className={cn("inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums px-2.5 py-0.5 rounded-full", up ? "text-success bg-success/10" : "text-destructive bg-destructive/10")}
+    >
       {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
       {Math.abs(pct).toFixed(1)}%
-    </span>
+    </motion.span>
   );
 }
 
-/* Mini sparkline for KPI cards */
-function Sparkline({ data, className }: { data: number[]; className?: string }) {
+/* Animated sparkline with gradient fill */
+function Sparkline({ data, color = "primary", className }: { data: number[]; color?: string; className?: string }) {
   if (data.length < 2) return null;
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
   const range = max - min || 1;
-  const w = 80;
-  const h = 28;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(" ");
+  const w = 90;
+  const h = 32;
+  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
+  const fillPoints = `0,${h} ${points} ${w},${h}`;
+  const id = `spark-${color}-${data.length}`;
   return (
     <svg width={w} height={h} className={cn("shrink-0", className)} viewBox={`0 0 ${w} ${h}`}>
-      <polyline points={points} fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={`hsl(var(--${color}))`} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <polygon points={fillPoints} fill={`url(#${id})`} />
+      <polyline points={points} fill="none" stroke={`hsl(var(--${color}))`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -135,22 +151,22 @@ function SortHead({ label, field, sort, onSort, className }: { label: string; fi
 function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
-      <div className="h-[200px] flex flex-col items-center justify-center gap-2">
+      <div className="h-[220px] flex flex-col items-center justify-center gap-2">
         {hidden ? <EyeOff className="h-5 w-5 text-muted-foreground/15" /> : <BarChart3 className="h-5 w-5 text-muted-foreground/15" />}
         <span className="text-[12px] text-muted-foreground/25">{hidden ? "Valores ocultos" : "Dados insuficientes"}</span>
       </div>
     );
   }
   return (
-    <ResponsiveContainer width="100%" height={200}>
+    <ResponsiveContainer width="100%" height={220}>
       <ComposedChart data={data} margin={{ top: 12, right: 8, left: -16, bottom: 0 }}>
         <defs>
           <linearGradient id="rv-gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.12} vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.1} vertical={false} />
         <XAxis
           dataKey="label"
           tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontFamily: "'JetBrains Mono', monospace" }}
@@ -165,15 +181,16 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
           contentStyle={{
             background: "hsl(var(--popover))",
             border: "1px solid hsl(var(--border))",
-            borderRadius: 12, fontSize: 12, padding: "10px 14px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+            borderRadius: 16, fontSize: 12, padding: "12px 16px",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
           }}
           formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
           labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}
           cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "4 4" }}
         />
-        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="6 4" fill="none" opacity={0.15} dot={false} />
-        <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#rv-gradient)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
+        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="6 4" fill="none" opacity={0.2} dot={false} />
+        <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#rv-gradient)" dot={false} activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -181,77 +198,77 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
-  const methods: Record<string, { label: string; icon: React.ReactNode }> = {
-    pix: { label: "PIX", icon: <Smartphone className="h-3.5 w-3.5" /> },
-    credit_card: { label: "Cartão", icon: <CreditCard className="h-3.5 w-3.5" /> },
-    boleto: { label: "Boleto", icon: <FileText className="h-3.5 w-3.5" /> },
+  const methods: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+    pix: { label: "PIX", icon: <Smartphone className="h-3.5 w-3.5" />, color: "text-success" },
+    credit_card: { label: "Cartão", icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-info" },
+    boleto: { label: "Boleto", icon: <FileText className="h-3.5 w-3.5" />, color: "text-warning" },
   };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null };
+  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null, color: "text-muted-foreground" };
   const name = tx.customer_name || "Cliente";
   const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/10" };
 
   return (
     <motion.tr
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.15, delay: Math.min(i * 0.01, 0.2) }}
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.25) }}
       onClick={onClick}
-      className="group cursor-pointer border-b border-border/[0.05] hover:bg-primary/[0.02] transition-colors duration-150"
+      className="group cursor-pointer border-b border-border/[0.06] hover:bg-primary/[0.03] transition-all duration-200"
     >
-      <td className="py-3.5 px-4">
+      <td className="py-4 px-5">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
+          <Avatar className="h-9 w-9 shrink-0 ring-2 ring-border/10">
             <AvatarFallback className={cn("text-[10px] font-bold tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-[13px] font-medium text-foreground truncate leading-tight">{name}</p>
-            {tx.customer_email && <p className="text-[11px] text-muted-foreground/35 truncate mt-0.5">{tx.customer_email}</p>}
+            <p className="text-[13px] font-semibold text-foreground truncate leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{name}</p>
+            {tx.customer_email && <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 font-mono">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
-      <td className="py-3.5 px-4">
-        <span className="text-[12px] text-muted-foreground/50 truncate block max-w-[150px]">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
+      <td className="py-4 px-4">
+        <span className="text-[12px] text-muted-foreground/50 truncate block max-w-[150px]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
       </td>
-      <td className="py-3.5 px-4">
+      <td className="py-4 px-4">
         <div>
-          <span className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight font-display">{fmt(Number(tx.amount))}</span>
-          <p className="text-[10px] text-muted-foreground/25 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
+          <span className="text-[15px] font-bold text-foreground tabular-nums tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmt(Number(tx.amount))}</span>
+          <p className="text-[10px] text-muted-foreground/30 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
         </div>
       </td>
-      <td className="py-3.5 px-4">
-        <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/45 font-medium">
+      <td className="py-4 px-4">
+        <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-semibold", method.color)}>
           {method.icon}{method.label}
         </span>
       </td>
-      <td className="py-3.5 px-4">
-        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide", st.fg, st.bg)}>
+      <td className="py-4 px-4">
+        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wide", st.fg, st.bg)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot, tx.status === "completed" && "animate-pulse")} />
           {st.label}
         </span>
       </td>
-      <td className="py-3.5 px-4">
+      <td className="py-4 px-4">
         <div className="flex flex-col">
-          <span className="text-[12px] text-muted-foreground/45 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
-          <span className="text-[10px] text-muted-foreground/20 tabular-nums font-mono">{fmtTime(tx.created_at)}</span>
+          <span className="text-[12px] text-muted-foreground/45 tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmtDate(tx.created_at)}</span>
+          <span className="text-[10px] text-muted-foreground/25 tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmtTime(tx.created_at)}</span>
         </div>
       </td>
-      <td className="py-3.5 px-2">
+      <td className="py-4 px-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/20">
-              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+            <button className="h-8 w-8 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-muted/30 active:scale-95">
+              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px]"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-52 rounded-xl">
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2.5 text-[12px] rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
             {tx.customer_phone && (
               <>
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Copiado!"); }} className="gap-2 text-[12px]"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
-                <DropdownMenuItem asChild><a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="gap-2 text-[12px]"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a></DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Copiado!"); }} className="gap-2.5 text-[12px] rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
+                <DropdownMenuItem asChild><a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="gap-2.5 text-[12px] rounded-lg"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a></DropdownMenuItem>
               </>
             )}
             {tx.status === "completed" && (
-              <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[12px] text-destructive focus:text-destructive"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
+              <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2.5 text-[12px] text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -268,40 +285,40 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.15) }}
-      className="rounded-2xl bg-card border border-border/30 p-4 cursor-pointer active:scale-[0.985] transition-all"
+      transition={{ duration: 0.25, delay: Math.min(i * 0.02, 0.15) }}
+      className="rounded-2xl bg-card border border-border/20 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Avatar className="h-9 w-9 shrink-0">
+          <Avatar className="h-10 w-10 shrink-0 ring-2 ring-border/10">
             <AvatarFallback className={cn("text-[10px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-foreground truncate leading-tight">{name}</p>
-            <p className="text-[11px] text-muted-foreground/35 truncate mt-0.5">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
+            <p className="text-[13px] font-bold text-foreground truncate leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{name}</p>
+            <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
           </div>
         </div>
-        <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold shrink-0 tracking-wide", st.fg, st.bg)}>
+        <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold shrink-0 tracking-wide", st.fg, st.bg)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />{st.label}
         </span>
       </div>
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-[22px] font-bold text-foreground tabular-nums tracking-tight leading-none font-display">{fmt(Number(tx.amount))}</p>
+          <p className="text-[24px] font-bold text-foreground tabular-nums tracking-tight leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmt(Number(tx.amount))}</p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[10px] text-muted-foreground/30 font-medium">{methodLabels[tx.payment_method || ""] || "—"}</span>
+            <span className="text-[10px] text-muted-foreground/35 font-semibold">{methodLabels[tx.payment_method || ""] || "—"}</span>
             <span className="text-[10px] text-muted-foreground/15">·</span>
-            <span className="text-[10px] text-muted-foreground/30 truncate max-w-[100px]">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
+            <span className="text-[10px] text-muted-foreground/35 truncate max-w-[100px]">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
           </div>
         </div>
         <div className="text-right flex flex-col items-end gap-2">
-          <span className="text-[11px] text-muted-foreground/35 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
+          <span className="text-[11px] text-muted-foreground/40 tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmtDate(tx.created_at)}</span>
           {tx.customer_phone && (
-            <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-7 w-7 rounded-full bg-success/10 flex items-center justify-center text-success hover:bg-success/20 transition-colors">
-              <MessageCircle className="h-3 w-3" />
+            <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center text-success hover:bg-success/20 transition-colors active:scale-95">
+              <MessageCircle className="h-3.5 w-3.5" />
             </a>
           )}
         </div>
@@ -352,47 +369,44 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-border/30 bg-card">
+      <DialogContent className="sm:max-w-md border-border/30 bg-card rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5 text-lg font-display"><Download className="h-5 w-5 text-primary" /> Exportar Vendas</DialogTitle>
+          <DialogTitle className="flex items-center gap-2.5 text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}><Download className="h-5 w-5 text-primary" /> Exportar Vendas</DialogTitle>
           <DialogDescription className="text-muted-foreground text-[13px]">Configure os filtros de exportação</DialogDescription>
         </DialogHeader>
         <div className="space-y-5 py-3">
-          {/* Status */}
           <div>
             <div className="flex items-center justify-between mb-2.5">
-              <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em]">Status</p>
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Status</p>
               <div className="flex gap-3 text-[10px]">
                 <button onClick={() => setSelectedStatuses(new Set())} className="text-muted-foreground/40 hover:text-foreground transition-colors">Limpar</button>
-                <button onClick={() => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)))} className="text-primary font-medium">Todos</button>
+                <button onClick={() => setSelectedStatuses(new Set(ALL_STATUSES.map(s => s.value)))} className="text-primary font-semibold">Todos</button>
               </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ALL_STATUSES.map(s => (
-                <button key={s.value} onClick={() => toggleStatus(s.value)} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all border", selectedStatuses.has(s.value) ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 text-muted-foreground/40 hover:border-border/40")}>
+                <button key={s.value} onClick={() => toggleStatus(s.value)} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border", selectedStatuses.has(s.value) ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 text-muted-foreground/40 hover:border-border/40")}>
                   <span className={cn("h-1.5 w-1.5 rounded-full", selectedStatuses.has(s.value) ? s.dot : "bg-muted-foreground/15")} />{s.label}
                 </button>
               ))}
             </div>
           </div>
-          {/* Method */}
           <div>
-            <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em] mb-2.5">Método</p>
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-2.5">Método</p>
             <div className="flex flex-wrap gap-1.5">
               {ALL_METHODS.map(m => {
                 const Icon = m.icon;
                 return (
-                  <button key={m.value} onClick={() => toggleMethod(m.value)} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all border", selectedMethods.has(m.value) ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 text-muted-foreground/40 hover:border-border/40")}>
+                  <button key={m.value} onClick={() => toggleMethod(m.value)} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border", selectedMethods.has(m.value) ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 text-muted-foreground/40 hover:border-border/40")}>
                     <Icon className="h-3 w-3" /> {m.label}
                   </button>
                 );
               })}
             </div>
           </div>
-          {/* Products */}
           {txProducts.length > 0 && (
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em] mb-2.5">Produtos</p>
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] mb-2.5">Produtos</p>
               <div className="space-y-0.5 max-h-[120px] overflow-y-auto">
                 <button onClick={() => toggleProduct("all")} className={cn("w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium text-left transition-colors", selectedProducts.has("all") ? "bg-primary/8 text-primary" : "text-muted-foreground/50 hover:bg-muted/10")}>
                   {selectedProducts.has("all") ? <CheckSquare className="h-3.5 w-3.5" /> : <Square className="h-3.5 w-3.5" />} Todos
@@ -405,18 +419,17 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
               </div>
             </div>
           )}
-          {/* Summary */}
-          <div className="rounded-2xl bg-muted/8 border border-border/15 p-4 flex items-center justify-between">
+          <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-semibold text-foreground">{exportFiltered.length} transações</p>
-              <p className="text-[10px] text-muted-foreground/35 mt-0.5">serão exportadas</p>
+              <p className="text-[13px] font-bold text-foreground">{exportFiltered.length} transações</p>
+              <p className="text-[10px] text-muted-foreground/40 mt-0.5">serão exportadas</p>
             </div>
-            <p className="text-[16px] font-bold text-primary tabular-nums font-display">{fmt(exportFiltered.reduce((a, t) => a + Number(t.net_amount), 0))}</p>
+            <p className="text-[18px] font-bold text-primary tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmt(exportFiltered.reduce((a, t) => a + Number(t.net_amount), 0))}</p>
           </div>
         </div>
         <div className="flex gap-2.5 pt-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-xl h-11 text-[12px] font-medium">Cancelar</Button>
-          <Button onClick={() => { onExport(exportFiltered); onOpenChange(false); }} disabled={exportFiltered.length === 0} className="flex-1 rounded-xl h-11 gap-2 text-[12px] font-semibold">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-xl h-11 text-[12px] font-semibold">Cancelar</Button>
+          <Button onClick={() => { onExport(exportFiltered); onOpenChange(false); }} disabled={exportFiltered.length === 0} className="flex-1 rounded-xl h-11 gap-2 text-[12px] font-bold">
             <Download className="h-3.5 w-3.5" /> Exportar{exportFiltered.length > 0 ? ` (${exportFiltered.length})` : ""}
           </Button>
         </div>
@@ -450,6 +463,7 @@ export default function Vendas() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [sort, setSort] = useState<{ field: SortField; dir: SortDir }>({ field: "date", dir: "desc" });
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
+  const [activeView, setActiveView] = useState<"overview" | "analytics">("overview");
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
@@ -526,7 +540,6 @@ export default function Vendas() {
     const current = calc(dateFiltered);
     const previous = calc(previousPeriodFiltered);
 
-    // Top products
     const pMap: Record<string, { revenue: number; sales: number; name: string }> = {};
     for (const t of current.approved) {
       if (t.product_id) {
@@ -537,7 +550,6 @@ export default function Vendas() {
     }
     const topProducts = Object.entries(pMap).map(([id, d]) => ({ id, ...d })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
-    // Chart data
     const dailyMap: Record<string, number> = {};
     const prevDailyMap: Record<string, number> = {};
     for (const t of current.approved) { const day = fmtDate(t.created_at); dailyMap[day] = (dailyMap[day] || 0) + Number(t.net_amount); }
@@ -546,7 +558,6 @@ export default function Vendas() {
     const prevDays = Object.values(prevDailyMap);
     const chartData = currentDays.map((d, i) => ({ ...d, previous: prevDays[i] || 0 }));
 
-    // Daily sparkline for KPI
     const dailyNetArr = Object.values(dailyMap).reverse();
     const dailyGrossArr: number[] = [];
     const dailyCountArr: number[] = [];
@@ -574,7 +585,6 @@ export default function Vendas() {
       dailyApprovalRateArr.push(attempts > 0 ? (approvedCount / attempts) * 100 : 0);
     });
 
-    // Hourly
     const hours = Array(24).fill(0);
     current.approved.forEach(t => { hours[new Date(t.created_at).getHours()]++; });
 
@@ -649,9 +659,9 @@ export default function Vendas() {
   const peakHour = rawPeakSales > 0 ? metrics.hours.findIndex((value) => value === rawPeakSales) : null;
 
   const paymentMix = [
-    { label: "PIX", value: m.pixRev, count: m.pixCount, icon: <Smartphone className="h-4 w-4" />, total: m.totalNet },
-    { label: "Cartão", value: m.cardRev, count: m.cardCount, icon: <CreditCard className="h-4 w-4" />, total: m.totalNet },
-    { label: "Boleto", value: m.boletoRev, count: m.boletoCount, icon: <FileText className="h-4 w-4" />, total: m.totalNet },
+    { label: "PIX", value: m.pixRev, count: m.pixCount, icon: <Smartphone className="h-4 w-4" />, total: m.totalNet, color: "success" },
+    { label: "Cartão", value: m.cardRev, count: m.cardCount, icon: <CreditCard className="h-4 w-4" />, total: m.totalNet, color: "info" },
+    { label: "Boleto", value: m.boletoRev, count: m.boletoCount, icon: <FileText className="h-4 w-4" />, total: m.totalNet, color: "warning" },
   ];
 
   const topPaymentMethod = paymentMix.reduce((best, item) => item.value > best.value ? item : best, paymentMix[0]);
@@ -664,458 +674,238 @@ export default function Vendas() {
       : "Personalizado"
     : selectedPeriod.label;
 
-  const commandPills = [
-    {
-      label: "Clientes únicos",
-      value: String(m.uniqueCustomers),
-      helper: "no período",
-      icon: <Users className="h-4 w-4" />,
-    },
-    {
-      label: "Pendências",
-      value: String(m.pending.length),
-      helper: "aguardando ação",
-      icon: <Clock className="h-4 w-4" />,
-    },
-    {
-      label: "Taxas",
-      value: hidden ? HIDE : fmt(m.totalFees),
-      helper: "custo total",
-      icon: <Receipt className="h-4 w-4" />,
-    },
-    {
-      label: "Pico",
-      value: peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`,
-      helper: rawPeakSales > 0 ? `${rawPeakSales} vendas` : "sem vendas",
-      icon: <Flame className="h-4 w-4" />,
-    },
-  ];
-
-  const kpis = [
-    {
-      label: "Faturamento bruto",
-      value: hidden ? HIDE : fmt(m.totalGross),
-      helper: "antes das taxas",
-      signal: "curva de receita",
-      deltaCur: m.totalGross,
-      deltaPrev: p.totalGross,
-      sparkline: metrics.dailyGrossArr,
-      icon: <Wallet className="h-4 w-4" />,
-      tone: "primary" as const,
-      className: "xl:col-span-5",
-    },
-    {
-      label: "Ticket médio",
-      value: hidden ? HIDE : fmt(m.avgTicket),
-      helper: "valor por pedido",
-      signal: "qualidade do ticket",
-      deltaCur: m.avgTicket,
-      deltaPrev: p.avgTicket,
-      sparkline: metrics.dailyAvgTicketArr,
-      icon: <Receipt className="h-4 w-4" />,
-      tone: "info" as const,
-      className: "xl:col-span-2",
-    },
-    {
-      label: "Conversão",
-      value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
-      helper: "aprovadas / total",
-      signal: "eficiência diária",
-      deltaCur: m.conversion,
-      deltaPrev: p.conversion,
-      sparkline: metrics.dailyApprovalRateArr,
-      icon: <Target className="h-4 w-4" />,
-      tone: "warning" as const,
-      className: "xl:col-span-2",
-    },
-    {
-      label: "Vendas aprovadas",
-      value: hidden ? HIDE : String(m.approved.length),
-      helper: `${topPaymentMethod.label} lidera`,
-      signal: `${topPaymentMethod.count} pedidos dominantes`,
-      deltaCur: m.approved.length,
-      deltaPrev: p.approved.length,
-      sparkline: metrics.dailyCountArr,
-      icon: <CheckSquare className="h-4 w-4" />,
-      tone: "success" as const,
-      className: "xl:col-span-3",
-    },
-  ];
-
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1280px] pb-12">
-      <section className="relative mb-6 overflow-hidden rounded-[32px] border border-border/30 bg-card/80">
-        <div
-          className="absolute inset-0 opacity-90"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.18), transparent 34%), radial-gradient(circle at 100% 0%, hsl(var(--info) / 0.12), transparent 26%), linear-gradient(180deg, hsl(var(--card)), hsl(var(--card)))",
-          }}
-        />
-        <div className="absolute inset-y-0 left-[64%] hidden w-px bg-border/12 xl:block" />
-
-        <div className="relative grid gap-6 p-6 md:p-8 xl:grid-cols-[1.35fr_0.95fr] xl:gap-8">
+    <div className="mx-auto w-full max-w-[1320px] pb-12 px-1">
+      {/* ─── HEADER ─── */}
+      <motion.header
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-lg shadow-primary/10">
+            <BarChart3 className="h-6 w-6" />
+          </div>
           <div>
-            <div className="mb-6 flex items-start gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm shadow-primary/10">
-                <BarChart3 className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground/45" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  Revenue command room
-                </p>
-                <h1 className="mt-1 text-[28px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Minhas Vendas
-                </h1>
-                <p className="mt-1 text-[12px] text-muted-foreground/42">Leitura premium de performance, mix e qualidade operacional.</p>
-              </div>
-              <div className="hidden shrink-0 rounded-full border border-success/20 bg-success/10 px-3 py-1.5 md:inline-flex md:items-center md:gap-2">
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-[26px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Minhas Vendas
+              </h1>
+              <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/10 px-3 py-1">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-45" />
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-50" />
                   <span className="relative h-2 w-2 rounded-full bg-success" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-success">Live</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-success">Live</span>
               </div>
             </div>
-
-            <div className="grid gap-4 lg:grid-cols-[1.12fr_0.88fr]">
-              <div className="rounded-[28px] border border-border/22 bg-background/20 p-5 backdrop-blur-sm md:p-6">
-                <div className="mb-3 flex items-center gap-2 text-[11px] font-medium text-muted-foreground/42">
-                  <Activity className="h-3.5 w-3.5 text-primary" />
-                  Receita líquida do período
-                </div>
-                <div className="flex flex-wrap items-end gap-3">
-                  <span
-                    className="text-[44px] font-bold leading-none tracking-[-0.06em] text-foreground md:text-[64px]"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontFeatureSettings: "'tnum'" }}
-                  >
-                    {hidden ? "R$ •••••" : fmtCompact(m.totalNet)}
-                  </span>
-                  {!hidden && <div className="pb-2"><DeltaBadge cur={m.totalNet} prev={p.totalNet} /></div>}
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2.5 text-[11px] text-muted-foreground/42">
-                  <span className="rounded-full bg-muted/8 px-3 py-1">Período: {periodLabel}</span>
-                  {lastSaleText && <span className="rounded-full bg-success/8 px-3 py-1 text-success">Última venda {lastSaleText}</span>}
-                </div>
-              </div>
-
-              <div className="rounded-[28px] border border-border/18 bg-background/14 p-4 backdrop-blur-sm md:p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/38" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                      Pulse board
-                    </p>
-                    <p className="mt-1 text-[13px] font-semibold text-foreground">Resumo executivo</p>
-                  </div>
-                  <div className="rounded-xl bg-primary/10 p-2 text-primary">
-                    <Zap className="h-4 w-4" />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {[
-                    {
-                      label: "Aprovadas",
-                      value: hidden ? HIDE : String(m.approved.length),
-                      helper: `${dateFiltered.length > 0 ? ((m.approved.length / dateFiltered.length) * 100).toFixed(0) : 0}% do fluxo`,
-                      accent: "bg-success",
-                      text: "text-success",
-                    },
-                    {
-                      label: "Método líder",
-                      value: topPaymentMethod.label,
-                      helper: hidden ? HIDE : fmt(topPaymentMethod.value),
-                      accent: "bg-primary",
-                      text: "text-primary",
-                    },
-                    {
-                      label: "Peak hour",
-                      value: peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`,
-                      helper: rawPeakSales > 0 ? `${rawPeakSales} vendas` : "sem movimento",
-                      accent: "bg-warning",
-                      text: "text-warning",
-                    },
-                  ].map((item) => (
-                    <div key={item.label} className="grid grid-cols-[3px_1fr_auto] items-center gap-3 rounded-2xl border border-border/12 bg-card/55 px-3 py-3.5">
-                      <div className={cn("h-full rounded-full", item.accent)} />
-                      <div>
-                        <p className="text-[11px] text-muted-foreground/38">{item.label}</p>
-                        <p className="mt-0.5 text-[12px] text-muted-foreground/55">{item.helper}</p>
-                      </div>
-                      <p className={cn("text-[18px] font-bold tracking-[-0.03em]", item.text)} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {item.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {commandPills.map((pill, index) => (
-                <motion.div key={pill.label} whileHover={{ y: -3 }} transition={{ duration: 0.2, delay: index * 0.02 }} className="rounded-2xl border border-border/14 bg-background/14 px-4 py-3 backdrop-blur-sm hover:border-primary/24 hover:bg-background/22">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[11px] text-muted-foreground/42">{pill.label}</span>
-                    <span className="text-muted-foreground/28">{pill.icon}</span>
-                  </div>
-                  <p className="text-[20px] font-bold leading-none tracking-[-0.03em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {pill.value}
-                  </p>
-                  <p className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/28" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    {pill.helper}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[30px] border border-border/18 bg-background/14 p-5 backdrop-blur-sm md:p-6">
-            <div className="mb-5 flex flex-wrap gap-2">
-              {PERIODS.map((opt) => (
-                <button
-                  key={opt.label}
-                  onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn(
-                    "rounded-full px-3.5 py-2 text-[11px] font-semibold transition-all",
-                    !isCustom && selectedPeriod.label === opt.label
-                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15"
-                      : "bg-muted/10 text-muted-foreground/42 hover:text-foreground"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="mb-5 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn(
-                    "h-11 rounded-2xl border px-4 text-left text-[11px] font-medium transition-all",
-                    isCustom ? "border-primary/28 bg-primary/8 text-primary" : "border-border/14 bg-card/55 text-muted-foreground/48 hover:text-foreground"
-                  )}>
-                    <span className="inline-flex items-center gap-2">
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      {isCustom && customRange?.from
-                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                        : "Selecionar período"}
-                    </span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/25 bg-card p-0 shadow-lg">
-                  <div className="p-3">
-                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-2" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              <button onClick={toggleHidden} className={cn("h-11 w-11 rounded-2xl border transition-all", hidden ? "border-primary/28 bg-primary/8 text-primary" : "border-border/14 bg-card/55 text-muted-foreground/44 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
-                {hidden ? <EyeOff className="mx-auto h-4 w-4" /> : <Eye className="mx-auto h-4 w-4" />}
-              </button>
-
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border/14 bg-card/55 px-4 text-[11px] font-medium text-muted-foreground/48 transition-all hover:text-foreground">
-                <Download className="h-3.5 w-3.5" /> Exportar
-              </button>
-            </div>
-
-            <div className="rounded-[28px] border border-border/14 bg-card/55 p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    Status rail
-                  </p>
-                  <p className="mt-1 text-[13px] font-semibold text-foreground">Qualidade do fluxo</p>
-                </div>
-                <div className="rounded-full bg-muted/10 px-3 py-1 text-[10px] text-muted-foreground/42">{statusFilter === "all" ? "Todas" : STATUS[statusFilter]?.label || statusFilter}</div>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  { label: "Aprovadas", value: m.approved.length, text: "text-success", bg: "bg-success/10", border: "border-success/15" },
-                  { label: "Pendentes", value: m.pending.length, text: "text-warning", bg: "bg-warning/10", border: "border-warning/15" },
-                  { label: "Falhas + risco", value: m.failed.length + m.chargebacks.length, text: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/15" },
-                ].map((item) => (
-                  <div key={item.label} className={cn("flex items-center justify-between rounded-2xl border px-4 py-3", item.bg, item.border)}>
-                    <div>
-                      <p className="text-[11px] text-muted-foreground/44">{item.label}</p>
-                      <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/28" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        monitoramento
-                      </p>
-                    </div>
-                    <span className={cn("text-[22px] font-bold tracking-[-0.04em]", item.text)} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {hidden ? HIDE : item.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <p className="text-[13px] text-muted-foreground/50" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Performance, analytics e gestão de transações em tempo real
+            </p>
           </div>
         </div>
-      </section>
 
-      <section className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        {kpis.map((kpi) => {
-          const toneClass = {
-            primary: "bg-primary/10 text-primary border-primary/18",
-            info: "bg-info/10 text-info border-info/18",
-            warning: "bg-warning/10 text-warning border-warning/18",
-            success: "bg-success/10 text-success border-success/18",
-          }[kpi.tone];
-
-          return (
-            <motion.article
-              key={kpi.label}
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.18 }}
-              className={cn("group relative overflow-hidden rounded-[28px] border border-border/24 bg-card/80 p-5 transition-all hover:border-primary/24 hover:shadow-[0_16px_46px_hsl(var(--primary)/0.08)]", kpi.className)}
+        <div className="flex flex-wrap items-center gap-2">
+          {PERIODS.map((opt) => (
+            <button
+              key={opt.label}
+              onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+              className={cn(
+                "rounded-xl px-3.5 py-2 text-[11px] font-bold transition-all active:scale-95",
+                !isCustom && selectedPeriod.label === opt.label
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                  : "bg-card text-muted-foreground/50 hover:text-foreground border border-border/20 hover:border-border/40"
+              )}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/[0.07] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <div className="mb-5 flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    {kpi.label}
-                  </p>
-                  <p className="mt-2 text-[28px] font-bold leading-none tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              {opt.label}
+            </button>
+          ))}
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "h-9 rounded-xl border px-3.5 text-[11px] font-bold transition-all active:scale-95",
+                isCustom ? "border-primary/30 bg-primary/10 text-primary" : "border-border/20 bg-card text-muted-foreground/50 hover:text-foreground"
+              )}>
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {isCustom && customRange?.from
+                    ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                    : "Período"}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/25 bg-card p-0 shadow-xl">
+              <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+            </PopoverContent>
+          </Popover>
+          <button onClick={toggleHidden} className={cn("h-9 w-9 rounded-xl border transition-all active:scale-95", hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border/20 bg-card text-muted-foreground/40 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+            {hidden ? <EyeOff className="mx-auto h-4 w-4" /> : <Eye className="mx-auto h-4 w-4" />}
+          </button>
+          <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-2 rounded-xl border border-border/20 bg-card px-3.5 text-[11px] font-bold text-muted-foreground/50 transition-all hover:text-foreground active:scale-95">
+            <Download className="h-3.5 w-3.5" /> Exportar
+          </button>
+        </div>
+      </motion.header>
+
+      {/* ─── HERO KPI STRIP ─── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.05 }}
+        className="mb-6"
+      >
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Receita Líquida", value: hidden ? "R$ •••••" : fmtCompact(m.totalNet), helper: periodLabel, deltaCur: m.totalNet, deltaPrev: p.totalNet, sparkline: metrics.dailyNetArr, color: "primary", icon: <Banknote className="h-5 w-5" /> },
+            { label: "Faturamento Bruto", value: hidden ? HIDE : fmt(m.totalGross), helper: "antes das taxas", deltaCur: m.totalGross, deltaPrev: p.totalGross, sparkline: metrics.dailyGrossArr, color: "info", icon: <Wallet className="h-5 w-5" /> },
+            { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgTicket), helper: `${m.approved.length} vendas`, deltaCur: m.avgTicket, deltaPrev: p.avgTicket, sparkline: metrics.dailyAvgTicketArr, color: "warning", icon: <Receipt className="h-5 w-5" /> },
+            { label: "Conversão", value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`, helper: `${m.approved.length}/${dateFiltered.length}`, deltaCur: m.conversion, deltaPrev: p.conversion, sparkline: metrics.dailyApprovalRateArr, color: "success", icon: <Target className="h-5 w-5" /> },
+          ].map((kpi, idx) => (
+            <motion.div
+              key={kpi.label}
+              whileHover={{ y: -4, scale: 1.01 }}
+              transition={springTransition}
+              className={cn(
+                "group relative overflow-hidden rounded-2xl border bg-card p-5 transition-all cursor-default",
+                "border-border/20 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/8",
+                idx === 0 && "col-span-2 lg:col-span-1"
+              )}
+            >
+              {/* Glow on hover */}
+              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-3">
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border", `bg-${kpi.color}/10 text-${kpi.color} border-${kpi.color}/20`)}>
+                    {kpi.icon}
+                  </div>
+                  <Sparkline data={kpi.sparkline} color={kpi.color} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+                </div>
+
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/45 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                  {kpi.label}
+                </p>
+                <div className="flex items-end gap-2.5">
+                  <span className={cn("text-[28px] font-bold leading-none tracking-tight text-foreground", idx === 0 && "text-[32px]")} style={{ fontFamily: "'Space Grotesk', sans-serif", fontFeatureSettings: "'tnum'" }}>
                     {kpi.value}
-                  </p>
+                  </span>
+                  {!hidden && <DeltaBadge cur={kpi.deltaCur} prev={kpi.deltaPrev} />}
                 </div>
-                <div className="flex items-center gap-3">
-                  {kpi.sparkline?.length > 1 && <Sparkline data={kpi.sparkline} className="opacity-80 transition-opacity duration-300 group-hover:opacity-100" />}
-                  <div className={cn("rounded-2xl border p-2.5", toneClass)}>{kpi.icon}</div>
-                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground/40" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{kpi.helper}</p>
               </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11px] text-muted-foreground/42">{kpi.helper}</p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/26" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{kpi.signal}</p>
-                </div>
-                {!hidden && <DeltaBadge cur={kpi.deltaCur} prev={kpi.deltaPrev} />}
-              </div>
-            </motion.article>
-          );
-        })}
-      </section>
-
-      <section className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <article className="rounded-[30px] border border-border/24 bg-card/80 p-5 md:p-6 xl:col-span-8">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      {/* ─── CHART + SIDEBAR ─── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.1 }}
+        className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12"
+      >
+        {/* Chart */}
+        <article className="rounded-2xl border border-border/20 bg-card p-5 md:p-6 xl:col-span-8">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                Revenue timeline
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                Revenue Timeline
               </p>
-              <h2 className="mt-2 text-[20px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Receita diária
+              <h2 className="text-[20px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Receita Diária
               </h2>
-              <p className="mt-1 text-[12px] text-muted-foreground/42">Comparativo entre o período atual e a janela anterior equivalente.</p>
             </div>
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="flex gap-2">
               {[
-                { label: "Líquido", value: hidden ? HIDE : fmt(m.totalNet) },
-                { label: "Bruto", value: hidden ? HIDE : fmt(m.totalGross) },
-                { label: "Taxas", value: hidden ? HIDE : `-${fmt(m.totalFees)}` },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-border/14 bg-muted/8 px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/30" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    {item.label}
-                  </p>
-                  <p className="mt-1 text-[16px] font-bold tracking-[-0.03em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {item.value}
-                  </p>
+                { label: "Líquido", value: hidden ? HIDE : fmtCompact(m.totalNet), color: "text-primary" },
+                { label: "Bruto", value: hidden ? HIDE : fmtCompact(m.totalGross), color: "text-foreground" },
+                { label: "Taxas", value: hidden ? HIDE : `-${fmtCompact(m.totalFees)}`, color: "text-destructive" },
+              ].map(s => (
+                <div key={s.label} className="rounded-xl bg-muted/8 border border-border/10 px-3 py-2 text-center min-w-[80px]">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</p>
+                  <p className={cn("text-[13px] font-bold mt-0.5 tabular-nums", s.color)} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.value}</p>
                 </div>
               ))}
             </div>
           </div>
-
           <RevenueChart data={metrics.chartData} hidden={hidden} />
         </article>
 
-        <div className="space-y-4 xl:col-span-4">
-          <article className="rounded-[30px] border border-border/24 bg-card/80 p-5">
-            <div className="mb-5 flex items-start justify-between gap-3">
+        {/* Payment Mix + Health */}
+        <div className="xl:col-span-4 space-y-4">
+          <article className="rounded-2xl border border-border/20 bg-card p-5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  Payment mix
-                </p>
-                <h2 className="mt-2 text-[18px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Métodos de pagamento
-                </h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Payment Mix</p>
+                <p className="text-[14px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Métodos</p>
               </div>
-              <div className="rounded-2xl bg-primary/10 px-3 py-2 text-right">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-primary/80" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  líder
-                </p>
-                <p className="mt-1 text-[13px] font-semibold text-primary">{topPaymentMethod.label}</p>
+              <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                <PieChart className="h-4 w-4" />
               </div>
             </div>
-
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {paymentMix.map((pm) => {
                 const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                 return (
-                  <div key={pm.label} className="rounded-2xl border border-border/12 bg-muted/6 p-3.5">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-card/80 text-muted-foreground/50">
-                          {pm.icon}
-                        </div>
-                        <div>
-                          <p className="text-[13px] font-semibold text-foreground">{pm.label}</p>
-                          <p className="text-[10px] text-muted-foreground/28" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{pm.count} pedidos</p>
-                        </div>
+                  <div key={pm.label} className="rounded-xl border border-border/10 bg-muted/5 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={cn(`text-${pm.color}`)}>{pm.icon}</span>
+                        <span className="text-[12px] font-bold text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{pm.label}</span>
+                        <span className="text-[10px] text-muted-foreground/35 font-mono">{pm.count}x</span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-bold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{hidden ? HIDE : fmt(pm.value)}</p>
-                        <p className="text-[10px] text-muted-foreground/32">{pct.toFixed(0)}%</p>
-                      </div>
+                      <span className="text-[13px] font-bold tabular-nums text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {hidden ? HIDE : fmtCompact(pm.value)}
+                      </span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary" />
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn("h-full rounded-full", `bg-${pm.color}`)}
+                      />
                     </div>
+                    <p className="text-[10px] text-muted-foreground/30 mt-1 tabular-nums font-mono">{pct.toFixed(1)}% do total</p>
                   </div>
                 );
               })}
             </div>
           </article>
 
-          <article className="rounded-[30px] border border-border/24 bg-card/80 p-5">
-            <div className="mb-5 flex items-start justify-between gap-3">
+          <article className="rounded-2xl border border-border/20 bg-card p-5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  Health score
-                </p>
-                <h2 className="mt-2 text-[18px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Saúde operacional
-                </h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Health Score</p>
+                <p className="text-[14px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Saúde</p>
               </div>
-              <div className="rounded-2xl bg-muted/8 px-3 py-2 text-[11px] text-muted-foreground/42">
-                risco ativo
+              <div className="h-10 w-10 rounded-xl bg-success/10 text-success flex items-center justify-center border border-success/20">
+                <Shield className="h-4 w-4" />
               </div>
             </div>
-
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {[
-                { label: "Reembolso", value: `${m.refundRate.toFixed(1)}%`, threshold: 5, raw: m.refundRate },
-                { label: "Chargeback", value: `${m.chargebackRate.toFixed(1)}%`, threshold: 1, raw: m.chargebackRate },
-                { label: "Falhas", value: `${m.failedRate.toFixed(1)}%`, threshold: 20, raw: m.failedRate },
-              ].map((item) => {
-                const isBad = item.raw > item.threshold;
+                { label: "Reembolso", value: m.refundRate, threshold: 5 },
+                { label: "Chargeback", value: m.chargebackRate, threshold: 1 },
+                { label: "Falhas", value: m.failedRate, threshold: 20 },
+              ].map((h) => {
+                const bad = h.value > h.threshold;
                 return (
-                  <div key={item.label} className="rounded-2xl border border-border/12 bg-muted/6 p-3.5">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[12px] font-semibold text-foreground">{item.label}</p>
-                        <p className="text-[10px] text-muted-foreground/30">limite saudável: {item.threshold}%</p>
+                  <div key={h.label} className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[11px] font-semibold text-foreground">{h.label}</span>
+                        <span className={cn("text-[12px] font-bold tabular-nums", bad ? "text-destructive" : "text-success")} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          {h.value.toFixed(1)}%
+                        </span>
                       </div>
-                      <p className={cn("text-[18px] font-bold tracking-[-0.03em]", isBad ? "text-destructive" : "text-success")} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {item.value}
-                      </p>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
-                      <div className={cn("h-full rounded-full", isBad ? "bg-destructive" : "bg-success")} style={{ width: `${Math.min(item.raw * 4, 100)}%` }} />
+                      <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
+                        <div className={cn("h-full rounded-full transition-all", bad ? "bg-destructive" : "bg-success")} style={{ width: `${Math.min(h.value * (100 / h.threshold), 100)}%` }} />
+                      </div>
+                      <p className="text-[9px] text-muted-foreground/25 mt-0.5 font-mono">limite: {h.threshold}%</p>
                     </div>
                   </div>
                 );
@@ -1123,97 +913,79 @@ export default function Vendas() {
             </div>
           </article>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mb-8 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <article className="rounded-[30px] border border-border/24 bg-card/80 p-5 md:p-6 xl:col-span-7">
-          <div className="mb-5 flex items-center justify-between gap-3">
+      {/* ─── BOTTOM GRID: Top Products + Heatmap + Quick Stats ─── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.15 }}
+        className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12"
+      >
+        {/* Top Products */}
+        <article className="rounded-2xl border border-border/20 bg-card p-5 xl:col-span-5">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                Product ranking
-              </p>
-              <h2 className="mt-2 text-[18px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Top produtos
-              </h2>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Product Ranking</p>
+              <p className="text-[16px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Top Produtos</p>
             </div>
-            <div className="rounded-2xl bg-muted/8 px-3 py-2 text-right">
-              <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/30" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                ativos
-              </p>
-              <p className="mt-1 text-[13px] font-semibold text-foreground">{metrics.topProducts.length}</p>
-            </div>
+            <span className="text-[11px] font-bold text-muted-foreground/40 bg-muted/10 rounded-lg px-2.5 py-1 tabular-nums">{metrics.topProducts.length} ativos</span>
           </div>
-
           {metrics.topProducts.length === 0 ? (
-            <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border border-dashed border-border/20 bg-muted/4 text-center">
-              <Package className="mb-3 h-6 w-6 text-muted-foreground/16" />
-              <p className="text-[13px] font-medium text-muted-foreground/38">Sem produtos performando neste período</p>
+            <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dashed border-border/15 text-center">
+              <Package className="mb-2 h-6 w-6 text-muted-foreground/15" />
+              <p className="text-[12px] text-muted-foreground/30">Sem produtos neste período</p>
             </div>
           ) : (
             <div className="space-y-2">
               {metrics.topProducts.map((prod, index) => {
-                const maxRevenue = metrics.topProducts[0]?.revenue || 1;
-                const pct = (prod.revenue / maxRevenue) * 100;
+                const maxRev = metrics.topProducts[0]?.revenue || 1;
+                const pct = (prod.revenue / maxRev) * 100;
                 return (
-                  <div key={prod.id} className="rounded-[22px] border border-border/12 bg-muted/6 p-4">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                          <span className="text-[13px] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{index + 1}</span>
+                  <motion.div
+                    key={prod.id}
+                    whileHover={{ x: 4 }}
+                    transition={springTransition}
+                    className="rounded-xl border border-border/10 bg-muted/5 p-3.5 hover:border-primary/15 transition-all cursor-default"
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <span className="text-[12px] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>#{index + 1}</span>
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-[13px] font-semibold text-foreground">{prod.name}</p>
-                          <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground/28" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            {prod.sales} vendas
-                          </p>
+                          <p className="text-[12px] font-bold text-foreground truncate" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{prod.name}</p>
+                          <p className="text-[10px] text-muted-foreground/30 font-mono">{prod.sales} vendas</p>
                         </div>
                       </div>
-                      <p className="shrink-0 text-[15px] font-bold tracking-[-0.03em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {hidden ? HIDE : fmt(prod.revenue)}
+                      <p className="text-[14px] font-bold text-foreground shrink-0 tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {hidden ? HIDE : fmtCompact(prod.revenue)}
                       </p>
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.55, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary/60" />
+                    <div className="h-1 overflow-hidden rounded-full bg-muted/10">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary/50" />
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
           )}
         </article>
 
-        <article className="rounded-[30px] border border-border/24 bg-card/80 p-5 md:p-6 xl:col-span-5">
-          <div className="mb-5 flex items-center justify-between gap-3">
+        {/* Heatmap */}
+        <article className="rounded-2xl border border-border/20 bg-card p-5 xl:col-span-4">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                Intraday pulse
-              </p>
-              <h2 className="mt-2 text-[18px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Horários de pico
-              </h2>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Intraday Pulse</p>
+              <p className="text-[16px] font-bold text-foreground mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Horários de Pico</p>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-muted/8 px-3 py-2 text-center">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground/30" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  pico
-                </p>
-                <p className="mt-1 text-[14px] font-bold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  {peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`}
-                </p>
-              </div>
-              <div className="rounded-2xl bg-muted/8 px-3 py-2 text-center">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground/30" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  clientes
-                </p>
-                <p className="mt-1 text-[14px] font-bold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  {m.uniqueCustomers}
-                </p>
-              </div>
+            <div className="text-right">
+              <p className="text-[10px] text-muted-foreground/30 font-mono">PICO</p>
+              <p className="text-[16px] font-bold text-primary" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`}</p>
             </div>
           </div>
-
-          <div className="rounded-[24px] border border-border/12 bg-muted/6 p-4">
-            <div className="flex h-[180px] items-end gap-[3px]">
+          <div className="rounded-xl border border-border/10 bg-muted/5 p-4">
+            <div className="flex h-[160px] items-end gap-[2px]">
               {metrics.hours.map((count, hour) => {
                 const intensity = count / maxHour;
                 const active = peakHour !== null && hour === peakHour;
@@ -1221,15 +993,15 @@ export default function Vendas() {
                   <div key={hour} className="group relative flex h-full flex-1 flex-col items-center justify-end">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${Math.max(intensity * 100, 3)}%` }}
-                      transition={{ duration: 0.4, delay: hour * 0.012, ease: [0.16, 1, 0.3, 1] }}
+                      animate={{ height: `${Math.max(intensity * 100, 4)}%` }}
+                      transition={{ duration: 0.5, delay: hour * 0.015, ease: [0.16, 1, 0.3, 1] }}
                       className={cn(
                         "w-full rounded-t-sm transition-colors",
-                        active ? "bg-primary" : intensity > 0 ? "bg-primary/35 group-hover:bg-primary/55" : "bg-muted/10"
+                        active ? "bg-primary shadow-sm shadow-primary/30" : intensity > 0 ? "bg-primary/30 group-hover:bg-primary/50" : "bg-muted/8"
                       )}
                     />
-                    <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <div className="rounded-lg border border-border/18 bg-popover px-2.5 py-1 text-[10px] font-medium text-foreground shadow-md" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                    <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className="rounded-lg border border-border/20 bg-popover px-2.5 py-1.5 text-[10px] font-bold text-foreground shadow-lg whitespace-nowrap" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                         {String(hour).padStart(2, "0")}h · {count}
                       </div>
                     </div>
@@ -1237,52 +1009,80 @@ export default function Vendas() {
                 );
               })}
             </div>
-            <div className="mt-3 flex justify-between text-[9px] text-muted-foreground/22" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              <span>00h</span>
-              <span>06h</span>
-              <span>12h</span>
-              <span>18h</span>
-              <span>23h</span>
+            <div className="mt-2 flex justify-between text-[9px] text-muted-foreground/25 font-mono">
+              <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
             </div>
           </div>
         </article>
-      </section>
 
-      <section className="overflow-hidden rounded-[32px] border border-border/24 bg-card/80">
+        {/* Quick Stats */}
+        <div className="xl:col-span-3 space-y-3">
+          {[
+            { label: "Clientes Únicos", value: String(m.uniqueCustomers), icon: <Users className="h-4 w-4" />, color: "primary" },
+            { label: "Pendências", value: String(m.pending.length), icon: <Clock className="h-4 w-4" />, color: "warning" },
+            { label: "Taxas Pagas", value: hidden ? HIDE : fmtCompact(m.totalFees), icon: <Receipt className="h-4 w-4" />, color: "destructive" },
+            { label: "Última Venda", value: lastSaleText ? lastSaleText.replace("há ", "").replace(" atrás", "") : "—", icon: <Zap className="h-4 w-4" />, color: "success" },
+          ].map((stat) => (
+            <motion.div
+              key={stat.label}
+              whileHover={{ x: 4 }}
+              transition={springTransition}
+              className="flex items-center gap-3.5 rounded-2xl border border-border/20 bg-card p-4 hover:border-primary/20 transition-all cursor-default"
+            >
+              <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", `bg-${stat.color}/10 text-${stat.color} border-${stat.color}/20`)}>
+                {stat.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{stat.label}</p>
+                <p className="text-[18px] font-bold text-foreground leading-tight truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/15 shrink-0" />
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* ─── TRANSACTION LEDGER ─── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.2 }}
+        className="overflow-hidden rounded-2xl border border-border/20 bg-card"
+      >
         <div className="border-b border-border/10 px-6 pt-5 pb-4">
           <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/34" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                Transaction ledger
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                Transaction Ledger
               </p>
-              <h2 className="mt-2 text-[20px] font-bold tracking-[-0.04em] text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h2 className="mt-1 text-[20px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Transações
               </h2>
-              <p className="mt-1 text-[12px] text-muted-foreground/42">Busca rápida, filtros por status e acesso direto ao detalhe da venda.</p>
             </div>
 
             <div className="relative w-full xl:w-80">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/22" />
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/25" />
               <input
                 id="vendas-search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar nome, e-mail ou ID…"
-                className="h-11 w-full rounded-2xl border border-border/14 bg-muted/8 pl-10 pr-12 text-[13px] text-foreground placeholder:text-muted-foreground/22 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/24 transition-all"
+                className="h-11 w-full rounded-xl border border-border/15 bg-muted/8 pl-10 pr-12 text-[13px] text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/25 transition-all"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               />
               {search ? (
-                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <X className="h-4 w-4 text-muted-foreground/28 hover:text-foreground transition-colors" />
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
+                  <X className="h-4 w-4 text-muted-foreground/30 hover:text-foreground transition-colors" />
                 </button>
               ) : (
-                <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/10 bg-muted/10 px-1.5 py-0.5 text-[9px] text-muted-foreground/20 md:inline" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/10 bg-muted/10 px-1.5 py-0.5 text-[9px] text-muted-foreground/20 md:inline font-mono">
                   ⌘K
                 </kbd>
               )}
             </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mb-1">
             {statusTabs.map((tab) => {
               const active = statusFilter === tab.value;
               return (
@@ -1290,12 +1090,12 @@ export default function Vendas() {
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
-                    "inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-medium transition-all",
-                    active ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15" : "bg-muted/8 text-muted-foreground/42 hover:text-foreground"
+                    "inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[11px] font-bold transition-all active:scale-95",
+                    active ? "bg-primary text-primary-foreground shadow-md shadow-primary/15" : "bg-muted/8 text-muted-foreground/40 hover:text-foreground border border-transparent hover:border-border/20"
                   )}
                 >
                   {tab.label}
-                  <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", active ? "bg-primary-foreground/16 text-primary-foreground" : "bg-card/80 text-muted-foreground/35")} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                  <span className={cn("rounded-lg px-2 py-0.5 text-[10px] font-bold tabular-nums", active ? "bg-primary-foreground/15 text-primary-foreground" : "bg-card text-muted-foreground/30")} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                     {tab.count}
                   </span>
                 </button>
@@ -1304,22 +1104,23 @@ export default function Vendas() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between bg-muted/[0.03] px-6 py-2.5">
-          <p className="text-[11px] text-muted-foreground/26" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="flex items-center justify-between bg-muted/[0.03] px-6 py-2.5 border-b border-border/[0.05]">
+          <p className="text-[11px] text-muted-foreground/30 font-mono">
             {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
           </p>
           {!hidden && sortedFiltered.length > 0 && (
-            <p className="text-[11px] font-bold text-primary/60" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Líquido filtrado {fmt(filteredNetTotal)}
+            <p className="text-[12px] font-bold text-primary tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Líquido: {fmt(filteredNetTotal)}
             </p>
           )}
         </div>
 
+        {/* Desktop Table */}
         <div className="hidden md:block">
           {loading ? (
             <div className="p-20 text-center">
-              <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-2 border-primary/18 border-t-primary" />
-              <p className="text-[12px] text-muted-foreground/26">Carregando transações…</p>
+              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+              <p className="text-[12px] text-muted-foreground/30">Carregando transações…</p>
             </div>
           ) : (
             <>
@@ -1328,10 +1129,10 @@ export default function Vendas() {
                   <thead>
                     <tr className="border-b border-border/8">
                       <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
-                      <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40">Produto</th>
+                      <th className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35">Produto</th>
                       <SortHead label="Valor" field="amount" sort={sort} onSort={handleSort} />
-                      <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40">Método</th>
-                      <th className="px-4 py-3.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40">Status</th>
+                      <th className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35">Método</th>
+                      <th className="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35">Status</th>
                       <SortHead label="Data" field="date" sort={sort} onSort={handleSort} />
                       <th className="w-10" />
                     </tr>
@@ -1351,7 +1152,7 @@ export default function Vendas() {
               </div>
               {visibleCount < sortedFiltered.length && (
                 <div className="border-t border-border/8 p-4 text-center">
-                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-2 rounded-xl text-[11px] font-medium text-muted-foreground/42 hover:text-foreground">
+                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-2 rounded-xl text-[11px] font-bold text-muted-foreground/40 hover:text-foreground active:scale-95">
                     <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount} restantes)
                   </Button>
                 </div>
@@ -1360,11 +1161,12 @@ export default function Vendas() {
           )}
         </div>
 
+        {/* Mobile Cards */}
         <div className="space-y-2.5 p-4 md:hidden">
           {loading ? (
             <div className="p-14 text-center">
-              <div className="mx-auto mb-2 h-7 w-7 animate-spin rounded-full border-2 border-primary/18 border-t-primary" />
-              <p className="text-[12px] text-muted-foreground/26">Carregando…</p>
+              <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+              <p className="text-[12px] text-muted-foreground/30">Carregando…</p>
             </div>
           ) : visibleItems.length === 0 ? (
             <EmptyState icon={<ShoppingCart className="h-6 w-6" />} title="Nenhuma venda" subtitle="Ajuste filtros ou período" />
@@ -1374,14 +1176,14 @@ export default function Vendas() {
                 <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
               ))}
               {visibleCount < sortedFiltered.length && (
-                <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-2 rounded-xl text-[11px] font-medium text-muted-foreground/42 hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-2 rounded-xl text-[11px] font-bold text-muted-foreground/40 hover:text-foreground active:scale-95">
                   <ChevronDown className="h-3.5 w-3.5" /> Mais {sortedFiltered.length - visibleCount}
                 </Button>
               )}
             </>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} transactions={dateFiltered} products={products} productsRaw={productsRaw} onExport={handleExportCSV} />
