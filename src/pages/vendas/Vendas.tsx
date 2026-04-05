@@ -179,16 +179,16 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
   label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
 }) {
   return (
-    <GlowCard glowColor={color} delay={delay} className="p-5">
+    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer">
       <div className="flex items-start justify-between mb-3">
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-colors", `bg-${color}/8 border-${color}/10 text-${color}`)}>
+        <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${color}/10 border-${color}/12 text-${color} group-hover:bg-${color}/15`)}>
           <Icon className="h-5 w-5" />
         </div>
         {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
       </div>
-      <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/30 mb-1">{label}</p>
+      <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
       <div className="flex items-end gap-2">
-        <span className="text-2xl font-display font-black tabular-nums tracking-tight text-foreground leading-none">
+        <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">
           {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
         </span>
         {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
