@@ -523,7 +523,7 @@ export default function ProductEditor() {
   const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* ───── Progress Bar (Top) ───── */}
       <div className="shrink-0 h-[3px] bg-border/10 relative z-[60]">
         <motion.div
