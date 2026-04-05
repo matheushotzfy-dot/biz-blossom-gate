@@ -626,45 +626,34 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* ACTIONS + ACTIVITY                                               */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-8">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-2xl glass-panel overflow-hidden">
-          <div className="flex items-center justify-between px-5 pt-5 pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-                <Rocket className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Ações Rápidas</p>
-            </div>
-            <span className="text-[10px] font-heading text-muted-foreground/20 tabular-nums">10 atalhos</span>
-          </div>
-          <div className="px-4 pb-4">
-            <div className="grid grid-cols-2 gap-2 md:gap-2.5">
-              {[
-                { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", accent: "primary" },
-                { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", accent: "info" },
-                { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", accent: "success" },
-                { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", accent: "primary" },
-                { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", accent: "warning" },
-                { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", accent: "success" },
-                { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", accent: "info" },
-                { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", accent: "primary" },
-                { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", accent: "info" },
-                { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", accent: "warning" },
-              ].map((action) => (
-                <Link key={action.href} to={action.href}
-                  className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/10 bg-card/30 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/15 hover:bg-primary/[0.03] hover:shadow-lg hover:shadow-primary/5 active:scale-[0.985]">
-                  <div className={cn("h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 group-hover:scale-110 transition-transform", `bg-${action.accent}/8 text-${action.accent} ring-${action.accent}/10`)}>
-                    <action.icon className="h-4 w-4 md:h-5 md:w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] md:text-[11px] text-muted-foreground/30 hidden md:block">{action.desc}</p>
-                  </div>
-                  <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/10 hidden md:block group-hover:text-primary/40 group-hover:translate-x-0.5 transition-all" />
-                </Link>
-              ))}
-            </div>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-2xl glass-panel p-4 md:p-5 flex flex-col">
+          <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
+            {[
+              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
+              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
+              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
+              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
+              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
+              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações" },
+              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta" },
+              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação" },
+              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
+            ].map((action) => (
+              <Link key={action.href} to={action.href}
+                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/10 bg-card/30 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/15 hover:bg-primary/[0.03] hover:shadow-lg hover:shadow-primary/5 active:scale-[0.985]">
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10 group-hover:scale-110 transition-transform">
+                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[10px] md:text-[11px] text-muted-foreground/30 hidden md:block">{action.desc}</p>
+                </div>
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/15 hidden md:block group-hover:text-primary/40 transition-colors" />
+              </Link>
+            ))}
           </div>
         </motion.div>
 
