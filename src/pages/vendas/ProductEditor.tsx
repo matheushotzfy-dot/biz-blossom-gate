@@ -486,7 +486,7 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center relative overflow-hidden">
+      <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[150px] animate-pulse" />
           <div className="absolute bottom-1/3 left-1/3 w-[400px] h-[200px] bg-info/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "0.5s" }} />
@@ -523,7 +523,7 @@ export default function ProductEditor() {
   const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* ───── Progress Bar (Top) ───── */}
       <div className="shrink-0 h-[3px] bg-border/10 relative z-[60]">
         <motion.div
@@ -538,10 +538,10 @@ export default function ProductEditor() {
 
       {/* ───── Premium Top Bar ───── */}
       <div className="shrink-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-[0_1px_8px_hsl(var(--foreground)/0.03)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[64px]">
-          <div className="flex items-center gap-4">
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2.5 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-[56px] sm:h-[64px]">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
                 <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
               </div>
               <span className="hidden sm:inline text-xs">Voltar</span>
@@ -646,7 +646,7 @@ export default function ProductEditor() {
 
       {/* ───── Main Area ───── */}
       <div className="flex-1 min-h-0 flex">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex gap-7 py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6">
 
           {/* ───── Premium Sidebar ───── */}
           <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
@@ -785,36 +785,38 @@ export default function ProductEditor() {
           </nav>
 
           {/* ───── Mobile Tab Scroll ───── */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/40 px-2 py-2 flex gap-1 overflow-x-auto safe-area-bottom">
-            {TABS.map((tab, idx) => (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  if (tab.key !== "geral" && tabsLocked) {
-                    toast.error("Preencha e salve a aba Geral primeiro");
-                    return;
-                  }
-                  setActiveTab(tab.key);
-                }}
-                disabled={tab.key !== "geral" && tabsLocked}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all relative",
-                  tab.key !== "geral" && tabsLocked
-                    ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
-                    : activeTab === tab.key ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground border border-transparent"
-                )}
-              >
-                {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
-                {tab.label}
-                {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
-                  <div className="h-1.5 w-1.5 rounded-full bg-success absolute top-1 right-1" />
-                )}
-              </button>
-            ))}
+          <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px))] md:bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/30 shadow-[0_-2px_12px_hsl(var(--foreground)/0.05)]">
+            <div className="px-2 py-1.5 flex gap-1 overflow-x-auto scrollbar-none">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    if (tab.key !== "geral" && tabsLocked) {
+                      toast.error("Preencha e salve a aba Geral primeiro");
+                      return;
+                    }
+                    setActiveTab(tab.key);
+                  }}
+                  disabled={tab.key !== "geral" && tabsLocked}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-display font-bold whitespace-nowrap transition-all relative min-w-[52px]",
+                    tab.key !== "geral" && tabsLocked
+                      ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                      : activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
+                  )}
+                >
+                  {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+                  <span className="truncate max-w-[48px]">{tab.label}</span>
+                  {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
+                    <div className="h-1 w-1 rounded-full bg-success absolute top-1 right-1" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ───── Content Area ───── */}
-          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-20 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-32 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
