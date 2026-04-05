@@ -564,42 +564,26 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-8">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-8 rounded-2xl glass-panel overflow-hidden">
-          <div className="flex items-center justify-between px-5 md:px-6 pt-5 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Evolução de Receita</p>
-              </div>
-            </div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/5 px-2.5 py-1">
-              <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" /><span className="relative h-1.5 w-1.5 rounded-full bg-success" /></span>
-              <span className="text-[9px] font-heading uppercase tracking-wider text-success">Live</span>
-            </div>
-          </div>
-          <div className="px-4 md:px-5 pb-5 min-h-[260px]">
-            <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
-                <Tooltip
-                  contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "12px", fontSize: "13px", color: "var(--tooltip-text)", padding: "10px 14px", boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}
-                  formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
-                  cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
-                />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-8 rounded-2xl glass-panel p-4 md:p-6 min-h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+              <YAxis tickLine={false} axisLine={false} width={58} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => `R$${v}`} />
+              <Tooltip
+                contentStyle={{ background: "var(--tooltip-bg)", border: "1px solid var(--tooltip-border)", borderRadius: "12px", fontSize: "13px", color: "var(--tooltip-text)", padding: "10px 14px", boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}
+                formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Receita"]}
+                cursor={{ stroke: "hsl(var(--primary) / 0.16)", strokeDasharray: "4 4" }}
+              />
+              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
+            </AreaChart>
+          </ResponsiveContainer>
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
