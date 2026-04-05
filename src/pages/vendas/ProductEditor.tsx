@@ -13,13 +13,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft, Save, Package, DollarSign, ImagePlus, X, Settings, ShoppingCart,
   ArrowUpRight, Users, Handshake, Tag, Link2, Trash2, Plus, ExternalLink,
   CreditCard, QrCode, FileText, Mail, MapPin, Shield, Timer, Eye,
   Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
   Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
-  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2
+  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
+  MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle,
+  RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award
 } from "lucide-react";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -161,10 +164,8 @@ export default function ProductEditor() {
     return Math.round((score / total) * 100);
   })();
 
-  // Other tabs locked until product is saved (geral filled)
   const tabsLocked = isNew;
 
-  // Tab completion status
   const tabCompleted = useCallback((key: TabKey): boolean => {
     switch (key) {
       case "geral": return !!(name && price && parseFloat(price) > 0);
@@ -298,7 +299,6 @@ export default function ProductEditor() {
         const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("id").single();
         if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
-        // Auto-create course linked to product when delivery = Área de Membros
         if (deliveryType === "digital") {
           await supabase.from("courses").insert({
             user_id: user.id,
@@ -316,7 +316,6 @@ export default function ProductEditor() {
         const { error } = await supabase.from("products").update(productData).eq("id", productId!).eq("user_id", user.id);
         if (error) { toast.error("Erro ao salvar"); return; }
 
-        // Auto-create course if switching to digital and no course exists
         if (deliveryType === "digital") {
           const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).maybeSingle();
           if (!existingCourse) {
@@ -344,6 +343,41 @@ export default function ProductEditor() {
     const { error } = await supabase.from("products").delete().eq("id", productId!).eq("user_id", user.id);
     if (error) { toast.error("Erro ao excluir"); return; }
     toast.success("Produto excluído");
+    invalidateAll(["products"]);
+    navigate("/vendas/produtos");
+  };
+
+  const handleDuplicate = async () => {
+    if (!user || isNew || !product) return;
+    const slug = crypto.randomUUID().slice(0, 8);
+    const checkoutUrl = `${window.location.origin}/pay/${slug}`;
+    const { error } = await supabase.from("products").insert({
+      user_id: user.id,
+      name: `${product.name} (cópia)`,
+      description: product.description,
+      price: product.price,
+      status: "pending_review",
+      page_url: product.page_url,
+      image_url: product.image_url,
+      support_email: product.support_email,
+      display_name: product.display_name,
+      delivery_type: product.delivery_type,
+      checkout_url: checkoutUrl,
+      checkout_button_color: product.checkout_button_color,
+      checkout_timer_enabled: product.checkout_timer_enabled,
+      checkout_timer_minutes: product.checkout_timer_minutes,
+      checkout_social_proof: product.checkout_social_proof,
+      checkout_guarantee_enabled: product.checkout_guarantee_enabled,
+      checkout_pix_enabled: product.checkout_pix_enabled,
+      checkout_boleto_enabled: product.checkout_boleto_enabled,
+      checkout_credit_card_enabled: product.checkout_credit_card_enabled,
+      checkout_address_required: product.checkout_address_required,
+      checkout_email_confirm: product.checkout_email_confirm,
+      affiliate_enabled: product.affiliate_enabled,
+      affiliate_commission: product.affiliate_commission,
+    } as any).select("id").single();
+    if (error) { toast.error("Erro ao duplicar"); return; }
+    toast.success("Produto duplicado com sucesso!");
     invalidateAll(["products"]);
     navigate("/vendas/produtos");
   };
@@ -511,9 +545,14 @@ export default function ProductEditor() {
 
             <div className="flex items-center gap-2">
               {!isNew && (
-                <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold rounded-xl h-9">
-                  <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Excluir</span>
-                </Button>
+                <>
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-xs font-display font-bold rounded-xl h-9">
+                    <Copy className="h-3.5 w-3.5" /> <span className="hidden lg:inline">Duplicar</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive gap-1.5 text-xs font-display font-bold rounded-xl h-9">
+                    <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Excluir</span>
+                  </Button>
+                </>
               )}
               <Button onClick={handleSave} disabled={saving} className={cn(
                 "gap-2 rounded-xl text-sm font-display font-black h-10 px-6 shadow-lg shadow-primary/20 transition-all duration-300",
@@ -542,13 +581,12 @@ export default function ProductEditor() {
 
           {/* ───── Premium Sidebar ───── */}
           <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
-            {/* Tab navigation */}
             <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
               <div className="flex items-center justify-between px-3 pt-1 pb-3">
                 <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
                 <span className="text-[9px] font-display font-bold text-muted-foreground/30">{currentTabIdx + 1}/{TABS.length}</span>
               </div>
-              {TABS.map((tab, idx) => {
+              {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
                 const completed = tabCompleted(tab.key);
                 return (
@@ -625,6 +663,33 @@ export default function ProductEditor() {
               <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
             </motion.div>
 
+            {/* Quick Actions */}
+            {!isNew && (
+              <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2">
+                <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Ações rápidas</p>
+                {product?.checkout_url && (
+                  <button
+                    onClick={() => window.open(getCheckoutLink(), "_blank")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+                  >
+                    <Eye className="h-3.5 w-3.5" /> Ver Checkout
+                  </button>
+                )}
+                <button
+                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${productId}/checkout-builder`), 100); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+                >
+                  <Palette className="h-3.5 w-3.5" /> Checkout Builder
+                </button>
+                <button
+                  onClick={handleDuplicate}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+                >
+                  <Copy className="h-3.5 w-3.5" /> Duplicar Produto
+                </button>
+              </div>
+            )}
+
             {/* Keyboard shortcut hint */}
             <div className="rounded-xl border border-border/20 bg-card/20 p-3 space-y-2">
               <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/30">Dica</p>
@@ -692,7 +757,7 @@ export default function ProductEditor() {
                 />}
 
                 {activeTab === "checkout" && <TabCheckout
-                  {...{ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate }}
+                  {...{ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
                 />}
 
                 {activeTab === "co-producao" && <TabCoProducao
@@ -708,7 +773,7 @@ export default function ProductEditor() {
                 />}
 
                 {activeTab === "links" && <TabLinks
-                  {...{ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink }}
+                  {...{ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }}
                 />}
               </motion.div>
             </AnimatePresence>
@@ -724,8 +789,6 @@ export default function ProductEditor() {
    ═══════════════════════════════════════════════ */
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
-
-
   return (
     <div className="space-y-6">
       <SectionHeader icon={Package} title="Informações do Produto" subtitle="Dados principais exibidos na área de membros e programa de afiliados." />
@@ -747,13 +810,12 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-11 w-11 rounded-xl bg-card/90 border border-border/30 flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all shadow-lg">
-                <ImagePlus className="h-4.5 w-4.5 text-foreground" />
+                <ImagePlus className="h-4 w-4 text-foreground" />
               </motion.button>
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-11 w-11 rounded-xl bg-card/90 border border-border/30 flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all shadow-lg">
-                <X className="h-4.5 w-4.5" />
+                <X className="h-4 w-4" />
               </motion.button>
             </div>
-            {/* Image quality badge */}
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 shadow-lg">
               <CheckCircle2 className="h-3 w-3 text-success" />
               <span className="text-[10px] font-display font-bold text-foreground">Imagem adicionada</span>
@@ -853,6 +915,18 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </div>
 
+          {/* Revenue estimate */}
+          {price && parseFloat(price) > 0 && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-success/5 border border-success/15 p-3 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-success/10 flex items-center justify-center shrink-0 ring-1 ring-success/20">
+                <TrendingUp className="h-4 w-4 text-success" />
+              </div>
+              <div>
+                <p className="text-[10px] font-display font-bold text-muted-foreground/60 uppercase tracking-wider">Estimativa de receita (100 vendas)</p>
+                <p className="text-sm font-numbers font-black text-success">R$ {(parseFloat(price) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+              </div>
+            </motion.div>
+          )}
         </div>
       </EditorCard>
 
@@ -877,6 +951,20 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <p className={cn("text-[10px]", displayName.trim() ? "text-success" : "text-muted-foreground/30")}>{displayName.trim() ? "✓ Nome preenchido" : "Obrigatório • Aparecerá no rodapé do checkout"}</p>
         </div>
       </EditorCard>
+
+      {/* ─── SEO Preview Card ─── */}
+      {name && (
+        <EditorCard accentColor="bg-warning">
+          <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
+            <Eye className="h-4 w-4 text-warning" /> Pré-visualização (Google)
+          </h3>
+          <div className="rounded-xl border border-border/30 bg-card/30 p-4 space-y-1">
+            <p className="text-[13px] text-info font-medium truncate">{pageUrl || "https://seusite.com/produto"}</p>
+            <p className="text-base text-primary font-display font-bold truncate">{name || "Nome do Produto"}{price ? ` — R$ ${Number(price).toFixed(2)}` : ""}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2">{description.slice(0, 160) || "Descrição do produto aparecerá aqui..."}</p>
+          </div>
+        </EditorCard>
+      )}
     </div>
   );
 }
@@ -895,6 +983,36 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
           <PaymentMethodRow icon={FileText} label="Boleto" sublabel="Taxa: 2,49% + R$ 2,49" color="text-warning" checked={boletoEnabled} onChange={setBoletoEnabled} />
           <PaymentMethodRow icon={CreditCard} label="Cartão de Crédito" sublabel="Taxa: 6,38% • Até 12x" color="text-info" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
         </div>
+
+        {/* Payment summary */}
+        {price && parseFloat(price) > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border/20 p-3 space-y-2">
+            <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
+            <div className="grid grid-cols-3 gap-3">
+              {pixEnabled && (
+                <div className="text-center">
+                  <p className="text-[10px] text-muted-foreground/50">PIX</p>
+                  <p className="text-xs font-numbers font-black text-success">R$ {(parseFloat(price) * 0.9751).toFixed(2)}</p>
+                  <p className="text-[9px] text-muted-foreground/30">líquido</p>
+                </div>
+              )}
+              {boletoEnabled && (
+                <div className="text-center">
+                  <p className="text-[10px] text-muted-foreground/50">Boleto</p>
+                  <p className="text-xs font-numbers font-black text-warning">R$ {(parseFloat(price) * 0.9751 - 2.49).toFixed(2)}</p>
+                  <p className="text-[9px] text-muted-foreground/30">líquido</p>
+                </div>
+              )}
+              {creditCardEnabled && (
+                <div className="text-center">
+                  <p className="text-[10px] text-muted-foreground/50">Cartão</p>
+                  <p className="text-xs font-numbers font-black text-info">R$ {(parseFloat(price) * 0.9362).toFixed(2)}</p>
+                  <p className="text-[9px] text-muted-foreground/30">líquido</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </EditorCard>
 
       <EditorCard accentColor="bg-info">
@@ -955,6 +1073,22 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
   return (
     <div className="space-y-6">
       <SectionHeader icon={Layers} title="Order Bump" subtitle="Adicione produtos complementares que aparecem como oferta no checkout." />
+
+      {/* How it works */}
+      <EditorCard accentColor="bg-info">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-xl bg-info/10 ring-1 ring-info/20 flex items-center justify-center shrink-0">
+            <Sparkles className="h-4 w-4 text-info" />
+          </div>
+          <div>
+            <p className="text-sm font-display font-bold text-foreground">Como funciona?</p>
+            <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
+              Order bumps são ofertas extras que aparecem no checkout antes da compra. O comprador pode adicionar com apenas um clique, aumentando seu ticket médio em até 30%.
+            </p>
+          </div>
+        </div>
+      </EditorCard>
+
       {isNew ? (
         <EmptyCard icon={Layers} message="Salve o produto primeiro para configurar Order Bumps." />
       ) : (
@@ -1017,29 +1151,115 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
 }
 
 function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
+  const [upsellType, setUpsellType] = useState("none");
+  const [downsellEnabled, setDownsellEnabled] = useState(false);
+  const [downsellUrl, setDownsellUrl] = useState("");
+  const [downsellDelay, setDownsellDelay] = useState("5");
+
   return (
     <div className="space-y-6">
-      <SectionHeader icon={ArrowUpRight} title="Upsell / Downsell" subtitle="Configure página de obrigado personalizada e ofertas pós-compra." />
-      <ToggleRow icon={MousePointerClick} label="Página de obrigado personalizada ou upsell" checked={hasCustomThankYou} onChange={setHasCustomThankYou} />
+      <SectionHeader icon={ArrowUpRight} title="Upsell / Downsell" subtitle="Maximize o valor de cada venda com ofertas pós-compra inteligentes." />
+
+      {/* Strategy info */}
+      <EditorCard accentColor="bg-success">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-xl bg-success/10 ring-1 ring-success/20 flex items-center justify-center shrink-0">
+            <Rocket className="h-4 w-4 text-success" />
+          </div>
+          <div>
+            <p className="text-sm font-display font-bold text-foreground">Aumente seu LTV</p>
+            <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
+              Vendedores que usam upsell aumentam o valor médio por cliente em até 40%. Configure sua estratégia de pós-venda para maximizar a receita.
+            </p>
+          </div>
+        </div>
+      </EditorCard>
+
+      {/* Upsell Type Selection */}
+      <EditorCard accentColor="bg-primary">
+        <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
+          <Target className="h-4 w-4 text-primary" /> Tipo de Upsell
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { value: "none", label: "Sem Upsell", desc: "Redirecionar para obrigado padrão", icon: Check },
+            { value: "page", label: "Página Custom", desc: "Redirecionar para URL personalizada", icon: ExternalLink },
+            { value: "popup", label: "Popup Upsell", desc: "Exibir oferta em popup na página", icon: Sparkles },
+          ].map((opt) => (
+            <motion.button
+              key={opt.value}
+              type="button"
+              onClick={() => { setUpsellType(opt.value); if (opt.value !== "none") setHasCustomThankYou(opt.value === "page"); }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                "flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
+                upsellType === opt.value
+                  ? "bg-primary/5 border-primary/20 shadow-sm"
+                  : "bg-card/30 border-border/20 hover:border-border/40"
+              )}
+            >
+              {upsellType === opt.value && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
+              <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center ring-1 transition-all", upsellType === opt.value ? "bg-primary/10 ring-primary/20" : "bg-muted/10 ring-border/20")}>
+                <opt.icon className={cn("h-4 w-4", upsellType === opt.value ? "text-primary" : "text-muted-foreground/40")} />
+              </div>
+              <p className="text-xs font-display font-bold text-foreground">{opt.label}</p>
+              <p className="text-[9px] text-muted-foreground/50">{opt.desc}</p>
+            </motion.button>
+          ))}
+        </div>
+      </EditorCard>
+
+      {/* Custom Thank You URL */}
       <AnimatePresence>
-        {hasCustomThankYou && (
+        {(upsellType === "page" || hasCustomThankYou) && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-            <div className="space-y-2 pl-4 border-l-2 border-primary/20">
-              <EditorLabel>URL da página de obrigado / upsell</EditorLabel>
-              <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
-            </div>
+            <EditorCard accentColor="bg-warning">
+              <h4 className="text-[15px] font-display font-black flex items-center gap-2">
+                <ExternalLink className="h-4 w-4 text-warning" /> Página de obrigado / upsell
+              </h4>
+              <div className="space-y-2">
+                <EditorLabel>URL da página</EditorLabel>
+                <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/obrigado" type="url" className="h-11 bg-card/80 border-border/40" />
+                <p className="text-[10px] text-muted-foreground/40">O comprador será redirecionado para esta URL após a compra</p>
+              </div>
+            </EditorCard>
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="space-y-3">
+
+      {/* Downsell */}
+      <EditorCard accentColor="bg-info">
+        <ToggleRow icon={ArrowUpRight} label="Downsell (oferta de recuperação)" sublabel="Se o comprador recusar o upsell, exiba uma oferta com desconto" checked={downsellEnabled} onChange={setDownsellEnabled} />
+        <AnimatePresence>
+          {downsellEnabled && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden space-y-4 pt-2">
+              <div className="space-y-2 pl-4 border-l-2 border-info/20">
+                <EditorLabel>URL da oferta downsell</EditorLabel>
+                <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
+              </div>
+              <div className="space-y-2 pl-4 border-l-2 border-info/20">
+                <EditorLabel icon={Timer}>Delay antes de exibir (segundos)</EditorLabel>
+                <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="w-24 h-10 text-center font-numbers bg-card/80 border-border/40" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </EditorCard>
+
+      {/* Email confirmation */}
+      <EditorCard accentColor="bg-success">
+        <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
+          <Mail className="h-4 w-4 text-success" /> E-mail pós-compra
+        </h3>
         <ToggleRow icon={Mail} label="Enviar e-mail de confirmação" checked={sendConfirmationEmail} onChange={setSendConfirmationEmail} />
         <AnimatePresence>
           {sendConfirmationEmail && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className="space-y-3 pl-4 border-l-2 border-primary/20">
+              <div className="space-y-3 pl-4 border-l-2 border-success/20">
                 {[
-                  { val: "immediate", label: "Enviar imediatamente após o pagamento" },
-                  { val: "after_upsell", label: "Enviar após concluir as ofertas de upsell" },
+                  { val: "immediate", label: "Enviar imediatamente após o pagamento", icon: Zap },
+                  { val: "after_upsell", label: "Enviar após concluir as ofertas de upsell", icon: Clock },
                 ].map(opt => (
                   <label key={opt.val} className={cn(
                     "flex items-center gap-3 cursor-pointer rounded-xl p-3 border transition-all",
@@ -1051,6 +1271,7 @@ function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setTh
                     )}>
                       {emailTiming === opt.val && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-2 w-2 rounded-full bg-primary" />}
                     </div>
+                    <opt.icon className={cn("h-3.5 w-3.5", emailTiming === opt.val ? "text-primary" : "text-muted-foreground/40")} />
                     <span className="text-sm font-display font-medium">{opt.label}</span>
                   </label>
                 ))}
@@ -1058,12 +1279,14 @@ function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setTh
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </EditorCard>
     </div>
   );
 }
 
-function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate }: any) {
+function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: any) {
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+
   return (
     <div className="space-y-6">
       <SectionHeader icon={ShoppingCart} title="Checkout" subtitle="Gerencie e personalize seus checkouts." />
@@ -1071,7 +1294,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
         <EmptyCard icon={ShoppingCart} message="Salve o produto primeiro para personalizar o checkout." />
       ) : (
         <>
-          {/* Checkout card */}
+          {/* Checkout Quick Actions Card */}
           <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden relative">
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
             <div className="p-5 flex items-center justify-between">
@@ -1091,9 +1314,94 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
                 <Button variant="outline" size="sm" onClick={() => copyLink(getCheckoutLink())} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
                   <Copy className="h-3.5 w-3.5" /> Copiar
                 </Button>
+                <Button variant="outline" size="sm" onClick={() => window.open(getCheckoutLink(), "_blank")} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
+                  <Eye className="h-3.5 w-3.5" /> Abrir
+                </Button>
               </div>
             </div>
           </div>
+
+          {/* Live Mini Preview */}
+          <EditorCard accentColor="bg-primary">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" /> Pré-visualização
+              </h3>
+              <div className="flex items-center gap-1 rounded-lg border border-border/30 bg-card/30 p-0.5">
+                <button
+                  onClick={() => setPreviewDevice("desktop")}
+                  className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "desktop" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
+                >
+                  <Monitor className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setPreviewDevice("mobile")}
+                  className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "mobile" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
+                >
+                  <Smartphone className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Mini checkout preview */}
+            <div className={cn(
+              "mx-auto rounded-xl border border-border/30 bg-background overflow-hidden transition-all duration-300",
+              previewDevice === "mobile" ? "max-w-[320px]" : "max-w-full"
+            )}>
+              {/* Banner area */}
+              {(previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview) && (
+                <img src={previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="" className="w-full h-20 object-cover" />
+              )}
+              <div className="p-4 space-y-3">
+                {/* Timer preview */}
+                {timerEnabled && (
+                  <div className="flex items-center justify-center gap-2 rounded-lg bg-destructive/10 border border-destructive/15 py-1.5 px-3">
+                    <Timer className="h-3 w-3 text-destructive" />
+                    <span className="text-[10px] font-numbers font-bold text-destructive">{timerMinutes}:00</span>
+                    <span className="text-[9px] text-destructive/60">restantes</span>
+                  </div>
+                )}
+
+                {/* Product */}
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-muted/10 flex items-center justify-center shrink-0 border border-border/20">
+                    <Package className="h-4 w-4 text-muted-foreground/30" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-display font-bold truncate text-foreground">{name || "Produto"}</p>
+                    <p className="text-xs font-numbers font-black text-primary">R$ {Number(price || 0).toFixed(2)}</p>
+                  </div>
+                </div>
+
+                {/* Payment methods preview */}
+                <div className="flex items-center gap-2">
+                  {pixEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-success/10 text-success border border-success/20 font-display font-bold">PIX</span>}
+                  {creditCardEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-info/10 text-info border border-info/20 font-display font-bold">Cartão</span>}
+                  {boletoEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-warning/10 text-warning border border-warning/20 font-display font-bold">Boleto</span>}
+                </div>
+
+                {/* Social proof */}
+                {socialProof && (
+                  <p className="text-[9px] text-muted-foreground/50 flex items-center gap-1">
+                    <Users className="h-2.5 w-2.5" /> 127 pessoas compraram recentemente
+                  </p>
+                )}
+
+                {/* CTA Button preview */}
+                <div className="rounded-lg py-2.5 text-center text-xs font-display font-black text-primary-foreground shadow-md" style={{ backgroundColor: buttonColor }}>
+                  Comprar Agora
+                </div>
+
+                {/* Guarantee badge */}
+                {guaranteeEnabled && (
+                  <div className="flex items-center justify-center gap-1.5 py-1.5">
+                    <Shield className="h-3 w-3 text-success/50" />
+                    <span className="text-[9px] text-muted-foreground/50 font-display">Garantia de {warrantyDays} dias</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </EditorCard>
 
           {/* Visual customization */}
           <EditorCard accentColor="bg-info">
@@ -1108,9 +1416,21 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
                   <input type="color" value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="w-12 h-12 rounded-xl border border-border cursor-pointer" />
                 </div>
                 <Input value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-card/80 border-border/40 h-11" />
-                <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-white shadow-lg cursor-default" style={{ backgroundColor: buttonColor }}>
+                <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-primary-foreground shadow-lg cursor-default" style={{ backgroundColor: buttonColor }}>
                   Comprar Agora
                 </motion.div>
+              </div>
+              {/* Quick color presets */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mr-1">Cores populares</span>
+                {["#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#f59e0b", "#ec4899", "#06b6d4", "#000000"].map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setButtonColor(c)}
+                    className={cn("h-6 w-6 rounded-lg border-2 transition-all hover:scale-110", buttonColor === c ? "border-foreground ring-1 ring-foreground/20 scale-110" : "border-border/30")}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
               </div>
             </div>
           </EditorCard>
@@ -1139,8 +1459,8 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
               <ImagePlus className="h-4 w-4 text-success" /> Banners do Checkout
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <BannerUpload label="Banner Desktop" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e: any) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} />
-              <BannerUpload label="Banner Mobile" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e: any) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} />
+              <BannerUpload label="Banner Desktop" sublabel="Recomendado: 1200×200px" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e: any) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} />
+              <BannerUpload label="Banner Mobile" sublabel="Recomendado: 600×200px" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e: any) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} />
             </div>
           </EditorCard>
         </>
@@ -1153,6 +1473,22 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
   return (
     <div className="space-y-6">
       <SectionHeader icon={Handshake} title="Co-Produção" subtitle="Divida receitas com parceiros de produção." />
+
+      {/* Info card */}
+      <EditorCard accentColor="bg-info">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-xl bg-info/10 ring-1 ring-info/20 flex items-center justify-center shrink-0">
+            <Award className="h-4 w-4 text-info" />
+          </div>
+          <div>
+            <p className="text-sm font-display font-bold text-foreground">Co-produção simplificada</p>
+            <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
+              Divida a receita automaticamente com seu co-produtor. Cada venda terá o split calculado e creditado em tempo real.
+            </p>
+          </div>
+        </div>
+      </EditorCard>
+
       {isNew ? (
         <EmptyCard icon={Handshake} message="Salve o produto primeiro para configurar co-produção." />
       ) : (
@@ -1392,25 +1728,95 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
   );
 }
 
-function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink }: any) {
+function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
+  const [showQR, setShowQR] = useState(false);
+  const checkoutLink = getCheckoutLink();
+
+  const shareLinks = [
+    { label: "WhatsApp", icon: MessageSquare, color: "bg-success/10 text-success ring-success/20", url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
+    { label: "Telegram", icon: Share2, color: "bg-info/10 text-info ring-info/20", url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}` },
+    { label: "Twitter/X", icon: Megaphone, color: "bg-foreground/5 text-foreground ring-border/20", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}&url=${encodeURIComponent(checkoutLink)}` },
+  ];
+
   return (
     <div className="space-y-6">
-      <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie os links de checkout e vendas deste produto." />
+      <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie, compartilhe e monitore seus links de checkout." />
       {isNew ? (
         <EmptyCard icon={Link2} message="Salve o produto primeiro para gerar links." />
       ) : (
         <div className="space-y-4">
+          {/* Main checkout link with QR */}
           {product?.checkout_url && (
             <EditorCard accentColor="bg-primary">
-              <h4 className="text-[15px] font-display font-black flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-[15px] font-display font-black flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
+                <button
+                  onClick={() => setShowQR(!showQR)}
+                  className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-all ring-1", showQR ? "bg-primary/10 ring-primary/20 text-primary" : "bg-muted/10 ring-border/20 text-muted-foreground/50 hover:text-foreground")}
+                >
+                  <QrCode className="h-4 w-4" />
+                </button>
+              </div>
               <div className="flex items-center gap-2">
-                <Input readOnly value={getCheckoutLink()} className="h-10 font-mono text-xs bg-muted/10 border-border/30" />
-                <Button variant="outline" size="sm" onClick={() => copyLink(getCheckoutLink())} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
+                <Input readOnly value={checkoutLink} className="h-10 font-mono text-xs bg-muted/10 border-border/30" />
+                <Button variant="outline" size="sm" onClick={() => copyLink(checkoutLink)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
                   <Copy className="h-3.5 w-3.5" /> Copiar
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => window.open(getCheckoutLink(), "_blank")} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
+                <Button variant="outline" size="sm" onClick={() => window.open(checkoutLink, "_blank")} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
                   <Eye className="h-3.5 w-3.5" /> Abrir
                 </Button>
+              </div>
+
+              {/* QR Code */}
+              <AnimatePresence>
+                {showQR && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-col items-center gap-3 py-4 border-t border-border/20 mt-2">
+                      <div className="bg-background p-4 rounded-xl border border-border/20 shadow-sm">
+                        <QRCodeSVG
+                          value={checkoutLink}
+                          size={180}
+                          level="M"
+                          bgColor="transparent"
+                          fgColor="hsl(var(--foreground))"
+                        />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/40 font-display">Escaneie para acessar o checkout</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </EditorCard>
+          )}
+
+          {/* Social sharing */}
+          {checkoutLink && (
+            <EditorCard accentColor="bg-success">
+              <h4 className="text-[15px] font-display font-black flex items-center gap-2">
+                <Share2 className="h-4 w-4 text-success" /> Compartilhar
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {shareLinks.map(sl => (
+                  <motion.a
+                    key={sl.label}
+                    href={sl.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-border/20 hover:border-border/40 bg-card/30 transition-all"
+                  >
+                    <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1 shrink-0", sl.color)}>
+                      <sl.icon className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-display font-bold text-foreground">{sl.label}</span>
+                  </motion.a>
+                ))}
               </div>
             </EditorCard>
           )}
@@ -1428,8 +1834,8 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
           )}
 
           {affiliateEnabled && (
-            <EditorCard accentColor="bg-success">
-              <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Users className="h-4 w-4 text-success" /> Link de Afiliado</h4>
+            <EditorCard accentColor="bg-warning">
+              <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Users className="h-4 w-4 text-warning" /> Link de Afiliado</h4>
               <div className="flex items-center gap-2">
                 <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-10 font-mono text-xs bg-muted/10 border-border/30" />
                 <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
@@ -1530,7 +1936,6 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
             return (
               <EditorCard key={c.id} accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
                 <div className="flex items-center gap-4">
-                  {/* Thumbnail */}
                   <div className="h-16 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15">
                     {c.thumbnail_url ? (
                       <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" />
@@ -1540,7 +1945,6 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
                       </div>
                     )}
                   </div>
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-sm font-display font-black text-foreground truncate">{c.title}</h3>
@@ -1559,7 +1963,6 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
                       <span className="flex items-center gap-1"><Video className="h-3 w-3 text-info/50" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
                     </div>
                   </div>
-                  {/* Actions */}
                   <Button
                     variant="ghost" size="sm"
                     onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
@@ -1706,12 +2109,13 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
   );
 }
 
-function BannerUpload({ label, preview, inputRef, onFile, onClear }: {
-  label: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
+function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
+  label: string; sublabel?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
 }) {
   return (
     <div className="space-y-2">
       <EditorLabel>{label}</EditorLabel>
+      {sublabel && <p className="text-[9px] text-muted-foreground/30">{sublabel}</p>}
       <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
       {preview ? (
         <div className="relative rounded-xl overflow-hidden border border-border/40 shadow-sm group/banner">
