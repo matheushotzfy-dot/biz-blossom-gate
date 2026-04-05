@@ -228,10 +228,10 @@ export default function Produtos() {
       </motion.section>
 
       {/* ═══════════════════ TOOLBAR ═══════════════════ */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, ease }} className="mb-6">
-        <div className="rounded-xl bg-card/95 ring-1 ring-border/15 p-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, ease }} className="mb-4 sm:mb-6">
+        <div className="rounded-xl bg-card/95 ring-1 ring-border/15 p-2.5 sm:p-3 flex flex-col gap-2.5 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Status tabs */}
-          <div className="flex gap-1 overflow-x-auto scrollbar-none">
+          <div className="flex gap-1 overflow-x-auto scrollbar-none -mx-0.5 px-0.5">
             {statusTabs.map((tab) => {
               const isActive = statusFilter === tab.value;
               return (
@@ -239,7 +239,7 @@ export default function Produtos() {
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
-                    "relative shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[10px] font-display font-bold transition-all duration-200 active:scale-[0.97]",
+                    "relative shrink-0 inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[10px] font-display font-bold transition-all duration-200 active:scale-[0.97]",
                     isActive
                       ? "bg-primary/8 ring-1 ring-primary/15 text-foreground"
                       : "text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-muted/5"
@@ -249,7 +249,7 @@ export default function Produtos() {
                     <motion.span layoutId="prod-tab" className="h-1.5 w-1.5 rounded-full bg-primary" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
                   )}
                   {tab.label}
-                  <span className={cn("text-[9px] px-1.5 py-0.5 rounded-md font-display font-bold min-w-[20px] text-center tabular-nums", isActive ? "bg-primary/10 text-primary/70" : "bg-muted/5 text-muted-foreground/20")}>{tab.count}</span>
+                  <span className={cn("text-[9px] px-1 sm:px-1.5 py-0.5 rounded-md font-display font-bold min-w-[18px] sm:min-w-[20px] text-center tabular-nums", isActive ? "bg-primary/10 text-primary/70" : "bg-muted/5 text-muted-foreground/20")}>{tab.count}</span>
                 </button>
               );
             })}
@@ -262,7 +262,7 @@ export default function Produtos() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar produto…"
-                className="h-9 w-full rounded-lg ring-1 ring-border/10 bg-muted/5 pl-9 pr-9 text-[11px] text-foreground placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-display"
+                className="h-8 sm:h-9 w-full rounded-lg ring-1 ring-border/10 bg-muted/5 pl-9 pr-9 text-[11px] text-foreground placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-display"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90"><X className="h-3.5 w-3.5 text-muted-foreground/30" /></button>
@@ -276,7 +276,7 @@ export default function Produtos() {
                 <button
                   key={v.mode}
                   onClick={() => setViewMode(v.mode)}
-                  className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === v.mode ? "bg-primary/10 text-primary ring-1 ring-primary/15" : "text-muted-foreground/25 hover:text-foreground")}
+                  className={cn("h-7 w-7 sm:h-8 sm:w-8 rounded-md flex items-center justify-center transition-all", viewMode === v.mode ? "bg-primary/10 text-primary ring-1 ring-primary/15" : "text-muted-foreground/25 hover:text-foreground")}
                 >
                   <v.icon className="h-3.5 w-3.5" />
                 </button>
