@@ -604,20 +604,20 @@ export default function ProductEditor() {
 
             <div className="h-5 w-px bg-border/20 hidden sm:block" />
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               {!isNew && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50 hidden sm:flex">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-[11px] font-display font-bold rounded-xl h-8">
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hidden sm:flex">
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
               )}
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+              <motion.div whileTap={{ scale: 0.97 }}>
                 <Button onClick={handleSave} disabled={saving} className={cn(
-                  "gap-2 rounded-xl text-xs font-display font-black h-9 px-5 shadow-lg transition-all duration-300 relative overflow-hidden",
+                  "gap-1.5 sm:gap-2 rounded-xl text-[11px] sm:text-xs font-display font-black h-8 sm:h-9 px-3 sm:px-5 shadow-lg transition-all duration-300 relative overflow-hidden",
                   saved
                     ? "bg-success shadow-success/25 hover:bg-success"
                     : "shadow-primary/25 hover:shadow-primary/35"
@@ -625,15 +625,15 @@ export default function ProductEditor() {
                   <AnimatePresence mode="wait">
                     {saved ? (
                       <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5" /> Salvo!
+                        <Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span>
                       </motion.div>
                     ) : saving ? (
                       <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5">
-                        <Loader2 className="h-3 w-3 animate-spin" /> Salvando...
+                        <Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span>
                       </motion.div>
                     ) : (
                       <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-1.5">
-                        <Save className="h-3 w-3" /> {isNew ? "Criar Produto" : "Salvar"}
+                        <Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}
                       </motion.div>
                     )}
                   </AnimatePresence>
