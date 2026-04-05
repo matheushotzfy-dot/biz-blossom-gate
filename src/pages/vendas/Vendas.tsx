@@ -881,7 +881,7 @@ export default function Vendas() {
             </div>
             <div className="flex items-end gap-5 mb-3">
               <motion.span
-                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] [text-shadow:0_0_100px_hsl(var(--primary)/0.2),0_4px_24px_hsl(var(--background)/0.5)]"
+                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_100px_hsl(var(--primary)/0.25),0_4px_24px_hsl(var(--background)/0.5)]"
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
