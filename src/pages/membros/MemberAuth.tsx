@@ -7,7 +7,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Lock, Mail, GraduationCap, ArrowRight, Shield, Sparkles, BookOpen, Play, Award, CheckCircle2, Fingerprint, Star, Crown, Zap } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, GraduationCap, ArrowRight, Shield, Sparkles, BookOpen, Play, Award, CheckCircle2, Fingerprint, Star, Crown, Zap, Users } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
