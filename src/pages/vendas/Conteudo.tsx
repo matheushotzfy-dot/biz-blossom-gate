@@ -731,7 +731,7 @@ export default function AdminConteudo() {
             {totalRevenue > 0 && <p className="text-sm font-display font-bold text-primary tabular-nums">{fmt(totalRevenue)} total</p>}
           </div>
         )}
-      </div>
+
 
       {/* ═══ Course Create/Edit Sheet ═══ */}
       <Sheet open={sheetOpen} onOpenChange={v => { setSheetOpen(v); if (!v) setEditCourseId(null); }}>
