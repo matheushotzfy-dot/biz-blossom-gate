@@ -57,6 +57,28 @@ import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { motion } from "framer-motion";
 
+/* ─────────────────────── Animated Number ─────────────────────── */
+function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
+  const [display, setDisplay] = useState(value);
+  const prevRef = useRef(value);
+  useEffect(() => {
+    const from = prevRef.current;
+    const to = value;
+    prevRef.current = value;
+    if (from === to) { setDisplay(to); return; }
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(from + (to - from) * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [value, duration]);
+  return <>{formatter(display)}</>;
+}
+
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
   { label: "Ontem", days: 1 },
