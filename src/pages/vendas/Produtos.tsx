@@ -212,14 +212,30 @@ export default function Produtos() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.25 + idx * 0.08 }}
-                className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative"
+                whileHover={{ y: -2, transition: { duration: 0.25 } }}
+                className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative cursor-default"
               >
                 <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-3">
-                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
+                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50 group-hover:bg-${item.color}/12 group-hover:border-${item.color}/20 group-hover:shadow-${item.color}/10`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
+                    <MiniSparkline color={item.color} />
+                  </div>
+                  <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-1.5">{item.label}</p>
+                  <div className="flex items-end gap-2">
+                    <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none transition-all duration-300", item.color === "primary" ? "text-foreground" : `text-${item.color}`, "group-hover:[text-shadow:0_0_20px_hsl(var(--primary)/0.15)]")}>{item.value}</p>
+                    {item.delta && (
+                      <span className="text-[9px] font-heading text-success/60 flex items-center gap-0.5 mb-0.5">
+                        <TrendingUp className="h-2.5 w-2.5" /> {item.delta}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
                     <MiniSparkline color={item.color} />
                   </div>
                   <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-1.5">{item.label}</p>
