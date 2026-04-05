@@ -120,8 +120,8 @@ Deno.serve(async (req) => {
       const email = `${emailName}@${randomFrom(DOMAINS)}`;
       
       const progress = i / TOTAL;
-      const timeOffset = Math.pow(progress, 0.6) * threeHoursMs;
-      const createdAt = new Date(launchStart + timeOffset + Math.random() * 30000).toISOString();
+      const timeOffset = Math.pow(progress, 0.6) * spreadMs;
+      const createdAt = new Date(launchStart + timeOffset + Math.random() * 3600000).toISOString();
 
       const roll = Math.random();
       let status: string;
