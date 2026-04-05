@@ -561,17 +561,17 @@ export default function Dashboard() {
           {/* Executive KPI strip */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { label: "Total Faturado", value: privacy.hidden ? CENSORED : fmt(revenue), color: "primary", icon: ShoppingCart },
-              { label: "Vendas Aprovadas", value: privacy.hidden ? CENSORED : String(approved.length), color: "success", icon: TrendingUp },
-              { label: "Taxa Conversão", value: privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`, color: "info", icon: Target },
-              { label: "Saldo Disponível", value: privacy.hidden ? CENSORED : fmt(Math.abs(balance)), color: balance < 0 ? "warning" : "primary", icon: Wallet },
+              { label: "Total Faturado", numValue: revenue, formatter: fmt, color: "primary", icon: ShoppingCart },
+              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), color: "success", icon: TrendingUp },
+              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, color: "info", icon: Target },
+              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 + idx * 0.1 }} className="group relative rounded-2xl glass-panel p-5 overflow-hidden card-premium">
                 <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div>
                     <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
-                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
+                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
                   <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
                     <item.icon className="h-5 w-5" />
