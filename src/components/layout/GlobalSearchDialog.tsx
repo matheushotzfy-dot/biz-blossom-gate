@@ -130,7 +130,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 shadow-2xl shadow-primary/5 border-border/30 bg-card/98 backdrop-blur-2xl max-w-lg rounded-2xl gap-0">
+      <DialogContent className="overflow-hidden p-0 shadow-2xl shadow-primary/5 border-border/30 bg-card/98 backdrop-blur-2xl max-w-lg rounded-2xl gap-0 [&>button:last-child]:hidden">
         {/* Ambient */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none rounded-2xl" />
         <div className="absolute inset-0 opacity-[0.01] pointer-events-none" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 0.5px, transparent 0.5px)", backgroundSize: "14px 14px" }} />
