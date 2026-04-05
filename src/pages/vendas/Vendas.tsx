@@ -805,7 +805,7 @@ export default function Vendas() {
 
         <div className="relative z-10">
           {/* Top controls bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-12">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-14">
             <div className="flex items-center gap-3">
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
