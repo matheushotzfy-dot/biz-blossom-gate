@@ -816,7 +816,7 @@ export default function ProductEditor() {
           </div>
 
           {/* ───── Content Area ───── */}
-          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-20 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-32 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
