@@ -332,12 +332,15 @@ export default function Produtos() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.3) }}
+              whileHover={{ y: -3, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
               className="group relative rounded-2xl glass-panel overflow-hidden flex flex-col hover:ring-1 hover:ring-primary/15 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 card-premium"
             >
+              {/* Ambient glow on hover */}
+              <div className="absolute -inset-4 bg-primary/[0.02] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none" />
               {/* Image */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-muted/10 to-muted/5">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <img src={p.image_url} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03]" />
