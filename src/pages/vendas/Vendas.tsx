@@ -883,10 +883,10 @@ export default function Vendas() {
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="mb-10"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-primary/30 to-transparent" />
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
               <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
-              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-primary/30 to-transparent" />
+              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
             </div>
             <div className="flex items-end gap-5 mb-3">
               <motion.span
