@@ -539,7 +539,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-end gap-5 mb-3">
               <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1)]">
-                {privacy.hidden ? "R$ •••••••" : fmt(revenue)}
+                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2.5 mt-6">
