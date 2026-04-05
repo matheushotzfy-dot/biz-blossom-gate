@@ -63,6 +63,18 @@ export default function Saques() {
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
+  const [availableBalance, setAvailableBalance] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchBalance = async () => {
+      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
+      if (!error && data !== null) setAvailableBalance(Number(data));
+    };
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 15000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
