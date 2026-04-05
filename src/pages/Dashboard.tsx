@@ -659,30 +659,21 @@ export default function Dashboard() {
 
         {/* Activity feed */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-2xl glass-panel flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Feed em Tempo Real</p>
-            </div>
+          <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/5 px-2 py-1">
-                <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" /><span className="relative h-1.5 w-1.5 rounded-full bg-success" /></span>
-                <span className="text-[8px] font-heading uppercase tracking-wider text-success">Live</span>
-              </div>
-              <Link to="/financeiro/extrato" className="text-[10px] font-heading text-muted-foreground/25 hover:text-primary transition-colors">Ver tudo →</Link>
+              <span className="relative flex h-2 w-2">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
+                <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+              </span>
+              <p className="text-[12px] font-heading text-muted-foreground/40">Tempo real</p>
             </div>
+            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-muted-foreground/25 hover:text-primary transition-colors">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-1.5">
+          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1.5">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
-                <div className="h-14 w-14 rounded-2xl bg-muted/30 flex items-center justify-center mb-4">
-                  <Activity className="h-6 w-6 text-muted-foreground/20" />
-                </div>
-                <p className="text-sm font-display font-bold text-muted-foreground/30">Sem movimentações ainda</p>
-                <p className="text-[11px] text-muted-foreground/20 mt-1">As transações aparecerão aqui em tempo real</p>
+                <p className="text-sm text-muted-foreground/30 font-display">Sem movimentações ainda</p>
               </div>
             ) : (
               activity.map((item) => {
