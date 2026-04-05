@@ -774,7 +774,7 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-12 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
       >
         {/* Animated floating orbs — extended beyond bounds for smooth fade */}
         <div className="absolute -inset-16 pointer-events-none">
@@ -805,7 +805,7 @@ export default function Vendas() {
 
         <div className="relative z-10">
           {/* Top controls bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-12">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-14">
             <div className="flex items-center gap-3">
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
@@ -883,14 +883,14 @@ export default function Vendas() {
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="mb-10"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-primary/30 to-transparent" />
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
               <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
-              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-primary/30 to-transparent" />
+              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
             </div>
             <div className="flex items-end gap-5 mb-3">
               <motion.span
-                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_100px_hsl(var(--primary)/0.25),0_4px_24px_hsl(var(--background)/0.5)]"
+                className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1),0_4px_24px_hsl(var(--background)/0.5)]"
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
@@ -899,7 +899,7 @@ export default function Vendas() {
               </motion.span>
               {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+            <div className="flex flex-wrap items-center gap-2.5 mt-6">
               {[
                 { icon: CalendarDays, text: periodLabel },
                 { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
@@ -930,7 +930,7 @@ export default function Vendas() {
           </motion.div>
 
           {/* Executive Strip — Premium glassmorphism cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
             {[
               {
                 label: "Taxa de Aprovação",
@@ -1292,7 +1292,7 @@ export default function Vendas() {
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/6 bg-card/25 backdrop-blur-xl card-premium">
+        <div className="overflow-hidden rounded-2xl border border-border/8 bg-card/30 backdrop-blur-xl card-premium shadow-[0_2px_24px_hsl(var(--background)/0.2)]">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
             <p className="text-[10px] text-muted-foreground/15 font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
