@@ -2022,13 +2022,14 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3.5 mb-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card/45 backdrop-blur-xl ring-1 ring-border/10">
+    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4 mb-6">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/8 backdrop-blur-xl ring-1 ring-primary/10 shadow-lg shadow-primary/5 relative">
         <Icon className="h-5 w-5 text-primary" />
+        <div className="absolute -inset-1 rounded-2xl bg-primary/5 blur-lg opacity-60" />
       </div>
       <div>
-        <h2 className="text-lg font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
-        <p className="text-[11px] text-muted-foreground/60 mt-0.5">{subtitle}</p>
+        <h2 className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
+        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">{subtitle}</p>
       </div>
     </motion.div>
   );
@@ -2036,17 +2037,23 @@ function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentT
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden group/card hover:border-border/60 hover:shadow-[0_4px_16px_hsl(var(--foreground)/0.06)] transition-all duration-300">
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden group/card hover:border-border/60 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.07)] transition-all duration-500"
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-300 group-hover/card:w-[4px]", accentColor)} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-8 rounded-l-2xl blur-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none", accentColor.replace("bg-", "bg-") + "/5")} />
       {children}
-    </div>
+    </motion.div>
   );
 }
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
     <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-      {Icon && <Icon className="h-3.5 w-3.5" />}
+      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />}
       {children}
     </Label>
   );
@@ -2054,9 +2061,11 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl flex flex-col items-center justify-center py-16 gap-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]">
-      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/20">
-        <Icon className="h-7 w-7 text-muted-foreground/20" />
+    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-xl flex flex-col items-center justify-center py-16 gap-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-info/[0.01]" />
+      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/15 relative">
+        <Icon className="h-7 w-7 text-muted-foreground/15" />
+        <div className="absolute -inset-2 rounded-3xl bg-muted/5 blur-xl" />
       </div>
       <p className="text-sm font-display font-bold text-muted-foreground/40">{message}</p>
     </motion.div>
