@@ -963,18 +963,22 @@ export default function CheckoutBuilder() {
               previewMode === "desktop" ? "w-full max-w-2xl" : "w-[375px]"
             )}
           >
-            {/* Device frame chrome */}
-            <div className="rounded-t-2xl border-t border-x border-border/15 bg-muted/8 backdrop-blur px-4 py-2 flex items-center gap-2">
+            {/* Device frame chrome — Enhanced macOS-style */}
+            <div className="rounded-t-2xl border-t border-x border-border/20 bg-gradient-to-b from-muted/12 to-muted/6 backdrop-blur-xl px-4 py-2.5 flex items-center gap-3">
               <div className="flex gap-1.5">
-                <div className="h-2.5 w-2.5 rounded-full bg-destructive/30" />
-                <div className="h-2.5 w-2.5 rounded-full bg-warning/30" />
-                <div className="h-2.5 w-2.5 rounded-full bg-success/30" />
+                <div className="h-3 w-3 rounded-full bg-[hsl(0_70%_55%)] shadow-[inset_0_-1px_1px_hsl(0_60%_40%)]" />
+                <div className="h-3 w-3 rounded-full bg-[hsl(45_80%_55%)] shadow-[inset_0_-1px_1px_hsl(45_70%_40%)]" />
+                <div className="h-3 w-3 rounded-full bg-[hsl(130_55%_48%)] shadow-[inset_0_-1px_1px_hsl(130_45%_35%)]" />
               </div>
-              <div className="flex-1 mx-4">
-                <div className="flex items-center gap-2 bg-card/50 rounded-lg px-3 py-1 border border-border/10">
-                  <Lock className="h-2.5 w-2.5 text-success/40" />
-                  <span className="text-[9px] text-muted-foreground/30 font-mono truncate">{checkoutUrl || "podpay.com/pay/seu-produto"}</span>
+              <div className="flex-1 mx-2">
+                <div className="flex items-center gap-2 bg-card/60 rounded-lg px-3 py-1.5 border border-border/15 shadow-inner">
+                  <Lock className="h-2.5 w-2.5 text-success/50" />
+                  <span className="text-[9px] text-muted-foreground/40 font-mono truncate">{checkoutUrl || "podpay.com/pay/seu-produto"}</span>
                 </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[7px] font-black text-success/50 uppercase tracking-widest">Live</span>
               </div>
             </div>
 
