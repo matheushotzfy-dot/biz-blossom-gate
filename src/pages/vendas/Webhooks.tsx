@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
@@ -285,15 +286,43 @@ export default function Webhooks() {
   };
 
   return (
-    <PageShell>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <PageTitle icon={<Webhook className="h-6 w-6" />} title="Webhooks" subtitle="Receba notificações em tempo real nos seus endpoints" />
-        <Dialog open={open} onOpenChange={setOpen}>
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
+
+      {/* ═══ HERO ═══ */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative mb-8 rounded-3xl p-6 sm:p-8 mesh-gradient-hero noise-overlay scan-line"
+      >
+        <div className="absolute -inset-16 pointer-events-none">
+          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
+          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-success/6 rounded-full blur-[160px]" />
+        </div>
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+              <Webhook className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-[18px] font-heading tracking-tight text-foreground">Webhooks</h1>
+              <p className="text-[11px] text-muted-foreground/50">Receba notificações em tempo real nos seus endpoints</p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm ml-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                <span className="relative h-2 w-2 rounded-full bg-success" />
+              </span>
+              <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">{webhooks.filter(w => w.is_active).length} Ativo{webhooks.filter(w => w.is_active).length !== 1 ? "s" : ""}</span>
+            </div>
+          </div>
+          <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-sm font-bold gradient-primary text-primary-foreground h-11 px-6 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-[1px] transition-all">
-              <Plus className="h-4 w-4" /> Novo Webhook
-            </Button>
+            <button className="h-9 px-5 rounded-full text-[10px] font-heading flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all duration-300">
+              <Plus className="h-3.5 w-3.5" /> Novo Webhook
+            </button>
           </DialogTrigger>
           <DialogContent className="max-w-xl rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none rounded-2xl" />
@@ -424,7 +453,8 @@ export default function Webhooks() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+      </motion.section>
 
       {/* Webhooks List */}
       <div className="space-y-3">
@@ -676,6 +706,6 @@ export default function Webhooks() {
           </div>
         )}
       </div>
-    </PageShell>
+    </div>
   );
 }

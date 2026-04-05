@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { BookOpen, Copy, Check, Zap, Shield, Terminal, Globe, Lock, AlertTriangle, Server, Code2, Hash, ChevronRight, ExternalLink, Radio } from "lucide-react";
 import { PageShell, PageTitle } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
@@ -136,28 +137,56 @@ export default function Documentacao() {
   };
 
   return (
-    <PageShell>
-      <PageTitle icon={<BookOpen className="h-6 w-6" />} title="Documentação da API" subtitle="Referência completa para integração com a gateway Hotzfy" />
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { icon: Globe, label: "Protocolo", value: "REST / JSON", color: "text-primary" },
-          { icon: Lock, label: "Autenticação", value: "Bearer Token", color: "text-success" },
-          { icon: Zap, label: "Webhooks", value: "HMAC-SHA256", color: "text-warning" },
-          { icon: Shield, label: "SSL", value: "Obrigatório", color: "text-destructive" },
-        ].map((s) => (
-          <div key={s.label} className="panel-enterprise p-4 flex items-center gap-3">
-            <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center bg-muted/20 border border-border/20", s.color)}>
-              <s.icon className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground/50 font-semibold uppercase tracking-wider">{s.label}</p>
-              <p className="text-[13px] font-bold text-foreground">{s.value}</p>
-            </div>
+      {/* ═══ HERO ═══ */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative mb-8 rounded-3xl p-6 sm:p-8 mesh-gradient-hero noise-overlay scan-line"
+      >
+        <div className="absolute -inset-16 pointer-events-none">
+          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
+          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
+        </div>
+        <div className="relative z-10 flex items-center gap-3 mb-6">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+            <BookOpen className="h-5 w-5 text-primary" />
           </div>
-        ))}
-      </div>
+          <div>
+            <h1 className="text-[18px] font-heading tracking-tight text-foreground">Documentação da API</h1>
+            <p className="text-[11px] text-muted-foreground/50">Referência completa para integração com a gateway Hotzfy</p>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { icon: Globe, label: "Protocolo", value: "REST / JSON", color: "primary" },
+            { icon: Lock, label: "Autenticação", value: "Bearer Token", color: "success" },
+            { icon: Zap, label: "Webhooks", value: "HMAC-SHA256", color: "warning" },
+            { icon: Shield, label: "SSL", value: "Obrigatório", color: "destructive" },
+          ].map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              className="group rounded-2xl glass-panel card-premium p-4 flex items-center gap-3"
+            >
+              <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all group-hover:scale-110", `bg-${s.color}/10 border-${s.color}/12 text-${s.color}`)}>
+                <s.icon className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[9px] text-muted-foreground/35 font-heading uppercase tracking-[0.15em]">{s.label}</p>
+                <p className="text-[13px] font-display font-bold text-foreground">{s.value}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
 
       {/* Layout: Sidebar + Content */}
       <div className="flex gap-6 relative">
@@ -611,7 +640,7 @@ const { data } = await response.json();
 
         </div>
       </div>
-    </PageShell>
+    </div>
   );
 }
 
