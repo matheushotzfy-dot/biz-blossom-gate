@@ -7,7 +7,7 @@ import {
   Shield, Globe, CreditCard, Package, BarChart3, Activity, Percent,
   ShieldAlert, RotateCcw, Clock, Smartphone, FileText, Lock,
   TrendingDown, Eye, Radio, Server, Wifi, WifiOff, AlertCircle,
-  UserCheck, UserX, ChevronRight,
+  UserCheck, UserX, ChevronRight, Sparkles, Crown, Flame, Target,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -37,10 +37,10 @@ interface Props {
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="pointer-events-none select-none rounded-xl border border-border/70 bg-card/95 px-3.5 py-2.5 shadow-[0_18px_40px_hsl(220_30%_4%_/_0.32)]">
-      <p className="mb-1 text-[10px] font-medium text-muted-foreground">{label}</p>
+    <div className="pointer-events-none select-none rounded-xl border border-white/[0.08] bg-[#0c0c1e]/95 backdrop-blur-xl px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <p className="mb-1.5 text-[10px] font-bold text-white/30 uppercase tracking-wider">{label}</p>
       {payload.map((p: any, i: number) => (
-        <p key={i} className="text-[11px] font-bold" style={{ color: p.color }}>
+        <p key={i} className="text-[12px] font-bold" style={{ color: p.color }}>
           {p.name}: {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
         </p>
       ))}
@@ -50,7 +50,7 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 
 /* ═══ Stagger animation ═══ */
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const fadeUp = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.24 } } };
+const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -85,7 +85,6 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const allTx = transactions;
   const approved = useMemo(() => allTx.filter(t => t.status === "approved" || t.status === "completed"), [allTx]);
 
-  // ═══ DATE RANGE FILTERING ═══
   const filteredTx = useMemo(() => {
     if (!dateRange) return allTx;
     return allTx.filter(t => {
@@ -103,7 +102,6 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   const todayTx = useMemo(() => approved.filter(t => new Date(t.created_at).toDateString() === todayStr), [approved, todayStr]);
   const monthTx = useMemo(() => approved.filter(t => new Date(t.created_at) >= thisMonthStart), [approved, thisMonthStart]);
 
-  // Use filtered data for main KPIs
   const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
   const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
   const totalVolume = filteredApproved.reduce((a, t) => a + Number(t.amount), 0);
@@ -169,7 +167,6 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     };
   }), [approved, days]);
 
-  // Chargeback/refund trend (last 7 days)
   const refundTrend = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (6 - i));
     const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
@@ -181,9 +178,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     };
   }), [allTx]);
 
-  // KYC pending
   const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
-  // High-value pending withdrawals
   const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
 
   const statusColorMap: Record<string, string> = {
@@ -211,14 +206,74 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
+    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
+      {/* ═══ HERO SECTION — Revenue Command Center ═══ */}
+      <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-white/[0.06] p-6 sm:p-8 lg:p-10"
+        style={{ background: "linear-gradient(135deg, rgba(15,15,40,0.95) 0%, rgba(20,15,50,0.9) 40%, rgba(12,12,35,0.95) 100%)" }}>
+        {/* Ambient glows */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div animate={{ opacity: [0.15, 0.3, 0.15] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[120px]" />
+          <motion.div animate={{ opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-violet-500/15 rounded-full blur-[100px]" />
+          <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-400/10 rounded-full blur-[150px]" />
+          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+        </div>
+
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-indigo-500/50 to-transparent" />
+            <div className="flex items-center gap-2">
+              <Crown className="h-3 w-3 text-indigo-400/60" />
+              <p className="text-[9px] font-black uppercase tracking-[0.35em] bg-gradient-to-r from-indigo-400 via-violet-300 to-purple-400 bg-clip-text text-transparent">
+                Lucro da Plataforma
+              </p>
+            </div>
+            <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-indigo-500/50 to-transparent" />
+          </div>
+
+          {/* Main revenue display */}
+          <div className="text-center mb-8">
+            <p className="text-[52px] sm:text-[68px] lg:text-[88px] font-black leading-[0.85] tracking-[-0.04em] text-white"
+              style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 0 120px rgba(99,102,241,0.25), 0 0 60px rgba(99,102,241,0.1)" }}>
+              {fmtCurrency(takeRateTotal)}
+            </p>
+            <p className="text-[12px] text-white/25 mt-4 font-medium">
+              Take Rate: <span className="text-indigo-400 font-bold">{takeRatePct}%</span> · TPV: <span className="text-white/50 font-bold">{fmtCurrency(totalVolume)}</span>
+            </p>
+          </div>
+
+          {/* Quick badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {filteredApproved.length} aprovadas
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
+              <Users className="h-3 w-3 text-blue-400" /> {activeSellersToday} sellers ativos
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
+              <Target className="h-3 w-3 text-violet-400" /> {conversionRate}% conversão
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              Tempo Real
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
       {/* ═══ 1. HERO METRICS — 4 Massive KPIs ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <HeroKpi
           icon={<PiggyBank className="h-6 w-6" />}
-          label="Lucro da Plataforma"
-          value={fmtCurrency(takeRateTotal)}
-          sub={`${takeRatePct}% `}
+          label="Lucro Hoje"
+          value={fmtCurrency(takeRateToday)}
+          sub={`Mês: ${fmtCurrency(takeRateMonth)}`}
           gradient="from-indigo-500 to-violet-600"
           metallic
         />
@@ -276,16 +331,16 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="tpvGradGod2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--chart-4))" stopOpacity={0.22} />
-                  <stop offset="100%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.32)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.6)" fontSize={9} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground) / 0.6)" fontSize={9} tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+              <XAxis dataKey="name" stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} />
+              <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
               <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" stroke="hsl(var(--chart-4))" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
-              <Area type="monotone" dataKey="takeRate" stroke="hsl(var(--warning))" fillOpacity={0} strokeWidth={1.5} dot={false} activeDot={false} strokeDasharray="4 2" name="Take Rate" isAnimationActive={false} />
+              <Area type="monotone" dataKey="tpv" stroke="#6366f1" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
+              <Area type="monotone" dataKey="takeRate" stroke="#f59e0b" fillOpacity={0} strokeWidth={1.5} dot={false} activeDot={false} strokeDasharray="4 2" name="Take Rate" isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </GlassPanel>
@@ -301,7 +356,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 <div key={m.method}>
                   <div className="flex justify-between items-center text-[11px] mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className={cn("h-1.5 w-1.5 rounded-full", isHealthy ? "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.6)]" : isWarning ? "bg-amber-400" : "bg-red-400 animate-pulse")} />
+                      <span className={cn("h-1.5 w-1.5 rounded-full", isHealthy ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" : isWarning ? "bg-amber-400" : "bg-red-400 animate-pulse")} />
                       <span className="font-semibold text-white/80">{m.method}</span>
                     </div>
                     <span className={cn("font-black", isHealthy ? "text-emerald-400" : isWarning ? "text-amber-400" : "text-red-400")}>
@@ -325,7 +380,6 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
                 </div>
               );
             })}
-            {/* Routing Status */}
             <div className="mt-3 pt-3 border-t border-white/[0.04] space-y-1.5">
               <div className="flex items-center gap-2 text-[10px]">
                 <Wifi className="h-3 w-3 text-emerald-400" />
@@ -344,8 +398,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
         {/* Realtime Feed */}
         <GlassPanel className="overflow-hidden flex flex-col max-h-[380px]">
-          <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>{""}</GlassPanelTitle>
-          <div className="flex-1 overflow-y-auto mt-3 space-y-1 pr-1">
+          <div className="flex items-center gap-2.5 mb-3">
+            <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>Feed Tempo Real</GlassPanelTitle>
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-1 pr-1">
             {realtimeTx.map(t => (
               <div key={t.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
                 <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
@@ -378,7 +434,11 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ═══ 4. RISK RADAR (Bento Box) ═══ */}
       <motion.div variants={fadeUp}>
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/15 mb-3">Compliance & Risco</h3>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 max-w-[24px] bg-gradient-to-r from-white/10 to-transparent" />
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/15">Compliance & Risco</h3>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/10 to-transparent" />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
           {/* Live Fraud Feed */}
           <GlassPanel className="lg:col-span-1 max-h-[340px] overflow-hidden flex flex-col">
@@ -408,12 +468,12 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Devoluções (7d)</GlassPanelTitle>
             <ResponsiveContainer width="100%" height={200} className="mt-3">
               <LineChart data={refundTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.32)" vertical={false} />
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground) / 0.55)" fontSize={9} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground) / 0.55)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} />
+                <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-                <Line type="monotone" dataKey="chargebacks" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--destructive))" }} activeDot={false} name="Chargebacks" isAnimationActive={false} />
-                <Line type="monotone" dataKey="refunds" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--warning))" }} activeDot={false} name="Reembolsos" isAnimationActive={false} />
+                <Line type="monotone" dataKey="chargebacks" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} activeDot={false} name="Chargebacks" isAnimationActive={false} />
+                <Line type="monotone" dataKey="refunds" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: "#f59e0b" }} activeDot={false} name="Reembolsos" isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
             <div className="flex items-center gap-4 mt-2">
@@ -426,30 +486,10 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           <GlassPanel>
             <GlassPanelTitle color="violet" icon={<AlertTriangle className="h-3.5 w-3.5" />}>Alertas de Risco</GlassPanelTitle>
             <div className="space-y-3 mt-4">
-              <RiskAlert
-                label="Taxa Chargeback"
-                value={`${chargebackRate.toFixed(2)}%`}
-                threshold="< 1%"
-                alert={chargebackAlert}
-              />
-              <RiskAlert
-                label="Disputas Abertas"
-                value={String(openDisputes)}
-                threshold="< 5"
-                alert={openDisputes > 5}
-              />
-              <RiskAlert
-                label="Saques Pendentes"
-                value={fmtCurrency(pendingWdAmount)}
-                threshold={`${pendingWd.length} na fila`}
-                alert={pendingWd.length > 10}
-              />
-              <RiskAlert
-                label="Sellers Sem KYC"
-                value={String(kycPending.length)}
-                threshold="Aguardando aprovação"
-                alert={kycPending.length > 0}
-              />
+              <RiskAlert label="Taxa Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="< 1%" alert={chargebackAlert} />
+              <RiskAlert label="Disputas Abertas" value={String(openDisputes)} threshold="< 5" alert={openDisputes > 5} />
+              <RiskAlert label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
+              <RiskAlert label="Sellers Sem KYC" value={String(kycPending.length)} threshold="Aguardando aprovação" alert={kycPending.length > 0} />
             </div>
           </GlassPanel>
         </div>
@@ -457,7 +497,11 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ═══ 5. OPERATIONS: KYC + HIGH-VALUE WITHDRAWALS ═══ */}
       <motion.div variants={fadeUp}>
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/15 mb-3">Fila Operacional</h3>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 max-w-[24px] bg-gradient-to-r from-white/10 to-transparent" />
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/15">Fila Operacional</h3>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/10 to-transparent" />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* KYC Queue */}
           <GlassPanel>
@@ -564,28 +608,29 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
   return (
     <motion.div variants={fadeUp} className="relative group">
       <div className={cn(
-        "relative isolate overflow-hidden rounded-2xl border border-border/70 bg-card/95 p-6 transition-all duration-300",
-        "shadow-[0_14px_40px_hsl(220_30%_4%_/_0.28),inset_0_1px_0_hsl(var(--foreground)_/_0.04)]",
-        "hover:border-primary/20 hover:shadow-[0_18px_48px_hsl(220_30%_4%_/_0.34),0_0_0_1px_hsl(var(--primary)_/_0.08)]",
-        alert && "border-destructive/30 ring-1 ring-destructive/10"
+        "relative isolate overflow-hidden rounded-2xl border p-6 transition-all duration-300",
+        "border-white/[0.07] bg-gradient-to-b from-white/[0.04] to-white/[0.015]",
+        "shadow-[0_16px_48px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]",
+        "hover:border-white/[0.12] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(99,102,241,0.08)]",
+        alert && "border-red-500/25 ring-1 ring-red-500/10"
       )}>
-        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-20 group-hover:opacity-30 transition-opacity duration-500 bg-gradient-to-br", gradient)} />
-        <div className={cn("absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r opacity-25", gradient)} />
+        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-15 group-hover:opacity-25 transition-opacity duration-700 bg-gradient-to-br", gradient)} />
+        <div className={cn("absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r opacity-20", gradient)} />
 
         <div className="relative z-10">
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
-            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-primary-foreground shadow-lg ring-1 ring-border/60", gradient)}>
+            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">{label}</span>
+            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.12]", gradient)}>
               {icon}
             </div>
           </div>
           <p className={cn(
-            "text-[32px] font-extrabold leading-none tracking-tight",
-            metallic ? "bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent" : alert ? "text-destructive" : "text-foreground"
-          )}>
+            "text-[32px] font-extrabold leading-none tracking-[-0.02em]",
+            metallic ? "bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent" : alert ? "text-red-400" : "text-white"
+          )} style={{ fontFamily: "'Space Grotesk', monospace" }}>
             {value}
           </p>
-          {sub && <p className="mt-2 text-[11px] font-medium text-muted-foreground">{sub}</p>}
+          {sub && <p className="mt-2.5 text-[11px] font-medium text-white/25">{sub}</p>}
         </div>
       </div>
     </motion.div>
@@ -597,12 +642,12 @@ function GlassKpi({ label, value, icon, iconColor }: {
   label: string; value: string; icon: React.ReactNode; iconColor?: string;
 }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-card/95 p-4 shadow-[0_10px_24px_hsl(220_30%_4%_/_0.18),inset_0_1px_0_hsl(var(--foreground)_/_0.04)] transition-all hover:border-primary/15 group">
+    <div className="rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.035] to-white/[0.01] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:border-white/[0.1] group">
       <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</span>
-        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-secondary/50", iconColor || "text-muted-foreground")}>{icon}</div>
+        <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-white/18">{label}</span>
+        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]", iconColor || "text-white/30")}>{icon}</div>
       </div>
-      <p className="text-lg font-extrabold tracking-tight text-foreground">{value}</p>
+      <p className="text-lg font-extrabold tracking-tight text-white" style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</p>
     </div>
   );
 }
@@ -611,9 +656,10 @@ function GlassKpi({ label, value, icon, iconColor }: {
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "relative isolate overflow-hidden rounded-2xl border border-border/70 bg-card/95 p-5",
-      "shadow-[0_12px_32px_hsl(220_30%_4%_/_0.24),inset_0_1px_0_hsl(var(--foreground)_/_0.04)]",
-      "transition-[border-color,box-shadow] duration-300 hover:border-primary/15 hover:shadow-[0_16px_40px_hsl(220_30%_4%_/_0.28),0_0_0_1px_hsl(var(--primary)_/_0.08)]",
+      "relative isolate overflow-hidden rounded-2xl border border-white/[0.06] p-5",
+      "bg-gradient-to-b from-white/[0.035] to-white/[0.01]",
+      "shadow-[0_14px_36px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.04)]",
+      "transition-[border-color,box-shadow] duration-300 hover:border-white/[0.1]",
       className
     )}>
       {children}
@@ -664,7 +710,7 @@ function RiskAlert({ label, value, threshold, alert }: { label: string; value: s
         <p className="text-[9px] text-white/25 mt-0.5">{threshold}</p>
       </div>
       <div className="flex items-center gap-2.5">
-        <span className={cn("text-sm font-black", alert ? "text-red-400" : "text-emerald-400")}>{value}</span>
+        <span className={cn("text-sm font-black", alert ? "text-red-400" : "text-emerald-400")} style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</span>
         {alert ? (
           <span className="h-2.5 w-2.5 rounded-full bg-red-400 animate-pulse shadow-[0_0_8px_rgba(248,113,113,0.6)]" />
         ) : (
@@ -684,7 +730,7 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor,
 }) {
   return (
     <div className={cn(
-      "rounded-xl bg-gradient-to-b from-white/[0.04] to-white/[0.015] backdrop-blur-2xl border border-white/[0.07] p-4",
+      "rounded-xl bg-gradient-to-b from-white/[0.04] to-white/[0.015] border border-white/[0.07] p-4",
       "shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_16px_rgba(0,0,0,0.2)]",
       "hover:border-white/[0.1] transition-all duration-300",
       alert && "border-amber-500/20 ring-1 ring-amber-500/10"
@@ -692,14 +738,14 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor,
       style={{ boxShadow: highlight && glowColor ? `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 35px ${glowColor}` : undefined }}
     >
       <div className="flex items-center justify-between mb-2.5">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/20 font-bold">{label}</span>
+        <span className="text-[8px] uppercase tracking-[0.22em] text-white/18 font-bold">{label}</span>
         {gradient ? (
           <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md ring-1 ring-white/[0.12]", gradient)}>{icon}</div>
         ) : (
           <div className={cn("h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center ring-1 ring-white/[0.05]", iconColor || "text-white/30")}>{icon}</div>
         )}
       </div>
-      <p className={cn("text-xl font-extrabold tracking-tight text-white", highlight && "text-amber-400")}>{value}</p>
+      <p className={cn("text-xl font-extrabold tracking-tight text-white", highlight && "text-amber-400")} style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</p>
       {sub && <p className="text-[10px] text-white/25 mt-1.5 font-medium">{sub}</p>}
     </div>
   );
