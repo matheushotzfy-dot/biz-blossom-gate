@@ -1017,8 +1017,8 @@ export default function Vendas() {
               <Activity className="h-4.5 w-4.5 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Revenue Timeline</h2>
-              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Evolução da receita ao longo do tempo</p>
+              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Evolução de Receita</h2>
+              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Comparativo com período anterior</p>
             </div>
           </div>
           <div className="flex gap-5 text-[11px] font-display tabular-nums">
