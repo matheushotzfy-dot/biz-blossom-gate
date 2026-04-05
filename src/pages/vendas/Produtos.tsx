@@ -380,7 +380,7 @@ export default function Produtos() {
               </div>
 
               {/* Body */}
-              <div className="p-5 flex flex-1 flex-col gap-3 relative z-10">
+              <div className="p-4 sm:p-5 flex flex-1 flex-col gap-2.5 sm:gap-3 relative z-10">
                 <div>
                   <h3 className="text-[14px] font-display font-bold text-foreground leading-snug tracking-[-0.02em] line-clamp-1">
                     {p.name}
