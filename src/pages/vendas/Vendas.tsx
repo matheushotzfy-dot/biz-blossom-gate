@@ -1029,7 +1029,7 @@ export default function Vendas() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="mb-10 grid grid-cols-1 gap-4 xl:grid-cols-12">
         {/* Payment Intelligence */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="primary" delay={0.1}>
+        <GlowCard className="xl:col-span-4 p-6" glowColor="primary" delay={0.1} animated>
           <div className="flex items-center gap-2.5 mb-6">
             <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
               <PieChart className="h-4 w-4 text-primary" />
