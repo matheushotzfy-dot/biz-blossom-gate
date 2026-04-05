@@ -768,49 +768,66 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-10 overflow-hidden"
+        className="relative mb-12 overflow-hidden mesh-gradient-hero noise-overlay"
       >
-        {/* Ambient background effects */}
+        {/* Animated floating orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-          <div className="absolute -bottom-20 -right-40 w-80 h-80 bg-info/4 rounded-full blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/3 rounded-full blur-[160px]" />
+          <motion.div
+            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-primary/6 rounded-full blur-[150px]"
+          />
+          <motion.div
+            animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-24 -right-32 w-[400px] h-[400px] bg-info/5 rounded-full blur-[130px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/3 rounded-full blur-[180px]"
+          />
+          {/* Decorative grid dots */}
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         </div>
 
         <div className="relative z-10">
           {/* Top controls bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-12">
             <div className="flex items-center gap-3">
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "auto", opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="inline-flex items-center gap-2"
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="inline-flex items-center gap-2.5"
               >
-                <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-primary" />
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                  <Zap className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/40">Revenue Command Center</span>
+                <div>
+                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-muted-foreground/40 block leading-none">Revenue</span>
+                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-gradient-premium block leading-tight mt-0.5">Command Center</span>
+                </div>
               </motion.div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/5 px-2.5 py-1 shadow-[0_0_12px_rgba(34,197,94,0.1)]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
                 </span>
-                <span className="text-[8px] font-display font-bold uppercase tracking-[0.2em] text-success">Live</span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-1">
-              {/* Period selector with pill style */}
-              <div className="inline-flex items-center rounded-full bg-card/40 backdrop-blur-sm border border-border/8 p-0.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {/* Period selector with premium pill style */}
+              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
                 {PERIODS.map((opt) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-[10px] font-display font-bold transition-all duration-300 active:scale-[0.97]",
+                      "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-primary text-primary-foreground shadow-[0_2px_12px_rgba(16,185,129,0.25)]"
+                        ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)] glow-primary"
                         : "text-muted-foreground/35 hover:text-foreground/70"
                     )}
                   >
@@ -821,10 +838,10 @@ export default function Vendas() {
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button className={cn(
-                    "h-7 rounded-full border px-3 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
-                    isCustom ? "border-primary/20 bg-primary/8 text-primary shadow-[0_0_8px_rgba(16,185,129,0.15)]" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                    "h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
+                    isCustom ? "border-primary/20 bg-primary/8 text-primary shadow-[0_0_10px_rgba(16,185,129,0.15)]" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
                   )}>
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
                       {isCustom && customRange?.from
                         ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
@@ -837,10 +854,10 @@ export default function Vendas() {
                 </PopoverContent>
               </Popover>
               <span className="w-px h-5 bg-border/8 mx-1 hidden sm:block" />
-              <button onClick={toggleHidden} className={cn("h-7 w-7 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
                 {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="h-7 rounded-full px-3 text-[10px] font-display font-bold text-muted-foreground/25 transition-all hover:text-foreground border border-transparent hover:border-border/10 active:scale-[0.97] inline-flex items-center gap-1.5">
+              <button onClick={() => setShowExportDialog(true)} className="h-8 rounded-full px-3.5 text-[10px] font-heading text-muted-foreground/25 transition-all hover:text-foreground border border-transparent hover:border-border/10 active:scale-[0.97] inline-flex items-center gap-1.5">
                 <Download className="h-3 w-3" /> Exportar
               </button>
             </div>
@@ -848,33 +865,53 @@ export default function Vendas() {
 
           {/* MAIN FOCAL POINT — Net Revenue with dramatic presentation */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-8"
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-10"
           >
-            <p className="text-[10px] font-display font-bold uppercase tracking-[0.25em] text-muted-foreground/25 mb-3">Receita Líquida do Período</p>
-            <div className="flex items-end gap-4 mb-2">
-              <span className="text-5xl sm:text-6xl lg:text-8xl font-display font-black tracking-[-0.04em] text-foreground tabular-nums leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.15)]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-primary/30 to-transparent" />
+              <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
+              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-primary/30 to-transparent" />
+            </div>
+            <div className="flex items-end gap-5 mb-3">
+              <motion.span
+                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] [text-shadow:0_0_100px_hsl(var(--primary)/0.2),0_4px_24px_hsl(var(--background)/0.5)]"
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
                 {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
-              </span>
+              </motion.span>
               {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
             </div>
-            <div className="flex flex-wrap items-center gap-3 mt-4">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                <CalendarDays className="h-3 w-3" /> {periodLabel}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                <Check className="h-3 w-3 text-success" /> {m.approved.length} aprovadas
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                <DollarSign className="h-3 w-3" /> bruto {hidden ? HIDE : fmtCompact(m.totalGross)}
-              </span>
+            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+              {[
+                { icon: CalendarDays, text: periodLabel },
+                { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
+                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}` },
+              ].map((chip, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.08 }}
+                  className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                >
+                  <chip.icon className={cn("h-3 w-3", chip.iconColor)} /> {chip.text}
+                </motion.span>
+              ))}
               {lastSaleText && (
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                  <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_4px_hsl(var(--primary))]" /></span>
+                <motion.span
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className="inline-flex items-center gap-2 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                >
+                  <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" /></span>
                   última {lastSaleText}
-                </span>
+                </motion.span>
               )}
             </div>
           </motion.div>
