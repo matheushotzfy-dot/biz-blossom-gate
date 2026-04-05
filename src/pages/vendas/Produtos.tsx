@@ -444,28 +444,25 @@ export default function Produtos() {
                 <div className="flex-1" />
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 pt-3 border-t border-border/8">
+                <div className="flex items-center gap-1.5 sm:gap-2 pt-3 border-t border-border/8">
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="gap-1.5 rounded-xl text-[11px] h-9 font-display font-bold flex-1 flex items-center justify-center bg-primary/8 text-primary hover:bg-primary/12 ring-1 ring-primary/12 hover:ring-primary/20 transition-all"
+                    className="gap-1.5 rounded-xl text-[11px] h-10 sm:h-9 font-display font-bold flex-1 flex items-center justify-center bg-primary/8 text-primary hover:bg-primary/12 ring-1 ring-primary/12 hover:ring-primary/20 transition-all active:scale-[0.97]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
                   >
                     <Settings2 className="h-3.5 w-3.5" /> Editar
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="gap-1.5 rounded-xl text-[11px] h-9 font-display font-bold flex-1 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/40 hover:text-foreground hover:ring-border/20 transition-all"
+                    className="gap-1.5 rounded-xl text-[11px] h-10 sm:h-9 font-display font-bold flex-1 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/40 hover:text-foreground hover:ring-border/20 transition-all active:scale-[0.97]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}
                   >
                     <Palette className="h-3.5 w-3.5" /> Customizar
                   </motion.button>
                   {p.checkout_url && (
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="rounded-xl h-9 w-9 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/25 hover:text-primary hover:ring-primary/15 transition-all"
+                      className="rounded-xl h-10 w-10 sm:h-9 sm:w-9 shrink-0 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/25 hover:text-primary hover:ring-primary/15 transition-all active:scale-[0.95]"
                       onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
