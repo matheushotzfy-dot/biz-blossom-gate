@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { BookOpen, Copy, Check, Zap, Shield, Terminal, Globe, Lock, AlertTriangle, Server, Code2, Hash, ChevronRight, ExternalLink, Radio } from "lucide-react";
 import { PageShell, PageTitle } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
