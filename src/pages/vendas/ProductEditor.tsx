@@ -535,19 +535,24 @@ export default function ProductEditor() {
               <span className="hidden sm:inline">Voltar</span>
             </motion.button>
 
-            {/* Product identity chip */}
+            {/* Product identity chip — enhanced */}
             {name && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-card/60 border border-border/30 backdrop-blur-xl">
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-4 py-2.5 rounded-xl bg-card/60 border border-border/25 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover ring-1 ring-border/20" />
+                  <img src={imagePreview} alt="" className="h-8 w-8 rounded-lg object-cover ring-1 ring-border/15 shadow-sm" />
                 ) : (
-                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
                     <Package className="h-3.5 w-3.5 text-primary" />
                   </div>
                 )}
                 <div className="flex flex-col">
-                  <span className="text-xs font-display font-black text-foreground truncate max-w-[180px] leading-tight">{name}</span>
-                  {price && <span className="text-[10px] font-numbers font-black text-primary leading-tight">R$ {Number(price).toFixed(2)}</span>}
+                  <span className="text-[12px] font-display font-black text-foreground truncate max-w-[180px] leading-tight">{name}</span>
+                  {price && (
+                    <span className="text-[10px] font-numbers font-black text-primary leading-tight flex items-center gap-1">
+                      R$ {Number(price).toFixed(2)}
+                      <span className={cn("h-1.5 w-1.5 rounded-full ml-0.5", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                    </span>
+                  )}
                 </div>
               </motion.div>
             )}
