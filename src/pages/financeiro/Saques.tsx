@@ -209,7 +209,7 @@ export default function Saques() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[2]);
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
