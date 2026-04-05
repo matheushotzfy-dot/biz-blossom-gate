@@ -87,7 +87,7 @@ const STATUS: Record<string, { label: string; fg: string; dot: string; bg: strin
   chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10" },
 };
 
-const springTransition = { type: "spring", stiffness: 300, damping: 30, mass: 0.8 };
+const springTransition = { type: "spring" as const, stiffness: 300, damping: 30, mass: 0.8 };
 
 /* ─────────────────────── Micro Components ─────────────────────── */
 
