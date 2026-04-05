@@ -166,6 +166,8 @@ function DashboardLayoutInner() {
           </div>
         </div>
       )}
+
+      <KycOnboardingPopup />
     </SidebarProvider>
   );
 }
