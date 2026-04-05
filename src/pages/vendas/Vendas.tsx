@@ -181,7 +181,9 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
   label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
 }) {
   return (
-    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer">
+    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer card-premium">
+      {/* Left accent bar */}
+      <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
       <div className="flex items-start justify-between mb-3">
         <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${color}/10 border-${color}/12 text-${color} group-hover:bg-${color}/15`)}>
           <Icon className="h-5 w-5" />
