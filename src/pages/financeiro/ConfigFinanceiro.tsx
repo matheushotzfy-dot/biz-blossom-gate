@@ -1,15 +1,23 @@
-import { useState } from "react";
-import { Building2, Landmark, Zap, PieChart, Banknote, FileText } from "lucide-react";
+import { useState, lazy, Suspense, ComponentType } from "react";
+import { Building2, Landmark, Zap, PieChart, Banknote, FileText, Loader2 } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
-import { lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
 
-const DadosBancarios = lazy(() => import("./DadosBancarios"));
-const Adquirente = lazy(() => import("./Adquirente"));
-const Taxas = lazy(() => import("./Taxas"));
-const ControleGastos = lazy(() => import("./ControleGastos"));
-const Antecipacao = lazy(() => import("./Antecipacao"));
-const NotasFiscais = lazy(() => import("./NotasFiscais"));
+function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
+  return lazy(() =>
+    importFn().catch(() =>
+      new Promise<{ default: ComponentType<any> }>((resolve) => {
+        setTimeout(() => resolve(importFn()), 1500);
+      })
+    )
+  );
+}
+
+const DadosBancarios = lazyRetry(() => import("./DadosBancarios"));
+const Adquirente = lazyRetry(() => import("./Adquirente"));
+const Taxas = lazyRetry(() => import("./Taxas"));
+const ControleGastos = lazyRetry(() => import("./ControleGastos"));
+const Antecipacao = lazyRetry(() => import("./Antecipacao"));
+const NotasFiscais = lazyRetry(() => import("./NotasFiscais"));
 
 const TABS: HubTab[] = [
   { id: "dados", label: "Dados Bancários", icon: Building2 },
@@ -20,7 +28,7 @@ const TABS: HubTab[] = [
   { id: "nfe", label: "Notas Fiscais", icon: FileText },
 ];
 
-const COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+const COMPONENTS: Record<string, ReturnType<typeof lazyRetry>> = {
   dados: DadosBancarios,
   adquirente: Adquirente,
   taxas: Taxas,
