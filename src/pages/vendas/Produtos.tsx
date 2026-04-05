@@ -349,8 +349,8 @@ export default function Produtos() {
                   </span>
                 </div>
 
-                {/* Menu */}
-                <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Menu - always visible on mobile, hover-reveal on desktop */}
+                <div className="absolute top-3 left-3 z-10 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="h-8 w-8 rounded-lg bg-card/80 backdrop-blur-sm ring-1 ring-border/15 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-lg active:scale-95 transition-all">
