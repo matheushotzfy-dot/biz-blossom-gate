@@ -930,7 +930,7 @@ export default function Vendas() {
           </motion.div>
 
           {/* Executive Strip — Premium glassmorphism cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
             {[
               {
                 label: "Taxa de Aprovação",
