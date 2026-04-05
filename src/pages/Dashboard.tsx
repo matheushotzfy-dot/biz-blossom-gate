@@ -595,7 +595,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             {[
               { icon: Zap, label: "PIX", value: privacy.hidden ? CENSORED : fmt(pixRevenue), helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
               { icon: CreditCard, label: "CARTÃO", value: privacy.hidden ? CENSORED : fmt(cardRevenue), helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
