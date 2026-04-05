@@ -1,10 +1,16 @@
+/**
+ * Premiações — Ultra-Premium Awards Trail
+ * @module Premiacoes
+ * @version 4.0.0 — Fintech Premium Redesign
+ */
+
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import {
   Trophy, Lock, CheckCircle2, Sparkles, Star, Crown, Gem, Zap, Gift, Target,
-  Flame, Award, TrendingUp, ChevronRight, Shield, Radio, ArrowUp, Rocket,
+  Flame, Award, TrendingUp, Shield, ArrowUp, Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +23,7 @@ import plaque1m from "@/assets/awards/plaque-1m.png";
 import plaque5m from "@/assets/awards/plaque-5m.png";
 import plaque10m from "@/assets/awards/plaque-10m.png";
 
-/* ═══════════════ TYPES & DATA ═══════════════ */
+/* ═══ Types & Data ═══ */
 type Tone = "primary" | "info" | "warning" | "success" | "destructive";
 
 const AWARDS = [
@@ -31,25 +37,21 @@ const AWARDS = [
 ];
 
 const TONE_MAP: Record<Tone, { accent: string; bg: string; ring: string; text: string; glow: string; gradient: string }> = {
-  primary:     { accent: "bg-primary",     bg: "bg-primary/8",     ring: "ring-primary/20",     text: "text-primary",     glow: "shadow-primary/15", gradient: "from-primary/20 to-primary/5" },
-  info:        { accent: "bg-info",        bg: "bg-info/8",        ring: "ring-info/20",        text: "text-info",        glow: "shadow-info/15", gradient: "from-info/20 to-info/5" },
-  warning:     { accent: "bg-warning",     bg: "bg-warning/8",     ring: "ring-warning/20",     text: "text-warning",     glow: "shadow-warning/15", gradient: "from-warning/20 to-warning/5" },
-  success:     { accent: "bg-success",     bg: "bg-success/8",     ring: "ring-success/20",     text: "text-success",     glow: "shadow-success/15", gradient: "from-success/20 to-success/5" },
-  destructive: { accent: "bg-destructive", bg: "bg-destructive/8", ring: "ring-destructive/20", text: "text-destructive", glow: "shadow-destructive/15", gradient: "from-destructive/20 to-destructive/5" },
+  primary:     { accent: "bg-primary",     bg: "bg-primary/8",     ring: "ring-primary/15",     text: "text-primary",     glow: "shadow-primary/15", gradient: "from-primary/15 to-primary/3" },
+  info:        { accent: "bg-info",        bg: "bg-info/8",        ring: "ring-info/15",        text: "text-info",        glow: "shadow-info/15", gradient: "from-info/15 to-info/3" },
+  warning:     { accent: "bg-warning",     bg: "bg-warning/8",     ring: "ring-warning/15",     text: "text-warning",     glow: "shadow-warning/15", gradient: "from-warning/15 to-warning/3" },
+  success:     { accent: "bg-success",     bg: "bg-success/8",     ring: "ring-success/15",     text: "text-success",     glow: "shadow-success/15", gradient: "from-success/15 to-success/3" },
+  destructive: { accent: "bg-destructive", bg: "bg-destructive/8", ring: "ring-destructive/15", text: "text-destructive", glow: "shadow-destructive/15", gradient: "from-destructive/15 to-destructive/3" },
 };
 
-/* ═══════════════ MICRO COMPONENTS ═══════════════ */
 const ease = [0.16, 1, 0.3, 1] as const;
 
-function FloatingOrb({ className }: { className?: string }) {
-  return (
-    <motion.div
-      className={cn("absolute rounded-full blur-3xl opacity-20 pointer-events-none", className)}
-      animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
-      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-    />
-  );
-}
+const fmtC = (v: number) =>
+  v >= 1000000 ? `R$ ${(v / 1000000).toFixed(1).replace(".", ",")}M`
+  : v >= 1000 ? `R$ ${(v / 1000).toFixed(0)}K`
+  : `R$ ${v.toLocaleString("pt-BR")}`;
+
+/* ═══ Micro Components ═══ */
 
 function LivePulse() {
   return (
@@ -63,7 +65,7 @@ function LivePulse() {
   );
 }
 
-function AnimatedCounter({ value, decimals = 0 }: { value: number; decimals?: number }) {
+function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>();
   useEffect(() => {
@@ -84,7 +86,7 @@ function AnimatedCounter({ value, decimals = 0 }: { value: number; decimals?: nu
   return <>{decimals > 0 ? display.toFixed(decimals) : Math.round(display)}</>;
 }
 
-/* Hero KPI Card with mouse glow */
+/* ─── Hero KPI Card ─── */
 function HeroKpi({ label, value, sub, icon: Icon, tone, delay = 0 }: {
   label: string; value: string; sub: string; icon: any; tone: Tone; delay?: number;
 }) {
@@ -108,21 +110,12 @@ function HeroKpi({ label, value, sub, icon: Icon, tone, delay = 0 }: {
         my.set((e.clientY - r.top) / r.height);
       }}
       className={cn(
-        "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden cursor-default",
+        "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden",
         "hover:ring-border/40 transition-all duration-300",
         `hover:shadow-lg ${t.glow}`
       )}
     >
-      {/* Ambient glow on hover */}
-      <motion.div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{
-          background: `radial-gradient(300px circle at ${smx.get() * 100}% ${smy.get() * 100}%, hsl(var(--${tone === 'primary' ? 'primary' : tone}) / 0.06), transparent)`,
-        }}
-      />
-      {/* Accent bar */}
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", t.accent)} />
-
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-3">
           <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", t.bg, t.ring)}>
@@ -137,17 +130,13 @@ function HeroKpi({ label, value, sub, icon: Icon, tone, delay = 0 }: {
   );
 }
 
-/* Premium Award Card */
+/* ─── Premium Award Card ─── */
 function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
   award: typeof AWARDS[0]; idx: number; unlocked: boolean; isCurrent: boolean; revenue: number;
 }) {
   const t = TONE_MAP[award.tone];
   const Icon = award.icon;
   const progress = Math.min((revenue / award.value) * 100, 100);
-  const fmtC = (v: number) =>
-    v >= 1000000 ? `R$ ${(v / 1000000).toFixed(1).replace(".", ",")}M`
-    : v >= 1000 ? `R$ ${(v / 1000).toFixed(0)}K`
-    : `R$ ${v.toLocaleString("pt-BR")}`;
 
   return (
     <motion.div
@@ -156,7 +145,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
       transition={{ delay: idx * 0.07, duration: 0.5, ease }}
       className="relative flex gap-4 md:gap-5"
     >
-      {/* ── Timeline Node ── */}
+      {/* Timeline Node */}
       <div className="relative z-10 shrink-0 flex flex-col items-center pt-5">
         <motion.div
           whileHover={{ scale: 1.1 }}
@@ -173,7 +162,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
         </motion.div>
       </div>
 
-      {/* ── Card Body ── */}
+      {/* Card Body */}
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ duration: 0.25, ease }}
@@ -190,16 +179,12 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
           unlocked ? t.accent : isCurrent ? "bg-primary" : "bg-border/15"
         )} />
 
-        {/* Ambient gradient for unlocked */}
-        {unlocked && (
-          <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30 pointer-events-none", t.gradient)} />
-        )}
-        {isCurrent && (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-        )}
+        {/* Ambient gradient */}
+        {unlocked && <div className={cn("absolute inset-0 bg-gradient-to-br opacity-20 pointer-events-none", t.gradient)} />}
+        {isCurrent && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />}
 
         <div className="relative z-10 flex flex-col lg:flex-row gap-5">
-          {/* ── Award Image ── */}
+          {/* Award Image */}
           <div className={cn(
             "relative w-full lg:w-44 h-36 lg:h-auto shrink-0 flex items-center justify-center rounded-xl overflow-hidden ring-1 transition-all duration-500",
             unlocked ? cn("bg-gradient-to-br ring-border/20", t.gradient) :
@@ -235,12 +220,11 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
             )}
           </div>
 
-          {/* ── Content ── */}
+          {/* Content */}
           <div className="flex-1 min-w-0">
-            {/* Header */}
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={cn(
                     "text-[8px] font-display font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg ring-1",
                     unlocked ? cn(t.bg, t.ring, t.text) :
@@ -292,7 +276,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
                 <span
                   key={r}
                   className={cn(
-                    "text-[9px] font-display font-bold px-2.5 py-1 rounded-lg ring-1 inline-flex items-center gap-1.5 transition-all duration-300",
+                    "text-[9px] font-display font-bold px-2.5 py-1 rounded-lg ring-1 inline-flex items-center gap-1.5",
                     unlocked ? cn(t.bg, t.ring, t.text) :
                     isCurrent ? "bg-primary/5 ring-primary/8 text-primary/40" :
                     "bg-muted/3 ring-border/5 text-muted-foreground/10"
@@ -344,7 +328,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
   );
 }
 
-/* ═══════════════ MAIN PAGE ═══════════════ */
+/* ═══ MAIN PAGE ═══ */
 export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
@@ -361,23 +345,18 @@ export default function Premiacoes() {
       });
   }, [user?.id]);
 
-  const fmtCurrency = (v: number) =>
-    v >= 1000000 ? `R$ ${(v / 1000000).toFixed(1).replace(".", ",")}M`
-    : v >= 1000 ? `R$ ${(v / 1000).toFixed(0)}K`
-    : `R$ ${v.toLocaleString("pt-BR")}`;
-
   const currentTierIdx = AWARDS.findIndex((a) => revenue < a.value);
   const unlockedCount = AWARDS.filter((a) => revenue >= a.value).length;
   const nextAward = currentTierIdx >= 0 ? AWARDS[currentTierIdx] : null;
   const globalProgress = nextAward ? Math.min((revenue / nextAward.value) * 100, 100) : 100;
 
   return (
-    <div className="space-y-5 pb-8">
-      {/* ═══ Ambient Background ═══ */}
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
+      {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <FloatingOrb className="h-[500px] w-[500px] -top-48 -right-48 bg-primary/30" />
-        <FloatingOrb className="h-[400px] w-[400px] -bottom-32 -left-32 bg-info/20" />
-        <FloatingOrb className="h-[300px] w-[300px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-warning/15" />
+        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.12, 0.22, 0.12] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-warning/15 rounded-full blur-[180px]" />
+        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.05, 0.1, 0.05] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-info/10 rounded-full blur-[160px]" />
       </div>
 
       {/* ═══ Hero Header ═══ */}
@@ -387,9 +366,9 @@ export default function Premiacoes() {
         transition={{ duration: 0.6, ease }}
         className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
       >
-        {/* Mesh gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-warning/5 pointer-events-none" />
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/3 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
         <div className="relative z-10 p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -406,7 +385,7 @@ export default function Premiacoes() {
                   <h1 className="text-xl md:text-2xl font-display font-black tracking-[-0.04em] text-foreground">Trilha de Conquistas</h1>
                   <LivePulse />
                 </div>
-                <p className="text-[11px] font-medium text-muted-foreground/50">Sua jornada rumo ao topo — cada marco, um prêmio exclusivo</p>
+                <p className="text-[11px] font-medium text-muted-foreground/40">Sua jornada rumo ao topo — cada marco, um prêmio exclusivo</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -421,10 +400,10 @@ export default function Premiacoes() {
 
       {/* ═══ KPI Grid ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <HeroKpi label="Faturamento" value={fmtCurrency(revenue)} sub="receita líquida total" icon={Flame} tone="primary" delay={0} />
+        <HeroKpi label="Faturamento" value={fmtC(revenue)} sub="receita líquida total" icon={Flame} tone="primary" delay={0} />
         <HeroKpi label="Conquistas" value={`${unlockedCount}/${AWARDS.length}`} sub={`${unlockedCount} desbloqueadas`} icon={Trophy} tone="success" delay={1} />
         <HeroKpi label="Próximo Marco" value={nextAward ? nextAward.label : "Completo!"} sub={nextAward ? nextAward.tier : "Todas desbloqueadas"} icon={Target} tone="warning" delay={2} />
-        <HeroKpi label="Progresso" value={`${globalProgress.toFixed(0)}%`} sub={nextAward ? `faltam ${fmtCurrency(nextAward.value - revenue)}` : "lenda absoluta"} icon={Sparkles} tone="info" delay={3} />
+        <HeroKpi label="Progresso" value={`${globalProgress.toFixed(0)}%`} sub={nextAward ? `faltam ${fmtC(nextAward.value - revenue)}` : "lenda absoluta"} icon={Sparkles} tone="info" delay={3} />
       </div>
 
       {/* ═══ Global Progress Bar ═══ */}
@@ -435,6 +414,7 @@ export default function Premiacoes() {
         className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-warning/3 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-warning" />
 
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
@@ -447,9 +427,7 @@ export default function Premiacoes() {
                 <span className="text-[9px] font-medium text-muted-foreground/40">{unlockedCount} de {AWARDS.length} marcos conquistados</span>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-lg font-display font-black text-primary tabular-nums">{((unlockedCount / AWARDS.length) * 100).toFixed(0)}%</span>
-            </div>
+            <span className="text-lg font-display font-black text-primary tabular-nums">{((unlockedCount / AWARDS.length) * 100).toFixed(0)}%</span>
           </div>
 
           {/* Bar */}
@@ -470,7 +448,13 @@ export default function Premiacoes() {
               const unlocked = revenue >= a.value;
               const at = TONE_MAP[a.tone];
               return (
-                <div key={a.id} className="flex flex-col items-center gap-1.5 group cursor-default">
+                <motion.div
+                  key={a.id}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + idx * 0.06, ease }}
+                  className="flex flex-col items-center gap-1.5 group cursor-default"
+                >
                   <motion.div
                     whileHover={{ scale: 1.3 }}
                     className={cn(
@@ -485,7 +469,7 @@ export default function Premiacoes() {
                     unlocked ? at.text + "/60" : "text-muted-foreground/15",
                     "group-hover:text-foreground/60"
                   )}>{a.label}</span>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -520,7 +504,7 @@ export default function Premiacoes() {
             );
           })}
 
-          {/* ── Final Node ── */}
+          {/* Final Node */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -553,10 +537,7 @@ export default function Premiacoes() {
               )} />
               <div className="flex items-center gap-3 pl-2">
                 {unlockedCount === AWARDS.length && (
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
+                  <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                     <Trophy className="h-6 w-6 text-primary" />
                   </motion.div>
                 )}

@@ -1,22 +1,34 @@
+/**
+ * Perfil — Ultra-Premium Profile Page
+ * @module Perfil
+ * @version 4.0.0 — Fintech Premium Redesign
+ */
+
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame, Zap } from "lucide-react";
+import {
+  User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame, Zap,
+  Crown, Sparkles, Target, TrendingUp, ArrowUp, Star, Lock, Globe,
+  Calendar, BadgeCheck, Fingerprint, Copy, Check, Award, Gem, Eye,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 const MILESTONES = [
-  { label: "Início", value: 0 },
-  { label: "10K", value: 10000 },
-  { label: "100K", value: 100000 },
-  { label: "500K", value: 500000 },
-  { label: "1M", value: 1000000 },
-  { label: "5M", value: 5000000 },
+  { label: "Início", value: 0, icon: Zap },
+  { label: "10K", value: 10000, icon: Star },
+  { label: "100K", value: 100000, icon: Flame },
+  { label: "500K", value: 500000, icon: Crown },
+  { label: "1M", value: 1000000, icon: Gem },
+  { label: "5M", value: 5000000, icon: Trophy },
 ];
 
 function getCurrentMilestone(revenue: number) {
@@ -33,11 +45,88 @@ function getCurrentMilestone(revenue: number) {
 
 const fmtCurrency = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmtCompact = (v: number) =>
+  v >= 1000000 ? `R$ ${(v / 1000000).toFixed(1).replace(".", ",")}M`
+  : v >= 1000 ? `R$ ${(v / 1000).toFixed(0)}K`
+  : fmtCurrency(v);
+
+/* ─── Animated Number ─── */
+function AnimatedNumber({ value, formatter = fmtCurrency, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
+  const [display, setDisplay] = useState(value);
+  const prevRef = useRef(value);
+  useEffect(() => {
+    const from = prevRef.current;
+    const to = value;
+    prevRef.current = value;
+    if (from === to) return;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(from + (to - from) * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [value, duration]);
+  return <>{formatter(display)}</>;
+}
+
+/* ─── Stat Pill ─── */
+function StatPill({ icon: Icon, label, value, tone = "primary", delay = 0 }: {
+  icon: any; label: string; value: string; tone?: string; delay?: number;
+}) {
+  const colors: Record<string, { bg: string; ring: string; text: string; accent: string; glow: string }> = {
+    primary: { bg: "bg-primary/8", ring: "ring-primary/15", text: "text-primary", accent: "bg-primary", glow: "shadow-primary/10" },
+    success: { bg: "bg-success/8", ring: "ring-success/15", text: "text-success", accent: "bg-success", glow: "shadow-success/10" },
+    info: { bg: "bg-info/8", ring: "ring-info/15", text: "text-info", accent: "bg-info", glow: "shadow-info/10" },
+    warning: { bg: "bg-warning/8", ring: "ring-warning/15", text: "text-warning", accent: "bg-warning", glow: "shadow-warning/10" },
+  };
+  const c = colors[tone] || colors.primary;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: delay * 0.06, duration: 0.5, ease }}
+      className={cn(
+        "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden",
+        "hover:ring-border/40 transition-all duration-300",
+        `hover:shadow-lg ${c.glow}`
+      )}
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", c.accent)} />
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-3">
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", c.bg, c.ring)}>
+            <Icon className={cn("h-4 w-4", c.text)} />
+          </div>
+          <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">{label}</span>
+        </div>
+        <p className={cn("text-xl md:text-2xl font-display font-black tracking-[-0.04em]", c.text)}>{value}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Live Pulse ─── */
+function LivePulse() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="relative">
+        <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+        <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
+      </div>
+      <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Online</span>
+    </div>
+  );
+}
 
 export default function Perfil() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -55,7 +144,10 @@ export default function Perfil() {
     if (!user) return;
     supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed")
       .then(({ data }) => {
-        if (data) setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
+        if (data) {
+          setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
+          setTotalSales(data.length);
+        }
       });
   }, [user]);
 
@@ -93,195 +185,406 @@ export default function Perfil() {
     setUploading(false);
   };
 
-  const statusLabels: Record<string, { label: string; cls: string }> = {
-    approved: { label: "Aprovada", cls: "text-success bg-success/10 border-success/15" },
-    pending_review: { label: "Em análise", cls: "text-warning bg-warning/10 border-warning/15" },
-    rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10 border-destructive/15" },
-    blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10 border-destructive/15" },
+  const statusLabels: Record<string, { label: string; cls: string; icon: any; ringCls: string }> = {
+    approved: { label: "Verificada", cls: "text-success bg-success/8 border-success/15", icon: BadgeCheck, ringCls: "ring-success/20" },
+    pending_review: { label: "Em Análise", cls: "text-warning bg-warning/8 border-warning/15", icon: Shield, ringCls: "ring-warning/20" },
+    rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/8 border-destructive/15", icon: Shield, ringCls: "ring-destructive/20" },
+    blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/8 border-destructive/15", icon: Shield, ringCls: "ring-destructive/20" },
   };
   const accStatus = statusLabels[profile?.account_status || "pending_review"] || statusLabels.pending_review;
+  const StatusIcon = accStatus.icon;
+
+  const memberDays = profile?.created_at
+    ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
-      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
+      {/* Ambient */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-info/15 rounded-full blur-[180px]" />
+      </div>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HERO                                                            */}
-      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ═══ HERO ═══ */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
       >
-        <div className="absolute -inset-16 pointer-events-none">
-          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
-          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
-          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]" />
-          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        </div>
+        {/* Mesh gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/3 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/3 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
-              <User className="h-4.5 w-4.5 text-primary" />
+        <div className="relative z-10 p-6 md:p-8">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+                <User className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Meu Perfil</span>
             </div>
-            <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Meu Perfil</span>
+            <LivePulse />
           </div>
 
-          {/* Avatar + name */}
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="flex items-center gap-6 mb-8">
+          {/* Avatar + Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15, ease }}
+            className="flex flex-col md:flex-row md:items-center gap-6"
+          >
+            {/* Avatar */}
             <div className="relative group shrink-0">
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
-              <div className="h-24 w-24 rounded-2xl overflow-hidden relative cursor-pointer border-2 border-primary/15 shadow-xl shadow-primary/10 active:scale-[0.97] transition-transform ring-4 ring-primary/5" onClick={() => fileRef.current?.click()}>
+              
+              {/* Glow ring */}
+              <div className="absolute -inset-1.5 rounded-[22px] bg-gradient-to-br from-primary/20 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+              
+              <div
+                className="relative h-[88px] w-[88px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-border/20 group-hover:ring-primary/30 transition-all duration-300 shadow-xl shadow-black/10 active:scale-[0.97]"
+                onClick={() => fileRef.current?.click()}
+              >
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center text-3xl font-display font-black text-primary">
-                    {(profile?.full_name || "U").charAt(0).toUpperCase()}
+                  <div className="w-full h-full bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 flex items-center justify-center">
+                    <span className="text-3xl font-display font-black text-primary/60">
+                      {(profile?.full_name || "U").charAt(0).toUpperCase()}
+                    </span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <Camera className="h-5 w-5 text-foreground" />
+                <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <Camera className="h-5 w-5 text-foreground/80" />
                 </div>
               </div>
-              {uploading && <div className="absolute inset-0 flex items-center justify-center"><div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              )}
             </div>
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-heading text-foreground leading-tight tracking-[-0.03em]">{profile?.full_name || "Usuário"}</h2>
-              <p className="text-[12px] text-muted-foreground/40 mt-1 font-display">{profile?.email || ""}</p>
-              <div className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-[9px] font-heading border ${accStatus.cls}`}>
-                <Shield className="h-3 w-3" /> {accStatus.label}
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                <h2 className="text-2xl md:text-3xl font-display font-black text-foreground tracking-[-0.04em] leading-tight">
+                  {profile?.full_name || "Usuário"}
+                </h2>
+                <div className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-display font-bold ring-1 border-0",
+                  accStatus.cls, accStatus.ringCls
+                )}>
+                  <StatusIcon className="h-3 w-3" />
+                  {accStatus.label}
+                </div>
               </div>
+              <p className="text-[12px] text-muted-foreground/40 font-medium mb-3">{profile?.email || ""}</p>
+              
+              {/* Quick stats */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
+                  <Calendar className="h-3 w-3" />
+                  <span>{memberDays} dias como membro</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
+                  <Fingerprint className="h-3 w-3" />
+                  <span>{profile?.seller_type === "empresa" ? "Pessoa Jurídica" : "Pessoa Física"}</span>
+                </div>
+                {profile?.document_number && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
+                    <Shield className="h-3 w-3" />
+                    <span>Doc. ***{profile.document_number.slice(-4)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Revenue highlight — desktop */}
+            <div className="hidden lg:block text-right shrink-0">
+              <p className="text-[9px] font-display font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mb-1">Receita Líquida</p>
+              <p className="text-3xl font-display font-black text-foreground tracking-[-0.04em] tabular-nums">
+                <AnimatedNumber value={allTimeRevenue} />
+              </p>
+              <p className="text-[10px] text-muted-foreground/40 mt-1">{totalSales} vendas aprovadas</p>
             </div>
           </motion.div>
         </div>
       </motion.section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* CONTENT                                                         */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        {/* Edit Profile */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl glass-panel p-5 md:p-6">
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-              <User className="h-4 w-4 text-primary" />
+      {/* ═══ KPI Strip ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatPill icon={Flame} label="Faturamento" value={fmtCompact(allTimeRevenue)} tone="primary" delay={0} />
+        <StatPill icon={Target} label="Vendas" value={String(totalSales)} tone="success" delay={1} />
+        <StatPill icon={Trophy} label="Marco Atual" value={milestone.current.label} tone="warning" delay={2} />
+        <StatPill icon={TrendingUp} label="Progresso" value={`${milestone.pct.toFixed(0)}%`} tone="info" delay={3} />
+      </div>
+
+      {/* ═══ Content Grid ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        {/* ─── Dados Pessoais ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, ease }}
+          className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300 group"
+        >
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+                <User className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[11px] font-display font-black text-foreground/70">Dados Pessoais</p>
+                <p className="text-[9px] text-muted-foreground/40">Informações do cadastro</p>
+              </div>
             </div>
-            <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Dados Pessoais</p>
+
+            <form onSubmit={handleSave} className="space-y-3.5">
+              <div>
+                <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                  {profile?.full_name ? <Lock className="h-2.5 w-2.5" /> : null} Nome completo
+                </Label>
+                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30" disabled={!!profile?.full_name} />
+              </div>
+              <div>
+                <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                  {profile?.email ? <Lock className="h-2.5 w-2.5" /> : null} E-mail
+                </Label>
+                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20" type="email" disabled={!!profile?.email} />
+              </div>
+              <div>
+                <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                  {profile?.phone ? <Lock className="h-2.5 w-2.5" /> : null} Telefone
+                </Label>
+                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-10 rounded-xl text-[12px] font-display font-bold shadow-lg shadow-primary/10 hover:shadow-xl hover:shadow-primary/15 transition-all active:scale-[0.985]"
+                disabled={saving}
+              >
+                {saving ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-3.5 w-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    <span>Salvando...</span>
+                  </div>
+                ) : (
+                  <span>Salvar alterações</span>
+                )}
+              </Button>
+            </form>
           </div>
-          <form onSubmit={handleSave} className="space-y-3.5">
-            <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em] font-bold">Nome completo {profile?.full_name && <span className="text-primary/40 normal-case tracking-normal text-[9px]">(bloqueado)</span>}</Label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5 h-10 rounded-xl" disabled={!!profile?.full_name} />
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em] font-bold">E-mail {profile?.email && <span className="text-primary/40 normal-case tracking-normal text-[9px]">(bloqueado)</span>}</Label>
-              <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5 h-10 rounded-xl" type="email" disabled={!!profile?.email} />
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em] font-bold">Telefone {profile?.phone && <span className="text-primary/40 normal-case tracking-normal text-[9px]">(bloqueado)</span>}</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5 h-10 rounded-xl" placeholder="(11) 99999-9999" disabled={!!profile?.phone} />
-            </div>
-            <Button type="submit" className="w-full h-10 rounded-xl text-[13px] font-bold shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 transition-all" disabled={saving}>
-              {saving ? "Salvando..." : "Salvar alterações"}
-            </Button>
-          </form>
         </motion.div>
 
-        {/* Limites */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl glass-panel p-5 md:p-6">
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="h-8 w-8 rounded-xl bg-success/8 border border-success/10 flex items-center justify-center">
-              <Wallet className="h-4 w-4 text-success" />
-            </div>
-            <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Limites</p>
-          </div>
-          <div className="space-y-3.5">
-            {[
-              { label: "Limite diário PIX", value: "Ilimitado" },
-              { label: "Limite diário Saque", value: "Ilimitado" },
-              { label: "Saques por dia", value: "Ilimitado" },
-            ].map(item => (
-              <div key={item.label} className="flex items-center justify-between py-2.5 border-b border-border/10 last:border-0">
-                <span className="text-[12px] text-muted-foreground/50 font-display">{item.label}</span>
-                <span className="text-[13px] font-display font-bold text-success">{item.value}</span>
+        {/* ─── Limites ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, ease }}
+          className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300"
+        >
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
+          <div className="absolute inset-0 bg-gradient-to-br from-success/[0.02] to-transparent pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="h-9 w-9 rounded-xl bg-success/8 ring-1 ring-success/15 flex items-center justify-center">
+                <Wallet className="h-4 w-4 text-success" />
               </div>
-            ))}
+              <div>
+                <p className="text-[11px] font-display font-black text-foreground/70">Limites Operacionais</p>
+                <p className="text-[9px] text-muted-foreground/40">Parâmetros da sua conta</p>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              {[
+                { label: "Limite diário PIX", value: "Ilimitado", icon: Zap },
+                { label: "Limite diário Saque", value: "Ilimitado", icon: ArrowUp },
+                { label: "Saques simultâneos", value: "3 pendentes", icon: Wallet },
+                { label: "Chaves PIX", value: "3 máximas", icon: Fingerprint },
+                { label: "Chaves API", value: "5 máximas", icon: Globe },
+              ].map((item, idx) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + idx * 0.04, ease }}
+                  className="flex items-center justify-between py-3 border-b border-border/8 last:border-0 group/item hover:bg-muted/5 rounded-lg px-2 -mx-2 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-7 w-7 rounded-lg bg-success/5 ring-1 ring-success/8 flex items-center justify-center">
+                      <item.icon className="h-3 w-3 text-success/60" />
+                    </div>
+                    <span className="text-[11px] text-muted-foreground/50 font-medium">{item.label}</span>
+                  </div>
+                  <span className={cn(
+                    "text-[11px] font-display font-bold tabular-nums",
+                    item.value === "Ilimitado" ? "text-success" : "text-foreground/60"
+                  )}>
+                    {item.value}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
 
-        {/* Account Info */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="rounded-2xl glass-panel p-5 md:p-6">
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
-              <Shield className="h-4 w-4 text-info" />
-            </div>
-            <p className="text-[11px] font-heading uppercase tracking-[0.15em] text-muted-foreground/40">Informações da Conta</p>
-          </div>
-          <div className="space-y-3.5">
-            {[
-              { label: "Tipo", value: profile?.seller_type === "empresa" ? "Empresa" : "Pessoa Física" },
-              { label: "Documento", value: profile?.document_number ? `***${profile.document_number.slice(-4)}` : "Não informado" },
-              { label: "Chave PIX", value: profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : "Não cadastrada" },
-              { label: "Membro desde", value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—" },
-            ].map(item => (
-              <div key={item.label} className="flex items-center justify-between py-2.5 border-b border-border/10 last:border-0">
-                <span className="text-[12px] text-muted-foreground/50 font-display">{item.label}</span>
-                <span className="text-[12px] font-display font-semibold text-foreground/70">{item.value}</span>
+        {/* ─── Info da Conta ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, ease }}
+          className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300"
+        >
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
+          <div className="absolute inset-0 bg-gradient-to-br from-info/[0.02] to-transparent pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="h-9 w-9 rounded-xl bg-info/8 ring-1 ring-info/15 flex items-center justify-center">
+                <Shield className="h-4 w-4 text-info" />
               </div>
-            ))}
+              <div>
+                <p className="text-[11px] font-display font-black text-foreground/70">Detalhes da Conta</p>
+                <p className="text-[9px] text-muted-foreground/40">Informações e segurança</p>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              {[
+                { label: "Tipo de Conta", value: profile?.seller_type === "empresa" ? "Empresa" : "Pessoa Física", icon: User },
+                { label: "Documento", value: profile?.document_number ? `***${profile.document_number.slice(-4)}` : "Não informado", icon: Fingerprint },
+                { label: "Chave PIX", value: profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : "Não cadastrada", icon: Zap },
+                { label: "Membro desde", value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—", icon: Calendar },
+                { label: "Nickname", value: profile?.nickname || "Não definido", icon: Star },
+              ].map((item, idx) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.45 + idx * 0.04, ease }}
+                  className="flex items-center justify-between py-3 border-b border-border/8 last:border-0 group/item hover:bg-muted/5 rounded-lg px-2 -mx-2 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-7 w-7 rounded-lg bg-info/5 ring-1 ring-info/8 flex items-center justify-center">
+                      <item.icon className="h-3 w-3 text-info/60" />
+                    </div>
+                    <span className="text-[11px] text-muted-foreground/50 font-medium">{item.label}</span>
+                  </div>
+                  <span className="text-[11px] font-display font-semibold text-foreground/60 truncate max-w-[140px]">{item.value}</span>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>
 
-      {/* ─── Progress Section ─── */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-2xl glass-panel p-5 md:p-6">
-        <div className="flex items-center gap-3.5 mb-6">
-          <div className="relative h-11 w-11 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
-            <Trophy className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h3 className="text-[15px] font-display font-bold text-foreground">Progresso de Faturamento</h3>
-            <p className="text-[11px] text-muted-foreground/40">Acompanhe sua evolução</p>
-          </div>
-        </div>
+      {/* ═══ Progresso de Faturamento ═══ */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45, ease }}
+        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-7 overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-warning/3 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-warning" />
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div>
-            <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-heading">Total faturado</p>
-            <p className="text-[22px] font-heading text-foreground mt-1 tabular-nums">{fmtCurrency(allTimeRevenue)}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-heading">Meta atual</p>
-            <p className="text-[22px] font-heading mt-1 text-primary tabular-nums">{milestone.next.label}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.15em] font-heading">Falta</p>
-            <p className="text-[22px] font-heading text-foreground/50 mt-1 tabular-nums">{fmtCurrency(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex justify-between mb-2.5">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-              <span className="text-[10px] font-heading text-muted-foreground/40">{milestone.pct.toFixed(0)}%</span>
-            </div>
-            <span className="text-[10px] font-heading text-muted-foreground/40">{milestone.next.label}</span>
-          </div>
-          <div className="w-full rounded-full h-3.5 overflow-hidden bg-muted/20 border border-border/10">
-            <div className="h-full rounded-full relative transition-all duration-1000 gradient-primary" style={{ width: `${Math.max(milestone.pct, 2)}%`, boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            </div>
-          </div>
-          <div className="flex justify-between mt-4">
-            {MILESTONES.slice(1).map((m) => (
-              <div key={m.label} className="text-center">
-                <div className="h-2.5 w-2.5 rounded-full mx-auto mb-1.5 border border-border/30" style={{ background: allTimeRevenue >= m.value ? "hsl(var(--primary))" : "hsl(var(--muted))", boxShadow: allTimeRevenue >= m.value ? "0 0 10px hsl(var(--primary) / 0.5)" : "none" }} />
-                <span className="text-[9px] text-muted-foreground/40 font-heading">{m.label}</span>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 0.6 }}
+                className="h-11 w-11 rounded-2xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shadow-lg shadow-primary/10"
+              >
+                <Trophy className="h-5 w-5 text-primary" />
+              </motion.div>
+              <div>
+                <h3 className="text-[13px] font-display font-black text-foreground tracking-[-0.02em]">Progresso de Faturamento</h3>
+                <p className="text-[9px] text-muted-foreground/40">Acompanhe sua evolução rumo ao próximo marco</p>
               </div>
-            ))}
+            </div>
+            <div className="text-right hidden sm:block">
+              <p className="text-[9px] font-display font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Próxima Meta</p>
+              <p className="text-lg font-display font-black text-primary tabular-nums">{milestone.next.label}</p>
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="text-center p-3 rounded-xl bg-muted/5 ring-1 ring-border/8">
+              <p className="text-[9px] text-muted-foreground/30 uppercase tracking-[0.15em] font-display font-bold mb-1">Total</p>
+              <p className="text-[18px] font-display font-black text-foreground tabular-nums tracking-[-0.03em]">{fmtCompact(allTimeRevenue)}</p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-primary/5 ring-1 ring-primary/10">
+              <p className="text-[9px] text-primary/50 uppercase tracking-[0.15em] font-display font-bold mb-1">Meta</p>
+              <p className="text-[18px] font-display font-black text-primary tabular-nums tracking-[-0.03em]">{milestone.next.label}</p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-muted/5 ring-1 ring-border/8">
+              <p className="text-[9px] text-muted-foreground/30 uppercase tracking-[0.15em] font-display font-bold mb-1">Falta</p>
+              <p className="text-[18px] font-display font-black text-foreground/50 tabular-nums tracking-[-0.03em]">{fmtCompact(Math.max(0, milestone.next.value - allTimeRevenue))}</p>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mb-2">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3 w-3 text-primary" />
+                <span className="text-[10px] font-display font-bold text-primary tabular-nums">{milestone.pct.toFixed(0)}%</span>
+              </div>
+              <span className="text-[9px] font-display font-bold text-muted-foreground/30">{milestone.next.label}</span>
+            </div>
+            <div className="w-full rounded-full h-3 overflow-hidden bg-muted/10 ring-1 ring-border/8">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.max(milestone.pct, 2)}%` }}
+                transition={{ duration: 1.5, delay: 0.5, ease }}
+                className="h-full rounded-full relative bg-gradient-to-r from-primary via-primary/80 to-primary/60"
+                style={{ boxShadow: "0 0 20px hsl(var(--primary) / 0.35)" }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Milestone dots */}
+          <div className="flex justify-between mt-5 px-1">
+            {MILESTONES.slice(1).map((m, idx) => {
+              const unlocked = allTimeRevenue >= m.value;
+              return (
+                <motion.div
+                  key={m.label}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 + idx * 0.08, ease }}
+                  className="flex flex-col items-center gap-1.5 group cursor-default"
+                >
+                  <div
+                    className={cn(
+                      "h-3 w-3 rounded-full ring-1 transition-all duration-500",
+                      unlocked ? "bg-primary ring-primary/20 shadow-sm shadow-primary/30" : "bg-muted/10 ring-border/10"
+                    )}
+                  />
+                  <span className={cn(
+                    "text-[8px] font-display font-bold tabular-nums transition-colors",
+                    unlocked ? "text-primary/60" : "text-muted-foreground/20",
+                    "group-hover:text-foreground/60"
+                  )}>
+                    {m.label}
+                  </span>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </motion.div>
