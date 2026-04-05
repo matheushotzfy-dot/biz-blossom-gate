@@ -328,7 +328,7 @@ export default function Produtos() {
               <div className="absolute -inset-4 bg-primary/[0.02] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none" />
 
               {/* Image */}
-              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-muted/8 to-transparent">
+              <div className="relative h-36 sm:h-48 overflow-hidden bg-gradient-to-br from-muted/8 to-transparent">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                 ) : (
