@@ -93,7 +93,7 @@ export default function Assinaturas() {
       price,
       interval: fInterval,
       trial_days: parseInt(fTrial) || 0,
-      product_id: fProduct || null,
+      product_id: fProduct && fProduct !== "none" ? fProduct : null,
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Plano criado!");
@@ -200,7 +200,7 @@ export default function Assinaturas() {
                       <Select value={fProduct} onValueChange={setFProduct}>
                         <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
+                          <SelectItem value="none">Nenhum</SelectItem>
                           {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
