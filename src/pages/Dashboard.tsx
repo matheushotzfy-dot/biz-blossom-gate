@@ -364,7 +364,9 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] space-y-5 md:space-y-6 relative">
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
+
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -372,22 +374,8 @@ export default function Dashboard() {
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
           <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
           <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 left-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
-          <div className="absolute top-0 right-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
-          <div className="absolute bottom-0 left-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
-          <div className="absolute bottom-0 right-0 h-48 w-48 bg-primary/30 blur-[60px] rounded-full" />
           {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-primary/60"
-              style={{
-                width: `${Math.random() * 6 + 2}px`,
-                height: `${Math.random() * 6 + 2}px`,
-                left: `${Math.random() * 100}%`,
-                bottom: `${Math.random() * 30}%`,
-                animation: `fireParticle ${1 + Math.random() * 2}s ease-out ${Math.random() * 0.5}s forwards`,
-              }}
-            />
+            <div key={i} className="absolute rounded-full bg-primary/60" style={{ width: `${Math.random() * 6 + 2}px`, height: `${Math.random() * 6 + 2}px`, left: `${Math.random() * 100}%`, bottom: `${Math.random() * 30}%`, animation: `fireParticle ${1 + Math.random() * 2}s ease-out ${Math.random() * 0.5}s forwards` }} />
           ))}
         </div>
       )}
@@ -400,245 +388,178 @@ export default function Dashboard() {
             <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
             <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
             <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
-            
-            <button
-              onClick={() => setShowScalePopup(false)}
-              className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"
-            >
-              <X className="h-4 w-4 text-muted-foreground" />
-            </button>
-
+            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
             <div className="relative p-8 md:p-10 text-center">
-              <div className="mx-auto mb-6 h-24 w-24 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10">
-                <Rocket className="h-12 w-12 text-primary" />
-              </div>
-
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-5">
-                <Flame className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Ativado</span>
-              </div>
-
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight tracking-[-0.04em]">
-                MODO ESCALA<br />
-                <span className="text-gradient">ATIVADO!</span>
-              </h2>
-
+              <div className="mx-auto mb-6 h-24 w-24 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10"><Rocket className="h-12 w-12 text-primary" /></div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-5"><Flame className="h-4 w-4 text-primary" /><span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Ativado</span></div>
+              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight tracking-[-0.04em]">MODO ESCALA<br /><span className="text-gradient">ATIVADO!</span></h2>
               <div className="space-y-4 text-sm text-muted-foreground leading-relaxed mb-6">
-                <p className="font-bold text-foreground text-base">
-                  AGORA É SANGUE NOS OLHOS!
-                </p>
-                <p>
-                  O futuro de luxo já está lá, falta <strong className="text-foreground">VOCÊ</strong> alcançar — e sabemos que irá conseguir!
-                </p>
-                <p>
-                  E estaremos <strong className="text-primary">juntos com você</strong> nessa jornada!
-                </p>
+                <p className="font-bold text-foreground text-base">AGORA É SANGUE NOS OLHOS!</p>
+                <p>O futuro de luxo já está lá, falta <strong className="text-foreground">VOCÊ</strong> alcançar — e sabemos que irá conseguir!</p>
+                <p>E estaremos <strong className="text-primary">juntos com você</strong> nessa jornada!</p>
               </div>
-
               <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-foreground mb-1">Suporte Prioritário Ativado</p>
-                    <p className="text-xs text-muted-foreground">
-                      No Modo Escala, o suporte e a fluidez da plataforma estarão 100% disponíveis para você. 
-                      Qualquer ajuda para escalar que precisar, pode nos chamar!
-                    </p>
-                  </div>
-                </div>
+                <div className="flex items-start gap-3"><ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" /><div className="text-left"><p className="text-sm font-bold text-foreground mb-1">Suporte Prioritário Ativado</p><p className="text-xs text-muted-foreground">No Modo Escala, o suporte e a fluidez da plataforma estarão 100% disponíveis para você. Qualquer ajuda para escalar que precisar, pode nos chamar!</p></div></div>
               </div>
-
-              <p className="text-lg font-display font-black text-primary mb-6">
-                RUMO À LUA!
-              </p>
-
-              <button
-                onClick={() => setShowScalePopup(false)}
-                className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
-              >
-                BORA ESCALAR!
-              </button>
+              <p className="text-lg font-display font-black text-primary mb-6">RUMO À LUA!</p>
+              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">BORA ESCALAR!</button>
             </div>
-
           </div>
         </div>
       )}
 
-
-      {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm backdrop-blur-xl p-4 md:p-8 animate-fade-in">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-16 -top-16 h-48 md:h-72 w-48 md:w-72 rounded-full bg-primary/15 blur-[60px] md:blur-[90px]" />
-          <div className="absolute -right-10 bottom-0 h-40 md:h-56 w-40 md:w-56 rounded-full bg-info/10 blur-[70px] md:blur-[110px]" />
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HERO — DASHBOARD COMMAND CENTER                                  */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+      >
+        <div className="absolute -inset-16 pointer-events-none">
+          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
+          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
+          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]" />
+          <motion.div animate={{ opacity: [0.4, 0.65, 0.4] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-20 left-[10%] right-[10%] h-[200px] bg-primary/6 rounded-full blur-[120px]" />
+          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         </div>
 
-        <div className="relative z-10 space-y-4 md:space-y-6">
-          {/* Title row */}
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-1.5 md:space-y-2">
-              <h1 className="text-xl md:text-4xl lg:text-5xl font-display font-black tracking-[-0.04em] leading-[1.05] text-foreground">
-                {nickname ? (
-                  <>Bem Vindo, <span className="text-gradient">{nickname}</span></>
-                ) : (
-                  <span className="inline-block w-48 h-8 md:h-12 rounded-xl bg-muted/30 animate-pulse" />
-                )}
-              </h1>
+        <div className="relative z-10">
+          {/* Top controls bar */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                  <BarChart3 className="h-4.5 w-4.5 text-primary" />
+                </div>
+                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Dashboard</span>
+              </motion.div>
+              {nickname && (
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 backdrop-blur-sm">
+                  <Crown className="h-3 w-3 text-primary" />
+                  <span className="text-[10px] font-heading text-primary">{nickname}</span>
+                </div>
+              )}
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                </span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
+            <div className="flex flex-wrap items-center gap-1.5">
               {/* Scale Mode Button */}
               {scaleModeUnlocked ? (
-                <button
-                  onClick={activateScaleMode}
-                  className={`flame-btn group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold transition-all ${
-                    scaleMode
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                      : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60 hover:shadow-md hover:shadow-primary/15"
-                  }`}
-                >
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <span
-                      key={i}
-                      className="flame-tip"
-                      style={{
-                        left: `${20 + i * 15}%`,
-                        width: `${3 + Math.random() * 3}px`,
-                        height: `${3 + Math.random() * 3}px`,
-                        ['--dur' as string]: `${0.6 + i * 0.15}s`,
-                        ['--delay' as string]: `${i * 0.12}s`,
-                      }}
-                    />
-                  ))}
-                  <Flame className={`h-3.5 w-3.5 md:h-4 md:w-4 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span className="leading-tight">Modo Escala</span>
+                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"}`}>
+                  {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
+                  <Flame className={`h-3.5 w-3.5 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
+                  <span className="leading-tight">Escala</span>
                 </button>
               ) : (
-                <div className="flame-btn group relative inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl px-3 md:px-4 text-xs md:text-sm font-bold border border-primary/30 bg-primary/10 text-primary cursor-not-allowed">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <span
-                      key={i}
-                      className="flame-tip"
-                      style={{
-                        left: `${20 + i * 15}%`,
-                        width: `${3 + Math.random() * 3}px`,
-                        height: `${3 + Math.random() * 3}px`,
-                        ['--dur' as string]: `${0.6 + i * 0.15}s`,
-                        ['--delay' as string]: `${i * 0.12}s`,
-                      }}
-                    />
-                  ))}
-                  <Lock className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                  <span className="leading-tight">Modo Escala</span>
+                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading border border-primary/30 bg-primary/10 text-primary cursor-not-allowed">
+                  {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
+                  <Lock className="h-3.5 w-3.5" />
+                  <span className="leading-tight">Escala</span>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     <p className="text-[11px] font-bold text-foreground mb-1">Modo Escala Bloqueado</p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado automaticamente ao atingir R$ 2.000 faturados em 24 horas. Continue vendendo!</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 em 24h.</p>
                   </div>
                 </div>
               )}
 
+              {/* Period selector */}
+              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
+                {PERIOD_PRESETS.map((opt) => (
+                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                    className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
+                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)] glow-primary" : "text-muted-foreground/35 hover:text-foreground/70"
+                    )}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button className="inline-flex h-9 md:h-10 items-center gap-1.5 md:gap-2 rounded-xl border border-border/80 bg-card px-3 md:px-3.5 text-xs md:text-sm font-semibold text-foreground shadow-sm transition-all hover:border-primary/25">
-                    <CalendarDays className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
-                    {isCustom && customRange?.from
-                      ? customRange.to
-                        ? `${format(customRange.from, "dd/MM", { locale: ptBR })} - ${format(customRange.to, "dd/MM", { locale: ptBR })}`
-                        : format(customRange.from, "dd/MM/yyyy", { locale: ptBR })
-                      : selectedPeriod.label}
-                    <ChevronDown className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground" />
+                  <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
+                    isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                  )}>
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays className="h-3 w-3" />
+                      {isCustom && customRange?.from
+                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                        : "Custom"}
+                    </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto p-0 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-xl overflow-hidden">
-                  <div className="p-2 space-y-0.5 min-w-[150px]">
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.14em] px-2.5 py-1.5">Período</p>
-                    {PERIOD_PRESETS.map((option) => (
-                      <button
-                        key={option.label}
-                        onClick={() => {
-                          setSelectedPeriod(option);
-                          setIsCustom(false);
-                          setCustomRange(undefined);
-                          setDatePickerOpen(false);
-                        }}
-                        className={cn(
-                          "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                          !isCustom && selectedPeriod.label === option.label
-                            ? "bg-primary/10 text-primary font-bold"
-                            : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
-                        )}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                    <div className="my-1.5 border-t border-border/20" />
-                    <button
-                      onClick={() => setIsCustom(true)}
-                      className={cn(
-                        "w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all flex items-center gap-2",
-                        isCustom
-                          ? "bg-primary/10 text-primary font-bold"
-                          : "text-foreground/70 hover:bg-muted/40 hover:text-foreground"
-                      )}
-                    >
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      Personalizado
-                    </button>
-                    {/* Calendar — only visible when "Personalizado" is selected */}
-                    {isCustom && (
-                      <div className="border-t border-border/20 mt-1.5 pt-1">
-                        <Calendar
-                          mode="range"
-                          selected={customRange}
-                          onSelect={(range) => {
-                            setCustomRange(range);
-                            setIsCustom(true);
-                            if (range?.from && range?.to) {
-                              setTimeout(() => setDatePickerOpen(false), 300);
-                            }
-                          }}
-                          numberOfMonths={1}
-                          locale={ptBR}
-                          disabled={(date) => date > new Date()}
-                          className={cn("p-3 pointer-events-auto")}
-                          classNames={{
-                            day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
-                            day_range_middle: "bg-primary/10 text-foreground",
-                            day_range_end: "bg-primary text-primary-foreground",
-                          }}
-                        />
-                        {customRange?.from && (
-                          <div className="px-3 pb-2 pt-1 border-t border-border/20 mt-1">
-                            <p className="text-[11px] text-muted-foreground font-medium text-center">
-                              {format(customRange.from, "dd MMM yyyy", { locale: ptBR })}
-                              {customRange.to && ` — ${format(customRange.to, "dd MMM yyyy", { locale: ptBR })}`}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
+                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
-
-              <button
-                onClick={privacy.toggle}
-                className="inline-flex h-9 md:h-10 items-center gap-1.5 rounded-xl border border-border/80 bg-card px-3 text-xs font-semibold text-foreground shadow-sm transition-all hover:border-primary/25"
-                title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-              >
-                {privacy.hidden ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-primary" />}
+              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", privacy.hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+                {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
 
-          {/* Hero metrics */}
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
-            <MiniHeroCard icon={<ShoppingCart className="h-4 w-4" />} label="Total Faturado" value={privacy.hidden ? CENSORED : fmt(revenue)} tone="primary" idx={0} />
-            <MiniHeroCard icon={<TrendingUp className="h-4 w-4" />} label="Vendas Realizadas" value={privacy.hidden ? CENSORED : String(approved.length)} tone="info" idx={1} />
-            <MiniHeroCard icon={<Target className="h-4 w-4" />} label="Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} tone="success" idx={2} />
-            <MiniHeroCard icon={<Wallet className="h-4 w-4" />} label="Saldo Disponível" value={privacy.hidden ? CENSORED : `${balance < 0 ? "- " : ""}${fmt(Math.abs(balance))}`} tone={balance < 0 ? "warning" : "primary"} idx={3} />
+          {/* MAIN FOCAL POINT — Revenue */}
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="mb-10">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
+              <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">
+                {isCustom && customRange?.from
+                  ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                  : `Receita — ${selectedPeriod.label}`}
+              </p>
+              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
+            </div>
+            <div className="flex items-end gap-5 mb-3">
+              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1)]">
+                {privacy.hidden ? "R$ •••••••" : fmt(revenue)}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5 mt-6">
+              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <Check className="h-3 w-3 text-success" /> {approved.length} aprovadas
+              </motion.span>
+              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <Clock3 className="h-3 w-3 text-warning" /> {pending.length} pendentes
+              </motion.span>
+              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.56 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <Target className="h-3 w-3" /> {conversion.toFixed(1)}% conversão
+              </motion.span>
+              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.64 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <Wallet className="h-3 w-3 text-primary" /> saldo {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
+              </motion.span>
+            </div>
+          </motion.div>
+
+          {/* Executive KPI strip */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: "Total Faturado", value: privacy.hidden ? CENSORED : fmt(revenue), color: "primary", icon: ShoppingCart },
+              { label: "Vendas Aprovadas", value: privacy.hidden ? CENSORED : String(approved.length), color: "success", icon: TrendingUp },
+              { label: "Taxa Conversão", value: privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`, color: "info", icon: Target },
+              { label: "Saldo Disponível", value: privacy.hidden ? CENSORED : fmt(Math.abs(balance)), color: balance < 0 ? "warning" : "primary", icon: Wallet },
+            ].map((item, idx) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 + idx * 0.1 }} className="group relative rounded-2xl glass-panel p-5 overflow-hidden card-premium">
+                <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
+                <div className="relative z-10 flex items-start justify-between">
+                  <div>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
+                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
+                  </div>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── CHART + HEALTH ─── */}
       <section className="grid grid-cols-1 gap-3 md:gap-4 xl:grid-cols-12">
