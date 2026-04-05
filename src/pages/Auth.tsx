@@ -441,81 +441,77 @@ export default function Auth() {
 
       {/* ─── RIGHT: Features (Desktop — independent scroll) ─── */}
       <div className="hidden lg:flex flex-1 relative overflow-y-auto overflow-x-hidden border-l border-border/8">
-        <div className="flex-1 flex items-center justify-center p-10 xl:p-12 py-16 min-h-full">
         <BgEffects side="right" />
-
         {/* Subtle scan-lines */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.008]" style={{
           backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, hsl(var(--foreground)) 2px, hsl(var(--foreground)) 3px)",
         }} />
 
-        <div className="max-w-[360px] relative z-10">
-          {/* Badge */}
-          <motion.div initial={{ opacity: 0, y: 14, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-primary text-[10px] font-bold mb-7 shadow-lg shadow-primary/5 tracking-wide">
-            <Crown className="h-3 w-3" />Plataforma #1 de Infoprodutos
-          </motion.div>
+        <div className="flex-1 flex items-center justify-center p-10 xl:p-12 py-16 min-h-full">
+          <div className="max-w-[360px] relative z-10">
+            {/* Badge */}
+            <motion.div initial={{ opacity: 0, y: 14, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-primary text-[10px] font-bold mb-7 shadow-lg shadow-primary/5 tracking-wide">
+              <Crown className="h-3 w-3" />Plataforma #1 de Infoprodutos
+            </motion.div>
 
-          {/* Headline */}
-          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-            className="text-3xl xl:text-4xl font-display font-black mb-4 text-foreground leading-[1.08] tracking-[-0.045em]">
-            Tudo que você precisa para{" "}
-            <span className="text-gradient relative inline-block">
-              vender online
-              <motion.div className="absolute -bottom-0.5 left-0 right-0 h-[2px] rounded-full bg-gradient-to-r from-primary via-primary/50 to-transparent"
-                initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.9 }} />
-            </span>
-          </motion.h2>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}
-            className="text-[13px] text-muted-foreground/50 mb-8 leading-[1.7] max-w-[320px]">
-            Checkout otimizado, área de membros, processamento de pagamentos e ferramentas avançadas.
-          </motion.p>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
+              className="text-3xl xl:text-4xl font-display font-black mb-4 text-foreground leading-[1.08] tracking-[-0.045em]">
+              Tudo que você precisa para{" "}
+              <span className="text-gradient relative inline-block">
+                vender online
+                <motion.div className="absolute -bottom-0.5 left-0 right-0 h-[2px] rounded-full bg-gradient-to-r from-primary via-primary/50 to-transparent"
+                  initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.9 }} />
+              </span>
+            </motion.h2>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}
+              className="text-[13px] text-muted-foreground/50 mb-8 leading-[1.7] max-w-[320px]">
+              Checkout otimizado, área de membros, processamento de pagamentos e ferramentas avançadas.
+            </motion.p>
 
-          {/* Feature cards */}
-          <div className="space-y-2">
-            <FeatureCard icon={CreditCard} title="Checkout de Alta Conversão" desc="PIX, Cartão e Boleto com 1-click" tone="primary" delay={0} />
-            <FeatureCard icon={GraduationCap} title="Área de Membros Netflix" desc="Entregue cursos e conteúdos premium" tone="info" delay={1} />
-            <FeatureCard icon={BarChart2} title="Analytics em Tempo Real" desc="Métricas completas das suas vendas" tone="warning" delay={2} />
-            <FeatureCard icon={Shield} title="Anti-fraude Integrado" desc="Blacklist, velocity check e proteção" tone="success" delay={3} />
-          </div>
-
-          {/* Stats */}
-          <div className="mt-7 grid grid-cols-3 gap-2.5">
-            {[{ target: "10", suffix: "K+", label: "Produtores", icon: Users },
-              { target: "50", suffix: "M+", label: "Processados", icon: TrendingUp, prefix: "R$" },
-              { target: "99.9", suffix: "%", label: "Uptime", icon: Activity }].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.1 + i * 0.1 }}
-                className="text-center p-3.5 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/10 hover:border-border/25 transition-all duration-300">
-                <s.icon className="h-3.5 w-3.5 mx-auto mb-1.5 text-primary/45" />
-                <p className="text-[16px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">
-                  <AnimatedCounter target={s.target} suffix={s.suffix} prefix={s.prefix || ""} />
-                </p>
-                <p className="text-[7px] text-muted-foreground/35 font-bold uppercase tracking-[0.15em] mt-0.5">{s.label}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Testimonial */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }}
-            className="mt-5 p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/10 hover:border-border/20 transition-all duration-300">
-            <div className="flex items-center gap-1 mb-2">
-              {[...Array(5)].map((_, i) => <Star key={i} className="h-2.5 w-2.5 fill-warning text-warning" />)}
-              <span className="text-[8px] text-muted-foreground/25 ml-1 font-bold">5.0</span>
+            <div className="space-y-2">
+              <FeatureCard icon={CreditCard} title="Checkout de Alta Conversão" desc="PIX, Cartão e Boleto com 1-click" tone="primary" delay={0} />
+              <FeatureCard icon={GraduationCap} title="Área de Membros Netflix" desc="Entregue cursos e conteúdos premium" tone="info" delay={1} />
+              <FeatureCard icon={BarChart2} title="Analytics em Tempo Real" desc="Métricas completas das suas vendas" tone="warning" delay={2} />
+              <FeatureCard icon={Shield} title="Anti-fraude Integrado" desc="Blacklist, velocity check e proteção" tone="success" delay={3} />
             </div>
-            <p className="text-[11px] text-muted-foreground/55 leading-[1.7] italic">
-              "Migrei de outra plataforma e minhas vendas triplicaram no primeiro mês. A melhor decisão que tomei!"
-            </p>
-            <div className="flex items-center gap-2.5 mt-3 pt-2.5 border-t border-border/8">
-              <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/10">
-                <span className="text-[9px] font-bold text-primary">RS</span>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-foreground">Rafael S.</p>
-                <p className="text-[8px] text-muted-foreground/30">Infoprodutor · R$120K/mês</p>
-              </div>
-              <CheckCircle2 className="h-3.5 w-3.5 text-success/40 ml-auto" />
+
+            <div className="mt-7 grid grid-cols-3 gap-2.5">
+              {[{ target: "10", suffix: "K+", label: "Produtores", icon: Users },
+                { target: "50", suffix: "M+", label: "Processados", icon: TrendingUp, prefix: "R$" },
+                { target: "99.9", suffix: "%", label: "Uptime", icon: Activity }].map((s, i) => (
+                <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.1 + i * 0.1 }}
+                  className="text-center p-3.5 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/10 hover:border-border/25 transition-all duration-300">
+                  <s.icon className="h-3.5 w-3.5 mx-auto mb-1.5 text-primary/45" />
+                  <p className="text-[16px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">
+                    <AnimatedCounter target={s.target} suffix={s.suffix} prefix={s.prefix || ""} />
+                  </p>
+                  <p className="text-[7px] text-muted-foreground/35 font-bold uppercase tracking-[0.15em] mt-0.5">{s.label}</p>
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }}
+              className="mt-5 p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/10 hover:border-border/20 transition-all duration-300">
+              <div className="flex items-center gap-1 mb-2">
+                {[...Array(5)].map((_, i) => <Star key={i} className="h-2.5 w-2.5 fill-warning text-warning" />)}
+                <span className="text-[8px] text-muted-foreground/25 ml-1 font-bold">5.0</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground/55 leading-[1.7] italic">
+                "Migrei de outra plataforma e minhas vendas triplicaram no primeiro mês. A melhor decisão que tomei!"
+              </p>
+              <div className="flex items-center gap-2.5 mt-3 pt-2.5 border-t border-border/8">
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/10">
+                  <span className="text-[9px] font-bold text-primary">RS</span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-foreground">Rafael S.</p>
+                  <p className="text-[8px] text-muted-foreground/30">Infoprodutor · R$120K/mês</p>
+                </div>
+                <CheckCircle2 className="h-3.5 w-3.5 text-success/40 ml-auto" />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </div>
