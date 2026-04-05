@@ -1046,7 +1046,7 @@ export default function Vendas() {
             <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
               <PieChart className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Payment Intelligence</h3>
+            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Meios de Pagamento</h3>
           </div>
           <div className="space-y-5">
             {paymentMix.map((pm, idx) => {
