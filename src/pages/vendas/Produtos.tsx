@@ -236,21 +236,6 @@ export default function Produtos() {
               </motion.div>
             ))}
           </div>
-                    <MiniSparkline color={item.color} />
-                  </div>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-1.5">{item.label}</p>
-                  <div className="flex items-end gap-2">
-                    <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
-                    {item.delta && (
-                      <span className="text-[9px] font-heading text-success/60 flex items-center gap-0.5 mb-0.5">
-                        <TrendingUp className="h-2.5 w-2.5" /> {item.delta}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </motion.section>
 
