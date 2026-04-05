@@ -292,7 +292,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.3), ease: [0.16, 1, 0.3, 1] }}
       onClick={onClick}
-      className="group cursor-pointer border-b border-border/[0.04] hover:bg-primary/[0.03] transition-all duration-200"
+      className="group cursor-pointer border-b border-border/[0.04] row-glow transition-all duration-200"
     >
       <td className="py-4 px-5">
         <div className="flex items-center gap-3">
