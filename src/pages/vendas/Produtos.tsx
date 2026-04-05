@@ -349,8 +349,8 @@ export default function Produtos() {
                   </span>
                 </div>
 
-                {/* Menu */}
-                <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Menu - always visible on mobile, hover-reveal on desktop */}
+                <div className="absolute top-3 left-3 z-10 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="h-8 w-8 rounded-lg bg-card/80 backdrop-blur-sm ring-1 ring-border/15 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-lg active:scale-95 transition-all">
@@ -444,28 +444,25 @@ export default function Produtos() {
                 <div className="flex-1" />
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 pt-3 border-t border-border/8">
+                <div className="flex items-center gap-1.5 sm:gap-2 pt-3 border-t border-border/8">
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="gap-1.5 rounded-xl text-[11px] h-9 font-display font-bold flex-1 flex items-center justify-center bg-primary/8 text-primary hover:bg-primary/12 ring-1 ring-primary/12 hover:ring-primary/20 transition-all"
+                    className="gap-1.5 rounded-xl text-[11px] h-10 sm:h-9 font-display font-bold flex-1 flex items-center justify-center bg-primary/8 text-primary hover:bg-primary/12 ring-1 ring-primary/12 hover:ring-primary/20 transition-all active:scale-[0.97]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
                   >
                     <Settings2 className="h-3.5 w-3.5" /> Editar
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="gap-1.5 rounded-xl text-[11px] h-9 font-display font-bold flex-1 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/40 hover:text-foreground hover:ring-border/20 transition-all"
+                    className="gap-1.5 rounded-xl text-[11px] h-10 sm:h-9 font-display font-bold flex-1 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/40 hover:text-foreground hover:ring-border/20 transition-all active:scale-[0.97]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}
                   >
                     <Palette className="h-3.5 w-3.5" /> Customizar
                   </motion.button>
                   {p.checkout_url && (
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="rounded-xl h-9 w-9 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/25 hover:text-primary hover:ring-primary/15 transition-all"
+                      className="rounded-xl h-10 w-10 sm:h-9 sm:w-9 shrink-0 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/25 hover:text-primary hover:ring-primary/15 transition-all active:scale-[0.95]"
                       onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
@@ -502,72 +499,74 @@ export default function Produtos() {
       ) : (
         /* ═══ LIST VIEW ═══ */
         <div className="rounded-2xl bg-card/95 ring-1 ring-border/15 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border/8">
-                <th className="text-left px-5 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Produto</th>
-                <th className="text-left px-4 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25 hidden sm:table-cell">Preço</th>
-                <th className="text-left px-4 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25 hidden md:table-cell">Tema</th>
-                <th className="text-left px-4 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Status</th>
-                <th className="w-36 px-4 py-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p, i) => (
-                <motion.tr
-                  key={p.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: Math.min(i * 0.02, 0.3), ease }}
-                  className="border-b border-border/5 transition-all duration-200 group cursor-pointer hover:bg-primary/[0.02]"
-                  onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
-                >
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      {p.image_url ? (
-                        <img src={p.image_url} alt="" className="h-11 w-11 rounded-xl object-cover ring-1 ring-border/10 shrink-0" />
-                      ) : (
-                        <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/5 to-transparent ring-1 ring-border/8 flex items-center justify-center shrink-0">
-                          <Package className="h-4 w-4 text-muted-foreground/15" />
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px]">
+              <thead>
+                <tr className="border-b border-border/8">
+                  <th className="text-left px-4 sm:px-5 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Produto</th>
+                  <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Preço</th>
+                  <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25 hidden md:table-cell">Tema</th>
+                  <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Status</th>
+                  <th className="w-28 sm:w-36 px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, i) => (
+                  <motion.tr
+                    key={p.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.3), ease }}
+                    className="border-b border-border/5 transition-all duration-200 group cursor-pointer hover:bg-primary/[0.02] active:bg-primary/[0.04]"
+                    onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
+                  >
+                    <td className="px-4 sm:px-5 py-3 sm:py-4">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        {p.image_url ? (
+                          <img src={p.image_url} alt="" className="h-9 w-9 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl object-cover ring-1 ring-border/10 shrink-0" />
+                        ) : (
+                          <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/5 to-transparent ring-1 ring-border/8 flex items-center justify-center shrink-0">
+                            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/15" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-[12px] sm:text-[13px] font-display font-bold text-foreground truncate max-w-[140px] sm:max-w-none">{p.name}</p>
+                          {p.description && <p className="text-[10px] text-muted-foreground/25 truncate mt-0.5 max-w-[120px] sm:max-w-[250px] font-display hidden sm:block">{p.description}</p>}
                         </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-display font-bold text-foreground truncate">{p.name}</p>
-                        {p.description && <p className="text-[10px] text-muted-foreground/25 truncate mt-0.5 max-w-[250px] font-display">{p.description}</p>}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 hidden sm:table-cell">
-                    <span className="text-[14px] font-display font-black text-foreground tabular-nums">{fmt(Number(p.price))}</span>
-                  </td>
-                  <td className="px-4 py-4 hidden md:table-cell">
-                    <span className="text-[10px] text-muted-foreground/30 font-display font-bold inline-flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/30" />
-                      {checkoutThemeLabel(p.checkout_theme)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-bold ring-1", statusColor(p.status))}>
-                      <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
-                      {statusLabel(p.status)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
-                      <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="h-8 px-3 rounded-lg text-[10px] font-display font-bold gap-1 flex items-center text-primary bg-primary/8 ring-1 ring-primary/12 hover:bg-primary/12 transition-all"
-                        onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}>
-                        <Settings2 className="h-3 w-3" /> Editar
-                      </motion.button>
-                      <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="h-8 px-3 rounded-lg text-[10px] font-display font-bold gap-1 flex items-center text-muted-foreground/30 hover:text-foreground ring-1 ring-border/10 hover:ring-border/20 transition-all"
-                        onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}>
-                        <Palette className="h-3 w-3" /> Builder
-                      </motion.button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4">
+                      <span className="text-[12px] sm:text-[14px] font-display font-black text-foreground tabular-nums">{fmt(Number(p.price))}</span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 hidden md:table-cell">
+                      <span className="text-[10px] text-muted-foreground/30 font-display font-bold inline-flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary/30" />
+                        {checkoutThemeLabel(p.checkout_theme)}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4">
+                      <span className={cn("inline-flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-2.5 py-0.5 sm:py-1 text-[8px] sm:text-[9px] font-display font-bold ring-1", statusColor(p.status))}>
+                        <span className={cn("h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full", statusDot(p.status))} />
+                        {statusLabel(p.status)}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell">
+                      <div className="flex items-center gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
+                        <motion.button whileTap={{ scale: 0.97 }} className="h-8 px-3 rounded-lg text-[10px] font-display font-bold gap-1 flex items-center text-primary bg-primary/8 ring-1 ring-primary/12 hover:bg-primary/12 transition-all"
+                          onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}>
+                          <Settings2 className="h-3 w-3" /> Editar
+                        </motion.button>
+                        <motion.button whileTap={{ scale: 0.97 }} className="h-8 px-3 rounded-lg text-[10px] font-display font-bold gap-1 flex items-center text-muted-foreground/30 hover:text-foreground ring-1 ring-border/10 hover:ring-border/20 transition-all"
+                          onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}>
+                          <Palette className="h-3 w-3" /> Builder
+                        </motion.button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
