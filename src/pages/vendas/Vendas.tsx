@@ -152,19 +152,23 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 }
 
 /* ─── Glow Card ─── */
-function GlowCard({ children, className, glowColor = "primary", delay = 0 }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number }) {
+function GlowCard({ children, className, glowColor = "primary", delay = 0, animated = false }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number; animated?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-2xl border border-border/8 bg-card/40 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-border/15 hover:shadow-lg",
+        "relative group rounded-2xl glass-panel overflow-hidden transition-all duration-500 hover:shadow-xl",
+        animated && "animated-border",
         className
       )}
     >
-      {/* Ambient glow */}
-      <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl pointer-events-none", `bg-${glowColor}/8`)} />
+      {/* Multi-layer ambient glow */}
+      <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[60px] pointer-events-none", `bg-${glowColor}/10`)} />
+      <div className={cn("absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-1000 blur-[40px] pointer-events-none", `bg-${glowColor}/5`)} />
+      {/* Shimmer line on top */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent" />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
@@ -175,16 +179,16 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
   label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
 }) {
   return (
-    <GlowCard glowColor={color} delay={delay} className="p-5">
+    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer">
       <div className="flex items-start justify-between mb-3">
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-colors", `bg-${color}/8 border-${color}/10 text-${color}`)}>
+        <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${color}/10 border-${color}/12 text-${color} group-hover:bg-${color}/15`)}>
           <Icon className="h-5 w-5" />
         </div>
         {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
       </div>
-      <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/30 mb-1">{label}</p>
+      <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
       <div className="flex items-end gap-2">
-        <span className="text-2xl font-display font-black tabular-nums tracking-tight text-foreground leading-none">
+        <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">
           {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
         </span>
         {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
@@ -764,49 +768,66 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-10 overflow-hidden"
+        className="relative mb-12 overflow-hidden mesh-gradient-hero noise-overlay"
       >
-        {/* Ambient background effects */}
+        {/* Animated floating orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-          <div className="absolute -bottom-20 -right-40 w-80 h-80 bg-info/4 rounded-full blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/3 rounded-full blur-[160px]" />
+          <motion.div
+            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-primary/6 rounded-full blur-[150px]"
+          />
+          <motion.div
+            animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-24 -right-32 w-[400px] h-[400px] bg-info/5 rounded-full blur-[130px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/3 rounded-full blur-[180px]"
+          />
+          {/* Decorative grid dots */}
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         </div>
 
         <div className="relative z-10">
           {/* Top controls bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-12">
             <div className="flex items-center gap-3">
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "auto", opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="inline-flex items-center gap-2"
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="inline-flex items-center gap-2.5"
               >
-                <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-primary" />
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                  <Zap className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/40">Revenue Command Center</span>
+                <div>
+                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-muted-foreground/40 block leading-none">Revenue</span>
+                  <span className="text-[10px] font-heading uppercase tracking-[0.25em] text-gradient-premium block leading-tight mt-0.5">Command Center</span>
+                </div>
               </motion.div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/5 px-2.5 py-1 shadow-[0_0_12px_rgba(34,197,94,0.1)]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
                 </span>
-                <span className="text-[8px] font-display font-bold uppercase tracking-[0.2em] text-success">Live</span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-1">
-              {/* Period selector with pill style */}
-              <div className="inline-flex items-center rounded-full bg-card/40 backdrop-blur-sm border border-border/8 p-0.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {/* Period selector with premium pill style */}
+              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
                 {PERIODS.map((opt) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-[10px] font-display font-bold transition-all duration-300 active:scale-[0.97]",
+                      "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-primary text-primary-foreground shadow-[0_2px_12px_rgba(16,185,129,0.25)]"
+                        ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)] glow-primary"
                         : "text-muted-foreground/35 hover:text-foreground/70"
                     )}
                   >
@@ -817,10 +838,10 @@ export default function Vendas() {
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button className={cn(
-                    "h-7 rounded-full border px-3 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
-                    isCustom ? "border-primary/20 bg-primary/8 text-primary shadow-[0_0_8px_rgba(16,185,129,0.15)]" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                    "h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
+                    isCustom ? "border-primary/20 bg-primary/8 text-primary shadow-[0_0_10px_rgba(16,185,129,0.15)]" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
                   )}>
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
                       {isCustom && customRange?.from
                         ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
@@ -833,10 +854,10 @@ export default function Vendas() {
                 </PopoverContent>
               </Popover>
               <span className="w-px h-5 bg-border/8 mx-1 hidden sm:block" />
-              <button onClick={toggleHidden} className={cn("h-7 w-7 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
                 {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="h-7 rounded-full px-3 text-[10px] font-display font-bold text-muted-foreground/25 transition-all hover:text-foreground border border-transparent hover:border-border/10 active:scale-[0.97] inline-flex items-center gap-1.5">
+              <button onClick={() => setShowExportDialog(true)} className="h-8 rounded-full px-3.5 text-[10px] font-heading text-muted-foreground/25 transition-all hover:text-foreground border border-transparent hover:border-border/10 active:scale-[0.97] inline-flex items-center gap-1.5">
                 <Download className="h-3 w-3" /> Exportar
               </button>
             </div>
@@ -844,38 +865,58 @@ export default function Vendas() {
 
           {/* MAIN FOCAL POINT — Net Revenue with dramatic presentation */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-8"
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-10"
           >
-            <p className="text-[10px] font-display font-bold uppercase tracking-[0.25em] text-muted-foreground/25 mb-3">Receita Líquida do Período</p>
-            <div className="flex items-end gap-4 mb-2">
-              <span className="text-5xl sm:text-6xl lg:text-8xl font-display font-black tracking-[-0.04em] text-foreground tabular-nums leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.15)]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-primary/30 to-transparent" />
+              <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
+              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-primary/30 to-transparent" />
+            </div>
+            <div className="flex items-end gap-5 mb-3">
+              <motion.span
+                className="text-5xl sm:text-7xl lg:text-[96px] font-heading tabular-nums text-foreground leading-[0.82] [text-shadow:0_0_100px_hsl(var(--primary)/0.2),0_4px_24px_hsl(var(--background)/0.5)]"
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
                 {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
-              </span>
+              </motion.span>
               {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
             </div>
-            <div className="flex flex-wrap items-center gap-3 mt-4">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                <CalendarDays className="h-3 w-3" /> {periodLabel}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                <Check className="h-3 w-3 text-success" /> {m.approved.length} aprovadas
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                <DollarSign className="h-3 w-3" /> bruto {hidden ? HIDE : fmtCompact(m.totalGross)}
-              </span>
+            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+              {[
+                { icon: CalendarDays, text: periodLabel },
+                { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
+                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}` },
+              ].map((chip, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.08 }}
+                  className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                >
+                  <chip.icon className={cn("h-3 w-3", chip.iconColor)} /> {chip.text}
+                </motion.span>
+              ))}
               {lastSaleText && (
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/30 font-display bg-card/30 backdrop-blur-sm rounded-full px-3 py-1 border border-border/6">
-                  <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_4px_hsl(var(--primary))]" /></span>
+                <motion.span
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className="inline-flex items-center gap-2 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                >
+                  <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" /></span>
                   última {lastSaleText}
-                </span>
+                </motion.span>
               )}
             </div>
           </motion.div>
 
-          {/* Executive Strip — Glassmorphism cards */}
+          {/* Executive Strip — Premium glassmorphism cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
@@ -910,26 +951,26 @@ export default function Vendas() {
             ].map((item, idx) => (
               <motion.div
                 key={item.label}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 + idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl border border-border/8 bg-card/30 backdrop-blur-xl p-5 overflow-hidden hover:border-border/15 transition-all duration-300 hover:shadow-lg"
+                transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden hover:shadow-xl transition-all duration-500"
               >
-                <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl pointer-events-none", `bg-${item.color}/8`)} />
+                <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div>
-                    <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/25 mb-2">{item.label}</p>
-                    <p className={cn("text-2xl font-display font-black tabular-nums tracking-tight leading-none", `text-${item.color === "primary" ? "foreground" : item.color}`)}>{item.value}</p>
-                    <div className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.sub}</div>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
+                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", `text-${item.color === "primary" ? "foreground" : item.color}`)}>{item.value}</p>
+                    <div className="mt-2 text-[10px] text-muted-foreground/25 font-mono">{item.sub}</div>
                   </div>
                   {item.ring ? (
-                    <div className="relative">
-                      <ProgressRing value={item.ring.value} max={item.ring.max} size={48} strokeWidth={3} color={item.color} />
+                    <div className="relative floating">
+                      <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.color} />
                       <item.icon className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4", `text-${item.color}/50`)} />
                     </div>
                   ) : (
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${item.color}/6 border-${item.color}/10 text-${item.color}/50`)}>
-                      <item.icon className="h-4.5 w-4.5" />
+                    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
+                      <item.icon className="h-5 w-5" />
                     </div>
                   )}
                 </div>
@@ -960,19 +1001,23 @@ export default function Vendas() {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-primary" />
+            <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/12 flex items-center justify-center">
+              <Activity className="h-4.5 w-4.5 text-primary" />
             </div>
-            <h2 className="text-sm font-display font-bold text-foreground/70 uppercase tracking-[0.1em]">Revenue Timeline</h2>
+            <div>
+              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Revenue Timeline</h2>
+              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Evolução da receita ao longo do tempo</p>
+            </div>
           </div>
-          <div className="flex gap-4 text-[11px] font-display tabular-nums">
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span></span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-muted-foreground/20 border border-dashed border-muted-foreground/30" /> Anterior</span>
-            <span className="text-destructive/60">Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
+          <div className="flex gap-5 text-[11px] font-display tabular-nums">
+            <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" /> Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span></span>
+            <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/15 border border-dashed border-muted-foreground/25" /> Anterior</span>
+            <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/6 bg-card/30 backdrop-blur-xl p-6 relative overflow-hidden">
-          <div className="absolute -top-32 right-0 w-64 h-64 bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
+        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden">
+          <div className="absolute -top-40 right-0 w-72 h-72 bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-32 left-10 w-48 h-48 bg-info/3 rounded-full blur-[80px] pointer-events-none" />
           <div className="relative z-10">
             <RevenueChart data={metrics.chartData} hidden={hidden} />
           </div>
@@ -984,12 +1029,12 @@ export default function Vendas() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="mb-10 grid grid-cols-1 gap-4 xl:grid-cols-12">
         {/* Payment Intelligence */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="primary" delay={0.1}>
+        <GlowCard className="xl:col-span-4 p-6" glowColor="primary" delay={0.1} animated>
           <div className="flex items-center gap-2.5 mb-6">
             <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
               <PieChart className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-xs font-display font-bold text-foreground/70 uppercase tracking-[0.12em]">Payment Intelligence</h3>
+            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Payment Intelligence</h3>
           </div>
           <div className="space-y-5">
             {paymentMix.map((pm, idx) => {
@@ -1035,7 +1080,7 @@ export default function Vendas() {
           <div className="mt-7 pt-6 border-t border-border/6">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="h-3.5 w-3.5 text-muted-foreground/30" />
-              <h4 className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Saúde Operacional</h4>
+              <h4 className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/30">Saúde Operacional</h4>
             </div>
             <div className="space-y-3">
               {healthItems.map(h => {
@@ -1065,12 +1110,12 @@ export default function Vendas() {
         </GlowCard>
 
         {/* Top Products */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="warning" delay={0.15}>
+        <GlowCard className="xl:col-span-4 p-6" glowColor="warning" delay={0.15} animated>
           <div className="flex items-center gap-2.5 mb-6">
             <div className="h-8 w-8 rounded-xl bg-warning/8 border border-warning/10 flex items-center justify-center">
               <Award className="h-4 w-4 text-warning" />
             </div>
-            <h3 className="text-xs font-display font-bold text-foreground/70 uppercase tracking-[0.12em]">Top Produtos</h3>
+            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Top Produtos</h3>
           </div>
           {metrics.topProducts.length === 0 ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center text-center">
@@ -1120,13 +1165,13 @@ export default function Vendas() {
         </GlowCard>
 
         {/* Peak Hours Heatmap + Quick Stats */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="info" delay={0.2}>
+        <GlowCard className="xl:col-span-4 p-6" glowColor="info" delay={0.2} animated>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
                 <Clock className="h-4 w-4 text-info" />
               </div>
-              <h3 className="text-xs font-display font-bold text-foreground/70 uppercase tracking-[0.12em]">Atividade Intraday</h3>
+              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Atividade Intraday</h3>
             </div>
             <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
           </div>
@@ -1191,7 +1236,7 @@ export default function Vendas() {
             <div className="h-8 w-8 rounded-xl bg-card/50 border border-border/10 flex items-center justify-center">
               <Layers className="h-4 w-4 text-muted-foreground/40" />
             </div>
-            <h2 className="text-sm font-display font-bold text-foreground/70 uppercase tracking-[0.1em]">Transações</h2>
+            <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.1em]">Transações</h2>
           </div>
           <div className="relative w-full xl:w-80">
             <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/15" />

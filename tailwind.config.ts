@@ -12,10 +12,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
-        display: ["Space Grotesk", "Outfit", "system-ui", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "Manrope", "Inter", "system-ui", "sans-serif"],
+        display: ["Sora", "Space Grotesk", "Outfit", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
         numbers: ["Space Grotesk", "JetBrains Mono", "monospace"],
+        heading: ["Sora", "Space Grotesk", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
