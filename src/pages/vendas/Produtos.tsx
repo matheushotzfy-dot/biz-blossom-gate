@@ -288,7 +288,7 @@ export default function Produtos() {
 
       {/* ═══════════════════ PRODUCTS ═══════════════════ */}
       {filtered.length === 0 ? (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-card/95 ring-1 ring-border/15 p-16 flex flex-col items-center gap-4">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-card/95 ring-1 ring-border/15 p-8 sm:p-16 flex flex-col items-center gap-4">
           <div className="h-20 w-20 rounded-2xl bg-primary/5 ring-1 ring-primary/10 flex items-center justify-center relative">
             <Package className="h-8 w-8 text-primary/20" />
             <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl pointer-events-none" />
