@@ -657,529 +657,427 @@ export default function Vendas() {
     <div className="mx-auto w-full max-w-[1400px] pb-16 px-1">
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* 1. HERO — REVENUE COMMAND CENTER                          */}
+      {/* HERO — REVENUE COMMAND CENTER (DOMINANT)                   */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="mb-6 rounded-2xl border border-border/10 bg-card/60 overflow-hidden relative">
-        {/* Subtle top glow */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-        
-        <div className="p-6 lg:p-8">
-          {/* Top bar */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-primary/60">Revenue Command Center</span>
-                <div className="inline-flex items-center gap-1.5 rounded-md border border-success/15 bg-success/6 px-2 py-0.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                    <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-                  </span>
-                  <span className="text-[8px] font-display font-bold uppercase tracking-widest text-success">Live</span>
-                </div>
-              </div>
-              <h1 className="text-2xl lg:text-3xl font-display font-black tracking-[-0.04em] text-foreground">Minhas Vendas</h1>
-              <p className="text-[12px] text-muted-foreground/40 font-display mt-1 max-w-md">
-                Visão operacional avançada da sua receita, conversão e qualidade de pagamentos.
-              </p>
-            </div>
-
-            {/* Controls */}
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex flex-wrap items-center gap-1">
-                {PERIODS.map((opt) => (
-                  <button
-                    key={opt.label}
-                    onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn(
-                      "rounded-lg px-3 py-1.5 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                        : "text-muted-foreground/35 hover:text-foreground hover:bg-muted/8"
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                  <PopoverTrigger asChild>
-                    <button className={cn(
-                      "h-7 rounded-lg border px-2.5 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
-                      isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/35 hover:text-foreground"
-                    )}>
-                      <span className="inline-flex items-center gap-1">
-                        <CalendarDays className="h-3 w-3" />
-                        {isCustom && customRange?.from
-                          ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                          : "Período"}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/15 bg-card p-0 shadow-xl">
-                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button onClick={toggleHidden} className={cn("h-7 w-7 rounded-lg border transition-all active:scale-[0.97]", hidden ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
-                  {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
-                </button>
-                <button onClick={() => setShowExportDialog(true)} className="h-7 rounded-lg border border-border/10 px-3 text-[10px] font-display font-bold text-muted-foreground/35 transition-all hover:text-foreground active:scale-[0.97] inline-flex items-center gap-1.5 hover:bg-muted/8">
-                  <Download className="h-3 w-3" /> Exportar
-                </button>
-              </div>
+      <section className="mb-8 relative">
+        {/* Top controls bar — minimal, floating */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <span className="text-[9px] font-display font-bold uppercase tracking-[0.25em] text-muted-foreground/30">Revenue Command Center</span>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-success/12 bg-success/5 px-2 py-0.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+              </span>
+              <span className="text-[7px] font-display font-bold uppercase tracking-[0.15em] text-success">Live</span>
             </div>
           </div>
-
-          {/* Hero Grid: Main metric + Executive panel */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Main Revenue */}
-            <div className="lg:col-span-7 rounded-2xl border border-border/8 bg-background/40 p-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent pointer-events-none" />
-              <div className="relative">
-                <p className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/30 mb-1">Receita Líquida</p>
-                <div className="flex items-end gap-3 mb-2">
-                  <span className="text-4xl lg:text-5xl font-display font-black tracking-[-0.04em] text-foreground tabular-nums leading-none">
-                    {hidden ? "R$ •••••••" : fmt(m.totalNet)}
-                  </span>
-                  {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
-                </div>
-                <p className="text-[11px] text-muted-foreground/25 font-display">
-                  {periodLabel} · {m.approved.length} vendas aprovadas
-                </p>
-                {lastSaleText && (
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border/8 bg-muted/5 px-3 py-1.5">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
-                      <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
-                    </span>
-                    <span className="text-[10px] text-muted-foreground/40 font-display">Última venda <span className="font-bold text-foreground/60">{lastSaleText}</span></span>
-                  </div>
+          <div className="flex flex-wrap items-center gap-1">
+            {PERIODS.map((opt) => (
+              <button
+                key={opt.label}
+                onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                className={cn(
+                  "rounded-full px-3 py-1 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
+                  !isCustom && selectedPeriod.label === opt.label
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground/30 hover:text-foreground"
                 )}
-              </div>
-            </div>
+              >
+                {opt.label}
+              </button>
+            ))}
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className={cn(
+                  "h-6 rounded-full border px-2.5 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
+                  isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-transparent text-muted-foreground/30 hover:text-foreground"
+                )}>
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarDays className="h-3 w-3" />
+                    {isCustom && customRange?.from
+                      ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                      : "Custom"}
+                  </span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/15 bg-card p-0 shadow-xl">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+              </PopoverContent>
+            </Popover>
+            <span className="w-px h-4 bg-border/8 mx-1 hidden sm:block" />
+            <button onClick={toggleHidden} className={cn("h-6 w-6 rounded-full transition-all active:scale-[0.97]", hidden ? "text-primary" : "text-muted-foreground/20 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+              {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
+            </button>
+            <button onClick={() => setShowExportDialog(true)} className="h-6 rounded-full px-2.5 text-[10px] font-display font-bold text-muted-foreground/20 transition-all hover:text-foreground active:scale-[0.97] inline-flex items-center gap-1">
+              <Download className="h-3 w-3" /> CSV
+            </button>
+          </div>
+        </div>
 
-            {/* Executive Panel */}
-            <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
-              {[
-                {
-                  label: "Taxa de Aprovação",
-                  value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
-                  sub: `${m.approved.length} de ${dateFiltered.length} transações`,
-                  icon: <Target className="h-4 w-4" />,
-                  color: m.conversion >= 80 ? "success" : m.conversion >= 50 ? "warning" : "destructive",
-                },
-                {
-                  label: "Método Líder",
-                  value: dominantMethod.label,
-                  sub: hidden ? HIDE : `${fmtCompact(dominantMethod.value)} · ${dominantMethod.count}x`,
-                  icon: dominantMethod.icon,
-                  color: dominantMethod.color,
-                },
-                {
-                  label: "Horário de Pico",
-                  value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
-                  sub: peakHour !== null ? `${rawPeakSales} vendas neste horário` : "Sem dados",
-                  icon: <Clock className="h-4 w-4" />,
-                  color: "info",
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-3 rounded-xl border border-border/8 bg-background/30 p-4 hover:border-primary/10 transition-all">
-                  <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", `bg-${item.color}/8 text-${item.color} border-${item.color}/10`)}>
-                    {item.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">{item.label}</p>
-                    <p className="text-lg font-display font-black text-foreground leading-tight tabular-nums tracking-tight">{item.value}</p>
-                    <p className="text-[10px] text-muted-foreground/25 font-display truncate">{item.sub}</p>
-                  </div>
-                </div>
-              ))}
+        {/* MAIN FOCAL POINT — Net Revenue */}
+        <div className="mb-6">
+          <p className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/25 mb-2">Receita Líquida do Período</p>
+          <div className="flex items-end gap-4 mb-1">
+            <span className="text-5xl sm:text-6xl lg:text-7xl font-display font-black tracking-[-0.05em] text-foreground tabular-nums leading-[0.85]">
+              {hidden ? "R$ •••••••" : fmt(m.totalNet)}
+            </span>
+            {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
+          </div>
+          <div className="flex items-center gap-3 mt-3">
+            <span className="text-[11px] text-muted-foreground/25 font-display">{periodLabel}</span>
+            <span className="w-px h-3 bg-border/10" />
+            <span className="text-[11px] text-muted-foreground/25 font-display">{m.approved.length} aprovadas</span>
+            <span className="w-px h-3 bg-border/10" />
+            <span className="text-[11px] text-muted-foreground/25 font-display">bruto {hidden ? HIDE : fmtCompact(m.totalGross)}</span>
+            {lastSaleText && (
+              <>
+                <span className="w-px h-3 bg-border/10" />
+                <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/30 font-display">
+                  <span className="relative flex h-1 w-1"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1 w-1 rounded-full bg-primary" /></span>
+                  última {lastSaleText}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Executive Strip — integrated, not boxed */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-4 py-5 border-t border-border/6">
+          <div>
+            <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-1">Aprovação</p>
+            <div className="flex items-baseline gap-2">
+              <span className={cn("text-2xl font-display font-black tabular-nums tracking-tight", m.conversion >= 80 ? "text-success" : m.conversion >= 50 ? "text-warning" : "text-destructive")}>
+                {hidden ? HIDE : `${m.conversion.toFixed(1)}%`}
+              </span>
+              <span className="text-[10px] text-muted-foreground/20 font-mono">{m.approved.length}/{dateFiltered.length}</span>
+            </div>
+          </div>
+          <div>
+            <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-1">Ticket Médio</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-display font-black tabular-nums tracking-tight text-foreground">{hidden ? HIDE : fmt(m.avgTicket)}</span>
+              {!hidden && <DeltaBadge cur={m.avgTicket} prev={p.avgTicket} />}
+            </div>
+          </div>
+          <div>
+            <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-1">Método Líder</p>
+            <div className="flex items-center gap-2">
+              <span className={cn("text-2xl font-display font-black tracking-tight text-foreground")}>{dominantMethod.label}</span>
+              <span className="text-[10px] text-muted-foreground/20 font-mono">{hidden ? HIDE : fmtCompact(dominantMethod.value)}</span>
+            </div>
+          </div>
+          <div>
+            <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-1">Pico de Vendas</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-display font-black tabular-nums tracking-tight text-foreground">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
+              {peakHour !== null && <span className="text-[10px] text-muted-foreground/20 font-mono">{rawPeakSales} vendas</span>}
             </div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* 2. KPI GRID                                                */}
+      {/* REVENUE TIMELINE — Large, prominent                        */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="mb-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: "Faturamento Bruto", value: hidden ? HIDE : fmtCompact(m.totalGross), cur: m.totalGross, prev: p.totalGross, spark: metrics.dailyGrossArr, color: "primary", icon: <Wallet className="h-4 w-4" /> },
-          { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgTicket), cur: m.avgTicket, prev: p.avgTicket, spark: metrics.dailyAvgTicketArr, color: "info", icon: <Receipt className="h-4 w-4" /> },
-          { label: "Clientes Únicos", value: hidden ? HIDE : String(m.uniqueCustomers), cur: m.uniqueCustomers, prev: p.uniqueCustomers, spark: metrics.dailyCountArr, color: "warning", icon: <Users className="h-4 w-4" /> },
-          { label: "Pendências", value: String(m.pending.length), cur: m.pending.length, prev: p.pending.length, spark: [], color: m.pending.length > 0 ? "warning" : "success", icon: <Clock className="h-4 w-4" /> },
-        ].map((kpi) => (
-          <div key={kpi.label} className="group rounded-2xl border border-border/8 bg-card/40 p-5 hover:border-primary/10 transition-all duration-300 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            <div className="relative">
-              <div className="flex items-start justify-between mb-3">
-                <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border", `bg-${kpi.color}/8 text-${kpi.color} border-${kpi.color}/10`)}>
-                  {kpi.icon}
-                </div>
-                {kpi.spark.length > 1 && <Sparkline data={kpi.spark} color={kpi.color} />}
-              </div>
-              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/30 mb-1">{kpi.label}</p>
-              <div className="flex items-end gap-2">
-                <span className="text-[22px] font-display font-black leading-none tracking-tight text-foreground tabular-nums">{kpi.value}</span>
-                {!hidden && <DeltaBadge cur={kpi.cur} prev={kpi.prev} />}
-              </div>
-            </div>
+      <section className="mb-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
+          <h2 className="text-sm font-display font-bold text-foreground/60 uppercase tracking-[0.1em]">Revenue Timeline</h2>
+          <div className="flex gap-4 text-[11px] font-display tabular-nums">
+            <span className="text-primary font-bold">Líquido {hidden ? HIDE : fmtCompact(m.totalNet)}</span>
+            <span className="text-muted-foreground/30">Bruto {hidden ? HIDE : fmtCompact(m.totalGross)}</span>
+            <span className="text-destructive/60">Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
-        ))}
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════ */}
-      {/* 3. REVENUE TIMELINE + 4. PAYMENT INTELLIGENCE              */}
-      {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        {/* Chart */}
-        <article className="rounded-2xl border border-border/8 bg-card/40 p-5 xl:col-span-8">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-0.5">Core Analytics</p>
-              <h2 className="text-lg font-display font-black tracking-tight text-foreground">Revenue Timeline</h2>
-            </div>
-            <div className="flex gap-2">
-              {[
-                { label: "Líquido", value: hidden ? HIDE : fmtCompact(m.totalNet), color: "text-primary" },
-                { label: "Bruto", value: hidden ? HIDE : fmtCompact(m.totalGross), color: "text-foreground" },
-                { label: "Taxas", value: hidden ? HIDE : `-${fmtCompact(m.totalFees)}`, color: "text-destructive" },
-              ].map(s => (
-                <div key={s.label} className="rounded-xl bg-background/30 border border-border/6 px-3 py-2 text-center min-w-[72px]">
-                  <p className="text-[8px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">{s.label}</p>
-                  <p className={cn("text-[12px] font-display font-bold mt-0.5 tabular-nums", s.color)}>{s.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        </div>
+        <div className="rounded-2xl border border-border/6 bg-card/30 p-5">
           <RevenueChart data={metrics.chartData} hidden={hidden} />
-        </article>
-
-        {/* Payment Intelligence */}
-        <div className="xl:col-span-4 space-y-4">
-          <article className="rounded-2xl border border-border/8 bg-card/40 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20">Intelligence</p>
-                <p className="text-base font-display font-bold text-foreground mt-0.5">Payment Mix</p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-primary/6 text-primary flex items-center justify-center border border-primary/10">
-                <PieChart className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="space-y-3">
-              {paymentMix.map((pm) => {
-                const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                const isDominant = pm.label === dominantMethod.label && pm.value > 0;
-                return (
-                  <div key={pm.label} className={cn("rounded-xl border p-3.5 transition-all", isDominant ? `border-${pm.color}/15 bg-${pm.color}/[0.03]` : "border-border/6 bg-background/20")}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className={cn(`text-${pm.color}`)}>{pm.icon}</span>
-                        <span className="text-[12px] font-display font-bold text-foreground">{pm.label}</span>
-                        {isDominant && <Crown className="h-3 w-3 text-warning" />}
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[13px] font-display font-bold tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(pm.value)}</span>
-                        <span className="text-[10px] text-muted-foreground/25 ml-1.5 font-mono">{pm.count}x</span>
-                      </div>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted/8">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                        className={cn("h-full rounded-full", `bg-${pm.color}`)}
-                      />
-                    </div>
-                    <div className="flex justify-between mt-1.5">
-                      <span className="text-[9px] text-muted-foreground/20 font-mono tabular-nums">{pct.toFixed(1)}% do total</span>
-                      {!hidden && pm.value > 0 && (
-                        <span className="text-[9px] font-display font-semibold text-muted-foreground/30">
-                          ticket {fmt(pm.count > 0 ? pm.value / pm.count : 0)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </article>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* 5. OPERATIONAL HEALTH + 6. TOP PRODUCTS + 7. PEAK HOURS   */}
+      {/* SECONDARY ROW — Payment Mix + Health + Heatmap (merged)    */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        {/* Operational Health */}
-        <article className="rounded-2xl border border-border/8 bg-card/40 p-5 xl:col-span-3">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20">Risk Control</p>
-              <p className="text-base font-display font-bold text-foreground mt-0.5">Saúde</p>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-success/6 text-success flex items-center justify-center border border-success/10">
-              <Shield className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="space-y-3">
-            {[
-              { label: "Reembolso", value: m.refundRate, threshold: 5, note: "Limite saudável: 5%" },
-              { label: "Chargeback", value: m.chargebackRate, threshold: 1, note: "Limite saudável: 1%" },
-              { label: "Falhas", value: m.failedRate, threshold: 10, note: "Limite saudável: 10%" },
-            ].map(h => {
-              const bad = h.value > h.threshold;
-              const warn = h.value > h.threshold * 0.7;
-              const statusColor = bad ? "destructive" : warn ? "warning" : "success";
+      <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-12">
+        {/* Payment Intelligence — clean list, no heavy cards */}
+        <div className="xl:col-span-4">
+          <h3 className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-4">Payment Intelligence</h3>
+          <div className="space-y-4">
+            {paymentMix.map((pm) => {
+              const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
+              const isDominant = pm.label === dominantMethod.label && pm.value > 0;
               return (
-                <div key={h.label} className="rounded-xl border border-border/6 bg-background/20 p-3.5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-display font-semibold text-foreground/70">{h.label}</span>
-                    <span className={cn("text-[14px] font-display font-black tabular-nums", `text-${statusColor}`)}>{h.value.toFixed(1)}%</span>
+                <div key={pm.label}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className={cn(`text-${pm.color}`)}>{pm.icon}</span>
+                      <span className="text-[12px] font-display font-bold text-foreground">{pm.label}</span>
+                      {isDominant && <Crown className="h-3 w-3 text-warning/60" />}
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[14px] font-display font-black tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(pm.value)}</span>
+                      <span className="text-[9px] text-muted-foreground/20 font-mono">{pct.toFixed(0)}%</span>
+                    </div>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted/8">
+                  <div className="h-1 overflow-hidden rounded-full bg-muted/6">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(h.value * (100 / h.threshold), 100)}%` }}
-                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                      className={cn("h-full rounded-full", `bg-${statusColor}`)}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                      className={cn("h-full rounded-full", `bg-${pm.color}`)}
                     />
                   </div>
-                  <p className="text-[9px] text-muted-foreground/20 mt-1.5 font-display">{h.note}</p>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[9px] text-muted-foreground/15 font-mono tabular-nums">{pm.count} transações</span>
+                    {!hidden && pm.count > 0 && <span className="text-[9px] text-muted-foreground/15 font-mono">avg {fmt(pm.value / pm.count)}</span>}
+                  </div>
                 </div>
               );
             })}
           </div>
-        </article>
+
+          {/* Health inline — compact, below payment mix */}
+          <div className="mt-6 pt-5 border-t border-border/5">
+            <h3 className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-3">Saúde Operacional</h3>
+            <div className="space-y-2.5">
+              {[
+                { label: "Reembolso", value: m.refundRate, threshold: 5 },
+                { label: "Chargeback", value: m.chargebackRate, threshold: 1 },
+                { label: "Falhas", value: m.failedRate, threshold: 10 },
+              ].map(h => {
+                const bad = h.value > h.threshold;
+                const warn = h.value > h.threshold * 0.7;
+                const statusColor = bad ? "destructive" : warn ? "warning" : "success";
+                return (
+                  <div key={h.label} className="flex items-center gap-3">
+                    <span className="text-[11px] font-display font-semibold text-foreground/50 w-20">{h.label}</span>
+                    <div className="flex-1 h-1 overflow-hidden rounded-full bg-muted/6">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(h.value * (100 / h.threshold), 100)}%` }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn("h-full rounded-full", `bg-${statusColor}`)}
+                      />
+                    </div>
+                    <span className={cn("text-[11px] font-display font-bold tabular-nums w-12 text-right", `text-${statusColor}`)}>{h.value.toFixed(1)}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
         {/* Top Products */}
-        <article className="rounded-2xl border border-border/8 bg-card/40 p-5 xl:col-span-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20">Performance</p>
-              <p className="text-base font-display font-bold text-foreground mt-0.5">Top Produtos</p>
-            </div>
-            <span className="text-[10px] font-display font-bold text-muted-foreground/25 bg-background/30 rounded-lg px-2.5 py-1 tabular-nums border border-border/6">{metrics.topProducts.length}</span>
-          </div>
+        <div className="xl:col-span-4">
+          <h3 className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20 mb-4">Top Produtos</h3>
           {metrics.topProducts.length === 0 ? (
-            <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dashed border-border/8 text-center">
-              <div className="h-12 w-12 rounded-2xl bg-muted/5 flex items-center justify-center mb-3">
-                <Package className="h-5 w-5 text-muted-foreground/10" />
-              </div>
-              <p className="text-[12px] text-muted-foreground/20 font-display font-semibold">Sem produtos neste período</p>
-              <p className="text-[10px] text-muted-foreground/12 font-display mt-1">Suas vendas aparecerão aqui</p>
+            <div className="flex min-h-[200px] flex-col items-center justify-center text-center">
+              <Package className="h-6 w-6 text-muted-foreground/8 mb-2" />
+              <p className="text-[11px] text-muted-foreground/15 font-display">Sem produtos neste período</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {metrics.topProducts.map((prod, index) => {
                 const maxRev = metrics.topProducts[0]?.revenue || 1;
                 const pct = (prod.revenue / maxRev) * 100;
-                const medals = ["🥇", "🥈", "🥉"];
                 return (
-                  <div key={prod.id} className="rounded-xl border border-border/6 bg-background/20 p-3.5 hover:border-primary/10 transition-all">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-sm shrink-0">{medals[index] || `#${index + 1}`}</span>
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-display font-bold text-foreground truncate">{prod.name}</p>
-                          <p className="text-[10px] text-muted-foreground/25 font-mono">{prod.sales} vendas</p>
-                        </div>
+                  <div key={prod.id}>
+                    <div className="flex items-center justify-between gap-3 mb-1">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-[10px] font-display font-bold text-muted-foreground/20 w-4 shrink-0">{index + 1}</span>
+                        <p className="text-[12px] font-display font-semibold text-foreground truncate">{prod.name}</p>
                       </div>
-                      <p className="text-[13px] font-display font-bold text-foreground shrink-0 tabular-nums">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                      <div className="flex items-baseline gap-2 shrink-0">
+                        <span className="text-[13px] font-display font-bold text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(prod.revenue)}</span>
+                        <span className="text-[9px] text-muted-foreground/15 font-mono">{prod.sales}x</span>
+                      </div>
                     </div>
-                    <div className="h-1 overflow-hidden rounded-full bg-muted/6">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary/50" />
+                    <div className="h-0.5 overflow-hidden rounded-full bg-muted/5 ml-6">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-primary/40" />
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </article>
+        </div>
 
-        {/* Peak Hours */}
-        <article className="rounded-2xl border border-border/8 bg-card/40 p-5 xl:col-span-4">
+        {/* Peak Hours — Heatmap */}
+        <div className="xl:col-span-4">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20">Intraday Insight</p>
-              <p className="text-base font-display font-bold text-foreground mt-0.5">Horários de Pico</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[8px] text-muted-foreground/15 font-mono uppercase">Pico</p>
-              <p className="text-lg font-display font-black text-primary tabular-nums">{peakHour === null ? "—" : `${String(peakHour).padStart(2, "0")}h`}</p>
-            </div>
+            <h3 className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20">Atividade Intraday</h3>
+            <span className="text-sm font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
           </div>
-          <div className="rounded-xl border border-border/6 bg-background/20 p-4">
-            <div className="flex h-[160px] items-end gap-[3px]">
-              {metrics.hours.map((count, hour) => {
-                const intensity = count / maxHour;
-                const active = peakHour !== null && hour === peakHour;
-                return (
-                  <div key={hour} className="group relative flex h-full flex-1 flex-col items-center justify-end">
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${Math.max(intensity * 100, 2)}%` }}
-                      transition={{ duration: 0.4, delay: hour * 0.015, ease: [0.16, 1, 0.3, 1] }}
-                      className={cn(
-                        "w-full rounded-t transition-colors",
-                        active ? "bg-primary shadow-sm shadow-primary/25" : intensity > 0.5 ? "bg-primary/35" : intensity > 0 ? "bg-primary/15 group-hover:bg-primary/30" : "bg-muted/5"
-                      )}
-                    />
-                    <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <div className="rounded-lg border border-border/15 bg-popover px-2.5 py-1 text-[9px] font-display font-bold text-foreground shadow-lg whitespace-nowrap">
-                        {String(hour).padStart(2, "0")}h · {count} vendas
-                      </div>
+          <div className="flex h-[180px] items-end gap-[2px]">
+            {metrics.hours.map((count, hour) => {
+              const intensity = count / maxHour;
+              const active = peakHour !== null && hour === peakHour;
+              return (
+                <div key={hour} className="group relative flex h-full flex-1 flex-col items-center justify-end">
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: `${Math.max(intensity * 100, 1.5)}%` }}
+                    transition={{ duration: 0.4, delay: hour * 0.015, ease: [0.16, 1, 0.3, 1] }}
+                    className={cn(
+                      "w-full rounded-t-sm transition-colors",
+                      active ? "bg-primary" : intensity > 0.5 ? "bg-primary/30" : intensity > 0 ? "bg-primary/12 group-hover:bg-primary/25" : "bg-muted/4"
+                    )}
+                  />
+                  <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <div className="rounded-md bg-popover border border-border/10 px-2 py-0.5 text-[9px] font-display font-bold text-foreground shadow-lg whitespace-nowrap">
+                      {String(hour).padStart(2, "0")}h · {count}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-            <div className="mt-2 flex justify-between text-[8px] text-muted-foreground/15 font-mono">
-              <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════ */}
-      {/* 8. TRANSACTIONS TABLE                                      */}
-      {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="overflow-hidden rounded-2xl border border-border/8 bg-card/40">
-        <div className="border-b border-border/6 px-6 pt-5 pb-4">
-          <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/20">Transaction Ledger</p>
-              <h2 className="mt-0.5 text-lg font-display font-black tracking-tight text-foreground">Transações</h2>
-            </div>
-
-            <div className="relative w-full xl:w-80">
-              <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/15" />
-              <input
-                id="vendas-search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar nome, e-mail ou ID…"
-                className="h-10 w-full rounded-xl border border-border/8 bg-background/30 pl-10 pr-10 text-[12px] text-foreground placeholder:text-muted-foreground/15 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/15 transition-all font-display"
-              />
-              {search ? (
-                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
-                  <X className="h-3.5 w-3.5 text-muted-foreground/20 hover:text-foreground transition-colors" />
-                </button>
-              ) : (
-                <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/6 bg-muted/6 px-1.5 py-0.5 text-[8px] text-muted-foreground/12 md:inline font-mono">⌘K</kbd>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-1.5 overflow-x-auto pb-0.5">
-            {statusTabs.map((tab) => {
-              const active = statusFilter === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setStatusFilter(tab.value)}
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
-                    active ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15" : "text-muted-foreground/25 hover:text-foreground hover:bg-muted/6"
-                  )}
-                >
-                  {tab.label}
-                  <span className={cn("rounded-md px-1.5 py-0.5 text-[9px] font-display font-bold tabular-nums", active ? "bg-primary-foreground/12 text-primary-foreground" : "bg-muted/8 text-muted-foreground/20")}>{tab.count}</span>
-                </button>
+                </div>
               );
             })}
           </div>
-        </div>
+          <div className="mt-1.5 flex justify-between text-[8px] text-muted-foreground/12 font-mono">
+            <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
+          </div>
 
-        <div className="flex items-center justify-between bg-background/20 px-6 py-2.5 border-b border-border/[0.04]">
-          <p className="text-[10px] text-muted-foreground/15 font-mono">
-            {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
-          </p>
-          {!hidden && sortedFiltered.length > 0 && (
-            <p className="text-[11px] font-display font-bold text-primary tabular-nums">Líquido: {fmt(filteredNetTotal)}</p>
-          )}
-        </div>
-
-        {/* Desktop Table */}
-        <div className="hidden md:block">
-          {loading ? (
-            <div className="p-20 text-center">
-              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-primary/10 border-t-primary" />
-              <p className="text-[11px] text-muted-foreground/15 font-display">Carregando transações…</p>
+          {/* Quick stats inline */}
+          <div className="mt-5 pt-4 border-t border-border/5 grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/15">Clientes</p>
+              <p className="text-lg font-display font-black text-foreground tabular-nums">{hidden ? HIDE : m.uniqueCustomers}</p>
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border/4">
-                      <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
-                      <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Produto</th>
-                      <SortHead label="Valor" field="amount" sort={sort} onSort={handleSort} />
-                      <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Método</th>
-                      <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/25">Status</th>
-                      <SortHead label="Data" field="date" sort={sort} onSort={handleSort} />
-                      <th className="w-8" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleItems.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="py-20">
-                          <div className="flex flex-col items-center justify-center">
-                            <div className="h-14 w-14 rounded-2xl bg-muted/5 flex items-center justify-center mb-3">
-                              <ShoppingCart className="h-6 w-6 text-muted-foreground/8" />
-                            </div>
-                            <p className="text-[13px] font-display font-bold text-muted-foreground/20">Nenhuma venda encontrada</p>
-                            <p className="text-[11px] text-muted-foreground/12 font-display mt-1">Ajuste os filtros ou período selecionado</p>
-                          </div>
-                        </td>
+            <div>
+              <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/15">Pendentes</p>
+              <p className={cn("text-lg font-display font-black tabular-nums", m.pending.length > 0 ? "text-warning" : "text-foreground")}>{m.pending.length}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* TRANSACTIONS TABLE                                         */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between mb-4">
+          <h2 className="text-sm font-display font-bold text-foreground/60 uppercase tracking-[0.1em]">Transações</h2>
+          <div className="relative w-full xl:w-72">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/12" />
+            <input
+              id="vendas-search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar nome, e-mail ou ID…"
+              className="h-9 w-full rounded-xl border border-border/6 bg-card/30 pl-9 pr-10 text-[12px] text-foreground placeholder:text-muted-foreground/12 focus:outline-none focus:ring-1 focus:ring-primary/15 transition-all font-display"
+            />
+            {search ? (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
+                <X className="h-3.5 w-3.5 text-muted-foreground/20 hover:text-foreground transition-colors" />
+              </button>
+            ) : (
+              <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-border/5 bg-muted/5 px-1 py-0.5 text-[8px] text-muted-foreground/10 md:inline font-mono">⌘K</kbd>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-1 overflow-x-auto mb-3">
+          {statusTabs.map((tab) => {
+            const active = statusFilter === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setStatusFilter(tab.value)}
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-display font-bold transition-all active:scale-[0.97]",
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground/20 hover:text-foreground"
+                )}
+              >
+                {tab.label}
+                <span className={cn("text-[9px] tabular-nums", active ? "text-primary-foreground/60" : "text-muted-foreground/12")}>{tab.count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-border/6 bg-card/30">
+          <div className="flex items-center justify-between px-6 py-2 border-b border-border/4">
+            <p className="text-[10px] text-muted-foreground/12 font-mono">
+              {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
+            </p>
+            {!hidden && sortedFiltered.length > 0 && (
+              <p className="text-[11px] font-display font-bold text-primary tabular-nums">{fmt(filteredNetTotal)}</p>
+            )}
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden md:block">
+            {loading ? (
+              <div className="p-20 text-center">
+                <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-primary/8 border-t-primary" />
+                <p className="text-[11px] text-muted-foreground/12 font-display">Carregando transações…</p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border/4">
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
+                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Produto</th>
+                        <SortHead label="Valor" field="amount" sort={sort} onSort={handleSort} />
+                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Método</th>
+                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Status</th>
+                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} />
+                        <th className="w-8" />
                       </tr>
-                    ) : visibleItems.map((tx, i) => (
-                      <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {visibleCount < sortedFiltered.length && (
-                <div className="border-t border-border/4 p-4 text-center">
-                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-1.5 rounded-xl text-[11px] font-display font-bold text-muted-foreground/25 hover:text-foreground active:scale-[0.97]">
-                    <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount})
-                  </Button>
+                    </thead>
+                    <tbody>
+                      {visibleItems.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-20">
+                            <div className="flex flex-col items-center justify-center">
+                              <ShoppingCart className="h-6 w-6 text-muted-foreground/6 mb-2" />
+                              <p className="text-[12px] font-display font-semibold text-muted-foreground/15">Nenhuma venda encontrada</p>
+                              <p className="text-[10px] text-muted-foreground/10 font-display mt-0.5">Ajuste filtros ou período</p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : visibleItems.map((tx, i) => (
+                        <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
-            </>
-          )}
-        </div>
+                {visibleCount < sortedFiltered.length && (
+                  <div className="border-t border-border/4 p-4 text-center">
+                    <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-1.5 rounded-full text-[11px] font-display font-bold text-muted-foreground/20 hover:text-foreground active:scale-[0.97]">
+                      <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount})
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
 
-        {/* Mobile Cards */}
-        <div className="space-y-2 p-3 md:hidden">
-          {loading ? (
-            <div className="p-14 text-center">
-              <div className="mx-auto mb-2 h-7 w-7 animate-spin rounded-full border-2 border-primary/10 border-t-primary" />
-              <p className="text-[11px] text-muted-foreground/15 font-display">Carregando…</p>
-            </div>
-          ) : visibleItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="h-12 w-12 rounded-2xl bg-muted/5 flex items-center justify-center mb-3">
-                <ShoppingCart className="h-5 w-5 text-muted-foreground/8" />
+          {/* Mobile Cards */}
+          <div className="space-y-2 p-3 md:hidden">
+            {loading ? (
+              <div className="p-14 text-center">
+                <div className="mx-auto mb-2 h-7 w-7 animate-spin rounded-full border-2 border-primary/8 border-t-primary" />
+                <p className="text-[11px] text-muted-foreground/12 font-display">Carregando…</p>
               </div>
-              <p className="text-[12px] font-display font-bold text-muted-foreground/20">Nenhuma venda</p>
-              <p className="text-[10px] text-muted-foreground/12 font-display mt-1">Ajuste filtros ou período</p>
-            </div>
-          ) : (
-            <>
-              {visibleItems.map((tx, i) => (
-                <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
-              ))}
-              {visibleCount < sortedFiltered.length && (
-                <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-1.5 rounded-xl text-[10px] font-display font-bold text-muted-foreground/25 hover:text-foreground active:scale-[0.97]">
-                  <ChevronDown className="h-3 w-3" /> Mais {sortedFiltered.length - visibleCount}
-                </Button>
-              )}
-            </>
-          )}
+            ) : visibleItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <ShoppingCart className="h-5 w-5 text-muted-foreground/6 mb-2" />
+                <p className="text-[11px] font-display font-semibold text-muted-foreground/15">Nenhuma venda</p>
+              </div>
+            ) : (
+              <>
+                {visibleItems.map((tx, i) => (
+                  <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
+                ))}
+                {visibleCount < sortedFiltered.length && (
+                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-1.5 rounded-full text-[10px] font-display font-bold text-muted-foreground/20 hover:text-foreground active:scale-[0.97]">
+                    <ChevronDown className="h-3 w-3" /> Mais {sortedFiltered.length - visibleCount}
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </section>
 
