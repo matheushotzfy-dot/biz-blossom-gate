@@ -698,7 +698,7 @@ export default function Dashboard() {
                 return (
                   <div key={item.id}
                     className={cn("group relative flex items-center gap-3 rounded-xl border-l-[3px] px-3.5 py-3 transition-all duration-300 hover:bg-primary/[0.03]", borderColor[item.status] || "border-l-muted-foreground")}>
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/10 shadow-sm transition-all duration-300 group-hover:scale-105", styles.iconBg, styles.iconText)}>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/10 shadow-sm", styles.iconBg, styles.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
                     </div>
                     <div className="min-w-0 flex-1">
