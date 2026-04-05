@@ -1183,7 +1183,7 @@ export default function Vendas() {
               <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
                 <Clock className="h-4 w-4 text-info" />
               </div>
-              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Atividade Intraday</h3>
+              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Horário de Pico</h3>
             </div>
             <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
           </div>
