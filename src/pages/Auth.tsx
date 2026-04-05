@@ -406,7 +406,7 @@ export default function Auth() {
     } finally { setLoading(false); }
   };
 
-  const inputCls = "h-12 rounded-xl border-border/20 bg-muted/12 backdrop-blur-sm text-foreground placeholder:text-muted-foreground/25 focus:border-primary/50 focus:ring-2 focus:ring-primary/15 focus:bg-muted/20 transition-all duration-300 font-display text-sm";
+  const inputCls = "h-12 rounded-xl border-border/30 bg-muted/40 backdrop-blur-sm text-foreground placeholder:text-muted-foreground/35 focus:border-primary/50 focus:ring-2 focus:ring-primary/15 focus:bg-muted/50 transition-all duration-300 font-display text-sm";
   const labelCls = "text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-1.5 block font-display";
 
   return (
