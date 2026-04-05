@@ -447,7 +447,7 @@ export default function Auth() {
           backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, hsl(var(--foreground)) 2px, hsl(var(--foreground)) 3px)",
         }} />
 
-        <div className="flex-1 flex items-center justify-center p-10 xl:p-12 py-16 min-h-full">
+        <div className="flex-1 flex items-center justify-center p-10 xl:p-12 py-20 min-h-full">
           <div className="max-w-[360px] relative z-10">
             {/* Badge */}
             <motion.div initial={{ opacity: 0, y: 14, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}
