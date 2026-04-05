@@ -3,17 +3,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import {
   Package, Plus, Trash2, Eye, MoreVertical,
-  Copy, CheckCircle2, Zap, Layers,
+  Copy, CheckCircle2, Zap,
   Link2, Settings2, Palette, Star,
   ExternalLink, Search, X, Grid3X3,
   List, Banknote, Target, Crosshair,
-  TrendingUp, ShoppingCart, BarChart3, Sparkles,
-  ArrowRight, Crown, Flame,
+  TrendingUp, Sparkles,
+  ArrowRight, Crown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { EmptyState } from "@/components/PageShell";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
@@ -23,20 +21,25 @@ import { supabase } from "@/integrations/supabase/client";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+const fmtCompact = (v: number) => {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`;
+  if (v >= 10_000) return `R$ ${(v / 1_000).toFixed(1).replace(".", ",")}K`;
+  return fmt(v);
+};
 
 /* ─── Sparkline Mini ─── */
 function MiniSparkline({ color }: { color: string }) {
   const points = Array.from({ length: 12 }, (_, i) => 20 + Math.sin(i * 0.8) * 10 + Math.random() * 8);
   const max = Math.max(...points);
   const min = Math.min(...points);
-  const h = 24; const w = 60;
+  const h = 28; const w = 64;
   const path = points.map((p, i) => {
     const x = (i / (points.length - 1)) * w;
     const y = h - ((p - min) / (max - min)) * h;
     return `${i === 0 ? "M" : "L"}${x},${y}`;
   }).join(" ");
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="opacity-40 group-hover:opacity-80 transition-opacity duration-500">
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="opacity-50 group-hover:opacity-90 transition-opacity duration-500">
       <defs>
         <linearGradient id={`spark-${color}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity="0.5" />
@@ -57,7 +60,7 @@ function LivePulse({ count }: { count: number }) {
         <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
         <span className="relative h-2 w-2 rounded-full bg-success" />
       </span>
-      <span className="text-[8px] font-display font-black uppercase tracking-[0.25em] text-success">{count} Ativo{count !== 1 ? "s" : ""}</span>
+      <span className="text-[8px] sm:text-[9px] font-display font-black uppercase tracking-[0.2em] text-success">{count} Ativo{count !== 1 ? "s" : ""}</span>
     </div>
   );
 }
@@ -123,7 +126,7 @@ export default function Produtos() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-20 px-3 sm:px-4 relative">
+    <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-20 relative">
       {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
@@ -140,16 +143,15 @@ export default function Produtos() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/3 pointer-events-none" />
         <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
-        <div className="relative z-10 p-4 sm:p-6 md:p-8">
+        <div className="relative z-10 p-5 sm:p-6 md:p-8">
           {/* Top bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-8">
+          <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
             <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shrink-0">
-                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shrink-0">
+                <Package className="h-4 w-4 sm:h-[18px] sm:w-[18px] text-primary" />
               </div>
               <div>
-                <span className="text-[9px] sm:text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Meus Produtos</span>
-                <span className="text-[7px] sm:text-[8px] text-muted-foreground/20 font-mono block mt-0.5">catálogo completo</span>
+                <span className="text-[10px] sm:text-[11px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Meus Produtos</span>
               </div>
               <LivePulse count={activeProducts} />
             </div>
@@ -157,66 +159,64 @@ export default function Produtos() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="h-9 sm:h-10 px-4 sm:px-5 rounded-xl text-[11px] font-display font-bold flex items-center justify-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 w-full sm:w-auto"
+              className="h-10 sm:h-11 px-5 sm:px-6 rounded-xl text-[11px] sm:text-[12px] font-display font-bold flex items-center justify-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 shrink-0"
             >
-              <Plus className="h-3.5 w-3.5" /> Novo Produto
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Novo Produto
             </motion.button>
           </div>
 
-          {/* Hero metric */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ease }} className="mb-5 sm:mb-8">
-            <p className="text-[8px] sm:text-[9px] font-display font-bold uppercase tracking-[0.2em] text-muted-foreground/30 mb-1.5 sm:mb-2">Catálogo de Produtos</p>
-            <div className="flex items-end gap-2 sm:gap-3">
-              <span className="text-4xl sm:text-5xl lg:text-7xl font-display font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.04em]" style={{ textShadow: "0 0 60px hsl(var(--primary) / 0.15)" }}>
+          {/* Hero metric – big number like Vendas page */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ease }} className="mb-6 sm:mb-8">
+            <p className="text-[9px] sm:text-[10px] font-display font-bold uppercase tracking-[0.25em] text-primary/60 mb-2 sm:mb-3">Catálogo de Produtos</p>
+            <div className="flex items-end gap-3 sm:gap-4">
+              <span className="text-[56px] sm:text-[72px] lg:text-[96px] font-display font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.04em]" style={{ textShadow: "0 0 80px hsl(var(--primary) / 0.15)" }}>
                 {products.length}
               </span>
-              <span className="text-sm sm:text-lg font-display font-bold text-muted-foreground/20 mb-0.5 sm:mb-1">produto{products.length !== 1 ? "s" : ""}</span>
+              <span className="text-base sm:text-lg font-display font-bold text-muted-foreground/25 mb-1 sm:mb-2">produto{products.length !== 1 ? "s" : ""}</span>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-3 sm:mt-4">
-              {[
-                { icon: Zap, label: `${activeProducts} ativos`, color: "success" },
-                { icon: Banknote, label: `catálogo ${fmt(totalValue)}`, color: "primary" },
-                { icon: Target, label: `ticket médio ${fmt(avgPrice)}`, color: "warning" },
-              ].map((chip) => (
-                <span key={chip.label} className="inline-flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-muted-foreground/35 font-display font-medium rounded-lg bg-muted/5 ring-1 ring-border/10 px-2 sm:px-2.5 py-1 sm:py-1.5">
-                  <chip.icon className={cn("h-2.5 w-2.5 sm:h-3 sm:w-3", `text-${chip.color}`)} /> {chip.label}
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-4">
+              <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground/40 font-display font-medium rounded-lg bg-muted/5 ring-1 ring-border/10 px-2.5 sm:px-3 py-1.5">
+                <Zap className="h-3 w-3 text-success" /> {activeProducts} ativos
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground/40 font-display font-medium rounded-lg bg-muted/5 ring-1 ring-border/10 px-2.5 sm:px-3 py-1.5">
+                <Banknote className="h-3 w-3 text-primary" /> catálogo {fmtCompact(totalValue)}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground/40 font-display font-medium rounded-lg bg-muted/5 ring-1 ring-border/10 px-2.5 sm:px-3 py-1.5">
+                <Target className="h-3 w-3 text-warning" /> ticket médio {fmtCompact(avgPrice)}
+              </span>
             </div>
           </motion.div>
 
           {/* KPI strip */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               { label: "Total Produtos", value: String(products.length), color: "primary", icon: Package },
               { label: "Ativos", value: String(activeProducts), color: "success", icon: Zap, delta: activeProducts > 0 ? `${Math.round((activeProducts / Math.max(products.length, 1)) * 100)}%` : null },
-              { label: "Valor Catálogo", value: fmt(totalValue), color: "info", icon: Banknote },
-              { label: "Ticket Médio", value: fmt(avgPrice), color: "warning", icon: Target },
+              { label: "Valor Catálogo", value: fmtCompact(totalValue), color: "info", icon: Banknote },
+              { label: "Ticket Médio", value: fmtCompact(avgPrice), color: "warning", icon: Target },
             ].map((item, idx) => (
               <motion.div
                 key={item.label}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.25 + idx * 0.06, ease }}
-                className="group relative rounded-xl bg-card/95 ring-1 ring-border/15 p-3 sm:p-4 overflow-hidden hover:ring-border/30 transition-all duration-300"
+                className="group relative rounded-xl bg-card/95 ring-1 ring-border/15 p-4 sm:p-5 overflow-hidden hover:ring-border/30 transition-all duration-300"
               >
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
                 <div className={cn("absolute -top-12 -right-12 w-28 h-28 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-2 sm:mb-3">
-                    <div className={cn("h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center ring-1 transition-all duration-300", `bg-${item.color}/8 ring-${item.color}/12 text-${item.color}/60 group-hover:bg-${item.color}/12 group-hover:ring-${item.color}/20`)}>
-                      <item.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={cn("h-8 w-8 sm:h-9 sm:w-9 rounded-lg flex items-center justify-center ring-1 transition-all duration-300", `bg-${item.color}/8 ring-${item.color}/12 text-${item.color}/60 group-hover:bg-${item.color}/12 group-hover:ring-${item.color}/20`)}>
+                      <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
-                    <div className="hidden sm:block">
-                      <MiniSparkline color={item.color} />
-                    </div>
+                    <MiniSparkline color={item.color} />
                   </div>
-                  <p className="text-[8px] sm:text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/30 mb-0.5 sm:mb-1">{item.label}</p>
-                  <div className="flex items-end gap-1.5 sm:gap-2">
-                    <p className={cn("text-sm sm:text-lg font-display font-black tabular-nums tracking-[-0.03em] leading-none", `text-${item.color}`)}>{item.value}</p>
+                  <p className="text-[8px] sm:text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/30 mb-1">{item.label}</p>
+                  <div className="flex items-end gap-2">
+                    <p className={cn("text-base sm:text-xl font-display font-black tabular-nums tracking-[-0.03em] leading-none", `text-${item.color}`)}>{item.value}</p>
                     {"delta" in item && item.delta && (
-                      <span className="text-[8px] sm:text-[9px] font-display font-bold text-success/60 flex items-center gap-0.5 mb-0.5">
-                        <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5" /> {item.delta}
+                      <span className="text-[9px] font-display font-bold text-success/60 flex items-center gap-0.5 mb-0.5">
+                        <TrendingUp className="h-2.5 w-2.5" /> {item.delta}
                       </span>
                     )}
                   </div>
@@ -239,7 +239,7 @@ export default function Produtos() {
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
-                    "relative shrink-0 inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[10px] font-display font-bold transition-all duration-200 active:scale-[0.97]",
+                    "relative shrink-0 inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg text-[10px] sm:text-[11px] font-display font-bold transition-all duration-200 active:scale-[0.97]",
                     isActive
                       ? "bg-primary/8 ring-1 ring-primary/15 text-foreground"
                       : "text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-muted/5"
@@ -249,7 +249,7 @@ export default function Produtos() {
                     <motion.span layoutId="prod-tab" className="h-1.5 w-1.5 rounded-full bg-primary" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
                   )}
                   {tab.label}
-                  <span className={cn("text-[9px] px-1 sm:px-1.5 py-0.5 rounded-md font-display font-bold min-w-[18px] sm:min-w-[20px] text-center tabular-nums", isActive ? "bg-primary/10 text-primary/70" : "bg-muted/5 text-muted-foreground/20")}>{tab.count}</span>
+                  <span className={cn("text-[9px] px-1.5 py-0.5 rounded-md font-display font-bold min-w-[20px] text-center tabular-nums", isActive ? "bg-primary/10 text-primary/70" : "bg-muted/5 text-muted-foreground/20")}>{tab.count}</span>
                 </button>
               );
             })}
@@ -262,7 +262,7 @@ export default function Produtos() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar produto…"
-                className="h-8 sm:h-9 w-full rounded-lg ring-1 ring-border/10 bg-muted/5 pl-9 pr-9 text-[11px] text-foreground placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-display"
+                className="h-9 w-full rounded-lg ring-1 ring-border/10 bg-muted/5 pl-9 pr-9 text-[11px] text-foreground placeholder:text-muted-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-display"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90"><X className="h-3.5 w-3.5 text-muted-foreground/30" /></button>
@@ -276,7 +276,7 @@ export default function Produtos() {
                 <button
                   key={v.mode}
                   onClick={() => setViewMode(v.mode)}
-                  className={cn("h-7 w-7 sm:h-8 sm:w-8 rounded-md flex items-center justify-center transition-all", viewMode === v.mode ? "bg-primary/10 text-primary ring-1 ring-primary/15" : "text-muted-foreground/25 hover:text-foreground")}
+                  className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-all", viewMode === v.mode ? "bg-primary/10 text-primary ring-1 ring-primary/15" : "text-muted-foreground/25 hover:text-foreground")}
                 >
                   <v.icon className="h-3.5 w-3.5" />
                 </button>
@@ -288,7 +288,7 @@ export default function Produtos() {
 
       {/* ═══════════════════ PRODUCTS ═══════════════════ */}
       {filtered.length === 0 ? (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-card/95 ring-1 ring-border/15 p-8 sm:p-16 flex flex-col items-center gap-4">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-card/95 ring-1 ring-border/15 p-10 sm:p-16 flex flex-col items-center gap-5">
           <div className="h-20 w-20 rounded-2xl bg-primary/5 ring-1 ring-primary/10 flex items-center justify-center relative">
             <Package className="h-8 w-8 text-primary/20" />
             <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl pointer-events-none" />
@@ -304,14 +304,14 @@ export default function Produtos() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-3 h-10 px-6 rounded-xl text-[12px] font-display font-bold flex items-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all"
+              className="mt-3 h-11 px-6 rounded-xl text-[12px] font-display font-bold flex items-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all"
             >
               <Plus className="h-4 w-4" /> Criar Primeiro Produto
             </motion.button>
           )}
         </motion.div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
           {filtered.map((p, i) => (
             <motion.div
               key={p.id}
@@ -328,7 +328,7 @@ export default function Produtos() {
               <div className="absolute -inset-4 bg-primary/[0.02] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none" />
 
               {/* Image */}
-              <div className="relative h-36 sm:h-48 overflow-hidden bg-gradient-to-br from-muted/8 to-transparent">
+              <div className="relative h-40 sm:h-48 overflow-hidden bg-gradient-to-br from-muted/8 to-transparent">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                 ) : (
@@ -343,18 +343,18 @@ export default function Produtos() {
 
                 {/* Status badge */}
                 <div className="absolute top-3 right-3 z-10">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-bold ring-1 backdrop-blur-sm", statusColor(p.status))}>
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[9px] sm:text-[10px] font-display font-bold ring-1 backdrop-blur-sm", statusColor(p.status))}>
                     <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status), p.status === "active" && "animate-pulse")} style={p.status === "active" ? { boxShadow: "0 0 6px hsl(var(--success))" } : undefined} />
                     {statusLabel(p.status)}
                   </span>
                 </div>
 
-                {/* Menu - always visible on mobile, hover-reveal on desktop */}
+                {/* Menu */}
                 <div className="absolute top-3 left-3 z-10 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="h-8 w-8 rounded-lg bg-card/80 backdrop-blur-sm ring-1 ring-border/15 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-lg active:scale-95 transition-all">
-                        <MoreVertical className="h-3.5 w-3.5" />
+                      <button className="h-9 w-9 rounded-lg bg-card/80 backdrop-blur-sm ring-1 ring-border/15 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-lg active:scale-95 transition-all">
+                        <MoreVertical className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-52 rounded-xl border border-border/20 bg-card/95 backdrop-blur-xl shadow-2xl">
@@ -374,15 +374,15 @@ export default function Produtos() {
                 <div className="absolute bottom-3 right-3 z-10">
                   <span className="inline-flex items-baseline gap-0.5 rounded-xl bg-card/90 backdrop-blur-md ring-1 ring-border/10 px-3 py-1.5 shadow-lg">
                     <span className="text-[9px] text-muted-foreground/40 font-display font-bold">R$</span>
-                    <span className="text-[18px] font-display font-black tracking-[-0.03em] text-primary tabular-nums" style={{ textShadow: "0 0 20px hsl(var(--primary) / 0.25)" }}>{Number(p.price).toFixed(2)}</span>
+                    <span className="text-[18px] sm:text-[20px] font-display font-black tracking-[-0.03em] text-primary tabular-nums" style={{ textShadow: "0 0 20px hsl(var(--primary) / 0.25)" }}>{Number(p.price).toFixed(2)}</span>
                   </span>
                 </div>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 flex flex-1 flex-col gap-2.5 sm:gap-3 relative z-10">
+              <div className="p-4 sm:p-5 flex flex-1 flex-col gap-3 relative z-10">
                 <div>
-                  <h3 className="text-[14px] font-display font-bold text-foreground leading-snug tracking-[-0.02em] line-clamp-1">
+                  <h3 className="text-[14px] sm:text-[15px] font-display font-bold text-foreground leading-snug tracking-[-0.02em] line-clamp-1">
                     {p.name}
                   </h3>
                   {p.description
@@ -418,14 +418,14 @@ export default function Produtos() {
                 )}
 
                 {/* Builder CTA */}
-                <div className="rounded-xl ring-1 ring-primary/8 bg-gradient-to-r from-primary/[0.03] to-transparent p-3 relative overflow-hidden">
+                <div className="rounded-xl ring-1 ring-primary/8 bg-gradient-to-r from-primary/[0.03] to-transparent p-3.5 relative overflow-hidden">
                   <div className="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-primary/5 blur-2xl pointer-events-none" />
                   <div className="flex items-center justify-between gap-3 relative z-10">
                     <div className="min-w-0">
                       <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-primary/50 flex items-center gap-1.5">
                         <Sparkles className="h-2.5 w-2.5" /> Checkout Builder
                       </p>
-                      <div className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-muted/5 ring-1 ring-border/8 px-2 py-0.5 text-[10px] font-display font-bold text-muted-foreground/40">
+                      <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-muted/5 ring-1 ring-border/8 px-2 py-0.5 text-[10px] font-display font-bold text-muted-foreground/40">
                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                         {checkoutThemeLabel(p.checkout_theme)}
                       </div>
@@ -433,7 +433,7 @@ export default function Produtos() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="h-8 px-3.5 rounded-lg text-[10px] font-display font-bold flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-md shadow-primary/15 transition-all"
+                      className="h-9 px-4 rounded-lg text-[10px] font-display font-bold flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-md shadow-primary/15 transition-all"
                       onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}
                     >
                       <Palette className="h-3 w-3" /> Builder
@@ -444,17 +444,17 @@ export default function Produtos() {
                 <div className="flex-1" />
 
                 {/* Actions */}
-                <div className="flex items-center gap-1.5 sm:gap-2 pt-3 border-t border-border/8">
+                <div className="flex items-center gap-2 pt-3 border-t border-border/8">
                   <motion.button
                     whileTap={{ scale: 0.97 }}
-                    className="gap-1.5 rounded-xl text-[11px] h-10 sm:h-9 font-display font-bold flex-1 flex items-center justify-center bg-primary/8 text-primary hover:bg-primary/12 ring-1 ring-primary/12 hover:ring-primary/20 transition-all active:scale-[0.97]"
+                    className="gap-1.5 rounded-xl text-[11px] h-11 sm:h-10 font-display font-bold flex-1 flex items-center justify-center bg-primary/8 text-primary hover:bg-primary/12 ring-1 ring-primary/12 hover:ring-primary/20 transition-all active:scale-[0.97]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
                   >
                     <Settings2 className="h-3.5 w-3.5" /> Editar
                   </motion.button>
                   <motion.button
                     whileTap={{ scale: 0.97 }}
-                    className="gap-1.5 rounded-xl text-[11px] h-10 sm:h-9 font-display font-bold flex-1 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/40 hover:text-foreground hover:ring-border/20 transition-all active:scale-[0.97]"
+                    className="gap-1.5 rounded-xl text-[11px] h-11 sm:h-10 font-display font-bold flex-1 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/40 hover:text-foreground hover:ring-border/20 transition-all active:scale-[0.97]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)}
                   >
                     <Palette className="h-3.5 w-3.5" /> Customizar
@@ -462,7 +462,7 @@ export default function Produtos() {
                   {p.checkout_url && (
                     <motion.button
                       whileTap={{ scale: 0.95 }}
-                      className="rounded-xl h-10 w-10 sm:h-9 sm:w-9 shrink-0 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/25 hover:text-primary hover:ring-primary/15 transition-all active:scale-[0.95]"
+                      className="rounded-xl h-11 w-11 sm:h-10 sm:w-10 shrink-0 flex items-center justify-center bg-muted/5 ring-1 ring-border/10 text-muted-foreground/25 hover:text-primary hover:ring-primary/15 transition-all active:scale-[0.95]"
                       onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
@@ -481,7 +481,7 @@ export default function Produtos() {
             onClick={() => navigate("/vendas/produtos/novo/editar")}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.985 }}
-            className="rounded-2xl border-2 border-dashed border-border/10 hover:border-primary/20 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-4 min-h-[300px] sm:min-h-[420px] transition-all group/add relative overflow-hidden"
+            className="rounded-2xl border-2 border-dashed border-border/10 hover:border-primary/20 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-4 min-h-[340px] sm:min-h-[420px] transition-all group/add relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent opacity-0 group-hover/add:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10 flex flex-col items-center gap-4">
@@ -503,11 +503,11 @@ export default function Produtos() {
             <table className="w-full min-w-[500px]">
               <thead>
                 <tr className="border-b border-border/8">
-                  <th className="text-left px-4 sm:px-5 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Produto</th>
-                  <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Preço</th>
-                  <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25 hidden md:table-cell">Tema</th>
-                  <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Status</th>
-                  <th className="w-28 sm:w-36 px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell"></th>
+                  <th className="text-left px-5 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Produto</th>
+                  <th className="text-left px-4 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Preço</th>
+                  <th className="text-left px-4 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25 hidden md:table-cell">Tema</th>
+                  <th className="text-left px-4 py-4 text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground/25">Status</th>
+                  <th className="w-36 px-4 py-4 hidden sm:table-cell"></th>
                 </tr>
               </thead>
               <tbody>
@@ -520,13 +520,13 @@ export default function Produtos() {
                     className="border-b border-border/5 transition-all duration-200 group cursor-pointer hover:bg-primary/[0.02] active:bg-primary/[0.04]"
                     onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
                   >
-                    <td className="px-4 sm:px-5 py-3 sm:py-4">
-                      <div className="flex items-center gap-2.5 sm:gap-3">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
                         {p.image_url ? (
-                          <img src={p.image_url} alt="" className="h-9 w-9 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl object-cover ring-1 ring-border/10 shrink-0" />
+                          <img src={p.image_url} alt="" className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl object-cover ring-1 ring-border/10 shrink-0" />
                         ) : (
-                          <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/5 to-transparent ring-1 ring-border/8 flex items-center justify-center shrink-0">
-                            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/15" />
+                          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br from-primary/5 to-transparent ring-1 ring-border/8 flex items-center justify-center shrink-0">
+                            <Package className="h-4 w-4 text-muted-foreground/15" />
                           </div>
                         )}
                         <div className="min-w-0">
@@ -535,22 +535,22 @@ export default function Produtos() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 sm:px-4 py-3 sm:py-4">
-                      <span className="text-[12px] sm:text-[14px] font-display font-black text-foreground tabular-nums">{fmt(Number(p.price))}</span>
+                    <td className="px-4 py-4">
+                      <span className="text-[13px] sm:text-[14px] font-display font-black text-foreground tabular-nums">{fmt(Number(p.price))}</span>
                     </td>
-                    <td className="px-3 sm:px-4 py-3 sm:py-4 hidden md:table-cell">
+                    <td className="px-4 py-4 hidden md:table-cell">
                       <span className="text-[10px] text-muted-foreground/30 font-display font-bold inline-flex items-center gap-1.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-primary/30" />
                         {checkoutThemeLabel(p.checkout_theme)}
                       </span>
                     </td>
-                    <td className="px-3 sm:px-4 py-3 sm:py-4">
-                      <span className={cn("inline-flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-2.5 py-0.5 sm:py-1 text-[8px] sm:text-[9px] font-display font-bold ring-1", statusColor(p.status))}>
-                        <span className={cn("h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full", statusDot(p.status))} />
+                    <td className="px-4 py-4">
+                      <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-bold ring-1", statusColor(p.status))}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
                         {statusLabel(p.status)}
                       </span>
                     </td>
-                    <td className="px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell">
+                    <td className="px-4 py-4 hidden sm:table-cell">
                       <div className="flex items-center gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
                         <motion.button whileTap={{ scale: 0.97 }} className="h-8 px-3 rounded-lg text-[10px] font-display font-bold gap-1 flex items-center text-primary bg-primary/8 ring-1 ring-primary/12 hover:bg-primary/12 transition-all"
                           onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}>
