@@ -146,12 +146,10 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
               placeholder="Buscar produtos, clientes, páginas..."
               className="flex-1 bg-transparent text-[13px] font-medium text-foreground placeholder:text-muted-foreground/40 outline-none"
             />
-            {query && (
-              <button onClick={() => setQuery("")} className="h-6 w-6 rounded-lg bg-muted/10 flex items-center justify-center hover:bg-muted/20 transition-colors">
-                <X className="h-3 w-3 text-muted-foreground/50" />
-              </button>
-            )}
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted/8 ring-1 ring-border/10">
+            <button onClick={() => query ? setQuery("") : onOpenChange(false)} className="h-6 w-6 rounded-lg bg-muted/10 flex items-center justify-center hover:bg-muted/20 transition-colors">
+              <X className="h-3 w-3 text-muted-foreground/50" />
+            </button>
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted/8 ring-1 ring-border/10 cursor-pointer" onClick={() => onOpenChange(false)}>
               <span className="text-[9px] font-display font-bold text-muted-foreground/30">ESC</span>
             </div>
           </div>
