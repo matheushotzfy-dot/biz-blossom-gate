@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -56,6 +56,28 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { motion } from "framer-motion";
+
+/* ─────────────────────── Animated Number ─────────────────────── */
+function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
+  const [display, setDisplay] = useState(value);
+  const prevRef = useRef(value);
+  useEffect(() => {
+    const from = prevRef.current;
+    const to = value;
+    prevRef.current = value;
+    if (from === to) { setDisplay(to); return; }
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(from + (to - from) * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [value, duration]);
+  return <>{formatter(display)}</>;
+}
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
@@ -517,7 +539,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-end gap-5 mb-3">
               <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1)]">
-                {privacy.hidden ? "R$ •••••••" : fmt(revenue)}
+                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2.5 mt-6">
@@ -539,17 +561,17 @@ export default function Dashboard() {
           {/* Executive KPI strip */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { label: "Total Faturado", value: privacy.hidden ? CENSORED : fmt(revenue), color: "primary", icon: ShoppingCart },
-              { label: "Vendas Aprovadas", value: privacy.hidden ? CENSORED : String(approved.length), color: "success", icon: TrendingUp },
-              { label: "Taxa Conversão", value: privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`, color: "info", icon: Target },
-              { label: "Saldo Disponível", value: privacy.hidden ? CENSORED : fmt(Math.abs(balance)), color: balance < 0 ? "warning" : "primary", icon: Wallet },
+              { label: "Total Faturado", numValue: revenue, formatter: fmt, color: "primary", icon: ShoppingCart },
+              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), color: "success", icon: TrendingUp },
+              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, color: "info", icon: Target },
+              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 + idx * 0.1 }} className="group relative rounded-2xl glass-panel p-5 overflow-hidden card-premium">
                 <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div>
                     <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
-                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
+                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
                   <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
                     <item.icon className="h-5 w-5" />
@@ -597,10 +619,10 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { icon: Zap, label: "PIX", value: privacy.hidden ? CENSORED : fmt(pixRevenue), helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
-              { icon: CreditCard, label: "CARTÃO", value: privacy.hidden ? CENSORED : fmt(cardRevenue), helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
-              { icon: Wallet, label: "TICKET MÉDIO", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), helper: "Por transação", color: "primary" },
-              { icon: DollarSign, label: "PENDENTE", value: privacy.hidden ? CENSORED : fmt(withdrawalPending), helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
+              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
+              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
+              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", color: "primary" },
+              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.06 }}
                 className="group relative rounded-2xl glass-panel p-3.5 md:p-4 overflow-hidden card-premium flex flex-col justify-between min-h-[130px]">
@@ -613,7 +635,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
+                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
                     <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.helper}</p>
                   </div>
                 </div>
