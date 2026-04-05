@@ -484,7 +484,7 @@ export default function Produtos() {
             onClick={() => navigate("/vendas/produtos/novo/editar")}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.985 }}
-            className="rounded-2xl border-2 border-dashed border-border/10 hover:border-primary/20 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-4 min-h-[420px] transition-all group/add relative overflow-hidden"
+            className="rounded-2xl border-2 border-dashed border-border/10 hover:border-primary/20 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-4 min-h-[300px] sm:min-h-[420px] transition-all group/add relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent opacity-0 group-hover/add:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10 flex flex-col items-center gap-4">
