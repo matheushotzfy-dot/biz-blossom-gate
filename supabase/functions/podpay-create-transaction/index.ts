@@ -211,7 +211,7 @@ Deno.serve(async (req) => {
 
     const amountInCents = Math.round(Number(product.price) * 100);
 
-    // === Calculate fees from DB (STRICT — no fallbacks) ===
+    // === Calculate fees from DB (payment-method-specific) ===
     const { data: fees, error: feesError } = await supabase.from('fees').select('*');
     if (feesError || !fees || fees.length === 0) {
       safeLog('Fee configuration missing', { error: feesError?.message || 'no fees found' });
@@ -220,27 +220,41 @@ Deno.serve(async (req) => {
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    const percentageFee = fees.find(f => f.name === 'Taxa por Transação' && f.fee_type === 'percentage');
+
+    // Map payment method to fee names
+    const feeNameMap: Record<string, string> = {
+      pix: 'Taxa PIX',
+      credit_card: 'Taxa Cartão',
+      boleto: 'Taxa Boleto',
+    };
+    const methodFeeName = feeNameMap[paymentMethod] || 'Taxa PIX';
+    const methodFee = fees.find(f => f.name === methodFeeName);
     const fixedFee = fees.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
-    
-    if (!percentageFee || !fixedFee) {
-      safeLog('Required fee entries missing', { hasPercentage: !!percentageFee, hasFixed: !!fixedFee });
-      return new Response(
-        JSON.stringify({ success: false, error: 'Configuração de taxas incompleta. Contate o suporte.' }),
-        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+
+    // Method-specific fee (percentage for pix/card, fixed for boleto)
+    let feeAmount = 0;
+    if (methodFee) {
+      if (methodFee.fee_type === 'percentage') {
+        feeAmount = Number(product.price) * Number(methodFee.value) / 100;
+      } else {
+        feeAmount = Number(methodFee.value);
+      }
     }
-    
-    const feePercentage = Number(percentageFee.value);
-    const feeFixed = Number(fixedFee.value);
-    if (feePercentage < 0 || feePercentage > 50 || feeFixed < 0 || feeFixed > 100) {
-      safeLog('Fee values out of safe range', { feePercentage, feeFixed });
+    // Add fixed per-transaction fee if exists
+    if (fixedFee) {
+      feeAmount += Number(fixedFee.value);
+    }
+
+    // Validate fee range
+    if (feeAmount < 0 || feeAmount >= Number(product.price)) {
+      safeLog('Fee values out of safe range', { feeAmount, productPrice: product.price });
       return new Response(
         JSON.stringify({ success: false, error: 'Erro na configuração de taxas. Contate o suporte.' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    const feeAmount = Math.round(((Number(product.price) * feePercentage / 100) + feeFixed) * 100) / 100;
+
+    feeAmount = Math.round(feeAmount * 100) / 100;
     const netAmount = Math.round((Number(product.price) - feeAmount) * 100) / 100;
 
     // === Build PodPay payload ===
