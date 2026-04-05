@@ -25,7 +25,7 @@ export default function FunilVendas() {
 
   const loadFunnel = async () => {
     setLoading(true);
-    const days = period === "7d" ? 7 : period === "90d" ? 90 : 30;
+    const days = period === "today" ? 0 : period === "7d" ? 7 : period === "90d" ? 90 : 30;
     const since = new Date();
     since.setDate(since.getDate() - days);
 
