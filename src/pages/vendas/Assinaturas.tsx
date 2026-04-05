@@ -93,7 +93,7 @@ export default function Assinaturas() {
       price,
       interval: fInterval,
       trial_days: parseInt(fTrial) || 0,
-      product_id: fProduct || null,
+      product_id: fProduct && fProduct !== "none" ? fProduct : null,
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Plano criado!");
