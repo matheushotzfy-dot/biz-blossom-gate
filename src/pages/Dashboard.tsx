@@ -619,10 +619,10 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { icon: Zap, label: "PIX", value: privacy.hidden ? CENSORED : fmt(pixRevenue), helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
-              { icon: CreditCard, label: "CARTÃO", value: privacy.hidden ? CENSORED : fmt(cardRevenue), helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
-              { icon: Wallet, label: "TICKET MÉDIO", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), helper: "Por transação", color: "primary" },
-              { icon: DollarSign, label: "PENDENTE", value: privacy.hidden ? CENSORED : fmt(withdrawalPending), helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
+              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
+              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
+              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", color: "primary" },
+              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.06 }}
                 className="group relative rounded-2xl glass-panel p-3.5 md:p-4 overflow-hidden card-premium flex flex-col justify-between min-h-[130px]">
@@ -635,7 +635,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
+                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
                     <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.helper}</p>
                   </div>
                 </div>
