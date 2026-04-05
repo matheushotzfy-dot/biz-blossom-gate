@@ -1110,7 +1110,7 @@ export default function Vendas() {
         </GlowCard>
 
         {/* Top Products */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="warning" delay={0.15}>
+        <GlowCard className="xl:col-span-4 p-6" glowColor="warning" delay={0.15} animated>
           <div className="flex items-center gap-2.5 mb-6">
             <div className="h-8 w-8 rounded-xl bg-warning/8 border border-warning/10 flex items-center justify-center">
               <Award className="h-4 w-4 text-warning" />
