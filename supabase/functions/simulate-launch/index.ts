@@ -101,12 +101,13 @@ Deno.serve(async (req) => {
     const FEE_FIXED = fixedFee ? Number(fixedFee.value) : 2.50;
     const FEE_AMOUNT = Number(((AMOUNT * FEE_PCT / 100) + FEE_FIXED).toFixed(2));
     const NET_AMOUNT = Number((AMOUNT - FEE_AMOUNT).toFixed(2));
-    const TOTAL = Math.min(body.total || 100, 500); // Cap at 500
+    const TOTAL = Math.min(body.total || 100, 1000); // Cap at 1000
 
-    // Generate timestamps spread over last 3 hours
+    // Generate timestamps spread over the specified number of days (default: current month)
+    const spreadDays = Math.min(body.spreadDays || 30, 60);
     const now = Date.now();
-    const threeHoursMs = 3 * 60 * 60 * 1000;
-    const launchStart = now - threeHoursMs;
+    const spreadMs = spreadDays * 24 * 60 * 60 * 1000;
+    const launchStart = now - spreadMs;
 
     const transactions = [];
     const completedIndices: number[] = [];
