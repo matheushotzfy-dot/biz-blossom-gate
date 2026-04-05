@@ -1165,7 +1165,7 @@ export default function Vendas() {
         </GlowCard>
 
         {/* Peak Hours Heatmap + Quick Stats */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="info" delay={0.2}>
+        <GlowCard className="xl:col-span-4 p-6" glowColor="info" delay={0.2} animated>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
