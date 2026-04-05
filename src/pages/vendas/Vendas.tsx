@@ -817,8 +817,9 @@ export default function Vendas() {
               </motion.div>
               <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
+                  <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
                 </span>
                 <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
