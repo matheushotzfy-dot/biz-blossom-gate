@@ -605,16 +605,16 @@ export default function Dashboard() {
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.06 }}
                 className="group relative rounded-2xl glass-panel p-3.5 md:p-4 overflow-hidden card-premium flex flex-col justify-between min-h-[130px]">
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
-                <div className="pl-2 flex flex-col h-full">
+                <div className="pl-1.5 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-auto">
-                    <span className="text-[9px] font-heading uppercase tracking-[0.16em] text-muted-foreground/30">{item.label}</span>
-                    <div className={cn("h-8 w-8 rounded-xl flex items-center justify-center ring-1 ring-border/15 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${item.color}/8 text-${item.color}/50 group-hover:shadow-${item.color}/10`)}>
+                    <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground/30">{item.label}</span>
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center ring-1 ring-border/20 transition-all group-hover:scale-110", `bg-${item.color}/8 text-${item.color}/50`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-xl md:text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono tabular-nums">{item.helper}</p>
+                    <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{item.value}</p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.helper}</p>
                   </div>
                 </div>
               </motion.div>
