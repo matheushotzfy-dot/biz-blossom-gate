@@ -6,9 +6,8 @@ const corsHeaders = {
 };
 
 /**
- * Server-side admin login with 2FA.
- * Step 1: Authenticate + role check → generate OTP → store in admin_2fa_codes → return tempToken
- * Step 2: Verify OTP via admin-2fa-verify function
+ * Server-side admin login — direct auth without 2FA.
+ * Authenticates, checks role, returns session tokens.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -22,7 +21,6 @@ Deno.serve(async (req) => {
 
     const { email, password } = await req.json();
 
-    // Input validation
     if (!email || typeof email !== "string" || !password || typeof password !== "string") {
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas." }),
@@ -114,47 +112,23 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ===== 2FA: Generate OTP & store session temporarily =====
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const tempToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-    const role = isAdmin ? "admin" : "employee";
-
-    // Clean old codes
-    await adminClient.from("admin_2fa_codes").delete().eq("email", trimmedEmail);
-
-    // Store OTP + session tokens
-    await adminClient.from("admin_2fa_codes").insert({
-      email: trimmedEmail,
-      code_hash: otp,
-      temp_token: tempToken,
-      access_token: authData.session.access_token,
-      refresh_token: authData.session.refresh_token,
-      role,
-      expires_at: expiresAt,
-      attempts: 0,
-    });
-
-    // Log attempt (pending 2FA)
+    // Log successful login
     await adminClient.from("admin_login_attempts").insert({
       email: trimmedEmail,
-      success: false, // Not fully authenticated yet
+      success: true,
     });
 
-    console.log(`[admin-login] 2FA OTP generated for ${trimmedEmail}`);
+    const role = isAdmin ? "admin" : "employee";
 
-    // Mask email for display
-    const [local, domain] = trimmedEmail.split("@");
-    const maskedEmail = local.slice(0, 2) + "***@" + domain;
+    console.log(`[admin-login] Direct login for ${trimmedEmail} (${role})`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        requires2FA: true,
-        tempToken,
-        maskedEmail,
-        // DEV ONLY: include OTP for testing
-        ...(Deno.env.get("DENO_DEPLOYMENT_ID") ? {} : { _devOtp: otp }),
+        requires2FA: false,
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
+        role,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
