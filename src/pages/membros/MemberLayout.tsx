@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Sparkles, Home, Menu, X, GraduationCap } from "lucide-react";
+import { LogOut, Home, Menu, X, GraduationCap, Search, Bell, ChevronRight, Bookmark, Settings, User as UserIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function MemberLayout() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function MemberLayout() {
   const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -33,7 +35,15 @@ export default function MemberLayout() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => setMobileMenuOpen(false), [location.pathname]);
+  useEffect(() => { setMobileMenuOpen(false); setProfileOpen(false); }, [location.pathname]);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handler = () => setProfileOpen(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [profileOpen]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -43,8 +53,11 @@ export default function MemberLayout() {
   if (loading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
-        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-xl shadow-primary/10">
-          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="relative">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-2xl shadow-primary/10">
+            <GraduationCap className="h-7 w-7 text-primary/60" />
+          </div>
+          <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 border-t-primary animate-spin" />
         </div>
         <p className="text-muted-foreground text-sm font-display font-bold tracking-tight">Carregando...</p>
       </motion.div>
@@ -52,59 +65,99 @@ export default function MemberLayout() {
   );
 
   const isHome = location.pathname === "/membros-area";
+  const isCourse = location.pathname.includes("/curso/");
   const initial = user?.email?.charAt(0).toUpperCase() || "U";
+  const displayName = user?.email?.split("@")[0] || "Membro";
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ═══ Premium Glass Nav ═══ */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
         scrolled
-          ? "bg-background/85 backdrop-blur-2xl border-b border-border/40 shadow-[0_1px_40px_hsl(var(--background)/0.6)]"
-          : "bg-gradient-to-b from-background/90 via-background/50 to-transparent"
-      }`}>
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
-          <div className="h-[68px] flex items-center justify-between">
+          ? "bg-background/90 backdrop-blur-2xl border-b border-border/30 shadow-[0_4px_30px_hsl(var(--background)/0.5)]"
+          : "bg-gradient-to-b from-background/95 via-background/60 to-transparent",
+        isCourse && "bg-background/95 backdrop-blur-2xl border-b border-border/20"
+      )}>
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-16 flex items-center justify-between gap-4">
             {/* Logo */}
-            <Link to="/membros-area" className="flex items-center gap-3 group">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/30 group-hover:scale-[1.04] transition-all duration-300 border border-primary/20">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
+            <Link to="/membros-area" className="flex items-center gap-2.5 group shrink-0">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/30 group-hover:scale-105 transition-all duration-300 border border-primary/20">
+                <GraduationCap className="h-4.5 w-4.5 text-primary-foreground" />
               </div>
-              <div className="hidden sm:block">
-                <span className="text-base font-display font-black tracking-[-0.04em] text-foreground">Área de Membros</span>
-              </div>
+              <span className="hidden sm:block text-sm font-display font-black tracking-[-0.03em] text-foreground">
+                Membros
+              </span>
             </Link>
 
-            {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-1.5">
-              <Link to="/membros-area"
-                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-display font-bold transition-all duration-300 ${
-                  isHome
-                    ? "bg-primary/10 text-primary border border-primary/15"
-                    : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                }`}>
-                <Home className="h-4 w-4" /> Início
-              </Link>
+            {/* Desktop nav links */}
+            <div className="hidden md:flex items-center gap-1">
+              <NavItem to="/membros-area" active={isHome} icon={<Home className="h-4 w-4" />} label="Início" />
             </div>
 
-            {/* Right side */}
-            <div className="flex items-center gap-3">
-              {/* User pill */}
-              <div className="hidden sm:flex items-center gap-3 pl-3 pr-4 py-2 rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 hover:border-border/30 transition-all duration-300">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-primary to-primary/60 flex items-center justify-center text-xs font-display font-black text-primary-foreground shadow-sm">
-                  {initial}
-                </div>
-                <span className="text-sm text-foreground/70 max-w-[180px] truncate font-display font-semibold">{user?.email}</span>
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Right side actions */}
+            <div className="flex items-center gap-2">
+              {/* Profile dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
+                  className={cn(
+                    "flex items-center gap-2.5 h-9 pl-1 pr-3 rounded-full transition-all duration-300 border",
+                    profileOpen
+                      ? "bg-card border-border/40"
+                      : "bg-card/40 border-border/15 hover:bg-card/60 hover:border-border/30"
+                  )}
+                >
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary via-primary to-primary/50 flex items-center justify-center text-[11px] font-display font-black text-primary-foreground shadow-sm">
+                    {initial}
+                  </div>
+                  <span className="hidden sm:block text-xs text-foreground/70 font-display font-semibold max-w-[120px] truncate">
+                    {displayName}
+                  </span>
+                </button>
+
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 top-[calc(100%+8px)] w-64 rounded-2xl bg-card/95 backdrop-blur-2xl border border-border/30 shadow-2xl shadow-background/50 overflow-hidden"
+                    >
+                      {/* User info */}
+                      <div className="p-4 border-b border-border/15">
+                        <div className="flex items-center gap-3">
+                          <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/50 flex items-center justify-center text-base font-display font-black text-primary-foreground shadow-md">
+                            {initial}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-display font-bold text-foreground truncate">{displayName}</p>
+                            <p className="text-xs text-muted-foreground/60 truncate font-display">{user?.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Actions */}
+                      <div className="p-2">
+                        <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-destructive/5 transition-all text-left group">
+                          <LogOut className="h-4 w-4 text-destructive/50 group-hover:text-destructive transition-colors" />
+                          <span className="text-sm font-display font-semibold text-destructive/60 group-hover:text-destructive transition-colors">Sair da conta</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <button onClick={handleLogout}
-                className="h-10 w-10 rounded-xl bg-card/50 backdrop-blur-xl hover:bg-destructive/10 hover:border-destructive/20 flex items-center justify-center transition-all duration-300 border border-border/20 group"
-                title="Sair">
-                <LogOut className="h-4 w-4 text-muted-foreground group-hover:text-destructive transition-colors" />
-              </button>
-
+              {/* Mobile menu toggle */}
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="h-10 w-10 rounded-xl bg-card/50 backdrop-blur-xl hover:bg-card/70 flex items-center justify-center transition-all md:hidden border border-border/20">
-                {mobileMenuOpen ? <X className="h-4.5 w-4.5 text-foreground" /> : <Menu className="h-4.5 w-4.5 text-foreground" />}
+                className="h-9 w-9 rounded-xl bg-card/40 backdrop-blur-xl hover:bg-card/60 flex items-center justify-center transition-all md:hidden border border-border/15">
+                {mobileMenuOpen ? <X className="h-4 w-4 text-foreground" /> : <Menu className="h-4 w-4 text-foreground" />}
               </button>
             </div>
           </div>
@@ -117,24 +170,20 @@ export default function MemberLayout() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden bg-card/95 backdrop-blur-2xl border-t border-border/20 overflow-hidden"
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden bg-card/95 backdrop-blur-2xl border-t border-border/15 overflow-hidden"
             >
-              <div className="max-w-7xl mx-auto px-5 py-4 space-y-2">
-                <Link to="/membros-area" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-muted/10 transition-all active:scale-[0.98]">
-                  <Home className="h-5 w-5 text-primary" />
-                  <span className="text-base font-display font-bold">Início</span>
+              <div className="max-w-[1440px] mx-auto px-4 py-3 space-y-1">
+                <Link to="/membros-area" className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all active:scale-[0.98]",
+                  isHome ? "bg-primary/10 text-primary" : "text-foreground/70 hover:bg-muted/10"
+                )}>
+                  <Home className="h-5 w-5" />
+                  <span className="text-sm font-display font-bold">Início</span>
                 </Link>
-                <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-muted/8 border border-border/10">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-sm font-display font-black text-primary-foreground shadow-sm">{initial}</div>
-                  <div>
-                    <p className="text-sm font-display font-bold text-foreground">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground font-display">Membro ativo</p>
-                  </div>
-                </div>
-                <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-destructive/5 transition-all w-full text-left active:scale-[0.98]">
-                  <LogOut className="h-5 w-5 text-destructive/60" />
-                  <span className="text-base font-display font-bold text-destructive/70">Sair da conta</span>
+                <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-destructive/5 transition-all w-full text-left">
+                  <LogOut className="h-5 w-5 text-destructive/50" />
+                  <span className="text-sm font-display font-bold text-destructive/60">Sair</span>
                 </button>
               </div>
             </motion.div>
@@ -143,9 +192,23 @@ export default function MemberLayout() {
       </nav>
 
       {/* Content */}
-      <main className="pt-[68px] min-h-screen">
+      <main className="pt-16 min-h-screen">
         <Outlet context={{ user }} />
       </main>
     </div>
+  );
+}
+
+/* ─── Nav Item ─── */
+function NavItem({ to, active, icon, label }: { to: string; active: boolean; icon: React.ReactNode; label: string }) {
+  return (
+    <Link to={to} className={cn(
+      "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-display font-bold transition-all duration-300",
+      active
+        ? "bg-primary/10 text-primary border border-primary/12"
+        : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+    )}>
+      {icon} {label}
+    </Link>
   );
 }

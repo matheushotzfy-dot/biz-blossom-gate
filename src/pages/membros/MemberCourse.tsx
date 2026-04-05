@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import {
   Play, CheckCircle2, ChevronDown, BookOpen, Clock,
   ArrowLeft, ArrowRight, FileText, Video, ChevronLeft, List,
-  Award, X, Check, Layers, GraduationCap,
+  Award, X, Check, Layers, GraduationCap, Maximize2, Minimize2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +24,6 @@ function extractVimeoId(url: string): string | null {
   const m = url.match(/vimeo\.com\/(\d+)/);
   return m ? m[1] : null;
 }
-
 function isAllowedVideoUrl(url: string): boolean {
   try {
     const u = new URL(url);
@@ -53,6 +52,7 @@ export default function MemberCourse() {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theaterMode, setTheaterMode] = useState(false);
 
   useEffect(() => { if (courseId && user) loadCourse(); }, [courseId, user]);
 
@@ -152,8 +152,11 @@ export default function MemberCourse() {
   if (loading) return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5">
-        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-xl shadow-primary/10">
-          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="relative">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-2xl shadow-primary/10">
+            <GraduationCap className="h-7 w-7 text-primary/60" />
+          </div>
+          <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 border-t-primary animate-spin" />
         </div>
         <p className="text-muted-foreground text-sm font-display font-bold tracking-tight">Carregando curso...</p>
       </motion.div>
@@ -162,79 +165,81 @@ export default function MemberCourse() {
 
   if (!course) return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center gap-5">
-      <div className="h-24 w-24 rounded-[2.5rem] bg-card border border-border/30 flex items-center justify-center shadow-xl">
-        <GraduationCap className="h-12 w-12 text-muted-foreground/15" />
+      <div className="h-20 w-20 rounded-[2rem] bg-card border border-border/30 flex items-center justify-center shadow-xl">
+        <GraduationCap className="h-10 w-10 text-muted-foreground/10" />
       </div>
-      <h1 className="text-2xl font-display font-black text-foreground tracking-tight">Curso não encontrado</h1>
+      <h1 className="text-xl font-display font-black text-foreground tracking-tight">Curso não encontrado</h1>
       <Link to="/membros-area" className="text-primary text-sm hover:underline font-display font-bold underline-offset-4">← Voltar ao início</Link>
     </div>
   );
 
+  const sidebarWidth = theaterMode ? "w-[300px]" : "w-[340px] xl:w-[380px]";
+
   const CourseSidebar = () => (
-    <div className="p-5 space-y-4">
-      {/* Progress card */}
-      <div className="p-5 rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-display font-bold text-muted-foreground uppercase tracking-[0.08em]">Progresso</span>
-          <span className="text-lg font-display font-black text-primary tabular-nums">{overallPct}%</span>
+    <div className="p-4 space-y-3">
+      {/* Progress */}
+      <div className="p-4 rounded-xl bg-card/40 border border-border/15">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Progresso</span>
+          <span className="text-base font-display font-black text-primary tabular-nums">{overallPct}%</span>
         </div>
-        <div className="h-2.5 rounded-full bg-muted/15 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-700" style={{ width: `${overallPct}%` }} />
+        <div className="h-1.5 rounded-full bg-muted/10 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-primary to-primary/50 rounded-full transition-all duration-700" style={{ width: `${overallPct}%` }} />
         </div>
-        <p className="text-xs text-muted-foreground mt-3 font-display tabular-nums">{completedLessons} de {totalLessons} aulas</p>
+        <p className="text-[10px] text-muted-foreground/40 mt-2 font-display tabular-nums">{completedLessons}/{totalLessons} aulas</p>
         {isComplete && (
-          <div className="flex items-center gap-2.5 mt-4 p-3 rounded-xl bg-success/10 border border-success/15">
-            <Award className="h-5 w-5 text-success" />
-            <span className="text-sm font-display font-bold text-success">Curso concluído!</span>
+          <div className="flex items-center gap-2 mt-3 p-2.5 rounded-lg bg-success/8 border border-success/12">
+            <Award className="h-4 w-4 text-success" />
+            <span className="text-xs font-display font-bold text-success">Curso concluído!</span>
           </div>
         )}
       </div>
 
       {/* Modules */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {modules.map((mod, modIdx) => {
           const modCompleted = mod.lessons.filter(l => progress.get(l.id)?.completed).length;
           const modPct = mod.lessons.length > 0 ? Math.round((modCompleted / mod.lessons.length) * 100) : 0;
           const isModComplete = modPct === 100 && mod.lessons.length > 0;
 
           return (
-            <div key={mod.id} className="rounded-2xl overflow-hidden bg-card/40 border border-border/15 hover:border-border/25 transition-all duration-300">
+            <div key={mod.id} className="rounded-xl overflow-hidden bg-card/30 border border-border/10 hover:border-border/20 transition-all duration-300">
               <button onClick={() => toggleModule(mod.id)} className="w-full text-left transition-colors hover:bg-muted/5">
                 {mod.banner_url ? (
-                  <div className="aspect-[3/1] overflow-hidden relative">
+                  <div className="aspect-[3.5/1] overflow-hidden relative">
                     <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-                    <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/85 to-transparent" />
+                    <div className="absolute bottom-2.5 left-3.5 right-3.5 flex items-end justify-between">
                       <div>
-                        <p className="text-foreground text-sm font-display font-bold line-clamp-1">{mod.title}</p>
-                        <p className="text-muted-foreground text-xs font-display tabular-nums mt-0.5">{mod.lessons.length} aulas · {modPct}%</p>
+                        <p className="text-foreground text-xs font-display font-bold line-clamp-1">{mod.title}</p>
+                        <p className="text-muted-foreground/50 text-[10px] font-display tabular-nums mt-0.5">{mod.lessons.length} aulas · {modPct}%</p>
                       </div>
                       <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                        <ChevronDown className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/40" />
                       </motion.div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center justify-between p-3.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className={cn(
-                        "h-9 w-9 rounded-xl flex items-center justify-center text-xs font-display font-black shrink-0 border",
-                        isModComplete ? "bg-success/10 text-success border-success/15" : "bg-card text-muted-foreground/50 border-border/20"
+                        "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-display font-black shrink-0 border",
+                        isModComplete ? "bg-success/8 text-success border-success/12" : "bg-card text-muted-foreground/40 border-border/15"
                       )}>
-                        {isModComplete ? <Check className="h-4 w-4" /> : modIdx + 1}
+                        {isModComplete ? <Check className="h-3.5 w-3.5" /> : modIdx + 1}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-display font-bold text-foreground line-clamp-1">{mod.title}</p>
-                        <p className="text-xs text-muted-foreground font-display tabular-nums mt-0.5">{modCompleted}/{mod.lessons.length} aulas</p>
+                        <p className="text-xs font-display font-bold text-foreground line-clamp-1">{mod.title}</p>
+                        <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums">{modCompleted}/{mod.lessons.length}</p>
                       </div>
                     </div>
                     <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />
                     </motion.div>
                   </div>
                 )}
                 {mod.lessons.length > 0 && (
-                  <div className="h-1 bg-muted/10">
+                  <div className="h-0.5 bg-muted/8">
                     <div className={cn("h-full transition-all rounded-full", isModComplete ? "bg-success" : "bg-primary")} style={{ width: `${modPct}%` }} />
                   </div>
                 )}
@@ -249,7 +254,7 @@ export default function MemberCourse() {
                     transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                     className="overflow-hidden"
                   >
-                    <div className="border-t border-border/10 py-1.5 px-1.5">
+                    <div className="border-t border-border/8 py-1 px-1">
                       {mod.lessons.map((lesson, lIdx) => {
                         const isActive = activeLesson?.id === lesson.id;
                         const isCompleted = progress.get(lesson.id)?.completed;
@@ -257,40 +262,37 @@ export default function MemberCourse() {
                         return (
                           <button key={lesson.id} onClick={() => selectLesson(lesson)}
                             className={cn(
-                              "w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all duration-300 rounded-xl",
-                              isActive
-                                ? "bg-primary/10 border border-primary/15"
-                                : "border border-transparent hover:bg-muted/5"
-                            )}
-                          >
+                              "w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-200 rounded-lg",
+                              isActive ? "bg-primary/8 border border-primary/12" : "border border-transparent hover:bg-muted/5"
+                            )}>
                             <div className="shrink-0">
                               {isCompleted ? (
-                                <div className="h-7 w-7 rounded-lg bg-success/10 flex items-center justify-center border border-success/10">
-                                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                                <div className="h-6 w-6 rounded-md bg-success/8 flex items-center justify-center border border-success/8">
+                                  <CheckCircle2 className="h-3 w-3 text-success" />
                                 </div>
                               ) : isActive ? (
-                                <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-                                  <Play className="h-3 w-3 text-primary-foreground ml-[1px] fill-current" />
+                                <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/20">
+                                  <Play className="h-2.5 w-2.5 text-primary-foreground ml-[1px] fill-current" />
                                 </div>
                               ) : (
-                                <span className="h-7 w-7 rounded-lg bg-muted/10 flex items-center justify-center text-xs text-muted-foreground/40 font-display font-black border border-border/10">{lIdx + 1}</span>
+                                <span className="h-6 w-6 rounded-md bg-muted/8 flex items-center justify-center text-[10px] text-muted-foreground/30 font-display font-black border border-border/8">{lIdx + 1}</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
-                                "text-sm truncate font-display",
-                                isCompleted ? "text-muted-foreground line-through font-semibold" : isActive ? "text-foreground font-bold" : "text-foreground/70 font-semibold"
+                                "text-xs truncate font-display",
+                                isCompleted ? "text-muted-foreground/50 line-through" : isActive ? "text-foreground font-bold" : "text-foreground/60 font-semibold"
                               )}>
                                 {lesson.title}
                               </p>
-                              <div className="flex items-center gap-2.5 mt-1">
+                              <div className="flex items-center gap-2 mt-0.5">
                                 {lesson.duration_minutes > 0 && (
-                                  <span className="text-xs text-muted-foreground/50 flex items-center gap-1 font-display tabular-nums"><Clock className="h-2.5 w-2.5" /> {lesson.duration_minutes}min</span>
+                                  <span className="text-[10px] text-muted-foreground/30 flex items-center gap-0.5 font-display tabular-nums"><Clock className="h-2.5 w-2.5" /> {lesson.duration_minutes}min</span>
                                 )}
                                 {isVideo ? (
-                                  <span className="text-xs text-muted-foreground/40 flex items-center gap-1 font-display"><Video className="h-2.5 w-2.5" /> Vídeo</span>
+                                  <span className="text-[10px] text-muted-foreground/25 flex items-center gap-0.5 font-display"><Video className="h-2.5 w-2.5" /> Vídeo</span>
                                 ) : (
-                                  <span className="text-xs text-muted-foreground/40 flex items-center gap-1 font-display"><FileText className="h-2.5 w-2.5" /> Texto</span>
+                                  <span className="text-[10px] text-muted-foreground/25 flex items-center gap-0.5 font-display"><FileText className="h-2.5 w-2.5" /> Texto</span>
                                 )}
                               </div>
                             </div>
@@ -309,113 +311,121 @@ export default function MemberCourse() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-68px)]">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
       {/* ═══ Main Content ═══ */}
       <div className="flex-1 overflow-y-auto">
-        {/* Premium top bar */}
-        <div className="sticky top-0 z-10 bg-background/85 backdrop-blur-2xl border-b border-border/20 px-5 sm:px-8 py-3.5">
+        {/* Top bar */}
+        <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-2xl border-b border-border/15 px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between max-w-5xl mx-auto">
-            <div className="flex items-center gap-3.5 min-w-0">
-              <Link to="/membros-area" className="h-10 w-10 rounded-xl bg-card/50 backdrop-blur-xl hover:bg-card/70 flex items-center justify-center transition-all duration-300 border border-border/20 shrink-0 group">
-                <ChevronLeft className="h-4.5 w-4.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <div className="flex items-center gap-3 min-w-0">
+              <Link to="/membros-area" className="h-9 w-9 rounded-lg bg-card/40 hover:bg-card/60 flex items-center justify-center transition-all border border-border/15 shrink-0 group">
+                <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </Link>
               <div className="min-w-0">
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-base font-display font-black text-foreground truncate tracking-tight">{course.title}</h1>
-                  {isComplete && <Award className="h-4.5 w-4.5 text-success shrink-0" />}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-sm font-display font-bold text-foreground truncate tracking-tight">{course.title}</h1>
+                  {isComplete && <Award className="h-4 w-4 text-success shrink-0" />}
                 </div>
-                <div className="flex items-center gap-3 mt-1">
-                  <div className="h-1.5 rounded-full bg-muted/15 overflow-hidden w-24 sm:w-32">
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="h-1 rounded-full bg-muted/10 overflow-hidden w-20 sm:w-28">
                     <div className="h-full bg-primary transition-all duration-500 rounded-full" style={{ width: `${overallPct}%` }} />
                   </div>
-                  <span className="text-xs text-muted-foreground font-display font-semibold tabular-nums">{completedLessons}/{totalLessons} · {overallPct}%</span>
+                  <span className="text-[10px] text-muted-foreground/50 font-display font-semibold tabular-nums">{completedLessons}/{totalLessons} · {overallPct}%</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button onClick={() => navigateLesson(-1)} disabled={currentIdx <= 0}
-                className="h-10 w-10 rounded-xl bg-card/50 backdrop-blur-xl hover:bg-card/70 flex items-center justify-center transition-all disabled:opacity-20 border border-border/20">
-                <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                className="h-8 w-8 rounded-lg bg-card/40 hover:bg-card/60 flex items-center justify-center transition-all disabled:opacity-15 border border-border/15">
+                <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
               <button onClick={() => navigateLesson(1)} disabled={currentIdx >= totalLessons - 1}
-                className="h-10 w-10 rounded-xl bg-card/50 backdrop-blur-xl hover:bg-card/70 flex items-center justify-center transition-all disabled:opacity-20 border border-border/20">
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                className="h-8 w-8 rounded-lg bg-card/40 hover:bg-card/60 flex items-center justify-center transition-all disabled:opacity-15 border border-border/15">
+                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+              <button onClick={() => setTheaterMode(!theaterMode)}
+                className="hidden lg:flex h-8 w-8 rounded-lg bg-card/40 hover:bg-card/60 items-center justify-center transition-all border border-border/15"
+                title={theaterMode ? "Modo normal" : "Modo teatro"}>
+                {theaterMode ? <Minimize2 className="h-3.5 w-3.5 text-muted-foreground" /> : <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />}
               </button>
               <button onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="h-10 w-10 rounded-xl bg-card/50 backdrop-blur-xl hover:bg-card/70 flex items-center justify-center transition-all lg:hidden border border-border/20">
-                <List className="h-4.5 w-4.5 text-muted-foreground" />
+                className="h-8 w-8 rounded-lg bg-card/40 hover:bg-card/60 flex items-center justify-center transition-all lg:hidden border border-border/15">
+                <List className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Lesson content */}
-        <div className="p-5 sm:p-8 lg:p-10 space-y-6 max-w-5xl mx-auto">
+        <div className={cn("p-4 sm:p-6 lg:p-8 space-y-5 mx-auto", theaterMode ? "max-w-6xl" : "max-w-5xl")}>
           {activeLesson ? (
             <motion.div
               key={activeLesson.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-6"
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-5"
             >
-              {/* Video / Content area */}
+              {/* Video / Content */}
               {hasVideo ? (
-                <div className="aspect-video rounded-2xl overflow-hidden bg-foreground/5 shadow-2xl shadow-background/50 ring-1 ring-border/15">
+                <div className={cn(
+                  "rounded-xl overflow-hidden bg-foreground/5 shadow-2xl shadow-background/50 ring-1 ring-border/10",
+                  theaterMode ? "aspect-video" : "aspect-video max-h-[520px]"
+                )}>
                   <VideoPlayer url={activeLesson.video_url!} />
                 </div>
               ) : (
-                <div className="aspect-video max-h-[420px] rounded-2xl overflow-hidden bg-gradient-to-br from-card to-muted/10 border border-border/20 flex flex-col items-center justify-center text-center p-10">
-                  <div className="h-24 w-24 rounded-[2rem] bg-primary/8 flex items-center justify-center mb-6 border border-primary/10">
-                    <FileText className="h-12 w-12 text-primary/25" />
+                <div className="aspect-video max-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-card to-muted/5 border border-border/15 flex flex-col items-center justify-center text-center p-8">
+                  <div className="h-20 w-20 rounded-2xl bg-primary/6 flex items-center justify-center mb-5 border border-primary/8">
+                    <FileText className="h-10 w-10 text-primary/20" />
                   </div>
-                  <h3 className="text-2xl font-display font-black text-foreground tracking-tight">{activeLesson.title}</h3>
-                  <p className="text-base text-muted-foreground mt-3 font-display">Conteúdo em texto — leia abaixo</p>
+                  <h3 className="text-xl font-display font-black text-foreground tracking-tight">{activeLesson.title}</h3>
+                  <p className="text-sm text-muted-foreground/60 mt-2 font-display">Conteúdo em texto — leia abaixo</p>
                 </div>
               )}
 
-              {/* Lesson details card */}
-              <div className="rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 overflow-hidden shadow-lg shadow-background/20">
-                <div className="p-6 sm:p-8">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
+              {/* Lesson details */}
+              <div className="rounded-xl bg-card/40 border border-border/15 overflow-hidden">
+                <div className="p-5 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       {activeModule && (
-                        <p className="text-xs text-muted-foreground font-display font-bold uppercase tracking-[0.1em] mb-3 flex items-center gap-2">
-                          <Layers className="h-3.5 w-3.5 text-primary/50" />
+                        <p className="text-[10px] text-muted-foreground/50 font-display font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <Layers className="h-3 w-3 text-primary/40" />
                           {activeModule.title}
-                          <span className="text-muted-foreground/30">·</span>
-                          <span className="tabular-nums">Aula {currentIdx + 1} de {totalLessons}</span>
+                          <span className="text-muted-foreground/20">·</span>
+                          <span className="tabular-nums">Aula {currentIdx + 1}/{totalLessons}</span>
                         </p>
                       )}
-                      <h2 className="text-xl sm:text-2xl font-display font-black text-foreground tracking-[-0.03em]">{activeLesson.title}</h2>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground font-display font-semibold">
-                        {hasVideo ? <span className="flex items-center gap-1.5"><Video className="h-4 w-4 text-primary" /> Vídeo-aula</span>
-                          : <span className="flex items-center gap-1.5"><FileText className="h-4 w-4 text-primary" /> Conteúdo</span>}
+                      <h2 className="text-lg sm:text-xl font-display font-black text-foreground tracking-[-0.02em]">{activeLesson.title}</h2>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground/50 font-display font-semibold">
+                        {hasVideo ? <span className="flex items-center gap-1"><Video className="h-3.5 w-3.5 text-primary/60" /> Vídeo-aula</span>
+                          : <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5 text-primary/60" /> Conteúdo</span>}
                         {activeLesson.duration_minutes > 0 && (
-                          <span className="flex items-center gap-1.5 tabular-nums"><Clock className="h-4 w-4" /> {activeLesson.duration_minutes} min</span>
+                          <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3.5 w-3.5" /> {activeLesson.duration_minutes} min</span>
                         )}
                         {activeLesson.is_free && (
-                          <span className="px-2.5 py-1 rounded-lg bg-success/10 text-success text-xs font-display font-bold border border-success/15">Grátis</span>
+                          <span className="px-2 py-0.5 rounded-md bg-success/8 text-success text-[10px] font-display font-bold border border-success/10">Grátis</span>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => markComplete(activeLesson.id)}
                         disabled={progress.get(activeLesson.id)?.completed}
                         className={cn(
-                          "flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-display font-bold transition-all duration-300 active:scale-[0.98]",
+                          "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-display font-bold transition-all duration-300 active:scale-[0.98]",
                           progress.get(activeLesson.id)?.completed
-                            ? "bg-success/10 text-success border border-success/15"
-                            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01]"
+                            ? "bg-success/8 text-success border border-success/12"
+                            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/15 hover:scale-[1.01]"
                         )}>
-                        <CheckCircle2 className="h-4.5 w-4.5" />
-                        {progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir aula"}
+                        <CheckCircle2 className="h-4 w-4" />
+                        {progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir"}
                       </button>
                       {currentIdx < totalLessons - 1 && (
                         <button onClick={() => navigateLesson(1)}
-                          className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-display font-bold bg-card/60 text-foreground/70 hover:bg-card hover:text-foreground transition-all border border-border/20">
-                          Próxima <ArrowRight className="h-4 w-4" />
+                          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-display font-bold bg-card/50 text-foreground/60 hover:bg-card hover:text-foreground transition-all border border-border/15">
+                          Próxima <ArrowRight className="h-3.5 w-3.5" />
                         </button>
                       )}
                     </div>
@@ -423,23 +433,23 @@ export default function MemberCourse() {
                 </div>
 
                 {activeLesson.description && (
-                  <div className="border-t border-border/15 p-6 sm:p-8">
-                    <h4 className="text-xs font-display font-bold text-muted-foreground uppercase tracking-[0.1em] mb-4 flex items-center gap-2">
-                      <FileText className="h-3.5 w-3.5" /> Sobre esta aula
+                  <div className="border-t border-border/10 p-5 sm:p-6">
+                    <h4 className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <FileText className="h-3 w-3" /> Sobre esta aula
                     </h4>
-                    <div className="text-base text-foreground/80 leading-relaxed whitespace-pre-wrap font-display">{activeLesson.description}</div>
+                    <div className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap font-display">{activeLesson.description}</div>
                   </div>
                 )}
               </div>
             </motion.div>
           ) : (
-            <div className="aspect-video max-h-[500px] rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 flex items-center justify-center shadow-lg">
+            <div className="aspect-video max-h-[480px] rounded-xl bg-card/40 border border-border/15 flex items-center justify-center">
               <div className="text-center">
-                <div className="h-20 w-20 rounded-2xl bg-muted/10 flex items-center justify-center mx-auto mb-5 border border-border/15">
-                  <BookOpen className="h-10 w-10 text-muted-foreground/15" />
+                <div className="h-16 w-16 rounded-xl bg-muted/8 flex items-center justify-center mx-auto mb-4 border border-border/10">
+                  <BookOpen className="h-8 w-8 text-muted-foreground/10" />
                 </div>
-                <p className="text-muted-foreground font-display font-bold text-base">Selecione uma aula para começar</p>
-                <p className="text-sm text-muted-foreground/60 mt-2 font-display">Use o menu lateral para navegar</p>
+                <p className="text-muted-foreground/60 font-display font-bold text-sm">Selecione uma aula para começar</p>
+                <p className="text-xs text-muted-foreground/30 mt-1 font-display">Use o menu lateral para navegar</p>
               </div>
             </div>
           )}
@@ -447,13 +457,16 @@ export default function MemberCourse() {
       </div>
 
       {/* ═══ Desktop Sidebar ═══ */}
-      <aside className="hidden lg:block w-[340px] xl:w-[400px] shrink-0 border-l border-border/20 bg-card/15 backdrop-blur-sm overflow-y-auto">
-        <div className="sticky top-0 z-10 bg-card/70 backdrop-blur-2xl border-b border-border/15 p-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Layers className="h-4 w-4 text-primary/60" />
-            <h3 className="text-sm font-display font-black text-foreground tracking-tight">Conteúdo</h3>
+      <aside className={cn(
+        "hidden lg:block shrink-0 border-l border-border/15 bg-card/10 overflow-y-auto transition-all duration-500",
+        sidebarWidth
+      )}>
+        <div className="sticky top-0 z-10 bg-card/60 backdrop-blur-2xl border-b border-border/10 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="h-3.5 w-3.5 text-primary/50" />
+            <h3 className="text-xs font-display font-black text-foreground tracking-tight">Conteúdo</h3>
           </div>
-          <span className="text-xs font-display font-semibold text-muted-foreground bg-muted/10 px-2.5 py-1 rounded-lg border border-border/15 tabular-nums">{totalLessons} aulas</span>
+          <span className="text-[10px] font-display font-semibold text-muted-foreground/40 bg-muted/8 px-2 py-0.5 rounded-md border border-border/10 tabular-nums">{totalLessons} aulas</span>
         </div>
         <CourseSidebar />
       </aside>
@@ -464,21 +477,21 @@ export default function MemberCourse() {
           <>
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 lg:hidden"
+              className="fixed inset-0 bg-background/50 backdrop-blur-sm z-40 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
             <motion.div
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-0 right-0 bottom-0 w-[88vw] max-w-[400px] bg-card/95 backdrop-blur-2xl border-l border-border/20 z-50 lg:hidden overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-[380px] bg-card/95 backdrop-blur-2xl border-l border-border/15 z-50 lg:hidden overflow-y-auto"
             >
-              <div className="sticky top-0 z-10 bg-card/85 backdrop-blur-2xl border-b border-border/15 p-5 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Layers className="h-4 w-4 text-primary/60" />
-                  <h3 className="text-base font-display font-black text-foreground tracking-tight">Conteúdo do Curso</h3>
+              <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-2xl border-b border-border/10 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-3.5 w-3.5 text-primary/50" />
+                  <h3 className="text-sm font-display font-black text-foreground tracking-tight">Conteúdo</h3>
                 </div>
-                <button onClick={() => setSidebarOpen(false)} className="h-9 w-9 rounded-xl bg-muted/15 hover:bg-muted/25 flex items-center justify-center transition-colors border border-border/15">
-                  <X className="h-4.5 w-4.5 text-muted-foreground" />
+                <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 rounded-lg bg-muted/10 hover:bg-muted/20 flex items-center justify-center transition-colors border border-border/10">
+                  <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
               <CourseSidebar />

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Play, Clock, BookOpen, TrendingUp, ChevronRight, Award, Zap, Sparkles, GraduationCap, Flame, Layers, Star } from "lucide-react";
+import { Play, Clock, BookOpen, TrendingUp, ChevronRight, Award, Zap, Sparkles, GraduationCap, Flame, Layers, Star, Target, Trophy, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -58,12 +58,16 @@ export default function MemberHome() {
   const totalLessons = courses.reduce((a, c) => a + c.totalLessons, 0);
   const overallPct = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
   const completedCourses = courses.filter(c => c.totalLessons > 0 && c.completedLessons === c.totalLessons).length;
+  const totalModules = courses.reduce((a, c) => a + c.modules.length, 0);
 
   if (loading) return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5">
-        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-xl shadow-primary/10">
-          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="relative">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-2xl shadow-primary/10">
+            <GraduationCap className="h-7 w-7 text-primary/60" />
+          </div>
+          <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 border-t-primary animate-spin" />
         </div>
         <p className="text-muted-foreground text-sm font-display font-bold tracking-tight">Carregando seus cursos...</p>
       </motion.div>
@@ -74,13 +78,13 @@ export default function MemberHome() {
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: [0.16, 1, 0.3, 1] }}>
         <div className="relative mb-10">
-          <div className="absolute inset-0 rounded-full bg-primary/8 blur-[100px] w-56 h-56 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2" />
-          <div className="relative h-32 w-32 rounded-[2.5rem] bg-card border border-border/30 flex items-center justify-center shadow-2xl">
-            <GraduationCap className="h-16 w-16 text-muted-foreground/15" />
+          <div className="absolute inset-0 rounded-full bg-primary/8 blur-[120px] w-64 h-64 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2" />
+          <div className="relative h-28 w-28 rounded-[2rem] bg-card border border-border/30 flex items-center justify-center shadow-2xl mx-auto">
+            <GraduationCap className="h-14 w-14 text-muted-foreground/10" />
           </div>
         </div>
         <h2 className="text-3xl sm:text-4xl font-display font-black text-foreground tracking-[-0.04em] mb-4">Bem-vindo à sua área</h2>
-        <p className="text-base text-muted-foreground max-w-md leading-relaxed font-display">
+        <p className="text-base text-muted-foreground max-w-md leading-relaxed font-display mx-auto">
           Quando você adquirir um produto, seus cursos e conteúdos aparecerão aqui automaticamente.
         </p>
       </motion.div>
@@ -92,78 +96,78 @@ export default function MemberHome() {
 
   return (
     <div className="pb-24">
-      {/* ═══ Cinematic Hero Banner ═══ */}
-      <div className="relative h-[60vh] min-h-[460px] max-h-[640px] overflow-hidden">
+      {/* ═══ Cinematic Hero ═══ */}
+      <div className="relative h-[55vh] min-h-[420px] max-h-[580px] overflow-hidden">
         {featured.thumbnail_url ? (
           <motion.img
-            initial={{ scale: 1.12, opacity: 0 }}
+            initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1.02, opacity: 1 }}
             transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
             src={featured.thumbnail_url} alt={featured.title}
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/12 via-background to-background" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-background" />
         )}
-        {/* Cinematic overlays — premium multi-layer */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/5" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/50 to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_30%,hsl(var(--background))_100%)]" />
+        {/* Multi-layer cinematic overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_40%,hsl(var(--background))_100%)]" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 lg:p-16 max-w-7xl mx-auto">
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-12 max-w-[1440px] mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-2xl"
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-xl"
           >
-            <div className="flex items-center gap-3 mb-6">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-black uppercase tracking-[0.1em] bg-primary/12 text-primary border border-primary/15 backdrop-blur-xl">
-                <Zap className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-2.5 mb-5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-display font-black uppercase tracking-[0.12em] bg-primary/12 text-primary border border-primary/12 backdrop-blur-xl">
+                <Zap className="h-3 w-3" />
                 {continueWatching.length > 0 ? "Continue assistindo" : "Em destaque"}
               </span>
               {featured.category && (
-                <span className="px-3 py-1.5 rounded-full text-xs font-display font-bold bg-card/30 backdrop-blur-xl text-foreground/60 border border-border/15">
+                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-display font-bold bg-card/20 backdrop-blur-xl text-foreground/50 border border-border/10 uppercase tracking-wider">
                   {featured.category}
                 </span>
               )}
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-display font-black text-foreground leading-[1.05] tracking-[-0.04em] mb-5">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-foreground leading-[1.08] tracking-[-0.04em] mb-4">
               {featured.title}
             </h1>
 
             {featured.description && (
-              <p className="text-base sm:text-lg text-muted-foreground line-clamp-2 mb-8 leading-relaxed max-w-xl font-display font-medium">{featured.description}</p>
+              <p className="text-sm sm:text-base text-muted-foreground/80 line-clamp-2 mb-6 leading-relaxed max-w-lg font-display">{featured.description}</p>
             )}
 
-            <div className="flex items-center gap-6 mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-40 sm:w-52">
-                  <div className="h-2 rounded-full bg-foreground/10 overflow-hidden backdrop-blur-sm">
+            {/* Progress inline */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-2.5">
+                <div className="w-32 sm:w-40">
+                  <div className="h-1.5 rounded-full bg-foreground/8 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${featuredPct}%` }}
-                      transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full"
-                      style={{ boxShadow: "0 0 16px hsl(var(--primary) / 0.25)" }}
+                      transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full"
                     />
                   </div>
                 </div>
-                <span className="text-sm text-foreground/60 font-display font-bold tabular-nums">{featuredPct}%</span>
+                <span className="text-xs text-foreground/50 font-display font-bold tabular-nums">{featuredPct}%</span>
               </div>
-              <span className="text-sm text-muted-foreground font-display font-semibold tabular-nums">{featured.completedLessons}/{featured.totalLessons} aulas</span>
+              <span className="text-xs text-muted-foreground/50 font-display tabular-nums">{featured.completedLessons}/{featured.totalLessons} aulas</span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="group inline-flex items-center gap-3 h-13 sm:h-14 px-8 sm:px-10 rounded-2xl bg-foreground text-background text-base font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-2xl shadow-foreground/15 active:scale-[0.98]">
-                <Play className="h-5 w-5 fill-current" />
-                {continueWatching.length > 0 ? "Continuar" : "Começar agora"}
+                className="group inline-flex items-center gap-2.5 h-11 px-6 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/10 active:scale-[0.98]">
+                <Play className="h-4 w-4 fill-current" />
+                {continueWatching.length > 0 ? "Continuar" : "Começar"}
               </Link>
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="inline-flex items-center gap-2.5 h-13 sm:h-14 px-7 rounded-2xl bg-card/40 backdrop-blur-xl text-foreground/80 text-base font-display font-bold border border-border/25 hover:bg-card/60 hover:text-foreground transition-all active:scale-[0.98]">
-                <BookOpen className="h-5 w-5" />
+                className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground transition-all active:scale-[0.98]">
+                <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Detalhes</span>
               </Link>
             </div>
@@ -171,51 +175,50 @@ export default function MemberHome() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 space-y-14 mt-12">
-        {/* ═══ Premium Stats Row ═══ */}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10 mt-10">
+        {/* ═══ Stats Strip ═══ */}
         {totalLessons > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+            transition={{ delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
           >
-            <PremiumStatCard icon={<BookOpen className="h-5 w-5" />} label="Cursos" value={String(courses.length)} color="primary" />
-            <PremiumStatCard icon={<TrendingUp className="h-5 w-5" />} label="Progresso" value={`${overallPct}%`} color="info" />
-            <PremiumStatCard icon={<Flame className="h-5 w-5" />} label="Aulas feitas" value={`${totalCompleted}`} color="warning" />
-            <PremiumStatCard icon={<Award className="h-5 w-5" />} label="Concluídos" value={String(completedCourses)} color="success" />
+            <StatPill icon={<BookOpen className="h-4 w-4" />} label="Cursos" value={String(courses.length)} accent="primary" />
+            <StatPill icon={<Target className="h-4 w-4" />} label="Progresso" value={`${overallPct}%`} accent="info" />
+            <StatPill icon={<Flame className="h-4 w-4" />} label="Aulas feitas" value={String(totalCompleted)} accent="warning" />
+            <StatPill icon={<Trophy className="h-4 w-4" />} label="Concluídos" value={String(completedCourses)} accent="success" />
           </motion.div>
         )}
 
         {/* ═══ Overall Progress ═══ */}
         {totalLessons > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-3xl p-6 sm:p-7 bg-card/50 backdrop-blur-xl border border-border/25 shadow-xl shadow-background/30"
+            transition={{ delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-2xl p-5 bg-card/40 border border-border/20"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/10">
-                  <Sparkles className="h-5 w-5 text-primary" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <span className="text-base font-display font-black text-foreground tracking-tight">Progresso geral</span>
-                  <p className="text-xs text-muted-foreground font-display mt-0.5 tabular-nums">
-                    {totalCompleted} de {totalLessons} aulas · {completedCourses} {completedCourses === 1 ? "curso completo" : "cursos completos"}
+                  <span className="text-sm font-display font-bold text-foreground">Progresso geral</span>
+                  <p className="text-[11px] text-muted-foreground/60 font-display tabular-nums">
+                    {totalCompleted}/{totalLessons} aulas · {completedCourses} concluído{completedCourses !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
-              <span className="text-2xl font-display font-black text-primary tabular-nums">{overallPct}%</span>
+              <span className="text-xl font-display font-black text-primary tabular-nums">{overallPct}%</span>
             </div>
-            <div className="h-3 rounded-full bg-muted/15 overflow-hidden">
+            <div className="h-2 rounded-full bg-muted/10 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${overallPct}%` }}
-                transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="h-full bg-gradient-to-r from-primary via-primary to-primary/60 rounded-full"
-                style={{ boxShadow: "0 0 24px hsl(var(--primary) / 0.3)" }}
+                transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="h-full bg-gradient-to-r from-primary via-primary to-primary/50 rounded-full"
               />
             </div>
           </motion.div>
@@ -224,15 +227,10 @@ export default function MemberHome() {
         {/* ═══ Continue Watching ═══ */}
         {continueWatching.length > 0 && (
           <section>
-            <SectionHeader icon={<Play className="h-4.5 w-4.5 text-primary fill-primary" />} title="Continue Assistindo" subtitle={`${continueWatching.length} cursos em andamento`} />
-            <div className="flex gap-5 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide snap-x snap-mandatory">
+            <SectionHeader icon={<Play className="h-4 w-4 text-primary fill-primary" />} title="Continue Assistindo" count={continueWatching.length} />
+            <div className="flex gap-4 overflow-x-auto pb-3 -mx-2 px-2 scrollbar-hide snap-x snap-mandatory">
               {continueWatching.map((c, i) => (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                >
+                <motion.div key={c.id} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}>
                   <ContinueCard course={c} />
                 </motion.div>
               ))}
@@ -242,63 +240,49 @@ export default function MemberHome() {
 
         {/* ═══ My Courses Grid ═══ */}
         <section>
-          <SectionHeader icon={<Layers className="h-4.5 w-4.5 text-foreground" />} title="Meus Cursos" subtitle={`${courses.length} cursos disponíveis`} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SectionHeader icon={<Layers className="h-4 w-4 text-foreground" />} title="Meus Cursos" count={courses.length} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {courses.map((course, i) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              >
+              <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}>
                 <CourseCard course={course} />
               </motion.div>
             ))}
           </div>
         </section>
 
-        {/* ═══ Module Carousels ═══ */}
+        {/* ═══ Module Rows ═══ */}
         {courses.filter(c => c.modules.length > 1).map((course, ci) => (
-          <motion.section
-            key={course.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + ci * 0.1, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="flex items-center justify-between mb-6">
+          <motion.section key={course.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + ci * 0.08, ease: [0.16, 1, 0.3, 1] }}>
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-display font-black text-foreground tracking-tight">{course.title}</h3>
-                <p className="text-sm text-muted-foreground font-display mt-0.5">{course.modules.length} módulos</p>
+                <h3 className="text-base font-display font-black text-foreground tracking-[-0.02em]">{course.title}</h3>
+                <p className="text-xs text-muted-foreground/60 font-display mt-0.5">{course.modules.length} módulos</p>
               </div>
-              <Link to={`/membros-area/curso/${course.id}`} className="text-sm text-primary hover:text-primary/80 font-display font-bold flex items-center gap-1.5 transition-colors group">
-                Ver curso <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              <Link to={`/membros-area/curso/${course.id}`} className="text-xs text-primary hover:text-primary/80 font-display font-bold flex items-center gap-1 transition-colors group">
+                Ver curso <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
-            <div className="flex gap-5 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide snap-x">
+            <div className="flex gap-4 overflow-x-auto pb-3 -mx-2 px-2 scrollbar-hide snap-x">
               {course.modules.map((mod, mi) => (
-                <motion.div
-                  key={mod.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: mi * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <Link to={`/membros-area/curso/${course.id}?module=${mod.id}`} className="group shrink-0 w-[240px] md:w-[280px] snap-start block">
-                    <div className="aspect-video rounded-2xl overflow-hidden relative bg-card border border-border/20 group-hover:border-primary/20 transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/5">
+                <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.05, ease: [0.16, 1, 0.3, 1] }}>
+                  <Link to={`/membros-area/curso/${course.id}?module=${mod.id}`} className="group shrink-0 w-[220px] md:w-[260px] snap-start block">
+                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card border border-border/15 group-hover:border-primary/15 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
                       {mod.banner_url ? (
-                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
+                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
-                          <BookOpen className="h-10 w-10 text-primary/10" />
+                          <BookOpen className="h-8 w-8 text-primary/8" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-foreground text-sm font-display font-bold line-clamp-1">{mod.title}</p>
-                        <p className="text-muted-foreground text-xs mt-1 font-display tabular-nums">{mod.lessonCount} aulas</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3.5">
+                        <p className="text-foreground text-xs font-display font-bold line-clamp-1">{mod.title}</p>
+                        <p className="text-muted-foreground/50 text-[10px] mt-0.5 font-display tabular-nums">{mod.lessonCount} aulas</p>
                       </div>
-                      <div className="absolute inset-0 bg-background/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="h-12 w-12 rounded-full bg-foreground/90 flex items-center justify-center shadow-2xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                          <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
+                      {/* Play overlay */}
+                      <div className="absolute inset-0 bg-background/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                          <Play className="h-4 w-4 text-background ml-0.5 fill-current" />
                         </div>
                       </div>
                     </div>
@@ -313,40 +297,36 @@ export default function MemberHome() {
   );
 }
 
-/* ─── Premium Sub Components ─── */
+/* ═══ Sub Components ═══ */
 
-function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
+function SectionHeader({ icon, title, count }: { icon: React.ReactNode; title: string; count?: number }) {
   return (
-    <div className="flex items-center gap-3.5 mb-6">
-      <div className="h-10 w-10 rounded-xl bg-card border border-border/25 flex items-center justify-center shadow-sm">
-        {icon}
-      </div>
-      <div>
-        <h2 className="text-lg font-display font-black text-foreground tracking-[-0.03em]">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground font-display mt-0.5">{subtitle}</p>}
-      </div>
+    <div className="flex items-center gap-2.5 mb-5">
+      <div className="h-8 w-8 rounded-lg bg-card border border-border/20 flex items-center justify-center">{icon}</div>
+      <h2 className="text-base font-display font-black text-foreground tracking-[-0.02em]">{title}</h2>
+      {count !== undefined && (
+        <span className="text-[10px] font-display font-bold text-muted-foreground/50 bg-muted/10 px-2 py-0.5 rounded-md border border-border/10 tabular-nums">{count}</span>
+      )}
     </div>
   );
 }
 
-function PremiumStatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
-  const colorMap: Record<string, { bg: string; text: string; border: string; glow: string }> = {
-    primary: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/15", glow: "shadow-primary/5" },
-    info: { bg: "bg-info/10", text: "text-info", border: "border-info/15", glow: "shadow-info/5" },
-    warning: { bg: "bg-warning/10", text: "text-warning", border: "border-warning/15", glow: "shadow-warning/5" },
-    success: { bg: "bg-success/10", text: "text-success", border: "border-success/15", glow: "shadow-success/5" },
+function StatPill({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent: string }) {
+  const colors: Record<string, string> = {
+    primary: "text-primary bg-primary/8 border-primary/10",
+    info: "text-info bg-info/8 border-info/10",
+    warning: "text-warning bg-warning/8 border-warning/10",
+    success: "text-success bg-success/8 border-success/10",
   };
-  const c = colorMap[color] || colorMap.primary;
   return (
-    <div className={cn(
-      "flex flex-col items-center gap-3 p-5 sm:p-6 rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 hover:border-border/30 transition-all duration-300 shadow-lg",
-      c.glow
-    )}>
-      <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border", c.bg, c.border)}>
-        <span className={c.text}>{icon}</span>
+    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-card/40 border border-border/15 transition-all hover:border-border/25">
+      <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center border shrink-0", colors[accent])}>
+        {icon}
       </div>
-      <span className="text-2xl sm:text-3xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums">{value}</span>
-      <span className="text-xs text-muted-foreground font-display font-bold uppercase tracking-[0.08em]">{label}</span>
+      <div>
+        <span className="text-lg font-display font-black text-foreground tracking-[-0.02em] tabular-nums block leading-tight">{value}</span>
+        <span className="text-[10px] text-muted-foreground/50 font-display font-bold uppercase tracking-wider">{label}</span>
+      </div>
     </div>
   );
 }
@@ -354,56 +334,51 @@ function PremiumStatCard({ icon, label, value, color }: { icon: React.ReactNode;
 function CourseCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   const isComplete = pct === 100 && course.totalLessons > 0;
-
   return (
     <Link to={`/membros-area/curso/${course.id}`}
-      className="group rounded-2xl overflow-hidden bg-card/50 backdrop-blur-xl border border-border/20 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/8 active:scale-[0.985] block">
+      className="group rounded-xl overflow-hidden bg-card/40 border border-border/15 hover:border-primary/15 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block h-full">
       <div className="aspect-video relative overflow-hidden">
         {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
+          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/8 to-card">
-            <BookOpen className="h-14 w-14 text-primary/10" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
+            <BookOpen className="h-12 w-12 text-primary/8" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        {/* Play button on hover */}
+        {/* Play hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="h-14 w-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-2xl transform scale-85 group-hover:scale-100 transition-transform duration-300">
-            <Play className="h-6 w-6 text-background ml-0.5 fill-current" />
+          <div className="h-12 w-12 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
+            <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
           </div>
         </div>
-
         {/* Progress bar */}
         {pct > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-background/30 backdrop-blur-sm">
-            <div className={cn("h-full transition-all duration-700 rounded-full", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${pct}%` }} />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/20">
+            <div className={cn("h-full rounded-full transition-all", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${pct}%` }} />
           </div>
         )}
-
         {/* Badges */}
         {isComplete && (
-          <div className="absolute top-3 right-3 h-9 w-9 rounded-xl bg-success/90 flex items-center justify-center shadow-lg backdrop-blur-sm border border-success/30">
-            <Award className="h-4.5 w-4.5 text-success-foreground" />
+          <div className="absolute top-2.5 right-2.5 h-7 w-7 rounded-lg bg-success/90 flex items-center justify-center shadow-md">
+            <Award className="h-3.5 w-3.5 text-success-foreground" />
           </div>
         )}
-        <div className="absolute top-3 left-3">
-          <span className="text-[10px] font-display font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-lg bg-background/60 backdrop-blur-xl text-foreground/70 border border-border/15">
+        <div className="absolute top-2.5 left-2.5">
+          <span className="text-[9px] font-display font-black uppercase tracking-[0.1em] px-2 py-1 rounded-md bg-background/50 backdrop-blur-xl text-foreground/60 border border-border/10">
             {course.category}
           </span>
         </div>
       </div>
-
-      <div className="p-5 sm:p-6">
-        <h3 className="font-display font-black text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors tracking-[-0.02em]">{course.title}</h3>
-        {course.description && <p className="text-sm text-muted-foreground line-clamp-2 mt-2 leading-relaxed font-display">{course.description}</p>}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/15">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground font-display font-semibold">
-            <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5" /> {course.modules.length} módulos</span>
+      <div className="p-4">
+        <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors tracking-[-0.01em]">{course.title}</h3>
+        {course.description && <p className="text-xs text-muted-foreground/60 line-clamp-2 mt-1.5 leading-relaxed font-display">{course.description}</p>}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/10">
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/50 font-display font-semibold">
+            <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {course.modules.length}m</span>
             <span className="tabular-nums">{course.totalLessons} aulas</span>
           </div>
-          {pct > 0 && <span className="text-sm font-display font-black text-primary tabular-nums">{pct}%</span>}
+          {pct > 0 && <span className="text-xs font-display font-black text-primary tabular-nums">{pct}%</span>}
         </div>
       </div>
     </Link>
@@ -414,28 +389,28 @@ function ContinueCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   return (
     <Link to={`/membros-area/curso/${course.id}`}
-      className="group shrink-0 w-[320px] md:w-[360px] snap-start rounded-2xl overflow-hidden bg-card/50 backdrop-blur-xl border border-border/20 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/8 active:scale-[0.985] block">
+      className="group shrink-0 w-[280px] md:w-[320px] snap-start rounded-xl overflow-hidden bg-card/40 border border-border/15 hover:border-primary/15 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block">
       <div className="aspect-video relative overflow-hidden">
         {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
+          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/8 to-card">
-            <BookOpen className="h-10 w-10 text-primary/10" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
+            <BookOpen className="h-8 w-8 text-primary/8" />
           </div>
         )}
-        <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="h-14 w-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-2xl">
-            <Play className="h-6 w-6 text-background ml-0.5 fill-current" />
+        <div className="absolute inset-0 bg-background/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl">
+            <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/20">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/15">
           <div className="h-full bg-primary transition-all duration-500 rounded-full" style={{ width: `${pct}%` }} />
         </div>
       </div>
-      <div className="p-5">
-        <h3 className="font-display font-black text-base text-foreground line-clamp-1 tracking-[-0.02em]">{course.title}</h3>
-        <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground font-display font-semibold">
-          <span className="flex items-center gap-1.5 tabular-nums"><Clock className="h-3.5 w-3.5" /> {pct}% concluído</span>
+      <div className="p-4">
+        <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 tracking-[-0.01em]">{course.title}</h3>
+        <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground/50 font-display font-semibold">
+          <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3 w-3" /> {pct}%</span>
           <span className="tabular-nums">{course.completedLessons}/{course.totalLessons} aulas</span>
         </div>
       </div>
