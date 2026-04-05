@@ -453,7 +453,8 @@ export default function Webhooks() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+      </motion.section>
 
       {/* Webhooks List */}
       <div className="space-y-3">
