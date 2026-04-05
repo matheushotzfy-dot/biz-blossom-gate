@@ -396,31 +396,100 @@ export default function AdminConteudo() {
   ];
 
   return (
-    <div className="relative animate-fade-in">
-      <div className="relative z-[1] mx-auto w-full max-w-[1200px] space-y-8 pb-12">
-        {/* ═══ Header ═══ */}
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-display font-black tracking-[-0.04em] text-foreground">Conteúdo</h1>
-              <p className="text-sm font-display text-muted-foreground mt-1">Gerencie cursos, módulos e aulas da área de membros</p>
-            </div>
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
-            <Button onClick={openNew} className="gap-2 rounded-xl text-sm font-display font-bold h-10 px-5 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.985] transition-all duration-300">
-              <Plus className="h-4 w-4" /> Novo Curso
-            </Button>
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HERO                                                            */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+      >
+        <div className="absolute -inset-16 pointer-events-none">
+          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
+          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
+          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]" />
+          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+        </div>
+
+        <div className="relative z-10">
+          {/* Top bar */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                <GraduationCap className="h-4.5 w-4.5 text-primary" />
+              </div>
+              <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Área de Membros</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                  <span className="relative h-2 w-2 rounded-full bg-success" />
+                </span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">{publishedCourses} Live</span>
+              </div>
+            </div>
+            <button
+              onClick={openNew}
+              className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all duration-300"
+            >
+              <Plus className="h-3.5 w-3.5" /> Novo Curso
+            </button>
           </div>
 
-          {/* ── Stats Row ── */}
-          {totalCourses > 0 && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <StatPill icon={BookOpen} label="Total de cursos" value={totalCourses} color="primary" />
-              <StatPill icon={Flame} label="Publicados" value={publishedCourses} color="success" trend={publishedCourses > 0 ? "Live" : undefined} />
-              <StatPill icon={Video} label="Total de aulas" value={totalLessons} color="info" />
-              <StatPill icon={DollarSign} label="Receita total" value={fmt(totalRevenue)} color="warning" />
+          {/* Main stats */}
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="mb-8">
+            <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40 mb-3">Conteúdo & Cursos</p>
+            <div className="flex items-end gap-4 mb-4">
+              <span className="text-5xl sm:text-6xl lg:text-7xl font-heading tabular-nums text-foreground leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.2)]">
+                {totalCourses}
+              </span>
+              <span className="text-lg font-heading text-muted-foreground/30 mb-1">curso{totalCourses !== 1 ? "s" : ""}</span>
             </div>
-          )}
+            <div className="flex flex-wrap items-center gap-2 mt-4">
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
+                <Flame className="h-3 w-3 text-success" /> {publishedCourses} publicados
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
+                <Layers className="h-3 w-3" /> {totalModules} módulos
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
+                <Video className="h-3 w-3 text-info" /> {totalLessons} aulas
+              </span>
+              {totalRevenue > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3 py-1.5">
+                  <DollarSign className="h-3 w-3 text-success" /> {fmt(totalRevenue)}
+                </span>
+              )}
+            </div>
+          </motion.div>
+
+          {/* KPI strip */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: "Total Cursos", value: String(totalCourses), color: "primary", icon: BookOpen },
+              { label: "Publicados", value: String(publishedCourses), color: "success", icon: Flame },
+              { label: "Total Aulas", value: String(totalLessons), color: "info", icon: Video },
+              { label: "Receita Total", value: fmt(totalRevenue), color: "warning", icon: DollarSign },
+            ].map((item, idx) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 + idx * 0.08 }} className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative">
+                <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
+                <div className="relative z-10 flex items-start justify-between">
+                  <div>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-2">{item.label}</p>
+                    <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
+                  </div>
+                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
+                    <item.icon className="h-4 w-4" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
+      </motion.section>
 
         {/* ═══ Toolbar ═══ */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
