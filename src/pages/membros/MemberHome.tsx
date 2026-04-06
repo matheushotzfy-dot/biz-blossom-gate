@@ -382,45 +382,46 @@ function CourseCard({ course }: { course: CourseWithProgress }) {
 
   return (
     <Link to={`/membros-area/curso/${course.id}`} className="group block h-full">
-      <div className="rounded-xl overflow-hidden bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 shadow-sm group-hover:shadow-lg group-hover:shadow-primary/5 h-full flex flex-col">
+      <div className="rounded-2xl overflow-hidden bg-card ring-1 ring-border/15 group-hover:ring-primary/25 transition-all duration-500 shadow-sm group-hover:shadow-xl group-hover:shadow-primary/8 h-full flex flex-col">
         <div className="aspect-[16/10] relative overflow-hidden">
           {course.thumbnail_url ? (
-            <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+            <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-[900ms] ease-out" loading="lazy" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/5 via-card to-card flex items-center justify-center">
-              <GraduationCap className="h-10 w-10 text-primary/8" />
+            <div className="w-full h-full bg-gradient-to-br from-primary/8 via-card to-card flex items-center justify-center relative">
+              <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+              <GraduationCap className="h-12 w-12 text-primary/8" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           {/* Status badge */}
           {isFinished && (
-            <div className="absolute top-2.5 right-2.5">
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-success/15 backdrop-blur-xl text-[9px] font-display font-bold text-success ring-1 ring-success/20">
-                <CheckCircle2 className="h-2.5 w-2.5" /> Concluído
+            <div className="absolute top-3 right-3">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-success/20 backdrop-blur-xl text-[9px] font-display font-black text-success ring-1 ring-success/25 shadow-lg shadow-success/10">
+                <CheckCircle2 className="h-3 w-3" /> Concluído
               </div>
             </div>
           )}
           {/* Category */}
           {course.category && !isFinished && (
-            <div className="absolute top-2.5 left-2.5">
-              <span className="px-2 py-1 rounded-lg bg-card/30 backdrop-blur-xl text-[9px] font-display font-bold text-foreground/60 ring-1 ring-border/15 uppercase tracking-wider">{course.category}</span>
+            <div className="absolute top-3 left-3">
+              <span className="px-2.5 py-1.5 rounded-lg bg-card/40 backdrop-blur-xl text-[9px] font-display font-bold text-foreground/70 ring-1 ring-border/20 uppercase tracking-wider shadow-sm">{course.category}</span>
             </div>
           )}
           {/* Play overlay */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="h-12 w-12 rounded-2xl bg-foreground/80 backdrop-blur-xl flex items-center justify-center shadow-2xl">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="h-12 w-12 rounded-2xl bg-foreground/85 backdrop-blur-xl flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform duration-500">
               <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
             </div>
           </div>
         </div>
-        <div className="flex-1 p-4 flex flex-col">
-          <h3 className="text-sm font-display font-black text-foreground tracking-[-0.02em] line-clamp-2 group-hover:text-primary transition-colors leading-snug">{course.title}</h3>
+        <div className="flex-1 p-4 sm:p-5 flex flex-col">
+          <h3 className="text-sm font-display font-black text-foreground tracking-[-0.02em] line-clamp-2 group-hover:text-primary transition-colors duration-300 leading-snug">{course.title}</h3>
           {course.description && (
-            <p className="text-[11px] text-muted-foreground/50 mt-1.5 line-clamp-2 font-display leading-relaxed">{course.description}</p>
+            <p className="text-[11px] text-muted-foreground/50 mt-2 line-clamp-2 font-display leading-relaxed">{course.description}</p>
           )}
-          <div className="mt-auto pt-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] text-muted-foreground/40 font-display tabular-nums">{course.completedLessons}/{course.totalLessons} aulas</span>
+          <div className="mt-auto pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-muted-foreground/40 font-display font-semibold tabular-nums">{course.completedLessons}/{course.totalLessons} aulas</span>
               <span className={cn("text-[10px] font-display font-black tabular-nums", isFinished ? "text-success" : "text-primary")}>{pct}%</span>
             </div>
             <div className="h-1.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
@@ -428,8 +429,10 @@ function CourseCard({ course }: { course: CourseWithProgress }) {
                 initial={{ width: 0 }}
                 animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.8, delay: 0.2, ease }}
-                className={cn("h-full rounded-full", isFinished ? "bg-success" : "bg-gradient-to-r from-primary to-primary/60")}
-              />
+                className={cn("h-full rounded-full relative", isFinished ? "bg-success" : "bg-gradient-to-r from-primary to-primary/60")}
+              >
+                {pct > 0 && pct < 100 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />}
+              </motion.div>
             </div>
           </div>
         </div>
