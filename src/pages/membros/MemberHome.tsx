@@ -176,12 +176,13 @@ export default function MemberHome() {
 
             <div className="flex items-center gap-2.5">
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="group inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/15 active:scale-[0.98]">
-                <Play className="h-4 w-4 fill-current" />
-                {continueWatching.length > 0 ? "Continuar" : "Começar"}
+                className="group inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/15 active:scale-[0.98] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer pointer-events-none" />
+                <Play className="h-4 w-4 fill-current relative z-10" />
+                <span className="relative z-10">{continueWatching.length > 0 ? "Continuar" : "Começar"}</span>
               </Link>
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground transition-all active:scale-[0.98] shadow-sm">
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground hover:border-border/30 transition-all active:scale-[0.98] shadow-sm">
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Detalhes</span>
               </Link>
