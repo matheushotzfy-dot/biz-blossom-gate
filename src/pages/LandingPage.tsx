@@ -456,16 +456,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ LOGOS / SOCIAL PROOF BAR ═══ */}
+      {/* ═══ SOCIAL PROOF BAR ═══ */}
       <Section className="py-12 md:py-16 border-y border-border/5">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="text-center">
-          <p className="text-[10px] text-muted-foreground/30 font-bold uppercase tracking-[0.2em] mb-8 font-display">
-            Mais de 2.000 infoprodutores confiam na HOTZFY
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-30">
-            {["Curso Pro", "Digital Academy", "Expert Hub", "Mentor Plus", "Infobiz", "Scale Up"].map(name => (
-              <span key={name} className="text-lg font-display font-black tracking-[-0.02em] text-foreground/60">{name}</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
+            {[
+              { number: "2K+", label: "produtores ativos" },
+              { number: "R$ 50M+", label: "processados" },
+              { number: "99.9%", label: "uptime" },
+              { number: "<2s", label: "tempo de saque PIX" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/20 border border-border/8">
+                <span className="text-lg font-display font-black text-primary tabular-nums">{item.number}</span>
+                <span className="text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider">{item.label}</span>
+              </div>
             ))}
           </div>
         </motion.div>
