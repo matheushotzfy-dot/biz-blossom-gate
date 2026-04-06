@@ -491,35 +491,23 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[150px] animate-pulse" />
-          <div className="absolute bottom-1/3 left-1/3 w-[400px] h-[200px] bg-info/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "0.5s" }} />
-        </div>
-        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col items-center gap-5 relative z-10">
+      <div className="h-[100dvh] bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center shadow-lg shadow-primary/10">
-              <Package className="h-7 w-7 text-primary" />
-            </div>
-            <div className="absolute -inset-6 rounded-3xl bg-primary/5 blur-2xl animate-pulse" />
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="absolute -inset-2"
-            >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary/60" />
-            </motion.div>
-          </div>
-          <div className="text-center space-y-1.5">
-            <p className="text-sm font-display font-black text-foreground">Carregando produto</p>
-            <p className="text-[11px] text-muted-foreground/50 font-display">Preparando editor avançado...</p>
-            <div className="flex items-center justify-center gap-1 mt-2">
-              {[0, 1, 2].map(i => (
-                <motion.div key={i} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} className="h-1.5 w-1.5 rounded-full bg-primary/60" />
-              ))}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+              className="h-12 w-12 border-2 border-border/20 border-t-primary rounded-full"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Package className="h-5 w-5 text-primary/60" />
             </div>
           </div>
-        </motion.div>
+          <div className="text-center space-y-1">
+            <p className="text-sm font-display font-bold text-foreground">Carregando produto</p>
+            <p className="text-xs text-muted-foreground">Preparando editor...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -530,66 +518,58 @@ export default function ProductEditor() {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* ───── Progress Bar (Top) ───── */}
-      <div className="shrink-0 h-[3px] bg-border/10 relative z-[60]">
+      <div className="shrink-0 h-[2px] bg-border/20 relative z-[60]">
         <motion.div
-          className="h-full bg-gradient-to-r from-primary via-primary to-primary/70 rounded-full relative"
+          className="h-full bg-primary rounded-full"
           initial={{ width: "0%" }}
           animate={{ width: `${completionPercent}%` }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-primary/50 blur-sm" />
-        </motion.div>
+        />
       </div>
 
-      {/* ───── Premium Top Bar ───── */}
-      <div className="shrink-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-[0_1px_8px_hsl(var(--foreground)/0.03)]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-[56px] sm:h-[64px]">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
-                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-              </div>
-              <span className="hidden sm:inline text-xs">Voltar</span>
-            </motion.button>
+      {/* ───── Top Bar ───── */}
+      <div className="shrink-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/40">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate("/vendas/produtos")} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-95">
+              <ArrowLeft className="h-4 w-4" />
+            </button>
 
-            {/* Product identity chip */}
+            {/* Product chip */}
             {name && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-3.5 py-2 rounded-xl bg-card/60 border border-border/25 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow group/chip">
+              <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/20 border border-border/30">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover ring-1 ring-border/15 shadow-sm group-hover/chip:ring-primary/20 transition-all" />
+                  <img src={imagePreview} alt="" className="h-6 w-6 rounded-md object-cover border border-border/20" />
                 ) : (
-                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
+                  <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
                     <Package className="h-3 w-3 text-primary" />
                   </div>
                 )}
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-display font-black text-foreground truncate max-w-[160px] leading-tight">{name}</span>
+                <div>
+                  <p className="text-xs font-bold text-foreground truncate max-w-[180px] leading-tight">{name}</p>
                   {price && (
-                    <span className="text-[9px] font-numbers font-black text-primary leading-tight flex items-center gap-1">
+                    <p className="text-[10px] font-numbers font-bold text-primary leading-tight flex items-center gap-1">
                       R$ {Number(price).toFixed(2)}
-                      <span className={cn("h-1.5 w-1.5 rounded-full ml-0.5", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
-                    </span>
+                      <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                    </p>
                   )}
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {/* Step indicator - shows current tab position */}
-            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card/30 border border-border/15">
-              {TABS.map((tab, i) => {
+          <div className="flex items-center gap-2">
+            {/* Step dots */}
+            <div className="hidden lg:flex items-center gap-1 px-3 py-2 rounded-lg bg-muted/15 border border-border/20">
+              {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
-                const isDone = tabCompleted(tab.key);
                 const locked = tab.key !== "geral" && tabsLocked;
                 return (
-                  <motion.div
+                  <div
                     key={tab.key}
                     className={cn(
-                      "h-2 rounded-full transition-all duration-300",
-                      isActive ? "w-6 bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" :
-                      locked ? "w-2 bg-muted-foreground/10" :
-                      "w-2 bg-muted-foreground/20"
+                      "h-1.5 rounded-full transition-all duration-300",
+                      isActive ? "w-5 bg-primary" : locked ? "w-1.5 bg-muted-foreground/10" : "w-1.5 bg-muted-foreground/25"
                     )}
                     title={tab.label}
                   />
@@ -597,52 +577,41 @@ export default function ProductEditor() {
               })}
             </div>
 
-            {/* Completion badge */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card/40 border border-border/20">
+            {/* Completion */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/15 border border-border/20">
               <CompletionRing percent={completionPercent} />
-              <div className="flex flex-col">
-                <span className="text-[8px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Completo</span>
-                <span className="text-[10px] font-numbers font-black text-foreground tabular-nums">{completionPercent}%</span>
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Completo</p>
+                <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums">{completionPercent}%</p>
               </div>
             </div>
 
             <div className="h-5 w-px bg-border/20 hidden sm:block" />
 
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            {/* Actions */}
+            <div className="flex items-center gap-1.5">
               {!tabsLocked && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50 hidden sm:flex">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground gap-1.5 text-xs rounded-lg h-8 hidden sm:flex">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hidden sm:flex">
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/60 hover:text-destructive hover:bg-destructive/5 h-8 rounded-lg hidden sm:flex">
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
               )}
-              <motion.div whileTap={{ scale: 0.97 }}>
-                <Button onClick={handleSave} disabled={saving} className={cn(
-                  "gap-1.5 sm:gap-2 rounded-xl text-[11px] sm:text-xs font-display font-black h-8 sm:h-9 px-3 sm:px-5 shadow-lg transition-all duration-300 relative overflow-hidden",
-                  saved
-                    ? "bg-success shadow-success/25 hover:bg-success"
-                    : "shadow-primary/25 hover:shadow-primary/35"
-                )}>
-                  <AnimatePresence mode="wait">
-                    {saved ? (
-                      <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span>
-                      </motion.div>
-                    ) : saving ? (
-                      <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5">
-                        <Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span>
-                      </motion.div>
-                    ) : (
-                      <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-1.5">
-                        <Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Button>
-              </motion.div>
+              <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
+                "gap-1.5 rounded-lg text-xs font-bold h-8 px-4 transition-all",
+                saved ? "bg-success hover:bg-success" : ""
+              )}>
+                {saved ? (
+                  <><Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span></>
+                ) : saving ? (
+                  <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
+                ) : (
+                  <><Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}</>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -650,176 +619,106 @@ export default function ProductEditor() {
 
       {/* ───── Main Area ───── */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6 min-h-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-6 py-5 min-h-0">
 
-          {/* ───── Premium Sidebar ───── */}
-          <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
-            <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_4px_20px_hsl(var(--foreground)/0.05)] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
-              <div className="flex items-center justify-between px-3 pt-1 pb-3 relative z-10">
-                <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
-                <span className="text-[9px] font-display font-bold text-muted-foreground/30">{currentTabIdx + 1}/{TABS.length}</span>
+          {/* ───── Sidebar ───── */}
+          <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
+            <div className="rounded-xl border border-border/40 bg-card/60 p-2 space-y-0.5">
+              <div className="px-3 py-2 mb-1">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Navegação</p>
               </div>
-              {TABS.map((tab, idx) => {
+              {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
                 const completed = tabCompleted(tab.key);
+                const locked = tab.key !== "geral" && tabsLocked;
                 return (
                   <button
                     key={tab.key}
                     onClick={() => {
-                      if (tab.key !== "geral" && tabsLocked) {
-                        toast.error("Preencha e salve a aba Geral primeiro");
-                        return;
-                      }
+                      if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; }
                       setActiveTab(tab.key);
                     }}
-                    disabled={tab.key !== "geral" && tabsLocked}
+                    disabled={locked}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-left tracking-[-0.01em] relative overflow-hidden group/tab",
-                      tab.key !== "geral" && tabsLocked
-                        ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
+                      "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all text-left relative",
+                      locked
+                        ? "opacity-35 cursor-not-allowed text-muted-foreground"
                         : isActive
-                          ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/15 border border-transparent"
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
                     )}
                   >
                     {isActive && (
-                      <motion.div layoutId="tab-accent" className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 500, damping: 35 }} />
+                      <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
-                    <div className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all relative",
-                      isActive
-                        ? "bg-primary/15 ring-1 ring-primary/20"
-                        : "bg-muted/15 ring-1 ring-border/20 group-hover/tab:ring-border/40"
-                    )}>
-                      {tab.key !== "geral" && tabsLocked ? (
-                        <Lock className="h-3.5 w-3.5 text-muted-foreground/40" />
-                      ) : (
-                        <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/60")} />
+                    {locked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <tab.icon className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "")} />}
+                    <span className="truncate">{tab.label}</span>
+                    {completed && !isActive && !locked && (
+                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-success/60 shrink-0" />
                     )}
-                    </div>
-                    <span className="flex-1">{tab.label}</span>
-                    {tab.key !== "geral" && tabsLocked && <Lock className="h-3 w-3 text-muted-foreground/30" />}
-                    {isActive && !(tab.key !== "geral" && tabsLocked) && <ChevronRight className="h-3 w-3 text-primary/40" />}
                   </button>
                 );
               })}
             </div>
 
-            {/* Quick Status Panel */}
-            <motion.div
-              layout
-              className={cn(
-                "rounded-2xl border p-4 space-y-3 transition-all duration-300",
-                status === "active"
-                  ? "border-success/30 bg-success/5"
-                  : status === "pending_review"
-                  ? "border-warning/30 bg-warning/5"
-                  : "border-border/30 bg-card/30"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "h-3 w-3 rounded-full transition-all",
-                  status === "active" ? "bg-success animate-pulse shadow-[0_0_8px_hsl(var(--success))]" :
-                  status === "pending_review" ? "bg-warning animate-pulse shadow-[0_0_8px_hsl(var(--warning))]" :
-                  "bg-muted-foreground/30"
-                )} />
-                <span className="text-xs font-display font-black">
-                  {status === "active" ? "Produto Ativo" : status === "pending_review" ? "Em Revisão" : "Inativo"}
-                </span>
-              </div>
-              <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
-            </motion.div>
-
-            {/* Live Product Card Preview */}
-            <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2.5 overflow-hidden">
-              <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Preview do card</p>
-              <div className="rounded-xl border border-border/25 bg-card/60 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="" className="w-full h-24 object-cover" />
-                ) : (
-                  <div className="w-full h-24 bg-gradient-to-br from-primary/5 via-transparent to-info/5 flex items-center justify-center">
-                    <Package className="h-8 w-8 text-muted-foreground/10" />
-                  </div>
-                )}
-                <div className="p-3 space-y-1.5">
-                  <p className="text-[11px] font-display font-black text-foreground truncate leading-tight">{name || "Nome do produto"}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-numbers font-black text-primary">{price ? `R$ ${Number(price).toFixed(2)}` : "R$ 0,00"}</span>
-                    <span className={cn(
-                      "text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border",
-                      status === "active" ? "text-success bg-success/10 border-success/20" : "text-muted-foreground/50 bg-muted/10 border-border/20"
-                    )}>
-                      {status === "active" ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
-                  {description && (
-                    <p className="text-[9px] text-muted-foreground/40 line-clamp-2 leading-relaxed">{description}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            {!tabsLocked && (
-              <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2">
-                <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Ações rápidas</p>
-                {product?.checkout_url && (
-                  <button
-                    onClick={() => window.open(getCheckoutLink(), "_blank")}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
-                  >
-                    <Eye className="h-3.5 w-3.5" /> Ver Checkout
-                  </button>
-                )}
-                <button
-                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`), 100); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+            {/* Quick info */}
+            {!tabsLocked && product?.checkout_url && (
+              <div className="mt-3 rounded-xl border border-border/30 bg-card/40 p-3 space-y-2">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Checkout</p>
+                <Button
+                  variant="outline" size="sm"
+                  onClick={() => copyLink(getCheckoutLink())}
+                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
                 >
-                  <Palette className="h-3.5 w-3.5" /> Checkout Builder
-                </button>
+                  <Copy className="h-3 w-3" /> Copiar Link
+                </Button>
+                <Button
+                  variant="outline" size="sm"
+                  onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
+                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
+                >
+                  <Palette className="h-3 w-3" /> Checkout Builder
+                </Button>
               </div>
             )}
           </nav>
 
-          {/* ───── Mobile Tab Scroll ───── */}
-          <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px))] md:bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/30 shadow-[0_-2px_12px_hsl(var(--foreground)/0.05)]">
-            <div className="px-2 py-1.5 flex gap-1 overflow-x-auto scrollbar-none">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => {
-                    if (tab.key !== "geral" && tabsLocked) {
-                      toast.error("Preencha e salve a aba Geral primeiro");
-                      return;
-                    }
-                    setActiveTab(tab.key);
-                  }}
-                  disabled={tab.key !== "geral" && tabsLocked}
-                  className={cn(
-                    "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-display font-bold whitespace-nowrap transition-all relative min-w-[52px]",
-                    tab.key !== "geral" && tabsLocked
-                      ? "opacity-40 cursor-not-allowed text-muted-foreground"
-                      : activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
-                  )}
-                >
-                  {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
-                  <span className="truncate max-w-[48px]">{tab.label}</span>
-                </button>
-              ))}
+          {/* ── Mobile Tab Bar ── */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
+            <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
+              {TABS.map(tab => {
+                const locked = tab.key !== "geral" && tabsLocked;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
+                      setActiveTab(tab.key);
+                    }}
+                    disabled={locked}
+                    className={cn(
+                      "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-all min-w-[50px]",
+                      locked ? "opacity-30 text-muted-foreground" :
+                      activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
+                    )}
+                  >
+                    {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+                    <span className="truncate max-w-[48px]">{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* ───── Content Area ───── */}
-          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-32 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               >
                 {activeTab === "geral" && <TabGeral
                   {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }}
@@ -2083,29 +1982,27 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4 mb-6">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/8 backdrop-blur-xl ring-1 ring-primary/10 shadow-lg shadow-primary/5 relative">
+    <div className="flex items-center gap-3 mb-5">
+      <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
         <Icon className="h-5 w-5 text-primary" />
-        <div className="absolute -inset-1 rounded-2xl bg-primary/5 blur-lg opacity-60" />
       </div>
       <div>
-        <h2 className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
-        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">{subtitle}</p>
+        <h2 className="text-base font-display font-bold text-foreground tracking-tight">{title}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden group/card hover:border-border/60 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.07)] transition-all duration-500"
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-xl border border-border/40 bg-card/80 p-5 space-y-4 shadow-sm relative overflow-hidden hover:border-border/60 transition-all duration-300"
     >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-300 group-hover/card:w-[4px]", accentColor)} />
-      <div className={cn("absolute left-0 top-0 bottom-0 w-8 rounded-l-2xl blur-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none", accentColor.replace("bg-", "bg-") + "/5")} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
       {children}
     </motion.div>
   );
@@ -2113,8 +2010,8 @@ function EditorCard({ children, accentColor = "bg-primary" }: { children: React.
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />}
+    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+      {Icon && <Icon className="h-3 w-3 text-muted-foreground/50" />}
       {children}
     </Label>
   );
@@ -2122,14 +2019,12 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-xl flex flex-col items-center justify-center py-16 gap-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-info/[0.01]" />
-      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/15 relative">
-        <Icon className="h-7 w-7 text-muted-foreground/15" />
-        <div className="absolute -inset-2 rounded-3xl bg-muted/5 blur-xl" />
+    <div className="rounded-xl border border-border/30 bg-card/40 flex flex-col items-center justify-center py-14 gap-3">
+      <div className="h-14 w-14 rounded-xl bg-muted/15 flex items-center justify-center border border-border/20">
+        <Icon className="h-6 w-6 text-muted-foreground/20" />
       </div>
-      <p className="text-sm font-display font-bold text-muted-foreground/40">{message}</p>
-    </motion.div>
+      <p className="text-sm font-medium text-muted-foreground/50">{message}</p>
+    </div>
   );
 }
 
@@ -2137,35 +2032,30 @@ function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }:
   icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
   return (
-    <motion.div
-      layout
-      className={cn(
-        "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
-        checked
-          ? "border-primary/20 bg-card/60 shadow-sm"
-          : "border-border/30 bg-card/20 hover:border-border/50"
-      )}
-    >
-      {checked && <motion.div layoutId={`toggle-accent-${label}`} className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
+    <div className={cn(
+      "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
+      checked ? "border-primary/20 bg-primary/[0.03]" : "border-border/30 bg-card/40 hover:border-border/50"
+    )}>
+      {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
       <div className="flex items-center gap-3 flex-1">
         {Icon && (
           <div className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all ring-1",
-            checked ? "bg-primary/10 ring-primary/20" : "bg-muted/10 ring-border/20"
+            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
+            checked ? "bg-primary/10 border-primary/15" : "bg-muted/15 border-transparent"
           )}>
-            <Icon className={cn("h-3.5 w-3.5 transition-colors", checked ? "text-primary" : "text-muted-foreground/50")} />
+            <Icon className={cn("h-3.5 w-3.5", checked ? "text-primary" : "text-muted-foreground/40")} />
           </div>
         )}
         <div>
-          <p className="text-sm font-display font-bold text-foreground tracking-[-0.01em]">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5">{sublabel}</p>}
+          <p className="text-sm font-semibold text-foreground">{label}</p>
+          {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
         {children}
         <Switch checked={checked} onCheckedChange={onChange} />
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -2173,31 +2063,25 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
   icon: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; color: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   const accentBg = color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info";
-  const ringColor = color === "text-success" ? "ring-success/20" : color === "text-warning" ? "ring-warning/20" : "ring-info/20";
   const bgColor = color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10";
 
   return (
-    <motion.div
-      layout
-      className={cn(
-        "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
-        checked
-          ? "bg-card/60 border-border/40 shadow-sm"
-          : "bg-card/15 border-border/15 opacity-50"
-      )}
-    >
-      {checked && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBg)} />}
+    <div className={cn(
+      "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
+      checked ? "bg-card/60 border-border/40" : "bg-card/20 border-border/20 opacity-50"
+    )}>
+      {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
       <div className="flex items-center gap-3">
-        <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl transition-all ring-1", bgColor, ringColor)}>
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-transparent", bgColor)}>
           <Icon className={cn("h-4 w-4", color)} />
         </div>
         <div>
-          <p className="text-sm font-display font-bold">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-numbers">{sublabel}</p>}
+          <p className="text-sm font-semibold">{label}</p>
+          {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
         </div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
-    </motion.div>
+    </div>
   );
 }
 
@@ -2207,24 +2091,24 @@ function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
   return (
     <div className="space-y-2">
       <EditorLabel>{label}</EditorLabel>
-      {sublabel && <p className="text-[9px] text-muted-foreground/30">{sublabel}</p>}
+      {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
       <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden border border-border/40 shadow-sm group/banner">
-          <img src={preview} alt={label} className="w-full h-28 object-cover" />
-          <div className="absolute inset-0 bg-background/40 opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center gap-2">
-            <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card/90 border border-border/30 flex items-center justify-center hover:bg-primary/10 transition-all">
-              <ImagePlus className="h-3.5 w-3.5" />
+        <div className="relative rounded-lg overflow-hidden border border-border/30 group/banner">
+          <img src={preview} alt={label} className="w-full h-24 object-cover" />
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center gap-2">
+            <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center hover:bg-muted/40 transition-all active:scale-95">
+              <ImagePlus className="h-3.5 w-3.5 text-foreground" />
             </button>
-            <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card/90 border border-border/30 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-all">
+            <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-all active:scale-95">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       ) : (
-        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} type="button" onClick={() => inputRef.current?.click()} className="w-full h-24 rounded-xl border-2 border-dashed border-border/20 hover:border-primary/30 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground/40 hover:text-primary text-xs transition-all">
+        <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border/25 hover:border-primary/30 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-all active:scale-[0.99]">
           <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
-        </motion.button>
+        </button>
       )}
     </div>
   );
