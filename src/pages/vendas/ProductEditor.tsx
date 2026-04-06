@@ -654,7 +654,7 @@ export default function ProductEditor() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6 min-h-0">
 
           {/* ───── Premium Sidebar ───── */}
-          <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
+          <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
             <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_4px_20px_hsl(var(--foreground)/0.05)] relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
               <div className="flex items-center justify-between px-3 pt-1 pb-3 relative z-10">
