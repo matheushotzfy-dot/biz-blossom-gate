@@ -195,7 +195,7 @@ export default function MemberHome() {
 
         {/* ═══ Stats Strip — Premium ═══ */}
         {totalLessons > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {[
               { icon: BookOpen, label: "Cursos", value: String(courses.length), tone: "primary" as const },
               { icon: Target, label: "Progresso", value: `${overallPct}%`, tone: "info" as const },
@@ -207,11 +207,12 @@ export default function MemberHome() {
                 initial={{ opacity: 0, y: 16, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.1 + i * 0.06, duration: 0.5, ease }}
-                className="relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 sm:p-5 overflow-hidden hover:ring-border/40 transition-all duration-300 shadow-sm"
+                className="relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 sm:p-5 overflow-hidden hover:ring-border/40 transition-all duration-500 shadow-sm hover:shadow-md cursor-default"
               >
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${kpi.tone}`)} />
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-500 group-hover:w-1", `bg-${kpi.tone}`)} />
+                <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", `bg-gradient-to-br from-${kpi.tone}/[0.03] to-transparent`)} />
                 <div className="relative z-10 flex items-center gap-3">
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all group-hover:scale-110 shadow-sm", `bg-${kpi.tone}/10 ring-${kpi.tone}/15 shadow-${kpi.tone}/5`)}>
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all duration-500 group-hover:scale-110 group-hover:shadow-md shadow-sm", `bg-${kpi.tone}/10 ring-${kpi.tone}/15 shadow-${kpi.tone}/5 group-hover:shadow-${kpi.tone}/10`)}>
                     <kpi.icon className={cn("h-4.5 w-4.5", `text-${kpi.tone}`)} />
                   </div>
                   <div>
