@@ -706,9 +706,9 @@ export default function Auth() {
               <StatCard target="99.9" suffix="%" label="Uptime" icon={Activity} delay={1.3} />
             </div>
 
-            {/* Live ticker */}
+            {/* Platform status */}
             <div className="mt-5">
-              <LiveTicker />
+              <PlatformStatus />
             </div>
 
             {/* Testimonial */}
