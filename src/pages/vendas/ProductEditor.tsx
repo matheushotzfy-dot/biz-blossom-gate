@@ -762,7 +762,7 @@ export default function ProductEditor() {
             </div>
 
             {/* Quick Actions */}
-            {!isNew && (
+            {!tabsLocked && (
               <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2">
                 <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Ações rápidas</p>
                 {product?.checkout_url && (
@@ -774,7 +774,7 @@ export default function ProductEditor() {
                   </button>
                 )}
                 <button
-                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${productId}/checkout-builder`), 100); }}
+                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`), 100); }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
                 >
                   <Palette className="h-3.5 w-3.5" /> Checkout Builder
