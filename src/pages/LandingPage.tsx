@@ -539,20 +539,33 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* ═══ TESTIMONIALS ═══ */}
+      {/* ═══ WHY HOTZFY ═══ */}
       <Section id="depoimentos" className="bg-gradient-to-b from-transparent via-primary/[0.015] to-transparent">
         <SectionHeader
-          badge="Depoimentos"
-          title={<>Quem usa, <span className="text-gradient">recomenda</span></>}
-          subtitle="Veja o que nossos clientes dizem sobre a plataforma."
+          badge="Por que a HOTZFY?"
+          title={<>Feita para quem <span className="text-gradient">leva a sério</span></>}
+          subtitle="Cada detalhe pensado para infoprodutores que querem performance real."
         />
         <div className="grid md:grid-cols-3 gap-6">
-          <TestimonialCard name="Juliana Ribeiro" role="Infoprodutora • R$ 280K/mês" avatar="JR"
-            text="A HOTZFY transformou meu negócio. O checkout converte absurdamente mais que qualquer outra plataforma que já usei. Em 3 meses, tripliquei meu faturamento." delay={0} />
-          <TestimonialCard name="Carlos Mendes" role="Mentor Digital • R$ 150K/mês" avatar="CM"
-            text="As taxas são imbatíveis e o suporte é excepcional. O PIX instantâneo e a área de membros integrada fazem toda diferença no meu lançamento." delay={1} />
-          <TestimonialCard name="Ana Beatriz" role="Educadora Online • R$ 95K/mês" avatar="AB"
-            text="Migrei de outra plataforma e não me arrependo. O dashboard é o mais completo que já vi. Tenho controle total das minhas vendas e métricas em tempo real." delay={2} />
+          {[
+            { icon: Zap, title: "Checkout que converte", desc: "Timer de escassez, order bumps, social proof e recuperação automática. Cada segundo do checkout foi otimizado para maximizar sua taxa de aprovação.", tone: "primary" },
+            { icon: Lock, title: "Segurança nível bancário", desc: "Antifraude com velocity checks, blacklist global, tokenização PCI-DSS e monitoramento 24/7. Seu dinheiro protegido.", tone: "success" },
+            { icon: LineChart, title: "Dados em tempo real", desc: "Dashboard com métricas ao vivo, gráficos de conversão por método de pagamento, churn rate e funil completo. Decisões baseadas em dados.", tone: "info" },
+          ].map((item, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/10 p-6 md:p-8 hover:border-primary/15 hover:shadow-xl transition-all duration-500 group"
+            >
+              <div className={`h-12 w-12 rounded-2xl bg-${item.tone}/8 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                <item.icon className={`h-5 w-5 text-${item.tone}`} />
+              </div>
+              <h3 className="text-lg font-display font-bold text-foreground mb-3">{item.title}</h3>
+              <p className="text-sm text-muted-foreground/50 leading-relaxed font-display">{item.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </Section>
 
