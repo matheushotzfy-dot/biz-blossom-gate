@@ -181,39 +181,43 @@ export default function MemberCourse() {
   const CourseSidebar = () => (
     <div className="p-4 space-y-3">
       {/* Progress */}
-      <div className="p-4 rounded-xl bg-card/60 border border-border/20 relative overflow-hidden">
+      <div className="p-4 rounded-xl bg-card/60 border border-border/20 relative overflow-hidden group/progress">
         <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-info" />
-        <div className="flex items-center justify-between mb-3 pl-1">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] to-transparent opacity-0 group-hover/progress:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="flex items-center justify-between mb-3 pl-1 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shadow-sm shadow-primary/5">
               <Flame className="h-3.5 w-3.5 text-primary" />
             </div>
             <span className="text-[11px] font-display font-black text-foreground/70">Progresso</span>
           </div>
           <span className="text-lg font-display font-black text-primary tabular-nums">{overallPct}%</span>
         </div>
-        <div className="h-2 rounded-full bg-muted/10 ring-1 ring-border/10 overflow-hidden ml-1">
+        <div className="h-2 rounded-full bg-muted/10 ring-1 ring-border/10 overflow-hidden ml-1 relative z-10">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${overallPct}%` }}
             transition={{ duration: 1, delay: 0.3, ease }}
-            className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 rounded-full"
+            className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 rounded-full relative"
             style={{ boxShadow: overallPct > 0 ? "0 0 12px hsl(var(--primary) / 0.25)" : "none" }}
-          />
+          >
+            {overallPct > 0 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />}
+          </motion.div>
         </div>
-        <p className="text-[10px] text-muted-foreground/40 mt-2.5 font-display tabular-nums ml-1">{completedLessons}/{totalLessons} aulas concluídas</p>
+        <p className="text-[10px] text-muted-foreground/40 mt-2.5 font-display tabular-nums ml-1 relative z-10">{completedLessons}/{totalLessons} aulas concluídas</p>
         {isComplete && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 mt-3 ml-1 p-3 rounded-xl bg-success/8 border border-success/15 ring-1 ring-success/10"
+            className="flex items-center gap-2.5 mt-3 ml-1 p-3.5 rounded-xl bg-success/8 border border-success/15 ring-1 ring-success/10 relative z-10 overflow-hidden"
           >
-            <div className="h-8 w-8 rounded-lg bg-success/15 flex items-center justify-center shrink-0">
-              <Trophy className="h-4 w-4 text-success" />
+            <div className="absolute inset-0 bg-gradient-to-r from-success/[0.03] to-transparent pointer-events-none" />
+            <div className="h-9 w-9 rounded-lg bg-success/15 flex items-center justify-center shrink-0 shadow-sm shadow-success/10 relative z-10">
+              <Trophy className="h-4.5 w-4.5 text-success" />
             </div>
-            <div>
-              <span className="text-xs font-display font-black text-success block">Parabéns!</span>
-              <span className="text-[10px] text-success/60 font-display">Curso 100% concluído</span>
+            <div className="relative z-10">
+              <span className="text-xs font-display font-black text-success block">Parabéns! 🎉</span>
+              <span className="text-[10px] text-success/60 font-display font-semibold">Curso 100% concluído</span>
             </div>
           </motion.div>
         )}

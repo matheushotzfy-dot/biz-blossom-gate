@@ -338,9 +338,10 @@ export default function CourseBuilder() {
   return (
     <div className="fixed inset-0 z-[70] bg-background flex flex-col overflow-hidden">
       {/* ═══ Premium Top Bar ═══ */}
-      <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-5 shrink-0 z-50 relative overflow-hidden">
+      <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-5 shrink-0 z-50 relative overflow-hidden shadow-sm">
         {/* Subtle mesh gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] via-transparent to-info/[0.03] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
 
         <div className="relative flex items-center gap-2.5 sm:gap-3.5 min-w-0">
           <button
