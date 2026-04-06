@@ -106,9 +106,11 @@ export default function MemberHome() {
   const featuredPct = featured.totalLessons > 0 ? Math.round((featured.completedLessons / featured.totalLessons) * 100) : 0;
 
   return (
-    <div className="pb-24">
+    <div className="pb-24 bg-background">
       {/* ═══ Cinematic Hero ═══ */}
       <div className="relative h-[55vh] min-h-[420px] max-h-[580px] overflow-hidden">
+        {/* Ambient glow */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/5 blur-[160px] animate-pulse-glow pointer-events-none" />
         {featured.thumbnail_url ? (
           <motion.img
             initial={{ scale: 1.1, opacity: 0 }}
