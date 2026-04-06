@@ -840,7 +840,7 @@ export default function ProductEditor() {
                 />}
 
                 {activeTab === "checkout" && <TabCheckout
-                  {...{ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
+                  {...{ isNew: tabsLocked, name, price, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
                 />}
 
                 {activeTab === "co-producao" && <TabCoProducao
