@@ -491,21 +491,25 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03] pointer-events-none" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-primary/5 blur-[120px] animate-pulse-glow pointer-events-none" />
+        <div className="flex flex-col items-center gap-5 relative z-10">
           <div className="relative">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="h-12 w-12 border-2 border-border/20 border-t-primary rounded-full"
+              className="h-16 w-16 border-2 border-border/15 border-t-primary rounded-full"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Package className="h-5 w-5 text-primary/60" />
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
+                <Package className="h-5 w-5 text-primary/60" />
+              </div>
             </div>
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-sm font-display font-bold text-foreground">Carregando produto</p>
-            <p className="text-xs text-muted-foreground">Preparando editor...</p>
+          <div className="text-center space-y-1.5">
+            <p className="text-sm font-display font-black text-foreground tracking-[-0.02em]">Carregando produto</p>
+            <p className="text-xs text-muted-foreground/40 font-display">Preparando o editor...</p>
           </div>
         </div>
       </div>
@@ -518,39 +522,43 @@ export default function ProductEditor() {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* ───── Progress Bar (Top) ───── */}
-      <div className="shrink-0 h-[2px] bg-border/20 relative z-[60]">
+      <div className="shrink-0 h-[2px] bg-border/10 relative z-[60]">
         <motion.div
-          className="h-full bg-primary rounded-full"
+          className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full relative"
           initial={{ width: "0%" }}
           animate={{ width: `${completionPercent}%` }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        />
+        >
+          {completionPercent > 5 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />}
+        </motion.div>
       </div>
 
       {/* ───── Top Bar ───── */}
-      <div className="shrink-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
+      <div className="shrink-0 z-50 bg-card/80 backdrop-blur-2xl border-b border-border/20 relative overflow-hidden shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px] relative">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/vendas/produtos")} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-95">
-              <ArrowLeft className="h-4 w-4" />
+            <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/20 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-[0.985] group shadow-sm">
+              <ArrowLeft className="h-4 w-4 group-hover:text-foreground transition-colors" />
             </button>
 
             {/* Product chip */}
             {name && (
-              <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/20 border border-border/30">
+              <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/50 border border-border/20 ring-1 ring-border/10 shadow-sm">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-6 w-6 rounded-md object-cover border border-border/20" />
+                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover border border-border/15 ring-1 ring-border/10" />
                 ) : (
-                  <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
-                    <Package className="h-3 w-3 text-primary" />
+                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center ring-1 ring-primary/15">
+                    <Package className="h-3.5 w-3.5 text-primary/60" />
                   </div>
                 )}
                 <div>
-                  <p className="text-xs font-bold text-foreground truncate max-w-[180px] leading-tight">{name}</p>
+                  <p className="text-xs font-display font-black text-foreground truncate max-w-[200px] leading-tight tracking-[-0.01em]">{name}</p>
                   {price && (
-                    <p className="text-[10px] font-numbers font-bold text-primary leading-tight flex items-center gap-1">
+                    <p className="text-[10px] font-numbers font-black text-primary leading-tight flex items-center gap-1.5">
                       R$ {Number(price).toFixed(2)}
-                      <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                      <span className={cn("h-1.5 w-1.5 rounded-full shadow-sm", status === "active" ? "bg-success animate-pulse shadow-success/30" : "bg-muted-foreground/30")} />
                     </p>
                   )}
                 </div>
@@ -558,18 +566,20 @@ export default function ProductEditor() {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Step dots */}
-            <div className="hidden lg:flex items-center gap-1 px-3 py-2 rounded-lg bg-muted/15 border border-border/20">
+          <div className="flex items-center gap-2.5">
+            {/* Step indicator */}
+            <div className="hidden lg:flex items-center gap-1 px-3 py-2.5 rounded-xl bg-card/40 border border-border/15 ring-1 ring-border/5">
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
                 const locked = tab.key !== "geral" && tabsLocked;
                 return (
-                  <div
+                  <motion.div
                     key={tab.key}
+                    animate={{ width: isActive ? 20 : 6, opacity: locked ? 0.15 : 1 }}
+                    transition={{ duration: 0.3 }}
                     className={cn(
-                      "h-1.5 rounded-full transition-all duration-300",
-                      isActive ? "w-5 bg-primary" : locked ? "w-1.5 bg-muted-foreground/10" : "w-1.5 bg-muted-foreground/25"
+                      "h-1.5 rounded-full transition-colors",
+                      isActive ? "bg-primary shadow-sm shadow-primary/20" : "bg-muted-foreground/20"
                     )}
                     title={tab.label}
                   />
@@ -578,38 +588,39 @@ export default function ProductEditor() {
             </div>
 
             {/* Completion */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/15 border border-border/20">
+            <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/40 border border-border/15 ring-1 ring-border/5">
               <CompletionRing percent={completionPercent} />
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Completo</p>
-                <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums">{completionPercent}%</p>
+                <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Completo</p>
+                <p className="text-[11px] font-numbers font-black text-foreground tabular-nums leading-tight">{completionPercent}%</p>
               </div>
             </div>
 
-            <div className="h-5 w-px bg-border/20 hidden sm:block" />
+            <div className="h-5 w-px bg-border/15 hidden sm:block" />
 
             {/* Actions */}
             <div className="flex items-center gap-1.5">
               {!tabsLocked && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground gap-1.5 text-xs rounded-lg h-8 hidden sm:flex">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground/50 gap-1.5 text-xs rounded-xl h-9 hidden sm:flex hover:text-foreground font-display font-bold">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/60 hover:text-destructive hover:bg-destructive/5 h-8 rounded-lg hidden sm:flex">
-                    <Trash2 className="h-3 w-3" />
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/40 hover:text-destructive hover:bg-destructive/5 h-9 w-9 p-0 rounded-xl hidden sm:flex">
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
               <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
-                "gap-1.5 rounded-lg text-xs font-bold h-8 px-4 transition-all",
-                saved ? "bg-success hover:bg-success" : ""
+                "gap-1.5 rounded-xl text-xs font-display font-black h-9 px-5 transition-all duration-300 shadow-md relative overflow-hidden",
+                saved ? "bg-success hover:bg-success shadow-success/20" : "shadow-primary/15"
               )}>
+                {!saved && !saving && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />}
                 {saved ? (
-                  <><Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span></>
+                  <><Check className="h-3.5 w-3.5 relative z-10" /> <span className="hidden sm:inline relative z-10">Salvo!</span></>
                 ) : saving ? (
                   <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
                 ) : (
-                  <><Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}</>
+                  <><Save className="h-3 w-3 relative z-10" /> <span className="relative z-10">{isNew ? "Criar" : "Salvar"}</span></>
                 )}
               </Button>
             </div>
@@ -622,10 +633,10 @@ export default function ProductEditor() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-6 py-5 min-h-0">
 
           {/* ───── Sidebar ───── */}
-          <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
-            <div className="rounded-xl border border-border/40 bg-card/60 p-2 space-y-0.5">
-              <div className="px-3 py-2 mb-1">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Navegação</p>
+          <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
+            <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl p-2.5 space-y-0.5 ring-1 ring-border/5 shadow-sm">
+              <div className="px-3 py-2.5 mb-1">
+                <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Navegação</p>
               </div>
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
@@ -640,21 +651,30 @@ export default function ProductEditor() {
                     }}
                     disabled={locked}
                     className={cn(
-                      "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all text-left relative",
+                      "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-300 text-left relative group/tab",
                       locked
-                        ? "opacity-35 cursor-not-allowed text-muted-foreground"
+                        ? "opacity-25 cursor-not-allowed text-muted-foreground"
                         : isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                          ? "bg-primary/8 text-primary ring-1 ring-primary/12"
+                          : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/10"
                     )}
                   >
                     {isActive && (
-                      <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                      <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.2)]" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
-                    {locked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <tab.icon className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "")} />}
+                    {locked ? (
+                      <Lock className="h-3.5 w-3.5 shrink-0" />
+                    ) : (
+                      <div className={cn(
+                        "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ring-1 transition-all duration-300",
+                        isActive ? "bg-primary/10 ring-primary/15 shadow-sm shadow-primary/5" : "bg-muted/5 ring-border/10 group-hover/tab:ring-border/20"
+                      )}>
+                        <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/30 group-hover/tab:text-muted-foreground/50")} />
+                      </div>
+                    )}
                     <span className="truncate">{tab.label}</span>
                     {completed && !isActive && !locked && (
-                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-success/60 shrink-0" />
+                      <div className="ml-auto h-2 w-2 rounded-full bg-success/60 shrink-0 shadow-sm shadow-success/20" />
                     )}
                   </button>
                 );
@@ -663,19 +683,19 @@ export default function ProductEditor() {
 
             {/* Quick info */}
             {!tabsLocked && product?.checkout_url && (
-              <div className="mt-3 rounded-xl border border-border/30 bg-card/40 p-3 space-y-2">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Checkout</p>
+              <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl p-3.5 space-y-2.5 ring-1 ring-border/5 shadow-sm">
+                <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Ações Rápidas</p>
                 <Button
                   variant="outline" size="sm"
                   onClick={() => copyLink(getCheckoutLink())}
-                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
+                  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold border-border/20 hover:border-border/30"
                 >
                   <Copy className="h-3 w-3" /> Copiar Link
                 </Button>
                 <Button
                   variant="outline" size="sm"
                   onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
-                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
+                  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold border-border/20 hover:border-border/30"
                 >
                   <Palette className="h-3 w-3" /> Checkout Builder
                 </Button>
@@ -778,8 +798,8 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       {/* ─── Interactive Image Upload with Drag & Drop ─── */}
       <div
         className={cn(
-          "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-300 relative",
-          isDragging ? "border-primary/50 bg-primary/5 scale-[1.01]" : "border-border/30 bg-card/50"
+          "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-500 relative group/upload",
+          isDragging ? "border-primary/50 bg-primary/5 scale-[1.005] shadow-lg shadow-primary/5" : "border-border/20 bg-card/30 hover:border-border/30"
         )}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
@@ -790,30 +810,34 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         {imagePreview ? (
           <div className="relative group/img">
             <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-11 w-11 rounded-xl bg-card/90 border border-border/30 flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all shadow-lg">
-                <ImagePlus className="h-4 w-4 text-foreground" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+            <div className="absolute inset-0 bg-background/40 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all shadow-xl ring-1 ring-border/10">
+                <ImagePlus className="h-5 w-5 text-foreground" />
               </motion.button>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-11 w-11 rounded-xl bg-card/90 border border-border/30 flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all shadow-lg">
-                <X className="h-4 w-4" />
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-12 w-12 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all shadow-xl ring-1 ring-border/10">
+                <X className="h-5 w-5" />
               </motion.button>
             </div>
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 shadow-lg">
-              <CheckCircle2 className="h-3 w-3 text-success" />
-              <span className="text-[10px] font-display font-bold text-foreground">Imagem adicionada</span>
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card/80 backdrop-blur-xl border border-border/15 shadow-lg ring-1 ring-border/10">
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+              <span className="text-[10px] font-display font-black text-foreground">Imagem adicionada</span>
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-48 flex flex-col items-center justify-center gap-4 text-muted-foreground/40 hover:text-primary/60 transition-all group/upload hover:bg-primary/[0.02]">
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-52 flex flex-col items-center justify-center gap-4 text-muted-foreground/30 hover:text-primary/50 transition-all duration-500 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-primary/[0.02] pointer-events-none" />
             <motion.div
-              animate={isDragging ? { scale: 1.1, y: -4 } : { scale: 1, y: 0 }}
-              className="h-16 w-16 rounded-2xl bg-muted/10 group-hover/upload:bg-primary/10 flex items-center justify-center transition-colors border border-dashed border-border/30 group-hover/upload:border-primary/20"
+              animate={isDragging ? { scale: 1.1, y: -8 } : { scale: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative h-18 w-18 rounded-2xl bg-muted/8 group-hover/upload:bg-primary/8 flex items-center justify-center transition-all duration-500 border border-dashed border-border/20 group-hover/upload:border-primary/20 ring-1 ring-transparent group-hover/upload:ring-primary/10"
             >
-              <Upload className="h-7 w-7" />
+              <Upload className="h-8 w-8" />
             </motion.div>
-            <div className="text-center space-y-1">
+            <div className="relative text-center space-y-1.5">
               <span className="text-sm font-display font-bold block">{isDragging ? "Solte a imagem aqui" : "Arraste ou clique para enviar"}</span>
-              <span className="text-[10px] text-muted-foreground/30 block">JPG, PNG, WebP, GIF • Máx: 10MB • Recomendado: 300×250px</span>
+              <span className="text-[10px] text-muted-foreground/25 block font-display">JPG, PNG, WebP, GIF • Máx: 10MB • Recomendado: 300×250px</span>
             </div>
           </button>
         )}
@@ -1913,47 +1937,55 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
         </EditorCard>
       ) : (
         <div className="space-y-3">
-          {courses.map(c => {
+          {courses.map((c: any, i: number) => {
             const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
             return (
-              <EditorCard key={c.id} accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15">
-                    {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
-                        <GraduationCap className="h-6 w-6 text-primary/15" />
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <EditorCard accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
+                  <div className="flex items-center gap-4">
+                    <div className="h-18 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15 ring-1 ring-border/5 relative group/thumb">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent relative">
+                          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+                          <GraduationCap className="h-7 w-7 text-primary/12 relative z-10" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <h3 className="text-sm font-display font-black text-foreground truncate tracking-[-0.01em]">{c.title}</h3>
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-black uppercase tracking-[0.08em] border ring-1",
+                          c.is_published
+                            ? "bg-success/10 text-success border-success/15 ring-success/10 shadow-sm shadow-success/5"
+                            : "bg-muted/10 text-muted-foreground/50 border-border/15 ring-border/5"
+                        )}>
+                          <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse shadow-[0_0_4px_hsl(var(--success)/0.3)]" : "bg-muted-foreground/30")} />
+                          {c.is_published ? "Live" : "Rascunho"}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-display font-black text-foreground truncate">{c.title}</h3>
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[9px] font-display font-black uppercase tracking-[0.08em] border",
-                        c.is_published
-                          ? "bg-success/10 text-success border-success/20"
-                          : "bg-muted/10 text-muted-foreground/50 border-border/20"
-                      )}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
-                        {c.is_published ? "Live" : "Rascunho"}
-                      </span>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground/50 font-display">
+                        <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-primary/40" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
+                        <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-info/40" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Layers className="h-3 w-3 text-primary/50" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
-                      <span className="flex items-center gap-1"><Video className="h-3 w-3 text-info/50" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
-                    </div>
+                    <Button
+                      variant="ghost" size="sm"
+                      onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                      className="gap-2 rounded-xl text-xs font-display font-black text-primary hover:text-primary hover:bg-primary/8 h-10 px-4 active:scale-[0.98]"
+                    >
+                      Gerenciar <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost" size="sm"
-                    onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                    className="gap-2 rounded-xl text-xs font-display font-bold text-primary hover:text-primary hover:bg-primary/8"
-                  >
-                    Gerenciar <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </div>
-              </EditorCard>
+                </EditorCard>
+              </motion.div>
             );
           })}
 
@@ -1966,7 +1998,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
               } as any).select().single();
               if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
             }}
-            className="w-full gap-2 rounded-xl font-display font-bold text-sm h-10 border-2 border-dashed border-border/20 hover:border-primary/20 hover:bg-primary/[0.02] text-muted-foreground/40 hover:text-primary"
+            className="w-full gap-2 rounded-2xl font-display font-bold text-sm h-12 border-2 border-dashed border-border/15 hover:border-primary/20 hover:bg-primary/[0.03] text-muted-foreground/30 hover:text-primary transition-all duration-500 active:scale-[0.99]"
           >
             <Plus className="h-4 w-4" /> Adicionar Curso
           </Button>
@@ -1982,13 +2014,13 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-    <div className="flex items-center gap-3 mb-5">
-      <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
-        <Icon className="h-5 w-5 text-primary" />
+    <div className="flex items-center gap-3.5 mb-6">
+      <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-primary/12 to-primary/5 border border-primary/12 flex items-center justify-center shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+        <Icon className="h-5 w-5 text-primary/70" />
       </div>
       <div>
-        <h2 className="text-base font-display font-bold text-foreground tracking-tight">{title}</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+        <h2 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">{title}</h2>
+        <p className="text-xs text-muted-foreground/50 mt-0.5 font-display">{subtitle}</p>
       </div>
     </div>
   );
@@ -1997,12 +2029,13 @@ function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentT
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-xl border border-border/40 bg-card/80 p-5 space-y-4 shadow-sm relative overflow-hidden hover:border-border/60 transition-all duration-300"
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-sm relative overflow-hidden hover:border-border/30 transition-all duration-500 ring-1 ring-border/5 group/card"
     >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-500 group-hover/card:shadow-sm", accentColor)} />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover/card:from-primary/[0.01] group-hover/card:to-transparent transition-all duration-700 pointer-events-none" />
       {children}
     </motion.div>
   );
@@ -2010,8 +2043,8 @@ function EditorCard({ children, accentColor = "bg-primary" }: { children: React.
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-      {Icon && <Icon className="h-3 w-3 text-muted-foreground/50" />}
+    <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/50 flex items-center gap-1.5">
+      {Icon && <Icon className="h-3 w-3 text-muted-foreground/30" />}
       {children}
     </Label>
   );
@@ -2019,11 +2052,13 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <div className="rounded-xl border border-border/30 bg-card/40 flex flex-col items-center justify-center py-14 gap-3">
-      <div className="h-14 w-14 rounded-xl bg-muted/15 flex items-center justify-center border border-border/20">
-        <Icon className="h-6 w-6 text-muted-foreground/20" />
+    <div className="rounded-2xl border border-border/20 bg-card/30 flex flex-col items-center justify-center py-16 gap-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.01]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center border border-border/15 ring-1 ring-border/5 relative shadow-sm">
+        <Icon className="h-7 w-7 text-muted-foreground/15" />
       </div>
-      <p className="text-sm font-medium text-muted-foreground/50">{message}</p>
+      <p className="text-sm font-display font-bold text-muted-foreground/40 relative">{message}</p>
     </div>
   );
 }
