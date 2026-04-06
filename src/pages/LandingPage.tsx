@@ -211,18 +211,8 @@ function TestimonialCard({ name, role, text, avatar, delay }: {
   );
 }
 
-/* ─── Live Ticker ─── */
-function LiveTicker() {
-  const msgs = [
-    "🎯 João acabou de vender R$ 497,00",
-    "🚀 Maria lançou um novo infoproduto",
-    "💰 Pedro sacou R$ 8.500,00 via PIX",
-    "📈 Ana atingiu R$ 50K em vendas",
-    "🔥 Lucas configurou checkout otimizado",
-    "⚡ Carla faturou R$ 25K esta semana",
-  ];
-  const [idx, setIdx] = useState(0);
-  useEffect(() => { const iv = setInterval(() => setIdx(p => (p + 1) % msgs.length), 3500); return () => clearInterval(iv); }, []);
+/* ─── Live Status ─── */
+function LiveStatus() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
       className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-card/30 backdrop-blur-xl border border-border/10 shadow-lg">
@@ -230,10 +220,7 @@ function LiveTicker() {
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
       </div>
-      <AnimatePresence mode="wait">
-        <motion.span key={idx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-          className="text-[11px] text-muted-foreground/50 font-display font-medium">{msgs[idx]}</motion.span>
-      </AnimatePresence>
+      <span className="text-[11px] text-muted-foreground/50 font-display font-medium">Plataforma online — todos os sistemas operacionais</span>
     </motion.div>
   );
 }
