@@ -328,7 +328,7 @@ export default function ProductEditor() {
         if (error) { toast.error("Erro ao salvar"); return; }
 
         if (deliveryType === "digital") {
-          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).maybeSingle();
+          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", effectiveProductId!).eq("user_id", user.id).limit(1).maybeSingle();
           if (!existingCourse) {
             await supabase.from("courses").insert({
               user_id: user.id,
