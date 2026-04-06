@@ -1937,47 +1937,55 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
         </EditorCard>
       ) : (
         <div className="space-y-3">
-          {courses.map(c => {
+          {courses.map((c: any, i: number) => {
             const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
             return (
-              <EditorCard key={c.id} accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15">
-                    {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
-                        <GraduationCap className="h-6 w-6 text-primary/15" />
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <EditorCard accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
+                  <div className="flex items-center gap-4">
+                    <div className="h-18 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15 ring-1 ring-border/5 relative group/thumb">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent relative">
+                          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+                          <GraduationCap className="h-7 w-7 text-primary/12 relative z-10" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <h3 className="text-sm font-display font-black text-foreground truncate tracking-[-0.01em]">{c.title}</h3>
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-black uppercase tracking-[0.08em] border ring-1",
+                          c.is_published
+                            ? "bg-success/10 text-success border-success/15 ring-success/10 shadow-sm shadow-success/5"
+                            : "bg-muted/10 text-muted-foreground/50 border-border/15 ring-border/5"
+                        )}>
+                          <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse shadow-[0_0_4px_hsl(var(--success)/0.3)]" : "bg-muted-foreground/30")} />
+                          {c.is_published ? "Live" : "Rascunho"}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-display font-black text-foreground truncate">{c.title}</h3>
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[9px] font-display font-black uppercase tracking-[0.08em] border",
-                        c.is_published
-                          ? "bg-success/10 text-success border-success/20"
-                          : "bg-muted/10 text-muted-foreground/50 border-border/20"
-                      )}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
-                        {c.is_published ? "Live" : "Rascunho"}
-                      </span>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground/50 font-display">
+                        <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-primary/40" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
+                        <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-info/40" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Layers className="h-3 w-3 text-primary/50" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
-                      <span className="flex items-center gap-1"><Video className="h-3 w-3 text-info/50" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
-                    </div>
+                    <Button
+                      variant="ghost" size="sm"
+                      onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                      className="gap-2 rounded-xl text-xs font-display font-black text-primary hover:text-primary hover:bg-primary/8 h-10 px-4 active:scale-[0.98]"
+                    >
+                      Gerenciar <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost" size="sm"
-                    onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                    className="gap-2 rounded-xl text-xs font-display font-bold text-primary hover:text-primary hover:bg-primary/8"
-                  >
-                    Gerenciar <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </div>
-              </EditorCard>
+                </EditorCard>
+              </motion.div>
             );
           })}
 
@@ -1990,7 +1998,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
               } as any).select().single();
               if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
             }}
-            className="w-full gap-2 rounded-xl font-display font-bold text-sm h-10 border-2 border-dashed border-border/20 hover:border-primary/20 hover:bg-primary/[0.02] text-muted-foreground/40 hover:text-primary"
+            className="w-full gap-2 rounded-2xl font-display font-bold text-sm h-12 border-2 border-dashed border-border/15 hover:border-primary/20 hover:bg-primary/[0.03] text-muted-foreground/30 hover:text-primary transition-all duration-500 active:scale-[0.99]"
           >
             <Plus className="h-4 w-4" /> Adicionar Curso
           </Button>
