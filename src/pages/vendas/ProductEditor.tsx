@@ -530,66 +530,58 @@ export default function ProductEditor() {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* ───── Progress Bar (Top) ───── */}
-      <div className="shrink-0 h-[3px] bg-border/10 relative z-[60]">
+      <div className="shrink-0 h-[2px] bg-border/20 relative z-[60]">
         <motion.div
-          className="h-full bg-gradient-to-r from-primary via-primary to-primary/70 rounded-full relative"
+          className="h-full bg-primary rounded-full"
           initial={{ width: "0%" }}
           animate={{ width: `${completionPercent}%` }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-primary/50 blur-sm" />
-        </motion.div>
+        />
       </div>
 
-      {/* ───── Premium Top Bar ───── */}
-      <div className="shrink-0 z-50 bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-[0_1px_8px_hsl(var(--foreground)/0.03)]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-[56px] sm:h-[64px]">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => navigate("/vendas/produtos")} className="flex items-center gap-2 text-sm font-display font-bold text-muted-foreground hover:text-foreground transition-colors group">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl group-hover:border-primary/20 group-hover:bg-primary/5 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-sm">
-                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-              </div>
-              <span className="hidden sm:inline text-xs">Voltar</span>
-            </motion.button>
+      {/* ───── Top Bar ───── */}
+      <div className="shrink-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/40">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate("/vendas/produtos")} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-95">
+              <ArrowLeft className="h-4 w-4" />
+            </button>
 
-            {/* Product identity chip */}
+            {/* Product chip */}
             {name && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="hidden md:flex items-center gap-3 px-3.5 py-2 rounded-xl bg-card/60 border border-border/25 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow group/chip">
+              <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/20 border border-border/30">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover ring-1 ring-border/15 shadow-sm group-hover/chip:ring-primary/20 transition-all" />
+                  <img src={imagePreview} alt="" className="h-6 w-6 rounded-md object-cover border border-border/20" />
                 ) : (
-                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
+                  <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
                     <Package className="h-3 w-3 text-primary" />
                   </div>
                 )}
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-display font-black text-foreground truncate max-w-[160px] leading-tight">{name}</span>
+                <div>
+                  <p className="text-xs font-bold text-foreground truncate max-w-[180px] leading-tight">{name}</p>
                   {price && (
-                    <span className="text-[9px] font-numbers font-black text-primary leading-tight flex items-center gap-1">
+                    <p className="text-[10px] font-numbers font-bold text-primary leading-tight flex items-center gap-1">
                       R$ {Number(price).toFixed(2)}
-                      <span className={cn("h-1.5 w-1.5 rounded-full ml-0.5", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
-                    </span>
+                      <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                    </p>
                   )}
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {/* Step indicator - shows current tab position */}
-            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card/30 border border-border/15">
-              {TABS.map((tab, i) => {
+          <div className="flex items-center gap-2">
+            {/* Step dots */}
+            <div className="hidden lg:flex items-center gap-1 px-3 py-2 rounded-lg bg-muted/15 border border-border/20">
+              {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
-                const isDone = tabCompleted(tab.key);
                 const locked = tab.key !== "geral" && tabsLocked;
                 return (
-                  <motion.div
+                  <div
                     key={tab.key}
                     className={cn(
-                      "h-2 rounded-full transition-all duration-300",
-                      isActive ? "w-6 bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" :
-                      locked ? "w-2 bg-muted-foreground/10" :
-                      "w-2 bg-muted-foreground/20"
+                      "h-1.5 rounded-full transition-all duration-300",
+                      isActive ? "w-5 bg-primary" : locked ? "w-1.5 bg-muted-foreground/10" : "w-1.5 bg-muted-foreground/25"
                     )}
                     title={tab.label}
                   />
@@ -597,52 +589,41 @@ export default function ProductEditor() {
               })}
             </div>
 
-            {/* Completion badge */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card/40 border border-border/20">
+            {/* Completion */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/15 border border-border/20">
               <CompletionRing percent={completionPercent} />
-              <div className="flex flex-col">
-                <span className="text-[8px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Completo</span>
-                <span className="text-[10px] font-numbers font-black text-foreground tabular-nums">{completionPercent}%</span>
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Completo</p>
+                <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums">{completionPercent}%</p>
               </div>
             </div>
 
             <div className="h-5 w-px bg-border/20 hidden sm:block" />
 
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            {/* Actions */}
+            <div className="flex items-center gap-1.5">
               {!tabsLocked && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50 hidden sm:flex">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground gap-1.5 text-xs rounded-lg h-8 hidden sm:flex">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/70 hover:text-destructive hover:bg-destructive/5 gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hidden sm:flex">
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/60 hover:text-destructive hover:bg-destructive/5 h-8 rounded-lg hidden sm:flex">
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
               )}
-              <motion.div whileTap={{ scale: 0.97 }}>
-                <Button onClick={handleSave} disabled={saving} className={cn(
-                  "gap-1.5 sm:gap-2 rounded-xl text-[11px] sm:text-xs font-display font-black h-8 sm:h-9 px-3 sm:px-5 shadow-lg transition-all duration-300 relative overflow-hidden",
-                  saved
-                    ? "bg-success shadow-success/25 hover:bg-success"
-                    : "shadow-primary/25 hover:shadow-primary/35"
-                )}>
-                  <AnimatePresence mode="wait">
-                    {saved ? (
-                      <motion.div key="saved" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} className="flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span>
-                      </motion.div>
-                    ) : saving ? (
-                      <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5">
-                        <Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span>
-                      </motion.div>
-                    ) : (
-                      <motion.div key="save" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex items-center gap-1.5">
-                        <Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Button>
-              </motion.div>
+              <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
+                "gap-1.5 rounded-lg text-xs font-bold h-8 px-4 transition-all",
+                saved ? "bg-success hover:bg-success" : ""
+              )}>
+                {saved ? (
+                  <><Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span></>
+                ) : saving ? (
+                  <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
+                ) : (
+                  <><Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}</>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -650,176 +631,106 @@ export default function ProductEditor() {
 
       {/* ───── Main Area ───── */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6 min-h-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-6 py-5 min-h-0">
 
-          {/* ───── Premium Sidebar ───── */}
-          <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
-            <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_4px_20px_hsl(var(--foreground)/0.05)] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
-              <div className="flex items-center justify-between px-3 pt-1 pb-3 relative z-10">
-                <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/50">Navegação</p>
-                <span className="text-[9px] font-display font-bold text-muted-foreground/30">{currentTabIdx + 1}/{TABS.length}</span>
+          {/* ───── Sidebar ───── */}
+          <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
+            <div className="rounded-xl border border-border/40 bg-card/60 p-2 space-y-0.5">
+              <div className="px-3 py-2 mb-1">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Navegação</p>
               </div>
-              {TABS.map((tab, idx) => {
+              {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
                 const completed = tabCompleted(tab.key);
+                const locked = tab.key !== "geral" && tabsLocked;
                 return (
                   <button
                     key={tab.key}
                     onClick={() => {
-                      if (tab.key !== "geral" && tabsLocked) {
-                        toast.error("Preencha e salve a aba Geral primeiro");
-                        return;
-                      }
+                      if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; }
                       setActiveTab(tab.key);
                     }}
-                    disabled={tab.key !== "geral" && tabsLocked}
+                    disabled={locked}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-left tracking-[-0.01em] relative overflow-hidden group/tab",
-                      tab.key !== "geral" && tabsLocked
-                        ? "opacity-40 cursor-not-allowed text-muted-foreground border border-transparent"
+                      "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all text-left relative",
+                      locked
+                        ? "opacity-35 cursor-not-allowed text-muted-foreground"
                         : isActive
-                          ? "bg-primary/10 text-primary border border-primary/15 shadow-sm"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/15 border border-transparent"
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
                     )}
                   >
                     {isActive && (
-                      <motion.div layoutId="tab-accent" className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 500, damping: 35 }} />
+                      <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
-                    <div className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all relative",
-                      isActive
-                        ? "bg-primary/15 ring-1 ring-primary/20"
-                        : "bg-muted/15 ring-1 ring-border/20 group-hover/tab:ring-border/40"
-                    )}>
-                      {tab.key !== "geral" && tabsLocked ? (
-                        <Lock className="h-3.5 w-3.5 text-muted-foreground/40" />
-                      ) : (
-                        <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/60")} />
+                    {locked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <tab.icon className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "")} />}
+                    <span className="truncate">{tab.label}</span>
+                    {completed && !isActive && !locked && (
+                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-success/60 shrink-0" />
                     )}
-                    </div>
-                    <span className="flex-1">{tab.label}</span>
-                    {tab.key !== "geral" && tabsLocked && <Lock className="h-3 w-3 text-muted-foreground/30" />}
-                    {isActive && !(tab.key !== "geral" && tabsLocked) && <ChevronRight className="h-3 w-3 text-primary/40" />}
                   </button>
                 );
               })}
             </div>
 
-            {/* Quick Status Panel */}
-            <motion.div
-              layout
-              className={cn(
-                "rounded-2xl border p-4 space-y-3 transition-all duration-300",
-                status === "active"
-                  ? "border-success/30 bg-success/5"
-                  : status === "pending_review"
-                  ? "border-warning/30 bg-warning/5"
-                  : "border-border/30 bg-card/30"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "h-3 w-3 rounded-full transition-all",
-                  status === "active" ? "bg-success animate-pulse shadow-[0_0_8px_hsl(var(--success))]" :
-                  status === "pending_review" ? "bg-warning animate-pulse shadow-[0_0_8px_hsl(var(--warning))]" :
-                  "bg-muted-foreground/30"
-                )} />
-                <span className="text-xs font-display font-black">
-                  {status === "active" ? "Produto Ativo" : status === "pending_review" ? "Em Revisão" : "Inativo"}
-                </span>
-              </div>
-              <Switch checked={status === "active"} onCheckedChange={(v) => setStatus(v ? "active" : "inactive")} />
-            </motion.div>
-
-            {/* Live Product Card Preview */}
-            <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2.5 overflow-hidden">
-              <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Preview do card</p>
-              <div className="rounded-xl border border-border/25 bg-card/60 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="" className="w-full h-24 object-cover" />
-                ) : (
-                  <div className="w-full h-24 bg-gradient-to-br from-primary/5 via-transparent to-info/5 flex items-center justify-center">
-                    <Package className="h-8 w-8 text-muted-foreground/10" />
-                  </div>
-                )}
-                <div className="p-3 space-y-1.5">
-                  <p className="text-[11px] font-display font-black text-foreground truncate leading-tight">{name || "Nome do produto"}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-numbers font-black text-primary">{price ? `R$ ${Number(price).toFixed(2)}` : "R$ 0,00"}</span>
-                    <span className={cn(
-                      "text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border",
-                      status === "active" ? "text-success bg-success/10 border-success/20" : "text-muted-foreground/50 bg-muted/10 border-border/20"
-                    )}>
-                      {status === "active" ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
-                  {description && (
-                    <p className="text-[9px] text-muted-foreground/40 line-clamp-2 leading-relaxed">{description}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            {!tabsLocked && (
-              <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2">
-                <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Ações rápidas</p>
-                {product?.checkout_url && (
-                  <button
-                    onClick={() => window.open(getCheckoutLink(), "_blank")}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
-                  >
-                    <Eye className="h-3.5 w-3.5" /> Ver Checkout
-                  </button>
-                )}
-                <button
-                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`), 100); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+            {/* Quick info */}
+            {!tabsLocked && product?.checkout_url && (
+              <div className="mt-3 rounded-xl border border-border/30 bg-card/40 p-3 space-y-2">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Checkout</p>
+                <Button
+                  variant="outline" size="sm"
+                  onClick={() => copyLink(getCheckoutLink())}
+                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
                 >
-                  <Palette className="h-3.5 w-3.5" /> Checkout Builder
-                </button>
+                  <Copy className="h-3 w-3" /> Copiar Link
+                </Button>
+                <Button
+                  variant="outline" size="sm"
+                  onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
+                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
+                >
+                  <Palette className="h-3 w-3" /> Checkout Builder
+                </Button>
               </div>
             )}
           </nav>
 
-          {/* ───── Mobile Tab Scroll ───── */}
-          <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px))] md:bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/30 shadow-[0_-2px_12px_hsl(var(--foreground)/0.05)]">
-            <div className="px-2 py-1.5 flex gap-1 overflow-x-auto scrollbar-none">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => {
-                    if (tab.key !== "geral" && tabsLocked) {
-                      toast.error("Preencha e salve a aba Geral primeiro");
-                      return;
-                    }
-                    setActiveTab(tab.key);
-                  }}
-                  disabled={tab.key !== "geral" && tabsLocked}
-                  className={cn(
-                    "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-display font-bold whitespace-nowrap transition-all relative min-w-[52px]",
-                    tab.key !== "geral" && tabsLocked
-                      ? "opacity-40 cursor-not-allowed text-muted-foreground"
-                      : activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
-                  )}
-                >
-                  {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
-                  <span className="truncate max-w-[48px]">{tab.label}</span>
-                </button>
-              ))}
+          {/* ── Mobile Tab Bar ── */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
+            <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
+              {TABS.map(tab => {
+                const locked = tab.key !== "geral" && tabsLocked;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
+                      setActiveTab(tab.key);
+                    }}
+                    disabled={locked}
+                    className={cn(
+                      "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-all min-w-[50px]",
+                      locked ? "opacity-30 text-muted-foreground" :
+                      activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
+                    )}
+                  >
+                    {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+                    <span className="truncate max-w-[48px]">{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* ───── Content Area ───── */}
-          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-32 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               >
                 {activeTab === "geral" && <TabGeral
                   {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }}
