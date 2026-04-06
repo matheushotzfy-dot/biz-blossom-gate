@@ -947,30 +947,52 @@ export default function PublicCheckout() {
             </section>
           )}
 
-          {/* ═══════ ORDER BUMPS (Premium) ═══════ */}
+          {/* ═══════ ORDER BUMPS (Persuasive Premium) ═══════ */}
           {orderBumps.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 px-1">
-                <div className="h-5 w-5 rounded-md bg-amber-500/10 flex items-center justify-center">
-                  <Sparkles className="h-3 w-3 text-amber-500" />
+                <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: btnColor + "15" }}>
+                  <Sparkles className="h-3.5 w-3.5" style={{ color: btnColor }} />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-500">Oferta exclusiva</span>
-                <div className="flex-1 h-px bg-amber-400/10" />
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: btnColor }}>Oferta exclusiva</span>
+                  <p className="text-[9px] text-gray-400 font-medium">Aproveite antes que acabe!</p>
+                </div>
+                <div className="flex-1 h-px" style={{ backgroundColor: btnColor + "15" }} />
               </div>
               {orderBumps.map(bump => {
                 const selected = selectedBumps.has(bump.id);
                 return (
                   <button key={bump.id} type="button" onClick={() => toggleBump(bump.id)}
-                    className={`w-full rounded-2xl border-2 p-4 md:p-5 text-left transition-all duration-300 relative overflow-hidden ${
-                      selected
-                        ? "border-emerald-500/50 bg-emerald-50/50 shadow-lg shadow-emerald-500/5"
-                        : "border-dashed border-amber-400/40 bg-gradient-to-br from-amber-50/50 to-transparent hover:border-amber-500/60 hover:shadow-md"
-                    }`}>
-                    {selected && <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3.5 py-1.5 rounded-bl-xl" style={{ backgroundColor: "#10b981" }}>ADICIONADO ✓</div>}
-                    {!selected && <div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-extrabold px-3.5 py-1.5 rounded-bl-xl animate-pulse">APROVEITE!</div>}
+                    className="w-full rounded-2xl border-2 p-4 md:p-5 text-left transition-all duration-300 relative overflow-hidden group"
+                    style={{
+                      borderColor: selected ? "#10b98180" : btnColor + "30",
+                      borderStyle: selected ? "solid" : "dashed",
+                      background: selected
+                        ? "linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02))"
+                        : `linear-gradient(135deg, ${btnColor}08, ${btnColor}03)`,
+                      boxShadow: selected ? "0 4px 16px -4px rgba(16,185,129,0.15)" : undefined,
+                    }}
+                  >
+                    {/* Badge */}
+                    {selected ? (
+                      <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl bg-emerald-500 shadow-sm">
+                        ADICIONADO ✓
+                      </div>
+                    ) : (
+                      <div className="absolute top-0 right-0 text-white text-[8px] font-extrabold px-3 py-1.5 rounded-bl-xl animate-pulse" style={{ backgroundColor: btnColor }}>
+                        APROVEITE!
+                      </div>
+                    )}
                     <div className="flex items-center gap-4">
-                      <div className="h-16 w-16 rounded-xl bg-white border border-gray-200/80 flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-black/5">
-                        {bump.bump_product.image_url ? <img src={bump.bump_product.image_url} alt="" className="h-16 w-16 rounded-xl object-cover" /> : <Package className="h-6 w-6 text-gray-300" />}
+                      <div className="h-16 w-16 rounded-xl border border-gray-200/80 flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-black/5 bg-white">
+                        {bump.bump_product.image_url ? (
+                          <img src={bump.bump_product.image_url} alt="" className="h-16 w-16 rounded-xl object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center" style={{ backgroundColor: btnColor + "08" }}>
+                            <Package className="h-6 w-6" style={{ color: btnColor + "40" }} />
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm leading-tight text-gray-800">{bump.bump_product.name}</p>
@@ -979,7 +1001,17 @@ export default function PublicCheckout() {
                           + R$ {fmtBRL(Number(bump.bump_product.price))}
                         </p>
                       </div>
-                      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${selected ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-110" : "bg-gray-50 border border-gray-200 text-gray-300 hover:border-gray-300"}`}>
+                      <div
+                        className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300"
+                        style={{
+                          backgroundColor: selected ? "#10b981" : btnColor + "10",
+                          borderWidth: selected ? 0 : 2,
+                          borderColor: btnColor + "25",
+                          color: selected ? "white" : btnColor,
+                          boxShadow: selected ? "0 4px 12px -4px rgba(16,185,129,0.3)" : undefined,
+                          transform: selected ? "scale(1.05)" : undefined,
+                        }}
+                      >
                         {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                       </div>
                     </div>
