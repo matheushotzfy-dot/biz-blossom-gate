@@ -1994,29 +1994,27 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4 mb-6">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/8 backdrop-blur-xl ring-1 ring-primary/10 shadow-lg shadow-primary/5 relative">
+    <div className="flex items-center gap-3 mb-5">
+      <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
         <Icon className="h-5 w-5 text-primary" />
-        <div className="absolute -inset-1 rounded-2xl bg-primary/5 blur-lg opacity-60" />
       </div>
       <div>
-        <h2 className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">{title}</h2>
-        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">{subtitle}</p>
+        <h2 className="text-base font-display font-bold text-foreground tracking-tight">{title}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-5 space-y-5 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden group/card hover:border-border/60 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.07)] transition-all duration-500"
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-xl border border-border/40 bg-card/80 p-5 space-y-4 shadow-sm relative overflow-hidden hover:border-border/60 transition-all duration-300"
     >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-300 group-hover/card:w-[4px]", accentColor)} />
-      <div className={cn("absolute left-0 top-0 bottom-0 w-8 rounded-l-2xl blur-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none", accentColor.replace("bg-", "bg-") + "/5")} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
       {children}
     </motion.div>
   );
@@ -2024,8 +2022,8 @@ function EditorCard({ children, accentColor = "bg-primary" }: { children: React.
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <Label className="text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/70 flex items-center gap-2">
-      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />}
+    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+      {Icon && <Icon className="h-3 w-3 text-muted-foreground/50" />}
       {children}
     </Label>
   );
@@ -2033,14 +2031,12 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-xl flex flex-col items-center justify-center py-16 gap-4 shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-info/[0.01]" />
-      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center ring-1 ring-border/15 relative">
-        <Icon className="h-7 w-7 text-muted-foreground/15" />
-        <div className="absolute -inset-2 rounded-3xl bg-muted/5 blur-xl" />
+    <div className="rounded-xl border border-border/30 bg-card/40 flex flex-col items-center justify-center py-14 gap-3">
+      <div className="h-14 w-14 rounded-xl bg-muted/15 flex items-center justify-center border border-border/20">
+        <Icon className="h-6 w-6 text-muted-foreground/20" />
       </div>
-      <p className="text-sm font-display font-bold text-muted-foreground/40">{message}</p>
-    </motion.div>
+      <p className="text-sm font-medium text-muted-foreground/50">{message}</p>
+    </div>
   );
 }
 
@@ -2048,35 +2044,30 @@ function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }:
   icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
   return (
-    <motion.div
-      layout
-      className={cn(
-        "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
-        checked
-          ? "border-primary/20 bg-card/60 shadow-sm"
-          : "border-border/30 bg-card/20 hover:border-border/50"
-      )}
-    >
-      {checked && <motion.div layoutId={`toggle-accent-${label}`} className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
+    <div className={cn(
+      "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
+      checked ? "border-primary/20 bg-primary/[0.03]" : "border-border/30 bg-card/40 hover:border-border/50"
+    )}>
+      {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
       <div className="flex items-center gap-3 flex-1">
         {Icon && (
           <div className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all ring-1",
-            checked ? "bg-primary/10 ring-primary/20" : "bg-muted/10 ring-border/20"
+            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
+            checked ? "bg-primary/10 border-primary/15" : "bg-muted/15 border-transparent"
           )}>
-            <Icon className={cn("h-3.5 w-3.5 transition-colors", checked ? "text-primary" : "text-muted-foreground/50")} />
+            <Icon className={cn("h-3.5 w-3.5", checked ? "text-primary" : "text-muted-foreground/40")} />
           </div>
         )}
         <div>
-          <p className="text-sm font-display font-bold text-foreground tracking-[-0.01em]">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5">{sublabel}</p>}
+          <p className="text-sm font-semibold text-foreground">{label}</p>
+          {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">
         {children}
         <Switch checked={checked} onCheckedChange={onChange} />
       </div>
-    </motion.div>
+    </div>
   );
 }
 
