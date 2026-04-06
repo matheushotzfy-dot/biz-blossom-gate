@@ -721,58 +721,14 @@ export default function AdminConteudo() {
         </motion.div>
       )}
 
-      {/* ═══ Course Create/Edit Sheet ═══ */}
-      <Sheet open={sheetOpen} onOpenChange={v => { setSheetOpen(v); if (!v) setEditCourseId(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card/95 backdrop-blur-2xl border-l border-border/15">
-          <SheetHeader className="mb-10">
-            <SheetTitle className="flex items-center gap-4">
-              <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-                {editCourseId ? <Edit className="h-6 w-6 text-primary-foreground" /> : <Sparkles className="h-6 w-6 text-primary-foreground" />}
-              </div>
-              <div>
-                <span className="text-xl font-display font-black tracking-[-0.03em]">{editCourseId ? "Editar Curso" : "Novo Curso"}</span>
-                <p className="text-sm font-display text-muted-foreground mt-1">{editCourseId ? "Atualize as informações" : "Crie algo incrível"}</p>
-              </div>
-            </SheetTitle>
-          </SheetHeader>
-
-          <form onSubmit={e => { e.preventDefault(); saveCourse(); }} className="space-y-7">
-            <div>
-              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Nome do Curso *</Label>
-              <Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Marketing Digital Avançado" className="mt-2.5 h-13 rounded-xl text-base font-display" required />
-            </div>
-
-            <div>
-              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Descrição</Label>
-              <Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} placeholder="O que os alunos vão aprender..." className="mt-2.5 rounded-xl text-sm font-display" rows={4} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Categoria</Label>
-                <Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex: Marketing" className="mt-2.5 h-12 rounded-xl font-display" />
-              </div>
-              <div>
-                <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Produto Vinculado</Label>
-                <Select value={courseForm.product_id} onValueChange={v => setCourseForm(p => ({ ...p, product_id: v }))}>
-                  <SelectTrigger className="mt-2.5 rounded-xl h-12 font-display"><SelectValue placeholder="Nenhum" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhum</SelectItem>
-                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <ImageUploadZone value={courseForm.thumbnail_url} onChange={url => setCourseForm(p => ({ ...p, thumbnail_url: url }))} label="Thumbnail do Curso" height="h-44" />
-
-            <Button type="submit" className="w-full h-13 rounded-xl font-display font-bold text-base gap-2.5 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all">
-              <Check className="h-5 w-5" />
-              {editCourseId ? "Salvar Alterações" : "Criar Curso"}
-            </Button>
-          </form>
-        </SheetContent>
-      </Sheet>
+      {/* ═══ Course Creation Wizard ═══ */}
+      <CourseCreationWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        products={products}
+        editCourse={editCourseData}
+        onSaved={reloadCourses}
+      />
     </div>
   );
 }
