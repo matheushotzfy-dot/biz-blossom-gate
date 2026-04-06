@@ -1139,8 +1139,8 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
               </div>
               {deliveryType === opt.value && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2">
-                  <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-3 w-3 text-primary-foreground" />
+                  <div className="h-5 w-5 rounded-full bg-primary/15 ring-1 ring-primary/25 flex items-center justify-center">
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                 </motion.div>
               )}
