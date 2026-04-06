@@ -1,17 +1,18 @@
 /**
  * MemberHome — Cinematic Netflix-Grade Member Dashboard
  * @module MemberHome
- * @version 7.0.0 — Full Netflix Redesign
+ * @version 8.0.0 — Ultra Premium Redesign
  */
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import {
   Play, Clock, BookOpen, ChevronRight, Zap, Sparkles,
   GraduationCap, Flame, Layers, Trophy, BarChart3,
-  CheckCircle2, ArrowUpRight, ChevronLeft, Info,
+  CheckCircle2, ArrowUpRight, ChevronLeft, Info, Search, X,
+  TrendingUp, Star, Filter,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,10 @@ export default function MemberHome() {
   const [courses, setCourses] = useState<CourseWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroIdx, setHeroIdx] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (user) loadCourses(); }, [user]);
 
@@ -73,6 +78,18 @@ export default function MemberHome() {
   const completedCourses = courses.filter(c => c.totalLessons > 0 && c.completedLessons === c.totalLessons).length;
   const categories = [...new Set(courses.map(c => c.category).filter(Boolean))];
 
+  const filteredCourses = useMemo(() => {
+    let result = courses;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(c => c.title.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q) || c.category.toLowerCase().includes(q));
+    }
+    if (activeFilter) {
+      result = result.filter(c => c.category === activeFilter);
+    }
+    return result;
+  }, [courses, searchQuery, activeFilter]);
+
   // Auto-rotate hero
   const heroItems = continueWatching.length > 0 ? continueWatching : courses.slice(0, 5);
   useEffect(() => {
@@ -80,6 +97,19 @@ export default function MemberHome() {
     const t = setInterval(() => setHeroIdx(i => (i + 1) % heroItems.length), 8000);
     return () => clearInterval(t);
   }, [heroItems.length]);
+
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
+
+  // Time-based greeting
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+  }, []);
+  const displayName = user?.email?.split("@")[0] || "Aluno";
 
   if (loading) return (
     <div className="min-h-[80vh] flex items-center justify-center bg-background">
@@ -104,7 +134,7 @@ export default function MemberHome() {
             <GraduationCap className="h-14 w-14 text-muted-foreground/10" />
           </div>
         </div>
-        <h2 className="text-3xl sm:text-4xl font-display font-black text-foreground tracking-[-0.04em] mb-4">Bem-vindo à sua área</h2>
+        <h2 className="text-3xl sm:text-4xl font-display font-black text-foreground tracking-[-0.04em] mb-4">{greeting}, {displayName}!</h2>
         <p className="text-base text-muted-foreground max-w-md leading-relaxed font-display mx-auto">
           Quando você adquirir um produto, seus cursos e conteúdos aparecerão aqui automaticamente.
         </p>
@@ -117,10 +147,8 @@ export default function MemberHome() {
 
   return (
     <div className="pb-24 bg-background">
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* CINEMATIC HERO — Netflix Billboard                             */}
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative h-[65vh] min-h-[480px] max-h-[680px] overflow-hidden">
+      {/* ═══ CINEMATIC HERO — Netflix Billboard ═══ */}
+      <div className="relative h-[65vh] min-h-[480px] max-h-[720px] overflow-hidden">
         {/* Background image with crossfade */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -145,7 +173,6 @@ export default function MemberHome() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/50 to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_30%,hsl(var(--background))_100%)]" />
-        {/* Vignette */}
         <div className="absolute inset-0 shadow-[inset_0_-120px_120px_-60px_hsl(var(--background))]" />
 
         {/* Content */}
@@ -160,7 +187,7 @@ export default function MemberHome() {
               className="max-w-2xl"
             >
               {/* Badges */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
                 {continueWatching.length > 0 && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.1em] bg-primary text-primary-foreground shadow-lg shadow-primary/25">
                     <Play className="h-3 w-3 fill-current" /> Continue assistindo
@@ -187,11 +214,11 @@ export default function MemberHome() {
                 <p className="text-sm sm:text-base text-foreground/60 line-clamp-2 mb-5 leading-relaxed max-w-xl font-display">{featured.description}</p>
               )}
 
-              {/* Progress */}
-              <div className="flex items-center gap-4 mb-6">
+              {/* Stats row */}
+              <div className="flex items-center gap-3 mb-5 flex-wrap">
                 <div className="flex items-center gap-2.5">
                   <div className="w-36 sm:w-48">
-                    <div className="h-1 rounded-full bg-foreground/10 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-foreground/10 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${featuredPct}%` }}
@@ -204,17 +231,20 @@ export default function MemberHome() {
                   <span className="text-xs text-foreground/40 font-display font-bold tabular-nums">{featuredPct}%</span>
                 </div>
                 <span className="text-xs text-foreground/30 font-display tabular-nums">{featured.completedLessons}/{featured.totalLessons} aulas</span>
+                <span className="text-xs text-foreground/20">•</span>
+                <span className="text-xs text-foreground/30 font-display tabular-nums">{featured.modules.length} módulos</span>
               </div>
 
               {/* CTA Buttons */}
               <div className="flex items-center gap-3">
                 <Link to={`/membros-area/curso/${featured.id}`}
-                  className="group inline-flex items-center gap-2.5 h-12 sm:h-14 px-7 sm:px-9 rounded-lg bg-foreground text-background text-sm sm:text-base font-display font-black hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-2xl relative overflow-hidden">
+                  className="group inline-flex items-center gap-2.5 h-12 sm:h-14 px-7 sm:px-9 rounded-xl bg-foreground text-background text-sm sm:text-base font-display font-black hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-2xl relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <Play className="h-5 w-5 fill-current relative z-10" />
                   <span className="relative z-10">{featuredPct > 0 && featuredPct < 100 ? "Continuar" : "Assistir"}</span>
                 </Link>
                 <Link to={`/membros-area/curso/${featured.id}`}
-                  className="inline-flex items-center gap-2 h-12 sm:h-14 px-6 sm:px-7 rounded-lg bg-foreground/10 backdrop-blur-xl text-foreground/80 text-sm font-display font-bold border border-foreground/10 hover:bg-foreground/15 hover:text-foreground transition-all active:scale-[0.97]">
+                  className="inline-flex items-center gap-2 h-12 sm:h-14 px-6 sm:px-7 rounded-xl bg-foreground/10 backdrop-blur-xl text-foreground/80 text-sm font-display font-bold border border-foreground/10 hover:bg-foreground/15 hover:text-foreground transition-all active:scale-[0.97]">
                   <Info className="h-4 w-4" />
                   <span>Detalhes</span>
                 </Link>
@@ -231,7 +261,7 @@ export default function MemberHome() {
                   onClick={() => setHeroIdx(i)}
                   className={cn(
                     "h-1 rounded-full transition-all duration-500",
-                    i === heroIdx ? "w-6 bg-foreground" : "w-1.5 bg-foreground/20 hover:bg-foreground/40"
+                    i === heroIdx ? "w-8 bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]" : "w-1.5 bg-foreground/20 hover:bg-foreground/40"
                   )}
                 />
               ))}
@@ -240,10 +270,106 @@ export default function MemberHome() {
         </div>
       </div>
 
-      {/* ═══ Content Rows ═══ */}
+      {/* ═══ Content Area ═══ */}
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 -mt-4 relative z-10">
 
-        {/* ─── Progress Overview ─── */}
+        {/* ─── Greeting + Search Bar ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, ease }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div>
+            <h2 className="text-xl sm:text-2xl font-display font-black text-foreground tracking-[-0.03em]">
+              {greeting}, <span className="text-primary">{displayName}</span>
+            </h2>
+            <p className="text-xs text-muted-foreground/40 font-display mt-0.5">
+              {continueWatching.length > 0
+                ? `Você tem ${continueWatching.length} curso${continueWatching.length > 1 ? "s" : ""} em andamento`
+                : `${courses.length} curso${courses.length > 1 ? "s" : ""} disponíve${courses.length > 1 ? "is" : "l"}`}
+            </p>
+          </div>
+
+          {/* Search */}
+          <div className="flex items-center gap-2">
+            <AnimatePresence mode="wait">
+              {searchOpen ? (
+                <motion.div
+                  key="search-input"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 260, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease }}
+                  className="relative"
+                >
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/30" />
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    placeholder="Buscar cursos..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full h-9 pl-9 pr-8 rounded-xl bg-card/60 border border-border/20 text-sm font-display text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/10 transition-all"
+                  />
+                  <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md flex items-center justify-center hover:bg-muted/10 transition-colors">
+                    <X className="h-3 w-3 text-muted-foreground/30" />
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="search-btn"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSearchOpen(true)}
+                  className="h-9 w-9 rounded-xl bg-card/60 border border-border/15 flex items-center justify-center hover:bg-card/80 hover:border-border/30 transition-all active:scale-95"
+                >
+                  <Search className="h-4 w-4 text-muted-foreground/40" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        {/* ─── Category Filters ─── */}
+        {categories.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, ease }}
+            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
+          >
+            <button
+              onClick={() => setActiveFilter(null)}
+              className={cn(
+                "shrink-0 px-4 py-2 rounded-xl text-xs font-display font-bold transition-all active:scale-95 border",
+                !activeFilter
+                  ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                  : "bg-card/40 text-muted-foreground/60 border-border/15 hover:bg-card/60 hover:text-foreground"
+              )}
+            >
+              Todos
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(activeFilter === cat ? null : cat)}
+                className={cn(
+                  "shrink-0 px-4 py-2 rounded-xl text-xs font-display font-bold transition-all active:scale-95 border",
+                  activeFilter === cat
+                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                    : "bg-card/40 text-muted-foreground/60 border-border/15 hover:bg-card/60 hover:text-foreground"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </motion.div>
+        )}
+
+        {/* ─── KPI Stats ─── */}
         {totalLessons > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -253,9 +379,9 @@ export default function MemberHome() {
           >
             {[
               { icon: BookOpen, label: "Cursos", value: String(courses.length), color: "primary" },
-              { icon: BarChart3, label: "Progresso", value: `${overallPct}%`, color: "info" },
-              { icon: Flame, label: "Concluídas", value: String(totalCompleted), color: "warning" },
-              { icon: Trophy, label: "Completos", value: String(completedCourses), color: "success" },
+              { icon: TrendingUp, label: "Progresso Geral", value: `${overallPct}%`, color: "info" },
+              { icon: Flame, label: "Aulas Concluídas", value: String(totalCompleted), color: "warning" },
+              { icon: Trophy, label: "Cursos Completos", value: String(completedCourses), color: "success" },
             ].map((kpi, i) => (
               <motion.div
                 key={kpi.label}
@@ -263,18 +389,18 @@ export default function MemberHome() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 + i * 0.05, ease }}
                 className={cn(
-                  "rounded-xl bg-card/80 backdrop-blur-xl border border-border/15 p-4 relative overflow-hidden group cursor-default",
+                  "rounded-xl bg-card/80 backdrop-blur-xl border border-border/15 p-4 sm:p-5 relative overflow-hidden group cursor-default",
                   "hover:border-border/30 transition-all duration-500 hover:shadow-lg"
                 )}
               >
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[2px]", `bg-${kpi.color}`)} />
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", `bg-${kpi.color}`)} />
                 <div className="flex items-center gap-3 relative z-10">
-                  <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center transition-transform duration-500 group-hover:scale-110", `bg-${kpi.color}/10`)}>
-                    <kpi.icon className={cn("h-4 w-4", `text-${kpi.color}`)} />
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110", `bg-${kpi.color}/10`)}>
+                    <kpi.icon className={cn("h-4.5 w-4.5", `text-${kpi.color}`)} />
                   </div>
                   <div>
-                    <span className={cn("text-lg font-display font-black tabular-nums block leading-none", `text-${kpi.color}`)}>{kpi.value}</span>
-                    <span className="text-[9px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider">{kpi.label}</span>
+                    <span className={cn("text-xl font-display font-black tabular-nums block leading-none", `text-${kpi.color}`)}>{kpi.value}</span>
+                    <span className="text-[10px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider mt-0.5 block">{kpi.label}</span>
                   </div>
                 </div>
               </motion.div>
@@ -282,54 +408,92 @@ export default function MemberHome() {
           </motion.div>
         )}
 
-        {/* ─── Continue Watching Row ─── */}
-        {continueWatching.length > 0 && (
-          <ContentRow title="Continue Assistindo" icon={<Play className="h-4 w-4 fill-current" />} accent="primary">
-            {continueWatching.map((c, i) => (
-              <motion.div key={c.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06, ease }}>
-                <WideCard course={c} />
-              </motion.div>
-            ))}
-          </ContentRow>
+        {/* ─── Search results mode ─── */}
+        {(searchQuery || activeFilter) && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-display font-black text-foreground">
+                {filteredCourses.length} resultado{filteredCourses.length !== 1 ? "s" : ""}
+                {searchQuery && <span className="text-muted-foreground/40 font-bold"> para "{searchQuery}"</span>}
+              </h2>
+              {(searchQuery || activeFilter) && (
+                <button
+                  onClick={() => { setSearchQuery(""); setActiveFilter(null); setSearchOpen(false); }}
+                  className="text-xs text-primary font-display font-bold hover:underline underline-offset-4"
+                >
+                  Limpar filtros
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+              {filteredCourses.map((course, i) => (
+                <motion.div key={course.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.03, ease }}>
+                  <GridCard course={course} />
+                </motion.div>
+              ))}
+            </div>
+            {filteredCourses.length === 0 && (
+              <div className="py-16 text-center">
+                <Search className="h-10 w-10 text-muted-foreground/10 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground/40 font-display font-bold">Nenhum curso encontrado</p>
+              </div>
+            )}
+          </div>
         )}
 
-        {/* ─── All Courses Row ─── */}
-        <ContentRow title="Meus Cursos" icon={<Layers className="h-4 w-4" />}>
-          {courses.map((course, i) => (
-            <motion.div key={course.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.05, ease }}>
-              <PortraitCard course={course} />
-            </motion.div>
-          ))}
-        </ContentRow>
+        {/* ─── Normal content rows ─── */}
+        {!searchQuery && !activeFilter && (
+          <>
+            {/* Continue Watching Row */}
+            {continueWatching.length > 0 && (
+              <ContentRow title="Continue Assistindo" icon={<Play className="h-4 w-4 fill-current" />} accent="primary">
+                {continueWatching.map((c, i) => (
+                  <motion.div key={c.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06, ease }}>
+                    <WideCard course={c} />
+                  </motion.div>
+                ))}
+              </ContentRow>
+            )}
 
-        {/* ─── Category Rows ─── */}
-        {categories.filter(cat => courses.filter(c => c.category === cat).length > 1).map((cat, ci) => (
-          <ContentRow key={cat} title={cat} icon={<Sparkles className="h-4 w-4" />}>
-            {courses.filter(c => c.category === cat).map((course, i) => (
-              <motion.div key={course.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05, ease }}>
-                <PortraitCard course={course} />
-              </motion.div>
-            ))}
-          </ContentRow>
-        ))}
+            {/* All Courses Row */}
+            <ContentRow title="Meus Cursos" icon={<Layers className="h-4 w-4" />}>
+              {courses.map((course, i) => (
+                <motion.div key={course.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.05, ease }}>
+                  <PortraitCard course={course} />
+                </motion.div>
+              ))}
+            </ContentRow>
 
-        {/* ─── Module Rows per Course ─── */}
-        {courses.filter(c => c.modules.length > 1).map(course => (
-          <ContentRow key={course.id} title={course.title} subtitle={`${course.modules.length} módulos`} icon={<BookOpen className="h-4 w-4" />}>
-            {course.modules.map((mod, mi) => (
-              <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.04, ease }}>
-                <ModuleCard courseId={course.id} mod={mod} />
-              </motion.div>
+            {/* Category Rows */}
+            {categories.filter(cat => courses.filter(c => c.category === cat).length > 1).map(cat => (
+              <ContentRow key={cat} title={cat} icon={<Sparkles className="h-4 w-4" />}>
+                {courses.filter(c => c.category === cat).map((course, i) => (
+                  <motion.div key={course.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05, ease }}>
+                    <PortraitCard course={course} />
+                  </motion.div>
+                ))}
+              </ContentRow>
             ))}
-          </ContentRow>
-        ))}
+
+            {/* Module Rows per Course */}
+            {courses.filter(c => c.modules.length > 1).map(course => (
+              <ContentRow key={course.id} title={course.title} subtitle={`${course.modules.length} módulos`} icon={<BookOpen className="h-4 w-4" />}>
+                {course.modules.map((mod, mi) => (
+                  <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.04, ease }}>
+                    <ModuleCard courseId={course.id} mod={mod} />
+                  </motion.div>
+                ))}
+              </ContentRow>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════ */
-/* CONTENT ROW — Netflix-style horizontal scroll with arrows         */
+/* CONTENT ROW — Netflix-style horizontal scroll                     */
 /* ═══════════════════════════════════════════════════════════════════ */
 function ContentRow({ title, subtitle, icon, accent, children }: {
   title: string; subtitle?: string; icon?: React.ReactNode; accent?: string;
@@ -392,8 +556,8 @@ function ContentRow({ title, subtitle, icon, accent, children }: {
 function WideCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   return (
-    <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[320px] sm:w-[380px] snap-start block">
-      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-foreground/15 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10">
+    <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[320px] sm:w-[400px] snap-start block">
+      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10">
         <div className="aspect-[2/1] relative overflow-hidden">
           {course.thumbnail_url ? (
             <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
@@ -409,10 +573,18 @@ function WideCard({ course }: { course: CourseWithProgress }) {
               <Play className="h-6 w-6 text-background ml-0.5 fill-current" />
             </div>
           </div>
+          {/* Info overlay on hover */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-10">
+            <div className="flex items-center gap-2 text-[10px] text-foreground/50 font-display">
+              <span className="flex items-center gap-1"><Layers className="h-2.5 w-2.5" /> {course.modules.length} módulos</span>
+              <span>•</span>
+              <span className="flex items-center gap-1"><BookOpen className="h-2.5 w-2.5" /> {course.totalLessons} aulas</span>
+            </div>
+          </div>
         </div>
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground/5">
-          <div className="h-full bg-primary rounded-r-full relative" style={{ width: `${pct}%` }}>
+          <div className="h-full bg-primary rounded-r-full relative transition-all" style={{ width: `${pct}%` }}>
             {pct > 5 && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]" />}
           </div>
         </div>
@@ -436,7 +608,7 @@ function PortraitCard({ course }: { course: CourseWithProgress }) {
 
   return (
     <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[180px] sm:w-[220px] snap-start block">
-      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-foreground/15 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:scale-[1.03] group-hover:z-10">
+      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:scale-[1.04] group-hover:z-10">
         <div className="aspect-[2/3] relative overflow-hidden">
           {course.thumbnail_url ? (
             <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
@@ -464,10 +636,14 @@ function PortraitCard({ course }: { course: CourseWithProgress }) {
               ) : null}
             </div>
           </div>
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          {/* Hover overlay with extra info */}
+          <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-4">
             <div className="h-12 w-12 rounded-full bg-foreground/90 flex items-center justify-center shadow-xl">
               <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-foreground/60 font-display font-bold">{course.modules.length} módulos</p>
+              <p className="text-[10px] text-foreground/40 font-display tabular-nums">{course.totalLessons} aulas</p>
             </div>
           </div>
           {/* Badges */}
@@ -484,11 +660,55 @@ function PortraitCard({ course }: { course: CourseWithProgress }) {
   );
 }
 
+/* ═══ Grid Card — Search Results ═══ */
+function GridCard({ course }: { course: CourseWithProgress }) {
+  const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
+  const isFinished = pct === 100 && course.totalLessons > 0;
+
+  return (
+    <Link to={`/membros-area/curso/${course.id}`} className="group block">
+      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-xl group-hover:scale-[1.03]">
+        <div className="aspect-[2/3] relative overflow-hidden">
+          {course.thumbnail_url ? (
+            <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-b from-primary/10 via-card to-card flex items-center justify-center">
+              <GraduationCap className="h-10 w-10 text-primary/10" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
+          <div className="absolute bottom-0 left-0 right-0 p-3">
+            <h3 className="text-xs font-display font-black text-foreground line-clamp-2 leading-snug mb-1.5">{course.title}</h3>
+            <div className="h-[2px] rounded-full bg-foreground/8 overflow-hidden">
+              <div className={cn("h-full rounded-full", isFinished ? "bg-success" : "bg-primary")} style={{ width: `${pct}%` }} />
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span className="text-[9px] text-foreground/30 font-display tabular-nums">{course.totalLessons} aulas</span>
+              {pct > 0 && <span className={cn("text-[9px] font-display font-bold tabular-nums", isFinished ? "text-success" : "text-primary")}>{pct}%</span>}
+            </div>
+          </div>
+          {/* Hover play */}
+          <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-foreground/90 flex items-center justify-center shadow-xl">
+              <Play className="h-4 w-4 text-background ml-0.5 fill-current" />
+            </div>
+          </div>
+          {isFinished && (
+            <div className="absolute top-2 right-2 h-5 w-5 rounded-md bg-success/20 backdrop-blur-xl flex items-center justify-center ring-1 ring-success/30">
+              <CheckCircle2 className="h-3 w-3 text-success" />
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 /* ═══ Module Card ═══ */
 function ModuleCard({ courseId, mod }: { courseId: string; mod: ModuleInfo }) {
   return (
     <Link to={`/membros-area/curso/${courseId}?module=${mod.id}`} className="group shrink-0 w-[240px] sm:w-[280px] snap-start block">
-      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-foreground/15 transition-all duration-500 group-hover:shadow-xl group-hover:scale-[1.02]">
+      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-xl group-hover:scale-[1.02]">
         <div className="aspect-video relative overflow-hidden">
           {mod.banner_url ? (
             <img src={mod.banner_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
