@@ -82,6 +82,7 @@ export default function ProductEditor() {
 
   const [activeTab, setActiveTab] = useState<TabKey>("geral");
   const [saving, setSaving] = useState(false);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const fileInputRef = useRef<HTMLInputElement>(null);
