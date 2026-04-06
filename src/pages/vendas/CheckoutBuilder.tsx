@@ -1050,22 +1050,39 @@ export default function CheckoutBuilder() {
                   {creditCardEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/15 inline-flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Cartão</span>}
                 </div>
 
-                {/* Order bumps */}
+                {/* Order bumps — Persuasive */}
                 {orderBumps.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2 px-0.5">
+                      <div className="h-4 w-4 rounded-md flex items-center justify-center" style={{ backgroundColor: buttonColor + "18" }}>
+                        <Sparkles className="h-2.5 w-2.5" style={{ color: buttonColor }} />
+                      </div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest" style={{ color: buttonColor }}>Oferta exclusiva</span>
+                      <div className="flex-1 h-px" style={{ backgroundColor: buttonColor + "15" }} />
+                    </div>
                     {orderBumps.map(bump => {
                       const prod = allProducts.find(p => p.id === bump.bump_product_id);
                       return (
-                        <div key={bump.id} className="p-3 rounded-lg border-2 border-dashed" style={{ borderColor: buttonColor + "30" }}>
+                        <div key={bump.id} className="relative rounded-xl border-2 border-dashed p-3.5 overflow-hidden transition-all hover:shadow-md cursor-pointer" style={{ borderColor: buttonColor + "35", background: `linear-gradient(135deg, ${buttonColor}08, ${buttonColor}03)` }}>
+                          <div className="absolute top-0 right-0 text-white text-[7px] font-extrabold px-2.5 py-1 rounded-bl-lg" style={{ backgroundColor: buttonColor }}>
+                            APROVEITE!
+                          </div>
                           <div className="flex items-center gap-3">
-                            <div className="h-4 w-4 rounded border-2 flex items-center justify-center" style={{ borderColor: buttonColor + "40" }}>
-                              <Plus className="h-2.5 w-2.5" style={{ color: buttonColor + "60" }} />
-                            </div>
+                            {prod?.image_url ? (
+                              <img src={prod.image_url} className="h-12 w-12 rounded-lg object-cover border border-gray-200 shadow-sm" />
+                            ) : (
+                              <div className="h-12 w-12 rounded-lg border border-gray-200 flex items-center justify-center shadow-sm" style={{ backgroundColor: buttonColor + "10" }}>
+                                <Package className="h-5 w-5" style={{ color: buttonColor + "60" }} />
+                              </div>
+                            )}
                             <div className="flex-1 min-w-0">
-                              <span className="text-xs font-bold text-gray-800 truncate block">{prod?.name || "Bump"}</span>
-                              <span className="text-[10px] text-gray-400">Adicione ao pedido</span>
+                              <p className="text-xs font-bold text-gray-800 truncate">{prod?.name || "Bump"}</p>
+                              <p className="text-[10px] text-gray-400 mt-0.5">Adicione ao seu pedido</p>
+                              <p className="text-sm font-extrabold mt-0.5" style={{ color: buttonColor }}>+ R$ {Number(prod?.price || 0).toFixed(2)}</p>
                             </div>
-                            <span className="text-sm font-black" style={{ color: buttonColor }}>+ R$ {Number(prod?.price || 0).toFixed(2)}</span>
+                            <div className="h-8 w-8 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all" style={{ borderColor: buttonColor + "40", backgroundColor: buttonColor + "08" }}>
+                              <Plus className="h-3.5 w-3.5" style={{ color: buttonColor }} />
+                            </div>
                           </div>
                         </div>
                       );
