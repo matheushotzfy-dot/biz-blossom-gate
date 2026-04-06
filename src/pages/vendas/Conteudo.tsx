@@ -302,28 +302,7 @@ export default function AdminConteudo() {
     setWizardOpen(true);
   };
 
-  const saveCourse = async () => {
-    if (!user || !courseForm.title.trim()) { toast.error("Preencha o título"); return; }
-    const payload = {
-      title: courseForm.title, description: courseForm.description || null,
-      category: courseForm.category || "geral",
-      product_id: courseForm.product_id && courseForm.product_id !== "none" ? courseForm.product_id : null,
-      thumbnail_url: courseForm.thumbnail_url || null,
-      user_id: user.id, is_published: false
-    };
-    if (editCourseId) {
-      const { user_id, is_published, ...up } = payload;
-      await supabase.from("courses").update(up).eq("id", editCourseId).eq("user_id", user.id);
-      toast.success("Curso atualizado!");
-      setSheetOpen(false);
-    } else {
-      const { data } = await supabase.from("courses").insert(payload).select().single();
-      toast.success("Curso criado!");
-      setSheetOpen(false);
-      if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
-    }
-    reloadCourses();
-  };
+  // saveCourse is now handled by the wizard component
 
   const togglePublish = async (id: string, cur: boolean) => {
     if (!user) return;
