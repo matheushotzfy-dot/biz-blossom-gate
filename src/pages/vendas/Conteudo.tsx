@@ -22,6 +22,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import CourseCreationWizard from "@/components/course/CourseCreationWizard";
 
 // ─── Types ────────────────────────────────────────────────────────
 interface Course {
@@ -286,46 +287,22 @@ export default function AdminConteudo() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [editCourseId, setEditCourseId] = useState<string | null>(null);
-  const [courseForm, setCourseForm] = useState({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" });
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editCourseData, setEditCourseData] = useState<any>(null);
 
   const reloadCourses = () => invalidateAll(["courses", "products"]);
 
   const openNew = () => {
-    setEditCourseId(null);
-    setCourseForm({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" });
-    setSheetOpen(true);
+    setEditCourseData(null);
+    setWizardOpen(true);
   };
 
   const openEdit = (c: Course) => {
-    setEditCourseId(c.id);
-    setCourseForm({ title: c.title, description: c.description || "", category: c.category || "geral", product_id: c.product_id || "", thumbnail_url: c.thumbnail_url || "" });
-    setSheetOpen(true);
+    setEditCourseData(c);
+    setWizardOpen(true);
   };
 
-  const saveCourse = async () => {
-    if (!user || !courseForm.title.trim()) { toast.error("Preencha o título"); return; }
-    const payload = {
-      title: courseForm.title, description: courseForm.description || null,
-      category: courseForm.category || "geral",
-      product_id: courseForm.product_id && courseForm.product_id !== "none" ? courseForm.product_id : null,
-      thumbnail_url: courseForm.thumbnail_url || null,
-      user_id: user.id, is_published: false
-    };
-    if (editCourseId) {
-      const { user_id, is_published, ...up } = payload;
-      await supabase.from("courses").update(up).eq("id", editCourseId).eq("user_id", user.id);
-      toast.success("Curso atualizado!");
-      setSheetOpen(false);
-    } else {
-      const { data } = await supabase.from("courses").insert(payload).select().single();
-      toast.success("Curso criado!");
-      setSheetOpen(false);
-      if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
-    }
-    reloadCourses();
-  };
+  // saveCourse is now handled by the wizard component
 
   const togglePublish = async (id: string, cur: boolean) => {
     if (!user) return;
@@ -744,58 +721,14 @@ export default function AdminConteudo() {
         </motion.div>
       )}
 
-      {/* ═══ Course Create/Edit Sheet ═══ */}
-      <Sheet open={sheetOpen} onOpenChange={v => { setSheetOpen(v); if (!v) setEditCourseId(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card/95 backdrop-blur-2xl border-l border-border/15">
-          <SheetHeader className="mb-10">
-            <SheetTitle className="flex items-center gap-4">
-              <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-                {editCourseId ? <Edit className="h-6 w-6 text-primary-foreground" /> : <Sparkles className="h-6 w-6 text-primary-foreground" />}
-              </div>
-              <div>
-                <span className="text-xl font-display font-black tracking-[-0.03em]">{editCourseId ? "Editar Curso" : "Novo Curso"}</span>
-                <p className="text-sm font-display text-muted-foreground mt-1">{editCourseId ? "Atualize as informações" : "Crie algo incrível"}</p>
-              </div>
-            </SheetTitle>
-          </SheetHeader>
-
-          <form onSubmit={e => { e.preventDefault(); saveCourse(); }} className="space-y-7">
-            <div>
-              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Nome do Curso *</Label>
-              <Input value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} placeholder="Ex: Marketing Digital Avançado" className="mt-2.5 h-13 rounded-xl text-base font-display" required />
-            </div>
-
-            <div>
-              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Descrição</Label>
-              <Textarea value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} placeholder="O que os alunos vão aprender..." className="mt-2.5 rounded-xl text-sm font-display" rows={4} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Categoria</Label>
-                <Input value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} placeholder="Ex: Marketing" className="mt-2.5 h-12 rounded-xl font-display" />
-              </div>
-              <div>
-                <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em]">Produto Vinculado</Label>
-                <Select value={courseForm.product_id} onValueChange={v => setCourseForm(p => ({ ...p, product_id: v }))}>
-                  <SelectTrigger className="mt-2.5 rounded-xl h-12 font-display"><SelectValue placeholder="Nenhum" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhum</SelectItem>
-                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <ImageUploadZone value={courseForm.thumbnail_url} onChange={url => setCourseForm(p => ({ ...p, thumbnail_url: url }))} label="Thumbnail do Curso" height="h-44" />
-
-            <Button type="submit" className="w-full h-13 rounded-xl font-display font-bold text-base gap-2.5 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all">
-              <Check className="h-5 w-5" />
-              {editCourseId ? "Salvar Alterações" : "Criar Curso"}
-            </Button>
-          </form>
-        </SheetContent>
-      </Sheet>
+      {/* ═══ Course Creation Wizard ═══ */}
+      <CourseCreationWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        products={products}
+        editCourse={editCourseData}
+        onSaved={reloadCourses}
+      />
     </div>
   );
 }
