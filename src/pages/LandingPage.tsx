@@ -182,34 +182,6 @@ function PricingCard({ name, price, desc, features, popular, delay }: {
   );
 }
 
-/* ─── Testimonial ─── */
-function TestimonialCard({ name, role, text, avatar, delay }: {
-  name: string; role: string; text: string; avatar: string; delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: delay * 0.1 }}
-      className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/10 p-6 md:p-8 hover:border-primary/15 hover:shadow-xl transition-all duration-500 group"
-    >
-      <div className="flex gap-1 mb-4">
-        {[1,2,3,4,5].map(i => <Star key={i} className="h-3.5 w-3.5 fill-warning text-warning" />)}
-      </div>
-      <p className="text-sm text-muted-foreground/60 leading-relaxed font-display mb-6">"{text}"</p>
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-info/20 flex items-center justify-center text-sm font-bold font-display text-primary">
-          {avatar}
-        </div>
-        <div>
-          <p className="text-sm font-display font-bold text-foreground">{name}</p>
-          <p className="text-[10px] text-muted-foreground/40 font-display">{role}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 /* ─── Live Status ─── */
 function LiveStatus() {
