@@ -609,7 +609,7 @@ export default function ProductEditor() {
             <div className="h-5 w-px bg-border/20 hidden sm:block" />
 
             <div className="flex items-center gap-1 sm:gap-1.5">
-              {!isNew && (
+              {!tabsLocked && (
                 <>
                   <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50 hidden sm:flex">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
