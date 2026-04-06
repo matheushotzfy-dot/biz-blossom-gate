@@ -341,37 +341,40 @@ function ContinueCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   return (
     <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[300px] sm:w-[340px] snap-start block">
-      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 shadow-md group-hover:shadow-lg group-hover:shadow-primary/5">
+      <div className="relative rounded-2xl overflow-hidden bg-card ring-1 ring-border/15 group-hover:ring-primary/25 transition-all duration-500 shadow-md group-hover:shadow-xl group-hover:shadow-primary/8">
         <div className="aspect-[2.2/1] relative overflow-hidden">
           {course.thumbnail_url ? (
-            <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+            <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-[900ms] ease-out" loading="lazy" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-card flex items-center justify-center">
-              <GraduationCap className="h-10 w-10 text-primary/8" />
+            <div className="w-full h-full bg-gradient-to-br from-primary/12 via-primary/5 to-card flex items-center justify-center relative">
+              <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+              <GraduationCap className="h-12 w-12 text-primary/10" />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-            <span className="text-[10px] font-display font-bold text-foreground/70 bg-card/30 backdrop-blur-xl px-2.5 py-1 rounded-lg border border-border/15">
+            <span className="text-[10px] font-display font-bold text-foreground/80 bg-card/40 backdrop-blur-xl px-3 py-1.5 rounded-lg border border-border/20 shadow-sm tabular-nums">
               {pct}% · {course.completedLessons}/{course.totalLessons}
             </span>
           </div>
           {/* Play overlay */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="h-14 w-14 rounded-2xl bg-foreground/80 backdrop-blur-xl flex items-center justify-center shadow-2xl">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="h-14 w-14 rounded-2xl bg-foreground/85 backdrop-blur-xl flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform duration-500">
               <Play className="h-6 w-6 text-background ml-0.5 fill-current" />
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-[3px]">
-          <div className="h-full bg-primary/60 rounded-full transition-all" style={{ width: `${pct}%` }} />
+        {/* Progress bar at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-muted/10">
+          <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all relative" style={{ width: `${pct}%` }}>
+            {pct > 5 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />}
+          </div>
         </div>
       </div>
-      <p className="text-sm font-display font-bold text-foreground mt-2.5 truncate group-hover:text-primary transition-colors">{course.title}</p>
+      <p className="text-sm font-display font-bold text-foreground mt-3 truncate group-hover:text-primary transition-colors duration-300">{course.title}</p>
     </Link>
   );
 }
-
 /* ─── Course Card ─── */
 function CourseCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
