@@ -829,10 +829,10 @@ export default function ProductEditor() {
                   {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }}
                 />}
 
-                {activeTab === "conteudo" && <TabConteudo productId={productId} isNew={isNew} />}
+                {activeTab === "conteudo" && <TabConteudo productId={effectiveProductId} isNew={tabsLocked} />}
 
                 {activeTab === "order-bump" && <TabOrderBump
-                  {...{ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
+                  {...{ isNew: tabsLocked, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
                 />}
 
                 {activeTab === "upsell" && <TabUpsell
