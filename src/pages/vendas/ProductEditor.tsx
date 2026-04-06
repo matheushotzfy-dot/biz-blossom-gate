@@ -359,7 +359,7 @@ export default function ProductEditor() {
   };
 
   const handleDuplicate = async () => {
-    if (!user || isNew || !product) return;
+    if (!user || tabsLocked || !product) return;
     const slug = crypto.randomUUID().slice(0, 8);
     const checkoutUrl = `${window.location.origin}/pay/${slug}`;
     const { error } = await supabase.from("products").insert({
