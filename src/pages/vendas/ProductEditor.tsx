@@ -82,6 +82,7 @@ export default function ProductEditor() {
 
   const [activeTab, setActiveTab] = useState<TabKey>("geral");
   const [saving, setSaving] = useState(false);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -170,7 +171,8 @@ export default function ProductEditor() {
     return Math.round((score / total) * 100);
   })();
 
-  const tabsLocked = isNew;
+  const effectiveProductId = createdProductId || productId;
+  const tabsLocked = isNew && !createdProductId;
 
   const tabCompleted = useCallback((key: TabKey): boolean => {
     switch (key) {
@@ -299,10 +301,10 @@ export default function ProductEditor() {
         checkout_banner_mobile_url: mobileUrl || null,
       };
 
-      if (isNew) {
+      if (isNew && !createdProductId) {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("id").single();
+        const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("*").single();
         if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
         if (deliveryType === "digital") {
@@ -315,19 +317,22 @@ export default function ProductEditor() {
           } as any);
         }
 
-        toast.success("Produto criado com sucesso!");
+        setCreatedProductId(newProduct.id);
+        setProduct(newProduct as any);
+        toast.success("Produto criado com sucesso! Continue configurando.");
         invalidateAll(["products", "courses"]);
-        navigate("/vendas/produtos");
+        setActiveTab("configuracoes");
+        window.history.replaceState(null, "", `/vendas/produtos/${newProduct.id}/editar`);
       } else {
-        const { error } = await supabase.from("products").update(productData).eq("id", productId!).eq("user_id", user.id);
+        const { error } = await supabase.from("products").update(productData).eq("id", effectiveProductId!).eq("user_id", user.id);
         if (error) { toast.error("Erro ao salvar"); return; }
 
         if (deliveryType === "digital") {
-          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", productId!).eq("user_id", user.id).limit(1).maybeSingle();
+          const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", effectiveProductId!).eq("user_id", user.id).limit(1).maybeSingle();
           if (!existingCourse) {
             await supabase.from("courses").insert({
               user_id: user.id,
-              product_id: productId!,
+              product_id: effectiveProductId!,
               title: name.trim(),
               description: description.trim() || null,
               is_published: false,
@@ -344,9 +349,9 @@ export default function ProductEditor() {
   };
 
   const handleDelete = async () => {
-    if (!user || isNew) return;
+    if (!user || tabsLocked) return;
     if (!window.confirm("Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) return;
-    const { error } = await supabase.from("products").delete().eq("id", productId!).eq("user_id", user.id);
+    const { error } = await supabase.from("products").delete().eq("id", effectiveProductId!).eq("user_id", user.id);
     if (error) { toast.error("Erro ao excluir"); return; }
     toast.success("Produto excluído");
     invalidateAll(["products"]);
@@ -354,7 +359,7 @@ export default function ProductEditor() {
   };
 
   const handleDuplicate = async () => {
-    if (!user || isNew || !product) return;
+    if (!user || tabsLocked || !product) return;
     const slug = crypto.randomUUID().slice(0, 8);
     const checkoutUrl = `${window.location.origin}/pay/${slug}`;
     const { error } = await supabase.from("products").insert({
@@ -583,7 +588,6 @@ export default function ProductEditor() {
                     className={cn(
                       "h-2 rounded-full transition-all duration-300",
                       isActive ? "w-6 bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" :
-                      isDone ? "w-2 bg-success/60" :
                       locked ? "w-2 bg-muted-foreground/10" :
                       "w-2 bg-muted-foreground/20"
                     )}
@@ -605,7 +609,7 @@ export default function ProductEditor() {
             <div className="h-5 w-px bg-border/20 hidden sm:block" />
 
             <div className="flex items-center gap-1 sm:gap-1.5">
-              {!isNew && (
+              {!tabsLocked && (
                 <>
                   <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground hover:text-foreground gap-1.5 text-[11px] font-display font-bold rounded-xl h-8 hover:bg-card/50 hidden sm:flex">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
@@ -645,11 +649,11 @@ export default function ProductEditor() {
       </div>
 
       {/* ───── Main Area ───── */}
-      <div className="flex-1 min-h-0 flex">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-7 py-4 sm:py-6 min-h-0">
 
           {/* ───── Premium Sidebar ───── */}
-          <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4">
+          <nav className="hidden lg:flex flex-col w-60 shrink-0 space-y-4 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
             <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-xl p-3 space-y-1 shadow-[0_4px_20px_hsl(var(--foreground)/0.05)] relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none" />
               <div className="flex items-center justify-between px-3 pt-1 pb-3 relative z-10">
@@ -692,12 +696,7 @@ export default function ProductEditor() {
                         <Lock className="h-3.5 w-3.5 text-muted-foreground/40" />
                       ) : (
                         <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/60")} />
-                      )}
-                      {completed && !isActive && !(tab.key !== "geral" && tabsLocked) && (
-                        <div className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-success flex items-center justify-center ring-2 ring-card">
-                          <Check className="h-2 w-2 text-success-foreground" />
-                        </div>
-                      )}
+                    )}
                     </div>
                     <span className="flex-1">{tab.label}</span>
                     {tab.key !== "geral" && tabsLocked && <Lock className="h-3 w-3 text-muted-foreground/30" />}
@@ -763,7 +762,7 @@ export default function ProductEditor() {
             </div>
 
             {/* Quick Actions */}
-            {!isNew && (
+            {!tabsLocked && (
               <div className="rounded-2xl border border-border/30 bg-card/20 p-3 space-y-2">
                 <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-1">Ações rápidas</p>
                 {product?.checkout_url && (
@@ -775,7 +774,7 @@ export default function ProductEditor() {
                   </button>
                 )}
                 <button
-                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${productId}/checkout-builder`), 100); }}
+                  onClick={() => { setActiveTab("checkout"); setTimeout(() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`), 100); }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-display font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
                 >
                   <Palette className="h-3.5 w-3.5" /> Checkout Builder
@@ -807,9 +806,6 @@ export default function ProductEditor() {
                 >
                   {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
                   <span className="truncate max-w-[48px]">{tab.label}</span>
-                  {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
-                    <div className="h-1 w-1 rounded-full bg-success absolute top-1 right-1" />
-                  )}
                 </button>
               ))}
             </div>
@@ -833,10 +829,10 @@ export default function ProductEditor() {
                   {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }}
                 />}
 
-                {activeTab === "conteudo" && <TabConteudo productId={productId} isNew={isNew} />}
+                {activeTab === "conteudo" && <TabConteudo productId={effectiveProductId} isNew={tabsLocked} />}
 
                 {activeTab === "order-bump" && <TabOrderBump
-                  {...{ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
+                  {...{ isNew: tabsLocked, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
                 />}
 
                 {activeTab === "upsell" && <TabUpsell
@@ -844,23 +840,23 @@ export default function ProductEditor() {
                 />}
 
                 {activeTab === "checkout" && <TabCheckout
-                  {...{ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
+                  {...{ isNew: tabsLocked, name, price, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
                 />}
 
                 {activeTab === "co-producao" && <TabCoProducao
-                  {...{ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }}
+                  {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }}
                 />}
 
                 {activeTab === "cupons" && <TabCupons
-                  {...{ isNew, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
+                  {...{ isNew: tabsLocked, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
                 />}
 
                 {activeTab === "afiliados" && <TabAfiliados
-                  {...{ isNew, productId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }}
+                  {...{ isNew: tabsLocked, productId: effectiveProductId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }}
                 />}
 
                 {activeTab === "links" && <TabLinks
-                  {...{ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }}
+                  {...{ isNew: tabsLocked, product, pageUrl, affiliateEnabled, productId: effectiveProductId, getCheckoutLink, copyLink, name, price }}
                 />}
               </motion.div>
             </AnimatePresence>
@@ -1143,8 +1139,8 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
               </div>
               {deliveryType === opt.value && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2">
-                  <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-3 w-3 text-primary-foreground" />
+                  <div className="h-5 w-5 rounded-full bg-primary/15 ring-1 ring-primary/25 flex items-center justify-center">
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                 </motion.div>
               )}
