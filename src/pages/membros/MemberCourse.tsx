@@ -1,10 +1,10 @@
 /**
  * MemberCourse — Cinematic Course Player
  * @module MemberCourse
- * @version 5.0.0 — Netflix Theater Experience
+ * @version 6.0.0 — Ultra Premium Player Experience
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useSearchParams, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -12,7 +12,8 @@ import {
   Play, CheckCircle2, ChevronDown, BookOpen, Clock,
   ArrowLeft, ArrowRight, FileText, Video, ChevronLeft, List,
   Award, X, Check, Layers, GraduationCap, Maximize2, Minimize2,
-  Sparkles, Trophy, Flame,
+  Sparkles, Trophy, Flame, Download, Paperclip, ExternalLink,
+  Keyboard, Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +23,7 @@ type Course = { id: string; title: string; description: string | null; thumbnail
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
 type Lesson = { id: string; title: string; description: string | null; video_url: string | null; duration_minutes: number; is_free: boolean; sort_order: number; module_id: string };
 type Progress = { lesson_id: string; completed: boolean; progress_seconds: number };
+type Attachment = { id: string; file_name: string; file_url: string; file_size: number; file_type: string };
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -39,6 +41,11 @@ function isAllowedVideoUrl(url: string): boolean {
     const allowed = ['youtube.com', 'www.youtube.com', 'youtu.be', 'player.vimeo.com', 'vimeo.com', 'www.vimeo.com', 'fast.wistia.net', 'player.hotmart.com', 'cdn.embedly.com', 'iframe.mediadelivery.net'];
     return u.protocol === 'https:' && allowed.some(d => u.hostname === d || u.hostname.endsWith('.' + d));
   } catch { return false; }
+}
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
 function VideoPlayer({ url }: { url: string }) {
@@ -62,8 +69,25 @@ export default function MemberCourse() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => { if (courseId && user) loadCourse(); }, [courseId, user]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowRight" && !e.metaKey && !e.ctrlKey) { e.preventDefault(); navigateLesson(1); }
+      if (e.key === "ArrowLeft" && !e.metaKey && !e.ctrlKey) { e.preventDefault(); navigateLesson(-1); }
+      if (e.key === "t" && !e.metaKey && !e.ctrlKey) { setTheaterMode(p => !p); }
+      if (e.key === "c" && !e.metaKey && !e.ctrlKey && activeLesson && !progress.get(activeLesson.id)?.completed) {
+        markComplete(activeLesson.id);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [activeLesson, progress, modules]);
 
   const loadCourse = async () => {
     if (!courseId || !user) return;
@@ -108,11 +132,20 @@ export default function MemberCourse() {
       if (targetLesson) {
         setActiveLesson(targetLesson);
         setExpandedModules(prev => new Set([...prev, targetLesson.module_id]));
+        loadAttachments(targetLesson.id);
       }
     } else if (enrichedModules.length > 0 && enrichedModules[0].lessons.length > 0) {
       setActiveLesson(enrichedModules[0].lessons[0]);
+      loadAttachments(enrichedModules[0].lessons[0].id);
     }
     setLoading(false);
+  };
+
+  const loadAttachments = async (lessonId: string) => {
+    const { data } = await supabase.from("lesson_attachments")
+      .select("id, file_name, file_url, file_size, file_type")
+      .eq("lesson_id", lessonId);
+    setAttachments(data || []);
   };
 
   const toggleModule = (id: string) => {
@@ -123,6 +156,7 @@ export default function MemberCourse() {
     setActiveLesson(lesson);
     setSidebarOpen(false);
     setExpandedModules(prev => new Set([...prev, lesson.module_id]));
+    loadAttachments(lesson.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -133,21 +167,29 @@ export default function MemberCourse() {
       { onConflict: "user_id,lesson_id" }
     );
     setProgress(prev => { const next = new Map(prev); next.set(lessonId, { lesson_id: lessonId, completed: true, progress_seconds: 0 }); return next; });
-    toast.success("Aula concluída!");
+
+    // Check if course completed
     const allLessons = modules.flatMap(m => m.lessons);
-    const idx = allLessons.findIndex(l => l.id === lessonId);
-    if (idx < allLessons.length - 1) {
-      setTimeout(() => selectLesson(allLessons[idx + 1]), 800);
+    const newCompleted = [...progress.values()].filter(p => p.completed).length + 1;
+    if (newCompleted >= allLessons.length) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 5000);
+    } else {
+      toast.success("Aula concluída! 🎉");
+      const idx = allLessons.findIndex(l => l.id === lessonId);
+      if (idx < allLessons.length - 1) {
+        setTimeout(() => selectLesson(allLessons[idx + 1]), 800);
+      }
     }
   };
 
-  const navigateLesson = (dir: -1 | 1) => {
+  const navigateLesson = useCallback((dir: -1 | 1) => {
     if (!activeLesson) return;
     const allLessons = modules.flatMap(m => m.lessons);
     const idx = allLessons.findIndex(l => l.id === activeLesson.id);
     const next = allLessons[idx + dir];
     if (next) selectLesson(next);
-  };
+  }, [activeLesson, modules]);
 
   const allLessons = modules.flatMap(m => m.lessons);
   const currentIdx = activeLesson ? allLessons.findIndex(l => l.id === activeLesson.id) : -1;
@@ -217,6 +259,18 @@ export default function MemberCourse() {
             </div>
           </motion.div>
         )}
+      </div>
+
+      {/* Keyboard shortcuts hint */}
+      <div className="px-3 py-2 rounded-lg bg-muted/5 border border-border/5">
+        <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/25 font-display">
+          <Keyboard className="h-3 w-3" />
+          <span>← → navegar</span>
+          <span className="text-border/20">·</span>
+          <span>C concluir</span>
+          <span className="text-border/20">·</span>
+          <span>T teatro</span>
+        </div>
       </div>
 
       {/* Modules */}
@@ -340,6 +394,70 @@ export default function MemberCourse() {
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
+      {/* ═══ Celebration Modal ═══ */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-2xl"
+            onClick={() => setShowCelebration(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.5, ease }}
+              className="text-center p-10 max-w-md"
+              onClick={e => e.stopPropagation()}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", bounce: 0.4 }}
+                className="mx-auto mb-6"
+              >
+                <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center mx-auto border border-success/20 shadow-2xl shadow-success/20">
+                  <Trophy className="h-12 w-12 text-success" />
+                </div>
+              </motion.div>
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-3xl font-display font-black text-foreground tracking-[-0.03em] mb-3"
+              >
+                Curso Concluído! 🎉
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-sm text-muted-foreground/60 font-display mb-6"
+              >
+                Parabéns! Você completou todas as {totalLessons} aulas de <strong className="text-foreground">{course.title}</strong>
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="flex items-center justify-center gap-3"
+              >
+                <Link to="/membros-area"
+                  className="px-6 py-3 rounded-xl bg-foreground text-background text-sm font-display font-bold hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-lg">
+                  Voltar aos cursos
+                </Link>
+                <button onClick={() => setShowCelebration(false)}
+                  className="px-6 py-3 rounded-xl bg-foreground/5 text-foreground/60 text-sm font-display font-bold hover:bg-foreground/10 transition-all active:scale-[0.97]">
+                  Continuar aqui
+                </button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ═══ Main Content ═══ */}
       <div className="flex-1 overflow-y-auto bg-background">
         {/* Top bar */}
@@ -368,16 +486,18 @@ export default function MemberCourse() {
             </div>
             <div className="flex items-center gap-1">
               <button onClick={() => navigateLesson(-1)} disabled={currentIdx <= 0}
-                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95">
+                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
+                title="Aula anterior (←)">
                 <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground/40" />
               </button>
               <button onClick={() => navigateLesson(1)} disabled={currentIdx >= totalLessons - 1}
-                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95">
+                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
+                title="Próxima aula (→)">
                 <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40" />
               </button>
               <button onClick={() => setTheaterMode(!theaterMode)}
                 className="hidden lg:flex h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] items-center justify-center transition-all active:scale-95"
-                title={theaterMode ? "Modo normal" : "Modo teatro"}>
+                title={theaterMode ? "Modo normal (T)" : "Modo teatro (T)"}>
                 {theaterMode ? <Minimize2 className="h-3.5 w-3.5 text-muted-foreground/40" /> : <Maximize2 className="h-3.5 w-3.5 text-muted-foreground/40" />}
               </button>
               <button onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -436,6 +556,9 @@ export default function MemberCourse() {
                         {activeLesson.duration_minutes > 0 && (
                           <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3 w-3" /> {activeLesson.duration_minutes} min</span>
                         )}
+                        {attachments.length > 0 && (
+                          <span className="flex items-center gap-1"><Paperclip className="h-3 w-3" /> {attachments.length} anexo{attachments.length > 1 ? "s" : ""}</span>
+                        )}
                       </div>
                     </div>
 
@@ -443,7 +566,7 @@ export default function MemberCourse() {
                       <button onClick={() => markComplete(activeLesson.id)}
                         disabled={progress.get(activeLesson.id)?.completed}
                         className={cn(
-                          "flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-display font-bold transition-all active:scale-[0.97]",
+                          "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-display font-bold transition-all active:scale-[0.97]",
                           progress.get(activeLesson.id)?.completed
                             ? "bg-success/10 text-success border border-success/15"
                             : "bg-foreground text-background hover:bg-foreground/90 shadow-lg"
@@ -453,7 +576,7 @@ export default function MemberCourse() {
                       </button>
                       {currentIdx < totalLessons - 1 && (
                         <button onClick={() => navigateLesson(1)}
-                          className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-display font-bold bg-foreground/5 text-foreground/50 hover:bg-foreground/8 hover:text-foreground transition-all active:scale-[0.97]">
+                          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-display font-bold bg-foreground/5 text-foreground/50 hover:bg-foreground/8 hover:text-foreground transition-all active:scale-[0.97]">
                           Próxima <ArrowRight className="h-3.5 w-3.5" />
                         </button>
                       )}
@@ -467,6 +590,35 @@ export default function MemberCourse() {
                       <FileText className="h-3 w-3" /> Sobre esta aula
                     </h4>
                     <div className="text-sm text-foreground/60 leading-relaxed whitespace-pre-wrap font-display">{activeLesson.description}</div>
+                  </div>
+                )}
+
+                {/* Attachments */}
+                {attachments.length > 0 && (
+                  <div className="border-t border-border/8 p-5 sm:p-6">
+                    <h4 className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Paperclip className="h-3 w-3" /> Materiais de apoio
+                    </h4>
+                    <div className="grid gap-2">
+                      {attachments.map(att => (
+                        <a
+                          key={att.id}
+                          href={att.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center gap-3 p-3 rounded-xl bg-card/30 border border-border/10 hover:border-primary/15 hover:bg-primary/5 transition-all active:scale-[0.99]"
+                        >
+                          <div className="h-9 w-9 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                            <Download className="h-4 w-4 text-primary/50 group-hover:text-primary transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-display font-bold text-foreground/70 truncate group-hover:text-foreground transition-colors">{att.file_name}</p>
+                            <p className="text-[10px] text-muted-foreground/30 font-display">{formatFileSize(att.file_size)} · {att.file_type}</p>
+                          </div>
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-primary/40 transition-colors shrink-0" />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
