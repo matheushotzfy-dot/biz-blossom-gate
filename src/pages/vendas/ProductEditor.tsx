@@ -844,19 +844,19 @@ export default function ProductEditor() {
                 />}
 
                 {activeTab === "co-producao" && <TabCoProducao
-                  {...{ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }}
+                  {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }}
                 />}
 
                 {activeTab === "cupons" && <TabCupons
-                  {...{ isNew, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
+                  {...{ isNew: tabsLocked, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
                 />}
 
                 {activeTab === "afiliados" && <TabAfiliados
-                  {...{ isNew, productId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }}
+                  {...{ isNew: tabsLocked, productId: effectiveProductId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }}
                 />}
 
                 {activeTab === "links" && <TabLinks
-                  {...{ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }}
+                  {...{ isNew: tabsLocked, product, pageUrl, affiliateEnabled, productId: effectiveProductId, getCheckoutLink, copyLink, name, price }}
                 />}
               </motion.div>
             </AnimatePresence>
