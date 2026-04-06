@@ -1044,6 +1044,18 @@ export default function CourseBuilder() {
             </div>
           )}
         </main>
+        {/* ─── RIGHT: Student Preview Panel ─── */}
+        <StudentPreviewPanel
+          course={course}
+          modules={modules.map(m => ({
+            ...m,
+            lessons: m.lessons.map(l => ({
+              id: l.id, title: l.title, video_url: l.video_url,
+              is_free: l.is_free, duration_minutes: l.duration_minutes,
+            }))
+          }))}
+          selectedLessonId={selectedLesson?.id || null}
+        />
       </div>
     </div>
   );
