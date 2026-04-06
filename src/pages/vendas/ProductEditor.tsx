@@ -807,9 +807,6 @@ export default function ProductEditor() {
                 >
                   {tab.key !== "geral" && tabsLocked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
                   <span className="truncate max-w-[48px]">{tab.label}</span>
-                  {tabCompleted(tab.key) && activeTab !== tab.key && !(tab.key !== "geral" && tabsLocked) && (
-                    <div className="h-1 w-1 rounded-full bg-success absolute top-1 right-1" />
-                  )}
                 </button>
               ))}
             </div>
