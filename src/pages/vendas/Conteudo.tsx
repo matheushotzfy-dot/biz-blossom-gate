@@ -287,22 +287,19 @@ export default function AdminConteudo() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [editCourseId, setEditCourseId] = useState<string | null>(null);
-  const [courseForm, setCourseForm] = useState({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" });
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editCourseData, setEditCourseData] = useState<any>(null);
 
   const reloadCourses = () => invalidateAll(["courses", "products"]);
 
   const openNew = () => {
-    setEditCourseId(null);
-    setCourseForm({ title: "", description: "", category: "geral", product_id: "", thumbnail_url: "" });
-    setSheetOpen(true);
+    setEditCourseData(null);
+    setWizardOpen(true);
   };
 
   const openEdit = (c: Course) => {
-    setEditCourseId(c.id);
-    setCourseForm({ title: c.title, description: c.description || "", category: c.category || "geral", product_id: c.product_id || "", thumbnail_url: c.thumbnail_url || "" });
-    setSheetOpen(true);
+    setEditCourseData(c);
+    setWizardOpen(true);
   };
 
   const saveCourse = async () => {
