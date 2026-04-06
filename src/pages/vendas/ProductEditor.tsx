@@ -697,12 +697,7 @@ export default function ProductEditor() {
                         <Lock className="h-3.5 w-3.5 text-muted-foreground/40" />
                       ) : (
                         <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/60")} />
-                      )}
-                      {completed && !isActive && !(tab.key !== "geral" && tabsLocked) && (
-                        <div className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-success flex items-center justify-center ring-2 ring-card">
-                          <Check className="h-2 w-2 text-success-foreground" />
-                        </div>
-                      )}
+                    )}
                     </div>
                     <span className="flex-1">{tab.label}</span>
                     {tab.key !== "geral" && tabsLocked && <Lock className="h-3 w-3 text-muted-foreground/30" />}
