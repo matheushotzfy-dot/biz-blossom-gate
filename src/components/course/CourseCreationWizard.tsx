@@ -1,274 +1,257 @@
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  Sparkles, Check, ChevronRight, ChevronLeft, Image as ImageIcon,
-  X, BookOpen, Layers, Type, FileText, Palette, Eye,
-  GraduationCap, Upload, Plus, Trash2, ArrowRight, Loader2,
-  Play, Clock, Users, Star, Zap, Monitor, Smartphone,
-  CheckCircle2, Flame, Trophy, BarChart3, Home,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  GraduationCap,
+  Image as ImageIcon,
+  Layers,
+  Loader2,
+  Monitor,
+  Palette,
+  Plus,
+  Smartphone,
+  Sparkles,
+  Star,
+  Trash2,
+  Type,
+  Upload,
+  Users,
+  X,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  MemberExperiencePreview,
+  type PreviewModule,
+} from "@/components/course/MemberExperiencePreview";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-interface Product { id: string; name: string; price: number; }
+type StepId = "identity" | "experience" | "curriculum" | "launch";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface EditModulePreview {
+  id?: string;
+  title: string;
+  banner_url?: string | null;
+  lessonsCount?: number;
+}
 
 interface WizardProps {
   open: boolean;
-  onOpenChange: (v: boolean) => void;
+  onOpenChange: (value: boolean) => void;
   products: Product[];
   editCourse?: {
-    id: string; title: string; description: string | null;
-    category: string | null; product_id: string | null;
+    id: string;
+    title: string;
+    description: string | null;
+    category: string | null;
+    product_id: string | null;
     thumbnail_url: string | null;
+    modules?: EditModulePreview[];
   } | null;
   onSaved: () => void;
 }
 
-const fmt = (v: number) =>
-  v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-
-type Step = "info" | "visual" | "modules" | "review";
-
-const STEPS: { id: Step; label: string; desc: string; icon: any }[] = [
-  { id: "info", label: "Informações", desc: "Nome e detalhes", icon: Type },
-  { id: "visual", label: "Visual", desc: "Capa e identidade", icon: Palette },
-  { id: "modules", label: "Módulos", desc: "Estrutura do curso", icon: Layers },
-  { id: "review", label: "Publicar", desc: "Revisão final", icon: Eye },
+const STEP_CONFIG: { id: StepId; label: string; caption: string; icon: typeof Type }[] = [
+  { id: "identity", label: "Identidade", caption: "Nome, categoria e vínculo", icon: Type },
+  { id: "experience", label: "Hero", caption: "Banner e promessa", icon: Palette },
+  { id: "curriculum", label: "Trilhos", caption: "Módulos que aparecem no catálogo", icon: Layers },
+  { id: "launch", label: "Launch", caption: "Resumo e próximo passo", icon: Eye },
 ];
 
-// ── Image Upload ──
-function ImageUpload({ value, onChange, label, aspect = "aspect-video", hint }: {
-  value: string; onChange: (url: string) => void; label: string; aspect?: string; hint?: string;
+const MODULE_SUGGESTIONS = [
+  "Boas-vindas",
+  "Fundamentos",
+  "Implementação",
+  "Escala",
+  "Bônus",
+];
+
+const formatCurrency = (value: number) => `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+function buildModuleLessons(title: string, count = 3) {
+  const cleanTitle = title.trim() || "Módulo";
+  const templates = [
+    `Introdução a ${cleanTitle}`,
+    `${cleanTitle} na prática`,
+    `Checklist final de ${cleanTitle}`,
+  ];
+
+  return Array.from({ length: Math.max(count, 1) }, (_, index) => ({
+    id: `${cleanTitle}-${index}`.toLowerCase().replace(/\s+/g, "-"),
+    title: templates[index] ?? `${cleanTitle} • Aula ${index + 1}`,
+    video_url: index === 0 ? "configured" : null,
+    duration_minutes: 8 + index * 3,
+    is_free: index === 0,
+    completed: index === 0,
+  }));
+}
+
+function buildPreviewModules(titles: string[], banner: string, seed = "Curso") {
+  const source = titles.length > 0 ? titles : ["Boas-vindas", `${seed} na prática`, "Aprofundamento", "Bônus"];
+
+  return source.map((title, index): PreviewModule => ({
+    id: `preview-module-${index}`,
+    title,
+    banner_url: banner || undefined,
+    lessonCount: 3,
+    lessons: buildModuleLessons(title),
+  }));
+}
+
+function ImageUploadField({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
-    const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    if (!ALLOWED.includes(file.type)) { toast.error("Formato inválido"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowed.includes(file.type)) {
+      toast.error("Use PNG, JPG, WEBP ou GIF.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem pode ter no máximo 5MB.");
+      return;
+    }
+
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `content/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("product-images").upload(path, file);
-    if (error) { toast.error("Erro no upload"); setUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
-    onChange(urlData.publicUrl);
-    setUploading(false);
+    try {
+      const extension = file.name.split(".").pop();
+      const path = `content/${crypto.randomUUID()}.${extension}`;
+      const { error } = await supabase.storage.from("product-images").upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      onChange(data.publicUrl);
+      toast.success("Banner enviado.");
+    } catch {
+      toast.error("Não foi possível enviar a imagem.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <div>
-      <Label className="text-[10px] font-display font-bold text-foreground/50 uppercase tracking-[0.1em] mb-2 block">{label}</Label>
+    <div className="space-y-2.5">
+      <div>
+        <Label className="text-[10px] font-display font-bold uppercase tracking-[0.16em] text-foreground/55">{label}</Label>
+        <p className="mt-1 text-[11px] font-display text-muted-foreground/40">{hint}</p>
+      </div>
+
       <div
         onClick={() => inputRef.current?.click()}
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-        className={cn("relative rounded-2xl border-2 border-dashed border-border/20 hover:border-primary/30 transition-all duration-500 cursor-pointer overflow-hidden group/img", aspect, value ? "p-0" : "flex flex-col items-center justify-center bg-muted/5")}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          const file = event.dataTransfer.files[0];
+          if (file) handleFile(file);
+        }}
+        className={cn(
+          "group relative overflow-hidden rounded-[1.75rem] border-2 border-dashed transition-all duration-500",
+          value ? "border-border/15 bg-card/60" : "border-border/20 bg-muted/[0.03] hover:border-primary/25 hover:bg-primary/[0.03]",
+        )}
       >
         {value ? (
-          <>
-            <img src={value} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-background/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-3">
-              <button type="button" onClick={e => { e.stopPropagation(); inputRef.current?.click(); }} className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"><ImageIcon className="h-4 w-4 text-foreground" /></button>
-              <button type="button" onClick={e => { e.stopPropagation(); onChange(""); }} className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center text-destructive hover:bg-muted transition-colors"><X className="h-4 w-4" /></button>
+          <div className="relative aspect-[16/9]">
+            <img src={value} alt="Banner do curso" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/30 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4">
+              <div>
+                <p className="text-xs font-display font-black text-foreground">Banner principal pronto</p>
+                <p className="mt-1 text-[10px] font-display text-muted-foreground/40">Esse visual já alimenta o hero do preview.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    inputRef.current?.click();
+                  }}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/15 bg-card/80 text-foreground/70 transition-colors hover:bg-card"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onChange("");
+                  }}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/15 bg-card/80 text-destructive transition-colors hover:bg-card"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </>
+          </div>
         ) : (
-          <>
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mb-3 border border-primary/10">
-              {uploading ? <Loader2 className="h-6 w-6 text-primary/40 animate-spin" /> : <Upload className="h-6 w-6 text-primary/20" />}
+          <div className="flex aspect-[16/9] flex-col items-center justify-center px-6 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 ring-1 ring-primary/15">
+              {uploading ? <Loader2 className="h-7 w-7 animate-spin text-primary" /> : <Upload className="h-7 w-7 text-primary" />}
             </div>
-            <p className="text-xs font-display font-bold text-muted-foreground/40">{uploading ? "Enviando..." : "Clique ou arraste"}</p>
-            <p className="text-[10px] text-muted-foreground/25 mt-1">PNG, JPG até 5MB</p>
-          </>
+            <p className="text-sm font-display font-black text-foreground/75">Suba o banner principal da área de membros</p>
+            <p className="mt-1.5 text-xs font-display text-muted-foreground/40">Arraste uma imagem 16:9 ou clique para buscar no seu computador.</p>
+          </div>
         )}
       </div>
-      {hint && <p className="text-[10px] text-muted-foreground/30 mt-2 font-display">{hint}</p>}
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) handleFile(file);
+        }}
+      />
     </div>
   );
 }
 
-// ── Cinematic Live Preview ──
-function CinematicPreview({ form, modules, viewMode }: { form: any; modules: string[]; viewMode: "desktop" | "mobile" }) {
-  const totalModules = modules.length;
-  const isMobile = viewMode === "mobile";
-
-  return (
-    <div className={cn(
-      "rounded-2xl border border-border/20 bg-background overflow-hidden shadow-2xl shadow-primary/5 transition-all duration-500 mx-auto",
-      isMobile ? "max-w-[220px]" : "w-full"
-    )}>
-      {/* Browser chrome */}
-      <div className={cn("bg-card/80 border-b border-border/15 flex items-center gap-1.5 px-3", isMobile ? "h-5" : "h-7")}>
-        <div className={cn("rounded-full bg-destructive/30", isMobile ? "h-1 w-1" : "h-1.5 w-1.5")} />
-        <div className={cn("rounded-full bg-warning/30", isMobile ? "h-1 w-1" : "h-1.5 w-1.5")} />
-        <div className={cn("rounded-full bg-success/30", isMobile ? "h-1 w-1" : "h-1.5 w-1.5")} />
-        <div className={cn("ml-2 flex-1 max-w-[140px] rounded-md bg-muted/10 flex items-center justify-center", isMobile ? "h-3" : "h-4")}>
-          <span className={cn("text-muted-foreground/30 truncate px-2", isMobile ? "text-[5px]" : "text-[7px]")}>{form.title || "Área de Membros"}</span>
-        </div>
-      </div>
-
-      {/* ─── Netflix-style content ─── */}
-      <div className={cn("overflow-y-auto", isMobile ? "max-h-[380px]" : "max-h-[360px]")}>
-        {/* Hero Billboard */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: isMobile ? "16/10" : "21/9" }}>
-          {form.thumbnail_url ? (
-            <img src={form.thumbnail_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/12 via-background to-background flex items-center justify-center relative">
-              <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-              <GraduationCap className={cn("text-primary/10", isMobile ? "h-6 w-6" : "h-10 w-10")} />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-2.5">
-            <div className="flex items-center gap-1 mb-1">
-              {form.category && (
-                <span className={cn("rounded bg-foreground/10 backdrop-blur-xl text-foreground/60 font-display font-bold uppercase tracking-wider", isMobile ? "text-[4px] px-1 py-0.5" : "text-[6px] px-1.5 py-0.5")}>
-                  {form.category}
-                </span>
-              )}
-            </div>
-            <p className={cn("font-display font-black text-foreground truncate leading-tight", isMobile ? "text-[8px]" : "text-[11px]")}>{form.title || "Nome do Curso"}</p>
-            {form.description && <p className={cn("text-muted-foreground/40 line-clamp-1 mt-0.5 font-display", isMobile ? "text-[5px]" : "text-[7px]")}>{form.description}</p>}
-            {/* Progress bar */}
-            <div className="mt-1.5 flex items-center gap-1.5">
-              <div className={cn("rounded-full bg-foreground/10 overflow-hidden flex-1", isMobile ? "h-0.5" : "h-1")}>
-                <div className="h-full w-1/3 bg-primary rounded-full" />
-              </div>
-              <span className={cn("text-foreground/30 font-display font-bold tabular-nums", isMobile ? "text-[4px]" : "text-[6px]")}>33%</span>
-            </div>
-            {/* CTA buttons */}
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <div className={cn("rounded-md bg-foreground text-background font-display font-black flex items-center gap-1", isMobile ? "text-[5px] px-2 py-0.5" : "text-[7px] px-3 py-1")}>
-                <Play className={cn("fill-current", isMobile ? "h-1.5 w-1.5" : "h-2 w-2")} /> Assistir
-              </div>
-              <div className={cn("rounded-md bg-foreground/10 backdrop-blur-xl text-foreground/60 font-display font-bold", isMobile ? "text-[5px] px-2 py-0.5" : "text-[7px] px-2.5 py-1")}>
-                Detalhes
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* KPI Stats */}
-        <div className={cn("grid gap-1 mx-2", isMobile ? "grid-cols-2 mt-1.5" : "grid-cols-4 mt-2")}>
-          {[
-            { icon: BookOpen, label: "Cursos", value: "1", color: "primary" },
-            { icon: BarChart3, label: "Progresso", value: "33%", color: "info" },
-            ...(isMobile ? [] : [
-              { icon: Flame, label: "Aulas", value: String(totalModules * 3 || "0"), color: "warning" },
-              { icon: Trophy, label: "Completos", value: "0", color: "success" },
-            ]),
-          ].map(kpi => (
-            <div key={kpi.label} className={cn("rounded-lg bg-card/60 border border-border/10 relative overflow-hidden", isMobile ? "p-1.5" : "p-2")}>
-              <div className={cn("absolute left-0 top-0 bottom-0 w-[1.5px]", `bg-${kpi.color}`)} />
-              <div className="flex items-center gap-1.5">
-                <div className={cn("rounded flex items-center justify-center", `bg-${kpi.color}/10`, isMobile ? "h-3 w-3" : "h-4 w-4")}>
-                  <kpi.icon className={cn(`text-${kpi.color}`, isMobile ? "h-1.5 w-1.5" : "h-2 w-2")} />
-                </div>
-                <div>
-                  <span className={cn(`text-${kpi.color} font-display font-black tabular-nums block leading-none`, isMobile ? "text-[6px]" : "text-[8px]")}>{kpi.value}</span>
-                  <span className={cn("text-muted-foreground/30 font-display font-bold uppercase tracking-wider", isMobile ? "text-[4px]" : "text-[5px]")}>{kpi.label}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Modules Section */}
-        <div className="p-2 mt-1">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <div className={cn("rounded bg-card flex items-center justify-center", isMobile ? "h-3 w-3" : "h-4 w-4")}>
-              <Layers className={cn("text-foreground/40", isMobile ? "h-1.5 w-1.5" : "h-2 w-2")} />
-            </div>
-            <span className={cn("font-display font-black text-foreground tracking-tight", isMobile ? "text-[7px]" : "text-[9px]")}>Meus Cursos</span>
-          </div>
-
-          {/* Course cards */}
-          <div className={cn("flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide", isMobile ? "" : "")}>
-            {/* Main course card */}
-            <div className={cn("shrink-0 rounded-lg overflow-hidden bg-card ring-1 ring-border/10 relative", isMobile ? "w-[70px]" : "w-[100px]")}>
-              <div className="aspect-[2/3] relative overflow-hidden">
-                {form.thumbnail_url ? (
-                  <img src={form.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-b from-primary/10 via-card to-card flex items-center justify-center">
-                    <GraduationCap className={cn("text-primary/10", isMobile ? "h-4 w-4" : "h-6 w-6")} />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
-                <div className="absolute bottom-0 left-0 right-0 p-1.5">
-                  <p className={cn("font-display font-black text-foreground line-clamp-2 leading-snug", isMobile ? "text-[5px]" : "text-[7px]")}>{form.title || "Meu Curso"}</p>
-                  <div className={cn("rounded-full bg-foreground/8 overflow-hidden mt-1", isMobile ? "h-[1px]" : "h-[2px]")}>
-                    <div className="h-full w-1/3 bg-primary rounded-full" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Placeholder cards */}
-            {[1, 2].map(i => (
-              <div key={i} className={cn("shrink-0 rounded-lg overflow-hidden bg-card/30 ring-1 ring-border/5 opacity-30", isMobile ? "w-[70px]" : "w-[100px]")}>
-                <div className="aspect-[2/3] bg-gradient-to-b from-muted/5 to-card flex items-center justify-center">
-                  <GraduationCap className={cn("text-muted-foreground/5", isMobile ? "h-3 w-3" : "h-5 w-5")} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Module rows */}
-        {modules.length > 0 && (
-          <div className="p-2 pt-0">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <div className={cn("rounded bg-card flex items-center justify-center", isMobile ? "h-3 w-3" : "h-4 w-4")}>
-                <BookOpen className={cn("text-foreground/40", isMobile ? "h-1.5 w-1.5" : "h-2 w-2")} />
-              </div>
-              <span className={cn("font-display font-black text-foreground tracking-tight", isMobile ? "text-[7px]" : "text-[9px]")}>{form.title || "Meu Curso"}</span>
-              <span className={cn("text-muted-foreground/30 font-display", isMobile ? "text-[5px]" : "text-[6px]")}>{modules.length} módulos</span>
-            </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-              {modules.map((m, i) => (
-                <div key={i} className={cn("shrink-0 rounded-lg overflow-hidden bg-card ring-1 ring-border/10", isMobile ? "w-[80px]" : "w-[110px]")}>
-                  <div className="aspect-video bg-gradient-to-br from-primary/5 to-card flex items-center justify-center relative">
-                    <BookOpen className={cn("text-primary/8", isMobile ? "h-3 w-3" : "h-4 w-4")} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                  </div>
-                  <div className="p-1.5">
-                    <p className={cn("font-display font-bold text-foreground/60 truncate", isMobile ? "text-[5px]" : "text-[7px]")}>{m}</p>
-                    <p className={cn("text-muted-foreground/20 font-display tabular-nums mt-0.5", isMobile ? "text-[4px]" : "text-[5px]")}>3 aulas</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-export default function CourseCreationWizard({ open, onOpenChange, products, editCourse, onSaved }: WizardProps) {
+export default function CourseCreationWizard({
+  open,
+  onOpenChange,
+  products,
+  editCourse,
+  onSaved,
+}: WizardProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState<Step>("info");
+  const [step, setStep] = useState<StepId>("identity");
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
-
+  const [newModuleName, setNewModuleName] = useState("");
+  const [wizardModules, setWizardModules] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: editCourse?.title || "",
     description: editCourse?.description || "",
@@ -277,404 +260,560 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
     thumbnail_url: editCourse?.thumbnail_url || "",
   });
 
-  const [wizardModules, setWizardModules] = useState<string[]>([]);
-  const [newModuleName, setNewModuleName] = useState("");
+  const stepIndex = STEP_CONFIG.findIndex((item) => item.id === step);
+  const linkedProduct = products.find((product) => product.id === form.product_id) ?? null;
 
-  const stepIndex = STEPS.findIndex(s => s.id === currentStep);
+  useEffect(() => {
+    if (!open) return;
+    setStep("identity");
+    setViewMode("desktop");
+    setNewModuleName("");
+    setForm({
+      title: editCourse?.title || "",
+      description: editCourse?.description || "",
+      category: editCourse?.category || "geral",
+      product_id: editCourse?.product_id || "",
+      thumbnail_url: editCourse?.thumbnail_url || "",
+    });
+    setWizardModules(editCourse?.modules?.map((module) => module.title) ?? []);
+  }, [open, editCourse]);
 
-  const canNext = () => {
-    if (currentStep === "info") return form.title.trim().length > 0;
-    return true;
-  };
+  const previewModules = useMemo(() => {
+    const sourceModules = editCourse?.modules?.length
+      ? editCourse.modules.map((module, index): PreviewModule => ({
+          id: module.id ?? `existing-module-${index}`,
+          title: module.title,
+          banner_url: module.banner_url ?? form.thumbnail_url,
+          lessonCount: module.lessonsCount ?? 3,
+          lessons: buildModuleLessons(module.title, Math.max(module.lessonsCount ?? 3, 1)),
+        }))
+      : buildPreviewModules(wizardModules, form.thumbnail_url, form.title || "Curso");
 
-  const goNext = () => {
-    const idx = STEPS.findIndex(s => s.id === currentStep);
-    if (idx < STEPS.length - 1) setCurrentStep(STEPS[idx + 1].id);
-  };
+    return sourceModules;
+  }, [editCourse?.modules, form.thumbnail_url, form.title, wizardModules]);
 
-  const goPrev = () => {
-    const idx = STEPS.findIndex(s => s.id === currentStep);
-    if (idx > 0) setCurrentStep(STEPS[idx - 1].id);
-  };
+  const checklist = [
+    { label: "Nome forte", done: form.title.trim().length > 0 },
+    { label: "Hero", done: Boolean(form.thumbnail_url) },
+    { label: "Promessa", done: form.description.trim().length > 0 },
+    { label: "Trilha", done: (editCourse?.modules?.length ?? wizardModules.length) > 0 },
+  ];
+  const completionPct = Math.round((checklist.filter((item) => item.done).length / checklist.length) * 100);
 
-  const addModule = () => {
-    if (!newModuleName.trim()) return;
-    setWizardModules(prev => [...prev, newModuleName.trim()]);
+  const canContinue = step !== "identity" || form.title.trim().length > 0;
+
+  const addModule = (title: string) => {
+    const cleanTitle = title.trim();
+    if (!cleanTitle) return;
+    setWizardModules((current) => (current.includes(cleanTitle) ? current : [...current, cleanTitle]));
     setNewModuleName("");
   };
 
-  const removeModule = (index: number) => {
-    setWizardModules(prev => prev.filter((_, i) => i !== index));
+  const removeModule = (title: string) => {
+    setWizardModules((current) => current.filter((item) => item !== title));
   };
 
-  const handleSave = async () => {
+  const saveCourse = async () => {
     if (!user || !form.title.trim()) return;
+
     setSaving(true);
     try {
       const payload = {
-        title: form.title,
-        description: form.description || null,
-        category: form.category || "geral",
-        product_id: form.product_id && form.product_id !== "none" ? form.product_id : null,
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        category: form.category.trim() || "geral",
+        product_id: form.product_id || null,
         thumbnail_url: form.thumbnail_url || null,
         user_id: user.id,
         is_published: false,
       };
 
       if (editCourse) {
-        const { user_id, is_published, ...up } = payload;
-        await supabase.from("courses").update(up).eq("id", editCourse.id).eq("user_id", user.id);
-        toast.success("Curso atualizado!");
+        const { user_id, is_published, ...updatePayload } = payload;
+        const { error } = await supabase
+          .from("courses")
+          .update(updatePayload)
+          .eq("id", editCourse.id)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+        toast.success("Curso atualizado.");
         onOpenChange(false);
         onSaved();
-      } else {
-        const { data } = await supabase.from("courses").insert(payload).select().single();
-        if (data && wizardModules.length > 0) {
-          const modulesPayload = wizardModules.map((title, i) => ({
+        return;
+      }
+
+      const { data, error } = await supabase.from("courses").insert(payload).select().single();
+      if (error || !data) throw error ?? new Error("Falha ao criar o curso.");
+
+      if (wizardModules.length > 0) {
+        const { error: modulesError } = await supabase.from("modules").insert(
+          wizardModules.map((title, index) => ({
             course_id: data.id,
             title,
-            sort_order: i,
-          }));
-          await supabase.from("modules").insert(modulesPayload);
-        }
-        toast.success("Curso criado com sucesso!");
-        onOpenChange(false);
-        onSaved();
-        if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+            sort_order: index,
+          })),
+        );
+        if (modulesError) throw modulesError;
       }
+
+      toast.success("Curso criado. Abrindo o studio...");
+      onOpenChange(false);
+      onSaved();
+      navigate(`/vendas/conteudo/${data.id}/builder`);
     } catch {
-      toast.error("Erro ao salvar");
+      toast.error("Não foi possível salvar o curso.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleOpenChange = (v: boolean) => {
-    if (v) {
-      setCurrentStep("info");
-      setForm({
-        title: editCourse?.title || "",
-        description: editCourse?.description || "",
-        category: editCourse?.category || "geral",
-        product_id: editCourse?.product_id || "",
-        thumbnail_url: editCourse?.thumbnail_url || "",
-      });
-      setWizardModules([]);
-    }
-    onOpenChange(v);
+  const nextStep = () => {
+    if (!canContinue) return;
+    const next = STEP_CONFIG[stepIndex + 1];
+    if (next) setStep(next.id);
   };
 
-  // Completion score
-  const completionItems = [
-    { done: !!form.title.trim(), label: "Nome" },
-    { done: !!form.description.trim(), label: "Descrição" },
-    { done: !!form.thumbnail_url, label: "Capa" },
-    { done: wizardModules.length > 0 || !!editCourse, label: "Módulos" },
-  ];
-  const completionPct = Math.round((completionItems.filter(i => i.done).length / completionItems.length) * 100);
+  const previousStep = () => {
+    const previous = STEP_CONFIG[stepIndex - 1];
+    if (previous) setStep(previous.id);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[1060px] p-0 gap-0 bg-card/95 backdrop-blur-2xl border-border/20 overflow-hidden rounded-3xl max-h-[92vh]">
-        {/* ── Header ── */}
-        <div className="px-6 pt-5 pb-4 border-b border-border/10 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] via-transparent to-info/[0.02] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-
-          <div className="relative flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20 ring-1 ring-primary/20">
-                {editCourse ? <BookOpen className="h-5 w-5 text-primary-foreground" /> : <Sparkles className="h-5 w-5 text-primary-foreground" />}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[94vh] max-w-[1280px] overflow-hidden rounded-[2rem] border-border/20 bg-card/95 p-0 backdrop-blur-2xl">
+        <div className="relative overflow-hidden border-b border-border/10 px-6 pb-5 pt-6">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/[0.05] via-transparent to-info/[0.03]" />
+          <div className="relative flex flex-col gap-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                  {editCourse ? <BookOpen className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                </div>
+                <div>
+                  <p className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-primary/60">Member Area Studio</p>
+                  <h2 className="mt-1 text-2xl font-display font-black tracking-[-0.03em] text-foreground">
+                    {editCourse ? "Refinar experiência do curso" : "Montar uma área de membros que prende"}
+                  </h2>
+                  <p className="mt-1.5 max-w-2xl text-sm font-display text-muted-foreground/45">
+                    Agora o seller enxerga logo, hero, trilhos e a visão do aluno enquanto configura tudo — sem ficar imaginando como vai ficar.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-display font-black tracking-[-0.02em] text-foreground">{editCourse ? "Editar Curso" : "Novo Curso"}</h2>
-                <p className="text-[10px] text-muted-foreground/40 font-display mt-0.5">
-                  {STEPS[stepIndex].desc} — Passo {stepIndex + 1} de {STEPS.length}
-                </p>
-              </div>
-            </div>
 
-            {/* Completion ring */}
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5">
-                {completionItems.map((item, i) => (
-                  <div key={i} className={cn("h-1.5 w-1.5 rounded-full transition-all", item.done ? "bg-success" : "bg-muted/15")} title={item.label} />
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {checklist.map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-border/10 bg-card/70 px-3 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-xl",
+                        item.done ? "bg-success/10 text-success" : "bg-muted/20 text-muted-foreground/35",
+                      )}>
+                        {item.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground/35">Setup</p>
+                        <p className="text-xs font-display font-black text-foreground/75">{item.label}</p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
-              <div className={cn(
-                "h-9 px-3 rounded-lg flex items-center gap-1.5 text-[10px] font-display font-black border transition-all",
-                completionPct === 100 ? "bg-success/10 text-success border-success/20" : "bg-muted/5 text-muted-foreground/40 border-border/15"
-              )}>
-                <span className="tabular-nums">{completionPct}%</span>
-                <span className="hidden sm:inline">completo</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {STEP_CONFIG.map((item, index) => {
+                const Icon = item.icon;
+                const active = item.id === step;
+                const done = index < stepIndex;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      if (done || active) setStep(item.id);
+                    }}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-left transition-all",
+                      active
+                        ? "border-primary/20 bg-primary/10 text-primary"
+                        : done
+                          ? "border-success/15 bg-success/10 text-success"
+                          : "border-border/10 bg-card/60 text-muted-foreground/45",
+                    )}
+                  >
+                    <div className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-xl",
+                      active ? "bg-primary text-primary-foreground" : done ? "bg-success text-success-foreground" : "bg-muted/20",
+                    )}>
+                      {done ? <Check className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-display font-black tracking-[-0.02em]">{item.label}</p>
+                      <p className="text-[10px] font-display opacity-80">{item.caption}</p>
+                    </div>
+                  </button>
+                );
+              })}
+
+              <div className="ml-auto inline-flex items-center gap-2 rounded-2xl border border-border/10 bg-card/60 px-3 py-2.5">
+                <div className="h-2 w-24 overflow-hidden rounded-full bg-muted/20">
+                  <motion.div
+                    className="h-full rounded-full bg-primary"
+                    animate={{ width: `${completionPct}%` }}
+                    transition={{ duration: 0.35, ease }}
+                  />
+                </div>
+                <span className="text-xs font-display font-black text-primary">{completionPct}%</span>
               </div>
             </div>
-          </div>
-
-          {/* Step indicators */}
-          <div className="relative flex items-center gap-1">
-            {STEPS.map((step, i) => {
-              const isActive = currentStep === step.id;
-              const isDone = i < stepIndex;
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => { if (isDone || isActive) setCurrentStep(step.id); }}
-                  className={cn(
-                    "relative flex-1 h-10 rounded-xl flex items-center justify-center gap-2 text-xs font-display font-bold transition-all duration-300",
-                    isActive ? "text-primary" : isDone ? "text-success/60 cursor-pointer hover:bg-success/5" : "text-muted-foreground/20"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="wizard-step-bg"
-                      className="absolute inset-0 rounded-xl bg-primary/8 border border-primary/15"
-                      transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-                    />
-                  )}
-                  <div className="relative z-10 flex items-center gap-2">
-                    {isDone ? (
-                      <div className="h-5 w-5 rounded-full bg-success/15 flex items-center justify-center">
-                        <Check className="h-3 w-3 text-success" />
-                      </div>
-                    ) : (
-                      <step.icon className="h-3.5 w-3.5" />
-                    )}
-                    <span className="hidden sm:inline">{step.label}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-3 h-1 bg-muted/10 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full"
-              animate={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
-              transition={{ duration: 0.4, ease }}
-            />
           </div>
         </div>
 
-        {/* ── Body: Content + Preview ── */}
-        <div className="flex min-h-[440px] max-h-[calc(92vh-220px)]">
-          {/* Left: Form */}
-          <div className="flex-1 p-6 overflow-y-auto">
+        <div className="grid max-h-[calc(94vh-190px)] min-h-[620px] lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="overflow-y-auto px-6 py-6">
             <AnimatePresence mode="wait">
               <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                key={step}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
                 transition={{ duration: 0.25, ease }}
                 className="space-y-5"
               >
-                {/* ─── STEP: INFO ─── */}
-                {currentStep === "info" && (
+                {step === "identity" && (
                   <>
-                    <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start gap-3">
-                      <Zap className="h-5 w-5 text-primary/50 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-display font-bold text-foreground/60">Comece pelo essencial</p>
-                        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">Dê um nome impactante e descreva o que o aluno vai aprender. Observe o preview em tempo real!</p>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-[10px] font-display font-bold text-foreground/50 uppercase tracking-[0.1em]">Nome do Curso *</Label>
-                      <Input
-                        value={form.title}
-                        onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                        placeholder="Ex: Marketing Digital Avançado"
-                        className="mt-2 h-12 rounded-xl text-base font-display"
-                        autoFocus
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[10px] font-display font-bold text-foreground/50 uppercase tracking-[0.1em]">Descrição</Label>
-                      <Textarea
-                        value={form.description}
-                        onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                        placeholder="O que os alunos vão aprender neste curso..."
-                        className="mt-2 rounded-xl text-sm font-display"
-                        rows={4}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-[10px] font-display font-bold text-foreground/50 uppercase tracking-[0.1em]">Categoria</Label>
-                        <Input
-                          value={form.category}
-                          onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-                          placeholder="Ex: Marketing"
-                          className="mt-2 h-11 rounded-xl font-display"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] font-display font-bold text-foreground/50 uppercase tracking-[0.1em]">Produto Vinculado</Label>
-                        <Select value={form.product_id} onValueChange={v => setForm(p => ({ ...p, product_id: v }))}>
-                          <SelectTrigger className="mt-2 rounded-xl h-11 font-display"><SelectValue placeholder="Nenhum" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Nenhum</SelectItem>
-                            {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* ─── STEP: VISUAL ─── */}
-                {currentStep === "visual" && (
-                  <>
-                    <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start gap-3">
-                      <Palette className="h-5 w-5 text-primary/50 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-display font-bold text-foreground/60">Crie uma identidade visual</p>
-                        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">Uma boa capa aumenta em até 3x o engajamento dos alunos. Veja o impacto no preview!</p>
-                      </div>
-                    </div>
-                    <ImageUpload
-                      value={form.thumbnail_url}
-                      onChange={url => setForm(p => ({ ...p, thumbnail_url: url }))}
-                      label="Thumbnail / Capa do Curso"
-                      aspect="aspect-video"
-                      hint="Recomendado: 1280x720px (16:9). Será exibida no catálogo Netflix dos seus alunos."
-                    />
-                  </>
-                )}
-
-                {/* ─── STEP: MODULES ─── */}
-                {currentStep === "modules" && (
-                  <>
-                    <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start gap-3">
-                      <Layers className="h-5 w-5 text-primary/50 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-display font-bold text-foreground/60">Monte a estrutura</p>
-                        <p className="text-[11px] text-muted-foreground/50 mt-0.5 leading-relaxed">Organize seu conteúdo em módulos. Cada módulo aparece como uma seção no catálogo do aluno.</p>
-                      </div>
-                    </div>
-                    {!editCourse ? (
-                      <>
-                        <div className="flex gap-2">
-                          <Input
-                            value={newModuleName}
-                            onChange={e => setNewModuleName(e.target.value)}
-                            placeholder="Ex: Introdução ao Marketing..."
-                            className="h-11 rounded-xl font-display"
-                            onKeyDown={e => { if (e.key === "Enter") addModule(); }}
-                          />
-                          <Button onClick={addModule} disabled={!newModuleName.trim()} className="h-11 rounded-xl px-5 font-display font-bold gap-2 shrink-0 active:scale-[0.985]">
-                            <Plus className="h-4 w-4" /> Adicionar
-                          </Button>
+                    <div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
+                      <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                        <div className="mb-5 flex items-start gap-3">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                            <Type className="h-4.5 w-4.5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-display font-black text-foreground/80">Base da identidade</p>
+                            <p className="mt-1 text-xs font-display text-muted-foreground/45">Defina como o aluno reconhece o curso na home, no hero e no catálogo.</p>
+                          </div>
                         </div>
 
-                        {wizardModules.length > 0 && (
-                          <div className="space-y-1.5">
-                            {wizardModules.map((m, i) => (
-                              <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                className="flex items-center gap-3 p-3.5 rounded-xl bg-card/60 border border-border/15 group hover:border-primary/15 hover:bg-primary/[0.02] transition-all"
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-[10px] font-display font-bold uppercase tracking-[0.16em] text-foreground/55">Nome do curso</Label>
+                            <Input
+                              value={form.title}
+                              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                              placeholder="Ex: Escala de Vendas com Conteúdo"
+                              className="mt-2 h-12 rounded-2xl font-display text-base"
+                              autoFocus
+                            />
+                          </div>
+
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div>
+                              <Label className="text-[10px] font-display font-bold uppercase tracking-[0.16em] text-foreground/55">Categoria</Label>
+                              <Input
+                                value={form.category}
+                                onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                                placeholder="Marketing, gestão, saúde..."
+                                className="mt-2 h-11 rounded-2xl font-display"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] font-display font-bold uppercase tracking-[0.16em] text-foreground/55">Produto vinculado</Label>
+                              <Select
+                                value={form.product_id || "none"}
+                                onValueChange={(value) => setForm((current) => ({ ...current, product_id: value === "none" ? "" : value }))}
                               >
-                                <div className="h-9 w-9 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center text-xs font-display font-black text-primary/60 shrink-0">{i + 1}</div>
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-sm font-display font-bold text-foreground/70">{m}</span>
-                                  <p className="text-[10px] text-muted-foreground/30 font-display mt-0.5">Aulas serão adicionadas no editor</p>
-                                </div>
-                                <button onClick={() => removeModule(i)} className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive/8 transition-all">
-                                  <Trash2 className="h-3 w-3 text-destructive/40" />
-                                </button>
-                              </motion.div>
-                            ))}
-                          </div>
-                        )}
-
-                        {wizardModules.length === 0 && (
-                          <div className="rounded-xl border-2 border-dashed border-border/15 py-10 flex flex-col items-center gap-3 text-muted-foreground/15">
-                            <Layers className="h-10 w-10" />
-                            <p className="text-xs font-display font-bold">Nenhum módulo adicionado</p>
-                            <p className="text-[10px]">Você pode pular e adicionar depois</p>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="rounded-xl bg-info/5 border border-info/10 p-5 text-center">
-                        <Layers className="h-8 w-8 text-info/30 mx-auto mb-2" />
-                        <p className="text-sm font-display font-bold text-foreground/60">Gerencie módulos no editor</p>
-                        <p className="text-xs text-muted-foreground/40 mt-1">Vá ao editor completo para adicionar, reordenar ou remover módulos e aulas.</p>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* ─── STEP: REVIEW ─── */}
-                {currentStep === "review" && (
-                  <div className="space-y-4">
-                    <div className="rounded-2xl bg-card/60 border border-border/15 overflow-hidden">
-                      <div className="px-5 py-4 border-b border-border/10 bg-card/30">
-                        <p className="text-xs font-display font-black text-foreground/60 uppercase tracking-wider">Resumo do Curso</p>
-                      </div>
-                      <div className="p-5 space-y-4">
-                        <div className="flex items-start gap-4">
-                          <div className="h-20 w-32 rounded-xl overflow-hidden bg-muted/5 border border-border/10 shrink-0">
-                            {form.thumbnail_url ? (
-                              <img src={form.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
-                                <GraduationCap className="h-6 w-6 text-primary/10" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-base font-display font-black text-foreground tracking-[-0.01em]">{form.title}</h3>
-                            {form.description && <p className="text-xs text-muted-foreground/50 mt-1 line-clamp-2">{form.description}</p>}
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {form.category && (
-                                <span className="text-[10px] font-display font-bold text-muted-foreground/50 bg-muted/8 px-2 py-0.5 rounded-md">{form.category}</span>
-                              )}
-                              {!editCourse && wizardModules.length > 0 && (
-                                <span className="text-[10px] font-display font-bold text-primary/60 bg-primary/5 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                  <Layers className="h-2.5 w-2.5" /> {wizardModules.length} módulo{wizardModules.length !== 1 ? "s" : ""}
-                                </span>
-                              )}
-                              {/* Completion badges */}
-                              {completionItems.map((item, i) => (
-                                <span key={i} className={cn(
-                                  "text-[9px] font-display font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5",
-                                  item.done ? "text-success/60 bg-success/5" : "text-muted-foreground/20 bg-muted/5"
-                                )}>
-                                  {item.done ? <CheckCircle2 className="h-2 w-2" /> : <span className="h-2 w-2 rounded-full border border-current" />}
-                                  {item.label}
-                                </span>
-                              ))}
+                                <SelectTrigger className="mt-2 h-11 rounded-2xl font-display">
+                                  <SelectValue placeholder="Nenhum" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">Nenhum</SelectItem>
+                                  {products.map((product) => (
+                                    <SelectItem key={product.id} value={product.id}>
+                                      {product.name} — {formatCurrency(product.price)}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        {!editCourse && wizardModules.length > 0 && (
-                          <div className="pt-3 border-t border-border/10 space-y-1.5">
-                            <p className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-2">Estrutura de Módulos</p>
-                            {wizardModules.map((m, i) => (
-                              <div key={i} className="flex items-center gap-2 text-xs">
-                                <div className="h-5 w-5 rounded-md bg-primary/8 flex items-center justify-center text-[9px] font-display font-black text-primary/50">{i + 1}</div>
-                                <span className="text-foreground/60 font-display font-semibold">{m}</span>
-                              </div>
-                            ))}
+                      <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                        <div className="mb-4 flex items-start gap-3">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-info/10 text-info ring-1 ring-info/15">
+                            <GraduationCap className="h-4.5 w-4.5" />
                           </div>
-                        )}
+                          <div>
+                            <p className="text-sm font-display font-black text-foreground/80">Workspace pronto para vender</p>
+                            <p className="mt-1 text-xs font-display text-muted-foreground/45">Seu setup gera automaticamente um logo com iniciais, hero principal e trilhos com leitura clara.</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {[
+                            { icon: Sparkles, label: "Logo automático", description: "Monograma gerado do título para dar cara de marca já no preview." },
+                            { icon: Users, label: "Leitura rápida", description: "Nome, categoria e produto entram nos pontos mais nobres da experiência." },
+                            { icon: BookOpen, label: "Entrada premium", description: "O aluno já vê promessa, CTA e catálogo sem sensação de sistema cru." },
+                          ].map((item) => (
+                            <div key={item.label} className="rounded-2xl border border-border/10 bg-background/70 p-3">
+                              <div className="flex items-start gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                  <item.icon className="h-4 w-4" />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-display font-black text-foreground/80">{item.label}</p>
+                                  <p className="mt-1 text-[11px] font-display text-muted-foreground/40">{item.description}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {step === "experience" && (
+                  <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+                    <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                      <div className="mb-5 flex items-start gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                          <Palette className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-display font-black text-foreground/80">Hero que segura a atenção</p>
+                          <p className="mt-1 text-xs font-display text-muted-foreground/45">Descrição e banner alimentam o billboard do aluno, o card principal e os trilhos internos.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-[10px] font-display font-bold uppercase tracking-[0.16em] text-foreground/55">Promessa do curso</Label>
+                          <Textarea
+                            value={form.description}
+                            onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                            placeholder="O que o aluno domina depois de entrar aqui?"
+                            className="mt-2 min-h-[180px] rounded-[1.5rem] font-display"
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-success/5 border border-success/10 p-4 flex items-center gap-3">
-                      <Check className="h-5 w-5 text-success/50" />
-                      <p className="text-xs text-foreground/60 font-display leading-relaxed">
-                        {editCourse
-                          ? "Suas alterações serão salvas. Você pode continuar editando no editor."
-                          : "Após criar, você será direcionado ao editor para adicionar aulas e conteúdos."
-                        }
-                      </p>
+                    <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                      <ImageUploadField
+                        label="Banner principal"
+                        hint="Use uma capa 16:9 forte — ela aparece como vitrine, hero e fundo dos cartões mais importantes."
+                        value={form.thumbnail_url}
+                        onChange={(value) => setForm((current) => ({ ...current, thumbnail_url: value }))}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {step === "curriculum" && (
+                  <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                    <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                      <div className="mb-5 flex items-start gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                          <Layers className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-display font-black text-foreground/80">Trilhos que guiam o aluno</p>
+                          <p className="mt-1 text-xs font-display text-muted-foreground/45">Organize os módulos na ordem em que eles devem aparecer no catálogo e na experiência de consumo.</p>
+                        </div>
+                      </div>
+
+                      {editCourse ? (
+                        <div className="space-y-3">
+                          {(editCourse.modules ?? []).length > 0 ? (
+                            (editCourse.modules ?? []).map((module, index) => (
+                              <div key={`${module.title}-${index}`} className="flex items-center gap-3 rounded-2xl border border-border/10 bg-background/70 p-3.5">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 font-display font-black text-primary">{index + 1}</div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-display font-black text-foreground/80">{module.title}</p>
+                                  <p className="mt-1 text-[11px] font-display text-muted-foreground/40">{module.lessonsCount ?? 0} aula{(module.lessonsCount ?? 0) !== 1 ? "s" : ""} configuradas</p>
+                                </div>
+                                <span className="rounded-full bg-info/10 px-2.5 py-1 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-info">Studio</span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="rounded-2xl border border-dashed border-border/15 bg-background/70 p-5 text-center">
+                              <Layers className="mx-auto h-8 w-8 text-primary/25" />
+                              <p className="mt-2 text-sm font-display font-black text-foreground/70">Esse curso ainda não tem módulos</p>
+                              <p className="mt-1 text-xs font-display text-muted-foreground/40">Salve e entre no studio para começar sua estrutura.</p>
+                            </div>
+                          )}
+
+                          <div className="rounded-2xl border border-info/10 bg-info/5 p-4">
+                            <p className="text-xs font-display font-black text-foreground/75">Modo edição</p>
+                            <p className="mt-1 text-[11px] font-display text-muted-foreground/45">Na edição, o wizard mostra a leitura visual do catálogo e o studio completo continua sendo o lugar de arrastar, criar aulas e ajustar conteúdo fino.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex gap-2">
+                            <Input
+                              value={newModuleName}
+                              onChange={(event) => setNewModuleName(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") addModule(newModuleName);
+                              }}
+                              placeholder="Ex: Método principal, onboarding, entrega..."
+                              className="h-12 rounded-2xl font-display"
+                            />
+                            <Button onClick={() => addModule(newModuleName)} className="h-12 rounded-2xl px-5 font-display font-bold">
+                              <Plus className="mr-2 h-4 w-4" /> Adicionar
+                            </Button>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {MODULE_SUGGESTIONS.map((suggestion) => (
+                              <button
+                                key={suggestion}
+                                type="button"
+                                onClick={() => addModule(suggestion)}
+                                className="rounded-full border border-border/10 bg-background/70 px-3 py-2 text-[11px] font-display font-bold text-foreground/70 transition-all hover:border-primary/20 hover:bg-primary/10 hover:text-primary"
+                              >
+                                + {suggestion}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="space-y-2 pt-2">
+                            {wizardModules.length > 0 ? (
+                              wizardModules.map((module, index) => (
+                                <div key={module} className="flex items-center gap-3 rounded-2xl border border-border/10 bg-background/70 p-3.5">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 font-display font-black text-primary">{index + 1}</div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-display font-black text-foreground/80">{module}</p>
+                                    <p className="mt-1 text-[11px] font-display text-muted-foreground/40">Esse bloco já entra como rail no preview lateral.</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeModule(module)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl text-destructive transition-colors hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="rounded-2xl border border-dashed border-border/15 bg-background/70 p-6 text-center">
+                                <Layers className="mx-auto h-8 w-8 text-primary/25" />
+                                <p className="mt-2 text-sm font-display font-black text-foreground/70">Nenhum rail criado ainda</p>
+                                <p className="mt-1 text-xs font-display text-muted-foreground/40">Adicione de 3 a 5 módulos para o catálogo nascer com cara de produto premium.</p>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                      <div className="mb-4 flex items-start gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-warning/10 text-warning ring-1 ring-warning/15">
+                          <BookOpen className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-display font-black text-foreground/80">Como isso aparece</p>
+                          <p className="mt-1 text-xs font-display text-muted-foreground/45">O aluno não vê “módulos soltos”: ele vê trilhos, fila e conteúdo organizado para continuar fácil.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {previewModules.slice(0, 4).map((module, index) => (
+                          <div key={module.id} className="rounded-2xl border border-border/10 bg-background/70 p-3">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-warning/10 font-display font-black text-warning">{index + 1}</div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-display font-black text-foreground/80">{module.title}</p>
+                                <p className="mt-1 text-[11px] font-display text-muted-foreground/40">{module.lessonCount ?? module.lessons?.length ?? 0} aulas no rail</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === "launch" && (
+                  <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+                    <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                      <div className="mb-5 flex items-start gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-success/10 text-success ring-1 ring-success/15">
+                          <CheckCircle2 className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-display font-black text-foreground/80">Resumo final do launch</p>
+                          <p className="mt-1 text-xs font-display text-muted-foreground/45">Confira a leitura do seller e o impacto direto na experiência do aluno antes de seguir.</p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[1.75rem] border border-border/10 bg-background/70 p-4">
+                        <div className="flex items-start gap-4">
+                          <div className="h-24 w-40 overflow-hidden rounded-2xl border border-border/10 bg-card/70">
+                            {form.thumbnail_url ? (
+                              <img src={form.thumbnail_url} alt={form.title || "Banner do curso"} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 via-card to-card">
+                                <GraduationCap className="h-8 w-8 text-primary/20" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-lg font-display font-black tracking-[-0.03em] text-foreground">{form.title || "Curso sem nome"}</p>
+                            <p className="mt-1 line-clamp-2 text-sm font-display text-muted-foreground/45">{form.description || "Inclua uma promessa clara para aumentar retenção e valor percebido."}</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">{form.category || "geral"}</span>
+                              {linkedProduct ? <span className="rounded-full bg-info/10 px-3 py-1 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-info">{linkedProduct.name}</span> : null}
+                              <span className="rounded-full bg-warning/10 px-3 py-1 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-warning">{previewModules.length} trilho{previewModules.length !== 1 ? "s" : ""}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 md:grid-cols-2">
+                        {[
+                          "Logo e hero já aparecem no preview do lado.",
+                          editCourse ? "Depois de salvar, continue refinando conteúdo e ordem direto no studio." : "Depois de criar, você cai direto no studio para montar aulas e materiais.",
+                          "O catálogo já nasce com rails e CTA de continuidade.",
+                          "A experiência mobile também já está simulada no toggle lateral.",
+                        ].map((item) => (
+                          <div key={item} className="rounded-2xl border border-border/10 bg-background/70 px-4 py-3 text-sm font-display text-foreground/75">
+                            <div className="flex items-start gap-2.5">
+                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                              <span>{item}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-5">
+                      <div className="mb-4 flex items-start gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                          <Sparkles className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-display font-black text-foreground/80">Próximo clique</p>
+                          <p className="mt-1 text-xs font-display text-muted-foreground/45">Você sai desse setup direto para o fluxo onde reordena, grava e publica.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                          <p className="text-xs font-display font-black uppercase tracking-[0.16em] text-primary/70">Seller flow</p>
+                          <p className="mt-2 text-sm font-display text-foreground/80">{editCourse ? "Salvar ajustes de posicionamento e seguir refinando a experiência do aluno." : "Criar o curso e entrar no studio para completar módulos, aulas, anexos e publicação."}</p>
+                        </div>
+                        <div className="rounded-2xl border border-border/10 bg-background/70 p-4">
+                          <p className="text-xs font-display font-black uppercase tracking-[0.16em] text-muted-foreground/45">Leitura do aluno</p>
+                          <p className="mt-2 text-sm font-display text-foreground/75">Hero forte, rails claros, continuidade visual e sensação de plataforma pronta desde o primeiro acesso.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -682,62 +821,78 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             </AnimatePresence>
           </div>
 
-          {/* Right: Live Preview */}
-          <div className="hidden md:flex w-[300px] border-l border-border/10 bg-muted/[0.02] p-4 flex-col gap-3 overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Eye className="h-3.5 w-3.5 text-primary/40" />
-                <span className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider">Preview do Aluno</span>
+          <aside className="hidden border-l border-border/10 bg-muted/[0.02] px-5 py-6 lg:flex lg:flex-col">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-primary/60">Preview lateral</p>
+                <p className="mt-1 text-sm font-display font-black text-foreground/80">Visão real do aluno</p>
               </div>
-              {/* Device toggle */}
-              <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-muted/10 border border-border/10">
+              <div className="flex items-center gap-0.5 rounded-xl border border-border/10 bg-card/70 p-0.5">
                 {[
                   { id: "desktop" as const, icon: Monitor },
                   { id: "mobile" as const, icon: Smartphone },
-                ].map(v => (
+                ].map((item) => (
                   <button
-                    key={v.id}
-                    onClick={() => setViewMode(v.id)}
+                    key={item.id}
+                    type="button"
+                    onClick={() => setViewMode(item.id)}
                     className={cn(
-                      "relative h-6 w-6 rounded-md flex items-center justify-center transition-all",
-                      viewMode === v.id ? "text-primary bg-card shadow-sm" : "text-muted-foreground/20 hover:text-muted-foreground/40"
+                      "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
+                      viewMode === item.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground/35 hover:text-foreground/70",
                     )}
                   >
-                    <v.icon className="h-3 w-3" />
+                    <item.icon className="h-4 w-4" />
                   </button>
                 ))}
               </div>
             </div>
-            <CinematicPreview form={form} modules={wizardModules} viewMode={viewMode} />
-            <p className="text-[9px] text-muted-foreground/25 text-center font-display">
-              {viewMode === "mobile" ? "📱 Visão mobile" : "🖥 Visão desktop"} — atualiza em tempo real
-            </p>
-          </div>
+
+            <div className="rounded-[1.75rem] border border-border/10 bg-card/70 p-3">
+              <MemberExperiencePreview
+                course={{
+                  title: form.title || "Sua área premium",
+                  description: form.description,
+                  category: form.category,
+                  thumbnail_url: form.thumbnail_url,
+                  productName: linkedProduct?.name,
+                  is_published: false,
+                }}
+                modules={previewModules}
+                viewMode={viewMode}
+              />
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-2xl border border-border/10 bg-card/70 px-3 py-2.5">
+                <p className="text-[9px] font-display font-bold uppercase tracking-[0.16em] text-muted-foreground/35">Rails</p>
+                <p className="mt-1 text-sm font-display font-black text-foreground/80">{previewModules.length}</p>
+              </div>
+              <div className="rounded-2xl border border-border/10 bg-card/70 px-3 py-2.5">
+                <p className="text-[9px] font-display font-bold uppercase tracking-[0.16em] text-muted-foreground/35">Hero</p>
+                <p className="mt-1 text-sm font-display font-black text-primary">{form.thumbnail_url ? "On" : "Off"}</p>
+              </div>
+            </div>
+          </aside>
         </div>
 
-        {/* ── Footer ── */}
-        <div className="px-6 py-4 border-t border-border/10 flex items-center justify-between bg-card/50">
+        <div className="flex items-center justify-between border-t border-border/10 bg-card/70 px-6 py-4">
           <div>
-            {stepIndex > 0 && (
-              <Button variant="ghost" onClick={goPrev} className="gap-2 rounded-xl font-display font-bold text-xs h-10 text-muted-foreground/50 hover:text-foreground active:scale-[0.985]">
-                <ChevronLeft className="h-3.5 w-3.5" /> Voltar
+            {stepIndex > 0 ? (
+              <Button variant="ghost" onClick={previousStep} className="rounded-2xl font-display font-bold text-foreground/70">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
               </Button>
-            )}
+            ) : null}
           </div>
+
           <div className="flex items-center gap-2">
-            {currentStep !== "review" && (
-              <span className="text-[10px] text-muted-foreground/25 font-display hidden sm:block">
-                {currentStep === "info" ? "Preencha o nome para continuar" : currentStep === "visual" ? "Adicione uma capa impactante" : "Organize seus módulos"}
-              </span>
-            )}
-            {currentStep === "review" ? (
-              <Button onClick={handleSave} disabled={saving || !form.title.trim()} className="gap-2 rounded-xl font-display font-bold text-sm h-10 px-6 shadow-lg shadow-primary/15 active:scale-[0.985]">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                {editCourse ? "Salvar Alterações" : "Criar Curso"}
+            {step !== "launch" ? (
+              <Button onClick={nextStep} disabled={!canContinue} className="rounded-2xl px-6 font-display font-bold shadow-lg shadow-primary/15">
+                Próximo <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
-              <Button onClick={goNext} disabled={!canNext()} className="gap-2 rounded-xl font-display font-bold text-sm h-10 px-6 shadow-lg shadow-primary/15 active:scale-[0.985]">
-                Próximo <ChevronRight className="h-3.5 w-3.5" />
+              <Button onClick={saveCourse} disabled={saving || !form.title.trim()} className="rounded-2xl px-6 font-display font-bold shadow-lg shadow-primary/15">
+                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                {editCourse ? "Salvar ajustes" : "Criar curso"}
               </Button>
             )}
           </div>
