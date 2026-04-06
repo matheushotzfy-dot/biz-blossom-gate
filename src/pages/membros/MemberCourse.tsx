@@ -411,21 +411,24 @@ export default function MemberCourse() {
               transition={{ duration: 0.35, ease }}
               className="space-y-6"
             >
-              {/* Video / Content */}
+               {/* Video / Content */}
               {hasVideo ? (
                 <div className={cn(
-                  "rounded-2xl overflow-hidden shadow-2xl shadow-background/50 ring-1 ring-border/15",
+                  "rounded-2xl overflow-hidden shadow-2xl shadow-background/50 ring-1 ring-border/15 relative group/player",
                   theaterMode ? "aspect-video" : "aspect-video max-h-[520px]"
                 )}>
                   <VideoPlayer url={activeLesson.video_url!} />
+                  {/* Ambient glow behind video */}
+                  <div className="absolute -inset-4 -z-10 bg-primary/3 blur-[60px] rounded-3xl opacity-0 group-hover/player:opacity-100 transition-opacity duration-1000 pointer-events-none" />
                 </div>
               ) : (
-                <div className="aspect-video max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-card via-card/80 to-muted/5 border border-border/20 flex flex-col items-center justify-center text-center p-8 ring-1 ring-border/10">
-                  <div className="h-20 w-20 rounded-2xl bg-primary/6 flex items-center justify-center mb-5 border border-primary/10 shadow-lg shadow-primary/5">
+                <div className="aspect-video max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-card via-card/80 to-muted/5 border border-border/20 flex flex-col items-center justify-center text-center p-8 ring-1 ring-border/10 relative">
+                  <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+                  <div className="h-20 w-20 rounded-2xl bg-primary/6 flex items-center justify-center mb-5 border border-primary/10 shadow-lg shadow-primary/5 relative">
                     <FileText className="h-10 w-10 text-primary/20" />
                   </div>
-                  <h3 className="text-xl font-display font-black text-foreground tracking-[-0.02em]">{activeLesson.title}</h3>
-                  <p className="text-sm text-muted-foreground/60 mt-2 font-display">Conteúdo em texto — leia abaixo</p>
+                  <h3 className="text-xl font-display font-black text-foreground tracking-[-0.02em] relative">{activeLesson.title}</h3>
+                  <p className="text-sm text-muted-foreground/60 mt-2 font-display relative">Conteúdo em texto — leia abaixo</p>
                 </div>
               )}
 
