@@ -324,7 +324,7 @@ export default function ProductEditor() {
         setActiveTab("configuracoes");
         window.history.replaceState(null, "", `/vendas/produtos/${newProduct.id}/editar`);
       } else {
-        const { error } = await supabase.from("products").update(productData).eq("id", productId!).eq("user_id", user.id);
+        const { error } = await supabase.from("products").update(productData).eq("id", effectiveProductId!).eq("user_id", user.id);
         if (error) { toast.error("Erro ao salvar"); return; }
 
         if (deliveryType === "digital") {
