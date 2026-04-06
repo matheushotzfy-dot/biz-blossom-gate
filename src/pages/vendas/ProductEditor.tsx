@@ -332,7 +332,7 @@ export default function ProductEditor() {
           if (!existingCourse) {
             await supabase.from("courses").insert({
               user_id: user.id,
-              product_id: productId!,
+              product_id: effectiveProductId!,
               title: name.trim(),
               description: description.trim() || null,
               is_published: false,
