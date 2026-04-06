@@ -588,7 +588,6 @@ export default function ProductEditor() {
                     className={cn(
                       "h-2 rounded-full transition-all duration-300",
                       isActive ? "w-6 bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" :
-                      isDone ? "w-2 bg-success/60" :
                       locked ? "w-2 bg-muted-foreground/10" :
                       "w-2 bg-muted-foreground/20"
                     )}
