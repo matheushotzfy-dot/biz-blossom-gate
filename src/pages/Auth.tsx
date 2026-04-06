@@ -225,48 +225,19 @@ function FeatureCard({ icon: Icon, title, desc, tone, delay }: {
   );
 }
 
-/* ─────────────────── Live activity ticker ─────────────────── */
-function LiveTicker() {
-  const messages = [
-    "🎯 João acabou de vender R$ 497,00",
-    "🚀 Maria lançou um novo curso",
-    "💰 Pedro sacou R$ 2.300,00",
-    "📈 Ana bateu 100 vendas hoje",
-    "🔥 Lucas criou novo checkout",
-    "⚡ Carla faturou R$ 15K esta semana",
-  ];
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const iv = setInterval(() => setIdx(p => (p + 1) % messages.length), 3500);
-    return () => clearInterval(iv);
-  }, []);
+/* ─────────────────── Platform status indicator ─────────────────── */
+function PlatformStatus() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.6 }}
-      className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/10"
-    >
+    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/10">
       <div className="relative flex h-2 w-2 shrink-0">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
       </div>
-      <div className="flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={idx}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[10px] text-muted-foreground/50 font-medium font-display truncate"
-          >
-            {messages[idx]}
-          </motion.p>
-        </AnimatePresence>
-      </div>
-      <span className="text-[7px] font-bold text-success/50 uppercase tracking-[0.15em] font-display shrink-0">ao vivo</span>
-    </motion.div>
+      <p className="text-[10px] text-muted-foreground/50 font-medium font-display truncate">
+        Plataforma online — checkout e saques funcionando normalmente
+      </p>
+      <span className="text-[7px] font-bold text-success/50 uppercase tracking-[0.15em] font-display shrink-0">online</span>
+    </div>
   );
 }
 
@@ -735,9 +706,9 @@ export default function Auth() {
               <StatCard target="99.9" suffix="%" label="Uptime" icon={Activity} delay={1.3} />
             </div>
 
-            {/* Live ticker */}
+            {/* Platform status */}
             <div className="mt-5">
-              <LiveTicker />
+              <PlatformStatus />
             </div>
 
             {/* Testimonial */}

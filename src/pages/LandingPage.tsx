@@ -182,47 +182,9 @@ function PricingCard({ name, price, desc, features, popular, delay }: {
   );
 }
 
-/* ─── Testimonial ─── */
-function TestimonialCard({ name, role, text, avatar, delay }: {
-  name: string; role: string; text: string; avatar: string; delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: delay * 0.1 }}
-      className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/10 p-6 md:p-8 hover:border-primary/15 hover:shadow-xl transition-all duration-500 group"
-    >
-      <div className="flex gap-1 mb-4">
-        {[1,2,3,4,5].map(i => <Star key={i} className="h-3.5 w-3.5 fill-warning text-warning" />)}
-      </div>
-      <p className="text-sm text-muted-foreground/60 leading-relaxed font-display mb-6">"{text}"</p>
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-info/20 flex items-center justify-center text-sm font-bold font-display text-primary">
-          {avatar}
-        </div>
-        <div>
-          <p className="text-sm font-display font-bold text-foreground">{name}</p>
-          <p className="text-[10px] text-muted-foreground/40 font-display">{role}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
-/* ─── Live Ticker ─── */
-function LiveTicker() {
-  const msgs = [
-    "🎯 João acabou de vender R$ 497,00",
-    "🚀 Maria lançou um novo infoproduto",
-    "💰 Pedro sacou R$ 8.500,00 via PIX",
-    "📈 Ana atingiu R$ 50K em vendas",
-    "🔥 Lucas configurou checkout otimizado",
-    "⚡ Carla faturou R$ 25K esta semana",
-  ];
-  const [idx, setIdx] = useState(0);
-  useEffect(() => { const iv = setInterval(() => setIdx(p => (p + 1) % msgs.length), 3500); return () => clearInterval(iv); }, []);
+/* ─── Live Status ─── */
+function LiveStatus() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
       className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-card/30 backdrop-blur-xl border border-border/10 shadow-lg">
@@ -230,10 +192,7 @@ function LiveTicker() {
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
       </div>
-      <AnimatePresence mode="wait">
-        <motion.span key={idx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-          className="text-[11px] text-muted-foreground/50 font-display font-medium">{msgs[idx]}</motion.span>
-      </AnimatePresence>
+      <span className="text-[11px] text-muted-foreground/50 font-display font-medium">Plataforma online — todos os sistemas operacionais</span>
     </motion.div>
   );
 }
@@ -396,7 +355,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
-                <LiveTicker />
+                <LiveStatus />
               </motion.div>
             </div>
 
@@ -456,16 +415,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ LOGOS / SOCIAL PROOF BAR ═══ */}
+      {/* ═══ SOCIAL PROOF BAR ═══ */}
       <Section className="py-12 md:py-16 border-y border-border/5">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="text-center">
-          <p className="text-[10px] text-muted-foreground/30 font-bold uppercase tracking-[0.2em] mb-8 font-display">
-            Mais de 2.000 infoprodutores confiam na HOTZFY
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-30">
-            {["Curso Pro", "Digital Academy", "Expert Hub", "Mentor Plus", "Infobiz", "Scale Up"].map(name => (
-              <span key={name} className="text-lg font-display font-black tracking-[-0.02em] text-foreground/60">{name}</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
+            {[
+              { number: "2K+", label: "produtores ativos" },
+              { number: "R$ 50M+", label: "processados" },
+              { number: "99.9%", label: "uptime" },
+              { number: "<2s", label: "tempo de saque PIX" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/20 border border-border/8">
+                <span className="text-lg font-display font-black text-primary tabular-nums">{item.number}</span>
+                <span className="text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider">{item.label}</span>
+              </div>
             ))}
           </div>
         </motion.div>
@@ -547,20 +511,33 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* ═══ TESTIMONIALS ═══ */}
+      {/* ═══ WHY HOTZFY ═══ */}
       <Section id="depoimentos" className="bg-gradient-to-b from-transparent via-primary/[0.015] to-transparent">
         <SectionHeader
-          badge="Depoimentos"
-          title={<>Quem usa, <span className="text-gradient">recomenda</span></>}
-          subtitle="Veja o que nossos clientes dizem sobre a plataforma."
+          badge="Por que a HOTZFY?"
+          title={<>Feita para quem <span className="text-gradient">leva a sério</span></>}
+          subtitle="Cada detalhe pensado para infoprodutores que querem performance real."
         />
         <div className="grid md:grid-cols-3 gap-6">
-          <TestimonialCard name="Juliana Ribeiro" role="Infoprodutora • R$ 280K/mês" avatar="JR"
-            text="A HOTZFY transformou meu negócio. O checkout converte absurdamente mais que qualquer outra plataforma que já usei. Em 3 meses, tripliquei meu faturamento." delay={0} />
-          <TestimonialCard name="Carlos Mendes" role="Mentor Digital • R$ 150K/mês" avatar="CM"
-            text="As taxas são imbatíveis e o suporte é excepcional. O PIX instantâneo e a área de membros integrada fazem toda diferença no meu lançamento." delay={1} />
-          <TestimonialCard name="Ana Beatriz" role="Educadora Online • R$ 95K/mês" avatar="AB"
-            text="Migrei de outra plataforma e não me arrependo. O dashboard é o mais completo que já vi. Tenho controle total das minhas vendas e métricas em tempo real." delay={2} />
+          {[
+            { icon: Zap, title: "Checkout que converte", desc: "Timer de escassez, order bumps, social proof e recuperação automática. Cada segundo do checkout foi otimizado para maximizar sua taxa de aprovação.", tone: "primary" },
+            { icon: Lock, title: "Segurança nível bancário", desc: "Antifraude com velocity checks, blacklist global, tokenização PCI-DSS e monitoramento 24/7. Seu dinheiro protegido.", tone: "success" },
+            { icon: LineChart, title: "Dados em tempo real", desc: "Dashboard com métricas ao vivo, gráficos de conversão por método de pagamento, churn rate e funil completo. Decisões baseadas em dados.", tone: "info" },
+          ].map((item, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/10 p-6 md:p-8 hover:border-primary/15 hover:shadow-xl transition-all duration-500 group"
+            >
+              <div className={`h-12 w-12 rounded-2xl bg-${item.tone}/8 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                <item.icon className={`h-5 w-5 text-${item.tone}`} />
+              </div>
+              <h3 className="text-lg font-display font-bold text-foreground mb-3">{item.title}</h3>
+              <p className="text-sm text-muted-foreground/50 leading-relaxed font-display">{item.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </Section>
 
