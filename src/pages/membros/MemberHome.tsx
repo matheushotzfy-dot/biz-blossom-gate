@@ -307,17 +307,24 @@ export default function MemberHome() {
               {course.modules.map((mod, mi) => (
                 <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.05, ease }}>
                   <Link to={`/membros-area/curso/${course.id}?module=${mod.id}`} className="group shrink-0 w-[220px] md:w-[260px] snap-start block">
-                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
+                    <div className="aspect-video rounded-2xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/25 transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/8">
                       {mod.banner_url ? (
-                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
+                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-[900ms] ease-out" loading="lazy" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card relative">
+                          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
                           <BookOpen className="h-8 w-8 text-primary/8" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      {/* Play icon on hover */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        <div className="h-10 w-10 rounded-xl bg-foreground/80 backdrop-blur-xl flex items-center justify-center shadow-xl scale-90 group-hover:scale-100 transition-transform duration-500">
+                          <Play className="h-4 w-4 text-background ml-0.5 fill-current" />
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs font-display font-bold text-foreground/80 mt-2.5 truncate group-hover:text-foreground transition-colors">{mod.title}</p>
+                    <p className="text-xs font-display font-bold text-foreground/80 mt-3 truncate group-hover:text-foreground transition-colors duration-300">{mod.title}</p>
                     <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums mt-0.5">{mod.lessonCount} aula{mod.lessonCount !== 1 ? "s" : ""}</p>
                   </Link>
                 </motion.div>
