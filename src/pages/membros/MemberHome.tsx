@@ -109,8 +109,9 @@ export default function MemberHome() {
     <div className="pb-24 bg-background">
       {/* ═══ Cinematic Hero ═══ */}
       <div className="relative h-[55vh] min-h-[420px] max-h-[580px] overflow-hidden">
-        {/* Ambient glow */}
+        {/* Ambient glows */}
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/5 blur-[160px] animate-pulse-glow pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-info/4 blur-[120px] animate-pulse-glow pointer-events-none" style={{ animationDelay: "1.5s" }} />
         {featured.thumbnail_url ? (
           <motion.img
             initial={{ scale: 1.1, opacity: 0 }}
@@ -120,7 +121,9 @@ export default function MemberHome() {
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-background" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-background">
+            <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+          </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/5" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
