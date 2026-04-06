@@ -2063,31 +2063,25 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
   icon: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; color: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   const accentBg = color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info";
-  const ringColor = color === "text-success" ? "ring-success/20" : color === "text-warning" ? "ring-warning/20" : "ring-info/20";
   const bgColor = color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10";
 
   return (
-    <motion.div
-      layout
-      className={cn(
-        "flex items-center justify-between p-4 rounded-xl border transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
-        checked
-          ? "bg-card/60 border-border/40 shadow-sm"
-          : "bg-card/15 border-border/15 opacity-50"
-      )}
-    >
-      {checked && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBg)} />}
+    <div className={cn(
+      "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
+      checked ? "bg-card/60 border-border/40" : "bg-card/20 border-border/20 opacity-50"
+    )}>
+      {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
       <div className="flex items-center gap-3">
-        <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl transition-all ring-1", bgColor, ringColor)}>
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-transparent", bgColor)}>
           <Icon className={cn("h-4 w-4", color)} />
         </div>
         <div>
-          <p className="text-sm font-display font-bold">{label}</p>
-          {sublabel && <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-numbers">{sublabel}</p>}
+          <p className="text-sm font-semibold">{label}</p>
+          {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
         </div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
-    </motion.div>
+    </div>
   );
 }
 
@@ -2097,24 +2091,24 @@ function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
   return (
     <div className="space-y-2">
       <EditorLabel>{label}</EditorLabel>
-      {sublabel && <p className="text-[9px] text-muted-foreground/30">{sublabel}</p>}
+      {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
       <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden border border-border/40 shadow-sm group/banner">
-          <img src={preview} alt={label} className="w-full h-28 object-cover" />
-          <div className="absolute inset-0 bg-background/40 opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center gap-2">
-            <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card/90 border border-border/30 flex items-center justify-center hover:bg-primary/10 transition-all">
-              <ImagePlus className="h-3.5 w-3.5" />
+        <div className="relative rounded-lg overflow-hidden border border-border/30 group/banner">
+          <img src={preview} alt={label} className="w-full h-24 object-cover" />
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center gap-2">
+            <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center hover:bg-muted/40 transition-all active:scale-95">
+              <ImagePlus className="h-3.5 w-3.5 text-foreground" />
             </button>
-            <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card/90 border border-border/30 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-all">
+            <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-all active:scale-95">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       ) : (
-        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} type="button" onClick={() => inputRef.current?.click()} className="w-full h-24 rounded-xl border-2 border-dashed border-border/20 hover:border-primary/30 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground/40 hover:text-primary text-xs transition-all">
+        <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border/25 hover:border-primary/30 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-all active:scale-[0.99]">
           <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
-        </motion.button>
+        </button>
       )}
     </div>
   );
