@@ -109,8 +109,9 @@ export default function MemberHome() {
     <div className="pb-24 bg-background">
       {/* ═══ Cinematic Hero ═══ */}
       <div className="relative h-[55vh] min-h-[420px] max-h-[580px] overflow-hidden">
-        {/* Ambient glow */}
+        {/* Ambient glows */}
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/5 blur-[160px] animate-pulse-glow pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-info/4 blur-[120px] animate-pulse-glow pointer-events-none" style={{ animationDelay: "1.5s" }} />
         {featured.thumbnail_url ? (
           <motion.img
             initial={{ scale: 1.1, opacity: 0 }}
@@ -120,7 +121,9 @@ export default function MemberHome() {
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-background" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-background">
+            <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+          </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/5" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
@@ -173,12 +176,13 @@ export default function MemberHome() {
 
             <div className="flex items-center gap-2.5">
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="group inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/15 active:scale-[0.98]">
-                <Play className="h-4 w-4 fill-current" />
-                {continueWatching.length > 0 ? "Continuar" : "Começar"}
+                className="group inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/15 active:scale-[0.98] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer pointer-events-none" />
+                <Play className="h-4 w-4 fill-current relative z-10" />
+                <span className="relative z-10">{continueWatching.length > 0 ? "Continuar" : "Começar"}</span>
               </Link>
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground transition-all active:scale-[0.98] shadow-sm">
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground hover:border-border/30 transition-all active:scale-[0.98] shadow-sm">
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Detalhes</span>
               </Link>
@@ -191,7 +195,7 @@ export default function MemberHome() {
 
         {/* ═══ Stats Strip — Premium ═══ */}
         {totalLessons > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {[
               { icon: BookOpen, label: "Cursos", value: String(courses.length), tone: "primary" as const },
               { icon: Target, label: "Progresso", value: `${overallPct}%`, tone: "info" as const },
@@ -203,11 +207,12 @@ export default function MemberHome() {
                 initial={{ opacity: 0, y: 16, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.1 + i * 0.06, duration: 0.5, ease }}
-                className="relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 sm:p-5 overflow-hidden hover:ring-border/40 transition-all duration-300 shadow-sm"
+                className="relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 sm:p-5 overflow-hidden hover:ring-border/40 transition-all duration-500 shadow-sm hover:shadow-md cursor-default"
               >
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${kpi.tone}`)} />
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-500 group-hover:w-1", `bg-${kpi.tone}`)} />
+                <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", `bg-gradient-to-br from-${kpi.tone}/[0.03] to-transparent`)} />
                 <div className="relative z-10 flex items-center gap-3">
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all group-hover:scale-110 shadow-sm", `bg-${kpi.tone}/10 ring-${kpi.tone}/15 shadow-${kpi.tone}/5`)}>
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all duration-500 group-hover:scale-110 group-hover:shadow-md shadow-sm", `bg-${kpi.tone}/10 ring-${kpi.tone}/15 shadow-${kpi.tone}/5 group-hover:shadow-${kpi.tone}/10`)}>
                     <kpi.icon className={cn("h-4.5 w-4.5", `text-${kpi.tone}`)} />
                   </div>
                   <div>
@@ -302,17 +307,24 @@ export default function MemberHome() {
               {course.modules.map((mod, mi) => (
                 <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.05, ease }}>
                   <Link to={`/membros-area/curso/${course.id}?module=${mod.id}`} className="group shrink-0 w-[220px] md:w-[260px] snap-start block">
-                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
+                    <div className="aspect-video rounded-2xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/25 transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/8">
                       {mod.banner_url ? (
-                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
+                        <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-[900ms] ease-out" loading="lazy" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card relative">
+                          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
                           <BookOpen className="h-8 w-8 text-primary/8" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      {/* Play icon on hover */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        <div className="h-10 w-10 rounded-xl bg-foreground/80 backdrop-blur-xl flex items-center justify-center shadow-xl scale-90 group-hover:scale-100 transition-transform duration-500">
+                          <Play className="h-4 w-4 text-background ml-0.5 fill-current" />
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs font-display font-bold text-foreground/80 mt-2.5 truncate group-hover:text-foreground transition-colors">{mod.title}</p>
+                    <p className="text-xs font-display font-bold text-foreground/80 mt-3 truncate group-hover:text-foreground transition-colors duration-300">{mod.title}</p>
                     <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums mt-0.5">{mod.lessonCount} aula{mod.lessonCount !== 1 ? "s" : ""}</p>
                   </Link>
                 </motion.div>
