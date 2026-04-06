@@ -171,7 +171,8 @@ export default function ProductEditor() {
     return Math.round((score / total) * 100);
   })();
 
-  const tabsLocked = isNew;
+  const effectiveProductId = createdProductId || productId;
+  const tabsLocked = isNew && !createdProductId;
 
   const tabCompleted = useCallback((key: TabKey): boolean => {
     switch (key) {
