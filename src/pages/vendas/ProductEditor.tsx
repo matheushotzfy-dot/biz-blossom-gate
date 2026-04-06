@@ -633,10 +633,10 @@ export default function ProductEditor() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-6 py-5 min-h-0">
 
           {/* ───── Sidebar ───── */}
-          <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none">
-            <div className="rounded-xl border border-border/40 bg-card/60 p-2 space-y-0.5">
-              <div className="px-3 py-2 mb-1">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Navegação</p>
+          <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
+            <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl p-2.5 space-y-0.5 ring-1 ring-border/5 shadow-sm">
+              <div className="px-3 py-2.5 mb-1">
+                <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Navegação</p>
               </div>
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
@@ -651,21 +651,30 @@ export default function ProductEditor() {
                     }}
                     disabled={locked}
                     className={cn(
-                      "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all text-left relative",
+                      "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-300 text-left relative group/tab",
                       locked
-                        ? "opacity-35 cursor-not-allowed text-muted-foreground"
+                        ? "opacity-25 cursor-not-allowed text-muted-foreground"
                         : isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                          ? "bg-primary/8 text-primary ring-1 ring-primary/12"
+                          : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/10"
                     )}
                   >
                     {isActive && (
-                      <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                      <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.2)]" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
-                    {locked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : <tab.icon className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-primary" : "")} />}
+                    {locked ? (
+                      <Lock className="h-3.5 w-3.5 shrink-0" />
+                    ) : (
+                      <div className={cn(
+                        "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ring-1 transition-all duration-300",
+                        isActive ? "bg-primary/10 ring-primary/15 shadow-sm shadow-primary/5" : "bg-muted/5 ring-border/10 group-hover/tab:ring-border/20"
+                      )}>
+                        <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/30 group-hover/tab:text-muted-foreground/50")} />
+                      </div>
+                    )}
                     <span className="truncate">{tab.label}</span>
                     {completed && !isActive && !locked && (
-                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-success/60 shrink-0" />
+                      <div className="ml-auto h-2 w-2 rounded-full bg-success/60 shrink-0 shadow-sm shadow-success/20" />
                     )}
                   </button>
                 );
@@ -674,19 +683,19 @@ export default function ProductEditor() {
 
             {/* Quick info */}
             {!tabsLocked && product?.checkout_url && (
-              <div className="mt-3 rounded-xl border border-border/30 bg-card/40 p-3 space-y-2">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Checkout</p>
+              <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl p-3.5 space-y-2.5 ring-1 ring-border/5 shadow-sm">
+                <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Ações Rápidas</p>
                 <Button
                   variant="outline" size="sm"
                   onClick={() => copyLink(getCheckoutLink())}
-                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
+                  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold border-border/20 hover:border-border/30"
                 >
                   <Copy className="h-3 w-3" /> Copiar Link
                 </Button>
                 <Button
                   variant="outline" size="sm"
                   onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
-                  className="w-full gap-1.5 h-8 text-[11px] rounded-lg"
+                  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold border-border/20 hover:border-border/30"
                 >
                   <Palette className="h-3 w-3" /> Checkout Builder
                 </Button>
