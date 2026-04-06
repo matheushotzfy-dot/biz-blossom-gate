@@ -798,8 +798,8 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       {/* ─── Interactive Image Upload with Drag & Drop ─── */}
       <div
         className={cn(
-          "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-300 relative",
-          isDragging ? "border-primary/50 bg-primary/5 scale-[1.01]" : "border-border/30 bg-card/50"
+          "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-500 relative group/upload",
+          isDragging ? "border-primary/50 bg-primary/5 scale-[1.005] shadow-lg shadow-primary/5" : "border-border/20 bg-card/30 hover:border-border/30"
         )}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
@@ -810,30 +810,34 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         {imagePreview ? (
           <div className="relative group/img">
             <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-11 w-11 rounded-xl bg-card/90 border border-border/30 flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all shadow-lg">
-                <ImagePlus className="h-4 w-4 text-foreground" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+            <div className="absolute inset-0 bg-background/40 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all shadow-xl ring-1 ring-border/10">
+                <ImagePlus className="h-5 w-5 text-foreground" />
               </motion.button>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-11 w-11 rounded-xl bg-card/90 border border-border/30 flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all shadow-lg">
-                <X className="h-4 w-4" />
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-12 w-12 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all shadow-xl ring-1 ring-border/10">
+                <X className="h-5 w-5" />
               </motion.button>
             </div>
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card/80 backdrop-blur-xl border border-border/20 shadow-lg">
-              <CheckCircle2 className="h-3 w-3 text-success" />
-              <span className="text-[10px] font-display font-bold text-foreground">Imagem adicionada</span>
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card/80 backdrop-blur-xl border border-border/15 shadow-lg ring-1 ring-border/10">
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+              <span className="text-[10px] font-display font-black text-foreground">Imagem adicionada</span>
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-48 flex flex-col items-center justify-center gap-4 text-muted-foreground/40 hover:text-primary/60 transition-all group/upload hover:bg-primary/[0.02]">
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-52 flex flex-col items-center justify-center gap-4 text-muted-foreground/30 hover:text-primary/50 transition-all duration-500 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-primary/[0.02] pointer-events-none" />
             <motion.div
-              animate={isDragging ? { scale: 1.1, y: -4 } : { scale: 1, y: 0 }}
-              className="h-16 w-16 rounded-2xl bg-muted/10 group-hover/upload:bg-primary/10 flex items-center justify-center transition-colors border border-dashed border-border/30 group-hover/upload:border-primary/20"
+              animate={isDragging ? { scale: 1.1, y: -8 } : { scale: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative h-18 w-18 rounded-2xl bg-muted/8 group-hover/upload:bg-primary/8 flex items-center justify-center transition-all duration-500 border border-dashed border-border/20 group-hover/upload:border-primary/20 ring-1 ring-transparent group-hover/upload:ring-primary/10"
             >
-              <Upload className="h-7 w-7" />
+              <Upload className="h-8 w-8" />
             </motion.div>
-            <div className="text-center space-y-1">
+            <div className="relative text-center space-y-1.5">
               <span className="text-sm font-display font-bold block">{isDragging ? "Solte a imagem aqui" : "Arraste ou clique para enviar"}</span>
-              <span className="text-[10px] text-muted-foreground/30 block">JPG, PNG, WebP, GIF • Máx: 10MB • Recomendado: 300×250px</span>
+              <span className="text-[10px] text-muted-foreground/25 block font-display">JPG, PNG, WebP, GIF • Máx: 10MB • Recomendado: 300×250px</span>
             </div>
           </button>
         )}
