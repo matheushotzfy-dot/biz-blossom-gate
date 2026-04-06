@@ -1017,21 +1017,25 @@ export default function CourseBuilder() {
             /* ── Empty State — Cinematic ── */
             <div className="h-full flex flex-col items-center justify-center gap-6 relative overflow-hidden">
               {/* Decorative background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-info/[0.01] pointer-events-none" />
-              <div className="absolute inset-0 opacity-[0.01]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
+              <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+              {/* Ambient blobs */}
+              <div className="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-primary/4 blur-[120px] animate-pulse-glow pointer-events-none" />
+              <div className="absolute bottom-1/4 right-1/3 w-48 h-48 rounded-full bg-info/4 blur-[100px] animate-pulse-glow pointer-events-none" style={{ animationDelay: "1.5s" }} />
 
               <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="relative text-center">
-                <div className="h-28 w-28 rounded-[2rem] bg-gradient-to-br from-card via-card to-primary/5 border border-border/15 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary/[0.03] relative">
-                  <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary/5 to-transparent" />
-                  <GraduationCap className="h-14 w-14 text-primary/10 relative z-10" />
+                <div className="h-28 w-28 rounded-[2rem] bg-gradient-to-br from-card via-card to-primary/5 border border-border/15 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary/[0.05] relative group">
+                  <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary/5 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
+                  <GraduationCap className="h-14 w-14 text-primary/10 relative z-10 group-hover:text-primary/20 transition-colors duration-500" />
                 </div>
                 <h3 className="text-xl font-display font-black text-foreground/30 mb-2 tracking-[-0.02em]">Selecione uma aula</h3>
                 <p className="text-sm text-muted-foreground/25 font-display max-w-[300px] leading-relaxed">Clique em uma aula na sidebar para começar a editar o conteúdo</p>
               </motion.div>
               {modules.length === 0 && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                  <Button onClick={() => setShowNewModule(true)} className="gap-2 rounded-xl font-display font-bold text-xs h-11 px-6 shadow-lg shadow-primary/15 active:scale-[0.985]">
-                    <Plus className="h-3.5 w-3.5" /> Criar Primeiro Módulo
+                  <Button onClick={() => setShowNewModule(true)} className="gap-2 rounded-xl font-display font-bold text-xs h-11 px-6 shadow-lg shadow-primary/15 active:scale-[0.985] relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
+                    <Plus className="h-3.5 w-3.5 relative z-10" /> <span className="relative z-10">Criar Primeiro Módulo</span>
                   </Button>
                 </motion.div>
               )}
