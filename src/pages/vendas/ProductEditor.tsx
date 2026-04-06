@@ -491,21 +491,25 @@ export default function ProductEditor() {
 
   if (loading) {
     return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03] pointer-events-none" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-primary/5 blur-[120px] animate-pulse-glow pointer-events-none" />
+        <div className="flex flex-col items-center gap-5 relative z-10">
           <div className="relative">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="h-12 w-12 border-2 border-border/20 border-t-primary rounded-full"
+              className="h-16 w-16 border-2 border-border/15 border-t-primary rounded-full"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Package className="h-5 w-5 text-primary/60" />
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
+                <Package className="h-5 w-5 text-primary/60" />
+              </div>
             </div>
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-sm font-display font-bold text-foreground">Carregando produto</p>
-            <p className="text-xs text-muted-foreground">Preparando editor...</p>
+          <div className="text-center space-y-1.5">
+            <p className="text-sm font-display font-black text-foreground tracking-[-0.02em]">Carregando produto</p>
+            <p className="text-xs text-muted-foreground/40 font-display">Preparando o editor...</p>
           </div>
         </div>
       </div>
