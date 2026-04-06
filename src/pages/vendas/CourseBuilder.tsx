@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
+import StudentPreviewPanel from "@/components/course/StudentPreviewPanel";
 
 // ─── Types ────────────────────────────────────────────────────────
 interface Course {
