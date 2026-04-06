@@ -301,10 +301,10 @@ export default function ProductEditor() {
         checkout_banner_mobile_url: mobileUrl || null,
       };
 
-      if (isNew) {
+      if (isNew && !createdProductId) {
         const slug = crypto.randomUUID().slice(0, 8);
         const checkoutUrl = `${window.location.origin}/pay/${slug}`;
-        const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("id").single();
+        const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("*").single();
         if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
         if (deliveryType === "digital") {
@@ -317,9 +317,12 @@ export default function ProductEditor() {
           } as any);
         }
 
-        toast.success("Produto criado com sucesso!");
+        setCreatedProductId(newProduct.id);
+        setProduct(newProduct as any);
+        toast.success("Produto criado com sucesso! Continue configurando.");
         invalidateAll(["products", "courses"]);
-        navigate("/vendas/produtos");
+        setActiveTab("configuracoes");
+        window.history.replaceState(null, "", `/vendas/produtos/${newProduct.id}/editar`);
       } else {
         const { error } = await supabase.from("products").update(productData).eq("id", productId!).eq("user_id", user.id);
         if (error) { toast.error("Erro ao salvar"); return; }
