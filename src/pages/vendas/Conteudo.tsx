@@ -298,7 +298,16 @@ export default function AdminConteudo() {
   };
 
   const openEdit = (c: Course) => {
-    setEditCourseData(c);
+    const sourceCourse = coursesRaw.find((item: any) => item.id === c.id);
+    setEditCourseData({
+      ...c,
+      modules: (sourceCourse?.modules || []).map((module: any) => ({
+        id: module.id,
+        title: module.title,
+        banner_url: module.banner_url ?? null,
+        lessonsCount: module.lessons?.length ?? 0,
+      })),
+    });
     setWizardOpen(true);
   };
 
