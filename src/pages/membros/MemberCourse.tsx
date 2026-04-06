@@ -458,17 +458,20 @@ export default function MemberCourse() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 shrink-0">
+                     <div className="flex items-center gap-2.5 shrink-0">
                       <button onClick={() => markComplete(activeLesson.id)}
                         disabled={progress.get(activeLesson.id)?.completed}
                         className={cn(
-                          "flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-display font-bold transition-all duration-300 active:scale-[0.98]",
+                          "flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-display font-bold transition-all duration-300 active:scale-[0.98] relative overflow-hidden",
                           progress.get(activeLesson.id)?.completed
                             ? "bg-success/10 text-success border border-success/15 ring-1 ring-success/10"
-                            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/25"
+                            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/30"
                         )}>
-                        <CheckCircle2 className="h-4 w-4" />
-                        {progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir"}
+                        {!progress.get(activeLesson.id)?.completed && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
+                        )}
+                        <CheckCircle2 className="h-4 w-4 relative z-10" />
+                        <span className="relative z-10">{progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir"}</span>
                       </button>
                       {currentIdx < totalLessons - 1 && (
                         <button onClick={() => navigateLesson(1)}
