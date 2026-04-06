@@ -1,3 +1,9 @@
+/**
+ * MemberCourse — Cinematic Course Player
+ * @module MemberCourse
+ * @version 5.0.0 — Netflix Theater Experience
+ */
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -176,106 +182,90 @@ export default function MemberCourse() {
     </div>
   );
 
-  const sidebarWidth = theaterMode ? "w-[300px]" : "w-[340px] xl:w-[380px]";
+  const sidebarWidth = theaterMode ? "w-[280px]" : "w-[320px] xl:w-[360px]";
 
+  /* ─── Sidebar Component ─── */
   const CourseSidebar = () => (
-    <div className="p-4 space-y-3">
+    <div className="p-3 space-y-2">
       {/* Progress */}
-      <div className="p-4 rounded-xl bg-card/60 border border-border/20 relative overflow-hidden group/progress">
-        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-info" />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] to-transparent opacity-0 group-hover/progress:opacity-100 transition-opacity duration-500 pointer-events-none" />
-        <div className="flex items-center justify-between mb-3 pl-1 relative z-10">
+      <div className="p-3.5 rounded-xl bg-card/40 border border-border/10 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shadow-sm shadow-primary/5">
-              <Flame className="h-3.5 w-3.5 text-primary" />
+            <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", isComplete ? "bg-success/10" : "bg-primary/10")}>
+              {isComplete ? <Trophy className="h-3.5 w-3.5 text-success" /> : <Flame className="h-3.5 w-3.5 text-primary" />}
             </div>
-            <span className="text-[11px] font-display font-black text-foreground/70">Progresso</span>
+            <span className="text-[11px] font-display font-bold text-foreground/60">Progresso</span>
           </div>
-          <span className="text-lg font-display font-black text-primary tabular-nums">{overallPct}%</span>
+          <span className={cn("text-base font-display font-black tabular-nums", isComplete ? "text-success" : "text-primary")}>{overallPct}%</span>
         </div>
-        <div className="h-2 rounded-full bg-muted/10 ring-1 ring-border/10 overflow-hidden ml-1 relative z-10">
+        <div className="h-1.5 rounded-full bg-foreground/5 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${overallPct}%` }}
             transition={{ duration: 1, delay: 0.3, ease }}
-            className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 rounded-full relative"
-            style={{ boxShadow: overallPct > 0 ? "0 0 12px hsl(var(--primary) / 0.25)" : "none" }}
-          >
-            {overallPct > 0 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />}
-          </motion.div>
+            className={cn("h-full rounded-full", isComplete ? "bg-success" : "bg-primary")}
+          />
         </div>
-        <p className="text-[10px] text-muted-foreground/40 mt-2.5 font-display tabular-nums ml-1 relative z-10">{completedLessons}/{totalLessons} aulas concluídas</p>
+        <p className="text-[10px] text-muted-foreground/30 mt-2 font-display tabular-nums">{completedLessons}/{totalLessons} aulas concluídas</p>
         {isComplete && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2.5 mt-3 ml-1 p-3.5 rounded-xl bg-success/8 border border-success/15 ring-1 ring-success/10 relative z-10 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-success/[0.03] to-transparent pointer-events-none" />
-            <div className="h-9 w-9 rounded-lg bg-success/15 flex items-center justify-center shrink-0 shadow-sm shadow-success/10 relative z-10">
-              <Trophy className="h-4.5 w-4.5 text-success" />
-            </div>
-            <div className="relative z-10">
-              <span className="text-xs font-display font-black text-success block">Parabéns! 🎉</span>
-              <span className="text-[10px] text-success/60 font-display font-semibold">Curso 100% concluído</span>
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 mt-3 p-2.5 rounded-lg bg-success/8 border border-success/12">
+            <Trophy className="h-4 w-4 text-success" />
+            <div>
+              <span className="text-[11px] font-display font-bold text-success block">Parabéns! 🎉</span>
+              <span className="text-[9px] text-success/50 font-display">Curso concluído</span>
             </div>
           </motion.div>
         )}
       </div>
 
       {/* Modules */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {modules.map((mod, modIdx) => {
           const modCompleted = mod.lessons.filter(l => progress.get(l.id)?.completed).length;
           const modPct = mod.lessons.length > 0 ? Math.round((modCompleted / mod.lessons.length) * 100) : 0;
           const isModComplete = modPct === 100 && mod.lessons.length > 0;
 
           return (
-            <div key={mod.id} className="rounded-xl overflow-hidden bg-card/40 border border-border/15 hover:border-border/25 transition-all duration-300 ring-1 ring-transparent hover:ring-border/10">
-              <button onClick={() => toggleModule(mod.id)} className="w-full text-left transition-colors hover:bg-muted/5">
+            <div key={mod.id} className="rounded-xl overflow-hidden bg-card/20 border border-border/8 hover:border-border/15 transition-all duration-300">
+              <button onClick={() => toggleModule(mod.id)} className="w-full text-left transition-colors hover:bg-card/20">
                 {mod.banner_url ? (
                   <div className="aspect-[3.5/1] overflow-hidden relative">
-                    <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
-                    <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                    <img src={mod.banner_url} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+                    <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
                       <div>
-                        <p className="text-foreground text-xs font-display font-bold line-clamp-1">{mod.title}</p>
-                        <p className="text-muted-foreground/60 text-[10px] font-display tabular-nums mt-0.5">{mod.lessons.length} aulas · {modPct}%</p>
+                        <p className="text-foreground text-[11px] font-display font-bold line-clamp-1">{mod.title}</p>
+                        <p className="text-foreground/40 text-[9px] font-display tabular-nums mt-0.5">{mod.lessons.length} aulas · {modPct}%</p>
                       </div>
                       <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/40" />
+                        <ChevronDown className="h-3 w-3 text-foreground/30" />
                       </motion.div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-3.5 relative">
-                    {isModComplete && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />}
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center justify-between p-3 relative">
+                    {isModComplete && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-success" />}
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className={cn(
-                        "h-9 w-9 rounded-xl flex items-center justify-center text-[10px] font-display font-black shrink-0 ring-1 transition-all",
-                        isModComplete
-                          ? "bg-success/10 text-success ring-success/15 shadow-sm shadow-success/5"
-                          : "bg-card/80 text-muted-foreground/40 ring-border/15"
+                        "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-display font-black shrink-0",
+                        isModComplete ? "bg-success/10 text-success" : "bg-card/60 text-muted-foreground/30"
                       )}>
-                        {isModComplete ? <Check className="h-4 w-4" /> : modIdx + 1}
+                        {isModComplete ? <Check className="h-3.5 w-3.5" /> : modIdx + 1}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-display font-bold text-foreground line-clamp-1">{mod.title}</p>
-                        <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums mt-0.5">{modCompleted}/{mod.lessons.length} concluída{modCompleted !== 1 ? "s" : ""}</p>
+                        <p className="text-[11px] font-display font-bold text-foreground/80 line-clamp-1">{mod.title}</p>
+                        <p className="text-[9px] text-muted-foreground/30 font-display tabular-nums mt-0.5">{modCompleted}/{mod.lessons.length}</p>
                       </div>
                     </div>
                     <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />
+                      <ChevronDown className="h-3 w-3 text-muted-foreground/20 shrink-0" />
                     </motion.div>
                   </div>
                 )}
                 {mod.lessons.length > 0 && (
-                  <div className="h-[2px] bg-muted/8">
-                    <motion.div
-                      className={cn("h-full transition-all rounded-full", isModComplete ? "bg-success" : "bg-primary")}
-                      animate={{ width: `${modPct}%` }}
-                      transition={{ duration: 0.5, ease }}
-                    />
+                  <div className="h-[2px] bg-foreground/[0.03]">
+                    <div className={cn("h-full transition-all rounded-full", isModComplete ? "bg-success" : "bg-primary")} style={{ width: `${modPct}%` }} />
                   </div>
                 )}
               </button>
@@ -289,7 +279,7 @@ export default function MemberCourse() {
                     transition={{ duration: 0.25, ease }}
                     className="overflow-hidden"
                   >
-                    <div className="border-t border-border/10 py-1 px-1.5">
+                    <div className="border-t border-border/5 py-1 px-1">
                       {mod.lessons.map((lesson, lIdx) => {
                         const isActive = activeLesson?.id === lesson.id;
                         const isCompleted = progress.get(lesson.id)?.completed;
@@ -297,40 +287,40 @@ export default function MemberCourse() {
                         return (
                           <button key={lesson.id} onClick={() => selectLesson(lesson)}
                             className={cn(
-                              "w-full flex items-center gap-3 px-3 py-3 text-left transition-all duration-300 rounded-xl relative",
-                              isActive ? "bg-primary/8 ring-1 ring-primary/15" : "ring-1 ring-transparent hover:bg-muted/5"
+                              "w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-200 rounded-lg relative",
+                              isActive ? "bg-primary/8" : "hover:bg-foreground/[0.02]"
                             )}>
                             {isActive && (
-                              <motion.div layoutId="member-lesson-active" className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.25)]" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
+                              <motion.div layoutId="member-lesson-active" className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-primary" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
                             )}
                             <div className="shrink-0">
                               {isCompleted ? (
-                                <div className="h-7 w-7 rounded-lg bg-success/10 flex items-center justify-center ring-1 ring-success/15 shadow-sm shadow-success/5">
-                                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                                <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center">
+                                  <CheckCircle2 className="h-3 w-3 text-success" />
                                 </div>
                               ) : isActive ? (
-                                <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-                                  <Play className="h-3 w-3 text-primary-foreground ml-[1px] fill-current" />
+                                <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/25">
+                                  <Play className="h-2.5 w-2.5 text-primary-foreground ml-[1px] fill-current" />
                                 </div>
                               ) : (
-                                <span className="h-7 w-7 rounded-lg bg-muted/8 flex items-center justify-center text-[10px] text-muted-foreground/30 font-display font-black ring-1 ring-border/10">{lIdx + 1}</span>
+                                <span className="h-6 w-6 rounded-md bg-foreground/[0.03] flex items-center justify-center text-[9px] text-muted-foreground/20 font-display font-black">{lIdx + 1}</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
-                                "text-xs truncate font-display",
-                                isCompleted ? "text-muted-foreground/50 line-through" : isActive ? "text-foreground font-bold" : "text-foreground/60 font-semibold"
+                                "text-[11px] truncate font-display",
+                                isCompleted ? "text-muted-foreground/40 line-through" : isActive ? "text-foreground font-bold" : "text-foreground/50 font-semibold"
                               )}>
                                 {lesson.title}
                               </p>
-                              <div className="flex items-center gap-2 mt-0.5">
+                              <div className="flex items-center gap-1.5 mt-0.5">
                                 {lesson.duration_minutes > 0 && (
-                                  <span className="text-[10px] text-muted-foreground/30 flex items-center gap-0.5 font-display tabular-nums"><Clock className="h-2.5 w-2.5" /> {lesson.duration_minutes}min</span>
+                                  <span className="text-[9px] text-muted-foreground/20 flex items-center gap-0.5 font-display tabular-nums"><Clock className="h-2 w-2" /> {lesson.duration_minutes}min</span>
                                 )}
                                 {isVideo ? (
-                                  <span className="text-[10px] text-muted-foreground/25 flex items-center gap-0.5 font-display"><Video className="h-2.5 w-2.5" /> Vídeo</span>
+                                  <span className="text-[9px] text-muted-foreground/15 flex items-center gap-0.5 font-display"><Video className="h-2 w-2" /> Vídeo</span>
                                 ) : (
-                                  <span className="text-[10px] text-muted-foreground/25 flex items-center gap-0.5 font-display"><FileText className="h-2.5 w-2.5" /> Texto</span>
+                                  <span className="text-[9px] text-muted-foreground/15 flex items-center gap-0.5 font-display"><FileText className="h-2 w-2" /> Texto</span>
                                 )}
                               </div>
                             </div>
@@ -351,135 +341,119 @@ export default function MemberCourse() {
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
       {/* ═══ Main Content ═══ */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-background">
         {/* Top bar */}
-        <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-2xl border-b border-border/20 px-4 sm:px-6 py-3">
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl border-b border-border/10 px-4 sm:px-6 py-2.5">
           <div className="flex items-center justify-between max-w-5xl mx-auto">
             <div className="flex items-center gap-3 min-w-0">
-              <Link to="/membros-area" className="h-9 w-9 rounded-xl bg-card/50 hover:bg-card/70 flex items-center justify-center transition-all border border-border/20 shrink-0 group shadow-sm">
-                <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <Link to="/membros-area" className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all shrink-0 group">
+                <ChevronLeft className="h-4 w-4 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
               </Link>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h1 className="text-sm font-display font-black text-foreground truncate tracking-[-0.02em]">{course.title}</h1>
                   {isComplete && (
-                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.3 }}>
-                      <div className="h-5 w-5 rounded-md bg-success/15 flex items-center justify-center ring-1 ring-success/20">
-                        <Award className="h-3 w-3 text-success" />
-                      </div>
-                    </motion.div>
+                    <div className="h-4 w-4 rounded-sm bg-success/15 flex items-center justify-center">
+                      <Award className="h-2.5 w-2.5 text-success" />
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2.5 mt-0.5">
-                  <div className="h-1.5 rounded-full bg-muted/15 overflow-hidden w-20 sm:w-32">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${overallPct}%` }}
-                      transition={{ duration: 0.8, delay: 0.3, ease }}
-                      className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-500 rounded-full"
-                    />
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="h-1 rounded-full bg-foreground/5 overflow-hidden w-16 sm:w-24">
+                    <div className={cn("h-full rounded-full transition-all", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${overallPct}%` }} />
                   </div>
-                  <span className="text-[10px] text-muted-foreground/50 font-display font-bold tabular-nums">{completedLessons}/{totalLessons} · {overallPct}%</span>
+                  <span className="text-[10px] text-muted-foreground/40 font-display font-bold tabular-nums">{completedLessons}/{totalLessons} · {overallPct}%</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <button onClick={() => navigateLesson(-1)} disabled={currentIdx <= 0}
-                className="h-9 w-9 rounded-xl bg-card/50 hover:bg-card/70 flex items-center justify-center transition-all disabled:opacity-15 border border-border/20 shadow-sm active:scale-[0.98]">
-                <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground" />
+                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95">
+                <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground/40" />
               </button>
               <button onClick={() => navigateLesson(1)} disabled={currentIdx >= totalLessons - 1}
-                className="h-9 w-9 rounded-xl bg-card/50 hover:bg-card/70 flex items-center justify-center transition-all disabled:opacity-15 border border-border/20 shadow-sm active:scale-[0.98]">
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95">
+                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40" />
               </button>
               <button onClick={() => setTheaterMode(!theaterMode)}
-                className="hidden lg:flex h-9 w-9 rounded-xl bg-card/50 hover:bg-card/70 items-center justify-center transition-all border border-border/20 shadow-sm active:scale-[0.98]"
+                className="hidden lg:flex h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] items-center justify-center transition-all active:scale-95"
                 title={theaterMode ? "Modo normal" : "Modo teatro"}>
-                {theaterMode ? <Minimize2 className="h-3.5 w-3.5 text-muted-foreground" /> : <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />}
+                {theaterMode ? <Minimize2 className="h-3.5 w-3.5 text-muted-foreground/40" /> : <Maximize2 className="h-3.5 w-3.5 text-muted-foreground/40" />}
               </button>
               <button onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="h-9 w-9 rounded-xl bg-card/50 hover:bg-card/70 flex items-center justify-center transition-all lg:hidden border border-border/20 shadow-sm active:scale-[0.98]">
-                <List className="h-3.5 w-3.5 text-muted-foreground" />
+                className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all lg:hidden active:scale-95">
+                <List className="h-3.5 w-3.5 text-muted-foreground/40" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Lesson content */}
-        <div className={cn("p-4 sm:p-6 lg:p-8 space-y-6 mx-auto", theaterMode ? "max-w-6xl" : "max-w-5xl")}>
+        <div className={cn("p-4 sm:p-6 lg:p-8 space-y-5 mx-auto", theaterMode ? "max-w-6xl" : "max-w-5xl")}>
           {activeLesson ? (
             <motion.div
               key={activeLesson.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease }}
-              className="space-y-6"
+              transition={{ duration: 0.3, ease }}
+              className="space-y-5"
             >
-               {/* Video / Content */}
+              {/* Video / Content */}
               {hasVideo ? (
                 <div className={cn(
-                  "rounded-2xl overflow-hidden shadow-2xl shadow-background/50 ring-1 ring-border/15 relative group/player",
+                  "rounded-xl overflow-hidden shadow-2xl shadow-background/50 ring-1 ring-foreground/5 relative",
                   theaterMode ? "aspect-video" : "aspect-video max-h-[520px]"
                 )}>
                   <VideoPlayer url={activeLesson.video_url!} />
-                  {/* Ambient glow behind video */}
-                  <div className="absolute -inset-4 -z-10 bg-primary/3 blur-[60px] rounded-3xl opacity-0 group-hover/player:opacity-100 transition-opacity duration-1000 pointer-events-none" />
                 </div>
               ) : (
-                <div className="aspect-video max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-card via-card/80 to-muted/5 border border-border/20 flex flex-col items-center justify-center text-center p-8 ring-1 ring-border/10 relative">
-                  <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-                  <div className="h-20 w-20 rounded-2xl bg-primary/6 flex items-center justify-center mb-5 border border-primary/10 shadow-lg shadow-primary/5 relative">
-                    <FileText className="h-10 w-10 text-primary/20" />
+                <div className="aspect-video max-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-card via-card to-background border border-border/10 flex flex-col items-center justify-center text-center p-8">
+                  <div className="h-16 w-16 rounded-xl bg-primary/8 flex items-center justify-center mb-4">
+                    <FileText className="h-8 w-8 text-primary/20" />
                   </div>
-                  <h3 className="text-xl font-display font-black text-foreground tracking-[-0.02em] relative">{activeLesson.title}</h3>
-                  <p className="text-sm text-muted-foreground/60 mt-2 font-display relative">Conteúdo em texto — leia abaixo</p>
+                  <h3 className="text-lg font-display font-black text-foreground tracking-tight">{activeLesson.title}</h3>
+                  <p className="text-sm text-muted-foreground/40 mt-1 font-display">Conteúdo em texto — leia abaixo</p>
                 </div>
               )}
 
               {/* Lesson details */}
-              <div className="rounded-2xl bg-card/60 border border-border/20 overflow-hidden ring-1 ring-border/5 shadow-lg shadow-background/30">
-                <div className="p-5 sm:p-7">
+              <div className="rounded-xl bg-card/40 border border-border/10 overflow-hidden">
+                <div className="p-5 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       {activeModule && (
-                        <p className="text-[10px] text-muted-foreground/50 font-display font-bold uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                          <Layers className="h-3 w-3 text-primary/40" />
+                        <p className="text-[10px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <Layers className="h-3 w-3 text-primary/30" />
                           {activeModule.title}
-                          <span className="text-muted-foreground/15">·</span>
+                          <span className="text-muted-foreground/10">·</span>
                           <span className="tabular-nums">Aula {currentIdx + 1}/{totalLessons}</span>
                         </p>
                       )}
                       <h2 className="text-lg sm:text-xl font-display font-black text-foreground tracking-[-0.02em] leading-tight">{activeLesson.title}</h2>
-                      <div className="flex items-center gap-3 mt-2.5 text-xs text-muted-foreground/50 font-display font-semibold flex-wrap">
-                        {hasVideo ? <span className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md"><Video className="h-3.5 w-3.5 text-primary/60" /> Vídeo-aula</span>
-                          : <span className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md"><FileText className="h-3.5 w-3.5 text-primary/60" /> Conteúdo</span>}
+                      <div className="flex items-center gap-2.5 mt-2 text-xs text-muted-foreground/40 font-display flex-wrap">
+                        {hasVideo ? <span className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md"><Video className="h-3 w-3 text-primary/50" /> Vídeo</span>
+                          : <span className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md"><FileText className="h-3 w-3 text-primary/50" /> Conteúdo</span>}
                         {activeLesson.duration_minutes > 0 && (
-                          <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3.5 w-3.5" /> {activeLesson.duration_minutes} min</span>
-                        )}
-                        {activeLesson.is_free && (
-                          <span className="px-2 py-0.5 rounded-md bg-success/8 text-success text-[10px] font-display font-bold border border-success/12">Grátis</span>
+                          <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3 w-3" /> {activeLesson.duration_minutes} min</span>
                         )}
                       </div>
                     </div>
 
-                     <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => markComplete(activeLesson.id)}
                         disabled={progress.get(activeLesson.id)?.completed}
                         className={cn(
-                          "flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-display font-bold transition-all duration-300 active:scale-[0.98] relative overflow-hidden",
+                          "flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-display font-bold transition-all active:scale-[0.97]",
                           progress.get(activeLesson.id)?.completed
-                            ? "bg-success/10 text-success border border-success/15 ring-1 ring-success/10"
-                            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 hover:scale-[1.01] hover:shadow-xl hover:shadow-primary/30"
+                            ? "bg-success/10 text-success border border-success/15"
+                            : "bg-foreground text-background hover:bg-foreground/90 shadow-lg"
                         )}>
-                        {!progress.get(activeLesson.id)?.completed && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
-                        )}
-                        <CheckCircle2 className="h-4 w-4 relative z-10" />
-                        <span className="relative z-10">{progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir"}</span>
+                        <CheckCircle2 className="h-4 w-4" />
+                        {progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir"}
                       </button>
                       {currentIdx < totalLessons - 1 && (
                         <button onClick={() => navigateLesson(1)}
-                          className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-display font-bold bg-card/60 text-foreground/60 hover:bg-card hover:text-foreground transition-all border border-border/20 active:scale-[0.98] shadow-sm">
+                          className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-display font-bold bg-foreground/5 text-foreground/50 hover:bg-foreground/8 hover:text-foreground transition-all active:scale-[0.97]">
                           Próxima <ArrowRight className="h-3.5 w-3.5" />
                         </button>
                       )}
@@ -488,23 +462,22 @@ export default function MemberCourse() {
                 </div>
 
                 {activeLesson.description && (
-                  <div className="border-t border-border/15 p-5 sm:p-7">
-                    <h4 className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <div className="border-t border-border/8 p-5 sm:p-6">
+                    <h4 className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <FileText className="h-3 w-3" /> Sobre esta aula
                     </h4>
-                    <div className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap font-display">{activeLesson.description}</div>
+                    <div className="text-sm text-foreground/60 leading-relaxed whitespace-pre-wrap font-display">{activeLesson.description}</div>
                   </div>
                 )}
               </div>
             </motion.div>
           ) : (
-            <div className="aspect-video max-h-[480px] rounded-2xl bg-card/50 border border-border/20 flex items-center justify-center ring-1 ring-border/5">
+            <div className="aspect-video max-h-[480px] rounded-xl bg-card/30 border border-border/10 flex items-center justify-center">
               <div className="text-center">
-                <div className="h-16 w-16 rounded-xl bg-muted/8 flex items-center justify-center mx-auto mb-4 border border-border/15">
+                <div className="h-16 w-16 rounded-xl bg-foreground/[0.03] flex items-center justify-center mx-auto mb-4">
                   <BookOpen className="h-8 w-8 text-muted-foreground/10" />
                 </div>
-                <p className="text-muted-foreground/60 font-display font-bold text-sm">Selecione uma aula para começar</p>
-                <p className="text-xs text-muted-foreground/30 mt-1 font-display">Use o menu lateral para navegar</p>
+                <p className="text-muted-foreground/50 font-display font-bold text-sm">Selecione uma aula para começar</p>
               </div>
             </div>
           )}
@@ -513,17 +486,17 @@ export default function MemberCourse() {
 
       {/* ═══ Desktop Sidebar ═══ */}
       <aside className={cn(
-        "hidden lg:block shrink-0 border-l border-border/20 bg-card/15 overflow-y-auto transition-all duration-500",
+        "hidden lg:block shrink-0 border-l border-border/10 bg-card/5 overflow-y-auto transition-all duration-500",
         sidebarWidth
       )}>
-        <div className="sticky top-0 z-10 bg-card/70 backdrop-blur-2xl border-b border-border/15 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
-              <Layers className="h-3.5 w-3.5 text-primary/50" />
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl border-b border-border/10 p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-primary/8 flex items-center justify-center">
+              <Layers className="h-3.5 w-3.5 text-primary/40" />
             </div>
-            <h3 className="text-xs font-display font-black text-foreground tracking-tight">Conteúdo</h3>
+            <h3 className="text-[11px] font-display font-black text-foreground/60 tracking-tight">Conteúdo</h3>
           </div>
-          <span className="text-[10px] font-display font-bold text-muted-foreground/40 bg-muted/10 px-2 py-0.5 rounded-lg border border-border/10 tabular-nums">{totalLessons} aulas</span>
+          <span className="text-[9px] font-display font-bold text-muted-foreground/30 bg-foreground/[0.03] px-2 py-0.5 rounded-md tabular-nums">{totalLessons} aulas</span>
         </div>
         <CourseSidebar />
       </aside>
@@ -540,17 +513,17 @@ export default function MemberCourse() {
             <motion.div
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease }}
-              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-[380px] bg-card/95 backdrop-blur-2xl border-l border-border/20 z-50 lg:hidden overflow-y-auto shadow-2xl shadow-background/50"
+              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-[380px] bg-background/95 backdrop-blur-2xl border-l border-border/10 z-50 lg:hidden overflow-y-auto shadow-2xl"
             >
-              <div className="sticky top-0 z-10 bg-card/90 backdrop-blur-2xl border-b border-border/15 p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
-                    <Layers className="h-3.5 w-3.5 text-primary/50" />
+              <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-2xl border-b border-border/10 p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-primary/8 flex items-center justify-center">
+                    <Layers className="h-3.5 w-3.5 text-primary/40" />
                   </div>
-                  <h3 className="text-sm font-display font-black text-foreground tracking-tight">Conteúdo</h3>
+                  <h3 className="text-sm font-display font-black text-foreground/70 tracking-tight">Conteúdo</h3>
                 </div>
-                <button onClick={() => setSidebarOpen(false)} className="h-9 w-9 rounded-xl bg-muted/10 hover:bg-muted/20 flex items-center justify-center transition-colors border border-border/15">
-                  <X className="h-4 w-4 text-muted-foreground" />
+                <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-colors">
+                  <X className="h-4 w-4 text-muted-foreground/40" />
                 </button>
               </div>
               <CourseSidebar />
