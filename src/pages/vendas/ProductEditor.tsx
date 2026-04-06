@@ -2002,13 +2002,13 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-    <div className="flex items-center gap-3 mb-5">
-      <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
-        <Icon className="h-5 w-5 text-primary" />
+    <div className="flex items-center gap-3.5 mb-6">
+      <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-primary/12 to-primary/5 border border-primary/12 flex items-center justify-center shadow-sm shadow-primary/5 ring-1 ring-primary/10">
+        <Icon className="h-5 w-5 text-primary/70" />
       </div>
       <div>
-        <h2 className="text-base font-display font-bold text-foreground tracking-tight">{title}</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+        <h2 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">{title}</h2>
+        <p className="text-xs text-muted-foreground/50 mt-0.5 font-display">{subtitle}</p>
       </div>
     </div>
   );
@@ -2017,12 +2017,13 @@ function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentT
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-xl border border-border/40 bg-card/80 p-5 space-y-4 shadow-sm relative overflow-hidden hover:border-border/60 transition-all duration-300"
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-sm relative overflow-hidden hover:border-border/30 transition-all duration-500 ring-1 ring-border/5 group/card"
     >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-500 group-hover/card:shadow-sm", accentColor)} />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover/card:from-primary/[0.01] group-hover/card:to-transparent transition-all duration-700 pointer-events-none" />
       {children}
     </motion.div>
   );
@@ -2030,8 +2031,8 @@ function EditorCard({ children, accentColor = "bg-primary" }: { children: React.
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-      {Icon && <Icon className="h-3 w-3 text-muted-foreground/50" />}
+    <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/50 flex items-center gap-1.5">
+      {Icon && <Icon className="h-3 w-3 text-muted-foreground/30" />}
       {children}
     </Label>
   );
@@ -2039,11 +2040,13 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-    <div className="rounded-xl border border-border/30 bg-card/40 flex flex-col items-center justify-center py-14 gap-3">
-      <div className="h-14 w-14 rounded-xl bg-muted/15 flex items-center justify-center border border-border/20">
-        <Icon className="h-6 w-6 text-muted-foreground/20" />
+    <div className="rounded-2xl border border-border/20 bg-card/30 flex flex-col items-center justify-center py-16 gap-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.01]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+      <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center border border-border/15 ring-1 ring-border/5 relative shadow-sm">
+        <Icon className="h-7 w-7 text-muted-foreground/15" />
       </div>
-      <p className="text-sm font-medium text-muted-foreground/50">{message}</p>
+      <p className="text-sm font-display font-bold text-muted-foreground/40 relative">{message}</p>
     </div>
   );
 }
