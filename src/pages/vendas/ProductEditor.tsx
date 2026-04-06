@@ -522,39 +522,43 @@ export default function ProductEditor() {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* ───── Progress Bar (Top) ───── */}
-      <div className="shrink-0 h-[2px] bg-border/20 relative z-[60]">
+      <div className="shrink-0 h-[2px] bg-border/10 relative z-[60]">
         <motion.div
-          className="h-full bg-primary rounded-full"
+          className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full relative"
           initial={{ width: "0%" }}
           animate={{ width: `${completionPercent}%` }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        />
+        >
+          {completionPercent > 5 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />}
+        </motion.div>
       </div>
 
       {/* ───── Top Bar ───── */}
-      <div className="shrink-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
+      <div className="shrink-0 z-50 bg-card/80 backdrop-blur-2xl border-b border-border/20 relative overflow-hidden shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px] relative">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/vendas/produtos")} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-95">
-              <ArrowLeft className="h-4 w-4" />
+            <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/20 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-[0.985] group shadow-sm">
+              <ArrowLeft className="h-4 w-4 group-hover:text-foreground transition-colors" />
             </button>
 
             {/* Product chip */}
             {name && (
-              <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/20 border border-border/30">
+              <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/50 border border-border/20 ring-1 ring-border/10 shadow-sm">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="h-6 w-6 rounded-md object-cover border border-border/20" />
+                  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover border border-border/15 ring-1 ring-border/10" />
                 ) : (
-                  <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
-                    <Package className="h-3 w-3 text-primary" />
+                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center ring-1 ring-primary/15">
+                    <Package className="h-3.5 w-3.5 text-primary/60" />
                   </div>
                 )}
                 <div>
-                  <p className="text-xs font-bold text-foreground truncate max-w-[180px] leading-tight">{name}</p>
+                  <p className="text-xs font-display font-black text-foreground truncate max-w-[200px] leading-tight tracking-[-0.01em]">{name}</p>
                   {price && (
-                    <p className="text-[10px] font-numbers font-bold text-primary leading-tight flex items-center gap-1">
+                    <p className="text-[10px] font-numbers font-black text-primary leading-tight flex items-center gap-1.5">
                       R$ {Number(price).toFixed(2)}
-                      <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-success animate-pulse" : "bg-muted-foreground/30")} />
+                      <span className={cn("h-1.5 w-1.5 rounded-full shadow-sm", status === "active" ? "bg-success animate-pulse shadow-success/30" : "bg-muted-foreground/30")} />
                     </p>
                   )}
                 </div>
@@ -562,18 +566,20 @@ export default function ProductEditor() {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Step dots */}
-            <div className="hidden lg:flex items-center gap-1 px-3 py-2 rounded-lg bg-muted/15 border border-border/20">
+          <div className="flex items-center gap-2.5">
+            {/* Step indicator */}
+            <div className="hidden lg:flex items-center gap-1 px-3 py-2.5 rounded-xl bg-card/40 border border-border/15 ring-1 ring-border/5">
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
                 const locked = tab.key !== "geral" && tabsLocked;
                 return (
-                  <div
+                  <motion.div
                     key={tab.key}
+                    animate={{ width: isActive ? 20 : 6, opacity: locked ? 0.15 : 1 }}
+                    transition={{ duration: 0.3 }}
                     className={cn(
-                      "h-1.5 rounded-full transition-all duration-300",
-                      isActive ? "w-5 bg-primary" : locked ? "w-1.5 bg-muted-foreground/10" : "w-1.5 bg-muted-foreground/25"
+                      "h-1.5 rounded-full transition-colors",
+                      isActive ? "bg-primary shadow-sm shadow-primary/20" : "bg-muted-foreground/20"
                     )}
                     title={tab.label}
                   />
@@ -582,38 +588,39 @@ export default function ProductEditor() {
             </div>
 
             {/* Completion */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/15 border border-border/20">
+            <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/40 border border-border/15 ring-1 ring-border/5">
               <CompletionRing percent={completionPercent} />
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Completo</p>
-                <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums">{completionPercent}%</p>
+                <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Completo</p>
+                <p className="text-[11px] font-numbers font-black text-foreground tabular-nums leading-tight">{completionPercent}%</p>
               </div>
             </div>
 
-            <div className="h-5 w-px bg-border/20 hidden sm:block" />
+            <div className="h-5 w-px bg-border/15 hidden sm:block" />
 
             {/* Actions */}
             <div className="flex items-center gap-1.5">
               {!tabsLocked && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground gap-1.5 text-xs rounded-lg h-8 hidden sm:flex">
+                  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground/50 gap-1.5 text-xs rounded-xl h-9 hidden sm:flex hover:text-foreground font-display font-bold">
                     <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/60 hover:text-destructive hover:bg-destructive/5 h-8 rounded-lg hidden sm:flex">
-                    <Trash2 className="h-3 w-3" />
+                  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/40 hover:text-destructive hover:bg-destructive/5 h-9 w-9 p-0 rounded-xl hidden sm:flex">
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
               <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
-                "gap-1.5 rounded-lg text-xs font-bold h-8 px-4 transition-all",
-                saved ? "bg-success hover:bg-success" : ""
+                "gap-1.5 rounded-xl text-xs font-display font-black h-9 px-5 transition-all duration-300 shadow-md relative overflow-hidden",
+                saved ? "bg-success hover:bg-success shadow-success/20" : "shadow-primary/15"
               )}>
+                {!saved && !saving && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />}
                 {saved ? (
-                  <><Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span></>
+                  <><Check className="h-3.5 w-3.5 relative z-10" /> <span className="hidden sm:inline relative z-10">Salvo!</span></>
                 ) : saving ? (
                   <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
                 ) : (
-                  <><Save className="h-3 w-3" /> {isNew ? "Criar" : "Salvar"}</>
+                  <><Save className="h-3 w-3 relative z-10" /> <span className="relative z-10">{isNew ? "Criar" : "Salvar"}</span></>
                 )}
               </Button>
             </div>
