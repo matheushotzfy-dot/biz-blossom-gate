@@ -1,7 +1,7 @@
 /**
  * MemberHome — Ultra-Premium Member Dashboard
  * @module MemberHome
- * @version 5.0.0 — Fintech Premium Redesign
+ * @version 6.0.0 — Cinematic Fintech Redesign
  */
 
 import { useEffect, useState } from "react";
@@ -132,12 +132,12 @@ export default function MemberHome() {
             className="max-w-xl"
           >
             <div className="flex items-center gap-2.5 mb-5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-display font-black uppercase tracking-[0.12em] bg-primary/12 text-primary border border-primary/12 backdrop-blur-xl">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-display font-black uppercase tracking-[0.12em] bg-primary/12 text-primary border border-primary/15 backdrop-blur-xl shadow-sm">
                 <Zap className="h-3 w-3" />
                 {continueWatching.length > 0 ? "Continue assistindo" : "Em destaque"}
               </span>
               {featured.category && (
-                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-display font-bold bg-card/20 backdrop-blur-xl text-foreground/50 border border-border/10 uppercase tracking-wider">
+                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-display font-bold bg-card/20 backdrop-blur-xl text-foreground/50 border border-border/15 uppercase tracking-wider">
                   {featured.category}
                 </span>
               )}
@@ -160,6 +160,7 @@ export default function MemberHome() {
                       animate={{ width: `${featuredPct}%` }}
                       transition={{ duration: 1, delay: 0.5, ease }}
                       className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full"
+                      style={{ boxShadow: featuredPct > 0 ? "0 0 10px hsl(var(--primary) / 0.2)" : "none" }}
                     />
                   </div>
                 </div>
@@ -170,12 +171,12 @@ export default function MemberHome() {
 
             <div className="flex items-center gap-2.5">
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="group inline-flex items-center gap-2.5 h-11 px-6 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/10 active:scale-[0.98]">
+                className="group inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-foreground text-background text-sm font-display font-black hover:opacity-90 transition-all hover:scale-[1.02] shadow-xl shadow-foreground/15 active:scale-[0.98]">
                 <Play className="h-4 w-4 fill-current" />
                 {continueWatching.length > 0 ? "Continuar" : "Começar"}
               </Link>
               <Link to={`/membros-area/curso/${featured.id}`}
-                className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground transition-all active:scale-[0.98]">
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-card/30 backdrop-blur-xl text-foreground/70 text-sm font-display font-bold border border-border/20 hover:bg-card/50 hover:text-foreground transition-all active:scale-[0.98] shadow-sm">
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Detalhes</span>
               </Link>
@@ -184,35 +185,31 @@ export default function MemberHome() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 mt-10">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10 mt-10">
 
         {/* ═══ Stats Strip — Premium ═══ */}
         {totalLessons > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: BookOpen, label: "Cursos", value: String(courses.length), tone: "primary" },
-              { icon: Target, label: "Progresso", value: `${overallPct}%`, tone: "info" },
-              { icon: Flame, label: "Aulas feitas", value: String(totalCompleted), tone: "warning" },
-              { icon: Trophy, label: "Concluídos", value: String(completedCourses), tone: "success" },
+              { icon: BookOpen, label: "Cursos", value: String(courses.length), tone: "primary" as const },
+              { icon: Target, label: "Progresso", value: `${overallPct}%`, tone: "info" as const },
+              { icon: Flame, label: "Aulas feitas", value: String(totalCompleted), tone: "warning" as const },
+              { icon: Trophy, label: "Concluídos", value: String(completedCourses), tone: "success" as const },
             ].map((kpi, i) => (
               <motion.div
                 key={kpi.label}
                 initial={{ opacity: 0, y: 16, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.1 + i * 0.06, duration: 0.5, ease }}
-                className={cn(
-                  "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 overflow-hidden",
-                  "hover:ring-border/40 transition-all duration-300",
-                  `hover:shadow-lg hover:shadow-${kpi.tone}/10`
-                )}
+                className="relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-4 sm:p-5 overflow-hidden hover:ring-border/40 transition-all duration-300 shadow-sm"
               >
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${kpi.tone}`)} />
                 <div className="relative z-10 flex items-center gap-3">
-                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 transition-all group-hover:scale-110", `bg-${kpi.tone}/8 ring-${kpi.tone}/15`)}>
-                    <kpi.icon className={cn("h-4 w-4", `text-${kpi.tone}`)} />
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1 transition-all group-hover:scale-110 shadow-sm", `bg-${kpi.tone}/10 ring-${kpi.tone}/15 shadow-${kpi.tone}/5`)}>
+                    <kpi.icon className={cn("h-4.5 w-4.5", `text-${kpi.tone}`)} />
                   </div>
                   <div>
-                    <span className={cn("text-lg font-display font-black tracking-[-0.02em] tabular-nums block leading-tight", `text-${kpi.tone}`)}>{kpi.value}</span>
+                    <span className={cn("text-xl font-display font-black tracking-[-0.02em] tabular-nums block leading-tight", `text-${kpi.tone}`)}>{kpi.value}</span>
                     <span className="text-[9px] text-muted-foreground/40 font-display font-bold uppercase tracking-[0.15em]">{kpi.label}</span>
                   </div>
                 </div>
@@ -227,26 +224,26 @@ export default function MemberHome() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, ease }}
-            className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden"
+            className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-6 overflow-hidden shadow-sm"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-info" />
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
-                    <BarChart3 className="h-4 w-4 text-primary" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center shadow-sm shadow-primary/5">
+                    <BarChart3 className="h-4.5 w-4.5 text-primary" />
                   </div>
                   <div>
-                    <span className="text-[12px] font-display font-black text-foreground/70 block">Progresso Geral</span>
-                    <p className="text-[9px] text-muted-foreground/40 font-display tabular-nums">
+                    <span className="text-[13px] font-display font-black text-foreground/80 block">Progresso Geral</span>
+                    <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums">
                       {totalCompleted}/{totalLessons} aulas · {completedCourses} concluído{completedCourses !== 1 ? "s" : ""}
                     </p>
                   </div>
                 </div>
-                <span className="text-xl font-display font-black text-primary tabular-nums">{overallPct}%</span>
+                <span className="text-2xl font-display font-black text-primary tabular-nums">{overallPct}%</span>
               </div>
-              <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+              <div className="h-3 rounded-full bg-muted/10 ring-1 ring-border/10 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${overallPct}%` }}
@@ -303,7 +300,7 @@ export default function MemberHome() {
               {course.modules.map((mod, mi) => (
                 <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: mi * 0.05, ease }}>
                   <Link to={`/membros-area/curso/${course.id}?module=${mod.id}`} className="group shrink-0 w-[220px] md:w-[260px] snap-start block">
-                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/15 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
+                    <div className="aspect-video rounded-xl overflow-hidden relative bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-primary/5">
                       {mod.banner_url ? (
                         <img src={mod.banner_url} alt={mod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
                       ) : (
@@ -311,17 +308,10 @@ export default function MemberHome() {
                           <BookOpen className="h-8 w-8 text-primary/8" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3.5">
-                        <p className="text-foreground text-xs font-display font-bold line-clamp-1">{mod.title}</p>
-                        <p className="text-muted-foreground/50 text-[10px] mt-0.5 font-display tabular-nums">{mod.lessonCount} aulas</p>
-                      </div>
-                      <div className="absolute inset-0 bg-background/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="h-10 w-10 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                          <Play className="h-4 w-4 text-background ml-0.5 fill-current" />
-                        </div>
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
+                    <p className="text-xs font-display font-bold text-foreground/80 mt-2.5 truncate group-hover:text-foreground transition-colors">{mod.title}</p>
+                    <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums mt-0.5">{mod.lessonCount} aula{mod.lessonCount !== 1 ? "s" : ""}</p>
                   </Link>
                 </motion.div>
               ))}
@@ -333,100 +323,110 @@ export default function MemberHome() {
   );
 }
 
-/* ═══ Sub Components ═══ */
-
-function SectionHeader({ icon, title, count }: { icon: React.ReactNode; title: string; count?: number }) {
+/* ─── Section Header ─── */
+function SectionHeader({ icon, title, count }: { icon: React.ReactNode; title: string; count: number }) {
   return (
-    <div className="flex items-center gap-2.5 mb-5">
-      <div className="h-8 w-8 rounded-xl bg-card/80 ring-1 ring-border/15 flex items-center justify-center">{icon}</div>
+    <div className="flex items-center gap-3 mb-5">
+      <div className="h-9 w-9 rounded-xl bg-card ring-1 ring-border/20 flex items-center justify-center shadow-sm">{icon}</div>
       <h2 className="text-base font-display font-black text-foreground tracking-[-0.02em]">{title}</h2>
-      {count !== undefined && (
-        <span className="text-[10px] font-display font-bold text-muted-foreground/50 bg-muted/8 px-2 py-0.5 rounded-lg ring-1 ring-border/8 tabular-nums">{count}</span>
-      )}
+      <span className="text-[10px] font-display font-bold text-muted-foreground/40 bg-muted/10 px-2 py-0.5 rounded-lg ring-1 ring-border/10 tabular-nums">{count}</span>
     </div>
   );
 }
 
-function CourseCard({ course }: { course: CourseWithProgress }) {
+/* ─── Continue Watching Card ─── */
+function ContinueCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
-  const isComplete = pct === 100 && course.totalLessons > 0;
   return (
-    <Link to={`/membros-area/curso/${course.id}`}
-      className="group rounded-2xl overflow-hidden bg-card/95 ring-1 ring-border/15 hover:ring-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block h-full">
-      <div className="aspect-video relative overflow-hidden">
-        {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
-            <BookOpen className="h-12 w-12 text-primary/8" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="h-12 w-12 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
-            <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
-          </div>
-        </div>
-        {pct > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/20">
-            <div className={cn("h-full rounded-full transition-all", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${pct}%` }} />
-          </div>
-        )}
-        {isComplete && (
-          <div className="absolute top-2.5 right-2.5 h-7 w-7 rounded-lg bg-success/90 flex items-center justify-center shadow-md">
-            <Award className="h-3.5 w-3.5 text-success-foreground" />
-          </div>
-        )}
-        <div className="absolute top-2.5 left-2.5">
-          <span className="text-[9px] font-display font-black uppercase tracking-[0.1em] px-2 py-1 rounded-lg bg-background/50 backdrop-blur-xl text-foreground/60 ring-1 ring-border/10">
-            {course.category}
-          </span>
-        </div>
-      </div>
-      <div className="p-4">
-        <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors tracking-[-0.01em]">{course.title}</h3>
-        {course.description && <p className="text-xs text-muted-foreground/50 line-clamp-2 mt-1.5 leading-relaxed font-display">{course.description}</p>}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/8">
-          <div className="flex items-center gap-3 text-[10px] text-muted-foreground/40 font-display font-bold">
-            <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {course.modules.length}m</span>
-            <span className="tabular-nums">{course.totalLessons} aulas</span>
-          </div>
-          {pct > 0 && (
-            <span className={cn("text-[11px] font-display font-black tabular-nums", isComplete ? "text-success" : "text-primary")}>{pct}%</span>
+    <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[300px] sm:w-[340px] snap-start block">
+      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 shadow-md group-hover:shadow-lg group-hover:shadow-primary/5">
+        <div className="aspect-[2.2/1] relative overflow-hidden">
+          {course.thumbnail_url ? (
+            <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-card flex items-center justify-center">
+              <GraduationCap className="h-10 w-10 text-primary/8" />
+            </div>
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+            <span className="text-[10px] font-display font-bold text-foreground/70 bg-card/30 backdrop-blur-xl px-2.5 py-1 rounded-lg border border-border/15">
+              {pct}% · {course.completedLessons}/{course.totalLessons}
+            </span>
+          </div>
+          {/* Play overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="h-14 w-14 rounded-2xl bg-foreground/80 backdrop-blur-xl flex items-center justify-center shadow-2xl">
+              <Play className="h-6 w-6 text-background ml-0.5 fill-current" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-[3px]">
+          <div className="h-full bg-primary/60 rounded-full transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
+      <p className="text-sm font-display font-bold text-foreground mt-2.5 truncate group-hover:text-primary transition-colors">{course.title}</p>
     </Link>
   );
 }
 
-function ContinueCard({ course }: { course: CourseWithProgress }) {
+/* ─── Course Card ─── */
+function CourseCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
+  const isFinished = pct === 100 && course.totalLessons > 0;
+
   return (
-    <Link to={`/membros-area/curso/${course.id}`}
-      className="group shrink-0 w-[280px] md:w-[320px] snap-start rounded-2xl overflow-hidden bg-card/95 ring-1 ring-border/15 hover:ring-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.985] block">
-      <div className="aspect-video relative overflow-hidden">
-        {course.thumbnail_url ? (
-          <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-card">
-            <BookOpen className="h-8 w-8 text-primary/8" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-background/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="h-12 w-12 rounded-full bg-foreground/85 flex items-center justify-center shadow-xl">
-            <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
+    <Link to={`/membros-area/curso/${course.id}`} className="group block h-full">
+      <div className="rounded-xl overflow-hidden bg-card ring-1 ring-border/15 group-hover:ring-primary/20 transition-all duration-500 shadow-sm group-hover:shadow-lg group-hover:shadow-primary/5 h-full flex flex-col">
+        <div className="aspect-[16/10] relative overflow-hidden">
+          {course.thumbnail_url ? (
+            <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/5 via-card to-card flex items-center justify-center">
+              <GraduationCap className="h-10 w-10 text-primary/8" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Status badge */}
+          {isFinished && (
+            <div className="absolute top-2.5 right-2.5">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-success/15 backdrop-blur-xl text-[9px] font-display font-bold text-success ring-1 ring-success/20">
+                <CheckCircle2 className="h-2.5 w-2.5" /> Concluído
+              </div>
+            </div>
+          )}
+          {/* Category */}
+          {course.category && !isFinished && (
+            <div className="absolute top-2.5 left-2.5">
+              <span className="px-2 py-1 rounded-lg bg-card/30 backdrop-blur-xl text-[9px] font-display font-bold text-foreground/60 ring-1 ring-border/15 uppercase tracking-wider">{course.category}</span>
+            </div>
+          )}
+          {/* Play overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="h-12 w-12 rounded-2xl bg-foreground/80 backdrop-blur-xl flex items-center justify-center shadow-2xl">
+              <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
+            </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/15">
-          <div className="h-full bg-primary transition-all duration-500 rounded-full" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-      <div className="p-4">
-        <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 tracking-[-0.01em]">{course.title}</h3>
-        <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground/40 font-display font-bold">
-          <span className="flex items-center gap-1 tabular-nums text-primary"><Rocket className="h-3 w-3" /> {pct}%</span>
-          <span className="tabular-nums">{course.completedLessons}/{course.totalLessons} aulas</span>
+        <div className="flex-1 p-4 flex flex-col">
+          <h3 className="text-sm font-display font-black text-foreground tracking-[-0.02em] line-clamp-2 group-hover:text-primary transition-colors leading-snug">{course.title}</h3>
+          {course.description && (
+            <p className="text-[11px] text-muted-foreground/50 mt-1.5 line-clamp-2 font-display leading-relaxed">{course.description}</p>
+          )}
+          <div className="mt-auto pt-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] text-muted-foreground/40 font-display tabular-nums">{course.completedLessons}/{course.totalLessons} aulas</span>
+              <span className={cn("text-[10px] font-display font-black tabular-nums", isFinished ? "text-success" : "text-primary")}>{pct}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.8, delay: 0.2, ease }}
+                className={cn("h-full rounded-full", isFinished ? "bg-success" : "bg-gradient-to-r from-primary to-primary/60")}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </Link>
