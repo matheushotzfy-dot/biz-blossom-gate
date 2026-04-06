@@ -349,9 +349,9 @@ export default function ProductEditor() {
   };
 
   const handleDelete = async () => {
-    if (!user || isNew) return;
+    if (!user || tabsLocked) return;
     if (!window.confirm("Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) return;
-    const { error } = await supabase.from("products").delete().eq("id", productId!).eq("user_id", user.id);
+    const { error } = await supabase.from("products").delete().eq("id", effectiveProductId!).eq("user_id", user.id);
     if (error) { toast.error("Erro ao excluir"); return; }
     toast.success("Produto excluído");
     invalidateAll(["products"]);
