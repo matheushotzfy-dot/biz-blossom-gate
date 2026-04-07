@@ -200,6 +200,24 @@ export default function Saques() {
         </div>
 
         <div className="relative z-10">
+          {/* Address warning */}
+          {!hasAddress && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-warning/10 ring-1 ring-warning/20 cursor-pointer hover:bg-warning/15 transition-all"
+              onClick={() => navigate("/perfil")}
+            >
+              <div className="h-10 w-10 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
+                <MapPin className="h-5 w-5 text-warning" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-display font-bold text-warning">Endereço não cadastrado</p>
+                <p className="text-[10px] text-warning/60">Preencha seu endereço no Perfil para realizar saques normalmente.</p>
+              </div>
+              <AlertTriangle className="h-5 w-5 text-warning/60 shrink-0" />
+            </motion.div>
+          )}
           {/* Top bar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
