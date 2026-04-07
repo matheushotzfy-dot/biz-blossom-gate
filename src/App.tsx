@@ -12,6 +12,7 @@ import { RequireManager } from "@/hooks/useManagerGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import PerfilHub from "./pages/PerfilHub";
 import PremiacoesHub from "./pages/PremiacoesHub";
@@ -80,6 +81,7 @@ const App = () => (
             <ScrollToTop />
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
               <Route path="/obrigado" element={<ThankYou />} />
