@@ -458,19 +458,19 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ SOCIAL PROOF BAR ═══ */}
-      <Section className="py-12 md:py-16 border-y border-border/5">
+      <Section className="py-8 md:py-16 border-y border-border/5">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="text-center">
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-3 md:gap-6">
             {[
               { number: "2K+", label: "produtores ativos" },
               { number: "R$ 50M+", label: "processados" },
               { number: "99.9%", label: "uptime" },
               { number: "<2s", label: "tempo de saque PIX" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/20 border border-border/8">
-                <span className="text-lg font-display font-black text-primary tabular-nums">{item.number}</span>
-                <span className="text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider">{item.label}</span>
+              <div key={item.label} className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-card/20 border border-border/8">
+                <span className="text-sm md:text-lg font-display font-black text-primary tabular-nums whitespace-nowrap">{item.number}</span>
+                <span className="text-[8px] md:text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider leading-tight">{item.label}</span>
               </div>
             ))}
           </div>
