@@ -1,7 +1,7 @@
 /**
  * Identidade & KYC — Ultra-Premium Verification Page
  * @module Identidade
- * @version 4.0.0 — Fintech Premium Redesign
+ * @version 5.0.0 — Immersive Redesign
  */
 
 import { useEffect, useState, useRef } from "react";
@@ -15,6 +15,7 @@ import {
   Upload, Camera, Image, Loader2, Lock, Info, Fingerprint,
   Wallet, BadgeCheck, Building2, CreditCard, Edit3, Zap,
   Eye, Star, TrendingUp, ArrowUp, Globe, Award, Crown,
+  AlertTriangle, ChevronDown, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,19 +59,6 @@ const pixKeyTypeLabels: Record<string, string> = {
   cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Aleatória",
 };
 
-/* ─── Live Pulse ─── */
-function LivePulse() {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="relative">
-        <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-        <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
-      </div>
-      <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Seguro</span>
-    </div>
-  );
-}
-
 /* ─── Completion Ring ─── */
 function CompletionRing({ pct }: { pct: number }) {
   const circ = 2 * Math.PI * 20;
@@ -109,7 +97,6 @@ export default function Identidade() {
   const kycSectionRef = useRef<HTMLDivElement>(null);
   const hasScrolledToKyc = useRef(false);
 
-  // Auto-scroll to KYC docs section when coming from verification banner
   useEffect(() => {
     const scrollTo = searchParams.get("scrollTo");
     if (scrollTo === "kyc" && kycSectionRef.current && !hasScrolledToKyc.current) {
@@ -191,8 +178,8 @@ export default function Identidade() {
     <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
       {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.18, 0.1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
-        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-info/15 rounded-full blur-[180px]" />
+        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-info/15 rounded-full blur-[180px]" />
       </div>
 
       {/* ═══ HERO ═══ */}
@@ -202,8 +189,9 @@ export default function Identidade() {
         transition={{ duration: 0.6 }}
         className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/3 pointer-events-none" />
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+        <div className="h-1.5 bg-gradient-to-r from-primary via-info/80 to-warning/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
         <div className="relative z-10 p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
@@ -213,11 +201,16 @@ export default function Identidade() {
               </div>
               <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Identidade & KYC</span>
             </div>
-            <LivePulse />
+            <div className="flex items-center gap-1.5">
+              <div className="relative">
+                <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
+              </div>
+              <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Seguro</span>
+            </div>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ease }} className="flex flex-col md:flex-row md:items-center gap-6">
-            {/* Completion ring */}
             <CompletionRing pct={completionPct} />
 
             <div className="flex-1">
@@ -231,7 +224,6 @@ export default function Identidade() {
               <p className="text-[11px] text-muted-foreground/40 font-medium">Complete todos os passos para liberar saques e funcionalidades premium</p>
             </div>
 
-            {/* Steps counter */}
             <div className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-muted/5 ring-1 ring-border/10 shrink-0">
               <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
               <span className="text-[11px] font-display font-bold text-foreground/60 tabular-nums">
@@ -241,7 +233,6 @@ export default function Identidade() {
             </div>
           </motion.div>
 
-          {/* Approved Banner */}
           {isApproved && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, ease }} className="mt-5 rounded-xl bg-success/5 ring-1 ring-success/15 p-4 flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-success/10 ring-1 ring-success/20 flex items-center justify-center shrink-0">
@@ -256,7 +247,7 @@ export default function Identidade() {
         </div>
       </motion.section>
 
-      {/* ═══ Steps Checklist ═══ */}
+      {/* ═══ Steps Progress ═══ */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -272,7 +263,6 @@ export default function Identidade() {
             <span className="text-[11px] font-display font-black text-foreground/70">Progresso da Verificação</span>
           </div>
 
-          {/* Progress bar */}
           <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden mb-4">
             <motion.div
               initial={{ width: 0 }}
@@ -530,7 +520,7 @@ export default function Identidade() {
         <div className="absolute inset-0 bg-gradient-to-br from-warning/[0.02] to-transparent pointer-events-none" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2.5 mb-5">
+          <div className="flex items-center gap-2.5 mb-2">
             <div className="h-9 w-9 rounded-xl bg-warning/8 ring-1 ring-warning/15 flex items-center justify-center">
               <FileCheck className="h-4 w-4 text-warning" />
             </div>
@@ -540,10 +530,20 @@ export default function Identidade() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <DocSlot type="front" label="Documento (Frente)" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} locked={!!kycDocs.front} />
-            <DocSlot type="back" label="Documento (Verso)" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} locked={!!kycDocs.back} />
-            <DocSlot type="selfie" label="Selfie com Documento" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} locked={!!kycDocs.selfie} />
+          {/* Alert for incomplete docs */}
+          {(!kycDocs.front || !kycDocs.back || !kycDocs.selfie) && !isApproved && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-warning/5 ring-1 ring-warning/10 mb-4 mt-3">
+              <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
+              <p className="text-[10px] text-warning/70 font-medium">
+                Envie todos os 3 documentos abaixo para completar a verificação e liberar os saques.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+            <DocSlot type="front" label="Documento (Frente)" desc="RG, CNH ou outro documento com foto" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} locked={!!kycDocs.front} />
+            <DocSlot type="back" label="Documento (Verso)" desc="Verso do documento enviado acima" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} locked={!!kycDocs.back} />
+            <DocSlot type="selfie" label="Selfie com Documento" desc="Segure o documento ao lado do rosto" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} locked={!!kycDocs.selfie} />
           </div>
 
           {kycDocs.front && kycDocs.back && kycDocs.selfie && (
@@ -573,8 +573,8 @@ function LockedField({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DocSlot({ type, label, icon, preview, uploading, onUpload, locked }: {
-  type: string; label: string; icon: React.ReactNode; preview: string | null;
+function DocSlot({ type, label, desc, icon, preview, uploading, onUpload, locked }: {
+  type: string; label: string; desc: string; icon: React.ReactNode; preview: string | null;
   uploading: boolean; onUpload: (file: File) => void; locked: boolean;
 }) {
   const ref = useRef<HTMLInputElement>(null);
@@ -584,27 +584,34 @@ function DocSlot({ type, label, icon, preview, uploading, onUpload, locked }: {
       whileHover={canUpload ? { scale: 1.01 } : undefined}
       onClick={() => canUpload && ref.current?.click()}
       className={cn(
-        "relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all ring-1 group",
+        "relative flex flex-col items-center gap-3 p-6 rounded-2xl transition-all ring-1 group",
         locked
           ? "bg-primary/3 ring-primary/15 cursor-default"
-          : "bg-muted/3 ring-border/10 cursor-pointer hover:ring-primary/20 hover:bg-primary/[0.02]"
+          : "bg-muted/3 ring-border/10 cursor-pointer hover:ring-warning/20 hover:bg-warning/[0.02]"
       )}
     >
       <input ref={ref} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
       
       <div className={cn(
-        "h-14 w-14 rounded-2xl flex items-center justify-center ring-1 transition-all duration-300",
-        locked ? "bg-primary/10 ring-primary/15 text-primary" : "bg-muted/10 ring-border/10 text-muted-foreground/30 group-hover:ring-primary/15 group-hover:text-primary/50"
+        "h-16 w-16 rounded-2xl flex items-center justify-center ring-1 transition-all duration-300",
+        locked ? "bg-primary/10 ring-primary/15 text-primary" : "bg-muted/10 ring-border/10 text-muted-foreground/30 group-hover:ring-warning/15 group-hover:text-warning/50"
       )}>
-        {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : locked ? <CheckCircle2 className="h-6 w-6" /> : icon}
+        {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : locked ? <CheckCircle2 className="h-7 w-7" /> : icon}
       </div>
       
       <div className="text-center">
         <p className={cn("text-[12px] font-display font-bold", locked ? "text-foreground/70" : "text-foreground/50")}>{label}</p>
-        <p className={cn("text-[9px] mt-0.5", locked ? "text-primary/50" : "text-muted-foreground/30")}>
-          {locked ? "Enviado ✓" : "Clique para enviar"}
+        <p className={cn("text-[9px] mt-0.5 leading-relaxed max-w-[180px]", locked ? "text-primary/50" : "text-muted-foreground/30")}>
+          {locked ? "Enviado ✓" : desc}
         </p>
       </div>
+
+      {!locked && !uploading && (
+        <div className="mt-1 flex items-center gap-1.5 text-[9px] font-display font-bold text-warning/50 group-hover:text-warning/70 transition-colors">
+          <Upload className="h-3 w-3" />
+          <span>Clique para enviar</span>
+        </div>
+      )}
 
       {locked && (
         <div className="absolute top-3 right-3">

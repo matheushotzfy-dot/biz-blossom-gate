@@ -1,7 +1,7 @@
 /**
  * Perfil — Ultra-Premium Profile Page
  * @module Perfil
- * @version 5.0.0 — Refined Premium Polish
+ * @version 6.0.0 — Immersive Premium Redesign
  */
 
 import { useEffect, useState, useRef } from "react";
@@ -12,7 +12,8 @@ import {
   User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame, Zap,
   Crown, Sparkles, Target, TrendingUp, ArrowUp, Star, Lock, Globe,
   Calendar, BadgeCheck, Fingerprint, Copy, Check, Award, Gem, Eye,
-  MapPin, Loader2, AlertTriangle,
+  MapPin, Loader2, AlertTriangle, Key, Building2, CreditCard, FileCheck,
+  Edit3, ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,58 +74,6 @@ function AnimatedNumber({ value, formatter = fmtCurrency, duration = 800 }: { va
   return <>{formatter(display)}</>;
 }
 
-/* ─── Stat Pill ─── */
-function StatPill({ icon: Icon, label, value, tone = "primary", delay = 0 }: {
-  icon: any; label: string; value: string; tone?: string; delay?: number;
-}) {
-  const colors: Record<string, { bg: string; ring: string; text: string; accent: string; glow: string }> = {
-    primary: { bg: "bg-primary/8", ring: "ring-primary/15", text: "text-primary", accent: "bg-primary", glow: "shadow-primary/10" },
-    success: { bg: "bg-success/8", ring: "ring-success/15", text: "text-success", accent: "bg-success", glow: "shadow-success/10" },
-    info: { bg: "bg-info/8", ring: "ring-info/15", text: "text-info", accent: "bg-info", glow: "shadow-info/10" },
-    warning: { bg: "bg-warning/8", ring: "ring-warning/15", text: "text-warning", accent: "bg-warning", glow: "shadow-warning/10" },
-  };
-  const c = colors[tone] || colors.primary;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: delay * 0.06, duration: 0.5, ease }}
-      className={cn(
-        "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden",
-        "hover:ring-border/40 transition-all duration-300",
-        `hover:shadow-lg ${c.glow}`
-      )}
-    >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", c.accent)} />
-      {/* Hover glow */}
-      <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `${c.bg}`)} />
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-3">
-          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 transition-transform duration-300 group-hover:scale-110", c.bg, c.ring)}>
-            <Icon className={cn("h-4 w-4", c.text)} />
-          </div>
-          <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">{label}</span>
-        </div>
-        <p className={cn("text-xl md:text-2xl font-display font-black tracking-[-0.04em]", c.text)}>{value}</p>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─── Live Pulse ─── */
-function LivePulse() {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="relative">
-        <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-        <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
-      </div>
-      <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Online</span>
-    </div>
-  );
-}
-
 /* ─── Copy Button ─── */
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -137,6 +86,24 @@ function CopyButton({ text }: { text: string }) {
     <button onClick={handleCopy} className="h-6 w-6 rounded-lg bg-muted/10 hover:bg-primary/10 flex items-center justify-center transition-all duration-200 group/copy">
       {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground/30 group-hover/copy:text-primary transition-colors" />}
     </button>
+  );
+}
+
+/* ─── Section Card ─── */
+function SectionCard({ children, accent, glow, delay = 0, className }: {
+  children: React.ReactNode; accent: string; glow: string; delay?: number; className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, ease }}
+      className={cn("relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300 group", className)}
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />
+      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glow)} />
+      <div className="relative z-10">{children}</div>
+    </motion.div>
   );
 }
 
@@ -178,20 +145,41 @@ function InfoRow({ icon: Icon, label, value, color = "info", delay = 0, copyable
   );
 }
 
-/* ─── Section Card ─── */
-function SectionCard({ children, accent, glow, delay = 0 }: {
-  children: React.ReactNode; accent: string; glow: string; delay?: number;
+/* ─── Stat Card ─── */
+function StatCard({ icon: Icon, label, value, tone = "primary", delay = 0, sub }: {
+  icon: any; label: string; value: string; tone?: string; delay?: number; sub?: string;
 }) {
+  const colors: Record<string, { bg: string; ring: string; text: string; accent: string; glow: string }> = {
+    primary: { bg: "bg-primary/8", ring: "ring-primary/15", text: "text-primary", accent: "bg-primary", glow: "shadow-primary/10" },
+    success: { bg: "bg-success/8", ring: "ring-success/15", text: "text-success", accent: "bg-success", glow: "shadow-success/10" },
+    info: { bg: "bg-info/8", ring: "ring-info/15", text: "text-info", accent: "bg-info", glow: "shadow-info/10" },
+    warning: { bg: "bg-warning/8", ring: "ring-warning/15", text: "text-warning", accent: "bg-warning", glow: "shadow-warning/10" },
+  };
+  const c = colors[tone] || colors.primary;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, ease }}
-      className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300 group"
+      initial={{ opacity: 0, y: 16, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: delay * 0.06, duration: 0.5, ease }}
+      className={cn(
+        "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden",
+        "hover:ring-border/40 transition-all duration-300",
+        `hover:shadow-lg ${c.glow}`
+      )}
     >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />
-      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glow)} />
-      <div className="relative z-10">{children}</div>
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", c.accent)} />
+      <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `${c.bg}`)} />
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-3">
+          <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 transition-transform duration-300 group-hover:scale-110", c.bg, c.ring)}>
+            <Icon className={cn("h-4 w-4", c.text)} />
+          </div>
+          <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">{label}</span>
+        </div>
+        <p className={cn("text-xl md:text-2xl font-display font-black tracking-[-0.04em]", c.text)}>{value}</p>
+        {sub && <p className="text-[9px] text-muted-foreground/30 mt-1 font-display">{sub}</p>}
+      </div>
     </motion.div>
   );
 }
@@ -338,8 +326,8 @@ export default function Perfil() {
     <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
       {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
-        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-info/15 rounded-full blur-[180px]" />
+        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-info/15 rounded-full blur-[180px]" />
       </div>
 
       {/* ═══ HERO ═══ */}
@@ -350,29 +338,33 @@ export default function Perfil() {
         className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
       >
         {/* Top accent gradient bar */}
-        <div className="h-1 bg-gradient-to-r from-primary via-info to-success" />
+        <div className="h-1.5 bg-gradient-to-r from-primary via-info/80 to-success/60" />
 
-        {/* Mesh gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/3 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/3 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+        {/* Mesh gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
         <div className="relative z-10 p-6 md:p-8">
           {/* Top bar */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-7">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
                 <User className="h-3.5 w-3.5 text-primary" />
               </div>
               <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Meu Perfil</span>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Tier badge */}
+            <div className="flex items-center gap-2.5">
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 ring-1 ring-primary/10">
                 <milestone.current.icon className="h-3 w-3 text-primary" />
                 <span className="text-[10px] font-display font-bold text-primary">{tierLabel}</span>
               </div>
-              <LivePulse />
+              <div className="flex items-center gap-1.5">
+                <div className="relative">
+                  <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                  <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
+                </div>
+                <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Online</span>
+              </div>
             </div>
           </div>
 
@@ -387,11 +379,11 @@ export default function Perfil() {
             <div className="relative group shrink-0">
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
               
-              {/* Glow ring */}
-              <div className="absolute -inset-2 rounded-[24px] bg-gradient-to-br from-primary/25 via-info/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
+              {/* Outer animated ring */}
+              <div className="absolute -inset-1.5 rounded-[22px] bg-gradient-to-br from-primary/30 via-info/15 to-success/20 opacity-50 group-hover:opacity-100 transition-opacity duration-500 blur-[1px]" />
               
               <div
-                className="relative h-[96px] w-[96px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-border/20 group-hover:ring-primary/30 transition-all duration-300 shadow-xl shadow-black/10 active:scale-[0.97]"
+                className="relative h-[88px] w-[88px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-card group-hover:ring-primary/20 transition-all duration-300 shadow-xl active:scale-[0.97]"
                 onClick={() => fileRef.current?.click()}
               >
                 {profile?.avatar_url ? (
@@ -412,6 +404,11 @@ export default function Perfil() {
                   <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
               )}
+
+              {/* Status dot */}
+              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-lg bg-card ring-2 ring-card flex items-center justify-center">
+                <StatusIcon className={cn("h-3.5 w-3.5", accStatus.cls.split(" ")[0])} />
+              </div>
             </div>
 
             {/* Info */}
@@ -449,7 +446,7 @@ export default function Perfil() {
               </div>
             </div>
 
-            {/* Revenue highlight — desktop */}
+            {/* Revenue — desktop */}
             <div className="hidden lg:flex flex-col items-end shrink-0 gap-1">
               <p className="text-[9px] font-display font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Receita Líquida</p>
               <p className="text-3xl font-display font-black text-foreground tracking-[-0.04em] tabular-nums">
@@ -461,15 +458,25 @@ export default function Perfil() {
               </div>
             </div>
           </motion.div>
+
+          {/* Mobile revenue */}
+          <div className="lg:hidden mt-5 p-4 rounded-xl bg-muted/5 ring-1 ring-border/10">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Receita Total</p>
+              <p className="text-xl font-display font-black text-foreground tabular-nums tracking-[-0.03em]">
+                <AnimatedNumber value={allTimeRevenue} />
+              </p>
+            </div>
+          </div>
         </div>
       </motion.section>
 
       {/* ═══ KPI Strip ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatPill icon={Flame} label="Faturamento" value={fmtCompact(allTimeRevenue)} tone="primary" delay={0} />
-        <StatPill icon={Target} label="Vendas" value={String(totalSales)} tone="success" delay={1} />
-        <StatPill icon={Trophy} label="Marco Atual" value={milestone.current.label} tone="warning" delay={2} />
-        <StatPill icon={TrendingUp} label="Progresso" value={`${milestone.pct.toFixed(0)}%`} tone="info" delay={3} />
+        <StatCard icon={Flame} label="Faturamento" value={fmtCompact(allTimeRevenue)} tone="primary" delay={0} sub="receita líquida" />
+        <StatCard icon={Target} label="Vendas" value={String(totalSales)} tone="success" delay={1} sub="aprovadas" />
+        <StatCard icon={Trophy} label="Marco Atual" value={milestone.current.label} tone="warning" delay={2} sub={tierLabel} />
+        <StatCard icon={TrendingUp} label="Progresso" value={`${milestone.pct.toFixed(0)}%`} tone="info" delay={3} sub={`rumo a ${milestone.next.label}`} />
       </div>
 
       {/* ═══ Content Grid ═══ */}
@@ -725,7 +732,6 @@ export default function Perfil() {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-warning/3 pointer-events-none opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
         <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-warning" />
-        {/* Top shimmer line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
 
         <div className="relative z-10">
