@@ -238,6 +238,17 @@ export default function Saques() {
               <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
                 {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
+              {!hasAddress ? (
+                <button
+                  onClick={() => {
+                    toast.info("Preencha seu endereço primeiro para realizar saques");
+                    navigate("/perfil");
+                  }}
+                  className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 bg-warning text-warning-foreground shadow-lg shadow-warning/20 hover:shadow-xl active:scale-[0.97] transition-all duration-300"
+                >
+                  <MapPin className="h-3.5 w-3.5" /> Preencher Endereço
+                </button>
+              ) : (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <button className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all duration-300">
