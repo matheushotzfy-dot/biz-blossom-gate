@@ -203,14 +203,14 @@ export default function Produtos() {
           )}
         </motion.div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
           {filtered.map((p, i) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: Math.min(i * 0.05, 0.3), ease }}
-              className="group relative rounded-2xl bg-card/95 ring-1 ring-border/10 overflow-hidden flex flex-col hover:ring-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
+              className="group relative rounded-2xl bg-card/95 ring-1 ring-border/10 overflow-hidden flex flex-col hover:ring-primary/25 hover:shadow-2xl hover:shadow-primary/8 transition-all duration-500 hover:-translate-y-0.5"
             >
               {/* Image */}
               <div className="relative h-44 sm:h-48 overflow-hidden bg-gradient-to-br from-muted/8 to-transparent">
