@@ -363,15 +363,15 @@ export default function LandingPage() {
                   { value: 1.99, suffix: "%", label: "Taxa PIX", icon: QrCode },
                   { value: 50, suffix: "K+", label: "Vendas/mês", icon: TrendingUp },
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-primary/8 flex items-center justify-center">
-                      <stat.icon className="h-4 w-4 text-primary" />
+                  <div key={i} className="flex flex-col md:flex-row items-center md:items-center gap-1.5 md:gap-3">
+                    <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 flex items-center justify-center">
+                      <stat.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums">
+                    <div className="text-center md:text-left">
+                      <p className="text-base md:text-xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums">
                         <Counter target={stat.value} suffix={stat.suffix} />
                       </p>
-                      <p className="text-[9px] text-muted-foreground/35 font-bold uppercase tracking-[0.12em] font-display">{stat.label}</p>
+                      <p className="text-[8px] md:text-[9px] text-muted-foreground/35 font-bold uppercase tracking-[0.12em] font-display">{stat.label}</p>
                     </div>
                   </div>
                 ))}
