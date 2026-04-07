@@ -445,7 +445,7 @@ export default function Auth() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.7 }}
-                className="text-[28px] md:text-[34px] font-display font-black tracking-[-0.045em] text-foreground leading-[1.08]"
+                className="text-[26px] sm:text-[30px] md:text-[34px] font-display font-black tracking-[-0.045em] text-foreground leading-[1.12]"
               >
                 {isLogin ? (
                   <>Bem-vindo de <span className="text-gradient">volta</span></>
@@ -457,7 +457,7 @@ export default function Auth() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.45 }}
-                className="text-sm text-muted-foreground/50 mt-2.5 font-display leading-relaxed"
+                className="text-[13px] text-muted-foreground/60 mt-2.5 font-display leading-relaxed"
               >
                 {isLogin ? "Acesse seu painel e acompanhe seus resultados" : "Crie sua conta e lance seu primeiro infoproduto"}
               </motion.p>
@@ -657,10 +657,10 @@ export default function Auth() {
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + i * 0.08 }}
-                  className="text-center p-3 rounded-2xl bg-card/20 backdrop-blur-sm border border-border/8"
+                  className="text-center p-3 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/12"
                 >
-                  <p className="text-[14px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">{s.value}</p>
-                  <p className="text-[7px] text-muted-foreground/30 font-bold uppercase tracking-[0.12em] font-display mt-0.5">{s.label}</p>
+                  <p className="text-[15px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">{s.value}</p>
+                  <p className="text-[8px] text-muted-foreground/40 font-bold uppercase tracking-[0.12em] font-display mt-0.5">{s.label}</p>
                 </motion.div>
               ))}
             </div>
