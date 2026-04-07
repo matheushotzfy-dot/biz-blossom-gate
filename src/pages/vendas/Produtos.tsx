@@ -88,15 +88,14 @@ export default function Produtos() {
         className="mb-6 sm:mb-8"
       >
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center shadow-lg shadow-primary/5">
-              <Package className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3.5">
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 flex items-center justify-center shadow-lg shadow-primary/5">
+              <Package className="h-5.5 w-5.5 text-primary" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-display font-black text-foreground tracking-[-0.02em]">Meus Produtos</h1>
-              <p className="text-[11px] text-muted-foreground/40 font-display">
-                {products.length} produto{products.length !== 1 ? "s" : ""}
-                {activeProducts > 0 && <span className="text-success"> · {activeProducts} ativo{activeProducts !== 1 ? "s" : ""}</span>}
+              <h1 className="text-xl sm:text-2xl font-display font-black text-foreground tracking-[-0.03em]">Meus Produtos</h1>
+              <p className="text-xs text-muted-foreground/50 font-display mt-0.5">
+                Gerencie seus infoprodutos e checkouts
               </p>
             </div>
           </div>
@@ -104,7 +103,7 @@ export default function Produtos() {
             whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -10px hsl(var(--primary) / 0.3)" }}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="h-10 sm:h-11 px-5 sm:px-6 rounded-xl text-[12px] font-display font-bold flex items-center justify-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 shrink-0"
+            className="h-11 px-6 rounded-xl text-[13px] font-display font-bold flex items-center justify-center gap-2.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 shrink-0"
           >
             <Plus className="h-4 w-4" /> Novo Produto
           </motion.button>
@@ -204,14 +203,14 @@ export default function Produtos() {
           )}
         </motion.div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
           {filtered.map((p, i) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: Math.min(i * 0.05, 0.3), ease }}
-              className="group relative rounded-2xl bg-card/95 ring-1 ring-border/10 overflow-hidden flex flex-col hover:ring-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
+              className="group relative rounded-2xl bg-card/95 ring-1 ring-border/10 overflow-hidden flex flex-col hover:ring-primary/25 hover:shadow-2xl hover:shadow-primary/8 transition-all duration-500 hover:-translate-y-0.5"
             >
               {/* Image */}
               <div className="relative h-44 sm:h-48 overflow-hidden bg-gradient-to-br from-muted/8 to-transparent">

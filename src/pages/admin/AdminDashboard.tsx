@@ -97,7 +97,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
-type AdminTheme = "dark-green" | "dark" | "light-green";
+type AdminTheme = "dark-green" | "dark" | "light-green" | "mint";
 
 const ADMIN_THEMES: Record<AdminTheme, {
   label: string; bg: string; sidebarBg: string; topBarBg: string;
@@ -105,6 +105,15 @@ const ADMIN_THEMES: Record<AdminTheme, {
   textPrimary: string; textSecondary: string; textMuted: string;
   border: string; cardBg: string; isDark: boolean;
 }> = {
+  "mint": {
+    label: "Verde Suave",
+    bg: "linear-gradient(135deg, #0b1a14 0%, #0e1f18 30%, #111f1a 60%, #0b1a14 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(11,26,20,0.98) 0%, rgba(8,20,15,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(11,26,20,0.8) 0%, rgba(14,31,24,0.7) 100%)",
+    accent: "emerald", accentLight: "rgba(52,211,153,0.12)", accentGlow: "rgba(52,211,153,0.35)",
+    textPrimary: "rgba(255,255,255,0.92)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.28)",
+    border: "rgba(255,255,255,0.06)", cardBg: "rgba(52,211,153,0.04)", isDark: true,
+  },
   "dark-green": {
     label: "Verde Escuro",
     bg: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
@@ -298,6 +307,15 @@ export default function AdminDashboard() {
     indicatorShadow: "shadow-[0_0_14px_rgba(139,92,246,0.8)]",
     activeItem: "from-violet-500/[0.12] via-violet-500/[0.08] to-purple-500/[0.04] border-violet-500/[0.18] shadow-[inset_0_1px_0_rgba(139,92,246,0.12)]",
     activeIcon: "text-violet-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.6)]",
+  } : adminTheme === "mint" ? {
+    gradient: "from-emerald-400 via-teal-500 to-cyan-600",
+    text: "text-emerald-300", textSoft: "text-emerald-300/60", textGlow: "text-emerald-300/50",
+    bg: "bg-emerald-300", bgSoft: "bg-emerald-400/10", bgBorder: "border-emerald-400/10",
+    shadow: "shadow-[0_0_30px_rgba(52,211,153,0.3)]", glowBg: "bg-emerald-900/20",
+    ringActive: "ring-emerald-400/20", indicatorGradient: "from-emerald-300 via-teal-400 to-cyan-400",
+    indicatorShadow: "shadow-[0_0_14px_rgba(52,211,153,0.7)]",
+    activeItem: "from-emerald-400/[0.10] via-teal-400/[0.06] to-cyan-400/[0.03] border-emerald-400/[0.15] shadow-[inset_0_1px_0_rgba(52,211,153,0.10)]",
+    activeIcon: "text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]",
   } : {
     gradient: "from-emerald-500 via-emerald-600 to-teal-700",
     text: "text-emerald-400", textSoft: "text-emerald-400/60", textGlow: "text-emerald-400/50",

@@ -388,10 +388,10 @@ export default function CheckoutBuilder() {
   /*                   RENDER                        */
   /* ═══════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+    <div className="h-screen bg-background flex flex-col lg:flex-row overflow-hidden">
       
       {/* ─── LEFT: Control Panel ─── */}
-      <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col lg:h-screen lg:sticky lg:top-0 min-h-0">
+      <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-[50vh] lg:h-screen min-h-0">
         
         {/* Header */}
         <div className="px-4 py-3 border-b border-border/40 bg-card/80">
@@ -829,7 +829,7 @@ export default function CheckoutBuilder() {
       </aside>
 
       {/* ─── RIGHT: Live Preview ─── */}
-      <main className="flex-1 flex flex-col min-h-[60vh] lg:min-h-screen bg-muted/10">
+      <main className="flex-1 flex flex-col min-h-0 bg-muted/10 overflow-hidden">
         
         {/* Preview Header */}
         <div className="h-12 border-b border-border/40 bg-card/80 backdrop-blur-sm flex items-center justify-between px-5 sticky top-0 z-10">
@@ -881,7 +881,7 @@ export default function CheckoutBuilder() {
 
         {/* Preview Canvas */}
         <div
-          className="flex-1 flex items-start justify-center p-6 lg:p-10 overflow-auto"
+          className="flex-1 flex items-start justify-center p-6 lg:p-10 overflow-auto min-h-0"
           style={{
             backgroundImage: "radial-gradient(circle, hsl(var(--border)/0.08) 1px, transparent 1px)",
             backgroundSize: "20px 20px",
