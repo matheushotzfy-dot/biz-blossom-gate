@@ -355,20 +355,20 @@ export default function AdminDashboard() {
 
         {/* Quick Stats */}
         {!sidebarCollapsed && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-3 mt-3 mb-1 p-3 rounded-xl border border-emerald-500/10 bg-gradient-to-br from-emerald-500/[0.06] to-teal-500/[0.03]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn("mx-3 mt-3 mb-1 p-3 rounded-xl border", accentClasses.bgBorder)} style={{ background: themeConfig.cardBg }}>
             <div className="flex items-center gap-2 mb-2">
-              <Globe className="h-3 w-3 text-emerald-400/60" />
-              <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-400/50">Volume Total</span>
+              <Globe className={cn("h-3 w-3", accentClasses.textSoft)} />
+              <span className={cn("text-[8px] font-bold uppercase tracking-[0.25em]", accentClasses.textGlow)}>Volume Total</span>
             </div>
             <p className="text-[14px] font-black text-white/90 tracking-tight" style={{ fontFamily: "'Space Grotesk', monospace" }}>
               {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
             </p>
             <div className="flex items-center gap-1.5 mt-1.5">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                <span className={cn("absolute h-full w-full animate-ping rounded-full opacity-40", accentClasses.bg)} />
+                <span className={cn("relative h-1.5 w-1.5 rounded-full", accentClasses.bg)} />
               </span>
-              <span className="text-[8px] font-bold text-emerald-400/60 uppercase tracking-widest">Live</span>
+              <span className={cn("text-[8px] font-bold uppercase tracking-widest", accentClasses.textSoft)}>Live</span>
             </div>
           </motion.div>
         )}
@@ -394,18 +394,18 @@ export default function AdminDashboard() {
                         "relative w-full flex items-center gap-2.5 rounded-xl transition-all duration-200 group",
                         sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive
-                          ? "bg-gradient-to-r from-emerald-500/[0.12] via-emerald-500/[0.08] to-teal-500/[0.04] text-white shadow-[inset_0_1px_0_rgba(16,185,129,0.12)] border border-emerald-500/[0.18]"
+                          ? cn("bg-gradient-to-r text-white border", accentClasses.activeItem)
                           : "text-white/25 hover:text-white/55 hover:bg-white/[0.03] border border-transparent"
                       )}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-indicator"
-                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b from-emerald-400 via-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(16,185,129,0.8)]"
+                          className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b", accentClasses.indicatorGradient, accentClasses.indicatorShadow)}
                           transition={{ type: "spring", stiffness: 500, damping: 35 }}
                         />
                       )}
-                      <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isActive ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" : "opacity-40 group-hover:opacity-70")} />
+                      <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isActive ? accentClasses.activeIcon : "opacity-40 group-hover:opacity-70")} />
                       {!sidebarCollapsed && (
                         <span className={cn("text-[12px] truncate transition-all", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
                       )}
