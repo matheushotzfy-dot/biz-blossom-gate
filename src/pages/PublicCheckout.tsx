@@ -161,7 +161,7 @@ function LiveViewers({ color }: { color: string }) {
 /* ═══ Recent Purchase Toast ═══ */
 function RecentPurchaseToast({ productName, color }: { productName: string; color: string }) {
   const [visible, setVisible] = useState(false);
-  const [buyer, setBuyer] = useState({ name: "", city: "", ago: 0 });
+  const [buyer, setBuyer] = useState({ name: "", city: "", ago: 0, avatar: "" });
 
   useEffect(() => {
     const show = () => {
@@ -169,6 +169,7 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
         name: BUYER_NAMES[Math.floor(Math.random() * BUYER_NAMES.length)],
         city: CITIES[Math.floor(Math.random() * CITIES.length)],
         ago: Math.floor(Math.random() * 15) + 1,
+        avatar: AVATAR_URLS[Math.floor(Math.random() * AVATAR_URLS.length)],
       });
       setVisible(true);
       setTimeout(() => setVisible(false), 4000);
@@ -182,9 +183,7 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
   return (
     <div className="fixed bottom-4 left-4 z-50 animate-slide-in-left max-w-[320px]">
       <div className="rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] p-3.5 shadow-2xl shadow-black/10 flex items-center gap-3 backdrop-blur-xl">
-        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + "15" }}>
-          <Check className="h-5 w-5" style={{ color }} />
-        </div>
+        <img src={buyer.avatar} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/20 shadow-md shrink-0" />
         <div className="min-w-0">
           <p className="text-[12px] font-bold text-[hsl(var(--checkout-text))] truncate">{buyer.name} de {buyer.city}</p>
           <p className="text-[10px] text-[hsl(var(--checkout-text-muted))]">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
