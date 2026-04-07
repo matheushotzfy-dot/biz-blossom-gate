@@ -333,7 +333,7 @@ export default function LandingPage() {
           <Particles />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full py-10 md:py-0">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left column */}
             <div>
