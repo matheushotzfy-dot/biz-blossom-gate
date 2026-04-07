@@ -201,10 +201,14 @@ export default function Perfil() {
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
+  const [addressForm, setAddressForm] = useState({ zip_code: "", street: "", street_number: "", complement: "", neighborhood: "", city: "", state: "" });
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [formInit, setFormInit] = useState(false);
+  const [addressInit, setAddressInit] = useState(false);
 
   useEffect(() => {
     if (profile && !formInit) {
@@ -212,6 +216,62 @@ export default function Perfil() {
       setFormInit(true);
     }
   }, [profile, formInit]);
+
+  useEffect(() => {
+    if (profile && !addressInit) {
+      setAddressForm({
+        zip_code: (profile as any).zip_code || "",
+        street: (profile as any).street || "",
+        street_number: (profile as any).street_number || "",
+        complement: (profile as any).complement || "",
+        neighborhood: (profile as any).neighborhood || "",
+        city: (profile as any).city || "",
+        state: (profile as any).state || "",
+      });
+      setAddressInit(true);
+    }
+  }, [profile, addressInit]);
+
+  const isAddressLocked = !!(profile as any)?.address_locked;
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+
+  const handleCepLookup = async (cep: string) => {
+    const digits = cep.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    setLoadingCep(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setAddressForm(prev => ({
+          ...prev,
+          street: data.logradouro || prev.street,
+          neighborhood: data.bairro || prev.neighborhood,
+          city: data.localidade || prev.city,
+          state: data.uf || prev.state,
+        }));
+      }
+    } catch {}
+    setLoadingCep(false);
+  };
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || isAddressLocked) return;
+    if (!addressForm.zip_code || !addressForm.street || !addressForm.street_number || !addressForm.city || !addressForm.state) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+    setSavingAddress(true);
+    const updates = { ...addressForm, address_locked: true };
+    const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
+    if (error) toast.error("Erro ao salvar endereço");
+    else {
+      updateProfile(updates as any);
+      toast.success("Endereço salvo! Agora você pode realizar saques normalmente.");
+    }
+    setSavingAddress(false);
+  };
 
   useEffect(() => {
     if (!user) return;
