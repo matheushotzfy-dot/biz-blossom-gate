@@ -669,7 +669,7 @@ export default function LandingPage() {
       {/* ═══ FOOTER ═══ */}
       <footer className="border-t border-border/8 bg-card/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
-          <div className="grid md:grid-cols-4 gap-8 md:gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <img src={hotzfyLogo} alt="HOTZFY" className="h-8 w-8" loading="lazy" width={512} height={512} />
