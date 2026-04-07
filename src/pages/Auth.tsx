@@ -170,7 +170,7 @@ function GlowCard({ children, className }: { children: React.ReactNode; classNam
       {/* Animated border glow */}
       <div className="absolute -inset-px rounded-[25px] bg-gradient-to-br from-primary/20 via-border/15 to-info/15 opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
       {/* Inner card */}
-      <div className="relative rounded-3xl border border-border/10 bg-card/55 backdrop-blur-2xl shadow-[0_24px_80px_hsl(var(--foreground)/0.06)] overflow-hidden">
+      <div className="relative rounded-3xl border border-border/15 bg-card/70 backdrop-blur-2xl shadow-[0_24px_80px_hsl(var(--foreground)/0.08)] overflow-hidden">
         {/* Mouse-follow glow */}
         <motion.div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: gradientBg }} />
         {/* Static decorative elements */}
