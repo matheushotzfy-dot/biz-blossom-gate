@@ -357,7 +357,7 @@ export default function LandingPage() {
 
               {/* Stats row */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}
-                className="flex flex-wrap gap-6 md:gap-10 mb-10">
+                className="grid grid-cols-3 gap-3 md:flex md:flex-wrap md:gap-10 mb-8 md:mb-10">
                 {[
                   { value: 99.9, suffix: "%", label: "Uptime", icon: Activity },
                   { value: 1.99, suffix: "%", label: "Taxa PIX", icon: QrCode },
