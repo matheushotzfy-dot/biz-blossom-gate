@@ -1,6 +1,5 @@
 /**
- * KYC Onboarding Popup — shown right after account creation
- * Allows uploading documents without navigating to Identidade page.
+ * KYC Onboarding Popup — Interactive multi-step verification
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
   X as XIcon, Shield, Upload, Camera, Image, Loader2, CheckCircle2,
-  AlertTriangle, ArrowRight, FileCheck, Fingerprint, Sparkles,
+  AlertTriangle, ArrowRight, ArrowLeft, FileCheck, Fingerprint, Sparkles,
+  Rocket, PartyPopper, Eye, Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -18,40 +18,11 @@ import { motion, AnimatePresence } from "framer-motion";
 const ease = [0.16, 1, 0.3, 1] as const;
 const ALLOWED_KYC_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
-function MiniDocSlot({ type, label, icon, uploaded, uploading, onUpload }: {
-  type: string; label: string; icon: React.ReactNode;
-  uploaded: boolean; uploading: boolean; onUpload: (f: File) => void;
-}) {
-  const ref = useRef<HTMLInputElement>(null);
-  const canUpload = !uploaded && !uploading;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 * (type === "front" ? 0 : type === "back" ? 1 : 2), ease }}
-      whileHover={canUpload ? { scale: 1.02 } : undefined}
-      onClick={() => canUpload && ref.current?.click()}
-      className={cn(
-        "relative flex flex-col items-center gap-2 p-4 rounded-xl transition-all ring-1 group cursor-pointer",
-        uploaded
-          ? "bg-primary/5 ring-primary/15"
-          : "bg-muted/5 ring-border/10 hover:ring-warning/20 hover:bg-warning/[0.03]"
-      )}
-    >
-      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
-      <div className={cn(
-        "h-11 w-11 rounded-xl flex items-center justify-center ring-1 transition-all",
-        uploaded ? "bg-primary/10 ring-primary/15 text-primary" : "bg-muted/8 ring-border/10 text-muted-foreground/30 group-hover:text-warning/50 group-hover:ring-warning/15"
-      )}>
-        {uploading ? <Loader2 className="h-5 w-5 animate-spin text-warning" /> : uploaded ? <CheckCircle2 className="h-5 w-5" /> : icon}
-      </div>
-      <p className={cn("text-[10px] font-display font-bold text-center", uploaded ? "text-primary/60" : "text-foreground/50")}>{label}</p>
-      <p className={cn("text-[8px]", uploaded ? "text-primary/40" : "text-muted-foreground/25")}>
-        {uploaded ? "Enviado ✓" : "Toque para enviar"}
-      </p>
-    </motion.div>
-  );
-}
+const STEPS = [
+  { type: "front", label: "Documento — Frente", desc: "Foto nítida da frente do seu RG ou CNH", icon: Image, tip: "Posicione o documento em superfície plana e com boa iluminação" },
+  { type: "back", label: "Documento — Verso", desc: "Foto nítida do verso do seu RG ou CNH", icon: Image, tip: "Garanta que todos os dados estejam legíveis" },
+  { type: "selfie", label: "Selfie com Documento", desc: "Tire uma selfie segurando seu documento ao lado do rosto", icon: Camera, tip: "Seu rosto e o documento devem estar visíveis e sem obstruções" },
+];
 
 export function KycOnboardingPopup() {
   const { user } = useAuth();
@@ -59,19 +30,19 @@ export function KycOnboardingPopup() {
   const [open, setOpen] = useState(false);
   const [docs, setDocs] = useState<Record<string, boolean>>({ front: false, back: false, selfie: false });
   const [uploading, setUploading] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  // Show popup on first login when not approved and hasn't been dismissed yet
   useEffect(() => {
     if (!user?.id || !profile) return;
     if (profile.account_status === "approved") return;
     const key = `hotzfy_kyc_popup_dismissed_${user.id}`;
     if (localStorage.getItem(key)) return;
-    // Small delay to let dashboard render first
     const timer = setTimeout(() => setOpen(true), 800);
     return () => clearTimeout(timer);
   }, [user?.id, profile?.account_status]);
 
-  // Check existing docs
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
@@ -80,8 +51,13 @@ export function KycOnboardingPopup() {
         types.map(t => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: t }))
       );
       const d: Record<string, boolean> = {};
-      types.forEach((t, i) => { d[t] = !!(results[i].data && results[i].data.length > 0); });
+      let firstMissing = -1;
+      types.forEach((t, i) => {
+        d[t] = !!(results[i].data && results[i].data.length > 0);
+        if (!d[t] && firstMissing === -1) firstMissing = i;
+      });
       setDocs(d);
+      if (firstMissing >= 0) setCurrentStep(firstMissing);
     })();
   }, [user?.id]);
 
@@ -94,7 +70,20 @@ export function KycOnboardingPopup() {
     const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
     if (error) { toast.error("Erro no upload"); }
-    else { toast.success("Documento enviado!"); setDocs(prev => ({ ...prev, [type]: true })); }
+    else {
+      toast.success("Documento enviado!");
+      setDocs(prev => {
+        const next = { ...prev, [type]: true };
+        // Auto-advance
+        if (next.front && next.back && next.selfie) {
+          setTimeout(() => setCompleted(true), 600);
+        } else {
+          const stepIdx = STEPS.findIndex(s => s.type === type);
+          if (stepIdx < STEPS.length - 1) setTimeout(() => setCurrentStep(stepIdx + 1), 500);
+        }
+        return next;
+      });
+    }
     setUploading(null);
   }, [user]);
 
@@ -104,124 +93,225 @@ export function KycOnboardingPopup() {
   }, [user?.id]);
 
   const allDone = docs.front && docs.back && docs.selfie;
+  const uploadedCount = Object.values(docs).filter(Boolean).length;
+  const step = STEPS[currentStep];
 
   if (!open) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/70 backdrop-blur-xl"
+          className="absolute inset-0 bg-background/80 backdrop-blur-2xl"
           onClick={handleDismiss}
         />
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.92, y: 24 }}
+          initial={{ opacity: 0, scale: 0.9, y: 32 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 12 }}
           transition={{ duration: 0.5, ease }}
-          className="relative w-full max-w-md rounded-2xl border border-warning/20 bg-card shadow-2xl overflow-hidden"
+          className="relative w-full max-w-lg rounded-3xl border border-border/20 bg-card shadow-[0_40px_120px_rgba(0,0,0,0.2)] overflow-hidden"
         >
-          {/* Ambient glow */}
+          {/* Top accent */}
+          <div className="h-1 bg-gradient-to-r from-warning via-primary to-success" />
+
+          {/* Ambient */}
           <div className="absolute inset-0 bg-gradient-to-b from-warning/5 via-transparent to-primary/3 pointer-events-none" />
           <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
 
           {/* Close */}
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10 transition-colors"
+            className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/40 flex items-center justify-center hover:bg-muted/60 z-10 transition-colors"
           >
             <XIcon className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          <div className="relative p-6 sm:p-8">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-                className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-warning/10 ring-1 ring-warning/20 flex items-center justify-center"
-              >
-                <Shield className="h-8 w-8 text-warning" />
-              </motion.div>
-              <h2 className="text-lg font-display font-black text-foreground tracking-[-0.03em]">
-                Verifique sua Conta
-              </h2>
-              <p className="text-[12px] text-muted-foreground/50 mt-1.5 max-w-[280px] mx-auto leading-relaxed">
-                Envie seus documentos agora para liberar saques e acessar todas as funcionalidades da plataforma.
-              </p>
-            </div>
-
-            {/* Steps info */}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-warning/5 ring-1 ring-warning/10 mb-5">
-              <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
-              <p className="text-[10px] text-warning/70 font-medium">
-                Sua conta ficará em análise até os documentos serem verificados.
-              </p>
-            </div>
-
-            {/* Upload slots */}
-            <div className="grid grid-cols-3 gap-2.5 mb-5">
-              <MiniDocSlot type="front" label="Doc. Frente" icon={<Image className="h-5 w-5" />} uploaded={docs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} />
-              <MiniDocSlot type="back" label="Doc. Verso" icon={<Image className="h-5 w-5" />} uploaded={docs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} />
-              <MiniDocSlot type="selfie" label="Selfie c/ Doc" icon={<Camera className="h-5 w-5" />} uploaded={docs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} />
-            </div>
-
-            {/* Progress */}
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Progresso</span>
-                <span className="text-[10px] font-display font-bold text-foreground/50 tabular-nums">
-                  {Object.values(docs).filter(Boolean).length}/3
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+          <div className="relative p-5 sm:p-8">
+            <AnimatePresence mode="wait">
+              {completed ? (
+                /* ═══ SUCCESS SCREEN ═══ */
                 <motion.div
-                  animate={{ width: `${(Object.values(docs).filter(Boolean).length / 3) * 100}%` }}
-                  transition={{ duration: 0.6, ease }}
-                  className="h-full rounded-full bg-gradient-to-r from-warning via-warning/80 to-primary"
-                  style={{ boxShadow: "0 0 8px hsl(var(--warning) / 0.3)" }}
-                />
-              </div>
-            </div>
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center py-4"
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+                    className="mx-auto mb-6 h-20 w-20 rounded-3xl bg-success/10 ring-2 ring-success/20 flex items-center justify-center"
+                  >
+                    <PartyPopper className="h-10 w-10 text-success" />
+                  </motion.div>
+                  <h2 className="text-2xl font-display font-black text-foreground tracking-[-0.03em] mb-2">
+                    Documentos Enviados!
+                  </h2>
+                  <p className="text-sm text-muted-foreground/50 max-w-xs mx-auto mb-8 leading-relaxed">
+                    Sua conta será analisada pela nossa equipe. Você receberá uma notificação quando for aprovada.
+                  </p>
+                  <div className="flex items-center justify-center gap-3 mb-6">
+                    {STEPS.map((s, i) => (
+                      <motion.div
+                        key={s.type}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 + i * 0.1 }}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-success/5 ring-1 ring-success/15"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-success" />
+                        <span className="text-[11px] font-display font-bold text-success/70">{s.label.split("—")[0].trim()}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <Button onClick={handleDismiss} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-display font-bold text-sm shadow-lg shadow-primary/20">
+                    <Rocket className="h-4 w-4 mr-2" /> Ir para o Dashboard
+                  </Button>
+                </motion.div>
+              ) : (
+                /* ═══ STEP-BY-STEP ═══ */
+                <motion.div key={`step-${currentStep}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                  {/* Header */}
+                  <div className="text-center mb-6">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
+                      className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-warning/10 ring-1 ring-warning/20 flex items-center justify-center"
+                    >
+                      <Shield className="h-8 w-8 text-warning" />
+                    </motion.div>
+                    <h2 className="text-xl font-display font-black text-foreground tracking-[-0.03em]">
+                      Verifique sua Conta
+                    </h2>
+                    <p className="text-[12px] text-muted-foreground/50 mt-1.5 max-w-[320px] mx-auto leading-relaxed">
+                      Envie seus documentos para liberar saques e todas as funcionalidades.
+                    </p>
+                  </div>
 
-            {/* All done message */}
-            {allDone && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 p-3 rounded-xl bg-success/5 ring-1 ring-success/15 mb-5"
-              >
-                <Sparkles className="h-4 w-4 text-success shrink-0" />
-                <p className="text-[11px] font-display font-bold text-success">
-                  Documentos enviados! Sua conta será analisada em breve.
-                </p>
-              </motion.div>
-            )}
+                  {/* Step indicators */}
+                  <div className="flex items-center justify-center gap-2 mb-6">
+                    {STEPS.map((s, i) => (
+                      <button key={s.type} onClick={() => setCurrentStep(i)} className="flex items-center gap-1.5 group">
+                        <div className={cn(
+                          "h-8 w-8 rounded-xl flex items-center justify-center ring-1 transition-all duration-300 text-[11px] font-display font-bold",
+                          docs[s.type]
+                            ? "bg-success/10 ring-success/20 text-success"
+                            : i === currentStep
+                              ? "bg-warning/10 ring-warning/20 text-warning scale-110"
+                              : "bg-muted/10 ring-border/15 text-muted-foreground/30"
+                        )}>
+                          {docs[s.type] ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
+                        </div>
+                        {i < STEPS.length - 1 && (
+                          <div className={cn("w-8 h-0.5 rounded-full transition-colors", docs[s.type] ? "bg-success/30" : "bg-border/15")} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
 
-            {/* Actions */}
-            <div className="flex flex-col gap-2">
-              <Button
-                onClick={handleDismiss}
-                className={cn(
-                  "w-full h-11 rounded-xl font-display font-bold shadow-lg active:scale-[0.985] transition-all",
-                  allDone
-                    ? "gradient-primary shadow-primary/15"
-                    : "bg-muted/10 hover:bg-muted/20 text-foreground/60 shadow-none"
-                )}
-              >
-                {allDone ? "Concluir" : "Fazer depois"}
-              </Button>
-              {!allDone && (
-                <p className="text-[9px] text-center text-muted-foreground/30">
-                  Você pode enviar depois em <span className="font-bold text-muted-foreground/50">Perfil → Identidade & KYC</span>
-                </p>
+                  {/* Current step content */}
+                  <div className="mb-6">
+                    <div className={cn(
+                      "relative rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-300 cursor-pointer group",
+                      docs[step.type]
+                        ? "border-success/30 bg-success/5"
+                        : uploading === step.type
+                          ? "border-warning/30 bg-warning/5"
+                          : "border-border/20 bg-muted/5 hover:border-warning/30 hover:bg-warning/[0.03]"
+                    )} onClick={() => !docs[step.type] && !uploading && fileRef.current?.click()}>
+                      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(step.type, e.target.files[0])} />
+
+                      <div className={cn(
+                        "mx-auto mb-4 h-16 w-16 rounded-2xl flex items-center justify-center ring-1 transition-all",
+                        docs[step.type]
+                          ? "bg-success/10 ring-success/20"
+                          : uploading === step.type
+                            ? "bg-warning/10 ring-warning/20"
+                            : "bg-muted/10 ring-border/15 group-hover:ring-warning/20 group-hover:bg-warning/10"
+                      )}>
+                        {uploading === step.type ? (
+                          <Loader2 className="h-7 w-7 animate-spin text-warning" />
+                        ) : docs[step.type] ? (
+                          <CheckCircle2 className="h-7 w-7 text-success" />
+                        ) : (
+                          <step.icon className="h-7 w-7 text-muted-foreground/30 group-hover:text-warning transition-colors" />
+                        )}
+                      </div>
+
+                      <h3 className="text-base font-display font-bold text-foreground mb-1">{step.label}</h3>
+                      <p className="text-[12px] text-muted-foreground/50 mb-3">{step.desc}</p>
+
+                      {docs[step.type] ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/10 text-success text-[11px] font-display font-bold">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Enviado com sucesso
+                        </span>
+                      ) : uploading === step.type ? (
+                        <span className="text-[11px] text-warning font-display font-bold">Enviando...</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-warning/10 text-warning text-[11px] font-display font-bold group-hover:bg-warning/15 transition-colors">
+                          <Upload className="h-3.5 w-3.5" /> Clique para enviar
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Tip */}
+                    <div className="flex items-start gap-2.5 mt-3 p-3 rounded-xl bg-info/5 ring-1 ring-info/10">
+                      <Eye className="h-4 w-4 text-info shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-info/60 font-medium leading-relaxed">{step.tip}</p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mb-5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Progresso</span>
+                      <span className="text-[11px] font-display font-bold text-foreground/50 tabular-nums">{uploadedCount}/3</span>
+                    </div>
+                    <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+                      <motion.div
+                        animate={{ width: `${(uploadedCount / 3) * 100}%` }}
+                        transition={{ duration: 0.6, ease }}
+                        className="h-full rounded-full bg-gradient-to-r from-warning via-primary to-success"
+                        style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.3)" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="flex items-center gap-3">
+                    {currentStep > 0 && (
+                      <Button variant="ghost" onClick={() => setCurrentStep(currentStep - 1)} className="h-11 px-4 rounded-xl text-muted-foreground/50 hover:text-foreground">
+                        <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
+                      </Button>
+                    )}
+                    <div className="flex-1" />
+                    {allDone ? (
+                      <Button onClick={() => setCompleted(true)} className="h-11 px-6 rounded-xl gradient-primary text-primary-foreground font-display font-bold shadow-lg shadow-primary/15">
+                        <Sparkles className="h-4 w-4 mr-2" /> Concluir
+                      </Button>
+                    ) : currentStep < STEPS.length - 1 ? (
+                      <Button variant="ghost" onClick={() => setCurrentStep(currentStep + 1)} className="h-11 px-4 rounded-xl text-muted-foreground/50 hover:text-foreground">
+                        Próximo <ArrowRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  {/* Skip */}
+                  <div className="text-center mt-4">
+                    <button onClick={handleDismiss} className="text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 font-display font-medium transition-colors">
+                      Fazer depois — <span className="font-bold text-muted-foreground/40">Perfil → Identidade & KYC</span>
+                    </button>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
         </motion.div>
       </div>
