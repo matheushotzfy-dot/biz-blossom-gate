@@ -84,7 +84,7 @@ function SectionHeader({ badge, title, subtitle, center = true }: { badge: strin
         <Sparkles className="h-3 w-3" />{badge}
       </div>
       <h2 className="text-3xl md:text-5xl font-display font-black tracking-[-0.04em] text-foreground leading-[1.1]">{title}</h2>
-      <p className="text-base md:text-lg text-muted-foreground/60 mt-4 max-w-2xl font-display leading-relaxed mx-auto">{subtitle}</p>
+      <p className="text-sm md:text-lg text-muted-foreground/70 mt-4 max-w-2xl font-display leading-relaxed mx-auto">{subtitle}</p>
     </motion.div>
   );
 }
