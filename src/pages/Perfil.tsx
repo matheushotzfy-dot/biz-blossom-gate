@@ -12,6 +12,7 @@ import {
   User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame, Zap,
   Crown, Sparkles, Target, TrendingUp, ArrowUp, Star, Lock, Globe,
   Calendar, BadgeCheck, Fingerprint, Copy, Check, Award, Gem, Eye,
+  MapPin, Loader2, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
