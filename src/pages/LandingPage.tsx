@@ -64,7 +64,7 @@ function Particles() {
 /* ─── Section wrapper ─── */
 function Section({ children, className, id }: { children: React.ReactNode; className?: string; id?: string }) {
   return (
-    <section id={id} className={cn("relative py-24 md:py-32 px-4 md:px-8", className)}>
+    <section id={id} className={cn("relative py-16 md:py-32 px-4 md:px-8", className)}>
       <div className="max-w-7xl mx-auto relative z-10">{children}</div>
     </section>
   );
@@ -231,6 +231,7 @@ export default function LandingPage() {
   const { scrollYProgress } = useScroll();
   const headerBg = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 50);
@@ -238,18 +239,27 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  // Close mobile nav on scroll
+  useEffect(() => {
+    if (mobileNav) {
+      const close = () => setMobileNav(false);
+      window.addEventListener("scroll", close, { passive: true, once: true });
+      return () => window.removeEventListener("scroll", close);
+    }
+  }, [mobileNav]);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
 
       {/* ═══ NAVBAR ═══ */}
       <motion.nav className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-500",
-        scrolled ? "bg-background/80 backdrop-blur-2xl border-b border-border/10 shadow-lg shadow-black/5" : "bg-transparent"
+        scrolled || mobileNav ? "bg-background/80 backdrop-blur-2xl border-b border-border/10 shadow-lg shadow-black/5" : "bg-transparent"
       )}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-16 md:h-20">
-          <div className="flex items-center gap-3">
-            <motion.img src={hotzfyLogo} alt="HOTZFY" className="h-8 w-8 md:h-9 md:w-9" whileHover={{ rotate: 12, scale: 1.1 }} />
-            <span className="text-base md:text-lg font-display font-black tracking-[-0.04em] text-foreground">HOTZFY</span>
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-14 md:h-20">
+          <div className="flex items-center gap-2.5">
+            <motion.img src={hotzfyLogo} alt="HOTZFY" className="h-7 w-7 md:h-9 md:w-9" whileHover={{ rotate: 12, scale: 1.1 }} />
+            <span className="text-sm md:text-lg font-display font-black tracking-[-0.04em] text-foreground">HOTZFY</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {[
@@ -261,19 +271,51 @@ export default function LandingPage() {
               <a key={link.href} href={link.href} className="text-sm text-muted-foreground/50 hover:text-foreground font-display font-medium transition-colors duration-200">{link.label}</a>
             ))}
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={() => navigate("/auth")} className="text-sm font-display font-semibold text-muted-foreground/60 hover:text-foreground">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Button variant="ghost" onClick={() => navigate("/auth")} className="hidden sm:inline-flex text-sm font-display font-semibold text-muted-foreground/60 hover:text-foreground">
               Entrar
             </Button>
-            <Button onClick={() => navigate("/auth")} className="gradient-primary text-primary-foreground font-display font-bold text-sm h-10 px-6 rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
-              Criar conta <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+            <Button onClick={() => navigate("/auth")} className="gradient-primary text-primary-foreground font-display font-bold text-xs md:text-sm h-9 md:h-10 px-4 md:px-6 rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+              Criar conta <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Button>
+            {/* Mobile hamburger */}
+            <button onClick={() => setMobileNav(!mobileNav)} className="md:hidden h-9 w-9 rounded-xl bg-card/40 flex items-center justify-center border border-border/15">
+              {mobileNav
+                ? <span className="text-foreground text-lg leading-none">✕</span>
+                : <span className="flex flex-col gap-1 items-center"><span className="block w-4 h-0.5 bg-foreground rounded" /><span className="block w-4 h-0.5 bg-foreground rounded" /><span className="block w-3 h-0.5 bg-foreground rounded" /></span>}
+            </button>
           </div>
         </div>
+        {/* Mobile dropdown */}
+        <AnimatePresence>
+          {mobileNav && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden overflow-hidden bg-background/95 backdrop-blur-2xl border-t border-border/10"
+            >
+              <div className="px-4 py-4 space-y-1">
+                {[
+                  { label: "Recursos", href: "#recursos" },
+                  { label: "Preços", href: "#precos" },
+                  { label: "Depoimentos", href: "#depoimentos" },
+                  { label: "FAQ", href: "#faq" },
+                ].map(link => (
+                  <a key={link.href} href={link.href} onClick={() => setMobileNav(false)} className="block px-4 py-3 rounded-xl text-sm font-display font-semibold text-muted-foreground/60 hover:text-foreground hover:bg-card/40 transition-all">{link.label}</a>
+                ))}
+                <button onClick={() => { setMobileNav(false); navigate("/auth"); }} className="block w-full text-left px-4 py-3 rounded-xl text-sm font-display font-semibold text-primary hover:bg-primary/5 transition-all sm:hidden">
+                  Entrar na conta
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
 
       {/* ═══ HERO ═══ */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      <section className="relative min-h-[100dvh] flex items-center pt-16 md:pt-20 overflow-hidden">
         {/* Background effects */}
         <div className="pointer-events-none absolute inset-0">
           <motion.div animate={{ y: [0, -40, 0], x: [0, 20, 0], scale: [1, 1.15, 1] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
@@ -291,7 +333,7 @@ export default function LandingPage() {
           <Particles />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full py-10 md:py-0">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left column */}
             <div>
@@ -302,34 +344,34 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.8 }}
-                className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.05] mb-6">
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.08] mb-5 md:mb-6">
                 Venda seus{" "}
                 <span className="text-gradient">infoprodutos</span>{" "}
                 sem limites
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                className="text-lg md:text-xl text-muted-foreground/55 font-display leading-relaxed mb-8 max-w-lg">
+                className="text-base md:text-xl text-muted-foreground/55 font-display leading-relaxed mb-6 md:mb-8 max-w-lg">
                 Plataforma completa de pagamentos com checkout inteligente, área de membros, e as menores taxas do mercado.
               </motion.p>
 
               {/* Stats row */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}
-                className="flex flex-wrap gap-6 md:gap-10 mb-10">
+                className="grid grid-cols-3 gap-3 md:flex md:flex-wrap md:gap-10 mb-8 md:mb-10">
                 {[
                   { value: 99.9, suffix: "%", label: "Uptime", icon: Activity },
                   { value: 1.99, suffix: "%", label: "Taxa PIX", icon: QrCode },
                   { value: 50, suffix: "K+", label: "Vendas/mês", icon: TrendingUp },
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-primary/8 flex items-center justify-center">
-                      <stat.icon className="h-4 w-4 text-primary" />
+                  <div key={i} className="flex flex-col md:flex-row items-center md:items-center gap-1.5 md:gap-3">
+                    <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 flex items-center justify-center">
+                      <stat.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums">
+                    <div className="text-center md:text-left">
+                      <p className="text-base md:text-xl font-display font-black text-foreground tracking-[-0.03em] tabular-nums">
                         <Counter target={stat.value} suffix={stat.suffix} />
                       </p>
-                      <p className="text-[9px] text-muted-foreground/35 font-bold uppercase tracking-[0.12em] font-display">{stat.label}</p>
+                      <p className="text-[8px] md:text-[9px] text-muted-foreground/35 font-bold uppercase tracking-[0.12em] font-display">{stat.label}</p>
                     </div>
                   </div>
                 ))}
@@ -337,9 +379,9 @@ export default function LandingPage() {
 
               {/* CTA buttons */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}
-                className="flex flex-wrap gap-4 mb-8">
+                className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-6 md:mb-8">
                 <Button onClick={() => navigate("/auth")} size="lg"
-                  className="gradient-primary text-primary-foreground font-display font-bold text-base h-14 px-8 rounded-2xl shadow-2xl shadow-primary/25 hover:shadow-[0_20px_60px] hover:shadow-primary/35 transition-all duration-300 relative overflow-hidden group">
+                  className="gradient-primary text-primary-foreground font-display font-bold text-sm md:text-base h-12 md:h-14 px-6 md:px-8 rounded-2xl shadow-2xl shadow-primary/25 hover:shadow-[0_20px_60px] hover:shadow-primary/35 transition-all duration-300 relative overflow-hidden group w-full sm:w-auto">
                   <div className="absolute inset-0 overflow-hidden rounded-2xl">
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
                   </div>
@@ -349,7 +391,7 @@ export default function LandingPage() {
                   const el = document.getElementById("recursos");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
-                  className="h-14 px-6 rounded-2xl text-base font-display font-semibold text-muted-foreground/50 hover:text-foreground border border-border/10 hover:border-border/20 hover:bg-card/30 transition-all">
+                  className="h-12 md:h-14 px-6 rounded-2xl text-sm md:text-base font-display font-semibold text-muted-foreground/50 hover:text-foreground border border-border/10 hover:border-border/20 hover:bg-card/30 transition-all w-full sm:w-auto justify-center">
                   <Play className="h-4 w-4 mr-2" /> Conhecer recursos
                 </Button>
               </motion.div>
@@ -416,19 +458,19 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ SOCIAL PROOF BAR ═══ */}
-      <Section className="py-12 md:py-16 border-y border-border/5">
+      <Section className="py-8 md:py-16 border-y border-border/5">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           className="text-center">
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-3 md:gap-6">
             {[
               { number: "2K+", label: "produtores ativos" },
               { number: "R$ 50M+", label: "processados" },
               { number: "99.9%", label: "uptime" },
               { number: "<2s", label: "tempo de saque PIX" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/20 border border-border/8">
-                <span className="text-lg font-display font-black text-primary tabular-nums">{item.number}</span>
-                <span className="text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider">{item.label}</span>
+              <div key={item.label} className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-card/20 border border-border/8">
+                <span className="text-sm md:text-lg font-display font-black text-primary tabular-nums whitespace-nowrap">{item.number}</span>
+                <span className="text-[8px] md:text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider leading-tight">{item.label}</span>
               </div>
             ))}
           </div>
@@ -498,7 +540,7 @@ export default function LandingPage() {
           title={<>Taxas justas, sem <span className="text-gradient">surpresas</span></>}
           subtitle="Sem mensalidades. Você só paga quando vende. Simples assim."
         />
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid gap-4 md:grid-cols-3 md:gap-6 max-w-5xl mx-auto">
           <PricingCard name="PIX" price="1,99%" desc="Ideal para vendas rápidas"
             features={["QR Code instantâneo", "Confirmação automática", "Saque em 1 dia útil", "Dashboard completo", "Suporte por e-mail"]}
             delay={0} />
@@ -627,8 +669,8 @@ export default function LandingPage() {
       {/* ═══ FOOTER ═══ */}
       <footer className="border-t border-border/8 bg-card/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
-          <div className="grid md:grid-cols-4 gap-8 md:gap-12">
-            <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-3 mb-4">
                 <img src={hotzfyLogo} alt="HOTZFY" className="h-8 w-8" loading="lazy" width={512} height={512} />
                 <span className="text-base font-display font-black tracking-[-0.03em] text-foreground">HOTZFY</span>
