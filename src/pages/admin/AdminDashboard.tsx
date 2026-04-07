@@ -97,7 +97,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
-type AdminTheme = "dark-green" | "dark" | "light-green";
+type AdminTheme = "dark-green" | "dark" | "light-green" | "mint";
 
 const ADMIN_THEMES: Record<AdminTheme, {
   label: string; bg: string; sidebarBg: string; topBarBg: string;
@@ -105,6 +105,15 @@ const ADMIN_THEMES: Record<AdminTheme, {
   textPrimary: string; textSecondary: string; textMuted: string;
   border: string; cardBg: string; isDark: boolean;
 }> = {
+  "mint": {
+    label: "Verde Suave",
+    bg: "linear-gradient(135deg, #0b1a14 0%, #0e1f18 30%, #111f1a 60%, #0b1a14 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(11,26,20,0.98) 0%, rgba(8,20,15,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(11,26,20,0.8) 0%, rgba(14,31,24,0.7) 100%)",
+    accent: "emerald", accentLight: "rgba(52,211,153,0.12)", accentGlow: "rgba(52,211,153,0.35)",
+    textPrimary: "rgba(255,255,255,0.92)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.28)",
+    border: "rgba(255,255,255,0.06)", cardBg: "rgba(52,211,153,0.04)", isDark: true,
+  },
   "dark-green": {
     label: "Verde Escuro",
     bg: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
