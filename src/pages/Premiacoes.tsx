@@ -1,7 +1,7 @@
 /**
  * Premiações — Ultra-Premium Awards Trail
  * @module Premiacoes
- * @version 5.0.0 — Fintech Command Center Redesign
+ * @version 6.0.0 — Cinematic Immersive Redesign
  */
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Trophy, Lock, CheckCircle2, Sparkles, Star, Crown, Gem, Zap, Gift, Target,
   Flame, Award, TrendingUp, Shield, ArrowUp, Rocket, ArrowUpRight, Eye,
-  Percent, Radio,
+  Percent, Radio, ChevronRight, Medal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -74,70 +74,6 @@ function AnimatedNumber({ value, formatter }: { value: number; formatter: (v: nu
   return <>{formatter(display)}</>;
 }
 
-/* ═══ Sparkline ═══ */
-function Sparkline({ data, color = "primary" }: { data: number[]; color?: string }) {
-  if (data.length < 2) return null;
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
-  const w = 72; const h = 24;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
-  const fillPoints = `0,${h} ${points} ${w},${h}`;
-  const id = `sp-${color}-${data.length}`;
-  return (
-    <svg width={w} height={h} className="shrink-0 opacity-50" viewBox={`0 0 ${w} ${h}`}>
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={`hsl(var(--${color}))`} stopOpacity={0.3} />
-          <stop offset="100%" stopColor={`hsl(var(--${color}))`} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <polygon points={fillPoints} fill={`url(#${id})`} />
-      <polyline points={points} fill="none" stroke={`hsl(var(--${color}))`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-/* ═══ GlowCard ═══ */
-function GlowCard({ children, className, glowColor = "primary", delay = 0 }: {
-  children: React.ReactNode; className?: string; glowColor?: string; delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease }}
-      className={cn("relative group rounded-2xl glass-panel overflow-hidden card-premium", className)}
-    >
-      <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[60px] pointer-events-none", `bg-${glowColor}/12`)} />
-      <div className={cn("absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-1000 blur-[40px] pointer-events-none", `bg-${glowColor}/6`)} />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-      <div className={cn("absolute bottom-0 left-[10%] right-[10%] h-px opacity-0 group-hover:opacity-100 transition-opacity duration-700", `bg-gradient-to-r from-transparent via-${glowColor}/20 to-transparent`)} />
-      <div className="relative z-10">{children}</div>
-    </motion.div>
-  );
-}
-
-/* ═══ KPI Tile (same pattern as Vendas) ═══ */
-function KpiTile({ label, value, icon: Icon, color = "primary", delay = 0, sparkData, sub }: {
-  label: string; value: string; icon: any; color?: string; delay?: number; sparkData?: number[]; sub?: string;
-}) {
-  return (
-    <GlowCard glowColor={color} delay={delay} className="p-5 shimmer">
-      <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
-      <div className="flex items-start justify-between mb-3">
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${color}/10 border-${color}/12 text-${color} group-hover:bg-${color}/15`)}>
-          <Icon className="h-4.5 w-4.5" />
-        </div>
-        {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
-      </div>
-      <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
-      <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">{value}</span>
-      {sub && <p className="text-[10px] text-muted-foreground/40 mt-1.5 font-display">{sub}</p>}
-    </GlowCard>
-  );
-}
-
 /* ═══ Premium Award Card ═══ */
 function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
   award: typeof AWARDS[0]; idx: number; unlocked: boolean; isCurrent: boolean; revenue: number;
@@ -145,6 +81,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
   const t = TONE_MAP[award.tone];
   const Icon = award.icon;
   const progress = Math.min((revenue / award.value) * 100, 100);
+  const [hovered, setHovered] = useState(false);
 
   return (
     <motion.div
@@ -152,6 +89,8 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: idx * 0.06, duration: 0.5, ease }}
       className="relative flex gap-4 md:gap-5"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Timeline Node */}
       <div className="relative z-10 shrink-0 flex flex-col items-center pt-5">
@@ -172,13 +111,13 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
 
       {/* Card Body */}
       <motion.div
-        whileHover={{ y: -2 }}
+        animate={hovered && (unlocked || isCurrent) ? { y: -3 } : { y: 0 }}
         transition={{ duration: 0.25, ease }}
         className={cn(
-          "flex-1 mb-2 relative rounded-2xl glass-panel card-premium overflow-hidden p-5 transition-all duration-500",
-          unlocked ? cn("hover:shadow-lg", `hover:${t.glow}`) :
-          isCurrent ? "ring-1 ring-primary/15 shadow-md shadow-primary/8" :
-          "opacity-40 hover:opacity-60"
+          "flex-1 mb-2 relative rounded-2xl bg-card/95 ring-1 overflow-hidden p-5 md:p-6 transition-all duration-500",
+          unlocked ? cn("ring-border/20 hover:ring-border/40 hover:shadow-lg", `hover:${t.glow}`) :
+          isCurrent ? "ring-primary/15 shadow-md shadow-primary/8 hover:ring-primary/25" :
+          "ring-border/10 opacity-40 hover:opacity-55"
         )}
       >
         {/* Accent bar */}
@@ -188,13 +127,13 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
         )} />
 
         {/* Ambient gradient */}
-        {unlocked && <div className={cn("absolute inset-0 bg-gradient-to-br opacity-20 pointer-events-none", t.gradient)} />}
+        {unlocked && <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30 pointer-events-none", t.gradient)} />}
         {isCurrent && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />}
 
         <div className="relative z-10 flex flex-col lg:flex-row gap-5">
           {/* Award Image */}
           <div className={cn(
-            "relative w-full lg:w-44 h-36 lg:h-auto shrink-0 flex items-center justify-center rounded-xl overflow-hidden ring-1 transition-all duration-500",
+            "relative w-full lg:w-48 h-40 lg:h-auto shrink-0 flex items-center justify-center rounded-2xl overflow-hidden ring-1 transition-all duration-500",
             unlocked ? cn("bg-gradient-to-br ring-border/20", t.gradient) :
             isCurrent ? "bg-primary/5 ring-primary/10" :
             "bg-muted/5 ring-border/5"
@@ -203,7 +142,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
               src={award.image}
               alt={award.title}
               className={cn(
-                "h-full w-full object-contain max-h-32 lg:max-h-36 drop-shadow-xl transition-all duration-700",
+                "h-full w-full object-contain max-h-36 lg:max-h-40 drop-shadow-xl transition-all duration-700",
                 unlocked ? "hover:scale-110" : "grayscale opacity-40"
               )}
               whileHover={unlocked ? { rotate: [0, -2, 2, 0] } : undefined}
@@ -234,7 +173,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
               <div>
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={cn(
-                    "text-[8px] font-heading font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg ring-1",
+                    "text-[8px] font-display font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg ring-1",
                     unlocked ? cn(t.bg, t.ring, t.text) :
                     isCurrent ? "bg-primary/8 ring-primary/15 text-primary" :
                     "bg-muted/5 ring-border/8 text-muted-foreground/15"
@@ -245,26 +184,26 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
                     <motion.span
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="text-[8px] font-heading font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg bg-primary/10 ring-1 ring-primary/20 text-primary inline-flex items-center gap-1"
+                      className="text-[8px] font-display font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg bg-primary/10 ring-1 ring-primary/20 text-primary inline-flex items-center gap-1"
                     >
                       <Rocket className="h-2.5 w-2.5" /> Próximo
                     </motion.span>
                   )}
                   {unlocked && (
-                    <span className="text-[8px] font-heading font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-lg bg-success/8 ring-1 ring-success/15 text-success">
+                    <span className="text-[8px] font-display font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-lg bg-success/8 ring-1 ring-success/15 text-success">
                       ✓ Conquistado
                     </span>
                   )}
                 </div>
                 <h3 className={cn(
-                  "text-base md:text-lg font-heading font-black tracking-[-0.03em]",
+                  "text-base md:text-lg font-display font-black tracking-[-0.03em]",
                   unlocked ? "text-foreground" : isCurrent ? "text-foreground/70" : "text-muted-foreground/20"
                 )}>
                   {award.title}
                 </h3>
               </div>
               <span className={cn(
-                "text-lg md:text-xl font-heading font-black shrink-0 tabular-nums tracking-[-0.04em]",
+                "text-lg md:text-xl font-display font-black shrink-0 tabular-nums tracking-[-0.04em]",
                 unlocked ? t.text : isCurrent ? "text-foreground/40" : "text-muted-foreground/10"
               )}>
                 {award.label}
@@ -284,7 +223,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
                 <span
                   key={r}
                   className={cn(
-                    "text-[9px] font-heading font-bold px-2.5 py-1 rounded-lg ring-1 inline-flex items-center gap-1.5",
+                    "text-[9px] font-display font-bold px-2.5 py-1 rounded-lg ring-1 inline-flex items-center gap-1.5",
                     unlocked ? cn(t.bg, t.ring, t.text) :
                     isCurrent ? "bg-primary/5 ring-primary/8 text-primary/40" :
                     "bg-muted/3 ring-border/5 text-muted-foreground/10"
@@ -305,8 +244,8 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-[9px] font-heading font-bold", isCurrent ? "text-primary/50" : "text-muted-foreground/10")}>Progresso</span>
-                  <span className={cn("text-[9px] font-heading font-black tabular-nums", isCurrent ? "text-primary/60" : "text-muted-foreground/10")}>{progress.toFixed(1)}%</span>
+                  <span className={cn("text-[9px] font-display font-bold", isCurrent ? "text-primary/50" : "text-muted-foreground/10")}>Progresso</span>
+                  <span className={cn("text-[9px] font-display font-black tabular-nums", isCurrent ? "text-primary/60" : "text-muted-foreground/10")}>{progress.toFixed(1)}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted/8 ring-1 ring-border/5 overflow-hidden">
                   <motion.div
@@ -340,6 +279,7 @@ function AwardCard({ award, idx, unlocked, isCurrent, revenue }: {
 export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
+  const [expandedSection, setExpandedSection] = useState<"awards" | null>("awards");
 
   useEffect(() => {
     if (!user?.id) return;
@@ -358,72 +298,69 @@ export default function Premiacoes() {
   const nextAward = currentTierIdx >= 0 ? AWARDS[currentTierIdx] : null;
   const globalProgress = nextAward ? Math.min((revenue / nextAward.value) * 100, 100) : 100;
 
-  // Generate mock sparkline data from revenue
-  const sparkRevenue = useMemo(() => {
-    const base = revenue * 0.6;
-    return Array.from({ length: 7 }, (_, i) => base + (revenue - base) * (i / 6) + Math.random() * revenue * 0.05);
-  }, [revenue]);
-
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
-      {/* Dot grid background */}
-      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
+      {/* Ambient */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-warning/15 rounded-full blur-[180px]" />
+      </div>
 
-      {/* ═══ HERO — Mesh Gradient (same as Vendas) ═══ */}
+      {/* ═══ HERO ═══ */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-8 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
       >
-        {/* Floating blobs */}
-        <div className="absolute -inset-16 pointer-events-none">
-          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
-          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-warning/6 rounded-full blur-[160px]" />
-          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        </div>
+        {/* Top accent gradient */}
+        <div className="h-1.5 bg-gradient-to-r from-primary via-warning/80 to-destructive/60" />
+        
+        {/* Mesh gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-warning/[0.03] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
-        <div className="relative z-10">
+        <div className="relative z-10 p-6 md:p-8">
           {/* Top bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2.5">
               <motion.div
                 whileHover={{ rotate: [0, -10, 10, 0] }}
                 transition={{ duration: 0.6 }}
-                className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary"
+                className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shadow-lg shadow-primary/10"
               >
-                <Trophy className="h-4.5 w-4.5 text-primary" />
+                <Trophy className="h-4 w-4 text-primary" />
               </motion.div>
-              <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Trilha de Conquistas</span>
+              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Trilha de Conquistas</span>
             </div>
             <div className="flex items-center gap-2.5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-success/5 ring-1 ring-success/10">
                 <div className="relative">
                   <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                   <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
                 </div>
-                <span className="text-[9px] font-heading uppercase tracking-[0.2em] text-success">{unlockedCount} Desbloqueadas</span>
+                <span className="text-[9px] font-display font-bold text-success uppercase tracking-[0.15em]">{unlockedCount} Desbloqueadas</span>
               </div>
-              <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 backdrop-blur-sm">
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 ring-1 ring-primary/10">
                 <Sparkles className="h-3 w-3 text-primary" />
-                <span className="text-[9px] font-heading uppercase tracking-[0.2em] text-primary">{AWARDS.length} Marcos</span>
+                <span className="text-[9px] font-display font-bold text-primary">{AWARDS.length} Marcos</span>
               </div>
             </div>
           </div>
 
           {/* Hero revenue display */}
-          <div className="flex flex-col md:flex-row items-start md:items-end gap-6 mb-4">
-            <div>
-              <p className="text-[9px] font-heading uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">Faturamento Líquido Total</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ease }} className="flex flex-col md:flex-row items-start md:items-end gap-6">
+            <div className="flex-1">
+              <p className="text-[9px] font-display font-bold uppercase tracking-[0.25em] text-muted-foreground/35 mb-2">Faturamento Líquido Total</p>
               <div className="flex items-end gap-3">
-                <h2 className="text-[40px] sm:text-[52px] md:text-[64px] font-heading tracking-[-0.04em] text-foreground leading-[0.9] drop-shadow-[0_0_30px_hsl(var(--primary)/0.12)]">
+                <h2 className="text-[40px] sm:text-[52px] md:text-[64px] font-display font-black tracking-[-0.04em] text-foreground leading-[0.9]">
                   <AnimatedNumber value={revenue} formatter={fmtC} />
                 </h2>
                 {revenue > 0 && (
                   <motion.span
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="inline-flex items-center gap-0.5 text-[9px] font-heading font-bold text-success bg-success/6 px-2 py-0.5 rounded-md border border-success/10 mb-2"
+                    className="inline-flex items-center gap-0.5 text-[9px] font-display font-bold text-success bg-success/6 px-2 py-0.5 rounded-md ring-1 ring-success/10 mb-2"
                   >
                     <ArrowUpRight className="h-2.5 w-2.5" />
                     ativo
@@ -434,88 +371,147 @@ export default function Premiacoes() {
                 {nextAward ? `Próximo marco: ${nextAward.label} — ${nextAward.tier}` : "Todas as conquistas desbloqueadas!"}
               </p>
             </div>
-          </div>
+
+            {/* Next award preview — desktop */}
+            {nextAward && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, ease }}
+                className="hidden md:flex items-center gap-4 p-4 rounded-2xl bg-muted/5 ring-1 ring-border/10 shrink-0">
+                <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary/10 to-warning/5 flex items-center justify-center ring-1 ring-primary/10 overflow-hidden">
+                  <img src={nextAward.image} alt={nextAward.title} className="h-14 w-14 object-contain drop-shadow-lg" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-display font-bold text-muted-foreground/30 uppercase tracking-[0.15em]">Próximo</p>
+                  <p className="text-[14px] font-display font-black text-foreground/70">{nextAward.title}</p>
+                  <p className="text-[10px] text-primary font-display font-bold tabular-nums">{nextAward.label}</p>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
         </div>
       </motion.section>
 
-      {/* ═══ KPI Grid (same pattern as Vendas) ═══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <KpiTile label="Faturamento" value={fmtC(revenue)} icon={Flame} color="primary" delay={0} sparkData={sparkRevenue} sub="receita líquida total" />
-        <KpiTile label="Conquistas" value={`${unlockedCount}/${AWARDS.length}`} icon={Trophy} color="success" delay={0.06} sub={`${unlockedCount} desbloqueadas`} />
-        <KpiTile label="Próximo Marco" value={nextAward ? nextAward.label : "✓"} icon={Target} color="warning" delay={0.12} sub={nextAward ? nextAward.tier : "Completo!"} />
-        <KpiTile label="Progresso" value={`${globalProgress.toFixed(0)}%`} icon={Percent} color="info" delay={0.18} sub={nextAward ? `faltam ${fmtC(nextAward.value - revenue)}` : "lenda absoluta"} />
+      {/* ═══ KPI Grid ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Faturamento", value: fmtC(revenue), icon: Flame, tone: "primary", sub: "receita líquida total" },
+          { label: "Conquistas", value: `${unlockedCount}/${AWARDS.length}`, icon: Trophy, tone: "success", sub: `${unlockedCount} desbloqueadas` },
+          { label: "Próximo Marco", value: nextAward ? nextAward.label : "✓", icon: Target, tone: "warning", sub: nextAward ? nextAward.tier : "Completo!" },
+          { label: "Progresso", value: `${globalProgress.toFixed(0)}%`, icon: Percent, tone: "info", sub: nextAward ? `faltam ${fmtC(nextAward.value - revenue)}` : "lenda absoluta" },
+        ].map((kpi, i) => (
+          <motion.div
+            key={kpi.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.06, ease }}
+            className={cn("relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden hover:ring-border/40 transition-all duration-300 hover:shadow-lg", `hover:shadow-${kpi.tone}/10`)}
+          >
+            <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${kpi.tone}`)} />
+            <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${kpi.tone}/12`)} />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1 transition-transform duration-300 group-hover:scale-110", `bg-${kpi.tone}/8 ring-${kpi.tone}/15`)}>
+                  <kpi.icon className={cn("h-4 w-4", `text-${kpi.tone}`)} />
+                </div>
+                <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">{kpi.label}</span>
+              </div>
+              <p className={cn("text-xl md:text-2xl font-display font-black tracking-[-0.04em]", `text-${kpi.tone}`)}>{kpi.value}</p>
+              {kpi.sub && <p className="text-[9px] text-muted-foreground/30 mt-1 font-display">{kpi.sub}</p>}
+            </div>
+          </motion.div>
+        ))}
       </div>
 
       {/* ═══ Global Progress Bar ═══ */}
-      <GlowCard glowColor="primary" delay={0.24} className="p-5 mb-6">
-        <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-warning")} />
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
-              <TrendingUp className="h-3.5 w-3.5 text-primary" />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.24, ease }}
+        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden group"
+      >
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-gradient-to-b from-primary to-warning" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] to-warning/[0.02] pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+                <TrendingUp className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <div>
+                <span className="text-[11px] font-display font-black text-foreground/70 block">Progresso Geral</span>
+                <span className="text-[9px] font-medium text-muted-foreground/35">{unlockedCount} de {AWARDS.length} marcos conquistados</span>
+              </div>
             </div>
-            <div>
-              <span className="text-[11px] font-heading font-black text-foreground/70 block">Progresso Geral</span>
-              <span className="text-[9px] font-medium text-muted-foreground/35">{unlockedCount} de {AWARDS.length} marcos conquistados</span>
-            </div>
+            <span className="text-lg font-display font-black text-primary tabular-nums">{((unlockedCount / AWARDS.length) * 100).toFixed(0)}%</span>
           </div>
-          <span className="text-lg font-heading font-black text-primary tabular-nums">{((unlockedCount / AWARDS.length) * 100).toFixed(0)}%</span>
-        </div>
 
-        <div className="h-3 rounded-full bg-muted/10 ring-1 ring-border/10 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${(unlockedCount / AWARDS.length) * 100}%` }}
-            transition={{ duration: 1.8, ease }}
-            className="h-full rounded-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 relative shadow-md shadow-primary/20"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />
-          </motion.div>
-        </div>
+          <div className="h-3 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${(unlockedCount / AWARDS.length) * 100}%` }}
+              transition={{ duration: 1.8, ease }}
+              className="h-full rounded-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 relative shadow-md shadow-primary/20"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />
+            </motion.div>
+          </div>
 
-        {/* Mini milestones */}
-        <div className="flex justify-between mt-3.5 px-1">
-          {AWARDS.map((a, idx) => {
-            const unlocked = revenue >= a.value;
-            const at = TONE_MAP[a.tone];
-            return (
-              <motion.div
-                key={a.id}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + idx * 0.06, ease }}
-                className="flex flex-col items-center gap-1.5 group cursor-default"
-              >
+          {/* Mini milestones */}
+          <div className="flex justify-between mt-3.5 px-1">
+            {AWARDS.map((a, idx) => {
+              const unlocked = revenue >= a.value;
+              const at = TONE_MAP[a.tone];
+              return (
                 <motion.div
-                  whileHover={{ scale: 1.3 }}
-                  className={cn(
-                    "h-3.5 w-3.5 rounded-full ring-1 transition-all duration-500",
-                    unlocked ? cn(at.accent, at.ring, `shadow-sm ${at.glow}`) :
-                    idx === currentTierIdx ? "bg-primary/30 ring-primary/20 animate-pulse" :
-                    "bg-muted/8 ring-border/8"
-                  )}
-                />
-                <span className={cn(
-                  "text-[7px] font-heading font-bold tabular-nums hidden sm:block transition-all",
-                  unlocked ? at.text + "/60" : "text-muted-foreground/15",
-                  "group-hover:text-foreground/60"
-                )}>{a.label}</span>
-              </motion.div>
-            );
-          })}
+                  key={a.id}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + idx * 0.06, ease }}
+                  className="flex flex-col items-center gap-1.5 group/dot cursor-default"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.3 }}
+                    className={cn(
+                      "h-3.5 w-3.5 rounded-full ring-1 transition-all duration-500",
+                      unlocked ? cn(at.accent, at.ring, `shadow-sm ${at.glow}`) :
+                      idx === currentTierIdx ? "bg-primary/30 ring-primary/20 animate-pulse" :
+                      "bg-muted/8 ring-border/8"
+                    )}
+                  />
+                  <span className={cn(
+                    "text-[7px] font-display font-bold tabular-nums hidden sm:block transition-all",
+                    unlocked ? at.text + "/60" : "text-muted-foreground/15",
+                    "group-hover/dot:text-foreground/60"
+                  )}>{a.label}</span>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
-      </GlowCard>
+      </motion.div>
 
       {/* ═══ Awards Trail ═══ */}
       <div className="relative">
+        {/* Section header */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, ease }}
+          className="flex items-center gap-2.5 mb-5">
+          <div className="h-8 w-8 rounded-xl bg-warning/8 ring-1 ring-warning/15 flex items-center justify-center">
+            <Medal className="h-3.5 w-3.5 text-warning" />
+          </div>
+          <div>
+            <h3 className="text-[14px] font-display font-black text-foreground tracking-[-0.02em]">Conquistas & Premiações</h3>
+            <p className="text-[10px] text-muted-foreground/35">Desbloqueie marcos com seu faturamento</p>
+          </div>
+        </motion.div>
+
         {/* Vertical line background */}
-        <div className="absolute left-[23px] md:left-[27px] top-4 bottom-4 w-[2px] bg-border/8 rounded-full" />
+        <div className="absolute left-[23px] md:left-[27px] top-[72px] bottom-4 w-[2px] bg-border/8 rounded-full" />
         {/* Animated progress line */}
         <motion.div
           initial={{ height: 0 }}
           animate={{ height: unlockedCount === 0 ? "0%" : unlockedCount === AWARDS.length ? "100%" : `${((unlockedCount) / AWARDS.length) * 100}%` }}
           transition={{ duration: 2, delay: 0.5, ease }}
-          className="absolute left-[23px] md:left-[27px] top-4 w-[2px] bg-gradient-to-b from-primary via-primary/60 to-primary/20 rounded-full shadow-sm shadow-primary/20"
+          className="absolute left-[23px] md:left-[27px] top-[72px] w-[2px] bg-gradient-to-b from-primary via-primary/60 to-primary/20 rounded-full shadow-sm shadow-primary/20"
         />
 
         <div className="space-y-2">
@@ -555,27 +551,29 @@ export default function Premiacoes() {
                 <Crown className="h-5 w-5 md:h-6 md:w-6" />
               </motion.div>
             </div>
-            <GlowCard
-              glowColor="primary"
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: AWARDS.length * 0.07 + 0.4, ease }}
               className={cn(
-                "flex-1 p-5 transition-all duration-500",
+                "flex-1 p-5 rounded-2xl bg-card/95 ring-1 overflow-hidden transition-all duration-500",
                 unlockedCount === AWARDS.length
-                  ? "shadow-lg shadow-primary/10"
-                  : "opacity-40"
+                  ? "ring-primary/20 shadow-lg shadow-primary/10"
+                  : "ring-border/10 opacity-40"
               )}
             >
               <div className={cn(
                 "absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
                 unlockedCount === AWARDS.length ? "bg-gradient-to-b from-primary to-warning" : "bg-border/10"
               )} />
-              <div className="flex items-center gap-3 pl-2">
+              <div className="flex items-center gap-3 pl-2 relative z-10">
                 {unlockedCount === AWARDS.length && (
                   <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                     <Trophy className="h-6 w-6 text-primary" />
                   </motion.div>
                 )}
                 <p className={cn(
-                  "text-sm font-heading font-black",
+                  "text-sm font-display font-black",
                   unlockedCount === AWARDS.length
                     ? "text-transparent bg-clip-text bg-gradient-to-r from-primary to-warning"
                     : "text-muted-foreground/15"
@@ -585,7 +583,7 @@ export default function Premiacoes() {
                     : "Continue sua jornada para desbloquear todas as conquistas"}
                 </p>
               </div>
-            </GlowCard>
+            </motion.div>
           </motion.div>
         </div>
       </div>
