@@ -153,7 +153,7 @@ function PricingCard({ name, price, desc, features, popular, delay }: {
       )}
       <div className="mb-6">
         <h3 className="text-lg font-display font-bold text-foreground">{name}</h3>
-        <p className="text-xs text-muted-foreground/50 mt-1 font-display">{desc}</p>
+        <p className="text-xs text-muted-foreground/60 mt-1 font-display">{desc}</p>
       </div>
       <div className="mb-6">
         <span className="text-4xl font-display font-black text-foreground tracking-[-0.04em]">{price}</span>
@@ -163,7 +163,7 @@ function PricingCard({ name, price, desc, features, popular, delay }: {
         {features.map((f, i) => (
           <li key={i} className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span className="text-sm text-muted-foreground/60 font-display">{f}</span>
+            <span className="text-sm text-muted-foreground/70 font-display">{f}</span>
           </li>
         ))}
       </ul>
