@@ -619,8 +619,10 @@ export default function ProductEditor() {
                   <><Check className="h-3.5 w-3.5 relative z-10" /> <span className="hidden sm:inline relative z-10">Salvo!</span></>
                 ) : saving ? (
                   <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
+                ) : isNew && !createdProductId ? (
+                  <><ChevronRight className="h-3 w-3 relative z-10" /> <span className="relative z-10">Próximo</span></>
                 ) : (
-                  <><Save className="h-3 w-3 relative z-10" /> <span className="relative z-10">{isNew ? "Criar" : "Salvar"}</span></>
+                  <><Save className="h-3 w-3 relative z-10" /> <span className="relative z-10">Salvar</span></>
                 )}
               </Button>
             </div>
@@ -921,18 +923,6 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </div>
 
-          {/* Revenue estimate */}
-          {price && parseFloat(price) > 0 && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-success/5 border border-success/15 p-3 flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-success/10 flex items-center justify-center shrink-0 ring-1 ring-success/20">
-                <TrendingUp className="h-4 w-4 text-success" />
-              </div>
-              <div>
-                <p className="text-[10px] font-display font-bold text-muted-foreground/60 uppercase tracking-wider">Estimativa de receita (100 vendas)</p>
-                <p className="text-sm font-numbers font-black text-success">R$ {(parseFloat(price) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
-              </div>
-            </motion.div>
-          )}
         </div>
       </EditorCard>
 
@@ -942,13 +932,13 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <EditorLabel icon={ExternalLink}>Página de vendas <span className="text-destructive">*</span></EditorLabel>
-            <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" required />
-            <p className={cn("text-[10px]", pageUrl.trim() ? "text-success" : "text-muted-foreground/30")}>{pageUrl.trim() ? "✓ Página preenchida" : "Obrigatório"}</p>
+            <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className="h-11 bg-card/80 border-border/40" required />
+            <p className={cn("text-[10px]", /^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "✓ Página preenchida" : "Obrigatório — insira o domínio completo"}</p>
           </div>
           <div className="space-y-2">
             <EditorLabel icon={Mail}>E-mail de suporte <span className="text-destructive">*</span></EditorLabel>
             <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-card/80 border-border/40" required />
-            <p className={cn("text-[10px]", supportEmail.trim() ? "text-success" : "text-muted-foreground/30")}>{supportEmail.trim() ? "✓ E-mail preenchido" : "Obrigatório"}</p>
+            <p className={cn("text-[10px]", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "✓ E-mail preenchido" : "Obrigatório — insira um e-mail válido"}</p>
           </div>
         </div>
         <div className="space-y-2">
