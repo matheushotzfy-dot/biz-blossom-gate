@@ -328,26 +328,25 @@ export default function AdminDashboard() {
 
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
-        "relative z-50 h-full flex flex-col shrink-0 border-r border-white/[0.06] transition-all duration-300",
+        "relative z-50 h-full flex flex-col shrink-0 transition-all duration-300",
         sidebarCollapsed ? "w-[72px]" : "w-[248px]"
-      )} style={{ background: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)", backdropFilter: "blur(40px)" }}>
+      )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: `1px solid ${themeConfig.isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}` }}>
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-emerald-500/[0.06] to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-teal-500/[0.04] to-transparent" />
+          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : "from-emerald-500/[0.06]")} />
         </div>
 
         {/* Logo */}
         <div className="relative h-[64px] flex items-center px-4 gap-3 border-b border-white/[0.06] shrink-0">
-          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.35)] ring-1 ring-white/15 shrink-0">
+          <div className={cn("relative h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 ring-white/15 shrink-0", accentClasses.gradient, accentClasses.shadow)}>
             <Rocket className="h-4.5 w-4.5 text-white drop-shadow-sm" />
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/[0.12]" />
           </div>
           {!sidebarCollapsed && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="min-w-0">
-              <h1 className="text-[15px] font-black tracking-[-0.02em] bg-gradient-to-r from-white via-white/90 to-emerald-200 bg-clip-text text-transparent" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>HOTZFY</h1>
-              <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-emerald-400/50">
+              <h1 className="text-[15px] font-black tracking-[-0.02em] bg-gradient-to-r from-white via-white/90 to-white/60 bg-clip-text text-transparent" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>HOTZFY</h1>
+              <p className={cn("text-[7px] font-bold uppercase tracking-[0.4em]", accentClasses.textGlow)}>
                 {isEmployee ? "Staff Panel" : "Control Center"}
               </p>
             </motion.div>
