@@ -391,7 +391,7 @@ export default function LandingPage() {
                   const el = document.getElementById("recursos");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
-                  className="h-14 px-6 rounded-2xl text-base font-display font-semibold text-muted-foreground/50 hover:text-foreground border border-border/10 hover:border-border/20 hover:bg-card/30 transition-all">
+                  className="h-12 md:h-14 px-6 rounded-2xl text-sm md:text-base font-display font-semibold text-muted-foreground/50 hover:text-foreground border border-border/10 hover:border-border/20 hover:bg-card/30 transition-all w-full sm:w-auto justify-center">
                   <Play className="h-4 w-4 mr-2" /> Conhecer recursos
                 </Button>
               </motion.div>
