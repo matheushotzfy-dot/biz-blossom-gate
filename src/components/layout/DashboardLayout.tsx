@@ -12,8 +12,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
 import { usePrefetchDashboardData } from "@/hooks/useQueryData";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocation } from "react-router-dom";
 
 function DashboardLayoutInner() {
   const { user } = useAuth();
@@ -21,10 +22,16 @@ function DashboardLayoutInner() {
   const { profile } = useProfile();
   usePrefetchDashboardData();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [showApproved, setShowApproved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const unreadCount = useNotificationCount();
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
 
   useEffect(() => {
     if (!user?.id || !profile?.account_status || !profile?.updated_at) return;
@@ -123,7 +130,7 @@ function DashboardLayoutInner() {
 
           <MobileRevenueBar />
 
-          <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="mx-auto w-full max-w-[1180px] py-4 md:py-8">
               <Outlet />
             </div>
