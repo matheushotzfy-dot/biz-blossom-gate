@@ -381,7 +381,7 @@ export default function LandingPage() {
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}
                 className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-6 md:mb-8">
                 <Button onClick={() => navigate("/auth")} size="lg"
-                  className="gradient-primary text-primary-foreground font-display font-bold text-base h-14 px-8 rounded-2xl shadow-2xl shadow-primary/25 hover:shadow-[0_20px_60px] hover:shadow-primary/35 transition-all duration-300 relative overflow-hidden group">
+                  className="gradient-primary text-primary-foreground font-display font-bold text-sm md:text-base h-12 md:h-14 px-6 md:px-8 rounded-2xl shadow-2xl shadow-primary/25 hover:shadow-[0_20px_60px] hover:shadow-primary/35 transition-all duration-300 relative overflow-hidden group w-full sm:w-auto">
                   <div className="absolute inset-0 overflow-hidden rounded-2xl">
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
                   </div>
