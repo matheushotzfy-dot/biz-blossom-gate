@@ -289,24 +289,42 @@ export default function AdminDashboard() {
   const approvedTx = transactions.filter(t => t.status === "completed" || t.status === "approved");
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
 
+  const accentClasses = adminTheme === "dark" ? {
+    gradient: "from-violet-500 via-violet-600 to-purple-700",
+    text: "text-violet-400", textSoft: "text-violet-400/60", textGlow: "text-violet-400/50",
+    bg: "bg-violet-500", bgSoft: "bg-violet-500/10", bgBorder: "border-violet-500/10",
+    shadow: "shadow-[0_0_30px_rgba(139,92,246,0.35)]", glowBg: "bg-violet-950/25",
+    ringActive: "ring-violet-500/20", indicatorGradient: "from-violet-400 via-violet-500 to-purple-500",
+    indicatorShadow: "shadow-[0_0_14px_rgba(139,92,246,0.8)]",
+    activeItem: "from-violet-500/[0.12] via-violet-500/[0.08] to-purple-500/[0.04] border-violet-500/[0.18] shadow-[inset_0_1px_0_rgba(139,92,246,0.12)]",
+    activeIcon: "text-violet-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.6)]",
+  } : {
+    gradient: "from-emerald-500 via-emerald-600 to-teal-700",
+    text: "text-emerald-400", textSoft: "text-emerald-400/60", textGlow: "text-emerald-400/50",
+    bg: "bg-emerald-400", bgSoft: "bg-emerald-500/10", bgBorder: "border-emerald-500/10",
+    shadow: "shadow-[0_0_30px_rgba(16,185,129,0.35)]", glowBg: "bg-emerald-950/25",
+    ringActive: "ring-emerald-500/20", indicatorGradient: "from-emerald-400 via-emerald-500 to-teal-500",
+    indicatorShadow: "shadow-[0_0_14px_rgba(16,185,129,0.8)]",
+    activeItem: "from-emerald-500/[0.12] via-emerald-500/[0.08] to-teal-500/[0.04] border-emerald-500/[0.18] shadow-[inset_0_1px_0_rgba(16,185,129,0.12)]",
+    activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
+  };
+
   return (
     <div
-      className="dark h-screen text-white flex overflow-hidden"
+      className={cn("h-screen flex overflow-hidden", themeConfig.isDark ? "dark text-white" : "text-gray-900")}
       style={{
-        background: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
+        background: themeConfig.bg,
         fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif",
       }}
     >
       {/* ═══ Ambient Glow ═══ */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-200px] left-1/4 w-[900px] h-[600px] bg-emerald-950/25 rounded-full blur-[200px]" />
-        <motion.div animate={{ opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-teal-950/20 rounded-full blur-[160px]" />
-        <motion.div animate={{ opacity: [0.03, 0.06, 0.03] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-emerald-950/15 rounded-full blur-[150px]" />
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-      </div>
+      {themeConfig.isDark && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className={cn("absolute top-[-200px] left-1/4 w-[900px] h-[600px] rounded-full blur-[200px]", accentClasses.glowBg)} />
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+        </div>
+      )}
 
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
