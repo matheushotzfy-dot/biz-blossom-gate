@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ScrollToTop from "@/components/ScrollToTop";
 import { RequireAuth } from "@/hooks/useAuth";
@@ -51,7 +51,6 @@ import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import ThankYou from "./pages/ThankYou";
 import StatusPage from "./pages/StatusPage";
 
-// Member Area (standalone, Netflix-style)
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
 import MemberHome from "./pages/membros/MemberHome";
@@ -89,30 +88,25 @@ const App = () => (
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
               <Route path="/status" element={<StatusPage />} />
               <Route path="/" element={<Index />} />
-              
-              {/* Public Member Area (standalone, Netflix-style) */}
+
               <Route path="/membros-area/login" element={<MemberAuth />} />
               <Route path="/membros-area" element={<MemberLayout />}>
                 <Route index element={<MemberHome />} />
                 <Route path="curso/:courseId" element={<MemberCourse />} />
               </Route>
 
-              {/* Admin Master — server-side role verification */}
               <Route path="/admin-matheus" element={<AdminLogin />} />
               <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
               <Route path="/admin-matheus/auditoria" element={<RequireAdmin><AdminAuditoria /></RequireAdmin>} />
               <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
 
-              {/* Manager Panel */}
               <Route path="/gerentes" element={<ManagerLogin />} />
               <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
 
-              {/* Standalone full-screen pages (outside dashboard layout) */}
               <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
               <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
               <Route path="/vendas/produtos/:productId/checkout-builder" element={<RequireAuth><CheckoutBuilder /></RequireAuth>} />
 
-              {/* User Dashboard */}
               <Route
                 element={
                   <RequireAuth>
@@ -122,6 +116,7 @@ const App = () => (
               >
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<PerfilHub />} />
+                <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
                 <Route path="/premiacoes" element={<PremiacoesHub />} />
                 <Route path="/gamificacao" element={<Gamificacao />} />
                 <Route path="/suporte" element={<Suporte />} />
@@ -131,16 +126,15 @@ const App = () => (
                 <Route path="/vendas" element={<Vendas />} />
                 <Route path="/vendas/produtos" element={<Produtos />} />
                 <Route path="/vendas/checkout" element={<Checkout />} />
-                
+
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
-                {/* <Route path="/otimizacao" element={<VendasHub />} /> */}
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                 <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
-                
+
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />

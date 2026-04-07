@@ -108,7 +108,7 @@ function DashboardLayoutInner() {
           {/* ─── VERIFICATION BANNER ─── */}
           {profile && profile.account_status !== "approved" && (
             <button
-              onClick={() => navigate("/financeiro/identidade")}
+              onClick={() => navigate("/perfil?tab=identidade")}
               className="relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b transition-colors cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
             >
               <AlertTriangle className="h-4 w-4 shrink-0" />
