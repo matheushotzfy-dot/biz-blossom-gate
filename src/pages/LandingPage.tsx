@@ -351,7 +351,7 @@ export default function LandingPage() {
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                className="text-lg md:text-xl text-muted-foreground/55 font-display leading-relaxed mb-8 max-w-lg">
+                className="text-base md:text-xl text-muted-foreground/55 font-display leading-relaxed mb-6 md:mb-8 max-w-lg">
                 Plataforma completa de pagamentos com checkout inteligente, área de membros, e as menores taxas do mercado.
               </motion.p>
 
