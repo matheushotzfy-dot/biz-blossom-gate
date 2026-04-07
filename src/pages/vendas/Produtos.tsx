@@ -238,19 +238,45 @@ export default function Produtos() {
                 <div className="absolute top-3 left-3 z-10 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="h-8 w-8 rounded-lg bg-card/80 backdrop-blur-md ring-1 ring-border/15 flex items-center justify-center text-muted-foreground hover:text-foreground shadow-lg active:scale-95 transition-all">
-                        <MoreVertical className="h-3.5 w-3.5" />
+                      <button className="h-9 w-9 rounded-xl bg-card/90 backdrop-blur-xl ring-1 ring-border/15 flex items-center justify-center text-muted-foreground/60 hover:text-foreground shadow-xl hover:shadow-2xl active:scale-95 transition-all hover:ring-border/30">
+                        <MoreVertical className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-52 rounded-xl border border-border/20 bg-card/95 backdrop-blur-xl shadow-2xl">
+                    <DropdownMenuContent align="start" sideOffset={6} className="w-56 rounded-2xl border border-border/15 bg-card/98 backdrop-blur-2xl shadow-2xl shadow-background/50 p-1.5 ring-1 ring-border/5">
+                      <p className="px-3 py-2 text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/30">Ações</p>
                       {p.checkout_url && (
-                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2.5 cursor-pointer text-xs rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver Checkout</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-muted-foreground/70 hover:text-foreground focus:text-foreground">
+                          <div className="h-7 w-7 rounded-lg bg-info/10 ring-1 ring-info/15 flex items-center justify-center shrink-0">
+                            <Eye className="h-3.5 w-3.5 text-info" />
+                          </div>
+                          Ver Checkout
+                        </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => copyCheckout(p)} className="gap-2.5 cursor-pointer text-xs rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar Link</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2.5 cursor-pointer text-xs rounded-lg"><Crosshair className="h-3.5 w-3.5" /> Configurar Pixels</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2.5 cursor-pointer text-xs rounded-lg"><Star className="h-3.5 w-3.5" /> Área de Membros</DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-border/10" />
-                      <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-2.5 cursor-pointer text-destructive focus:text-destructive text-xs rounded-lg"><Trash2 className="h-3.5 w-3.5" /> Excluir Produto</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => copyCheckout(p)} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-muted-foreground/70 hover:text-foreground focus:text-foreground">
+                        <div className="h-7 w-7 rounded-lg bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center shrink-0">
+                          <Copy className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        Copiar Link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-muted-foreground/70 hover:text-foreground focus:text-foreground">
+                        <div className="h-7 w-7 rounded-lg bg-warning/10 ring-1 ring-warning/15 flex items-center justify-center shrink-0">
+                          <Crosshair className="h-3.5 w-3.5 text-warning" />
+                        </div>
+                        Configurar Pixels
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-muted-foreground/70 hover:text-foreground focus:text-foreground">
+                        <div className="h-7 w-7 rounded-lg bg-success/10 ring-1 ring-success/15 flex items-center justify-center shrink-0">
+                          <Star className="h-3.5 w-3.5 text-success" />
+                        </div>
+                        Área de Membros
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-border/8 my-1" />
+                      <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-destructive/60 focus:text-destructive hover:text-destructive">
+                        <div className="h-7 w-7 rounded-lg bg-destructive/8 ring-1 ring-destructive/12 flex items-center justify-center shrink-0">
+                          <Trash2 className="h-3.5 w-3.5 text-destructive/60" />
+                        </div>
+                        Excluir Produto
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
