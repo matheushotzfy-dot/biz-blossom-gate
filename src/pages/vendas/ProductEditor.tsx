@@ -248,8 +248,8 @@ export default function ProductEditor() {
     if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
     if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
     if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
-    if (!pageUrl.trim()) { toast.error("Página de vendas é obrigatória"); setActiveTab("geral"); return; }
-    if (!supportEmail.trim()) { toast.error("E-mail de suporte é obrigatório"); setActiveTab("geral"); return; }
+    if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
+    if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
     if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
 
     setSaving(true);
