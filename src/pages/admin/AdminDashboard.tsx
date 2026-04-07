@@ -160,6 +160,18 @@ export default function AdminDashboard() {
   });
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
+  const [adminTheme, setAdminTheme] = useState<AdminTheme>(() => {
+    return (localStorage.getItem("admin-theme") as AdminTheme) || "dark-green";
+  });
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
+
+  const themeConfig = ADMIN_THEMES[adminTheme];
+
+  const changeAdminTheme = (t: AdminTheme) => {
+    setAdminTheme(t);
+    localStorage.setItem("admin-theme", t);
+    toast.success(`Tema "${ADMIN_THEMES[t].label}" aplicado!`);
+  };
 
   useEffect(() => {
     if (!user) return;
