@@ -344,7 +344,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.8 }}
-                className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.05] mb-6">
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.08] mb-5 md:mb-6">
                 Venda seus{" "}
                 <span className="text-gradient">infoprodutos</span>{" "}
                 sem limites
