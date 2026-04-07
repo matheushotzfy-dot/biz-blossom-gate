@@ -10,7 +10,7 @@ import {
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
   ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft,
-  Flame, Sparkles, Crown, Globe,
+  Flame, Sparkles, Crown, Globe, Palette,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -97,6 +97,42 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
+type AdminTheme = "dark-green" | "dark" | "light-green";
+
+const ADMIN_THEMES: Record<AdminTheme, {
+  label: string; bg: string; sidebarBg: string; topBarBg: string;
+  accent: string; accentLight: string; accentGlow: string;
+  textPrimary: string; textSecondary: string; textMuted: string;
+  border: string; cardBg: string; isDark: boolean;
+}> = {
+  "dark-green": {
+    label: "Verde Escuro",
+    bg: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(6,18,12,0.8) 0%, rgba(8,20,14,0.7) 100%)",
+    accent: "emerald", accentLight: "rgba(16,185,129,0.15)", accentGlow: "rgba(16,185,129,0.4)",
+    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
+    border: "rgba(255,255,255,0.06)", cardBg: "rgba(16,185,129,0.04)", isDark: true,
+  },
+  "dark": {
+    label: "Dark Clássico",
+    bg: "linear-gradient(135deg, #0a0a0f 0%, #0f0f18 30%, #12121e 60%, #0a0a0f 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(10,10,18,0.98) 0%, rgba(8,8,14,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(10,10,18,0.8) 0%, rgba(12,12,20,0.7) 100%)",
+    accent: "violet", accentLight: "rgba(139,92,246,0.15)", accentGlow: "rgba(139,92,246,0.4)",
+    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
+    border: "rgba(255,255,255,0.06)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
+  },
+  "light-green": {
+    label: "Light + Verde",
+    bg: "linear-gradient(135deg, #f8faf9 0%, #f0f5f2 30%, #e8f0ec 60%, #f8faf9 100%)",
+    sidebarBg: "linear-gradient(180deg, #0f1f17 0%, #0a1810 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(248,250,249,0.9) 100%)",
+    accent: "emerald", accentLight: "rgba(16,185,129,0.12)", accentGlow: "rgba(16,185,129,0.3)",
+    textPrimary: "rgba(15,31,23,0.9)", textSecondary: "rgba(15,31,23,0.6)", textMuted: "rgba(15,31,23,0.35)",
+    border: "rgba(0,0,0,0.08)", cardBg: "rgba(16,185,129,0.03)", isDark: false,
+  },
+};
 
 const DATE_PRESETS = [
   { label: "Hoje", days: 0 },
@@ -124,6 +160,18 @@ export default function AdminDashboard() {
   });
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
+  const [adminTheme, setAdminTheme] = useState<AdminTheme>(() => {
+    return (localStorage.getItem("admin-theme") as AdminTheme) || "dark-green";
+  });
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
+
+  const themeConfig = ADMIN_THEMES[adminTheme];
+
+  const changeAdminTheme = (t: AdminTheme) => {
+    setAdminTheme(t);
+    localStorage.setItem("admin-theme", t);
+    toast.success(`Tema "${ADMIN_THEMES[t].label}" aplicado!`);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -241,47 +289,64 @@ export default function AdminDashboard() {
   const approvedTx = transactions.filter(t => t.status === "completed" || t.status === "approved");
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
 
+  const accentClasses = adminTheme === "dark" ? {
+    gradient: "from-violet-500 via-violet-600 to-purple-700",
+    text: "text-violet-400", textSoft: "text-violet-400/60", textGlow: "text-violet-400/50",
+    bg: "bg-violet-500", bgSoft: "bg-violet-500/10", bgBorder: "border-violet-500/10",
+    shadow: "shadow-[0_0_30px_rgba(139,92,246,0.35)]", glowBg: "bg-violet-950/25",
+    ringActive: "ring-violet-500/20", indicatorGradient: "from-violet-400 via-violet-500 to-purple-500",
+    indicatorShadow: "shadow-[0_0_14px_rgba(139,92,246,0.8)]",
+    activeItem: "from-violet-500/[0.12] via-violet-500/[0.08] to-purple-500/[0.04] border-violet-500/[0.18] shadow-[inset_0_1px_0_rgba(139,92,246,0.12)]",
+    activeIcon: "text-violet-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.6)]",
+  } : {
+    gradient: "from-emerald-500 via-emerald-600 to-teal-700",
+    text: "text-emerald-400", textSoft: "text-emerald-400/60", textGlow: "text-emerald-400/50",
+    bg: "bg-emerald-400", bgSoft: "bg-emerald-500/10", bgBorder: "border-emerald-500/10",
+    shadow: "shadow-[0_0_30px_rgba(16,185,129,0.35)]", glowBg: "bg-emerald-950/25",
+    ringActive: "ring-emerald-500/20", indicatorGradient: "from-emerald-400 via-emerald-500 to-teal-500",
+    indicatorShadow: "shadow-[0_0_14px_rgba(16,185,129,0.8)]",
+    activeItem: "from-emerald-500/[0.12] via-emerald-500/[0.08] to-teal-500/[0.04] border-emerald-500/[0.18] shadow-[inset_0_1px_0_rgba(16,185,129,0.12)]",
+    activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
+  };
+
   return (
     <div
-      className="dark h-screen text-white flex overflow-hidden"
+      className={cn("h-screen flex overflow-hidden", themeConfig.isDark ? "dark text-white" : "text-gray-900")}
       style={{
-        background: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
+        background: themeConfig.bg,
         fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif",
       }}
     >
       {/* ═══ Ambient Glow ═══ */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-200px] left-1/4 w-[900px] h-[600px] bg-emerald-950/25 rounded-full blur-[200px]" />
-        <motion.div animate={{ opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] bg-teal-950/20 rounded-full blur-[160px]" />
-        <motion.div animate={{ opacity: [0.03, 0.06, 0.03] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-emerald-950/15 rounded-full blur-[150px]" />
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-      </div>
+      {themeConfig.isDark && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className={cn("absolute top-[-200px] left-1/4 w-[900px] h-[600px] rounded-full blur-[200px]", accentClasses.glowBg)} />
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+        </div>
+      )}
 
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
-        "relative z-50 h-full flex flex-col shrink-0 border-r border-white/[0.06] transition-all duration-300",
+        "relative z-50 h-full flex flex-col shrink-0 transition-all duration-300",
         sidebarCollapsed ? "w-[72px]" : "w-[248px]"
-      )} style={{ background: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)", backdropFilter: "blur(40px)" }}>
+      )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: `1px solid ${themeConfig.isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}` }}>
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-emerald-500/[0.06] to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-teal-500/[0.04] to-transparent" />
+          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : "from-emerald-500/[0.06]")} />
         </div>
 
         {/* Logo */}
         <div className="relative h-[64px] flex items-center px-4 gap-3 border-b border-white/[0.06] shrink-0">
-          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.35)] ring-1 ring-white/15 shrink-0">
+          <div className={cn("relative h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 ring-white/15 shrink-0", accentClasses.gradient, accentClasses.shadow)}>
             <Rocket className="h-4.5 w-4.5 text-white drop-shadow-sm" />
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/[0.12]" />
           </div>
           {!sidebarCollapsed && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="min-w-0">
-              <h1 className="text-[15px] font-black tracking-[-0.02em] bg-gradient-to-r from-white via-white/90 to-emerald-200 bg-clip-text text-transparent" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>HOTZFY</h1>
-              <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-emerald-400/50">
+              <h1 className="text-[15px] font-black tracking-[-0.02em] bg-gradient-to-r from-white via-white/90 to-white/60 bg-clip-text text-transparent" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>HOTZFY</h1>
+              <p className={cn("text-[7px] font-bold uppercase tracking-[0.4em]", accentClasses.textGlow)}>
                 {isEmployee ? "Staff Panel" : "Control Center"}
               </p>
             </motion.div>
@@ -290,20 +355,20 @@ export default function AdminDashboard() {
 
         {/* Quick Stats */}
         {!sidebarCollapsed && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-3 mt-3 mb-1 p-3 rounded-xl border border-emerald-500/10 bg-gradient-to-br from-emerald-500/[0.06] to-teal-500/[0.03]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn("mx-3 mt-3 mb-1 p-3 rounded-xl border", accentClasses.bgBorder)} style={{ background: themeConfig.cardBg }}>
             <div className="flex items-center gap-2 mb-2">
-              <Globe className="h-3 w-3 text-emerald-400/60" />
-              <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-400/50">Volume Total</span>
+              <Globe className={cn("h-3 w-3", accentClasses.textSoft)} />
+              <span className={cn("text-[8px] font-bold uppercase tracking-[0.25em]", accentClasses.textGlow)}>Volume Total</span>
             </div>
             <p className="text-[14px] font-black text-white/90 tracking-tight" style={{ fontFamily: "'Space Grotesk', monospace" }}>
               {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
             </p>
             <div className="flex items-center gap-1.5 mt-1.5">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                <span className={cn("absolute h-full w-full animate-ping rounded-full opacity-40", accentClasses.bg)} />
+                <span className={cn("relative h-1.5 w-1.5 rounded-full", accentClasses.bg)} />
               </span>
-              <span className="text-[8px] font-bold text-emerald-400/60 uppercase tracking-widest">Live</span>
+              <span className={cn("text-[8px] font-bold uppercase tracking-widest", accentClasses.textSoft)}>Live</span>
             </div>
           </motion.div>
         )}
@@ -329,18 +394,18 @@ export default function AdminDashboard() {
                         "relative w-full flex items-center gap-2.5 rounded-xl transition-all duration-200 group",
                         sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive
-                          ? "bg-gradient-to-r from-emerald-500/[0.12] via-emerald-500/[0.08] to-teal-500/[0.04] text-white shadow-[inset_0_1px_0_rgba(16,185,129,0.12)] border border-emerald-500/[0.18]"
+                          ? cn("bg-gradient-to-r text-white border", accentClasses.activeItem)
                           : "text-white/25 hover:text-white/55 hover:bg-white/[0.03] border border-transparent"
                       )}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-indicator"
-                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b from-emerald-400 via-emerald-500 to-teal-500 shadow-[0_0_14px_rgba(16,185,129,0.8)]"
+                          className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b", accentClasses.indicatorGradient, accentClasses.indicatorShadow)}
                           transition={{ type: "spring", stiffness: 500, damping: 35 }}
                         />
                       )}
-                      <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isActive ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" : "opacity-40 group-hover:opacity-70")} />
+                      <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isActive ? accentClasses.activeIcon : "opacity-40 group-hover:opacity-70")} />
                       {!sidebarCollapsed && (
                         <span className={cn("text-[12px] truncate transition-all", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
                       )}
@@ -382,27 +447,27 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* ═══ TOP BAR ═══ */}
-        <header className="relative z-40 h-[56px] border-b border-white/[0.06] flex items-center px-5 gap-4 shrink-0" style={{ background: "linear-gradient(90deg, rgba(6,18,12,0.8) 0%, rgba(8,20,14,0.7) 100%)", backdropFilter: "blur(30px)" }}>
+        <header className="relative z-40 h-[56px] flex items-center px-5 gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/10 flex items-center justify-center border border-emerald-500/10">
+              <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center border", accentClasses.bgBorder)} style={{ background: themeConfig.accentLight }}>
                 {(() => {
                   const Icon = NAV_SECTIONS.flatMap(s => s.items).find(i => i.id === activeTab)?.icon || LayoutDashboard;
-                  return <Icon className="h-3.5 w-3.5 text-emerald-400/70" />;
+                  return <Icon className={cn("h-3.5 w-3.5", accentClasses.textSoft)} />;
                 })()}
               </div>
-              <h2 className="text-[14px] font-bold text-white/85 truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{activeTabLabel}</h2>
+              <h2 className="text-[14px] font-bold truncate" style={{ color: themeConfig.textPrimary, fontFamily: "'Space Grotesk', sans-serif" }}>{activeTabLabel}</h2>
             </div>
             {syncing && (
-              <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/15 px-2.5 py-1">
-                <RefreshCw className="h-2.5 w-2.5 text-emerald-400 animate-spin" />
-                <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">Sync</span>
+              <div className={cn("flex items-center gap-1.5 rounded-full px-2.5 py-1 border", accentClasses.bgSoft, accentClasses.bgBorder)}>
+                <RefreshCw className={cn("h-2.5 w-2.5 animate-spin", accentClasses.text)} />
+                <span className={cn("text-[8px] font-bold uppercase tracking-wider", accentClasses.text)}>Sync</span>
               </div>
             )}
           </div>
 
           {/* Date Picker */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
@@ -410,20 +475,21 @@ export default function AdminDashboard() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
                   datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
-                    ? "bg-emerald-500/15 text-emerald-400 shadow-sm ring-1 ring-emerald-500/20"
-                    : "text-white/20 hover:text-white/45"
+                    ? cn(accentClasses.bgSoft, accentClasses.text, "shadow-sm ring-1", accentClasses.ringActive)
+                    : ""
                 )}
+                style={datePreset !== (p.days === 0 ? "Hoje" : `${p.days}d`) ? { color: themeConfig.textMuted } : {}}
               >
                 {p.label}
               </button>
             ))}
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
-                <button className="px-2 py-1 rounded-md text-white/20 hover:text-white/45 transition-all">
+                <button className="px-2 py-1 rounded-md transition-all" style={{ color: themeConfig.textMuted }}>
                   <Calendar className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-[#061210]/98 backdrop-blur-3xl border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" align="end">
+              <PopoverContent className="w-auto p-0 backdrop-blur-3xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" style={{ background: themeConfig.isDark ? "rgba(6,18,16,0.98)" : "rgba(255,255,255,0.98)", border: `1px solid ${themeConfig.border}` }} align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
@@ -447,15 +513,42 @@ export default function AdminDashboard() {
               <span className="text-[8px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full px-2.5 py-0.5 uppercase tracking-wider">Staff</span>
             )}
 
-            <button className="relative h-8 w-8 rounded-xl flex items-center justify-center bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all group">
-              <Bell className="h-3.5 w-3.5 text-white/25 group-hover:text-white/55 transition-colors" />
-              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)] ring-2 ring-[#040f08]" />}
+            {/* Theme Picker */}
+            <Popover open={themePickerOpen} onOpenChange={setThemePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+                  <Palette className="h-3.5 w-3.5 transition-colors" style={{ color: themeConfig.textMuted }} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(6,18,16,0.98)" : "rgba(255,255,255,0.98)", border: `1px solid ${themeConfig.border}`, backdropFilter: "blur(30px)" }} align="end">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-1.5" style={{ color: themeConfig.textMuted }}>Tema do Painel</p>
+                {(Object.entries(ADMIN_THEMES) as [AdminTheme, typeof ADMIN_THEMES[AdminTheme]][]).map(([key, theme]) => (
+                  <button
+                    key={key}
+                    onClick={() => { changeAdminTheme(key); setThemePickerOpen(false); }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-2.5 py-2 rounded-lg transition-all text-left",
+                      adminTheme === key ? cn(accentClasses.bgSoft, "ring-1", accentClasses.ringActive) : "hover:bg-white/[0.04]"
+                    )}
+                  >
+                    <div className="h-5 w-5 rounded-md border border-white/10 overflow-hidden" style={{ background: theme.bg }} />
+                    <span className="text-[11px] font-semibold" style={{ color: adminTheme === key ? themeConfig.textPrimary : themeConfig.textSecondary }}>{theme.label}</span>
+                    {adminTheme === key && <span className={cn("ml-auto h-1.5 w-1.5 rounded-full", accentClasses.bg)} />}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+
+            <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+              <Bell className="h-3.5 w-3.5 transition-colors" style={{ color: themeConfig.textMuted }} />
+              {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]" />}
             </button>
 
             <button
               onClick={loadData}
               disabled={syncing}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[10px] font-semibold border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.1] text-white/25 hover:text-white/55 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[10px] font-semibold transition-all"
+              style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}`, color: themeConfig.textMuted }}
             >
               <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} /> Sync
             </button>

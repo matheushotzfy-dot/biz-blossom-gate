@@ -85,6 +85,13 @@ const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits:
 /* ─── Fake names for social proof ─── */
 const BUYER_NAMES = ["Ana S.", "Carlos M.", "Juliana R.", "Pedro H.", "Mariana L.", "Lucas F.", "Fernanda A.", "Rafael B.", "Camila T.", "Bruno V.", "Patricia O.", "Diego N.", "Isabela C.", "Thiago P.", "Larissa D."];
 const CITIES = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Porto Alegre", "Salvador", "Brasília", "Fortaleza", "Recife", "Goiânia"];
+const AVATAR_URLS = [
+  "https://i.pravatar.cc/80?img=1", "https://i.pravatar.cc/80?img=5", "https://i.pravatar.cc/80?img=10",
+  "https://i.pravatar.cc/80?img=12", "https://i.pravatar.cc/80?img=16", "https://i.pravatar.cc/80?img=20",
+  "https://i.pravatar.cc/80?img=23", "https://i.pravatar.cc/80?img=25", "https://i.pravatar.cc/80?img=32",
+  "https://i.pravatar.cc/80?img=36", "https://i.pravatar.cc/80?img=41", "https://i.pravatar.cc/80?img=44",
+  "https://i.pravatar.cc/80?img=47", "https://i.pravatar.cc/80?img=49", "https://i.pravatar.cc/80?img=53",
+];
 
 /* ═══ Premium Loading Screen ═══ */
 function PremiumLoader({ color }: { color?: string }) {
@@ -154,7 +161,7 @@ function LiveViewers({ color }: { color: string }) {
 /* ═══ Recent Purchase Toast ═══ */
 function RecentPurchaseToast({ productName, color }: { productName: string; color: string }) {
   const [visible, setVisible] = useState(false);
-  const [buyer, setBuyer] = useState({ name: "", city: "", ago: 0 });
+  const [buyer, setBuyer] = useState({ name: "", city: "", ago: 0, avatar: "" });
 
   useEffect(() => {
     const show = () => {
@@ -162,6 +169,7 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
         name: BUYER_NAMES[Math.floor(Math.random() * BUYER_NAMES.length)],
         city: CITIES[Math.floor(Math.random() * CITIES.length)],
         ago: Math.floor(Math.random() * 15) + 1,
+        avatar: AVATAR_URLS[Math.floor(Math.random() * AVATAR_URLS.length)],
       });
       setVisible(true);
       setTimeout(() => setVisible(false), 4000);
@@ -175,9 +183,7 @@ function RecentPurchaseToast({ productName, color }: { productName: string; colo
   return (
     <div className="fixed bottom-4 left-4 z-50 animate-slide-in-left max-w-[320px]">
       <div className="rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] p-3.5 shadow-2xl shadow-black/10 flex items-center gap-3 backdrop-blur-xl">
-        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + "15" }}>
-          <Check className="h-5 w-5" style={{ color }} />
-        </div>
+        <img src={buyer.avatar} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/20 shadow-md shrink-0" />
         <div className="min-w-0">
           <p className="text-[12px] font-bold text-[hsl(var(--checkout-text))] truncate">{buyer.name} de {buyer.city}</p>
           <p className="text-[10px] text-[hsl(var(--checkout-text-muted))]">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
@@ -804,10 +810,8 @@ export default function PublicCheckout() {
           <div className="mb-5 rounded-2xl border border-gray-200/80 bg-white p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 shadow-lg shadow-black/[0.03]">
             <div className="flex items-center gap-3 flex-1">
               <div className="flex -space-x-2.5">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-9 w-9 rounded-full border-[2.5px] border-white flex items-center justify-center text-[9px] font-bold shadow-md" style={{ backgroundColor: `hsl(${150 + i * 15}, 55%, ${32 + i * 5}%)`, color: "white", zIndex: 6 - i }}>
-                    {["AS", "CM", "JR", "PH", "ML", "LF"][i]}
-                  </div>
+                {AVATAR_URLS.slice(0, 6).map((url, i) => (
+                  <img key={i} src={url} alt="" className="h-9 w-9 rounded-full border-[2.5px] border-white object-cover shadow-md" style={{ zIndex: 6 - i }} />
                 ))}
               </div>
               <div>
