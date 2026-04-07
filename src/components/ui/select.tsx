@@ -66,18 +66,20 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-[min(var(--radix-select-content-available-height),22rem)] min-w-[8rem] overflow-hidden rounded-xl border border-border/30 bg-popover/98 backdrop-blur-2xl text-popover-foreground shadow-2xl shadow-background/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1.5 data-[side=left]:slide-in-from-right-1.5 data-[side=right]:slide-in-from-left-1.5 data-[side=top]:slide-in-from-bottom-1.5 duration-200",
+        "relative z-50 max-h-[min(var(--radix-select-content-available-height),22rem)] min-w-[8rem] overflow-hidden rounded-2xl border border-primary/15 bg-popover/98 backdrop-blur-2xl text-popover-foreground shadow-[0_16px_64px_hsl(var(--primary)/0.12),0_0_0_1px_hsl(var(--primary)/0.06)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-250",
         position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          "data-[side=bottom]:translate-y-1.5 data-[side=left]:-translate-x-1.5 data-[side=right]:translate-x-1.5 data-[side=top]:-translate-y-1.5",
         className,
       )}
       position={position}
       {...props}
     >
+      {/* Top glow line */}
+      <div className="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "p-1",
+          "p-1.5",
           position === "popper" &&
             "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
         )}
@@ -85,6 +87,8 @@ const SelectContent = React.forwardRef<
         {children}
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />
+      {/* Bottom glow line */}
+      <div className="absolute bottom-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ));
