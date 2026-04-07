@@ -315,7 +315,7 @@ export default function LandingPage() {
       </motion.nav>
 
       {/* ═══ HERO ═══ */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      <section className="relative min-h-[100dvh] flex items-center pt-16 md:pt-20 overflow-hidden">
         {/* Background effects */}
         <div className="pointer-events-none absolute inset-0">
           <motion.div animate={{ y: [0, -40, 0], x: [0, 20, 0], scale: [1, 1.15, 1] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
