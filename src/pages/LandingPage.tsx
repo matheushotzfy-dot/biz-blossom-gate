@@ -64,7 +64,7 @@ function Particles() {
 /* ─── Section wrapper ─── */
 function Section({ children, className, id }: { children: React.ReactNode; className?: string; id?: string }) {
   return (
-    <section id={id} className={cn("relative py-24 md:py-32 px-4 md:px-8", className)}>
+    <section id={id} className={cn("relative py-16 md:py-32 px-4 md:px-8", className)}>
       <div className="max-w-7xl mx-auto relative z-10">{children}</div>
     </section>
   );
