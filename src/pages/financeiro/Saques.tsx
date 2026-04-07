@@ -54,6 +54,8 @@ const STATUS_CONFIG: Record<string, { label: string; fg: string; dot: string; bg
 /* ═══════════════════════════════════════════════════════════════════════ */
 export default function Saques() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const { data: withdrawals = [], refetch: refetchWithdrawals } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const invalidateAll = useInvalidateAll();
@@ -66,6 +68,8 @@ export default function Saques() {
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
+
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street && !!(profile as any)?.street_number && !!(profile as any)?.city;
 
   useEffect(() => {
     if (!user?.id) return;
