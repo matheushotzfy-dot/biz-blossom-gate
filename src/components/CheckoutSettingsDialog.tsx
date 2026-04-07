@@ -319,16 +319,16 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
             {/* Add new bump */}
             {availableForBump.length > 0 && (
               <div className="flex gap-2">
-                <select
-                  value={selectedBumpProduct}
-                  onChange={e => setSelectedBumpProduct(e.target.value)}
-                  className="flex-1 h-10 rounded-xl border border-border bg-background text-foreground text-sm px-3 appearance-none"
-                >
-                  <option value="">Selecione um produto...</option>
-                  {availableForBump.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</option>
-                  ))}
-                </select>
+                <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
+                  <SelectTrigger className="flex-1 h-10 rounded-xl">
+                    <SelectValue placeholder="Selecione um produto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableForBump.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button onClick={addBump} disabled={!selectedBumpProduct} size="sm" className="gap-1 rounded-xl">
                   <Plus className="h-4 w-4" /> Adicionar
                 </Button>
