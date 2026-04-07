@@ -12,6 +12,7 @@ import {
   User, Camera, Trophy, Wallet, Shield, CheckCircle2, Flame, Zap,
   Crown, Sparkles, Target, TrendingUp, ArrowUp, Star, Lock, Globe,
   Calendar, BadgeCheck, Fingerprint, Copy, Check, Award, Gem, Eye,
+  MapPin, Loader2, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -201,10 +202,14 @@ export default function Perfil() {
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
+  const [addressForm, setAddressForm] = useState({ zip_code: "", street: "", street_number: "", complement: "", neighborhood: "", city: "", state: "" });
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [formInit, setFormInit] = useState(false);
+  const [addressInit, setAddressInit] = useState(false);
 
   useEffect(() => {
     if (profile && !formInit) {
@@ -212,6 +217,62 @@ export default function Perfil() {
       setFormInit(true);
     }
   }, [profile, formInit]);
+
+  useEffect(() => {
+    if (profile && !addressInit) {
+      setAddressForm({
+        zip_code: (profile as any).zip_code || "",
+        street: (profile as any).street || "",
+        street_number: (profile as any).street_number || "",
+        complement: (profile as any).complement || "",
+        neighborhood: (profile as any).neighborhood || "",
+        city: (profile as any).city || "",
+        state: (profile as any).state || "",
+      });
+      setAddressInit(true);
+    }
+  }, [profile, addressInit]);
+
+  const isAddressLocked = !!(profile as any)?.address_locked;
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+
+  const handleCepLookup = async (cep: string) => {
+    const digits = cep.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    setLoadingCep(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setAddressForm(prev => ({
+          ...prev,
+          street: data.logradouro || prev.street,
+          neighborhood: data.bairro || prev.neighborhood,
+          city: data.localidade || prev.city,
+          state: data.uf || prev.state,
+        }));
+      }
+    } catch {}
+    setLoadingCep(false);
+  };
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || isAddressLocked) return;
+    if (!addressForm.zip_code || !addressForm.street || !addressForm.street_number || !addressForm.city || !addressForm.state) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+    setSavingAddress(true);
+    const updates = { ...addressForm, address_locked: true };
+    const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
+    if (error) toast.error("Erro ao salvar endereço");
+    else {
+      updateProfile(updates as any);
+      toast.success("Endereço salvo! Agora você pode realizar saques normalmente.");
+    }
+    setSavingAddress(false);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -512,6 +573,148 @@ export default function Perfil() {
           </div>
         </SectionCard>
       </div>
+
+      {/* ═══ Endereço ═══ */}
+      <SectionCard accent="bg-warning" glow="from-warning/[0.03] to-transparent" delay={0.5}>
+        <div className="flex items-center gap-2.5 mb-5">
+          <div className="h-9 w-9 rounded-xl bg-warning/8 ring-1 ring-warning/15 flex items-center justify-center">
+            <MapPin className="h-4 w-4 text-warning" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[11px] font-display font-black text-foreground/70">Endereço do Vendedor</p>
+            <p className="text-[9px] text-muted-foreground/40">
+              {isAddressLocked ? "Bloqueado — contate seu gerente para alterações" : "Obrigatório para realizar saques"}
+            </p>
+          </div>
+          {isAddressLocked && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-success/8 ring-1 ring-success/15">
+              <Lock className="h-3 w-3 text-success" />
+              <span className="text-[9px] font-display font-bold text-success">Salvo</span>
+            </div>
+          )}
+        </div>
+
+        {!hasAddress && !isAddressLocked && (
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-warning/5 ring-1 ring-warning/10 mb-4">
+            <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
+            <p className="text-[10px] text-warning/70 font-medium">
+              Preencha seu endereço para poder realizar saques na plataforma.
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleSaveAddress} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {isAddressLocked && <Lock className="h-2.5 w-2.5" />} CEP
+              </Label>
+              <div className="relative">
+                <Input
+                  value={addressForm.zip_code}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, "").slice(0, 8);
+                    const formatted = v.length > 5 ? `${v.slice(0, 5)}-${v.slice(5)}` : v;
+                    setAddressForm(prev => ({ ...prev, zip_code: formatted }));
+                    if (v.length === 8) handleCepLookup(v);
+                  }}
+                  className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+                  placeholder="00000-000"
+                  disabled={isAddressLocked}
+                  inputMode="numeric"
+                />
+                {loadingCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/4 h-4 w-4 animate-spin text-primary" />}
+              </div>
+            </div>
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Estado
+              </Label>
+              <Input
+                value={addressForm.state}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, state: e.target.value.toUpperCase().slice(0, 2) }))}
+                className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+                placeholder="SP"
+                disabled={isAddressLocked}
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+              {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Rua / Avenida
+            </Label>
+            <Input
+              value={addressForm.street}
+              onChange={(e) => setAddressForm(prev => ({ ...prev, street: e.target.value }))}
+              className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+              placeholder="Rua das Flores"
+              disabled={isAddressLocked}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Número
+              </Label>
+              <Input
+                value={addressForm.street_number}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, street_number: e.target.value }))}
+                className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+                placeholder="123"
+                disabled={isAddressLocked}
+              />
+            </div>
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold">Complemento</Label>
+              <Input
+                value={addressForm.complement}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, complement: e.target.value }))}
+                className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+                placeholder="Apto 42"
+                disabled={isAddressLocked}
+              />
+            </div>
+            <div>
+              <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+                {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Bairro
+              </Label>
+              <Input
+                value={addressForm.neighborhood}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, neighborhood: e.target.value }))}
+                className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+                placeholder="Centro"
+                disabled={isAddressLocked}
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
+              {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Cidade
+            </Label>
+            <Input
+              value={addressForm.city}
+              onChange={(e) => setAddressForm(prev => ({ ...prev, city: e.target.value }))}
+              className="mt-1.5 h-10 rounded-xl bg-muted/10 border-border/20 focus:border-primary/30"
+              placeholder="São Paulo"
+              disabled={isAddressLocked}
+            />
+          </div>
+          {!isAddressLocked && (
+            <Button type="submit" className="w-full h-10 rounded-xl text-[12px] font-display font-bold shadow-lg shadow-warning/10 bg-warning text-warning-foreground hover:bg-warning/90 transition-all active:scale-[0.985]" disabled={savingAddress}>
+              {savingAddress ? (
+                <div className="flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Salvando...</span></div>
+              ) : (
+                <span className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> Salvar Endereço</span>
+              )}
+            </Button>
+          )}
+          {!isAddressLocked && (
+            <p className="text-[9px] text-center text-muted-foreground/30">
+              Após salvar, o endereço será <span className="font-bold text-warning/60">bloqueado</span>. Para alterar, entre em contato com seu gerente.
+            </p>
+          )}
+        </form>
+      </SectionCard>
 
       {/* ═══ Progresso de Faturamento ═══ */}
       <motion.div

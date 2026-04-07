@@ -1519,9 +1519,12 @@ export type Database = {
         Row: {
           account_status: string
           acquirer_id: string | null
+          address_locked: boolean | null
           admin_notes: string | null
           avatar_url: string | null
           balance_frozen: boolean
+          city: string | null
+          complement: string | null
           created_at: string
           document_number: string | null
           document_type: string | null
@@ -1531,20 +1534,28 @@ export type Database = {
           kyc_rejection_reason: string | null
           last_ip: string | null
           last_login_at: string | null
+          neighborhood: string | null
           nickname: string | null
           phone: string | null
           pix_key: string | null
           pix_key_type: string | null
           seller_type: string | null
+          state: string | null
+          street: string | null
+          street_number: string | null
           updated_at: string
           user_id: string
+          zip_code: string | null
         }
         Insert: {
           account_status?: string
           acquirer_id?: string | null
+          address_locked?: boolean | null
           admin_notes?: string | null
           avatar_url?: string | null
           balance_frozen?: boolean
+          city?: string | null
+          complement?: string | null
           created_at?: string
           document_number?: string | null
           document_type?: string | null
@@ -1554,20 +1565,28 @@ export type Database = {
           kyc_rejection_reason?: string | null
           last_ip?: string | null
           last_login_at?: string | null
+          neighborhood?: string | null
           nickname?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
           seller_type?: string | null
+          state?: string | null
+          street?: string | null
+          street_number?: string | null
           updated_at?: string
           user_id: string
+          zip_code?: string | null
         }
         Update: {
           account_status?: string
           acquirer_id?: string | null
+          address_locked?: boolean | null
           admin_notes?: string | null
           avatar_url?: string | null
           balance_frozen?: boolean
+          city?: string | null
+          complement?: string | null
           created_at?: string
           document_number?: string | null
           document_type?: string | null
@@ -1577,13 +1596,18 @@ export type Database = {
           kyc_rejection_reason?: string | null
           last_ip?: string | null
           last_login_at?: string | null
+          neighborhood?: string | null
           nickname?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
           seller_type?: string | null
+          state?: string | null
+          street?: string | null
+          street_number?: string | null
           updated_at?: string
           user_id?: string
+          zip_code?: string | null
         }
         Relationships: [
           {

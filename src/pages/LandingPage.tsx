@@ -84,7 +84,7 @@ function SectionHeader({ badge, title, subtitle, center = true }: { badge: strin
         <Sparkles className="h-3 w-3" />{badge}
       </div>
       <h2 className="text-3xl md:text-5xl font-display font-black tracking-[-0.04em] text-foreground leading-[1.1]">{title}</h2>
-      <p className="text-base md:text-lg text-muted-foreground/60 mt-4 max-w-2xl font-display leading-relaxed mx-auto">{subtitle}</p>
+      <p className="text-sm md:text-lg text-muted-foreground/70 mt-4 max-w-2xl font-display leading-relaxed mx-auto">{subtitle}</p>
     </motion.div>
   );
 }
@@ -121,7 +121,7 @@ function BentoCard({ icon: Icon, title, desc, tone, delay, large }: {
           <Icon className={cn("h-5 w-5", t.icon)} />
         </div>
         <h3 className="text-lg font-display font-bold text-foreground tracking-[-0.02em] mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground/50 leading-relaxed font-display">{desc}</p>
+        <p className="text-sm text-muted-foreground/60 leading-relaxed font-display">{desc}</p>
       </div>
     </motion.div>
   );
@@ -153,7 +153,7 @@ function PricingCard({ name, price, desc, features, popular, delay }: {
       )}
       <div className="mb-6">
         <h3 className="text-lg font-display font-bold text-foreground">{name}</h3>
-        <p className="text-xs text-muted-foreground/50 mt-1 font-display">{desc}</p>
+        <p className="text-xs text-muted-foreground/60 mt-1 font-display">{desc}</p>
       </div>
       <div className="mb-6">
         <span className="text-4xl font-display font-black text-foreground tracking-[-0.04em]">{price}</span>
@@ -163,7 +163,7 @@ function PricingCard({ name, price, desc, features, popular, delay }: {
         {features.map((f, i) => (
           <li key={i} className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span className="text-sm text-muted-foreground/60 font-display">{f}</span>
+            <span className="text-sm text-muted-foreground/70 font-display">{f}</span>
           </li>
         ))}
       </ul>
@@ -344,14 +344,14 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.8 }}
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.08] mb-5 md:mb-6">
+                className="text-[32px] sm:text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.1] mb-5 md:mb-6">
                 Venda seus{" "}
                 <span className="text-gradient">infoprodutos</span>{" "}
                 sem limites
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                className="text-base md:text-xl text-muted-foreground/55 font-display leading-relaxed mb-6 md:mb-8 max-w-lg">
+                className="text-[15px] md:text-xl text-muted-foreground/65 font-display leading-relaxed mb-6 md:mb-8 max-w-lg">
                 Plataforma completa de pagamentos com checkout inteligente, área de membros, e as menores taxas do mercado.
               </motion.p>
 

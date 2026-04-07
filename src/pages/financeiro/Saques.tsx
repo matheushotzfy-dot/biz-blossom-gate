@@ -1,12 +1,14 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   ArrowDownToLine, Plus, Key, Clock, CheckCircle2, XCircle,
   Rocket, PartyPopper, X, Wallet, TrendingUp, Shield, Zap,
   Eye, EyeOff, Search, Banknote, Percent,
-  Activity, Layers, Target, Receipt,
+  Activity, Layers, Target, Receipt, MapPin, AlertTriangle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,6 +54,8 @@ const STATUS_CONFIG: Record<string, { label: string; fg: string; dot: string; bg
 /* ═══════════════════════════════════════════════════════════════════════ */
 export default function Saques() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const { data: withdrawals = [], refetch: refetchWithdrawals } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const invalidateAll = useInvalidateAll();
@@ -64,6 +68,8 @@ export default function Saques() {
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
+
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street && !!(profile as any)?.street_number && !!(profile as any)?.city;
 
   useEffect(() => {
     if (!user?.id) return;
@@ -194,6 +200,24 @@ export default function Saques() {
         </div>
 
         <div className="relative z-10">
+          {/* Address warning */}
+          {!hasAddress && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-warning/10 ring-1 ring-warning/20 cursor-pointer hover:bg-warning/15 transition-all"
+              onClick={() => navigate("/perfil")}
+            >
+              <div className="h-10 w-10 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
+                <MapPin className="h-5 w-5 text-warning" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-display font-bold text-warning">Endereço não cadastrado</p>
+                <p className="text-[10px] text-warning/60">Preencha seu endereço no Perfil para realizar saques normalmente.</p>
+              </div>
+              <AlertTriangle className="h-5 w-5 text-warning/60 shrink-0" />
+            </motion.div>
+          )}
           {/* Top bar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -232,6 +256,17 @@ export default function Saques() {
               <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
                 {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
+              {!hasAddress ? (
+                <button
+                  onClick={() => {
+                    toast.info("Preencha seu endereço primeiro para realizar saques");
+                    navigate("/perfil");
+                  }}
+                  className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 bg-warning text-warning-foreground shadow-lg shadow-warning/20 hover:shadow-xl active:scale-[0.97] transition-all duration-300"
+                >
+                  <MapPin className="h-3.5 w-3.5" /> Preencher Endereço
+                </button>
+              ) : (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <button className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all duration-300">
@@ -312,6 +347,7 @@ export default function Saques() {
                   </form>
                 </DialogContent>
               </Dialog>
+              )}
             </div>
           </div>
 

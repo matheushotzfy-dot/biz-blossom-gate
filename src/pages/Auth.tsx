@@ -170,7 +170,7 @@ function GlowCard({ children, className }: { children: React.ReactNode; classNam
       {/* Animated border glow */}
       <div className="absolute -inset-px rounded-[25px] bg-gradient-to-br from-primary/20 via-border/15 to-info/15 opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
       {/* Inner card */}
-      <div className="relative rounded-3xl border border-border/10 bg-card/55 backdrop-blur-2xl shadow-[0_24px_80px_hsl(var(--foreground)/0.06)] overflow-hidden">
+      <div className="relative rounded-3xl border border-border/15 bg-card/70 backdrop-blur-2xl shadow-[0_24px_80px_hsl(var(--foreground)/0.08)] overflow-hidden">
         {/* Mouse-follow glow */}
         <motion.div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: gradientBg }} />
         {/* Static decorative elements */}
@@ -377,8 +377,8 @@ export default function Auth() {
     } finally { setLoading(false); }
   };
 
-  const inputCls = "h-12 rounded-xl border-border/30 bg-muted/40 backdrop-blur-sm text-foreground placeholder:text-muted-foreground/35 focus:border-primary/50 focus:ring-2 focus:ring-primary/15 focus:bg-muted/50 transition-all duration-300 font-display text-sm";
-  const labelCls = "text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-1.5 block font-display";
+  const inputCls = "h-12 rounded-xl border-border/40 bg-background/60 backdrop-blur-sm text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50 focus:ring-2 focus:ring-primary/15 focus:bg-background/80 transition-all duration-300 font-display text-sm";
+  const labelCls = "text-[11px] font-bold text-foreground/60 uppercase tracking-[0.12em] mb-1.5 block font-display";
 
   return (
     <div className="h-screen flex bg-background text-foreground overflow-hidden">
@@ -445,7 +445,7 @@ export default function Auth() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.7 }}
-                className="text-[28px] md:text-[34px] font-display font-black tracking-[-0.045em] text-foreground leading-[1.08]"
+                className="text-[26px] sm:text-[30px] md:text-[34px] font-display font-black tracking-[-0.045em] text-foreground leading-[1.12]"
               >
                 {isLogin ? (
                   <>Bem-vindo de <span className="text-gradient">volta</span></>
@@ -457,7 +457,7 @@ export default function Auth() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.45 }}
-                className="text-sm text-muted-foreground/50 mt-2.5 font-display leading-relaxed"
+                className="text-[13px] text-muted-foreground/60 mt-2.5 font-display leading-relaxed"
               >
                 {isLogin ? "Acesse seu painel e acompanhe seus resultados" : "Crie sua conta e lance seu primeiro infoproduto"}
               </motion.p>
@@ -657,10 +657,10 @@ export default function Auth() {
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + i * 0.08 }}
-                  className="text-center p-3 rounded-2xl bg-card/20 backdrop-blur-sm border border-border/8"
+                  className="text-center p-3 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/12"
                 >
-                  <p className="text-[14px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">{s.value}</p>
-                  <p className="text-[7px] text-muted-foreground/30 font-bold uppercase tracking-[0.12em] font-display mt-0.5">{s.label}</p>
+                  <p className="text-[15px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">{s.value}</p>
+                  <p className="text-[8px] text-muted-foreground/40 font-bold uppercase tracking-[0.12em] font-display mt-0.5">{s.label}</p>
                 </motion.div>
               ))}
             </div>
