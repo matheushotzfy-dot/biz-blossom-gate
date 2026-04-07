@@ -97,6 +97,42 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
+type AdminTheme = "dark-green" | "dark" | "light-green";
+
+const ADMIN_THEMES: Record<AdminTheme, {
+  label: string; bg: string; sidebarBg: string; topBarBg: string;
+  accent: string; accentLight: string; accentGlow: string;
+  textPrimary: string; textSecondary: string; textMuted: string;
+  border: string; cardBg: string; isDark: boolean;
+}> = {
+  "dark-green": {
+    label: "Verde Escuro",
+    bg: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(6,18,12,0.8) 0%, rgba(8,20,14,0.7) 100%)",
+    accent: "emerald", accentLight: "rgba(16,185,129,0.15)", accentGlow: "rgba(16,185,129,0.4)",
+    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
+    border: "rgba(255,255,255,0.06)", cardBg: "rgba(16,185,129,0.04)", isDark: true,
+  },
+  "dark": {
+    label: "Dark Clássico",
+    bg: "linear-gradient(135deg, #0a0a0f 0%, #0f0f18 30%, #12121e 60%, #0a0a0f 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(10,10,18,0.98) 0%, rgba(8,8,14,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(10,10,18,0.8) 0%, rgba(12,12,20,0.7) 100%)",
+    accent: "violet", accentLight: "rgba(139,92,246,0.15)", accentGlow: "rgba(139,92,246,0.4)",
+    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
+    border: "rgba(255,255,255,0.06)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
+  },
+  "light-green": {
+    label: "Light + Verde",
+    bg: "linear-gradient(135deg, #f8faf9 0%, #f0f5f2 30%, #e8f0ec 60%, #f8faf9 100%)",
+    sidebarBg: "linear-gradient(180deg, #0f1f17 0%, #0a1810 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(248,250,249,0.9) 100%)",
+    accent: "emerald", accentLight: "rgba(16,185,129,0.12)", accentGlow: "rgba(16,185,129,0.3)",
+    textPrimary: "rgba(15,31,23,0.9)", textSecondary: "rgba(15,31,23,0.6)", textMuted: "rgba(15,31,23,0.35)",
+    border: "rgba(0,0,0,0.08)", cardBg: "rgba(16,185,129,0.03)", isDark: false,
+  },
+};
 
 const DATE_PRESETS = [
   { label: "Hoje", days: 0 },
