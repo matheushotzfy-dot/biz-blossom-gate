@@ -81,6 +81,7 @@ const App = () => (
             <ScrollToTop />
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
               <Route path="/obrigado" element={<ThankYou />} />
