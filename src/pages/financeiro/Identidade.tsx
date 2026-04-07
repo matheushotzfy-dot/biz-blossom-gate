@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -104,6 +105,20 @@ export default function Identidade() {
   const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null });
   const [uploading, setUploading] = useState<string | null>(null);
   const [nicknameInit, setNicknameInit] = useState(false);
+  const [searchParams] = useSearchParams();
+  const kycSectionRef = useRef<HTMLDivElement>(null);
+  const hasScrolledToKyc = useRef(false);
+
+  // Auto-scroll to KYC docs section when coming from verification banner
+  useEffect(() => {
+    const scrollTo = searchParams.get("scrollTo");
+    if (scrollTo === "kyc" && kycSectionRef.current && !hasScrolledToKyc.current) {
+      hasScrolledToKyc.current = true;
+      setTimeout(() => {
+        kycSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 600);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (profile && !nicknameInit) {
@@ -505,6 +520,7 @@ export default function Identidade() {
 
       {/* ═══ KYC Documents ═══ */}
       <motion.div
+        ref={kycSectionRef}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, ease }}
