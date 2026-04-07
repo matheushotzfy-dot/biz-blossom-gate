@@ -810,10 +810,8 @@ export default function PublicCheckout() {
           <div className="mb-5 rounded-2xl border border-gray-200/80 bg-white p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 shadow-lg shadow-black/[0.03]">
             <div className="flex items-center gap-3 flex-1">
               <div className="flex -space-x-2.5">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-9 w-9 rounded-full border-[2.5px] border-white flex items-center justify-center text-[9px] font-bold shadow-md" style={{ backgroundColor: `hsl(${150 + i * 15}, 55%, ${32 + i * 5}%)`, color: "white", zIndex: 6 - i }}>
-                    {["AS", "CM", "JR", "PH", "ML", "LF"][i]}
-                  </div>
+                {AVATAR_URLS.slice(0, 6).map((url, i) => (
+                  <img key={i} src={url} alt="" className="h-9 w-9 rounded-full border-[2.5px] border-white object-cover shadow-md" style={{ zIndex: 6 - i }} />
                 ))}
               </div>
               <div>
