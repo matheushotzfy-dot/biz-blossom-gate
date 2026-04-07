@@ -121,7 +121,7 @@ function BentoCard({ icon: Icon, title, desc, tone, delay, large }: {
           <Icon className={cn("h-5 w-5", t.icon)} />
         </div>
         <h3 className="text-lg font-display font-bold text-foreground tracking-[-0.02em] mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground/50 leading-relaxed font-display">{desc}</p>
+        <p className="text-sm text-muted-foreground/60 leading-relaxed font-display">{desc}</p>
       </div>
     </motion.div>
   );
@@ -344,14 +344,14 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.8 }}
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.08] mb-5 md:mb-6">
+                className="text-[32px] sm:text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-[-0.045em] text-foreground leading-[1.1] mb-5 md:mb-6">
                 Venda seus{" "}
                 <span className="text-gradient">infoprodutos</span>{" "}
                 sem limites
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                className="text-base md:text-xl text-muted-foreground/55 font-display leading-relaxed mb-6 md:mb-8 max-w-lg">
+                className="text-[15px] md:text-xl text-muted-foreground/65 font-display leading-relaxed mb-6 md:mb-8 max-w-lg">
                 Plataforma completa de pagamentos com checkout inteligente, área de membros, e as menores taxas do mercado.
               </motion.p>
 
