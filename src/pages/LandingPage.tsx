@@ -540,7 +540,7 @@ export default function LandingPage() {
           title={<>Taxas justas, sem <span className="text-gradient">surpresas</span></>}
           subtitle="Sem mensalidades. Você só paga quando vende. Simples assim."
         />
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid gap-4 md:grid-cols-3 md:gap-6 max-w-5xl mx-auto">
           <PricingCard name="PIX" price="1,99%" desc="Ideal para vendas rápidas"
             features={["QR Code instantâneo", "Confirmação automática", "Saque em 1 dia útil", "Dashboard completo", "Suporte por e-mail"]}
             delay={0} />
