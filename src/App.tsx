@@ -87,6 +87,7 @@ const App = () => (
               <Route path="/termos-de-uso" element={<TermosDeUso />} />
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
               <Route path="/status" element={<StatusPage />} />
+              <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
               <Route path="/" element={<Index />} />
 
               <Route path="/membros-area/login" element={<MemberAuth />} />
