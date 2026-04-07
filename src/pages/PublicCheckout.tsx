@@ -85,6 +85,13 @@ const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits:
 /* ─── Fake names for social proof ─── */
 const BUYER_NAMES = ["Ana S.", "Carlos M.", "Juliana R.", "Pedro H.", "Mariana L.", "Lucas F.", "Fernanda A.", "Rafael B.", "Camila T.", "Bruno V.", "Patricia O.", "Diego N.", "Isabela C.", "Thiago P.", "Larissa D."];
 const CITIES = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Porto Alegre", "Salvador", "Brasília", "Fortaleza", "Recife", "Goiânia"];
+const AVATAR_URLS = [
+  "https://i.pravatar.cc/80?img=1", "https://i.pravatar.cc/80?img=5", "https://i.pravatar.cc/80?img=10",
+  "https://i.pravatar.cc/80?img=12", "https://i.pravatar.cc/80?img=16", "https://i.pravatar.cc/80?img=20",
+  "https://i.pravatar.cc/80?img=23", "https://i.pravatar.cc/80?img=25", "https://i.pravatar.cc/80?img=32",
+  "https://i.pravatar.cc/80?img=36", "https://i.pravatar.cc/80?img=41", "https://i.pravatar.cc/80?img=44",
+  "https://i.pravatar.cc/80?img=47", "https://i.pravatar.cc/80?img=49", "https://i.pravatar.cc/80?img=53",
+];
 
 /* ═══ Premium Loading Screen ═══ */
 function PremiumLoader({ color }: { color?: string }) {

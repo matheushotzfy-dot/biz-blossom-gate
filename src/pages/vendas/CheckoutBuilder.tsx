@@ -391,7 +391,7 @@ export default function CheckoutBuilder() {
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       
       {/* ─── LEFT: Control Panel ─── */}
-      <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col lg:h-screen lg:sticky lg:top-0 overflow-hidden">
+      <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col lg:h-screen lg:sticky lg:top-0 min-h-0">
         
         {/* Header */}
         <div className="px-4 py-3 border-b border-border/40 bg-card/80">
@@ -656,7 +656,19 @@ export default function CheckoutBuilder() {
                   <SectionHeader icon={Mail} title="Formulário" desc="Campos do formulário do checkout" />
                   <ToggleRow icon={Mail} title="Confirmação de e-mail" desc="Pede e-mail 2 vezes" checked={emailConfirm} onChange={setEmailConfirm} />
                   <ToggleRow icon={Phone} title="Telefone / WhatsApp" desc="Solicita número" checked={phoneRequired} onChange={setPhoneRequired} />
-                  <ToggleRow icon={Hash} title="CPF / CNPJ" desc="Solicita documento" checked={cpfRequired} onChange={setCpfRequired} />
+                  <div className="group relative flex items-center justify-between p-3 rounded-xl border border-primary/25 bg-primary/[0.04]">
+                    <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-primary/60" />
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 border border-primary/15">
+                        <Hash className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground">CPF / CNPJ</p>
+                        <p className="text-[11px] text-muted-foreground leading-snug">Obrigatório — campo sempre ativo</p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/15">Obrigatório</span>
+                  </div>
                   <ToggleRow icon={MapPin} title="Endereço completo" desc="CEP com auto-preenchimento" checked={addressRequired} onChange={setAddressRequired} />
                   <ToggleRow icon={CreditCard} title="Nome no cartão" desc="Campo separado" checked={nameOnCardRequired} onChange={setNameOnCardRequired} badge="Novo" />
                   <ConversionTip text="Menos campos = mais conversão. Peça apenas o essencial." icon={MousePointerClick} />
