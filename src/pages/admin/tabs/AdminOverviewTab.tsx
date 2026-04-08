@@ -739,7 +739,7 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor,
       style={{ boxShadow: highlight && glowColor ? `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 35px ${glowColor}` : undefined }}
     >
       <div className="flex items-center justify-between mb-2.5">
-        <span className="text-[8px] uppercase tracking-[0.22em] text-white/18 font-bold">{label}</span>
+        <span className="text-[8px] uppercase tracking-[0.22em] text-white/[0.18] font-bold">{label}</span>
         {gradient ? (
           <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md ring-1 ring-white/[0.12]", gradient)}>{icon}</div>
         ) : (
