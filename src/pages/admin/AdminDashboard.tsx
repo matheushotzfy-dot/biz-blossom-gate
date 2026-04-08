@@ -97,7 +97,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
-type AdminTheme = "dark-green" | "dark" | "light-green" | "mint";
+type AdminTheme = "dark-green" | "dark" | "midnight" | "mint";
 
 const ADMIN_THEMES: Record<AdminTheme, {
   label: string; bg: string; sidebarBg: string; topBarBg: string;
@@ -109,37 +109,37 @@ const ADMIN_THEMES: Record<AdminTheme, {
     label: "Verde Suave",
     bg: "linear-gradient(135deg, #0b1a14 0%, #0e1f18 30%, #111f1a 60%, #0b1a14 100%)",
     sidebarBg: "linear-gradient(180deg, rgba(11,26,20,0.98) 0%, rgba(8,20,15,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(11,26,20,0.8) 0%, rgba(14,31,24,0.7) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(11,26,20,0.85) 0%, rgba(14,31,24,0.75) 100%)",
     accent: "emerald", accentLight: "rgba(52,211,153,0.12)", accentGlow: "rgba(52,211,153,0.35)",
-    textPrimary: "rgba(255,255,255,0.92)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.28)",
-    border: "rgba(255,255,255,0.06)", cardBg: "rgba(52,211,153,0.04)", isDark: true,
+    textPrimary: "rgba(255,255,255,0.95)", textSecondary: "rgba(255,255,255,0.60)", textMuted: "rgba(255,255,255,0.32)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(52,211,153,0.04)", isDark: true,
   },
   "dark-green": {
-    label: "Verde Escuro",
+    label: "Esmeralda Pro",
     bg: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
     sidebarBg: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(6,18,12,0.8) 0%, rgba(8,20,14,0.7) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(6,18,12,0.85) 0%, rgba(8,20,14,0.75) 100%)",
     accent: "emerald", accentLight: "rgba(16,185,129,0.15)", accentGlow: "rgba(16,185,129,0.4)",
-    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
-    border: "rgba(255,255,255,0.06)", cardBg: "rgba(16,185,129,0.04)", isDark: true,
+    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(16,185,129,0.04)", isDark: true,
   },
   "dark": {
-    label: "Dark Clássico",
-    bg: "linear-gradient(135deg, #0a0a0f 0%, #0f0f18 30%, #12121e 60%, #0a0a0f 100%)",
-    sidebarBg: "linear-gradient(180deg, rgba(10,10,18,0.98) 0%, rgba(8,8,14,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(10,10,18,0.8) 0%, rgba(12,12,20,0.7) 100%)",
+    label: "Violeta Stealth",
+    bg: "linear-gradient(135deg, #09090f 0%, #0d0d18 30%, #10101e 60%, #09090f 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(9,9,18,0.98) 0%, rgba(7,7,14,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(9,9,18,0.85) 0%, rgba(12,12,22,0.75) 100%)",
     accent: "violet", accentLight: "rgba(139,92,246,0.15)", accentGlow: "rgba(139,92,246,0.4)",
-    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
-    border: "rgba(255,255,255,0.06)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
+    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
   },
-  "light-green": {
-    label: "Light + Verde",
-    bg: "linear-gradient(135deg, #f8faf9 0%, #f0f5f2 30%, #e8f0ec 60%, #f8faf9 100%)",
-    sidebarBg: "linear-gradient(180deg, #0f1f17 0%, #0a1810 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(248,250,249,0.9) 100%)",
-    accent: "emerald", accentLight: "rgba(16,185,129,0.12)", accentGlow: "rgba(16,185,129,0.3)",
-    textPrimary: "rgba(15,31,23,0.9)", textSecondary: "rgba(15,31,23,0.6)", textMuted: "rgba(15,31,23,0.35)",
-    border: "rgba(0,0,0,0.08)", cardBg: "rgba(16,185,129,0.03)", isDark: false,
+  "midnight": {
+    label: "Midnight Blue",
+    bg: "linear-gradient(135deg, #060a14 0%, #081020 30%, #0a1428 60%, #060a14 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(6,10,20,0.98) 0%, rgba(4,8,16,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(6,10,20,0.85) 0%, rgba(8,14,28,0.75) 100%)",
+    accent: "cyan", accentLight: "rgba(34,211,238,0.12)", accentGlow: "rgba(34,211,238,0.35)",
+    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(34,211,238,0.04)", isDark: true,
   },
 };
 
@@ -170,7 +170,10 @@ export default function AdminDashboard() {
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
   const [adminTheme, setAdminTheme] = useState<AdminTheme>(() => {
-    return (localStorage.getItem("admin-theme") as AdminTheme) || "dark-green";
+    const saved = localStorage.getItem("admin-theme") as string;
+    if (saved === "light-green") return "midnight";
+    if (saved && saved in ADMIN_THEMES) return saved as AdminTheme;
+    return "dark-green";
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -308,6 +311,15 @@ export default function AdminDashboard() {
     indicatorShadow: "shadow-[0_0_14px_rgba(139,92,246,0.8)]",
     activeItem: "from-violet-500/[0.12] via-violet-500/[0.08] to-purple-500/[0.04] border-violet-500/[0.18] shadow-[inset_0_1px_0_rgba(139,92,246,0.12)]",
     activeIcon: "text-violet-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.6)]",
+  } : adminTheme === "midnight" ? {
+    gradient: "from-cyan-500 via-sky-600 to-blue-700",
+    text: "text-cyan-400", textSoft: "text-cyan-400/60", textGlow: "text-cyan-400/50",
+    bg: "bg-cyan-500", bgSoft: "bg-cyan-500/10", bgBorder: "border-cyan-500/10",
+    shadow: "shadow-[0_0_30px_rgba(34,211,238,0.3)]", glowBg: "bg-cyan-950/25",
+    ringActive: "ring-cyan-500/20", indicatorGradient: "from-cyan-400 via-sky-500 to-blue-500",
+    indicatorShadow: "shadow-[0_0_14px_rgba(34,211,238,0.7)]",
+    activeItem: "from-cyan-500/[0.12] via-sky-500/[0.08] to-blue-500/[0.04] border-cyan-500/[0.18] shadow-[inset_0_1px_0_rgba(34,211,238,0.12)]",
+    activeIcon: "text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]",
   } : adminTheme === "mint" ? {
     gradient: "from-emerald-400 via-teal-500 to-cyan-600",
     text: "text-emerald-300", textSoft: "text-emerald-300/60", textGlow: "text-emerald-300/50",
@@ -332,20 +344,18 @@ export default function AdminDashboard() {
 
   return (
     <div
-      className={cn("h-screen flex overflow-hidden", themeConfig.isDark ? "dark text-white" : "text-gray-900")}
+      className="dark h-screen flex overflow-hidden text-white"
       style={{
         background: themeConfig.bg,
         fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif",
       }}
     >
       {/* ═══ Ambient Glow ═══ */}
-      {themeConfig.isDark && (
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("absolute top-[-200px] left-1/4 w-[900px] h-[600px] rounded-full blur-[200px]", accentClasses.glowBg)} />
-          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-        </div>
-      )}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className={cn("absolute top-[-200px] left-1/4 w-[900px] h-[600px] rounded-full blur-[200px]", accentClasses.glowBg)} />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+      </div>
 
       {/* ═══ MOBILE OVERLAY ═══ */}
       {mobileMenuOpen && (
@@ -360,11 +370,11 @@ export default function AdminDashboard() {
         sidebarCollapsed ? "w-[72px]" : "w-[248px]",
         "max-lg:fixed max-lg:left-0 max-lg:top-0",
         mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
-      )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: `1px solid ${themeConfig.isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}` }}>
+      )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : "from-emerald-500/[0.06]")} />
+          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : adminTheme === "midnight" ? "from-cyan-500/[0.06]" : "from-emerald-500/[0.06]")} />
         </div>
 
         {/* Logo */}
@@ -480,7 +490,7 @@ export default function AdminDashboard() {
         <header className="relative z-40 h-[56px] flex items-center px-4 lg:px-5 gap-3 lg:gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Mobile hamburger */}
-            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${themeConfig.border}` }}>
+            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${themeConfig.border}` }}>
               <PanelLeft className="h-4 w-4" style={{ color: themeConfig.textMuted }} />
             </button>
             <div className="flex items-center gap-2.5">
@@ -501,7 +511,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Date Picker */}
-          <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+          <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}` }}>
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
@@ -523,7 +533,7 @@ export default function AdminDashboard() {
                   <Calendar className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 backdrop-blur-3xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" style={{ background: themeConfig.isDark ? "rgba(6,18,16,0.98)" : "rgba(255,255,255,0.98)", border: `1px solid ${themeConfig.border}` }} align="end">
+              <PopoverContent className="w-auto p-0 backdrop-blur-3xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" style={{ background: "rgba(6,18,16,0.98)", border: `1px solid ${themeConfig.border}` }} align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
@@ -550,11 +560,11 @@ export default function AdminDashboard() {
             {/* Theme Picker */}
             <Popover open={themePickerOpen} onOpenChange={setThemePickerOpen}>
               <PopoverTrigger asChild>
-                <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+                <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}` }}>
                   <Palette className="h-3.5 w-3.5 transition-colors" style={{ color: themeConfig.textMuted }} />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-2 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(6,18,16,0.98)" : "rgba(255,255,255,0.98)", border: `1px solid ${themeConfig.border}`, backdropFilter: "blur(30px)" }} align="end">
+              <PopoverContent className="w-56 p-2 rounded-xl" style={{ background: "rgba(6,18,16,0.98)", border: `1px solid ${themeConfig.border}`, backdropFilter: "blur(30px)" }} align="end">
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-1.5" style={{ color: themeConfig.textMuted }}>Tema do Painel</p>
                 {(Object.entries(ADMIN_THEMES) as [AdminTheme, typeof ADMIN_THEMES[AdminTheme]][]).map(([key, theme]) => (
                   <button
@@ -573,7 +583,7 @@ export default function AdminDashboard() {
               </PopoverContent>
             </Popover>
 
-            <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+            <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}` }}>
               <Bell className="h-3.5 w-3.5 transition-colors" style={{ color: themeConfig.textMuted }} />
               {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]" />}
             </button>
@@ -582,7 +592,7 @@ export default function AdminDashboard() {
               onClick={loadData}
               disabled={syncing}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[10px] font-semibold transition-all"
-              style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}`, color: themeConfig.textMuted }}
+              style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}`, color: themeConfig.textMuted }}
             >
               <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} /> Sync
             </button>
