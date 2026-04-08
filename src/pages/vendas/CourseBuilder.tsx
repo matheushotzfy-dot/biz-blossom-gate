@@ -480,6 +480,15 @@ export default function CourseBuilder() {
             </motion.div>
           </AnimatePresence>
 
+          {/* Course Settings */}
+          <button
+            onClick={openCourseSettings}
+            className="hidden sm:flex h-9 w-9 rounded-xl bg-muted/10 border border-border/20 items-center justify-center hover:bg-muted/20 hover:border-border/30 transition-all active:scale-[0.985] text-muted-foreground/40 hover:text-foreground/60"
+            title="Configurações do curso"
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </button>
+
           {/* Preview */}
           {course.is_published && (
             <button
