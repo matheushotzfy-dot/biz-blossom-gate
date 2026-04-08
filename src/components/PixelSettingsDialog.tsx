@@ -240,7 +240,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                       ? "bg-primary/10 text-primary ring-1 ring-primary/15 shadow-md shadow-primary/5"
                       : "text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-muted/6"
                   )}>
-                  <p.icon className={cn("h-3.5 w-3.5", isActive ? p.color : "")} />
+                  <p.LogoComp className={cn("h-3.5 w-3.5", isActive ? p.color : "")} />
                   {p.label}
                   {count > 0 && (
                     <span className={cn(
@@ -296,7 +296,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                       <div className="flex items-center gap-3.5 px-5 py-4 cursor-pointer" onClick={() => setExpandedPixel(isExpanded ? null : px.id)}>
                         <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 transition-all",
                           px.is_active ? cn(platform.bg, platform.ring) : "bg-muted/8 ring-border/10")}>
-                          <platform.icon className={cn("h-4 w-4", px.is_active ? platform.color : "text-muted-foreground/20")} />
+                          <platform.LogoComp className={cn("h-4 w-4", px.is_active ? platform.color : "text-muted-foreground/20")} />
                         </div>
 
                         <div className="flex-1 min-w-0">
