@@ -453,11 +453,16 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10"
+        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
       >
-
-        <div className="relative z-10">
-          {/* Top controls bar */}
+        {/* Atmospheric glow effects */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute -top-32 -left-32 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" />
+          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-48 w-[60%] rounded-full bg-primary/5 blur-[120px]" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none z-0" />
+          <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
@@ -574,7 +579,7 @@ export default function Dashboard() {
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 + idx * 0.06 }}
-                className="group relative rounded-xl border border-border/50 bg-card/95 p-5 overflow-hidden transition-all hover:border-border/70 hover:shadow-sm">
+                className="group relative rounded-xl border border-border/50 bg-card/95 p-5 overflow-hidden transition-all hover:border-primary/20 hover:shadow-[0_0_24px_rgba(0,220,130,0.08)] card-premium">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-2">{item.label}</p>
@@ -594,7 +599,8 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/50 bg-card/95 p-4 md:p-6 min-h-[280px]">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/50 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+          <div className="absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -632,7 +638,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className="group relative rounded-xl border border-border/50 bg-card/95 p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all hover:border-border/70 hover:shadow-sm">
+                className="group relative rounded-xl border border-border/50 bg-card/95 p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all hover:border-primary/20 hover:shadow-[0_0_20px_rgba(0,220,130,0.06)] card-premium">
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
                 <div className="pl-1.5 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-auto">
