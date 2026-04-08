@@ -308,6 +308,15 @@ export default function AdminDashboard() {
     indicatorShadow: "shadow-[0_0_14px_rgba(139,92,246,0.8)]",
     activeItem: "from-violet-500/[0.12] via-violet-500/[0.08] to-purple-500/[0.04] border-violet-500/[0.18] shadow-[inset_0_1px_0_rgba(139,92,246,0.12)]",
     activeIcon: "text-violet-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.6)]",
+  } : adminTheme === "midnight" ? {
+    gradient: "from-cyan-500 via-sky-600 to-blue-700",
+    text: "text-cyan-400", textSoft: "text-cyan-400/60", textGlow: "text-cyan-400/50",
+    bg: "bg-cyan-500", bgSoft: "bg-cyan-500/10", bgBorder: "border-cyan-500/10",
+    shadow: "shadow-[0_0_30px_rgba(34,211,238,0.3)]", glowBg: "bg-cyan-950/25",
+    ringActive: "ring-cyan-500/20", indicatorGradient: "from-cyan-400 via-sky-500 to-blue-500",
+    indicatorShadow: "shadow-[0_0_14px_rgba(34,211,238,0.7)]",
+    activeItem: "from-cyan-500/[0.12] via-sky-500/[0.08] to-blue-500/[0.04] border-cyan-500/[0.18] shadow-[inset_0_1px_0_rgba(34,211,238,0.12)]",
+    activeIcon: "text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]",
   } : adminTheme === "mint" ? {
     gradient: "from-emerald-400 via-teal-500 to-cyan-600",
     text: "text-emerald-300", textSoft: "text-emerald-300/60", textGlow: "text-emerald-300/50",
