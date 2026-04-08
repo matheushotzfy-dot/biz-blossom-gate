@@ -406,13 +406,18 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
           )}
 
           {/* ═══ ADD NEW PIXEL ═══ */}
-          <div className="rounded-2xl ring-1 ring-border/10 bg-muted/3 overflow-hidden">
+          <div className="rounded-2xl ring-1 ring-border/12 bg-muted/4 overflow-hidden relative">
+            <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(135deg, ${platform.brandColor}04 0%, transparent 60%)` }} />
             {/* Section header */}
-            <div className="flex items-center gap-3 px-5 pt-5 pb-4">
-              <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", platform.bg, platform.ring)}>
-                <Plus className={cn("h-4 w-4", platform.color)} />
+            <div className="relative flex items-center gap-3.5 px-5 pt-5 pb-4">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center ring-1"
+                style={{ background: `${platform.brandColor}10`, borderColor: `${platform.brandColor}15` }}>
+                <platform.LogoComp className="h-4.5 w-4.5" style={{ color: platform.brandColor }} />
               </div>
-              <p className="text-[13px] font-display font-bold text-foreground/80">Adicionar Pixel {platform.label}</p>
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground/85">Adicionar {platform.label}</p>
+                <p className="text-[10px] text-muted-foreground/30 font-display">Configure o rastreamento de conversões</p>
+              </div>
             </div>
 
             <div className="px-5 pb-5 space-y-4">
