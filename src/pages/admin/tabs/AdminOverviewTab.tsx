@@ -606,28 +606,28 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
     <motion.div variants={fadeUp} className="relative group">
       <div className={cn(
         "relative isolate overflow-hidden rounded-2xl border p-5 sm:p-6 transition-all duration-300",
-        "border-white/[0.07] bg-gradient-to-b from-white/[0.04] to-white/[0.015]",
-        "shadow-[0_16px_48px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]",
-        "hover:border-white/[0.12] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(16,185,129,0.08)]",
+        "border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02]",
+        "shadow-[0_16px_48px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]",
+        "hover:border-white/[0.14] hover:shadow-[0_20px_60px_rgba(0,0,0,0.4),0_0_0_1px_rgba(16,185,129,0.1)]",
         alert && "border-red-500/25 ring-1 ring-red-500/10"
       )}>
-        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-15 group-hover:opacity-25 transition-opacity duration-700 bg-gradient-to-br", gradient)} />
-        <div className={cn("absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r opacity-20", gradient)} />
+        <div className={cn("absolute -top-20 -right-20 h-48 w-48 rounded-full blur-[80px] opacity-[0.18] group-hover:opacity-[0.28] transition-opacity duration-700 bg-gradient-to-br", gradient)} />
+        <div className={cn("absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r opacity-25", gradient)} />
 
         <div className="relative z-10">
           <div className="mb-3 sm:mb-4 flex items-center justify-between">
-            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/25">{label}</span>
-            <div className={cn("h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.12]", gradient)}>
+            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/35">{label}</span>
+            <div className={cn("h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.15]", gradient)}>
               {icon}
             </div>
           </div>
           <p className={cn(
             "text-[26px] sm:text-[32px] font-extrabold leading-none tracking-[-0.02em]",
             metallic ? "bg-gradient-to-r from-white via-emerald-200 to-white bg-clip-text text-transparent" : alert ? "text-red-400" : "text-white"
-          )} style={{ fontFamily: "'Space Grotesk', monospace" }}>
+          )} style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
             {value}
           </p>
-          {sub && <p className="mt-2 sm:mt-2.5 text-[11px] font-medium text-white/30">{sub}</p>}
+          {sub && <p className="mt-2 sm:mt-2.5 text-[11px] font-medium text-white/40">{sub}</p>}
         </div>
       </div>
     </motion.div>
