@@ -382,7 +382,7 @@ export default function Saques() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Total Sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), color: "primary", icon: ArrowDownToLine, delta: m.prevTotalApproved > 0 ? m.totalApproved - m.prevTotalApproved : undefined },
-              { label: "Taxa de Aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, color: m.approvalRate >= 80 ? "success" : m.approvalRate >= 50 ? "warning" : "destructive", icon: Target },
+              { label: "Taxa de Aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, color: "success", icon: Target },
               { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgAmount), color: "primary", icon: Receipt },
               { label: "Total em Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), color: "warning", icon: Percent },
             ].map((item, idx) => (
