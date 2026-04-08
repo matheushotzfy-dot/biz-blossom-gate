@@ -6,11 +6,10 @@ import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useTran
 import {
   Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
   Link as LinkIcon, Search, Copy, MoreVertical,
-  Globe, Lock, Image as ImageIcon, X, Check,
-  Video, DollarSign, PlayCircle, Sparkles, Clock,
-  TrendingUp, Users, Zap, ArrowRight, Grid3X3, List,
-  BarChart3, Star, Flame, Crown, ChevronRight, GraduationCap,
-  Award, Rocket, Target, Activity, Shield,
+  Globe, Lock, Image as ImageIcon, X,
+  Video, DollarSign, PlayCircle, Sparkles,
+  Users, Grid3X3, List,
+  ChevronRight, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
