@@ -327,6 +327,8 @@ export default function AdminDashboard() {
     activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div
       className={cn("h-screen flex overflow-hidden", themeConfig.isDark ? "dark text-white" : "text-gray-900")}
@@ -344,10 +346,19 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* ═══ MOBILE OVERLAY ═══ */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        </div>
+      )}
+
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
-        "relative z-50 h-full flex flex-col shrink-0 transition-all duration-300",
-        sidebarCollapsed ? "w-[72px]" : "w-[248px]"
+        "relative z-[70] h-full flex flex-col shrink-0 transition-all duration-300",
+        sidebarCollapsed ? "w-[72px]" : "w-[248px]",
+        "max-lg:fixed max-lg:left-0 max-lg:top-0",
+        mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
       )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: `1px solid ${themeConfig.isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}` }}>
         
         {/* Sidebar ambient glow */}
@@ -406,7 +417,7 @@ export default function AdminDashboard() {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => handleTabChange(item.id as TabId)}
+                      onClick={() => { handleTabChange(item.id as TabId); setMobileMenuOpen(false); }}
                       title={sidebarCollapsed ? item.label : undefined}
                       className={cn(
                         "relative w-full flex items-center gap-2.5 rounded-xl transition-all duration-200 group",
@@ -447,7 +458,7 @@ export default function AdminDashboard() {
         <div className="relative border-t border-white/[0.06] p-2.5 space-y-1 shrink-0">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-white/15 hover:text-white/40 hover:bg-white/[0.03] transition-all"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-white/15 hover:text-white/40 hover:bg-white/[0.03] transition-all max-lg:hidden"
           >
             {sidebarCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!sidebarCollapsed && <span className="text-[11px] font-medium">Recolher</span>}
@@ -465,8 +476,12 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* ═══ TOP BAR ═══ */}
-        <header className="relative z-40 h-[56px] flex items-center px-5 gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
+        <header className="relative z-40 h-[56px] flex items-center px-4 lg:px-5 gap-3 lg:gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Mobile hamburger */}
+            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${themeConfig.border}` }}>
+              <PanelLeft className="h-4 w-4" style={{ color: themeConfig.textMuted }} />
+            </button>
             <div className="flex items-center gap-2.5">
               <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center border", accentClasses.bgBorder)} style={{ background: themeConfig.accentLight }}>
                 {(() => {
@@ -485,7 +500,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Date Picker */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+          <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
