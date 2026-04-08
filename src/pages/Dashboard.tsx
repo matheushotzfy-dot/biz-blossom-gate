@@ -404,7 +404,6 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
-      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
@@ -453,16 +452,9 @@ export default function Dashboard() {
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        transition={{ duration: 0.4 }}
+        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10"
       >
-        <div className="absolute -inset-16 pointer-events-none">
-          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
-          <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
-          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]" />
-          <motion.div animate={{ opacity: [0.4, 0.65, 0.4] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-20 left-[10%] right-[10%] h-[200px] bg-primary/6 rounded-full blur-[120px]" />
-          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        </div>
 
         <div className="relative z-10">
           {/* Top controls bar */}
@@ -544,34 +536,32 @@ export default function Dashboard() {
           </div>
 
           {/* MAIN FOCAL POINT — Revenue */}
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="mb-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
-              <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
                 {isCustom && customRange?.from
                   ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                   : `Receita — ${selectedPeriod.label}`}
               </p>
-              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
             </div>
             <div className="flex items-end gap-5 mb-3">
-              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1)]">
+              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-6">
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+            <div className="flex flex-wrap items-center gap-2 mt-5">
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Check className="h-3 w-3 text-success" /> {approved.length} aprovadas
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Clock3 className="h-3 w-3 text-warning" /> {pending.length} pendentes
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.56 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Target className="h-3 w-3" /> {conversion.toFixed(1)}% conversão
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.64 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Wallet className="h-3 w-3 text-primary" /> saldo {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
-              </motion.span>
+              </span>
             </div>
           </motion.div>
 
@@ -583,15 +573,15 @@ export default function Dashboard() {
               { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, color: "info", icon: Target },
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 + idx * 0.1 }} className="group relative rounded-2xl glass-panel p-5 overflow-hidden card-premium">
-                <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
-                <div className="relative z-10 flex items-start justify-between">
+              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 + idx * 0.06 }}
+                className="group relative rounded-xl border border-border/50 bg-card/95 p-5 overflow-hidden transition-all hover:border-border/70 hover:shadow-sm">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-2">{item.label}</p>
                     <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${item.color}/8 border-${item.color}/15 text-${item.color}/60`)}>
+                    <item.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
               </motion.div>
@@ -604,7 +594,7 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-8 rounded-2xl glass-panel p-4 md:p-6 min-h-[280px]">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/50 bg-card/95 p-4 md:p-6 min-h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -626,7 +616,7 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl glass-panel p-4 md:p-5">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border/50 bg-card/95 p-4 md:p-5">
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -641,13 +631,13 @@ export default function Dashboard() {
               { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", color: "primary" },
               { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.06 }}
-                className="group relative rounded-2xl glass-panel p-3.5 md:p-4 overflow-hidden card-premium flex flex-col justify-between min-h-[130px]">
+              <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
+                className="group relative rounded-xl border border-border/50 bg-card/95 p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all hover:border-border/70 hover:shadow-sm">
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
                 <div className="pl-1.5 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-auto">
                     <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground/30">{item.label}</span>
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center ring-1 ring-border/20 transition-all group-hover:scale-110", `bg-${item.color}/8 text-${item.color}/50`)}>
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center ring-1 ring-border/20", `bg-${item.color}/8 text-${item.color}/60`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
                   </div>
@@ -667,7 +657,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-2xl glass-panel p-4 md:p-5 flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border/50 bg-card/95 p-4 md:p-5 flex flex-col">
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
@@ -682,8 +672,8 @@ export default function Dashboard() {
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
             ].map((action) => (
               <Link key={action.href} to={action.href}
-                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/10 bg-card/30 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/15 hover:bg-primary/[0.03] hover:shadow-lg hover:shadow-primary/5 active:scale-[0.985]">
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/10 group-hover:scale-110 transition-transform">
+                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/40 bg-card/60 p-2.5 md:p-3.5 transition-all duration-200 hover:border-border/60 hover:bg-card/80 active:scale-[0.985]">
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0 ring-1 ring-primary/12">
                   <action.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -697,7 +687,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-2xl glass-panel flex flex-col overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-xl border border-border/50 bg-card/95 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">

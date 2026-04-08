@@ -553,7 +553,6 @@ export default function Extrato() {
   /* ═══════════ RENDER ═══════════ */
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
-      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
       {/* ═══════════════════════════════════════════ */}
       {/* HERO — EXTRATO                              */}
@@ -561,33 +560,9 @@ export default function Extrato() {
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        transition={{ duration: 0.4 }}
+        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10"
       >
-        {/* Animated floating orbs */}
-        <div className="absolute -inset-16 pointer-events-none">
-          <motion.div
-            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]"
-          />
-          <motion.div
-            animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]"
-          />
-          <motion.div
-            animate={{ opacity: [0.4, 0.65, 0.4] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-20 left-[10%] right-[10%] h-[200px] bg-primary/6 rounded-full blur-[120px]"
-          />
-          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        </div>
 
         <div className="relative z-10">
           {/* Top controls bar */}
@@ -599,7 +574,7 @@ export default function Extrato() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="inline-flex items-center gap-2.5"
               >
-                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
                   <Receipt className="h-4.5 w-4.5 text-primary" />
                 </div>
                 <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80 block leading-tight">Extrato</span>
