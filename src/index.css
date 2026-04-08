@@ -23,7 +23,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --card-foreground: 220 30% 8%;
     --popover: 0 0% 99%;
     --popover-foreground: 220 30% 8%;
-    --primary: 160 84% 36%;
+    --primary: 155 100% 32%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 18% 88%;
     --secondary-foreground: 220 24% 12%;
@@ -35,19 +35,19 @@ input[type="number"]::-webkit-inner-spin-button {
     --destructive-foreground: 0 0% 100%;
     --border: 210 18% 76%;
     --input: 210 18% 78%;
-    --ring: 160 84% 36%;
+    --ring: 155 100% 32%;
     --radius: 0.75rem;
 
     --sidebar-background: 220 22% 96%;
     --sidebar-foreground: 220 16% 24%;
-    --sidebar-primary: 160 84% 36%;
+    --sidebar-primary: 155 100% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 20% 90%;
     --sidebar-accent-foreground: 220 20% 12%;
     --sidebar-border: 210 18% 82%;
-    --sidebar-ring: 160 84% 36%;
+    --sidebar-ring: 155 100% 32%;
 
-    --chart-1: 160 84% 36%;
+    --chart-1: 155 100% 32%;
     --chart-2: 200 78% 48%;
     --chart-3: 35 92% 50%;
     --chart-4: 258 54% 54%;
@@ -72,7 +72,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --card-foreground: 210 20% 95%;
     --popover: 220 16% 13%;
     --popover-foreground: 210 20% 95%;
-    --primary: 160 72% 46%;
+    --primary: 155 85% 45%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 12% 18%;
     --secondary-foreground: 210 14% 90%;
@@ -84,16 +84,16 @@ input[type="number"]::-webkit-inner-spin-button {
     --destructive-foreground: 0 0% 100%;
     --border: 220 10% 22%;
     --input: 220 10% 22%;
-    --ring: 160 72% 46%;
+    --ring: 155 85% 45%;
 
     --sidebar-background: 220 15% 13%;
     --sidebar-foreground: 215 10% 65%;
-    --sidebar-primary: 160 72% 46%;
+    --sidebar-primary: 155 85% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 12% 17%;
     --sidebar-accent-foreground: 210 14% 92%;
     --sidebar-border: 220 10% 20%;
-    --sidebar-ring: 160 72% 46%;
+    --sidebar-ring: 155 85% 45%;
 
     --success: 152 60% 44%;
     --success-foreground: 0 0% 5%;
