@@ -500,7 +500,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Date Picker */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+          <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
