@@ -26,7 +26,7 @@ import StudentPreviewPanel from "@/components/course/StudentPreviewPanel";
 // ─── Types ────────────────────────────────────────────────────────
 interface Course {
   id: string; title: string; description: string | null; is_published: boolean;
-  user_id: string; product_id: string | null;
+  user_id: string; product_id: string | null; thumbnail_url: string | null;
 }
 interface Module {
   id: string; course_id: string; title: string; description: string | null;
