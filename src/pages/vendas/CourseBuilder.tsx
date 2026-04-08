@@ -258,13 +258,29 @@ export default function CourseBuilder() {
   };
 
   const deleteModule = async (id: string) => {
-    if (!window.confirm("Excluir este módulo e todas as suas aulas?")) return;
-    await supabase.from("lessons").delete().in("module_id", [id]);
-    await supabase.from("modules").delete().eq("id", id);
-    if (selectedLesson && modules.find(m => m.id === id)?.lessons.some(l => l.id === selectedLesson.id)) {
-      setSelectedLesson(null);
+    const mod = modules.find(m => m.id === id);
+    setDeleteTarget({ type: "module", id, label: mod?.title || "Módulo" });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingItem(true);
+    if (deleteTarget.type === "module") {
+      await supabase.from("lessons").delete().in("module_id", [deleteTarget.id]);
+      await supabase.from("modules").delete().eq("id", deleteTarget.id);
+      if (selectedLesson && modules.find(m => m.id === deleteTarget.id)?.lessons.some(l => l.id === selectedLesson.id)) {
+        setSelectedLesson(null);
+      }
+      toast.success("Módulo excluído");
+    } else {
+      await supabase.from("lesson_attachments" as any).delete().eq("lesson_id", deleteTarget.id);
+      await supabase.from("lessons").delete().eq("id", deleteTarget.id);
+      if (selectedLesson?.id === deleteTarget.id) setSelectedLesson(null);
+      toast.success("Aula excluída");
     }
-    toast.success("Módulo excluído"); loadAll();
+    setDeletingItem(false);
+    setDeleteTarget(null);
+    loadAll();
   };
 
   // ─── Lesson CRUD ───────────────────────────────────────────────
@@ -279,11 +295,65 @@ export default function CourseBuilder() {
   };
 
   const deleteLesson = async (id: string) => {
-    if (!window.confirm("Excluir esta aula?")) return;
-    await supabase.from("lesson_attachments" as any).delete().eq("lesson_id", id);
-    await supabase.from("lessons").delete().eq("id", id);
-    if (selectedLesson?.id === id) setSelectedLesson(null);
-    toast.success("Aula excluída"); loadAll();
+    const lesson = modules.flatMap(m => m.lessons).find(l => l.id === id);
+    setDeleteTarget({ type: "lesson", id, label: lesson?.title || "Aula" });
+  };
+
+  const duplicateLesson = async (lesson: Lesson) => {
+    const mod = modules.find(m => m.lessons.some(l => l.id === lesson.id));
+    if (!mod) return;
+    const { data } = await supabase.from("lessons").insert({
+      module_id: lesson.module_id,
+      title: `${lesson.title} (cópia)`,
+      description: lesson.description,
+      video_url: lesson.video_url,
+      duration_minutes: lesson.duration_minutes,
+      is_free: lesson.is_free,
+      drip_days: lesson.drip_days,
+      sort_order: mod.lessons.length,
+    }).select().single();
+    toast.success("Aula duplicada!");
+    await loadAll();
+    if (data) selectLesson(data as Lesson);
+  };
+
+  // ─── Course Settings ───────────────────────────────────────────
+  const openCourseSettings = () => {
+    if (!course) return;
+    setCourseTitle(course.title);
+    setCourseDescription(course.description || "");
+    setCourseCategory("");
+    setCourseThumbnail("");
+    setCourseSettingsOpen(true);
+  };
+
+  const saveCourseSettings = async () => {
+    if (!course || !user) return;
+    const updates: Record<string, any> = {};
+    if (courseTitle.trim() && courseTitle !== course.title) updates.title = courseTitle.trim();
+    if (courseDescription !== (course.description || "")) updates.description = courseDescription || null;
+    if (Object.keys(updates).length === 0) { setCourseSettingsOpen(false); return; }
+    await supabase.from("courses").update(updates).eq("id", course.id).eq("user_id", user.id);
+    setCourse(prev => prev ? { ...prev, ...updates } : prev);
+    setCourseSettingsOpen(false);
+    toast.success("Configurações salvas!");
+  };
+
+  const handleThumbnailUpload = async (file: File) => {
+    if (!user || !course) return;
+    const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED.includes(file.type)) { toast.error("Use JPG, PNG ou WebP"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
+    setUploadingThumbnail(true);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/thumbnails/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file);
+    if (error) { toast.error("Erro no upload"); setUploadingThumbnail(false); return; }
+    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
+    await supabase.from("courses").update({ thumbnail_url: urlData.publicUrl }).eq("id", course.id);
+    setCourse(prev => prev ? { ...prev, thumbnail_url: urlData.publicUrl } : prev);
+    setUploadingThumbnail(false);
+    toast.success("Thumbnail atualizada!");
   };
 
   // ─── Drag & Drop ───────────────────────────────────────────────
