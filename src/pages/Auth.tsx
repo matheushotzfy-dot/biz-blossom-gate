@@ -90,59 +90,47 @@ function AnimatedCounter({ target, prefix = "", suffix = "", duration = 2000 }: 
 const SALE_NAMES = ["Lucas M.", "Carla F.", "Thiago B.", "Juliana R.", "Felipe S.", "Amanda L.", "Bruno C.", "Isabela T.", "Marcos P.", "Fernanda A."];
 const SALE_AMOUNTS = [97, 197, 297, 497, 697, 997, 1297, 1497, 47, 147];
 
-function FallingNotification({ index, onDone }: { index: number; onDone: () => void }) {
-  const name = SALE_NAMES[index % SALE_NAMES.length];
-  const amount = SALE_AMOUNTS[index % SALE_AMOUNTS.length];
-  const xPos = 10 + (index * 37) % 60;
-
-  useEffect(() => {
-    const t = setTimeout(onDone, 5000);
-    return () => clearTimeout(t);
-  }, [onDone]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 40, scale: 0.9 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      style={{ left: `${xPos}%` }}
-      className="absolute w-[220px] flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[hsl(160_20%_12%)] border border-[hsl(160_30%_22%)] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-    >
-      <div className="h-8 w-8 rounded-lg bg-[hsl(160_60%_40%/0.15)] flex items-center justify-center shrink-0">
-        <Zap className="h-3.5 w-3.5 text-[hsl(160_60%_55%)]" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[10px] font-bold text-[hsl(160_40%_85%)]">Venda aprovada</p>
-        <p className="text-[9px] text-[hsl(160_20%_55%)]">{name} · <span className="font-bold text-[hsl(160_60%_55%)]">R$ {amount},00</span></p>
-      </div>
-    </motion.div>
-  );
-}
-
-function NotificationRain() {
-  const [notifications, setNotifications] = useState<number[]>([]);
+function NotificationFeed() {
+  const [notifications, setNotifications] = useState<{id: number; name: string; amount: number; time: string}[]>([]);
   const counterRef = useRef(0);
+  const TIMES = ["agora", "1min", "2min", "3min", "5min"];
 
   useEffect(() => {
     const spawn = () => {
       counterRef.current++;
-      setNotifications(prev => [...prev.slice(-4), counterRef.current]);
+      const id = counterRef.current;
+      setNotifications(prev => [
+        { id, name: SALE_NAMES[id % SALE_NAMES.length], amount: SALE_AMOUNTS[id % SALE_AMOUNTS.length], time: TIMES[id % TIMES.length] },
+        ...prev,
+      ].slice(0, 3));
     };
     spawn();
-    const interval = setInterval(spawn, 3000);
+    const interval = setInterval(spawn, 4000);
     return () => clearInterval(interval);
   }, []);
 
-  const remove = (id: number) => setNotifications(prev => prev.filter(n => n !== id));
-
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <AnimatePresence>
-        {notifications.map((id, i) => (
-          <div key={id} style={{ top: `${15 + (i * 18) % 65}%` }} className="absolute">
-            <FallingNotification index={id} onDone={() => remove(id)} />
-          </div>
+    <div className="space-y-2">
+      <AnimatePresence mode="popLayout">
+        {notifications.map((n) => (
+          <motion.div
+            key={n.id}
+            layout
+            initial={{ opacity: 0, x: 30, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -20, scale: 0.9 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-[hsl(160_15%_10%)] border border-[hsl(160_20%_16%)]"
+          >
+            <div className="h-8 w-8 rounded-lg bg-[hsl(160_60%_40%/0.12)] flex items-center justify-center shrink-0">
+              <Zap className="h-3.5 w-3.5 text-[hsl(160_60%_50%)]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-[hsl(160_30%_75%)]">Venda aprovada</p>
+              <p className="text-[9px] text-[hsl(160_15%_45%)]">{n.name} · <span className="font-bold text-[hsl(160_60%_50%)]">R$ {n.amount},00</span></p>
+            </div>
+            <span className="text-[8px] text-[hsl(160_10%_30%)] font-medium shrink-0">{n.time}</span>
+          </motion.div>
         ))}
       </AnimatePresence>
     </div>
