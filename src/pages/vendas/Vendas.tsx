@@ -151,26 +151,18 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
   );
 }
 
-/* ─── Glow Card ─── */
-function GlowCard({ children, className, glowColor = "primary", delay = 0, animated = false }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number; animated?: boolean }) {
+/* ─── Clean Card ─── */
+function GlowCard({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number; animated?: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-2xl glass-panel overflow-hidden card-premium",
-        animated && "animated-border",
+        "relative group rounded-xl border border-border/50 bg-card/95 overflow-hidden transition-all hover:border-border/70 hover:shadow-sm",
         className
       )}
     >
-      {/* Multi-layer ambient glow */}
-      <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[60px] pointer-events-none", `bg-${glowColor}/12`)} />
-      <div className={cn("absolute -bottom-16 -left-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-1000 blur-[40px] pointer-events-none", `bg-${glowColor}/6`)} />
-      {/* Top shimmer line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-      {/* Bottom accent line */}
-      <div className={cn("absolute bottom-0 left-[10%] right-[10%] h-px opacity-0 group-hover:opacity-100 transition-opacity duration-700", `bg-gradient-to-r from-transparent via-${glowColor}/20 to-transparent`)} />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
@@ -181,21 +173,22 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
   label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
 }) {
   return (
-    <GlowCard glowColor={color} delay={delay} animated className="p-5 shimmer card-premium">
-      {/* Left accent bar */}
-      <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
-      <div className="flex items-start justify-between mb-3">
-        <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", `bg-${color}/10 border-${color}/12 text-${color} group-hover:bg-${color}/15`)}>
-          <Icon className="h-5 w-5" />
+    <GlowCard delay={delay} className="p-5">
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${color}`)} />
+      <div className="flex items-start justify-between mb-3 pl-2">
+        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${color}/8 border-${color}/12 text-${color}`)}>
+          <Icon className="h-4.5 w-4.5" />
         </div>
         {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
       </div>
-      <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
-      <div className="flex items-end gap-2">
-        <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">
-          {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
-        </span>
-        {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
+      <div className="pl-2">
+        <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-1.5">{label}</p>
+        <div className="flex items-end gap-2">
+          <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">
+            {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
+          </span>
+          {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
+        </div>
       </div>
     </GlowCard>
   );
