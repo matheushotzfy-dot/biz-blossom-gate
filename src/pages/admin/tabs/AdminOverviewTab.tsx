@@ -639,12 +639,12 @@ function GlassKpi({ label, value, icon, iconColor }: {
   label: string; value: string; icon: React.ReactNode; iconColor?: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.035] to-white/[0.01] p-3.5 sm:p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:border-white/[0.1] group">
+    <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.015] p-3.5 sm:p-4 shadow-[0_10px_24px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all hover:border-white/[0.12] group">
       <div className="mb-2 sm:mb-2.5 flex items-center justify-between">
-        <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-white/20">{label}</span>
-        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]", iconColor || "text-white/30")}>{icon}</div>
+        <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-white/30">{label}</span>
+        <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.05]", iconColor || "text-white/40")}>{icon}</div>
       </div>
-      <p className="text-base sm:text-lg font-extrabold tracking-tight text-white" style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</p>
+      <p className="text-base sm:text-lg font-extrabold tracking-tight text-white/95" style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 1px 2px rgba(0,0,0,0.2)" }}>{value}</p>
     </div>
   );
 }
