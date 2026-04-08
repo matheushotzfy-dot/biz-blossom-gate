@@ -199,12 +199,13 @@ function ProgressRing({ value, max = 100, size = 56, strokeWidth = 4, color = "p
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const pct = Math.min(value / max, 1);
+  const strokeColor = color.startsWith("hsl") ? color : `hsl(var(--${color}))`;
   return (
     <svg width={size} height={size} className="shrink-0 -rotate-90">
       <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted)/0.08)" strokeWidth={strokeWidth} />
       <motion.circle
         cx={size / 2} cy={size / 2} r={radius} fill="none"
-        stroke={`hsl(var(--${color}))`} strokeWidth={strokeWidth}
+        stroke={strokeColor} strokeWidth={strokeWidth}
         strokeLinecap="round"
         initial={{ strokeDashoffset: circumference }}
         animate={{ strokeDashoffset: circumference * (1 - pct) }}
