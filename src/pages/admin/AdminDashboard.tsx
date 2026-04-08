@@ -97,7 +97,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
-type AdminTheme = "dark-green" | "dark" | "light-green" | "mint";
+type AdminTheme = "dark-green" | "dark" | "midnight" | "mint";
 
 const ADMIN_THEMES: Record<AdminTheme, {
   label: string; bg: string; sidebarBg: string; topBarBg: string;
@@ -109,37 +109,37 @@ const ADMIN_THEMES: Record<AdminTheme, {
     label: "Verde Suave",
     bg: "linear-gradient(135deg, #0b1a14 0%, #0e1f18 30%, #111f1a 60%, #0b1a14 100%)",
     sidebarBg: "linear-gradient(180deg, rgba(11,26,20,0.98) 0%, rgba(8,20,15,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(11,26,20,0.8) 0%, rgba(14,31,24,0.7) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(11,26,20,0.85) 0%, rgba(14,31,24,0.75) 100%)",
     accent: "emerald", accentLight: "rgba(52,211,153,0.12)", accentGlow: "rgba(52,211,153,0.35)",
-    textPrimary: "rgba(255,255,255,0.92)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.28)",
-    border: "rgba(255,255,255,0.06)", cardBg: "rgba(52,211,153,0.04)", isDark: true,
+    textPrimary: "rgba(255,255,255,0.95)", textSecondary: "rgba(255,255,255,0.60)", textMuted: "rgba(255,255,255,0.32)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(52,211,153,0.04)", isDark: true,
   },
   "dark-green": {
-    label: "Verde Escuro",
+    label: "Esmeralda Pro",
     bg: "linear-gradient(135deg, #040f08 0%, #061210 30%, #081a12 60%, #040f08 100%)",
     sidebarBg: "linear-gradient(180deg, rgba(6,18,12,0.98) 0%, rgba(4,15,8,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(6,18,12,0.8) 0%, rgba(8,20,14,0.7) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(6,18,12,0.85) 0%, rgba(8,20,14,0.75) 100%)",
     accent: "emerald", accentLight: "rgba(16,185,129,0.15)", accentGlow: "rgba(16,185,129,0.4)",
-    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
-    border: "rgba(255,255,255,0.06)", cardBg: "rgba(16,185,129,0.04)", isDark: true,
+    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(16,185,129,0.04)", isDark: true,
   },
   "dark": {
-    label: "Dark Clássico",
-    bg: "linear-gradient(135deg, #0a0a0f 0%, #0f0f18 30%, #12121e 60%, #0a0a0f 100%)",
-    sidebarBg: "linear-gradient(180deg, rgba(10,10,18,0.98) 0%, rgba(8,8,14,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(10,10,18,0.8) 0%, rgba(12,12,20,0.7) 100%)",
+    label: "Violeta Stealth",
+    bg: "linear-gradient(135deg, #09090f 0%, #0d0d18 30%, #10101e 60%, #09090f 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(9,9,18,0.98) 0%, rgba(7,7,14,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(9,9,18,0.85) 0%, rgba(12,12,22,0.75) 100%)",
     accent: "violet", accentLight: "rgba(139,92,246,0.15)", accentGlow: "rgba(139,92,246,0.4)",
-    textPrimary: "rgba(255,255,255,0.9)", textSecondary: "rgba(255,255,255,0.55)", textMuted: "rgba(255,255,255,0.25)",
-    border: "rgba(255,255,255,0.06)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
+    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
   },
-  "light-green": {
-    label: "Light + Verde",
-    bg: "linear-gradient(135deg, #f8faf9 0%, #f0f5f2 30%, #e8f0ec 60%, #f8faf9 100%)",
-    sidebarBg: "linear-gradient(180deg, #0f1f17 0%, #0a1810 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(248,250,249,0.9) 100%)",
-    accent: "emerald", accentLight: "rgba(16,185,129,0.12)", accentGlow: "rgba(16,185,129,0.3)",
-    textPrimary: "rgba(15,31,23,0.9)", textSecondary: "rgba(15,31,23,0.6)", textMuted: "rgba(15,31,23,0.35)",
-    border: "rgba(0,0,0,0.08)", cardBg: "rgba(16,185,129,0.03)", isDark: false,
+  "midnight": {
+    label: "Midnight Blue",
+    bg: "linear-gradient(135deg, #060a14 0%, #081020 30%, #0a1428 60%, #060a14 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(6,10,20,0.98) 0%, rgba(4,8,16,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(6,10,20,0.85) 0%, rgba(8,14,28,0.75) 100%)",
+    accent: "cyan", accentLight: "rgba(34,211,238,0.12)", accentGlow: "rgba(34,211,238,0.35)",
+    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
+    border: "rgba(255,255,255,0.07)", cardBg: "rgba(34,211,238,0.04)", isDark: true,
   },
 };
 
