@@ -605,7 +605,7 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
   return (
     <motion.div variants={fadeUp} className="relative group">
       <div className={cn(
-        "relative isolate overflow-hidden rounded-2xl border p-6 transition-all duration-300",
+        "relative isolate overflow-hidden rounded-2xl border p-5 sm:p-6 transition-all duration-300",
         "border-white/[0.07] bg-gradient-to-b from-white/[0.04] to-white/[0.015]",
         "shadow-[0_16px_48px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]",
         "hover:border-white/[0.12] hover:shadow-[0_20px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(16,185,129,0.08)]",
@@ -615,19 +615,19 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
         <div className={cn("absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r opacity-20", gradient)} />
 
         <div className="relative z-10">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">{label}</span>
-            <div className={cn("h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.12]", gradient)}>
+          <div className="mb-3 sm:mb-4 flex items-center justify-between">
+            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/25">{label}</span>
+            <div className={cn("h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-lg ring-1 ring-white/[0.12]", gradient)}>
               {icon}
             </div>
           </div>
           <p className={cn(
-            "text-[32px] font-extrabold leading-none tracking-[-0.02em]",
+            "text-[26px] sm:text-[32px] font-extrabold leading-none tracking-[-0.02em]",
             metallic ? "bg-gradient-to-r from-white via-emerald-200 to-white bg-clip-text text-transparent" : alert ? "text-red-400" : "text-white"
           )} style={{ fontFamily: "'Space Grotesk', monospace" }}>
             {value}
           </p>
-          {sub && <p className="mt-2.5 text-[11px] font-medium text-white/25">{sub}</p>}
+          {sub && <p className="mt-2 sm:mt-2.5 text-[11px] font-medium text-white/30">{sub}</p>}
         </div>
       </div>
     </motion.div>
@@ -639,12 +639,12 @@ function GlassKpi({ label, value, icon, iconColor }: {
   label: string; value: string; icon: React.ReactNode; iconColor?: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.035] to-white/[0.01] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:border-white/[0.1] group">
-      <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-white/18">{label}</span>
+    <div className="rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.035] to-white/[0.01] p-3.5 sm:p-4 shadow-[0_10px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:border-white/[0.1] group">
+      <div className="mb-2 sm:mb-2.5 flex items-center justify-between">
+        <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-white/20">{label}</span>
         <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]", iconColor || "text-white/30")}>{icon}</div>
       </div>
-      <p className="text-lg font-extrabold tracking-tight text-white" style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</p>
+      <p className="text-base sm:text-lg font-extrabold tracking-tight text-white" style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</p>
     </div>
   );
 }
