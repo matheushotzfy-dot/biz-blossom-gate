@@ -380,10 +380,10 @@ export default function MemberHome() {
             className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3"
           >
             {[
-              { icon: BookOpen, label: "Cursos", value: String(courses.length), color: "primary" },
-              { icon: TrendingUp, label: "Progresso Geral", value: `${overallPct}%`, color: "info" },
-              { icon: Flame, label: "Aulas Concluídas", value: String(totalCompleted), color: "warning" },
-              { icon: Trophy, label: "Cursos Completos", value: String(completedCourses), color: "success" },
+              { icon: BookOpen, label: "Cursos", value: String(courses.length), color: "primary", glow: "hsl(var(--primary) / 0.15)" },
+              { icon: TrendingUp, label: "Progresso", value: `${overallPct}%`, color: "info", glow: "hsl(var(--info) / 0.15)" },
+              { icon: Flame, label: "Aulas Feitas", value: String(totalCompleted), color: "warning", glow: "hsl(var(--warning) / 0.15)" },
+              { icon: Trophy, label: "Completos", value: String(completedCourses), color: "success", glow: "hsl(var(--success) / 0.15)" },
             ].map((kpi, i) => (
               <motion.div
                 key={kpi.label}
@@ -391,18 +391,20 @@ export default function MemberHome() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 + i * 0.05, ease }}
                 className={cn(
-                  "rounded-xl bg-card/80 backdrop-blur-xl border border-border/15 p-4 sm:p-5 relative overflow-hidden group cursor-default",
-                  "hover:border-border/30 transition-all duration-500 hover:shadow-lg"
+                  "rounded-2xl bg-card/80 backdrop-blur-2xl border border-border/15 p-4 sm:p-5 relative overflow-hidden group cursor-default",
+                  "hover:border-border/30 transition-all duration-500 hover:shadow-xl"
                 )}
+                style={{ boxShadow: `0 2px 20px ${kpi.glow}` }}
               >
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", `bg-${kpi.color}`)} />
-                <div className="flex items-center gap-3 relative z-10">
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110", `bg-${kpi.color}/10`)}>
-                    <kpi.icon className={cn("h-4.5 w-4.5", `text-${kpi.color}`)} />
+                <div className={cn("absolute -top-12 -right-12 w-32 h-32 rounded-full blur-[60px] opacity-20 transition-opacity group-hover:opacity-40", `bg-${kpi.color}`)} />
+                <div className="flex items-center gap-3.5 relative z-10">
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 ring-1", `bg-${kpi.color}/10 ring-${kpi.color}/10`)}>
+                    <kpi.icon className={cn("h-5 w-5", `text-${kpi.color}`)} />
                   </div>
                   <div>
-                    <span className={cn("text-xl font-display font-black tabular-nums block leading-none", `text-${kpi.color}`)}>{kpi.value}</span>
-                    <span className="text-[10px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider mt-0.5 block">{kpi.label}</span>
+                    <span className={cn("text-2xl font-display font-black tabular-nums block leading-none tracking-tight", `text-${kpi.color}`)}>{kpi.value}</span>
+                    <span className="text-[10px] text-muted-foreground/45 font-display font-bold uppercase tracking-wider mt-1 block">{kpi.label}</span>
                   </div>
                 </div>
               </motion.div>
