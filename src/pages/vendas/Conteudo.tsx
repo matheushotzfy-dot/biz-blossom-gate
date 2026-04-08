@@ -645,7 +645,7 @@ export default function AdminConteudo() {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="min-w-[200px] rounded-xl p-1.5">
-                            <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><ArrowRight className="h-4 w-4" /> Gerenciar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><ChevronRight className="h-4 w-4" /> Gerenciar</DropdownMenuItem>
                             <DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(c); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><Edit className="h-4 w-4" /> Configurações</DropdownMenuItem>
                             <DropdownMenuItem onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published ?? false); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
                               {c.is_published ? <><EyeOff className="h-4 w-4" /> Despublicar</> : <><Eye className="h-4 w-4" /> Publicar</>}
