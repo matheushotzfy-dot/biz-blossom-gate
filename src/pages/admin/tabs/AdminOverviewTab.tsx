@@ -243,22 +243,22 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
               <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {filteredApproved.length} aprovadas
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
-              <Users className="h-3 w-3 text-teal-400" /> {activeSellersToday} sellers ativos
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
+              <Users className="h-3 w-3 text-teal-400" /> {activeSellersToday} sellers
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
-              <Target className="h-3 w-3 text-emerald-400" /> {conversionRate}% conversão
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
+              <Target className="h-3 w-3 text-emerald-400" /> {conversionRate}% conv.
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/25 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5">
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
                 <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
               </span>
-              Tempo Real
+              Live
             </span>
           </div>
         </div>
