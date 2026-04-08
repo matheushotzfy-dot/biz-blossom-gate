@@ -640,18 +640,20 @@ export default function Auth() {
                 <img
                   src={authHeroImg}
                   alt="Empreendedora feliz usando a plataforma HOTZFY"
-                  className="h-full w-full object-cover object-[center_15%] scale-105"
+                  className="h-full w-full object-cover object-[center_15%] scale-[1.08]"
                   width={960}
                   height={1280}
                 />
-                {/* Cinematic overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/20" />
-                <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-background" />
-                <div className="absolute inset-0 noise-overlay opacity-30 pointer-events-none" />
-                {/* Emerald atmospheric glows */}
-                <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-primary/8 blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-1/3 right-0 h-80 w-80 rounded-full bg-primary/6 blur-[140px] pointer-events-none" />
+                {/* Cinematic overlays — richer depth */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/15" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-transparent to-background" />
+                <div className="absolute inset-0 mix-blend-overlay bg-gradient-to-br from-primary/10 via-transparent to-info/5" />
+                <div className="absolute inset-0 noise-overlay opacity-20 pointer-events-none" />
+                {/* Rich atmospheric glows */}
+                <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-[130px] pointer-events-none animate-pulse-glow" />
+                <div className="absolute bottom-1/4 right-0 h-96 w-96 rounded-full bg-primary/8 blur-[160px] pointer-events-none" />
+                <div className="absolute top-1/3 right-1/4 h-48 w-48 rounded-full bg-info/6 blur-[100px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
               </div>
 
               {/* ─── Floating Revenue Card — top left ─── */}
@@ -661,7 +663,7 @@ export default function Auth() {
                 transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="absolute top-5 left-5 xl:top-7 xl:left-7 z-20"
               >
-                <div className="rounded-2xl border border-primary/25 bg-card/85 backdrop-blur-2xl p-5 shadow-[0_8px_40px_hsl(var(--primary)/0.12)]">
+                <div className="rounded-2xl border border-primary/25 bg-card/90 backdrop-blur-2xl p-5 shadow-[0_12px_48px_hsl(var(--primary)/0.15)]">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
                     <p className="text-[9px] font-heading uppercase tracking-[0.24em] text-primary/80">Receita Hoje</p>
@@ -669,7 +671,20 @@ export default function Auth() {
                   <p className="font-heading text-[38px] xl:text-[44px] tracking-[-0.06em] leading-none text-foreground">
                     R$ <AnimatedCounter target={128480} />
                   </p>
-                  <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/30">
+                  {/* Mini sparkline chart */}
+                  <div className="flex items-end gap-[2px] mt-2.5 h-6">
+                    {[28, 42, 36, 55, 48, 62, 44, 70, 58, 76, 64, 82, 72, 88, 78, 94].map((h, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${h}%` }}
+                        transition={{ delay: 0.5 + i * 0.04, duration: 0.4 }}
+                        className="flex-1 rounded-full bg-primary/40"
+                        style={{ minWidth: 2 }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
                     <div className="inline-flex items-center gap-1 rounded-full bg-success/12 px-2 py-0.5">
                       <TrendingUp className="h-3 w-3 text-success" />
                       <span className="text-[10px] font-bold text-success">+18,4%</span>
