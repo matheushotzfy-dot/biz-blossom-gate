@@ -962,33 +962,39 @@ export default function Vendas() {
                 valueColor: "text-foreground",
                 icon: Clock,
               },
-            ].map((item, idx) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
-              >
-                <div className="relative z-10 flex items-start justify-between">
-                  <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40 mb-2.5">{item.label}</p>
-                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.valueColor)}>{item.value}</p>
-                    <div className="mt-2 text-[10px] text-muted-foreground/30 font-mono">{item.sub}</div>
-                  </div>
-                  {item.ring ? (
-                    <div className="relative floating">
-                      <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.ring.ringColor} />
-                      <item.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                    </div>
-                  ) : (
-                    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-gradient-to-br", item.iconGradient, item.iconGlow)}>
-                      <item.icon className="h-5 w-5 text-foreground" />
-                    </div>
-                  )}
+            ].map((item, idx) => {
+              const mirrored = idx % 2 === 1;
+              const iconEl = item.ring ? (
+                <div className="relative floating">
+                  <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.ring.ringColor} />
+                  <item.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 </div>
-              </motion.div>
-            ))}
+              ) : (
+                <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-gradient-to-br", item.iconGradient, item.iconGlow)}>
+                  <item.icon className="h-5 w-5 text-foreground" />
+                </div>
+              );
+              const textEl = (
+                <div className={mirrored ? "text-right" : ""}>
+                  <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40 mb-2.5">{item.label}</p>
+                  <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.valueColor)}>{item.value}</p>
+                  <div className="mt-2 text-[10px] text-muted-foreground/30 font-mono">{item.sub}</div>
+                </div>
+              );
+              return (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
+                >
+                  <div className="relative z-10 flex items-start justify-between">
+                    {mirrored ? <>{iconEl}{textEl}</> : <>{textEl}{iconEl}</>}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </motion.section>
