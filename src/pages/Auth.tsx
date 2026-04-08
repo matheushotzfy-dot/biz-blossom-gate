@@ -86,50 +86,59 @@ function AnimatedCounter({ target, prefix = "", suffix = "", duration = 2000 }: 
   return <span>{prefix}{count.toLocaleString("pt-BR")}{suffix}</span>;
 }
 
-/* ─── Falling notification ─── */
+/* ─── Live preview data ─── */
 const SALE_NAMES = ["Lucas M.", "Carla F.", "Thiago B.", "Juliana R.", "Felipe S.", "Amanda L.", "Bruno C.", "Isabela T.", "Marcos P.", "Fernanda A."];
 const SALE_AMOUNTS = [97, 197, 297, 497, 697, 997, 1297, 1497, 47, 147];
+const PREVIEW_BARS = [34, 51, 39, 62, 48, 74, 57, 86, 69, 81, 76, 95, 72, 88, 79, 92, 84, 73, 89, 78, 94, 82, 68, 58];
 
 function NotificationFeed() {
-  const [notifications, setNotifications] = useState<{id: number; name: string; amount: number; time: string}[]>([]);
+  const [notifications, setNotifications] = useState<{ id: number; name: string; amount: number; time: string }[]>([]);
   const counterRef = useRef(0);
   const TIMES = ["agora", "1min", "2min", "3min", "5min"];
 
   useEffect(() => {
     const spawn = () => {
-      counterRef.current++;
+      counterRef.current += 1;
       const id = counterRef.current;
-      setNotifications(prev => [
-        { id, name: SALE_NAMES[id % SALE_NAMES.length], amount: SALE_AMOUNTS[id % SALE_AMOUNTS.length], time: TIMES[id % TIMES.length] },
+      setNotifications((prev) => [
+        {
+          id,
+          name: SALE_NAMES[id % SALE_NAMES.length],
+          amount: SALE_AMOUNTS[id % SALE_AMOUNTS.length],
+          time: TIMES[id % TIMES.length],
+        },
         ...prev,
-      ].slice(0, 3));
+      ].slice(0, 4));
     };
+
     spawn();
-    const interval = setInterval(spawn, 4000);
+    const interval = setInterval(spawn, 3800);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <AnimatePresence mode="popLayout">
-        {notifications.map((n) => (
+        {notifications.map((notification) => (
           <motion.div
-            key={n.id}
+            key={notification.id}
             layout
-            initial={{ opacity: 0, x: 30, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -20, scale: 0.9 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-[hsl(160_15%_10%)] border border-[hsl(160_20%_16%)]"
+            initial={{ opacity: 0, x: 24, y: 8 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: -16, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="panel-enterprise-subtle card-premium flex items-center gap-3 p-3"
           >
-            <div className="h-8 w-8 rounded-lg bg-[hsl(160_60%_40%/0.12)] flex items-center justify-center shrink-0">
-              <Zap className="h-3.5 w-3.5 text-[hsl(160_60%_50%)]" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary shrink-0">
+              <Zap className="h-4 w-4" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-[hsl(160_30%_75%)]">Venda aprovada</p>
-              <p className="text-[9px] text-[hsl(160_15%_45%)]">{n.name} · <span className="font-bold text-[hsl(160_60%_50%)]">R$ {n.amount},00</span></p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Venda aprovada</p>
+              <p className="truncate text-[11px] font-semibold text-foreground/85">
+                {notification.name} · <span className="text-primary">R$ {notification.amount},00</span>
+              </p>
             </div>
-            <span className="text-[8px] text-[hsl(160_10%_30%)] font-medium shrink-0">{n.time}</span>
+            <span className="text-[9px] font-medium text-muted-foreground/70 shrink-0">{notification.time}</span>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -189,7 +198,11 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          setLoginAttempts(prev => { const next = prev + 1; if (next >= 5) setLockoutUntil(Date.now() + 60000); return next; });
+          setLoginAttempts((prev) => {
+            const next = prev + 1;
+            if (next >= 5) setLockoutUntil(Date.now() + 60000);
+            return next;
+          });
           throw error;
         }
         setLoginAttempts(0);
@@ -203,9 +216,17 @@ export default function Auth() {
         if (digits.length !== 11 && digits.length !== 14) { toast.error("Informe um CPF ou CNPJ válido"); setLoading(false); return; }
         if (!referralSource) { toast.error("Selecione onde conheceu a plataforma"); setLoading(false); return; }
         const { error } = await supabase.auth.signUp({
-          email, password,
+          email,
+          password,
           options: {
-            data: { full_name: fullName, nickname, document_number: digits, document_type: digits.length === 11 ? "cpf" : "cnpj", phone: phone.replace(/\D/g, ""), referral_source: referralSource },
+            data: {
+              full_name: fullName,
+              nickname,
+              document_number: digits,
+              document_type: digits.length === 11 ? "cpf" : "cnpj",
+              phone: phone.replace(/\D/g, ""),
+              referral_source: referralSource,
+            },
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
@@ -215,533 +236,596 @@ export default function Auth() {
         setStep(1);
       }
     } catch (error: unknown) {
-      const msg = (error as any)?.message || "";
+      const msg = (error as { message?: string })?.message || "";
       if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
       else if (msg.includes("already registered")) toast.error("Este e-mail já está cadastrado.");
       else if (msg.includes("Email not confirmed")) toast.error("Confirme seu e-mail antes de acessar.");
       else if (msg.includes("duplicate key") || msg.includes("unique")) toast.error("CPF/CNPJ, e-mail ou telefone já cadastrado em outra conta.");
       else toast.error("Instabilidade na rede. Tente novamente em instantes.");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const inputCls = "h-12 rounded-xl border-[hsl(160_15%_20%)] bg-[hsl(180_10%_8%)] text-foreground placeholder:text-[hsl(160_10%_30%)] focus:border-[hsl(160_60%_40%)] focus:ring-1 focus:ring-[hsl(160_60%_40%/0.2)] transition-all text-[13px] font-medium";
-  const labelCls = "text-[10px] font-bold text-[hsl(160_15%_45%)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5";
+  const inputCls = "h-12 rounded-2xl border-border/60 bg-background/70 text-foreground placeholder:text-muted-foreground/55 focus:border-primary/45 focus:ring-2 focus:ring-primary/15";
+  const labelCls = "mb-1.5 flex items-center gap-1.5 text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground";
+
+  const desktopMetrics = [
+    { label: "Aprovação", value: "92%", icon: Target },
+    { label: "Ticket Médio", value: "R$ 347", icon: CreditCard },
+    { label: "Saldo Liberado", value: "R$ 8.940", icon: CheckCircle2 },
+    { label: "Chargeback", value: "0,12%", icon: Shield },
+  ];
+
+  const paymentMix = [
+    { label: "PIX", pct: 68, value: "R$ 87.420", colorClass: "bg-primary" },
+    { label: "Cartão", pct: 27, value: "R$ 34.980", colorClass: "bg-info" },
+    { label: "Boleto", pct: 5, value: "R$ 6.080", colorClass: "bg-warning" },
+  ];
+
+  const securitySignals = [
+    { icon: Shield, title: "Anti-fraude ativo", detail: "análise em tempo real" },
+    { icon: Lock, title: "2FA pronto", detail: "camadas extras de proteção" },
+    { icon: BadgeCheck, title: "LGPD", detail: "governança e consentimento" },
+    { icon: Activity, title: "Monitoramento 24/7", detail: "checkout e saques online" },
+  ];
 
   return (
-    <div className="min-h-screen flex bg-[hsl(200_15%_5%)] text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="fixed inset-0 dot-grid opacity-20 pointer-events-none" />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
+        <div className="absolute right-0 top-1/4 h-96 w-96 rounded-full bg-info/10 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
+      </div>
 
-      {/* ═══ LEFT: Form Panel ═══ */}
-      <div className="flex-1 relative overflow-y-auto">
-        {/* ── Navbar ── */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-5 md:px-8 h-14 bg-[hsl(200_15%_5%/0.9)] backdrop-blur-xl border-b border-[hsl(160_10%_15%)]">
-          <a href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <div className="h-9 w-9 rounded-xl bg-[hsl(160_60%_40%)] flex items-center justify-center">
-              <Rocket className="h-4 w-4 text-[hsl(200_15%_5%)]" />
-            </div>
-            <div>
-              <span className="text-[14px] font-display font-black tracking-[-0.03em] text-foreground">HOTZFY</span>
-              <div className="flex items-center gap-1">
-                <div className="h-1 w-1 rounded-full bg-[hsl(160_60%_50%)]" />
-                <span className="text-[8px] text-[hsl(160_15%_35%)] font-semibold tracking-wider uppercase">Plataforma de Infoprodutos</span>
+      <div className="relative lg:grid lg:grid-cols-[minmax(430px,42vw)_1fr]">
+        {/* ═══ LEFT: Auth Panel ═══ */}
+        <div className="relative border-r border-border/40 bg-background/80 backdrop-blur-xl">
+          <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-5 backdrop-blur-xl md:px-8">
+            <a href="/" className="flex items-center gap-3 hover:opacity-90">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/12 text-primary glow-primary">
+                <Rocket className="h-4.5 w-4.5" />
               </div>
+              <div>
+                <span className="block text-[14px] font-heading uppercase tracking-[0.08em] text-foreground">HOTZFY</span>
+                <span className="block text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Plataforma de Infoprodutos</span>
+              </div>
+            </a>
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/10 px-3 py-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
+                <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
+                <span className="relative h-2 w-2 rounded-full bg-success" />
+              </span>
+              <span className="text-[8px] font-heading uppercase tracking-[0.22em] text-success">Online</span>
             </div>
-          </a>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[hsl(160_60%_40%/0.08)] ring-1 ring-[hsl(160_60%_40%/0.15)]">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" />
-              <span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" />
-            </span>
-            <span className="text-[8px] font-bold text-[hsl(160_60%_50%/0.8)] uppercase tracking-wider">Online</span>
           </div>
-        </div>
 
-        {/* ── Form Content ── */}
-        <div className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4 pb-10 md:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-full max-w-[440px]"
-          >
-            {/* Header */}
-            <div className="mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[hsl(160_60%_40%/0.08)] ring-1 ring-[hsl(160_60%_40%/0.12)] text-[9px] font-bold text-[hsl(160_60%_55%)] uppercase tracking-wider mb-4">
-                <CheckCircle2 className="h-3 w-3" />
-                {isLogin ? "Acesse sua conta" : `Etapa ${step} de 4`}
-              </div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isLogin ? "login" : `signup-${step}`}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <h1 className="text-[26px] sm:text-[30px] font-display font-black tracking-[-0.04em] text-foreground leading-[1.1]">
-                    {isLogin ? (
-                      <>Bem-vindo de <span className="text-[hsl(160_60%_50%)]">volta</span></>
-                    ) : step === 1 ? (
-                      <>Seus <span className="text-[hsl(160_60%_50%)]">dados</span> pessoais</>
-                    ) : step === 2 ? (
-                      <>Contato e <span className="text-[hsl(160_60%_50%)]">documento</span></>
-                    ) : step === 3 ? (
-                      <>Proteja sua <span className="text-[hsl(160_60%_50%)]">conta</span></>
-                    ) : (
-                      <>Confirme e <span className="text-[hsl(160_60%_50%)]">comece</span></>
-                    )}
-                  </h1>
-                  <p className="text-[12px] text-[hsl(160_10%_40%)] mt-1.5 leading-relaxed">
-                    {isLogin ? "Entre no seu painel e acompanhe seus resultados" :
-                     step === 1 ? "Preencha seus dados pessoais para criar sua conta" :
-                     step === 2 ? "Precisamos do seu contato e documento para verificação" :
-                     step === 3 ? "Crie uma senha forte e nos diga como nos encontrou" :
-                     "Revise seus dados e finalize o cadastro"}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* Stepper (signup only) */}
-            {!isLogin && (
+          <div className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4 py-10 md:px-8">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="w-full max-w-[470px]">
               <div className="mb-6">
-                <div className="flex items-center gap-1">
-                  {SIGNUP_STEPS.map((s, idx) => {
-                    const StepIcon = s.icon;
-                    const isActive = step === s.id;
-                    const isDone = step > s.id;
-                    return (
-                      <div key={s.id} className="flex items-center flex-1">
-                        <div className={cn(
-                          "flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all",
-                          isActive ? "bg-[hsl(160_60%_40%/0.1)] ring-1 ring-[hsl(160_60%_40%/0.2)]" :
-                          isDone ? "bg-[hsl(160_60%_40%/0.06)] ring-1 ring-[hsl(160_60%_40%/0.1)]" : "bg-[hsl(160_10%_10%)] ring-1 ring-[hsl(160_10%_15%)]"
-                        )}>
-                          <div className={cn(
-                            "h-5 w-5 rounded-md flex items-center justify-center shrink-0",
-                            isActive ? "bg-[hsl(160_60%_40%/0.15)] text-[hsl(160_60%_55%)]" :
-                            isDone ? "bg-[hsl(160_60%_40%/0.1)] text-[hsl(160_60%_45%)]" : "bg-[hsl(160_10%_12%)] text-[hsl(160_10%_25%)]"
-                          )}>
-                            {isDone ? <CheckCircle2 className="h-3 w-3" /> : <StepIcon className="h-3 w-3" />}
-                          </div>
-                          <span className={cn(
-                            "text-[8px] font-bold uppercase tracking-wider hidden sm:block",
-                            isActive ? "text-[hsl(160_60%_55%)]" : isDone ? "text-[hsl(160_40%_40%)]" : "text-[hsl(160_10%_25%)]"
-                          )}>{s.label}</span>
-                        </div>
-                        {idx < SIGNUP_STEPS.length - 1 && (
-                          <div className={cn("h-px flex-1 mx-1", isDone ? "bg-[hsl(160_60%_40%/0.2)]" : "bg-[hsl(160_10%_12%)]")} />
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-[9px] font-heading uppercase tracking-[0.22em] text-primary">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {isLogin ? "Acesso seguro" : `Etapa ${step} de 4`}
                 </div>
-                <div className="mt-2.5 h-1 rounded-full bg-[hsl(160_10%_10%)] overflow-hidden">
-                  <motion.div
-                    animate={{ width: `${(step / 4) * 100}%` }}
-                    transition={{ duration: 0.4 }}
-                    className="h-full rounded-full bg-[hsl(160_60%_40%)]"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── Card ── */}
-            <div className="rounded-2xl border border-[hsl(160_10%_14%)] bg-[hsl(200_12%_7%)] shadow-[0_20px_60px_rgba(0,0,0,0.4)] overflow-hidden">
-              <div className="p-6 md:p-7">
-                {/* Mode toggle */}
-                <div className="flex items-center gap-1 p-1 rounded-xl bg-[hsl(180_8%_8%)] ring-1 ring-[hsl(160_10%_14%)] mb-5">
-                  {[
-                    { mode: true, label: "ENTRAR", icon: Lock },
-                    { mode: false, label: "CRIAR CONTA", icon: User },
-                  ].map(tab => (
-                    <button key={tab.label} onClick={() => setIsLogin(tab.mode)}
-                      className={cn(
-                        "flex-1 px-4 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all",
-                        isLogin === tab.mode
-                          ? "bg-[hsl(160_60%_40%)] text-[hsl(200_15%_5%)] shadow-sm"
-                          : "text-[hsl(160_10%_35%)] hover:text-[hsl(160_15%_50%)]"
-                      )}>
-                      <tab.icon className="h-3.5 w-3.5" />{tab.label}
-                    </button>
-                  ))}
-                </div>
-
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={isLogin ? "login-form" : `signup-form-${step}`}
-                    initial={{ opacity: 0, x: 12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -12 }}
-                    transition={{ duration: 0.2 }}
+                    key={isLogin ? "login" : `signup-${step}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.24 }}
                   >
-                    {isLogin ? (
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                          <Label htmlFor="email" className={labelCls}><Mail className="h-3 w-3 text-[hsl(160_50%_40%)]" />E-mail</Label>
-                          <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
-                            placeholder="seu@email.com" className={inputCls} required />
-                        </div>
-                        <div>
-                          <Label htmlFor="password" className={labelCls}><Lock className="h-3 w-3 text-[hsl(160_50%_40%)]" />Senha</Label>
-                          <div className="relative">
-                            <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
-                              placeholder="••••••••" className={cn(inputCls, "pr-12")} required minLength={8} />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(160_10%_30%)] hover:text-[hsl(160_20%_50%)] transition-colors">
-                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="pt-1">
-                          <Button type="submit" disabled={loading}
-                            className="w-full h-12 rounded-xl text-[13px] font-bold gap-2 bg-gradient-to-r from-[hsl(160_60%_40%)] to-[hsl(175_60%_38%)] text-[hsl(200_15%_5%)] hover:brightness-110 shadow-[0_8px_24px_rgba(16,185,129,0.25)] transition-all">
-                            {loading ? (
-                              <div className="h-5 w-5 border-2 border-[hsl(200_15%_5%/0.3)] border-t-[hsl(200_15%_5%)] rounded-full animate-spin" />
-                            ) : (
-                              <>Entrar na plataforma <ArrowRight className="h-4 w-4" /></>
-                            )}
-                          </Button>
-                        </div>
-                      </form>
-                    ) : (
-                      <div className="space-y-4">
-                        {step === 1 && (
-                          <>
-                            <div>
-                              <Label htmlFor="name" className={labelCls}><User className="h-3 w-3 text-[hsl(160_50%_40%)]" />Nome completo</Label>
-                              <Input id="name" value={fullName} onChange={e => setFullName(e.target.value)}
-                                placeholder="Seu nome completo" className={inputCls} required />
-                            </div>
-                            <div>
-                              <Label htmlFor="nickname" className={labelCls}><Heart className="h-3 w-3 text-[hsl(160_50%_40%)]" />Como quer ser chamado?</Label>
-                              <Input id="nickname" value={nickname} onChange={e => setNickname(e.target.value)}
-                                placeholder="Ex: João, Mari..." className={inputCls} required />
-                            </div>
-                          </>
-                        )}
+                    <h1 className="text-[28px] sm:text-[34px] font-heading leading-[1.02] tracking-[-0.05em] text-foreground">
+                      {isLogin ? (
+                        <>Acesse sua <span className="text-primary">operação</span></>
+                      ) : step === 1 ? (
+                        <>Seus <span className="text-primary">dados</span> pessoais</>
+                      ) : step === 2 ? (
+                        <>Contato e <span className="text-primary">documento</span></>
+                      ) : step === 3 ? (
+                        <>Proteja sua <span className="text-primary">conta</span></>
+                      ) : (
+                        <>Confirme e <span className="text-primary">comece</span></>
+                      )}
+                    </h1>
+                    <p className="mt-2 max-w-[420px] text-[13px] leading-relaxed text-muted-foreground">
+                      {isLogin
+                        ? "Faturamento, vendas, checkout e saques em uma visão única."
+                        : step === 1
+                          ? "Preencha seus dados para criar seu acesso à plataforma."
+                          : step === 2
+                            ? "Precisamos do seu contato e documento para liberar sua operação."
+                            : step === 3
+                              ? "Defina uma senha forte e finalize as últimas preferências."
+                              : "Revise seus dados e ative sua conta com segurança."}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
-                        {step === 2 && (
-                          <>
-                            <div>
-                              <Label htmlFor="email" className={labelCls}><Mail className="h-3 w-3 text-[hsl(160_50%_40%)]" />E-mail</Label>
-                              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
-                                placeholder="seu@email.com" className={inputCls} required />
+              {!isLogin && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-1.5">
+                    {SIGNUP_STEPS.map((signupStep, index) => {
+                      const StepIcon = signupStep.icon;
+                      const active = step === signupStep.id;
+                      const done = step > signupStep.id;
+                      return (
+                        <div key={signupStep.id} className="flex flex-1 items-center">
+                          <div className={cn(
+                            "flex items-center gap-2 rounded-xl px-2.5 py-2 transition-all",
+                            active ? "border border-primary/20 bg-primary/10 text-primary" : done ? "border border-success/20 bg-success/10 text-success" : "border border-border/50 bg-card/60 text-muted-foreground"
+                          )}>
+                            <div className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-lg",
+                              active ? "bg-primary/15" : done ? "bg-success/15" : "bg-muted/60"
+                            )}>
+                              {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <StepIcon className="h-3.5 w-3.5" />}
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <span className="hidden text-[8px] font-heading uppercase tracking-[0.18em] sm:block">{signupStep.label}</span>
+                          </div>
+                          {index < SIGNUP_STEPS.length - 1 && <div className="mx-1 h-px flex-1 bg-border/60" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted/60">
+                    <motion.div animate={{ width: `${(step / 4) * 100}%` }} transition={{ duration: 0.4 }} className="h-full rounded-full bg-primary" />
+                  </div>
+                </div>
+              )}
+
+              <div className="relative overflow-hidden rounded-[28px] panel-enterprise noise-overlay scan-line">
+                <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                <div className="absolute -right-12 top-0 h-32 w-32 rounded-full bg-primary/12 blur-3xl" />
+                <div className="relative z-10 p-6 md:p-7">
+                  <div className="mb-5 rounded-2xl glass-panel p-1">
+                    <div className="grid grid-cols-2 gap-1">
+                      {[
+                        { mode: true, label: "Entrar", icon: Lock },
+                        { mode: false, label: "Criar Conta", icon: User },
+                      ].map((tab) => (
+                        <button
+                          key={tab.label}
+                          type="button"
+                          onClick={() => setIsLogin(tab.mode)}
+                          className={cn(
+                            "flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[11px] font-heading uppercase tracking-[0.18em] transition-all",
+                            isLogin === tab.mode
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          <tab.icon className="h-3.5 w-3.5" />
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={isLogin ? "login-form" : `signup-form-${step}`}
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -12 }}
+                      transition={{ duration: 0.22 }}
+                    >
+                      {isLogin ? (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                          <div>
+                            <Label htmlFor="email" className={labelCls}><Mail className="h-3 w-3 text-primary/80" />E-mail</Label>
+                            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
+                          </div>
+                          <div>
+                            <Label htmlFor="password" className={labelCls}><Lock className="h-3 w-3 text-primary/80" />Senha</Label>
+                            <div className="relative">
+                              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={cn(inputCls, "pr-12")} required minLength={8} />
+                              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </div>
+                          <Button type="submit" disabled={loading} className="h-12 w-full rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.16em] shadow-lg shadow-primary/15 hover:brightness-110">
+                            {loading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <>Entrar na plataforma <ArrowRight className="ml-2 h-4 w-4" /></>}
+                          </Button>
+                        </form>
+                      ) : (
+                        <div className="space-y-4">
+                          {step === 1 && (
+                            <>
                               <div>
-                                <Label htmlFor="document" className={labelCls}><FileText className="h-3 w-3 text-[hsl(160_50%_40%)]" />CPF ou CNPJ</Label>
-                                <Input id="document" value={document} onChange={e => handleDocumentChange(e.target.value)}
-                                  placeholder="000.000.000-00" inputMode="numeric" autoComplete="off"
-                                  className={cn(inputCls, documentError && "border-destructive/50 ring-1 ring-destructive/15")} required />
-                                {documentError && (
-                                  <p className="text-[9px] text-destructive mt-1 font-medium flex items-center gap-1">
-                                    <span className="h-1 w-1 rounded-full bg-destructive" />{documentError}
-                                  </p>
+                                <Label htmlFor="name" className={labelCls}><User className="h-3 w-3 text-primary/80" />Nome completo</Label>
+                                <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className={inputCls} required />
+                              </div>
+                              <div>
+                                <Label htmlFor="nickname" className={labelCls}><Heart className="h-3 w-3 text-primary/80" />Como quer ser chamado?</Label>
+                                <Input id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="Ex: João, Mari..." className={inputCls} required />
+                              </div>
+                            </>
+                          )}
+
+                          {step === 2 && (
+                            <>
+                              <div>
+                                <Label htmlFor="signup-email" className={labelCls}><Mail className="h-3 w-3 text-primary/80" />E-mail</Label>
+                                <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
+                              </div>
+                              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                  <Label htmlFor="document" className={labelCls}><FileText className="h-3 w-3 text-primary/80" />CPF ou CNPJ</Label>
+                                  <Input id="document" value={document} onChange={(e) => handleDocumentChange(e.target.value)} placeholder="000.000.000-00" inputMode="numeric" autoComplete="off" className={cn(inputCls, documentError && "border-destructive/60 ring-2 ring-destructive/10")} required />
+                                  {documentError && <p className="mt-1 text-[10px] font-medium text-destructive">{documentError}</p>}
+                                </div>
+                                <div>
+                                  <Label htmlFor="phone" className={labelCls}><Phone className="h-3 w-3 text-primary/80" />WhatsApp</Label>
+                                  <Input
+                                    id="phone"
+                                    value={phone}
+                                    onChange={(e) => {
+                                      const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                                      let formatted = digits;
+                                      if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+                                      if (digits.length > 7) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+                                      setPhone(formatted);
+                                    }}
+                                    placeholder="(11) 99999-9999"
+                                    inputMode="tel"
+                                    className={inputCls}
+                                    required
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {step === 3 && (
+                            <>
+                              <div>
+                                <Label htmlFor="signup-password" className={labelCls}><Lock className="h-3 w-3 text-primary/80" />Senha</Label>
+                                <div className="relative">
+                                  <Input id="signup-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" className={cn(inputCls, "pr-12")} required minLength={8} />
+                                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                  </button>
+                                </div>
+                                {password.length > 0 && (
+                                  <div className="mt-2 space-y-1.5">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex flex-1 gap-1">
+                                        {[1, 2, 3].map((index) => (
+                                          <div key={index} className={cn("h-1.5 flex-1 rounded-full", index <= pwStrength.score ? pwStrength.color : "bg-muted/70")} />
+                                        ))}
+                                      </div>
+                                      <span className={cn("text-[9px] font-heading uppercase tracking-[0.18em]", pwStrength.text)}>{pwStrength.label}</span>
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground">Maiúscula, minúscula, número e 8+ caracteres.</p>
+                                  </div>
                                 )}
                               </div>
                               <div>
-                                <Label htmlFor="phone" className={labelCls}><Phone className="h-3 w-3 text-[hsl(160_50%_40%)]" />WhatsApp</Label>
-                                <Input id="phone" value={phone}
-                                  onChange={e => { const d = e.target.value.replace(/\D/g, "").slice(0, 11); let f = d; if (d.length > 2) f = `(${d.slice(0, 2)}) ${d.slice(2)}`; if (d.length > 7) f = `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`; setPhone(f); }}
-                                  placeholder="(11) 99999-9999" inputMode="tel" className={inputCls} required />
+                                <Label htmlFor="confirmPassword" className={labelCls}><Shield className="h-3 w-3 text-primary/80" />Confirmar Senha</Label>
+                                <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className={cn(inputCls, confirmPassword && password !== confirmPassword && "border-destructive/60 ring-2 ring-destructive/10")} required minLength={8} />
+                                {confirmPassword && password !== confirmPassword && <p className="mt-1 text-[10px] font-medium text-destructive">As senhas não coincidem</p>}
                               </div>
-                            </div>
-                          </>
-                        )}
+                              <div>
+                                <Label className={labelCls}><Target className="h-3 w-3 text-primary/80" />Onde conheceu a HOTZFY?</Label>
+                                <Select value={referralSource} onValueChange={setReferralSource}>
+                                  <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione uma opção..." /></SelectTrigger>
+                                  <SelectContent className="rounded-2xl border-border/60 bg-popover/95 backdrop-blur-xl">
+                                    {[
+                                      { value: "instagram", label: "Instagram" },
+                                      { value: "indicacao", label: "Indicação de amigo" },
+                                      { value: "youtube", label: "YouTube" },
+                                      { value: "pesquisa", label: "Pesquisa (Google)" },
+                                      { value: "tiktok", label: "TikTok" },
+                                      { value: "outro", label: "Outro" },
+                                    ].map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </>
+                          )}
 
-                        {step === 3 && (
-                          <>
-                            <div>
-                              <Label htmlFor="password" className={labelCls}><Lock className="h-3 w-3 text-[hsl(160_50%_40%)]" />Senha</Label>
-                              <div className="relative">
-                                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
-                                  placeholder="Mínimo 8 caracteres" className={cn(inputCls, "pr-12")} required minLength={8} />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(160_10%_30%)] hover:text-[hsl(160_20%_50%)] transition-colors">
-                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
-                              </div>
-                              {password.length > 0 && (
-                                <div className="mt-2 space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex-1 flex gap-1">
-                                      {[1,2,3].map(i => (
-                                        <div key={i} className={cn("h-1 flex-1 rounded-full transition-all", i <= pwStrength.score ? pwStrength.color : "bg-[hsl(160_10%_12%)]")} />
-                                      ))}
-                                    </div>
-                                    <span className={cn("text-[9px] font-bold uppercase tracking-wider", pwStrength.text)}>{pwStrength.label}</span>
-                                  </div>
-                                  <p className="text-[9px] text-[hsl(160_10%_30%)]">Maiúscula, minúscula, número. Mín. 8 caracteres.</p>
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <Label htmlFor="confirmPassword" className={labelCls}><Shield className="h-3 w-3 text-[hsl(160_50%_40%)]" />Confirmar Senha</Label>
-                              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                                placeholder="••••••••" className={cn(inputCls, confirmPassword && password !== confirmPassword && "border-destructive/50 ring-1 ring-destructive/15")} required minLength={8} />
-                              {confirmPassword && password !== confirmPassword && (
-                                <p className="text-[9px] text-destructive mt-1 font-medium flex items-center gap-1">
-                                  <span className="h-1 w-1 rounded-full bg-destructive" />As senhas não coincidem
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <Label className={labelCls}><Target className="h-3 w-3 text-[hsl(160_50%_40%)]" />Onde conheceu a HOTZFY?</Label>
-                              <Select value={referralSource} onValueChange={setReferralSource}>
-                                <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione uma opção..." /></SelectTrigger>
-                                <SelectContent className="rounded-xl border-[hsl(160_10%_14%)] bg-[hsl(200_12%_8%)]">
+                          {step === 4 && (
+                            <div className="space-y-3">
+                              <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                                <p className="mb-3 text-[10px] font-heading uppercase tracking-[0.18em] text-primary">Resumo do cadastro</p>
+                                <div className="space-y-2">
                                   {[
-                                    { value: "instagram", label: "Instagram" },
-                                    { value: "indicacao", label: "Indicação de amigo" },
-                                    { value: "youtube", label: "YouTube" },
-                                    { value: "pesquisa", label: "Pesquisa (Google)" },
-                                    { value: "tiktok", label: "TikTok" },
-                                    { value: "outro", label: "Outro" },
-                                  ].map(v => (
-                                    <SelectItem key={v.value} value={v.value} className="rounded-lg">{v.label}</SelectItem>
+                                    { label: "Nome", value: fullName },
+                                    { label: "Apelido", value: nickname },
+                                    { label: "E-mail", value: email },
+                                    { label: "Documento", value: document },
+                                    { label: "WhatsApp", value: phone },
+                                  ].map((item) => (
+                                    <div key={item.label} className="flex items-center justify-between rounded-xl border border-border/40 bg-background/45 px-3 py-2">
+                                      <span className="text-[10px] text-muted-foreground">{item.label}</span>
+                                      <span className="text-[11px] font-semibold text-foreground/85">{item.value || "—"}</span>
+                                    </div>
                                   ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </>
-                        )}
-
-                        {step === 4 && (
-                          <div className="space-y-3">
-                            <div className="rounded-xl bg-[hsl(160_60%_40%/0.05)] ring-1 ring-[hsl(160_60%_40%/0.1)] p-4 space-y-2">
-                              <p className="text-[10px] font-bold text-[hsl(160_60%_55%)] uppercase tracking-wider">Resumo do Cadastro</p>
-                              {[
-                                { label: "Nome", value: fullName },
-                                { label: "Apelido", value: nickname },
-                                { label: "E-mail", value: email },
-                                { label: "Documento", value: document },
-                                { label: "WhatsApp", value: phone },
-                              ].map(item => (
-                                <div key={item.label} className="flex items-center justify-between py-1.5 border-b border-[hsl(160_60%_40%/0.05)] last:border-0">
-                                  <span className="text-[10px] text-[hsl(160_10%_35%)] font-medium">{item.label}</span>
-                                  <span className="text-[11px] text-foreground/80 font-medium">{item.value || "—"}</span>
                                 </div>
-                              ))}
+                              </div>
+                              <div className="flex items-center gap-2 rounded-2xl border border-success/20 bg-success/10 p-3 text-success">
+                                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                <p className="text-[11px] font-semibold">Tudo pronto para ativar sua conta.</p>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 p-3 rounded-lg bg-[hsl(160_60%_40%/0.05)] ring-1 ring-[hsl(160_60%_40%/0.1)]">
-                              <CheckCircle2 className="h-4 w-4 text-[hsl(160_60%_50%)] shrink-0" />
-                              <p className="text-[10px] text-[hsl(160_40%_45%)] font-medium">Tudo pronto para criar sua conta!</p>
-                            </div>
+                          )}
+
+                          <div className="flex gap-3 pt-1">
+                            {step > 1 && (
+                              <Button type="button" variant="outline" onClick={() => setStep((current) => current - 1)} className="h-11 flex-1 rounded-2xl border-border/60 bg-background/50 font-heading uppercase tracking-[0.14em] text-muted-foreground hover:bg-muted/30">
+                                Voltar
+                              </Button>
+                            )}
+                            {step < 4 ? (
+                              <Button type="button" onClick={() => setStep((current) => current + 1)} disabled={!canAdvanceStep(step)} className="h-11 flex-1 rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.14em] shadow-lg shadow-primary/15 hover:brightness-110">
+                                Próximo <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button type="button" onClick={() => handleSubmit()} disabled={loading} className="h-12 flex-1 rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.14em] shadow-lg shadow-primary/15 hover:brightness-110">
+                                {loading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <>Criar conta grátis <ArrowRight className="ml-2 h-4 w-4" /></>}
+                              </Button>
+                            )}
                           </div>
-                        )}
-
-                        {/* Nav buttons */}
-                        <div className="flex gap-3 pt-1">
-                          {step > 1 && (
-                            <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)}
-                              className="flex-1 h-11 rounded-xl font-bold text-[12px] border-[hsl(160_10%_15%)] text-[hsl(160_15%_50%)] hover:bg-[hsl(160_10%_10%)]">
-                              Voltar
-                            </Button>
-                          )}
-                          {step < 4 ? (
-                            <Button type="button" onClick={() => setStep(s => s + 1)} disabled={!canAdvanceStep(step)}
-                              className="flex-1 h-11 rounded-xl text-[12px] font-bold gap-2 bg-gradient-to-r from-[hsl(160_60%_40%)] to-[hsl(175_60%_38%)] text-[hsl(200_15%_5%)] hover:brightness-110 shadow-[0_6px_20px_rgba(16,185,129,0.2)]">
-                              Próximo <ArrowRight className="h-3.5 w-3.5" />
-                            </Button>
-                          ) : (
-                            <Button type="button" onClick={() => handleSubmit()} disabled={loading}
-                              className="flex-1 h-12 rounded-xl text-[13px] font-bold gap-2 bg-gradient-to-r from-[hsl(160_60%_40%)] to-[hsl(175_60%_38%)] text-[hsl(200_15%_5%)] hover:brightness-110 shadow-[0_8px_24px_rgba(16,185,129,0.25)]">
-                              {loading ? (
-                                <div className="h-5 w-5 border-2 border-[hsl(200_15%_5%/0.3)] border-t-[hsl(200_15%_5%)] rounded-full animate-spin" />
-                              ) : (
-                                <>Criar conta grátis <ArrowRight className="h-4 w-4" /></>
-                              )}
-                            </Button>
-                          )}
                         </div>
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
 
-                {/* Divider */}
-                <div className="relative my-5">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[hsl(160_10%_12%)]" /></div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-[hsl(200_12%_7%)] px-3 text-[8px] font-bold uppercase tracking-wider text-[hsl(160_10%_25%)]">
-                      {isLogin ? "ou crie uma conta" : "já possui conta?"}
+                  <div className="relative my-5">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border/50" /></div>
+                    <div className="relative flex justify-center">
+                      <span className="bg-card px-3 text-[8px] font-heading uppercase tracking-[0.18em] text-muted-foreground">
+                        {isLogin ? "ou crie uma conta" : "já possui conta?"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button type="button" onClick={() => setIsLogin(!isLogin)} className="h-11 w-full rounded-2xl border border-border/60 bg-background/50 text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground hover:border-primary/20 hover:text-foreground">
+                    {isLogin ? "Criar conta grátis" : "Entrar na minha conta"}
+                  </button>
+
+                  {isLogin && (
+                    <div className="mt-5 grid grid-cols-2 gap-2 border-t border-border/40 pt-5 sm:grid-cols-4">
+                      {[
+                        { icon: Shield, label: "SSL 256-bit" },
+                        { icon: Shield, label: "Anti-fraude" },
+                        { icon: Lock, label: "Criptografado" },
+                        { icon: CheckCircle2, label: "LGPD" },
+                      ].map((badge) => (
+                        <div key={badge.label} className="rounded-xl border border-border/50 bg-background/45 px-2 py-3 text-center">
+                          <badge.icon className="mx-auto mb-1 h-3.5 w-3.5 text-primary/80" />
+                          <span className="text-[8px] font-heading uppercase tracking-[0.14em] text-muted-foreground">{badge.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">
+                    Ao continuar, você concorda com os <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Termos de Uso</a> e a <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Política de Privacidade</a>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2 lg:hidden">
+                {[
+                  { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
+                  { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M" },
+                  { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
+                ].map((item) => (
+                  <div key={item.label} className="panel-enterprise-subtle p-3 text-center">
+                    <item.icon className="mx-auto mb-1.5 h-3.5 w-3.5 text-primary/80" />
+                    <p className="font-heading text-[14px] tabular-nums text-foreground"><AnimatedCounter target={item.value} prefix={item.prefix} suffix={item.suffix} /></p>
+                    <p className="mt-0.5 text-[7px] font-heading uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* ═══ RIGHT: Product Preview ═══ */}
+        <div className="relative hidden overflow-hidden border-l border-border/40 lg:block">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/5" />
+          <div className="relative z-10 flex min-h-screen flex-col gap-4 p-6 xl:p-8">
+            <motion.section
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55 }}
+              className="relative overflow-hidden rounded-3xl p-6 xl:p-8 mesh-gradient-hero noise-overlay scan-line"
+            >
+              <div className="absolute -inset-16 pointer-events-none">
+                <motion.div animate={{ x: [0, 24, 0], y: [0, -14, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute -left-10 top-0 h-72 w-72 rounded-full bg-primary/10 blur-[140px]" />
+                <motion.div animate={{ x: [0, -20, 0], y: [0, 20, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute right-0 top-8 h-80 w-80 rounded-full bg-info/10 blur-[150px]" />
+              </div>
+
+              <div className="relative z-10">
+                <div className="mb-8 flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary glow-primary">
+                      <Rocket className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-heading uppercase tracking-[0.24em] text-foreground/85">HOTZFY Control Center</p>
+                      <p className="text-[12px] text-muted-foreground">Receita, checkout e segurança em uma visão só.</p>
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/10 px-3 py-1.5 shadow-[0_0_16px_hsl(var(--success)/0.15)]">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
+                      <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-35" />
+                      <span className="relative h-2 w-2 rounded-full bg-success" />
                     </span>
+                    <span className="text-[8px] font-heading uppercase tracking-[0.22em] text-success">Tempo real</span>
                   </div>
                 </div>
 
-                <button onClick={() => setIsLogin(!isLogin)}
-                  className="w-full h-10 rounded-xl border border-[hsl(160_10%_14%)] text-[11px] font-bold text-[hsl(160_10%_35%)] hover:text-[hsl(160_20%_55%)] hover:border-[hsl(160_20%_22%)] hover:bg-[hsl(160_10%_8%)] transition-all">
-                  {isLogin ? "Criar conta grátis" : "Entrar na minha conta"}
-                </button>
+                <div className="grid grid-cols-[1.6fr_0.95fr] gap-6">
+                  <div>
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="h-px max-w-[46px] flex-1 bg-gradient-to-r from-primary/40 to-transparent" />
+                      <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida de Hoje</p>
+                      <div className="h-px max-w-[46px] flex-1 bg-gradient-to-l from-primary/40 to-transparent" />
+                    </div>
+                    <div className="mb-4 flex items-end gap-4">
+                      <span className="text-5xl xl:text-7xl font-heading leading-[0.85] tracking-[-0.06em] text-foreground glow-value">
+                        R$ <AnimatedCounter target={128480} />
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/10 px-3 py-1.5 text-[10px] font-heading uppercase tracking-[0.18em] text-success">
+                        <TrendingUp className="h-3 w-3" /> +18,4%
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2.5">
+                      {[
+                        { icon: CreditCard, text: "328 pagamentos aprovados" },
+                        { icon: QrCode, text: "PIX liderando hoje" },
+                        { icon: BarChart2, text: "conversão 9,4%" },
+                        { icon: BadgeCheck, text: "saques em dia" },
+                      ].map((chip) => (
+                        <span key={chip.text} className="glass-panel inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground">
+                          <chip.icon className="h-3.5 w-3.5 text-primary" />
+                          {chip.text}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Trust badges */}
-                {isLogin && (
-                  <div className="mt-5 flex items-center justify-center gap-5 pt-4 border-t border-[hsl(160_10%_10%)]">
-                    {[
-                      { icon: Shield, label: "SSL 256-bit" },
-                      { icon: Shield, label: "Anti-fraude" },
-                      { icon: Lock, label: "Criptografado" },
-                      { icon: CheckCircle2, label: "LGPD" },
-                    ].map(b => (
-                      <div key={b.label} className="flex items-center gap-1 text-[hsl(160_10%_28%)]">
-                        <b.icon className="h-3 w-3" />
-                        <span className="text-[7px] font-bold uppercase tracking-wider">{b.label}</span>
+                  <div className="glass-panel rounded-3xl p-4">
+                    <div className="mb-4 flex items-center justify-between">
+                      <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Segurança operacional</p>
+                      <Shield className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="space-y-3">
+                      {securitySignals.map((signal) => (
+                        <div key={signal.title} className="rounded-2xl border border-border/40 bg-background/45 px-3 py-2.5">
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                              <signal.icon className="h-3.5 w-3.5" />
+                            </div>
+                            <div>
+                              <p className="text-[11px] font-semibold text-foreground/90">{signal.title}</p>
+                              <p className="text-[10px] text-muted-foreground">{signal.detail}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.section>
+
+            <div className="grid min-h-0 flex-1 grid-cols-5 gap-4">
+              <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.08 }} className="col-span-3 flex min-h-0 flex-col rounded-3xl panel-enterprise overflow-hidden p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Fluxo de vendas do dia</p>
+                    <p className="text-[12px] text-muted-foreground">Picos por hora e distribuição por meio de pagamento.</p>
+                  </div>
+                  <div className="inline-flex items-center gap-1 rounded-full glass-panel p-1 text-[10px] font-heading uppercase tracking-[0.16em]">
+                    <span className="rounded-full bg-primary px-3 py-1 text-primary-foreground">Hoje</span>
+                    <span className="px-3 py-1 text-muted-foreground">24h</span>
+                  </div>
+                </div>
+
+                <div className="grid flex-1 grid-rows-[1fr_auto] gap-4">
+                  <div className="rounded-2xl border border-border/40 bg-background/45 p-4">
+                    <div className="flex h-full items-end gap-[3px]">
+                      {PREVIEW_BARS.map((height, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ height: 0 }}
+                          animate={{ height: `${height}%` }}
+                          transition={{ delay: 0.15 + index * 0.025, duration: 0.35, ease: "easeOut" }}
+                          className="flex-1 rounded-t-md bg-primary/70 hover:bg-primary transition-colors"
+                          style={{ minHeight: 3 }}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-3 flex justify-between text-[8px] font-medium text-muted-foreground">
+                      {["00h", "06h", "12h", "18h", "23h"].map((label) => <span key={label}>{label}</span>)}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    {paymentMix.map((payment) => (
+                      <div key={payment.label} className="rounded-2xl border border-border/40 bg-background/45 p-3">
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="text-[9px] font-heading uppercase tracking-[0.16em] text-muted-foreground">{payment.label}</span>
+                          <span className="text-[9px] font-semibold text-foreground/80">{payment.pct}%</span>
+                        </div>
+                        <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-muted/60">
+                          <motion.div initial={{ width: 0 }} animate={{ width: `${payment.pct}%` }} transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }} className={cn("h-full rounded-full", payment.colorClass)} />
+                        </div>
+                        <p className="font-heading text-[13px] text-foreground">{payment.value}</p>
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
+              </motion.div>
 
-                <p className="text-center text-[9px] text-[hsl(160_10%_28%)] leading-relaxed mt-4">
-                  Ao continuar, você concorda com os{" "}
-                  <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline hover:text-[hsl(160_30%_50%)] transition-colors">Termos de Uso</a> e{" "}
-                  <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline hover:text-[hsl(160_30%_50%)] transition-colors">Política de Privacidade</a>.
-                </p>
+              <div className="col-span-2 flex min-h-0 flex-col gap-4">
+                <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.12 }} className="flex min-h-0 flex-1 flex-col rounded-3xl panel-enterprise p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Vendas ao vivo</p>
+                      <p className="text-[12px] text-muted-foreground">Atividade entrando no checkout em tempo real.</p>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-2.5 py-1 text-[9px] font-heading uppercase tracking-[0.18em] text-success">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success" /> live
+                    </div>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-hidden">
+                    <NotificationFeed />
+                  </div>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.16 }} className="rounded-3xl panel-enterprise p-5">
+                  <div className="mb-4 flex items-center gap-2">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <Shield className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Confiabilidade</p>
+                      <p className="text-[12px] text-foreground/80">Checkout estável, observabilidade e proteção contínua.</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {[
+                      { icon: Shield, label: "Fraude", value: "0 bloqueios críticos" },
+                      { icon: Lock, label: "Acesso", value: "2FA disponível" },
+                      { icon: Globe, label: "API", value: "98 ms médio" },
+                      { icon: CheckCircle2, label: "Status", value: "99,9% online" },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-2xl border border-border/40 bg-background/45 p-3">
+                        <item.icon className="mb-2 h-3.5 w-3.5 text-primary" />
+                        <p className="text-[8px] font-heading uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
+                        <p className="mt-1 text-[11px] font-semibold text-foreground/85">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
               </div>
             </div>
 
-            {/* Mobile stats */}
-            <div className="lg:hidden mt-5 grid grid-cols-3 gap-2">
-              {[
-                { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "" },
-                { value: 52, label: "Milhões processados", icon: TrendingUp, prefix: "R$", suffix: "M" },
-                { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
-              ].map(s => (
-                <div key={s.label} className="text-center p-3 rounded-xl bg-[hsl(200_12%_8%)] ring-1 ring-[hsl(160_10%_14%)]">
-                  <s.icon className="h-3.5 w-3.5 text-[hsl(160_50%_40%)] mx-auto mb-1" />
-                  <p className="text-[14px] font-display font-black text-foreground tabular-nums">
-                    <AnimatedCounter target={s.value} prefix={s.prefix} suffix={s.suffix} />
-                  </p>
-                  <p className="text-[7px] text-[hsl(160_10%_30%)] font-bold uppercase tracking-wider mt-0.5">{s.label}</p>
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.2 }} className="grid grid-cols-4 gap-3">
+              {desktopMetrics.map((metric) => (
+                <div key={metric.label} className="panel-enterprise-subtle card-premium flex items-center gap-3 p-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary shrink-0">
+                    <metric.icon className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</p>
+                    <p className="mt-1 font-heading text-[18px] leading-none text-foreground">{metric.value}</p>
+                  </div>
                 </div>
               ))}
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* ═══ RIGHT: Dashboard Preview Panel (Desktop) ═══ */}
-      <div className="hidden lg:flex w-[50%] xl:w-[52%] relative overflow-hidden flex-col bg-[hsl(170_12%_6%)]">
-        {/* BG */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[hsl(160_60%_30%/0.06)] blur-[150px]" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[hsl(200_50%_30%/0.04)] blur-[130px]" />
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(160 20% 20% / 0.12) 0.5px, transparent 0)", backgroundSize: "32px 32px" }} />
-        </div>
-
-        <div className="relative z-10 h-full flex flex-col p-7 xl:p-9 gap-3.5 overflow-y-auto">
-
-          {/* Title */}
-          <div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(160_60%_40%/0.08)] ring-1 ring-[hsl(160_60%_40%/0.15)] text-[9px] font-bold text-[hsl(160_60%_55%)] uppercase tracking-widest mb-2.5"
-            >
-              <Activity className="h-3 w-3" />
-              Dashboard Preview
             </motion.div>
-            <h2 className="text-[1.5rem] xl:text-[1.8rem] font-display font-black text-foreground leading-[1.08] tracking-[-0.04em]">
-              Seu painel será <span className="text-[hsl(160_60%_50%)]">assim</span>
-            </h2>
           </div>
-
-          {/* 4 stats */}
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-4 gap-2">
-            {[
-              { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
-              { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M", format: true },
-              { value: 284, label: "Vendas/hora", icon: Zap, prefix: "", suffix: "" },
-              { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
-            ].map((stat) => (
-              <div key={stat.label} className="p-2.5 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
-                <stat.icon className="h-3 w-3 text-[hsl(160_50%_40%)] mb-1" />
-                <p className="text-[15px] xl:text-[17px] font-display font-black text-foreground tabular-nums leading-none mb-0.5">
-                  {stat.format ? <AnimatedCounter target={52} prefix="R$" suffix="M" duration={2500} /> : <AnimatedCounter target={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={2000} />}
-                </p>
-                <p className="text-[6px] text-[hsl(160_15%_30%)] font-bold uppercase tracking-wider">{stat.label}</p>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Chart + Live feed */}
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="grid grid-cols-5 gap-2.5 flex-1 min-h-[140px]">
-            {/* Chart */}
-            <div className="col-span-3 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)] p-3.5 flex flex-col">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-[7px] font-bold text-[hsl(160_15%_30%)] uppercase tracking-wider">Faturamento — Hoje</p>
-                  <p className="text-[20px] xl:text-[24px] font-display font-black text-foreground tabular-nums leading-none mt-0.5">
-                    R$ <AnimatedCounter target={12480} duration={3000} />
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[hsl(160_60%_40%/0.1)]">
-                  <TrendingUp className="h-3 w-3 text-[hsl(160_60%_50%)]" />
-                  <span className="text-[9px] font-bold text-[hsl(160_60%_50%)]">+23%</span>
-                </div>
-              </div>
-              <div className="flex-1 flex items-end gap-[2px] min-h-[50px]">
-                {[35,52,40,68,45,78,60,85,55,92,70,95,65,88,72,98,80,75,90,82,96,88,70,60].map((h, i) => (
-                  <motion.div key={i} initial={{ height: 0 }} animate={{ height: `${h}%` }}
-                    transition={{ delay: 0.5 + i * 0.025, duration: 0.35, ease: "easeOut" }}
-                    className="flex-1 rounded-t-sm bg-[hsl(160_60%_40%)] opacity-50 hover:opacity-100 transition-opacity" style={{ minHeight: 2 }} />
-                ))}
-              </div>
-              <div className="flex justify-between mt-1">
-                {["00h","06h","12h","18h","23h"].map(t => <span key={t} className="text-[6px] text-[hsl(160_10%_25%)]">{t}</span>)}
-              </div>
-            </div>
-
-            {/* Live feed */}
-            <div className="col-span-2 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)] p-3.5 flex flex-col">
-              <p className="text-[7px] font-bold text-[hsl(160_15%_30%)] uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" /><span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" /></span>
-                Vendas ao vivo
-              </p>
-              <div className="flex-1 overflow-hidden"><NotificationFeed /></div>
-            </div>
-          </motion.div>
-
-          {/* Payment methods */}
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="grid grid-cols-3 gap-2">
-            {[
-              { label: "PIX", pct: 68, value: "R$ 8.486", color: "hsl(160 60% 50%)" },
-              { label: "Cartão", pct: 28, value: "R$ 3.494", color: "hsl(200 60% 50%)" },
-              { label: "Boleto", pct: 4, value: "R$ 499", color: "hsl(40 60% 50%)" },
-            ].map(m => (
-              <div key={m.label} className="p-2.5 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[8px] font-bold text-[hsl(160_20%_45%)] uppercase tracking-wider">{m.label}</span>
-                  <span className="text-[8px] font-bold text-foreground/70">{m.pct}%</span>
-                </div>
-                <div className="h-1 rounded-full bg-[hsl(160_10%_12%)] overflow-hidden mb-1">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${m.pct}%` }}
-                    transition={{ delay: 0.75, duration: 0.5, ease: "easeOut" }}
-                    className="h-full rounded-full" style={{ backgroundColor: m.color }} />
-                </div>
-                <p className="text-[11px] font-display font-black text-foreground tabular-nums">{m.value}</p>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Pills + status */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
-            <div className="flex flex-wrap gap-1 mb-2">
-              {[
-                { icon: CreditCard, label: "Checkout" }, { icon: GraduationCap, label: "Membros" },
-                { icon: Shield, label: "Anti-fraude" }, { icon: QrCode, label: "PIX" },
-                { icon: BarChart2, label: "Analytics" }, { icon: BadgeCheck, label: "Afiliados" },
-                { icon: Globe, label: "Integrações" },
-              ].map(f => (
-                <div key={f.label} className="flex items-center gap-1 px-2 py-1 rounded-md bg-[hsl(160_12%_9%)] border border-[hsl(160_15%_14%)] text-[7px] font-bold text-[hsl(160_20%_40%)] uppercase tracking-wider">
-                  <f.icon className="h-2.5 w-2.5 text-[hsl(160_50%_40%)]" />{f.label}
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
-              <span className="relative flex h-1.5 w-1.5 shrink-0"><span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" /><span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" /></span>
-              <span className="text-[9px] font-bold text-[hsl(160_30%_45%)]">Sistemas online</span>
-              <span className="text-[hsl(160_15%_20%)]">·</span>
-              <span className="text-[9px] text-[hsl(160_15%_30%)]">Checkout · Saque · API</span>
-            </div>
-          </motion.div>
         </div>
       </div>
     </div>
