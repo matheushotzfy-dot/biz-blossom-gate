@@ -1,9 +1,10 @@
 /**
- * Auth — Clean Fintech Login/Signup
+ * Auth — Ultra-Premium Fintech Login/Signup
+ * Inspired by Fruitfy but elevated with HOTZFY emerald identity
  * @module Auth
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,11 +15,12 @@ import {
   Rocket, Eye, EyeOff, Shield, GraduationCap, BarChart2, CreditCard,
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
   Star, Activity, ChevronRight, Mail, Phone, User, FileText,
-  Heart, Target,
+  Heart, Target, Zap, Globe, BadgeCheck, Sparkles, QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import authDashboardPreview from "@/assets/auth-dashboard-preview.jpg";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -66,6 +68,51 @@ const SIGNUP_STEPS = [
   { id: 3, label: "Segurança", icon: Lock },
   { id: 4, label: "Confirmar", icon: CheckCircle2 },
 ];
+
+/* ─── Floating sale notification ─── */
+function FloatingNotification({ name, amount, delay }: { name: string; amount: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 40, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      transition={{ delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/90 backdrop-blur-xl ring-1 ring-border/20 shadow-lg shadow-primary/5"
+    >
+      <div className="h-9 w-9 rounded-xl bg-primary/15 flex items-center justify-center ring-1 ring-primary/20">
+        <Zap className="h-4 w-4 text-primary" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-bold text-foreground truncate">Venda aprovada ✓</p>
+        <p className="text-[9px] text-muted-foreground/60">{name} · <span className="text-primary font-bold">{amount}</span></p>
+      </div>
+      <span className="text-[8px] text-muted-foreground/30 font-medium shrink-0">Agora</span>
+    </motion.div>
+  );
+}
+
+/* ─── Animated counter ─── */
+function AnimCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting && !started) { setStarted(true); } }, { threshold: 0.5 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [started]);
+  useEffect(() => {
+    if (!started) return;
+    let cur = 0;
+    const step = target / 40;
+    const iv = setInterval(() => {
+      cur += step;
+      if (cur >= target) { setCount(target); clearInterval(iv); }
+      else setCount(Math.floor(cur));
+    }, 35);
+    return () => clearInterval(iv);
+  }, [started, target]);
+  return <span ref={ref}>{count.toLocaleString("pt-BR")}{suffix}</span>;
+}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -483,7 +530,7 @@ export default function Auth() {
                             </Button>
                           ) : (
                             <Button type="button" onClick={() => handleSubmit()} disabled={loading}
-                              className="flex-1 gradient-primary text-primary-foreground font-bold h-12 rounded-xl text-[13px] shadow-md shadow-primary/15 gap-2">
+                              className="flex-1 gradient-primary text-primary-foreground font-bold h-12 rounded-xl text-[13px] shadow-primary/15 gap-2">
                               {loading ? (
                                 <div className="h-5 w-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                               ) : (
@@ -555,99 +602,193 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* ═══ RIGHT: Features Panel (Desktop) ═══ */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden border-l border-border/8">
+      {/* ═══ RIGHT: Premium Visual Panel (Desktop) ═══ */}
+      <div className="hidden lg:flex w-[52%] xl:w-[55%] relative overflow-hidden">
+        {/* Background mesh gradients */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-[20%] -top-[20%] h-[600px] w-[600px] rounded-full bg-primary/[0.04] blur-[180px]" />
-          <div className="absolute -right-[15%] bottom-[-15%] h-[500px] w-[500px] rounded-full bg-info/[0.03] blur-[160px]" />
+          <div className="absolute top-[10%] left-[20%] h-[500px] w-[500px] rounded-full bg-primary/[0.07] blur-[180px]" />
+          <div className="absolute bottom-[5%] right-[10%] h-[400px] w-[400px] rounded-full bg-info/[0.05] blur-[160px]" />
+          <div className="absolute top-[60%] left-[50%] h-[300px] w-[300px] rounded-full bg-primary/[0.04] blur-[140px]" />
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-10 xl:p-14">
-          <div className="max-w-[380px] relative z-10">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 ring-1 ring-primary/12 text-[9px] font-bold text-primary uppercase tracking-wider mb-6">
-              <CheckCircle2 className="h-3 w-3" />Plataforma Completa
-            </div>
+        {/* Grid pattern overlay */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }}
+        />
 
-            {/* Hero */}
-            <h2 className="text-[2rem] xl:text-[2.4rem] font-display font-black mb-3 text-foreground leading-[1.05] tracking-[-0.04em]">
-              Tudo para <span className="text-primary">vender</span> online
+        {/* Content */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-10 xl:px-16 py-12">
+          {/* Top badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="mb-8"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 ring-1 ring-primary/15 text-[10px] font-bold text-primary uppercase tracking-widest">
+              <Sparkles className="h-3.5 w-3.5" />
+              A plataforma que mais cresce no Brasil
+            </div>
+          </motion.div>
+
+          {/* Main headline */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <h2 className="text-[2.6rem] xl:text-[3.2rem] font-display font-black text-foreground leading-[1.02] tracking-[-0.04em] mb-4">
+              Venda sem limites,<br />
+              <span className="text-primary">lucre sem fronteiras</span>
             </h2>
-            <p className="text-[13px] text-muted-foreground/45 mb-7 leading-[1.7] max-w-[340px]">
-              Checkout otimizado, área de membros, pagamentos e ferramentas avançadas para escalar seu negócio digital.
+            <p className="text-[14px] xl:text-[15px] text-muted-foreground/50 leading-[1.8] max-w-[480px] mb-8">
+              Checkout otimizado, área de membros estilo Netflix, anti-fraude integrado 
+              e as menores taxas do mercado. Tudo em uma única plataforma.
             </p>
+          </motion.div>
 
-            {/* Features */}
-            <div className="space-y-2">
-              {[
-                { icon: CreditCard, title: "Checkout de Alta Conversão", desc: "PIX, Cartão e Boleto com 1-click", color: "text-primary bg-primary/10 ring-primary/12" },
-                { icon: GraduationCap, title: "Área de Membros Netflix", desc: "Entregue cursos e conteúdos premium", color: "text-info bg-info/10 ring-info/12" },
-                { icon: BarChart2, title: "Analytics em Tempo Real", desc: "Métricas completas das suas vendas", color: "text-warning bg-warning/10 ring-warning/12" },
-                { icon: Shield, title: "Anti-fraude Integrado", desc: "Blacklist, velocity check e proteção", color: "text-success bg-success/10 ring-success/12" },
-              ].map((f, i) => (
-                <div key={f.title}
-                  className="flex items-center gap-3 p-3.5 rounded-xl bg-card/20 ring-1 ring-border/8 hover:ring-border/18 hover:bg-card/30 transition-all group cursor-default">
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1", f.color)}>
-                    <f.icon className="h-[18px] w-[18px]" />
+          {/* Dashboard preview image */}
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="relative mb-8"
+          >
+            <div className="rounded-2xl overflow-hidden ring-1 ring-border/20 shadow-2xl shadow-primary/10">
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-card/90 border-b border-border/15">
+                <div className="flex gap-1.5">
+                  <div className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-warning/60" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-success/60" />
+                </div>
+                <div className="flex-1 mx-3">
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-muted/10 ring-1 ring-border/10 max-w-[280px]">
+                    <Lock className="h-2.5 w-2.5 text-success/50" />
+                    <span className="text-[9px] text-muted-foreground/40 font-mono">app.hotzfy.com/dashboard</span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-bold text-foreground tracking-[-0.01em]">{f.title}</p>
-                    <p className="text-[10px] text-muted-foreground/35 mt-0.5">{f.desc}</p>
-                  </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/8 group-hover:text-muted-foreground/25 transition-colors shrink-0" />
-                </div>
-              ))}
-            </div>
-
-            {/* Stats */}
-            <div className="mt-6 grid grid-cols-3 gap-2">
-              {[
-                { value: "10K+", label: "Produtores", icon: Users },
-                { value: "R$50M+", label: "Processados", icon: TrendingUp },
-                { value: "99.9%", label: "Uptime", icon: Activity },
-              ].map(s => (
-                <div key={s.label} className="text-center p-3 rounded-xl bg-card/15 ring-1 ring-border/8 hover:ring-border/15 transition-all cursor-default">
-                  <s.icon className="h-3.5 w-3.5 text-primary/30 mx-auto mb-1" />
-                  <p className="text-[16px] font-display font-black text-foreground tabular-nums">{s.value}</p>
-                  <p className="text-[7px] text-muted-foreground/25 font-bold uppercase tracking-wider mt-0.5">{s.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Testimonial */}
-            <div className="mt-4 p-4 rounded-xl bg-card/15 ring-1 ring-border/8">
-              <div className="flex items-center gap-0.5 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-warning text-warning" />
-                ))}
-              </div>
-              <p className="text-[11px] text-muted-foreground/40 leading-[1.7] italic">
-                "Migrei de outra plataforma e minhas vendas triplicaram no primeiro mês. A melhor decisão!"
-              </p>
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/6">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/10">
-                  <span className="text-[9px] font-bold text-primary">RS</span>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-foreground">Rafael S.</p>
-                  <p className="text-[8px] text-muted-foreground/30">Infoprodutor · R$120K/mês</p>
-                </div>
-                <div className="ml-auto flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3 text-success/30" />
-                  <span className="text-[7px] text-success/30 font-bold uppercase tracking-wider">Verificado</span>
                 </div>
               </div>
+              <img
+                src={authDashboardPreview}
+                alt="Dashboard HOTZFY - Painel de controle"
+                className="w-full h-auto"
+                width={1280}
+                height={960}
+              />
             </div>
 
-            {/* Status */}
-            <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-card/15 ring-1 ring-border/6">
-              <span className="relative flex h-1.5 w-1.5 shrink-0">
-                <span className="animate-ping absolute h-full w-full rounded-full bg-success opacity-60" />
-                <span className="relative rounded-full h-1.5 w-1.5 bg-success" />
-              </span>
-              <p className="text-[9px] text-muted-foreground/35 font-medium truncate">Sistemas online — checkout e saques funcionando</p>
+            {/* Floating sale notifications */}
+            <div className="absolute -right-4 top-[15%] w-[240px]">
+              <FloatingNotification name="Maria S." amount="R$ 497,00" delay={0.8} />
             </div>
-          </div>
+            <div className="absolute -left-4 bottom-[25%] w-[240px]">
+              <FloatingNotification name="Pedro L." amount="R$ 1.297,00" delay={1.4} />
+            </div>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            className="grid grid-cols-4 gap-3 mb-8"
+          >
+            {[
+              { value: 10000, suffix: "+", label: "Produtores ativos", icon: Users },
+              { value: 50, suffix: "M+", label: "Processados", icon: TrendingUp },
+              { value: 99, suffix: ".9%", label: "Uptime garantido", icon: Activity },
+              { value: 150, suffix: "+", label: "Integrações", icon: Globe },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center p-3 rounded-xl bg-card/30 ring-1 ring-border/10 backdrop-blur-sm hover:ring-primary/15 transition-all group">
+                <stat.icon className="h-4 w-4 text-primary/40 mx-auto mb-2 group-hover:text-primary/60 transition-colors" />
+                <p className="text-[18px] xl:text-[20px] font-display font-black text-foreground tabular-nums leading-none">
+                  <AnimCounter target={stat.value} suffix={stat.suffix} />
+                </p>
+                <p className="text-[8px] text-muted-foreground/35 font-bold uppercase tracking-wider mt-1.5">{stat.label}</p>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Features grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.5 }}
+            className="grid grid-cols-2 gap-2.5 mb-8"
+          >
+            {[
+              { icon: CreditCard, title: "Checkout de Alta Conversão", desc: "PIX, Cartão e Boleto com 1-click" },
+              { icon: GraduationCap, title: "Área de Membros Netflix", desc: "Entregue cursos e conteúdos premium" },
+              { icon: BarChart2, title: "Analytics em Tempo Real", desc: "Métricas completas das suas vendas" },
+              { icon: Shield, title: "Anti-fraude Integrado", desc: "Blacklist e velocity check" },
+              { icon: QrCode, title: "PIX Instantâneo", desc: "Receba em segundos no PIX" },
+              { icon: BadgeCheck, title: "Afiliados & Coprodução", desc: "Escale com parceiros e afiliados" },
+            ].map((f) => (
+              <div key={f.title}
+                className="flex items-start gap-3 p-3.5 rounded-xl bg-card/20 ring-1 ring-border/8 hover:ring-primary/15 hover:bg-card/30 transition-all group cursor-default">
+                <div className="h-9 w-9 rounded-lg bg-primary/8 ring-1 ring-primary/12 flex items-center justify-center shrink-0 group-hover:bg-primary/12 transition-colors">
+                  <f.icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-bold text-foreground tracking-[-0.01em] leading-tight">{f.title}</p>
+                  <p className="text-[9px] text-muted-foreground/35 mt-0.5">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Testimonials */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1, duration: 0.5 }}
+            className="grid grid-cols-2 gap-3"
+          >
+            {[
+              { name: "Rafael S.", role: "Infoprodutor", revenue: "R$120K/mês", quote: "Migrei e minhas vendas triplicaram no primeiro mês." },
+              { name: "Amanda C.", role: "Mentora", revenue: "R$85K/mês", quote: "Melhor checkout do mercado. Conversão disparou!" },
+            ].map((t) => (
+              <div key={t.name} className="p-4 rounded-xl bg-card/20 ring-1 ring-border/8 hover:ring-border/15 transition-all">
+                <div className="flex items-center gap-0.5 mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-2.5 w-2.5 fill-warning text-warning" />
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted-foreground/45 leading-[1.7] italic mb-3">"{t.quote}"</p>
+                <div className="flex items-center gap-2.5 pt-2.5 border-t border-border/6">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/10">
+                    <span className="text-[8px] font-bold text-primary">{t.name.split(" ").map(n => n[0]).join("")}</span>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold text-foreground">{t.name}</p>
+                    <p className="text-[7px] text-muted-foreground/30">{t.role} · {t.revenue}</p>
+                  </div>
+                  <div className="ml-auto">
+                    <BadgeCheck className="h-3.5 w-3.5 text-primary/30" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Bottom status */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.3, duration: 0.5 }}
+            className="mt-6 flex items-center gap-2 px-3 py-2 rounded-xl bg-card/15 ring-1 ring-border/6"
+          >
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              <span className="animate-ping absolute h-full w-full rounded-full bg-success opacity-60" />
+              <span className="relative rounded-full h-1.5 w-1.5 bg-success" />
+            </span>
+            <p className="text-[9px] text-muted-foreground/35 font-medium truncate">Sistemas 100% operacionais — checkout, saques e área de membros funcionando</p>
+          </motion.div>
         </div>
       </div>
     </div>
