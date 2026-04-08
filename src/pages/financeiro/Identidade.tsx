@@ -90,7 +90,7 @@ export default function Identidade() {
   const { data: bankAccounts = [] } = useBankAccounts();
   const [nickname, setNickname] = useState("");
   const [saving, setSaving] = useState(false);
-  const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null });
+  const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null, cnpj_card: null });
   const [uploading, setUploading] = useState<string | null>(null);
   const [nicknameInit, setNicknameInit] = useState(false);
   const [searchParams] = useSearchParams();
@@ -114,22 +114,21 @@ export default function Identidade() {
     }
   }, [profile, nicknameInit]);
 
-  useEffect(() => { loadKycDocs(); }, [user]);
+  useEffect(() => { loadKycDocs(); }, [user, profile?.document_type]);
 
   const loadKycDocs = async () => {
     if (!user) return;
-    const types = ["front", "back", "selfie"];
+    const isCnpj = profile?.document_type === "cnpj";
+    const types = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
     const results = await Promise.all(
       types.map(type => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type }))
     );
-    const docs: Record<string, string | null> = {};
+    const docs: Record<string, string | null> = { front: null, back: null, selfie: null, cnpj_card: null };
     types.forEach((type, i) => {
       const data = results[i].data;
       if (data && data.length > 0) {
         const { data: urlData } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
         docs[type] = urlData?.publicUrl || null;
-      } else {
-        docs[type] = null;
       }
     });
     setKycDocs(docs);
@@ -157,6 +156,7 @@ export default function Identidade() {
     setSaving(false);
   };
 
+  const isCnpj = profile?.document_type === "cnpj";
   const status = STATUS_MAP[profile?.account_status || "pending_review"] || STATUS_MAP.pending_review;
   const StatusIcon = status.icon;
   const completionSteps = [
@@ -167,6 +167,7 @@ export default function Identidade() {
     { label: "Doc. frente", done: !!kycDocs.front, icon: Image },
     { label: "Doc. verso", done: !!kycDocs.back, icon: Image },
     { label: "Selfie c/ doc", done: !!kycDocs.selfie, icon: Camera },
+    ...(isCnpj ? [{ label: "Cartão CNPJ", done: !!kycDocs.cnpj_card, icon: Building2 }] : []),
   ];
   const completionPct = Math.round((completionSteps.filter((s) => s.done).length / completionSteps.length) * 100);
   const isApproved = profile?.account_status === "approved";
@@ -531,22 +532,26 @@ export default function Identidade() {
           </div>
 
           {/* Alert for incomplete docs */}
-          {(!kycDocs.front || !kycDocs.back || !kycDocs.selfie) && !isApproved && (
+          {(!kycDocs.front || !kycDocs.back || !kycDocs.selfie || (isCnpj && !kycDocs.cnpj_card)) && !isApproved && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-warning/5 ring-1 ring-warning/10 mb-4 mt-3">
               <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
               <p className="text-[10px] text-warning/70 font-medium">
-                Envie todos os 3 documentos abaixo para completar a verificação e liberar os saques.
+                Envie todos os documentos abaixo para completar a verificação e liberar os saques.
+                {isCnpj && " Como seu cadastro é CNPJ, o Cartão CNPJ também é obrigatório."}
               </p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+          <div className={cn("grid grid-cols-1 gap-3 mt-4", isCnpj ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3")}>
             <DocSlot type="front" label="Documento (Frente)" desc="RG, CNH ou outro documento com foto" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} locked={!!kycDocs.front} />
             <DocSlot type="back" label="Documento (Verso)" desc="Verso do documento enviado acima" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} locked={!!kycDocs.back} />
             <DocSlot type="selfie" label="Selfie com Documento" desc="Segure o documento ao lado do rosto" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} locked={!!kycDocs.selfie} />
+            {isCnpj && (
+              <DocSlot type="cnpj_card" label="Cartão CNPJ" desc="Comprovante de inscrição e situação cadastral" icon={<Building2 className="h-5 w-5" />} preview={kycDocs.cnpj_card} uploading={uploading === "cnpj_card"} onUpload={(f) => handleUpload("cnpj_card", f)} locked={!!kycDocs.cnpj_card} />
+            )}
           </div>
 
-          {kycDocs.front && kycDocs.back && kycDocs.selfie && (
+          {kycDocs.front && kycDocs.back && kycDocs.selfie && (!isCnpj || kycDocs.cnpj_card) && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4 flex items-center gap-2 text-[10px] text-info p-3 rounded-xl bg-info/5 ring-1 ring-info/10">
               <Info className="h-3.5 w-3.5 shrink-0" />
               <span className="font-medium">Todos os documentos enviados. Aguarde aprovação ou contate o suporte.</span>
