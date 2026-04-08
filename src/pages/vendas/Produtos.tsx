@@ -6,9 +6,10 @@ import {
   Copy, CheckCircle2, Zap,
   Link2, Settings2, Palette, Star,
   ExternalLink, Search, X, Grid3X3,
-  List, Sparkles, Crosshair,
+  List, Sparkles, Crosshair, Loader2,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
@@ -29,6 +30,8 @@ export default function Produtos() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending_review">("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -41,10 +44,12 @@ export default function Produtos() {
 
   const activeProducts = products.filter(p => p.status === "active").length;
 
-  const handleDelete = async (id: string) => {
-    if (!user) return;
-    if (!window.confirm("Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id).eq("user_id", user.id);
+  const confirmDelete = async () => {
+    if (!user || !deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("products").delete().eq("id", deleteTarget).eq("user_id", user.id);
+    setDeleting(false);
+    setDeleteTarget(null);
     if (error) { toast.error("Erro ao excluir produto"); return; }
     toast.success("Produto removido"); loadProducts();
   };
@@ -271,7 +276,7 @@ export default function Produtos() {
                         Área de Membros
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-border/8 my-1" />
-                      <DropdownMenuItem onClick={() => handleDelete(p.id)} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-destructive/60 focus:text-destructive hover:text-destructive">
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-3 cursor-pointer text-[12px] font-display font-bold rounded-xl h-10 px-3 text-destructive/60 focus:text-destructive hover:text-destructive">
                         <div className="h-7 w-7 rounded-lg bg-destructive/8 ring-1 ring-destructive/12 flex items-center justify-center shrink-0">
                           <Trash2 className="h-3.5 w-3.5 text-destructive/60" />
                         </div>
@@ -467,6 +472,29 @@ export default function Produtos() {
       )}
 
       {pixelProduct && <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(v) => { if (!v) setPixelProduct(null); }} />}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="rounded-2xl border-border/15 bg-card/98 backdrop-blur-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display font-black text-lg">Excluir produto</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground/60 font-display text-sm">
+              Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita e todos os dados associados serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting} className="rounded-xl font-display font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="rounded-xl font-display font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            >
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
