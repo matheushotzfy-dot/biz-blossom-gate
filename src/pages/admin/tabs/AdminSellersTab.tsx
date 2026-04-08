@@ -692,13 +692,26 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   {kycImages.length > 0 ? (
                     <div>
                       <p className="text-xs font-bold text-muted-foreground mb-2">Documentos KYC:</p>
-                      <div className="grid grid-cols-3 gap-3">
-                        {kycImages.map((url, i) => (
-                          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-colors">
-                            <img src={url} alt={`KYC ${i+1}`} className="w-full h-40 object-cover" />
-                          </a>
-                        ))}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        {kycImages.map((url, i) => {
+                          const fileName = url.split("/").pop()?.split("?")[0] || "";
+                          const label = fileName.startsWith("front") ? "Frente" : fileName.startsWith("back") ? "Verso" : fileName.startsWith("selfie") ? "Selfie" : fileName.startsWith("cnpj_card") ? "Cartão CNPJ" : `Doc ${i+1}`;
+                          return (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-colors group">
+                              <img src={url} alt={`KYC ${label}`} className="w-full h-40 object-cover" />
+                              <div className="px-3 py-2 bg-muted/20 text-center">
+                                <span className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
+                              </div>
+                            </a>
+                          );
+                        })}
                       </div>
+                      {selectedUser?.document_type === "cnpj" && !kycImages.some(url => url.includes("cnpj_card")) && (
+                        <div className="mt-3 flex items-center gap-2 p-3 rounded-xl bg-warning/5 ring-1 ring-warning/10">
+                          <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
+                          <p className="text-[10px] text-warning/70 font-medium">Seller é CNPJ mas não enviou o Cartão CNPJ.</p>
+                        </div>
+                      )}
                     </div>
                   ) : <p className="text-xs text-muted-foreground">Nenhum documento KYC enviado</p>}
                 </TabsContent>
