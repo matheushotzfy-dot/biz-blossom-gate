@@ -10,7 +10,7 @@ import {
   Download, File, Sparkles, ChevronDown, MoreHorizontal,
   Zap, Settings, Star, PanelLeftClose, PanelLeft,
   GraduationCap, Flame, Shield, Copy, ExternalLink, Users,
-  Activity, Award, Target,
+  Activity, Award, Target, CopyPlus, Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
