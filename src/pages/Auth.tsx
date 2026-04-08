@@ -15,10 +15,12 @@ import {
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
   Activity, Mail, Phone, User, FileText,
   Heart, Target, Zap, Globe, BadgeCheck, QrCode,
+  DollarSign, Sparkles, Star, Play, Smartphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import authHeroImg from "@/assets/auth-hero.jpg";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
