@@ -110,7 +110,7 @@ const sections: SidebarSection[] = [
       { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
       { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
       { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat },
-      { title: (<span>Vitrine De Produtos<br /></span>), url: "/marketplace", icon: Store, exact: true },
+      // { title: "Vitrine De Produtos", url: "/marketplace", icon: Store, exact: true }, // Desativada temporariamente
     ],
   },
   {
