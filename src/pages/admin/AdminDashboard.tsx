@@ -170,7 +170,10 @@ export default function AdminDashboard() {
   const [datePreset, setDatePreset] = useState("30d");
   const [calOpen, setCalOpen] = useState(false);
   const [adminTheme, setAdminTheme] = useState<AdminTheme>(() => {
-    return (localStorage.getItem("admin-theme") as AdminTheme) || "dark-green";
+    const saved = localStorage.getItem("admin-theme") as string;
+    if (saved === "light-green") return "midnight";
+    if (saved && saved in ADMIN_THEMES) return saved as AdminTheme;
+    return "dark-green";
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
