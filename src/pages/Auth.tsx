@@ -619,124 +619,127 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* ═══ RIGHT: Live Activity Panel (Desktop) ═══ */}
+      {/* ═══ RIGHT: Dashboard Preview Panel (Desktop) ═══ */}
       <div className="hidden lg:flex w-[50%] xl:w-[52%] relative overflow-hidden flex-col bg-[hsl(170_12%_6%)]">
-        {/* Mesh gradient bg */}
+        {/* BG */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[hsl(160_60%_30%/0.06)] blur-[150px]" />
           <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[hsl(200_50%_30%/0.04)] blur-[130px]" />
-          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(160 20% 20% / 0.15) 0.5px, transparent 0)", backgroundSize: "48px 48px" }} />
+          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(160 20% 20% / 0.12) 0.5px, transparent 0)", backgroundSize: "32px 32px" }} />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 h-full flex flex-col justify-between p-10 xl:p-14">
-          {/* Top — title + live feed side by side */}
+        <div className="relative z-10 h-full flex flex-col p-7 xl:p-9 gap-3.5 overflow-y-auto">
+
+          {/* Title */}
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(160_60%_40%/0.08)] ring-1 ring-[hsl(160_60%_40%/0.15)] text-[9px] font-bold text-[hsl(160_60%_55%)] uppercase tracking-widest mb-6"
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(160_60%_40%/0.08)] ring-1 ring-[hsl(160_60%_40%/0.15)] text-[9px] font-bold text-[hsl(160_60%_55%)] uppercase tracking-widest mb-2.5"
             >
               <Activity className="h-3 w-3" />
-              Atividade em tempo real
+              Dashboard Preview
             </motion.div>
-
-            <div className="flex gap-8">
-              {/* Left text */}
-              <div className="flex-1 min-w-0">
-                <motion.h2
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  className="text-[2.2rem] xl:text-[2.8rem] font-display font-black text-foreground leading-[1.05] tracking-[-0.04em] mb-3"
-                >
-                  Vendas acontecendo{" "}
-                  <span className="text-[hsl(160_60%_50%)]">agora</span>
-                </motion.h2>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-[13px] text-[hsl(160_15%_40%)] leading-[1.8] max-w-[340px]"
-                >
-                  Milhares de infoprodutores usando a HOTZFY para vender todos os dias.
-                </motion.p>
-              </div>
-
-              {/* Right — live notification feed */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-                className="w-[240px] shrink-0"
-              >
-                <p className="text-[8px] font-bold text-[hsl(160_15%_30%)] uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" />
-                    <span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" />
-                  </span>
-                  Vendas ao vivo
-                </p>
-                <NotificationFeed />
-              </motion.div>
-            </div>
+            <h2 className="text-[1.5rem] xl:text-[1.8rem] font-display font-black text-foreground leading-[1.08] tracking-[-0.04em]">
+              Seu painel será <span className="text-[hsl(160_60%_50%)]">assim</span>
+            </h2>
           </div>
 
-          {/* Bottom — stats + features */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-          >
-            <div className="grid grid-cols-4 gap-2.5 mb-4">
-              {[
-                { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
-                { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M", format: true },
-                { value: 284, label: "Vendas/hora", icon: Zap, prefix: "", suffix: "" },
-                { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
-              ].map((stat) => (
-                <div key={stat.label} className="p-3 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
-                  <stat.icon className="h-3.5 w-3.5 text-[hsl(160_50%_40%)] mb-2" />
-                  <p className="text-[18px] xl:text-[20px] font-display font-black text-foreground tabular-nums leading-none mb-1">
-                    {stat.format ? (
-                      <><AnimatedCounter target={52} prefix="R$" suffix="M" duration={2500} /></>
-                    ) : (
-                      <AnimatedCounter target={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={2000} />
-                    )}
+          {/* 4 stats */}
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-4 gap-2">
+            {[
+              { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
+              { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M", format: true },
+              { value: 284, label: "Vendas/hora", icon: Zap, prefix: "", suffix: "" },
+              { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
+            ].map((stat) => (
+              <div key={stat.label} className="p-2.5 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
+                <stat.icon className="h-3 w-3 text-[hsl(160_50%_40%)] mb-1" />
+                <p className="text-[15px] xl:text-[17px] font-display font-black text-foreground tabular-nums leading-none mb-0.5">
+                  {stat.format ? <AnimatedCounter target={52} prefix="R$" suffix="M" duration={2500} /> : <AnimatedCounter target={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={2000} />}
+                </p>
+                <p className="text-[6px] text-[hsl(160_15%_30%)] font-bold uppercase tracking-wider">{stat.label}</p>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Chart + Live feed */}
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="grid grid-cols-5 gap-2.5 flex-1 min-h-[140px]">
+            {/* Chart */}
+            <div className="col-span-3 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)] p-3.5 flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-[7px] font-bold text-[hsl(160_15%_30%)] uppercase tracking-wider">Faturamento — Hoje</p>
+                  <p className="text-[20px] xl:text-[24px] font-display font-black text-foreground tabular-nums leading-none mt-0.5">
+                    R$ <AnimatedCounter target={12480} duration={3000} />
                   </p>
-                  <p className="text-[7px] text-[hsl(160_15%_30%)] font-bold uppercase tracking-wider">{stat.label}</p>
                 </div>
-              ))}
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[hsl(160_60%_40%/0.1)]">
+                  <TrendingUp className="h-3 w-3 text-[hsl(160_60%_50%)]" />
+                  <span className="text-[9px] font-bold text-[hsl(160_60%_50%)]">+23%</span>
+                </div>
+              </div>
+              <div className="flex-1 flex items-end gap-[2px] min-h-[50px]">
+                {[35,52,40,68,45,78,60,85,55,92,70,95,65,88,72,98,80,75,90,82,96,88,70,60].map((h, i) => (
+                  <motion.div key={i} initial={{ height: 0 }} animate={{ height: `${h}%` }}
+                    transition={{ delay: 0.5 + i * 0.025, duration: 0.35, ease: "easeOut" }}
+                    className="flex-1 rounded-t-sm bg-[hsl(160_60%_40%)] opacity-50 hover:opacity-100 transition-opacity" style={{ minHeight: 2 }} />
+                ))}
+              </div>
+              <div className="flex justify-between mt-1">
+                {["00h","06h","12h","18h","23h"].map(t => <span key={t} className="text-[6px] text-[hsl(160_10%_25%)]">{t}</span>)}
+              </div>
             </div>
 
-            {/* Feature pills */}
-            <div className="flex flex-wrap gap-1.5 mb-4">
+            {/* Live feed */}
+            <div className="col-span-2 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)] p-3.5 flex flex-col">
+              <p className="text-[7px] font-bold text-[hsl(160_15%_30%)] uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" /><span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" /></span>
+                Vendas ao vivo
+              </p>
+              <div className="flex-1 overflow-hidden"><NotificationFeed /></div>
+            </div>
+          </motion.div>
+
+          {/* Payment methods */}
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="grid grid-cols-3 gap-2">
+            {[
+              { label: "PIX", pct: 68, value: "R$ 8.486", color: "hsl(160 60% 50%)" },
+              { label: "Cartão", pct: 28, value: "R$ 3.494", color: "hsl(200 60% 50%)" },
+              { label: "Boleto", pct: 4, value: "R$ 499", color: "hsl(40 60% 50%)" },
+            ].map(m => (
+              <div key={m.label} className="p-2.5 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[8px] font-bold text-[hsl(160_20%_45%)] uppercase tracking-wider">{m.label}</span>
+                  <span className="text-[8px] font-bold text-foreground/70">{m.pct}%</span>
+                </div>
+                <div className="h-1 rounded-full bg-[hsl(160_10%_12%)] overflow-hidden mb-1">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${m.pct}%` }}
+                    transition={{ delay: 0.75, duration: 0.5, ease: "easeOut" }}
+                    className="h-full rounded-full" style={{ backgroundColor: m.color }} />
+                </div>
+                <p className="text-[11px] font-display font-black text-foreground tabular-nums">{m.value}</p>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Pills + status */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
+            <div className="flex flex-wrap gap-1 mb-2">
               {[
-                { icon: CreditCard, label: "Checkout" },
-                { icon: GraduationCap, label: "Membros" },
-                { icon: Shield, label: "Anti-fraude" },
-                { icon: QrCode, label: "PIX" },
-                { icon: BarChart2, label: "Analytics" },
-                { icon: BadgeCheck, label: "Afiliados" },
+                { icon: CreditCard, label: "Checkout" }, { icon: GraduationCap, label: "Membros" },
+                { icon: Shield, label: "Anti-fraude" }, { icon: QrCode, label: "PIX" },
+                { icon: BarChart2, label: "Analytics" }, { icon: BadgeCheck, label: "Afiliados" },
+                { icon: Globe, label: "Integrações" },
               ].map(f => (
-                <div key={f.label} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(160_12%_9%)] border border-[hsl(160_15%_14%)] text-[8px] font-bold text-[hsl(160_20%_40%)] uppercase tracking-wider">
-                  <f.icon className="h-3 w-3 text-[hsl(160_50%_40%)]" />
-                  {f.label}
+                <div key={f.label} className="flex items-center gap-1 px-2 py-1 rounded-md bg-[hsl(160_12%_9%)] border border-[hsl(160_15%_14%)] text-[7px] font-bold text-[hsl(160_20%_40%)] uppercase tracking-wider">
+                  <f.icon className="h-2.5 w-2.5 text-[hsl(160_50%_40%)]" />{f.label}
                 </div>
               ))}
             </div>
-
-            {/* Status bar */}
-            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" />
-                <span className="relative rounded-full h-2 w-2 bg-[hsl(160_60%_50%)]" />
-              </span>
-              <span className="text-[10px] font-bold text-[hsl(160_30%_45%)]">Sistemas online</span>
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
+              <span className="relative flex h-1.5 w-1.5 shrink-0"><span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" /><span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" /></span>
+              <span className="text-[9px] font-bold text-[hsl(160_30%_45%)]">Sistemas online</span>
               <span className="text-[hsl(160_15%_20%)]">·</span>
-              <span className="text-[10px] text-[hsl(160_15%_30%)] font-medium">Checkout · Saque · API</span>
+              <span className="text-[9px] text-[hsl(160_15%_30%)]">Checkout · Saque · API</span>
             </div>
           </motion.div>
         </div>
