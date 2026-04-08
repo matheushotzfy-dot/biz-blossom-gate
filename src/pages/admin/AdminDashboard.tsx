@@ -487,7 +487,7 @@ export default function AdminDashboard() {
         <header className="relative z-40 h-[56px] flex items-center px-4 lg:px-5 gap-3 lg:gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Mobile hamburger */}
-            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${themeConfig.border}` }}>
+            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${themeConfig.border}` }}>
               <PanelLeft className="h-4 w-4" style={{ color: themeConfig.textMuted }} />
             </button>
             <div className="flex items-center gap-2.5">
@@ -508,7 +508,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Date Picker */}
-          <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+          <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}` }}>
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
@@ -530,7 +530,7 @@ export default function AdminDashboard() {
                   <Calendar className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 backdrop-blur-3xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" style={{ background: themeConfig.isDark ? "rgba(6,18,16,0.98)" : "rgba(255,255,255,0.98)", border: `1px solid ${themeConfig.border}` }} align="end">
+              <PopoverContent className="w-auto p-0 backdrop-blur-3xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] rounded-2xl" style={{ background: "rgba(6,18,16,0.98)", border: `1px solid ${themeConfig.border}` }} align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
@@ -557,11 +557,11 @@ export default function AdminDashboard() {
             {/* Theme Picker */}
             <Popover open={themePickerOpen} onOpenChange={setThemePickerOpen}>
               <PopoverTrigger asChild>
-                <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+                <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}` }}>
                   <Palette className="h-3.5 w-3.5 transition-colors" style={{ color: themeConfig.textMuted }} />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-2 rounded-xl" style={{ background: themeConfig.isDark ? "rgba(6,18,16,0.98)" : "rgba(255,255,255,0.98)", border: `1px solid ${themeConfig.border}`, backdropFilter: "blur(30px)" }} align="end">
+              <PopoverContent className="w-56 p-2 rounded-xl" style={{ background: "rgba(6,18,16,0.98)", border: `1px solid ${themeConfig.border}`, backdropFilter: "blur(30px)" }} align="end">
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-1.5" style={{ color: themeConfig.textMuted }}>Tema do Painel</p>
                 {(Object.entries(ADMIN_THEMES) as [AdminTheme, typeof ADMIN_THEMES[AdminTheme]][]).map(([key, theme]) => (
                   <button
@@ -580,7 +580,7 @@ export default function AdminDashboard() {
               </PopoverContent>
             </Popover>
 
-            <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}` }}>
+            <button className="relative h-8 w-8 rounded-xl flex items-center justify-center transition-all group" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}` }}>
               <Bell className="h-3.5 w-3.5 transition-colors" style={{ color: themeConfig.textMuted }} />
               {pendingWdCount > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]" />}
             </button>
@@ -589,7 +589,7 @@ export default function AdminDashboard() {
               onClick={loadData}
               disabled={syncing}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[10px] font-semibold transition-all"
-              style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)", border: `1px solid ${themeConfig.border}`, color: themeConfig.textMuted }}
+              style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${themeConfig.border}`, color: themeConfig.textMuted }}
             >
               <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} /> Sync
             </button>
