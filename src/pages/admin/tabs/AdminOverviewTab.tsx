@@ -691,7 +691,7 @@ export function GlassPanelTitle({ children, color, icon }: { children: React.Rea
     green: "text-green-400",
   };
   return (
-    <h3 className="text-[13px] font-bold flex items-center gap-2.5 text-white/90">
+    <h3 className="text-[13px] font-bold flex items-center gap-2.5 text-white/[0.92]">
       <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.emerald)} />
       {icon && <span className={textColorMap[color] || "text-emerald-400"}>{icon}</span>}
       {children}
@@ -731,9 +731,9 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor,
 }) {
   return (
     <div className={cn(
-      "rounded-xl bg-gradient-to-b from-white/[0.04] to-white/[0.015] border border-white/[0.07] p-4",
-      "shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_16px_rgba(0,0,0,0.2)]",
-      "hover:border-white/[0.1] transition-all duration-300",
+      "rounded-xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.08] p-4",
+      "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_16px_rgba(0,0,0,0.25)]",
+      "hover:border-white/[0.12] transition-all duration-300",
       alert && "border-amber-500/20 ring-1 ring-amber-500/10"
     )}
       style={{ boxShadow: highlight && glowColor ? `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 35px ${glowColor}` : undefined }}
