@@ -328,7 +328,7 @@ export default function AdminDashboard() {
     activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
   };
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   return (
     <div
