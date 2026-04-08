@@ -663,7 +663,7 @@ export default function Auth() {
                 transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="absolute top-5 left-5 xl:top-7 xl:left-7 z-20"
               >
-                <div className="rounded-2xl border border-primary/25 bg-card/85 backdrop-blur-2xl p-5 shadow-[0_8px_40px_hsl(var(--primary)/0.12)]">
+                <div className="rounded-2xl border border-primary/25 bg-card/90 backdrop-blur-2xl p-5 shadow-[0_12px_48px_hsl(var(--primary)/0.15)]">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
                     <p className="text-[9px] font-heading uppercase tracking-[0.24em] text-primary/80">Receita Hoje</p>
@@ -671,7 +671,20 @@ export default function Auth() {
                   <p className="font-heading text-[38px] xl:text-[44px] tracking-[-0.06em] leading-none text-foreground">
                     R$ <AnimatedCounter target={128480} />
                   </p>
-                  <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/30">
+                  {/* Mini sparkline chart */}
+                  <div className="flex items-end gap-[2px] mt-2.5 h-6">
+                    {[28, 42, 36, 55, 48, 62, 44, 70, 58, 76, 64, 82, 72, 88, 78, 94].map((h, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${h}%` }}
+                        transition={{ delay: 0.5 + i * 0.04, duration: 0.4 }}
+                        className="flex-1 rounded-full bg-primary/40"
+                        style={{ minWidth: 2 }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
                     <div className="inline-flex items-center gap-1 rounded-full bg-success/12 px-2 py-0.5">
                       <TrendingUp className="h-3 w-3 text-success" />
                       <span className="text-[10px] font-bold text-success">+18,4%</span>
