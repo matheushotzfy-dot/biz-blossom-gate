@@ -301,17 +301,16 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                           ? "bg-card ring-1 ring-primary/15 shadow-xl shadow-primary/5"
                           : "bg-muted/4 ring-1 ring-border/10 hover:ring-border/20 hover:bg-muted/6"
                       )}>
-                      {/* Accent */}
-                      <div className={cn(
-                        "absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all",
-                        px.is_active ? "bg-success shadow-sm shadow-success/30" : "bg-muted-foreground/10"
-                      )} />
+                      {/* Accent bar with brand color */}
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all"
+                        style={{ backgroundColor: px.is_active ? platform.brandColor : "hsl(var(--muted-foreground) / 0.1)", boxShadow: px.is_active ? `0 0 8px ${platform.brandColor}40` : "none" }} />
 
                       {/* Header */}
                       <div className="flex items-center gap-3.5 px-5 py-4 cursor-pointer" onClick={() => setExpandedPixel(isExpanded ? null : px.id)}>
-                        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 transition-all",
-                          px.is_active ? cn(platform.bg, platform.ring) : "bg-muted/8 ring-border/10")}>
-                          <platform.LogoComp className={cn("h-4 w-4", px.is_active ? platform.color : "text-muted-foreground/20")} />
+                        <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 transition-all"
+                          style={px.is_active ? { background: `${platform.brandColor}12`, borderColor: `${platform.brandColor}20`, boxShadow: `0 2px 8px ${platform.brandColor}10` } : { background: "hsl(var(--muted) / 0.08)", borderColor: "hsl(var(--border) / 0.1)" }}>
+                          <platform.LogoComp className="h-4.5 w-4.5"
+                            style={{ color: px.is_active ? platform.brandColor : "hsl(var(--muted-foreground) / 0.2)" }} />
                         </div>
 
                         <div className="flex-1 min-w-0">
