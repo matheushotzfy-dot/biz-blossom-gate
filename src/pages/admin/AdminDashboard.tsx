@@ -476,8 +476,12 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* ═══ TOP BAR ═══ */}
-        <header className="relative z-40 h-[56px] flex items-center px-5 gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
+        <header className="relative z-40 h-[56px] flex items-center px-4 lg:px-5 gap-3 lg:gap-4 shrink-0" style={{ background: themeConfig.topBarBg, backdropFilter: "blur(30px)", borderBottom: `1px solid ${themeConfig.border}` }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Mobile hamburger */}
+            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: themeConfig.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${themeConfig.border}` }}>
+              <PanelLeft className="h-4 w-4" style={{ color: themeConfig.textMuted }} />
+            </button>
             <div className="flex items-center gap-2.5">
               <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center border", accentClasses.bgBorder)} style={{ background: themeConfig.accentLight }}>
                 {(() => {
