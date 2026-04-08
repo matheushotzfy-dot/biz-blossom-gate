@@ -691,7 +691,7 @@ export function GlassPanelTitle({ children, color, icon }: { children: React.Rea
     green: "text-green-400",
   };
   return (
-    <h3 className="text-[13px] font-bold flex items-center gap-2.5 text-white/85">
+    <h3 className="text-[13px] font-bold flex items-center gap-2.5 text-white/90">
       <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.emerald)} />
       {icon && <span className={textColorMap[color] || "text-emerald-400"}>{icon}</span>}
       {children}
