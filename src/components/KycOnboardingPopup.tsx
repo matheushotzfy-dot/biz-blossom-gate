@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import {
   X as XIcon, Shield, Upload, Camera, Image, Loader2, CheckCircle2,
   AlertTriangle, ArrowRight, ArrowLeft, FileCheck, Fingerprint, Sparkles,
-  Rocket, PartyPopper, Eye, Lock,
+  Rocket, PartyPopper, Eye, Lock, Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -18,17 +18,21 @@ import { motion, AnimatePresence } from "framer-motion";
 const ease = [0.16, 1, 0.3, 1] as const;
 const ALLOWED_KYC_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
-const STEPS = [
+const BASE_STEPS = [
   { type: "front", label: "Documento — Frente", desc: "Foto nítida da frente do seu RG ou CNH", icon: Image, tip: "Posicione o documento em superfície plana e com boa iluminação" },
   { type: "back", label: "Documento — Verso", desc: "Foto nítida do verso do seu RG ou CNH", icon: Image, tip: "Garanta que todos os dados estejam legíveis" },
   { type: "selfie", label: "Selfie com Documento", desc: "Tire uma selfie segurando seu documento ao lado do rosto", icon: Camera, tip: "Seu rosto e o documento devem estar visíveis e sem obstruções" },
 ];
 
+const CNPJ_STEP = { type: "cnpj_card", label: "Cartão CNPJ", desc: "Envie o comprovante de inscrição e situação cadastral do CNPJ", icon: Building2, tip: "Acesse o site da Receita Federal para gerar o cartão atualizado" };
+
 export function KycOnboardingPopup() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const [open, setOpen] = useState(false);
-  const [docs, setDocs] = useState<Record<string, boolean>>({ front: false, back: false, selfie: false });
+  const isCnpj = profile?.document_type === "cnpj";
+  const STEPS = isCnpj ? [...BASE_STEPS, CNPJ_STEP] : BASE_STEPS;
+  const [docs, setDocs] = useState<Record<string, boolean>>({ front: false, back: false, selfie: false, cnpj_card: false });
   const [uploading, setUploading] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState(false);
@@ -41,16 +45,16 @@ export function KycOnboardingPopup() {
     if (localStorage.getItem(key)) return;
     const timer = setTimeout(() => setOpen(true), 800);
     return () => clearTimeout(timer);
-  }, [user?.id, profile?.account_status]);
+  }, [user?.id, profile?.account_status, profile?.document_type]);
 
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const types = ["front", "back", "selfie"];
+      const types = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
       const results = await Promise.all(
         types.map(t => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: t }))
       );
-      const d: Record<string, boolean> = {};
+      const d: Record<string, boolean> = { front: false, back: false, selfie: false, cnpj_card: false };
       let firstMissing = -1;
       types.forEach((t, i) => {
         d[t] = !!(results[i].data && results[i].data.length > 0);
@@ -59,7 +63,7 @@ export function KycOnboardingPopup() {
       setDocs(d);
       if (firstMissing >= 0) setCurrentStep(firstMissing);
     })();
-  }, [user?.id]);
+  }, [user?.id, isCnpj]);
 
   const handleUpload = useCallback(async (type: string, file: File) => {
     if (!user) return;
@@ -74,8 +78,9 @@ export function KycOnboardingPopup() {
       toast.success("Documento enviado!");
       setDocs(prev => {
         const next = { ...prev, [type]: true };
-        // Auto-advance
-        if (next.front && next.back && next.selfie) {
+        const requiredKeys = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
+        const allComplete = requiredKeys.every(k => next[k]);
+        if (allComplete) {
           setTimeout(() => setCompleted(true), 600);
         } else {
           const stepIdx = STEPS.findIndex(s => s.type === type);
@@ -92,7 +97,8 @@ export function KycOnboardingPopup() {
     setOpen(false);
   }, [user?.id]);
 
-  const allDone = docs.front && docs.back && docs.selfie;
+  const requiredKeys = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
+  const allDone = requiredKeys.every(k => docs[k]);
   const uploadedCount = Object.values(docs).filter(Boolean).length;
   const step = STEPS[currentStep];
 
