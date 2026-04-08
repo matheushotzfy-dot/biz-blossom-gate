@@ -90,7 +90,7 @@ export default function Identidade() {
   const { data: bankAccounts = [] } = useBankAccounts();
   const [nickname, setNickname] = useState("");
   const [saving, setSaving] = useState(false);
-  const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null });
+  const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null, cnpj_card: null });
   const [uploading, setUploading] = useState<string | null>(null);
   const [nicknameInit, setNicknameInit] = useState(false);
   const [searchParams] = useSearchParams();
@@ -114,22 +114,21 @@ export default function Identidade() {
     }
   }, [profile, nicknameInit]);
 
-  useEffect(() => { loadKycDocs(); }, [user]);
+  useEffect(() => { loadKycDocs(); }, [user, profile?.document_type]);
 
   const loadKycDocs = async () => {
     if (!user) return;
-    const types = ["front", "back", "selfie"];
+    const isCnpj = profile?.document_type === "cnpj";
+    const types = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
     const results = await Promise.all(
       types.map(type => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type }))
     );
-    const docs: Record<string, string | null> = {};
+    const docs: Record<string, string | null> = { front: null, back: null, selfie: null, cnpj_card: null };
     types.forEach((type, i) => {
       const data = results[i].data;
       if (data && data.length > 0) {
         const { data: urlData } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
         docs[type] = urlData?.publicUrl || null;
-      } else {
-        docs[type] = null;
       }
     });
     setKycDocs(docs);
