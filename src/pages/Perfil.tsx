@@ -98,10 +98,11 @@ function SectionCard({ children, accent, glow, delay = 0, className }: {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, ease }}
-      className={cn("relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300 group", className)}
+      className={cn("relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 hover:-translate-y-0.5 transition-all duration-300 group shadow-[0_8px_30px_hsl(var(--foreground)/0.04)] hover:shadow-[0_16px_40px_hsl(var(--foreground)/0.07)]", className)}
     >
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />
       <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glow)} />
+      <div className="absolute inset-0 opacity-[0.008] pointer-events-none" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 0.5px, transparent 0.5px)", backgroundSize: "16px 16px" }} />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
@@ -164,8 +165,9 @@ function StatCard({ icon: Icon, label, value, tone = "primary", delay = 0, sub }
       transition={{ delay: delay * 0.06, duration: 0.5, ease }}
       className={cn(
         "relative group rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden",
-        "hover:ring-border/40 transition-all duration-300",
-        `hover:shadow-lg ${c.glow}`
+        "hover:ring-border/40 hover:-translate-y-0.5 transition-all duration-300",
+        `hover:shadow-lg ${c.glow}`,
+        "shadow-[0_6px_24px_hsl(var(--foreground)/0.04)]"
       )}
     >
       <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", c.accent)} />
@@ -323,7 +325,7 @@ export default function Perfil() {
   const tierLabel = milestone.tier === 0 ? "Iniciante" : milestone.tier === 1 ? "Prata" : milestone.tier === 2 ? "Ouro" : milestone.tier === 3 ? "Diamante" : milestone.tier === 4 ? "Platina" : "Lendário";
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-6">
       {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
@@ -335,10 +337,10 @@ export default function Perfil() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
+        className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden shadow-[0_12px_40px_hsl(var(--foreground)/0.05)]"
       >
         {/* Top accent gradient bar */}
-        <div className="h-1.5 bg-gradient-to-r from-primary via-info/80 to-success/60" />
+        <div className="h-2 bg-gradient-to-r from-primary via-info/80 to-success/60" />
 
         {/* Mesh gradient overlays */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none" />
@@ -380,10 +382,10 @@ export default function Perfil() {
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])} />
               
               {/* Outer animated ring */}
-              <div className="absolute -inset-1.5 rounded-[22px] bg-gradient-to-br from-primary/30 via-info/15 to-success/20 opacity-50 group-hover:opacity-100 transition-opacity duration-500 blur-[1px]" />
+              <div className="absolute -inset-2 rounded-[24px] bg-gradient-to-br from-primary/30 via-info/15 to-success/20 opacity-50 group-hover:opacity-100 transition-opacity duration-500 blur-[2px] animate-pulse" />
               
               <div
-                className="relative h-[88px] w-[88px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-card group-hover:ring-primary/20 transition-all duration-300 shadow-xl active:scale-[0.97]"
+                className="relative h-[96px] w-[96px] rounded-2xl overflow-hidden cursor-pointer ring-2 ring-card group-hover:ring-primary/20 transition-all duration-300 shadow-xl active:scale-[0.97]"
                 onClick={() => fileRef.current?.click()}
               >
                 {profile?.avatar_url ? (
@@ -414,7 +416,7 @@ export default function Perfil() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                <h2 className="text-2xl md:text-3xl font-display font-black text-foreground tracking-[-0.04em] leading-tight">
+                <h2 className="text-2xl md:text-[32px] font-display font-black text-foreground tracking-[-0.04em] leading-tight">
                   {profile?.full_name || "Usuário"}
                 </h2>
                 <div className={cn(
@@ -472,7 +474,7 @@ export default function Perfil() {
       </motion.section>
 
       {/* ═══ KPI Strip ═══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Flame} label="Faturamento" value={fmtCompact(allTimeRevenue)} tone="primary" delay={0} sub="receita líquida" />
         <StatCard icon={Target} label="Vendas" value={String(totalSales)} tone="success" delay={1} sub="aprovadas" />
         <StatCard icon={Trophy} label="Marco Atual" value={milestone.current.label} tone="warning" delay={2} sub={tierLabel} />
@@ -480,7 +482,7 @@ export default function Perfil() {
       </div>
 
       {/* ═══ Content Grid ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {/* ─── Dados Pessoais ─── */}
         <SectionCard accent="bg-primary" glow="from-primary/[0.03] to-transparent" delay={0.3}>
