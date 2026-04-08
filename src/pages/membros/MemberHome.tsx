@@ -613,7 +613,7 @@ function PortraitCard({ course }: { course: CourseWithProgress }) {
 
   return (
     <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[180px] sm:w-[220px] snap-start block">
-      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:scale-[1.04] group-hover:z-10">
+      <div className="relative rounded-2xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/25 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:scale-[1.04] group-hover:z-10">
         <div className="aspect-[2/3] relative overflow-hidden">
           {course.thumbnail_url ? (
             <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
@@ -623,12 +623,9 @@ function PortraitCard({ course }: { course: CourseWithProgress }) {
               <GraduationCap className="h-12 w-12 text-primary/10" />
             </div>
           )}
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
-          {/* Bottom info */}
-          <div className="absolute bottom-0 left-0 right-0 p-3">
-            <h3 className="text-xs font-display font-black text-foreground line-clamp-2 leading-snug tracking-tight mb-2">{course.title}</h3>
-            {/* Progress bar */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent opacity-90" />
+          <div className="absolute bottom-0 left-0 right-0 p-3.5">
+            <h3 className="text-xs font-display font-black text-foreground line-clamp-2 leading-snug tracking-tight mb-2.5">{course.title}</h3>
             <div className="h-[2px] rounded-full bg-foreground/8 overflow-hidden">
               <div className={cn("h-full rounded-full transition-all", isFinished ? "bg-success" : "bg-primary")} style={{ width: `${pct}%` }} />
             </div>
@@ -641,20 +638,18 @@ function PortraitCard({ course }: { course: CourseWithProgress }) {
               ) : null}
             </div>
           </div>
-          {/* Hover overlay with extra info */}
-          <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-4">
-            <div className="h-12 w-12 rounded-full bg-foreground/90 flex items-center justify-center shadow-xl">
+          {/* Hover play overlay */}
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 p-4">
+            <div className="h-14 w-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-xl ring-2 ring-foreground/20 scale-90 group-hover:scale-100 transition-transform duration-500">
               <Play className="h-5 w-5 text-background ml-0.5 fill-current" />
             </div>
             <div className="text-center">
               <p className="text-[10px] text-foreground/60 font-display font-bold">{course.modules.length} módulos</p>
-              <p className="text-[10px] text-foreground/40 font-display tabular-nums">{course.totalLessons} aulas</p>
             </div>
           </div>
-          {/* Badges */}
           {isFinished && (
-            <div className="absolute top-2 right-2">
-              <div className="h-6 w-6 rounded-md bg-success/20 backdrop-blur-xl flex items-center justify-center ring-1 ring-success/30">
+            <div className="absolute top-2.5 right-2.5">
+              <div className="h-7 w-7 rounded-lg bg-success/20 backdrop-blur-xl flex items-center justify-center ring-1 ring-success/30 shadow-lg shadow-success/20">
                 <CheckCircle2 className="h-3.5 w-3.5 text-success" />
               </div>
             </div>
