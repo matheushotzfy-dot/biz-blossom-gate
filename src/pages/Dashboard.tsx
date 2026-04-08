@@ -599,7 +599,8 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/50 bg-card/95 p-4 md:p-6 min-h-[280px]">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/50 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+          <div className="absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -637,7 +638,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className="group relative rounded-xl border border-border/50 bg-card/95 p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all hover:border-border/70 hover:shadow-sm">
+                className="group relative rounded-xl border border-border/50 bg-card/95 p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all hover:border-primary/20 hover:shadow-[0_0_20px_rgba(0,220,130,0.06)] card-premium">
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
                 <div className="pl-1.5 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-auto">
