@@ -255,15 +255,18 @@ export default function AdminConteudo() {
   const courses = useMemo(() => coursesRaw.map((c: any) => { const { modules: _, ...rest } = c; return rest; }) as Course[], [coursesRaw]);
   const products = useMemo(() => productsRaw.map((p: any) => ({ id: p.id, name: p.name, price: Number(p.price) })) as Product[], [productsRaw]);
 
+  const courseIds = useMemo(() => courses.map(c => c.id).sort().join(","), [courses]);
+
   useEffect(() => {
-    if (courses.length === 0) return;
-    supabase.from("user_access").select("course_id").eq("status", "active").in("course_id", courses.map(c => c.id))
+    if (!courseIds) return;
+    const ids = courseIds.split(",");
+    supabase.from("user_access").select("course_id").eq("status", "active").in("course_id", ids)
       .then(({ data }) => {
         const counts: Record<string, number> = {};
         data?.forEach(a => { counts[a.course_id] = (counts[a.course_id] || 0) + 1; });
         setStudentCounts(counts);
       });
-  }, [courses]);
+  }, [courseIds]);
 
   const courseStats = useMemo(() => {
     const stats: Record<string, { modules: number; lessons: number }> = {};
