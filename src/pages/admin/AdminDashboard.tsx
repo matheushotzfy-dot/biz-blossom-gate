@@ -327,6 +327,8 @@ export default function AdminDashboard() {
     activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div
       className={cn("h-screen flex overflow-hidden", themeConfig.isDark ? "dark text-white" : "text-gray-900")}
@@ -344,10 +346,19 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* ═══ MOBILE OVERLAY ═══ */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        </div>
+      )}
+
       {/* ═══ SIDEBAR ═══ */}
       <aside className={cn(
-        "relative z-50 h-full flex flex-col shrink-0 transition-all duration-300",
-        sidebarCollapsed ? "w-[72px]" : "w-[248px]"
+        "relative z-[70] h-full flex flex-col shrink-0 transition-all duration-300",
+        sidebarCollapsed ? "w-[72px]" : "w-[248px]",
+        "max-lg:fixed max-lg:left-0 max-lg:top-0",
+        mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
       )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: `1px solid ${themeConfig.isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}` }}>
         
         {/* Sidebar ambient glow */}
@@ -406,7 +417,7 @@ export default function AdminDashboard() {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => handleTabChange(item.id as TabId)}
+                      onClick={() => { handleTabChange(item.id as TabId); setMobileMenuOpen(false); }}
                       title={sidebarCollapsed ? item.label : undefined}
                       className={cn(
                         "relative w-full flex items-center gap-2.5 rounded-xl transition-all duration-200 group",
@@ -447,7 +458,7 @@ export default function AdminDashboard() {
         <div className="relative border-t border-white/[0.06] p-2.5 space-y-1 shrink-0">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-white/15 hover:text-white/40 hover:bg-white/[0.03] transition-all"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-white/15 hover:text-white/40 hover:bg-white/[0.03] transition-all max-lg:hidden"
           >
             {sidebarCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!sidebarCollapsed && <span className="text-[11px] font-medium">Recolher</span>}
