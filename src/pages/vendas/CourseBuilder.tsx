@@ -10,11 +10,15 @@ import {
   Download, File, Sparkles, ChevronDown, MoreHorizontal,
   Zap, Settings, Star, PanelLeftClose, PanelLeft,
   GraduationCap, Flame, Shield, Copy, ExternalLink, Users,
-  Activity, Award, Target,
+  Activity, Award, Target, CopyPlus, Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import StudentPreviewPanel from "@/components/course/StudentPreviewPanel";
@@ -22,7 +26,7 @@ import StudentPreviewPanel from "@/components/course/StudentPreviewPanel";
 // ─── Types ────────────────────────────────────────────────────────
 interface Course {
   id: string; title: string; description: string | null; is_published: boolean;
-  user_id: string; product_id: string | null;
+  user_id: string; product_id: string | null; thumbnail_url: string | null;
 }
 interface Module {
   id: string; course_id: string; title: string; description: string | null;
@@ -102,6 +106,15 @@ export default function CourseBuilder() {
   const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
   const [studentCount, setStudentCount] = useState(0);
   const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
+  const [deletingItem, setDeletingItem] = useState(false);
+  const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDescription, setCourseDescription] = useState("");
+  const [courseCategory, setCourseCategory] = useState("");
+  const [courseThumbnail, setCourseThumbnail] = useState("");
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -245,13 +258,29 @@ export default function CourseBuilder() {
   };
 
   const deleteModule = async (id: string) => {
-    if (!window.confirm("Excluir este módulo e todas as suas aulas?")) return;
-    await supabase.from("lessons").delete().in("module_id", [id]);
-    await supabase.from("modules").delete().eq("id", id);
-    if (selectedLesson && modules.find(m => m.id === id)?.lessons.some(l => l.id === selectedLesson.id)) {
-      setSelectedLesson(null);
+    const mod = modules.find(m => m.id === id);
+    setDeleteTarget({ type: "module", id, label: mod?.title || "Módulo" });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingItem(true);
+    if (deleteTarget.type === "module") {
+      await supabase.from("lessons").delete().in("module_id", [deleteTarget.id]);
+      await supabase.from("modules").delete().eq("id", deleteTarget.id);
+      if (selectedLesson && modules.find(m => m.id === deleteTarget.id)?.lessons.some(l => l.id === selectedLesson.id)) {
+        setSelectedLesson(null);
+      }
+      toast.success("Módulo excluído");
+    } else {
+      await supabase.from("lesson_attachments" as any).delete().eq("lesson_id", deleteTarget.id);
+      await supabase.from("lessons").delete().eq("id", deleteTarget.id);
+      if (selectedLesson?.id === deleteTarget.id) setSelectedLesson(null);
+      toast.success("Aula excluída");
     }
-    toast.success("Módulo excluído"); loadAll();
+    setDeletingItem(false);
+    setDeleteTarget(null);
+    loadAll();
   };
 
   // ─── Lesson CRUD ───────────────────────────────────────────────
@@ -266,11 +295,65 @@ export default function CourseBuilder() {
   };
 
   const deleteLesson = async (id: string) => {
-    if (!window.confirm("Excluir esta aula?")) return;
-    await supabase.from("lesson_attachments" as any).delete().eq("lesson_id", id);
-    await supabase.from("lessons").delete().eq("id", id);
-    if (selectedLesson?.id === id) setSelectedLesson(null);
-    toast.success("Aula excluída"); loadAll();
+    const lesson = modules.flatMap(m => m.lessons).find(l => l.id === id);
+    setDeleteTarget({ type: "lesson", id, label: lesson?.title || "Aula" });
+  };
+
+  const duplicateLesson = async (lesson: Lesson) => {
+    const mod = modules.find(m => m.lessons.some(l => l.id === lesson.id));
+    if (!mod) return;
+    const { data } = await supabase.from("lessons").insert({
+      module_id: lesson.module_id,
+      title: `${lesson.title} (cópia)`,
+      description: lesson.description,
+      video_url: lesson.video_url,
+      duration_minutes: lesson.duration_minutes,
+      is_free: lesson.is_free,
+      drip_days: lesson.drip_days,
+      sort_order: mod.lessons.length,
+    }).select().single();
+    toast.success("Aula duplicada!");
+    await loadAll();
+    if (data) selectLesson(data as Lesson);
+  };
+
+  // ─── Course Settings ───────────────────────────────────────────
+  const openCourseSettings = () => {
+    if (!course) return;
+    setCourseTitle(course.title);
+    setCourseDescription(course.description || "");
+    setCourseCategory("");
+    setCourseThumbnail("");
+    setCourseSettingsOpen(true);
+  };
+
+  const saveCourseSettings = async () => {
+    if (!course || !user) return;
+    const updates: Record<string, any> = {};
+    if (courseTitle.trim() && courseTitle !== course.title) updates.title = courseTitle.trim();
+    if (courseDescription !== (course.description || "")) updates.description = courseDescription || null;
+    if (Object.keys(updates).length === 0) { setCourseSettingsOpen(false); return; }
+    await supabase.from("courses").update(updates).eq("id", course.id).eq("user_id", user.id);
+    setCourse(prev => prev ? { ...prev, ...updates } : prev);
+    setCourseSettingsOpen(false);
+    toast.success("Configurações salvas!");
+  };
+
+  const handleThumbnailUpload = async (file: File) => {
+    if (!user || !course) return;
+    const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED.includes(file.type)) { toast.error("Use JPG, PNG ou WebP"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
+    setUploadingThumbnail(true);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/thumbnails/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file);
+    if (error) { toast.error("Erro no upload"); setUploadingThumbnail(false); return; }
+    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
+    await supabase.from("courses").update({ thumbnail_url: urlData.publicUrl }).eq("id", course.id);
+    setCourse(prev => prev ? { ...prev, thumbnail_url: urlData.publicUrl } : prev);
+    setUploadingThumbnail(false);
+    toast.success("Thumbnail atualizada!");
   };
 
   // ─── Drag & Drop ───────────────────────────────────────────────
@@ -396,6 +479,15 @@ export default function CourseBuilder() {
               {saveStatus === "error" && <><AlertCircle className="h-3 w-3 text-destructive/60" /><span className="text-[10px] text-destructive/60 font-display font-bold">Erro</span></>}
             </motion.div>
           </AnimatePresence>
+
+          {/* Course Settings */}
+          <button
+            onClick={openCourseSettings}
+            className="hidden sm:flex h-9 w-9 rounded-xl bg-muted/10 border border-border/20 items-center justify-center hover:bg-muted/20 hover:border-border/30 transition-all active:scale-[0.985] text-muted-foreground/40 hover:text-foreground/60"
+            title="Configurações do curso"
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </button>
 
           {/* Preview */}
           {course.is_published && (
@@ -573,12 +665,22 @@ export default function CourseBuilder() {
                                         )}
                                       </div>
                                     </div>
-                                    <button
-                                      onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
-                                      className="h-6 w-6 rounded-md flex items-center justify-center opacity-0 group-hover/lesson:opacity-100 hover:bg-destructive/8 transition-all shrink-0"
-                                    >
-                                      <Trash2 className="h-2.5 w-2.5 text-destructive/30" />
-                                    </button>
+                                    <div className="flex items-center gap-0.5 opacity-0 group-hover/lesson:opacity-100 transition-all shrink-0">
+                                      <button
+                                        onClick={e => { e.stopPropagation(); duplicateLesson(lesson); }}
+                                        className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-primary/8 transition-all"
+                                        title="Duplicar aula"
+                                      >
+                                        <CopyPlus className="h-2.5 w-2.5 text-primary/30" />
+                                      </button>
+                                      <button
+                                        onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
+                                        className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-destructive/8 transition-all"
+                                        title="Excluir aula"
+                                      >
+                                        <Trash2 className="h-2.5 w-2.5 text-destructive/30" />
+                                      </button>
+                                    </div>
                                   </Reorder.Item>
                                 ))}
                               </Reorder.Group>
@@ -1057,6 +1159,122 @@ export default function CourseBuilder() {
           selectedLessonId={selectedLesson?.id || null}
         />
       </div>
+
+      {/* ═══ Delete Confirmation Dialog ═══ */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="rounded-2xl border-border/15 bg-card/98 backdrop-blur-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display font-black text-lg">
+              Excluir {deleteTarget?.type === "module" ? "módulo" : "aula"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground/60 font-display text-sm">
+              {deleteTarget?.type === "module"
+                ? `Tem certeza que deseja excluir o módulo "${deleteTarget.label}" e todas as suas aulas? Esta ação não pode ser desfeita.`
+                : `Tem certeza que deseja excluir a aula "${deleteTarget?.label}"? Esta ação não pode ser desfeita.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingItem} className="rounded-xl font-display font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deletingItem}
+              className="rounded-xl font-display font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            >
+              {deletingItem && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deletingItem ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ═══ Course Settings Sheet ═══ */}
+      <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-display font-black text-xl flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
+                <Settings className="h-5 w-5 text-primary/60" />
+              </div>
+              Configurações do Curso
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            {/* Thumbnail */}
+            <div>
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">Thumbnail</Label>
+              <div
+                onClick={() => thumbnailInputRef.current?.click()}
+                className="relative rounded-2xl border-2 border-dashed border-border/25 hover:border-primary/30 transition-all cursor-pointer overflow-hidden h-44 group"
+              >
+                {course?.thumbnail_url ? (
+                  <>
+                    <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-foreground/50" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-muted/5">
+                    <ImageIcon className="h-10 w-10 text-primary/20 mb-3" />
+                    <p className="text-sm font-display font-bold text-muted-foreground/40">
+                      {uploadingThumbnail ? "Enviando..." : "Clique para enviar"}
+                    </p>
+                    <p className="text-xs text-muted-foreground/25 mt-1">JPG, PNG até 5MB</p>
+                  </div>
+                )}
+              </div>
+              <input ref={thumbnailInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbnailUpload(f); }} />
+            </div>
+
+            {/* Title */}
+            <div>
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">Título do Curso</Label>
+              <input
+                value={courseTitle}
+                onChange={e => setCourseTitle(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-card/50 border border-border/20 text-sm font-display font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all"
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">Descrição</Label>
+              <textarea
+                value={courseDescription}
+                onChange={e => setCourseDescription(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 rounded-xl bg-card/50 border border-border/20 text-sm font-display text-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all resize-none"
+                placeholder="Descreva o conteúdo deste curso..."
+              />
+            </div>
+
+            {/* Stats */}
+            <div className="rounded-xl bg-muted/5 border border-border/10 p-4">
+              <p className="text-[10px] font-display font-bold uppercase tracking-[0.1em] text-muted-foreground/30 mb-3">Informações</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center">
+                  <p className="text-lg font-display font-black text-foreground tabular-nums">{modules.length}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display">Módulos</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-display font-black text-foreground tabular-nums">{totalLessons}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display">Aulas</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-display font-black text-primary tabular-nums">{studentCount}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display">Alunos</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Save */}
+            <Button onClick={saveCourseSettings} className="w-full h-12 rounded-xl font-display font-bold text-sm gap-2 shadow-lg shadow-primary/15">
+              <CheckCircle2 className="h-4 w-4" /> Salvar Configurações
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
