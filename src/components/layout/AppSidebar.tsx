@@ -244,7 +244,7 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     className={cn(
                       "group/nav relative flex min-h-14 w-full items-center gap-3 rounded-[20px] px-3.5 py-3 text-[14px] font-semibold transition-all duration-[240ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2.5",
                       isActive
-                        ? "border border-sidebar-border/70 bg-card/95 text-sidebar-accent-foreground shadow-lg"
+                        ? "border border-primary/40 bg-card/95 text-sidebar-accent-foreground shadow-[0_0_20px_rgba(0,220,130,0.12),inset_0_1px_0_rgba(0,220,130,0.08)]"
                         : "text-sidebar-foreground/78 hover:bg-sidebar-accent/12 hover:text-sidebar-accent-foreground",
                     )}
                   >
