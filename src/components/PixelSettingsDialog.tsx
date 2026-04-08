@@ -94,7 +94,7 @@ function AnalyticsLogo({ className, style }: { className?: string; style?: React
   );
 }
 
-const PLATFORMS: { id: Platform; label: string; color: string; bg: string; ring: string; brandColor: string; LogoComp: React.FC<{className?: string}>; fields: string[] }[] = [
+const PLATFORMS: { id: Platform; label: string; color: string; bg: string; ring: string; brandColor: string; LogoComp: React.FC<{className?: string; style?: React.CSSProperties}>; fields: string[] }[] = [
   { id: "facebook", label: "Facebook Pixel", color: "text-[#1877F2]", bg: "bg-[#1877F2]/10", ring: "ring-[#1877F2]/15", brandColor: "#1877F2", LogoComp: FacebookLogo, fields: ["pixel_id", "api_token", "domain"] },
   { id: "google_ads", label: "Google Ads", color: "text-[#4285F4]", bg: "bg-[#4285F4]/10", ring: "ring-[#4285F4]/15", brandColor: "#4285F4", LogoComp: GoogleLogo, fields: ["pixel_id", "api_token"] },
   { id: "google_analytics", label: "Google Analytics", color: "text-[#E37400]", bg: "bg-[#E37400]/10", ring: "ring-[#E37400]/15", brandColor: "#E37400", LogoComp: AnalyticsLogo, fields: ["pixel_id"] },
