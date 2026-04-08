@@ -640,18 +640,20 @@ export default function Auth() {
                 <img
                   src={authHeroImg}
                   alt="Empreendedora feliz usando a plataforma HOTZFY"
-                  className="h-full w-full object-cover object-[center_15%] scale-105"
+                  className="h-full w-full object-cover object-[center_15%] scale-[1.08]"
                   width={960}
                   height={1280}
                 />
-                {/* Cinematic overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/20" />
-                <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-background" />
-                <div className="absolute inset-0 noise-overlay opacity-30 pointer-events-none" />
-                {/* Emerald atmospheric glows */}
-                <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-primary/8 blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-1/3 right-0 h-80 w-80 rounded-full bg-primary/6 blur-[140px] pointer-events-none" />
+                {/* Cinematic overlays — richer depth */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/15" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-transparent to-background" />
+                <div className="absolute inset-0 mix-blend-overlay bg-gradient-to-br from-primary/10 via-transparent to-info/5" />
+                <div className="absolute inset-0 noise-overlay opacity-20 pointer-events-none" />
+                {/* Rich atmospheric glows */}
+                <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-[130px] pointer-events-none animate-pulse-glow" />
+                <div className="absolute bottom-1/4 right-0 h-96 w-96 rounded-full bg-primary/8 blur-[160px] pointer-events-none" />
+                <div className="absolute top-1/3 right-1/4 h-48 w-48 rounded-full bg-info/6 blur-[100px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
               </div>
 
               {/* ─── Floating Revenue Card — top left ─── */}
