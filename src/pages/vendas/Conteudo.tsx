@@ -288,6 +288,8 @@ export default function AdminConteudo() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editCourseData, setEditCourseData] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deletingCourse, setDeletingCourse] = useState(false);
 
   const reloadCourses = () => invalidateAll(["courses", "products"]);
 
@@ -320,15 +322,21 @@ export default function AdminConteudo() {
   };
 
   const deleteCourse = async (id: string) => {
-    if (!user) return;
-    if (!window.confirm("Tem certeza que deseja excluir este curso e todo seu conteúdo?")) return;
-    const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", id);
+    setDeleteTarget(id);
+  };
+
+  const confirmDeleteCourse = async () => {
+    if (!user || !deleteTarget) return;
+    setDeletingCourse(true);
+    const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", deleteTarget);
     if (courseModules && courseModules.length > 0) {
       await supabase.from("lessons").delete().in("module_id", courseModules.map(m => m.id));
-      await supabase.from("modules").delete().eq("course_id", id);
+      await supabase.from("modules").delete().eq("course_id", deleteTarget);
     }
-    await supabase.from("user_access").delete().eq("course_id", id);
-    await supabase.from("courses").delete().eq("id", id).eq("user_id", user.id);
+    await supabase.from("user_access").delete().eq("course_id", deleteTarget);
+    await supabase.from("courses").delete().eq("id", deleteTarget).eq("user_id", user.id);
+    setDeletingCourse(false);
+    setDeleteTarget(null);
     reloadCourses();
     toast.success("Curso excluído!");
   };
