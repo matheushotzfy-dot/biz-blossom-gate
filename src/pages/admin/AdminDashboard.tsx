@@ -367,11 +367,11 @@ export default function AdminDashboard() {
         sidebarCollapsed ? "w-[72px]" : "w-[248px]",
         "max-lg:fixed max-lg:left-0 max-lg:top-0",
         mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
-      )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: `1px solid ${themeConfig.isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}` }}>
+      )} style={{ background: themeConfig.sidebarBg, backdropFilter: "blur(40px)", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : "from-emerald-500/[0.06]")} />
+          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : adminTheme === "midnight" ? "from-cyan-500/[0.06]" : "from-emerald-500/[0.06]")} />
         </div>
 
         {/* Logo */}
