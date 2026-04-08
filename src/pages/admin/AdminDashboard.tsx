@@ -341,7 +341,7 @@ export default function AdminDashboard() {
 
   return (
     <div
-      className={cn("h-screen flex overflow-hidden", themeConfig.isDark ? "dark text-white" : "text-gray-900")}
+      className="dark h-screen flex overflow-hidden text-white"
       style={{
         background: themeConfig.bg,
         fontFamily: "'Plus Jakarta Sans', 'Space Grotesk', system-ui, sans-serif",
