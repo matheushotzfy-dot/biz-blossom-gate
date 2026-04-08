@@ -549,19 +549,19 @@ export default function Dashboard() {
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-6">
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+            <div className="flex flex-wrap items-center gap-2 mt-5">
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Check className="h-3 w-3 text-success" /> {approved.length} aprovadas
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Clock3 className="h-3 w-3 text-warning" /> {pending.length} pendentes
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.56 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Target className="h-3 w-3" /> {conversion.toFixed(1)}% conversão
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.64 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
                 <Wallet className="h-3 w-3 text-primary" /> saldo {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
-              </motion.span>
+              </span>
             </div>
           </motion.div>
 
@@ -573,15 +573,15 @@ export default function Dashboard() {
               { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, color: "info", icon: Target },
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 + idx * 0.1 }} className="group relative rounded-2xl glass-panel p-5 overflow-hidden card-premium">
-                <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
-                <div className="relative z-10 flex items-start justify-between">
+              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 + idx * 0.06 }}
+                className="group relative rounded-xl border border-border/50 bg-card/95 p-5 overflow-hidden transition-all hover:border-border/70 hover:shadow-sm">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-2">{item.label}</p>
                     <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${item.color}/8 border-${item.color}/15 text-${item.color}/60`)}>
+                    <item.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
               </motion.div>
