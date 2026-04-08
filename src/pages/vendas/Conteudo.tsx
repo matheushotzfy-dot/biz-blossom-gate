@@ -690,6 +690,29 @@ export default function AdminConteudo() {
         editCourse={editCourseData}
         onSaved={reloadCourses}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="rounded-2xl border-border/15 bg-card/98 backdrop-blur-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display font-black text-lg">Excluir curso</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground/60 font-display text-sm">
+              Tem certeza que deseja excluir este curso e todo seu conteúdo? Módulos, aulas e acessos de alunos serão removidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingCourse} className="rounded-xl font-display font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCourse}
+              disabled={deletingCourse}
+              className="rounded-xl font-display font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            >
+              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deletingCourse ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
