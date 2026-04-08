@@ -653,10 +653,10 @@ function GlassKpi({ label, value, icon, iconColor }: {
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "relative isolate overflow-hidden rounded-2xl border border-white/[0.06] p-5",
-      "bg-gradient-to-b from-white/[0.035] to-white/[0.01]",
-      "shadow-[0_14px_36px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.04)]",
-      "transition-[border-color,box-shadow] duration-300 hover:border-white/[0.1]",
+      "relative isolate overflow-hidden rounded-2xl border border-white/[0.08] p-5",
+      "bg-gradient-to-b from-white/[0.05] to-white/[0.015]",
+      "shadow-[0_14px_36px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]",
+      "transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]",
       className
     )}>
       {children}
