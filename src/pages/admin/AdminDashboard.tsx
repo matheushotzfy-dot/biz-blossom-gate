@@ -348,13 +348,11 @@ export default function AdminDashboard() {
       }}
     >
       {/* ═══ Ambient Glow ═══ */}
-      {themeConfig.isDark && (
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("absolute top-[-200px] left-1/4 w-[900px] h-[600px] rounded-full blur-[200px]", accentClasses.glowBg)} />
-          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-        </div>
-      )}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <motion.div animate={{ opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className={cn("absolute top-[-200px] left-1/4 w-[900px] h-[600px] rounded-full blur-[200px]", accentClasses.glowBg)} />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+      </div>
 
       {/* ═══ MOBILE OVERLAY ═══ */}
       {mobileMenuOpen && (
