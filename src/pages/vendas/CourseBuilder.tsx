@@ -665,12 +665,22 @@ export default function CourseBuilder() {
                                         )}
                                       </div>
                                     </div>
-                                    <button
-                                      onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
-                                      className="h-6 w-6 rounded-md flex items-center justify-center opacity-0 group-hover/lesson:opacity-100 hover:bg-destructive/8 transition-all shrink-0"
-                                    >
-                                      <Trash2 className="h-2.5 w-2.5 text-destructive/30" />
-                                    </button>
+                                    <div className="flex items-center gap-0.5 opacity-0 group-hover/lesson:opacity-100 transition-all shrink-0">
+                                      <button
+                                        onClick={e => { e.stopPropagation(); duplicateLesson(lesson); }}
+                                        className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-primary/8 transition-all"
+                                        title="Duplicar aula"
+                                      >
+                                        <CopyPlus className="h-2.5 w-2.5 text-primary/30" />
+                                      </button>
+                                      <button
+                                        onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
+                                        className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-destructive/8 transition-all"
+                                        title="Excluir aula"
+                                      >
+                                        <Trash2 className="h-2.5 w-2.5 text-destructive/30" />
+                                      </button>
+                                    </div>
                                   </Reorder.Item>
                                 ))}
                               </Reorder.Group>
