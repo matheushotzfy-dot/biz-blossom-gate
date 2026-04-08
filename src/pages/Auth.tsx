@@ -628,12 +628,9 @@ export default function Auth() {
           <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, hsl(160 20% 20% / 0.15) 0.5px, transparent 0)", backgroundSize: "48px 48px" }} />
         </div>
 
-        {/* Notification rain */}
-        <NotificationRain />
-
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col justify-between p-10 xl:p-14">
-          {/* Top */}
+          {/* Top — title + live feed side by side */}
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -645,67 +642,86 @@ export default function Auth() {
               Atividade em tempo real
             </motion.div>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="text-[2.5rem] xl:text-[3rem] font-display font-black text-foreground leading-[1.05] tracking-[-0.04em] mb-3 max-w-[460px]"
-            >
-              Vendas acontecendo{" "}
-              <span className="text-[hsl(160_60%_50%)]">agora</span>
-            </motion.h2>
+            <div className="flex gap-8">
+              {/* Left text */}
+              <div className="flex-1 min-w-0">
+                <motion.h2
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                  className="text-[2.2rem] xl:text-[2.8rem] font-display font-black text-foreground leading-[1.05] tracking-[-0.04em] mb-3"
+                >
+                  Vendas acontecendo{" "}
+                  <span className="text-[hsl(160_60%_50%)]">agora</span>
+                </motion.h2>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="text-[14px] text-[hsl(160_15%_40%)] leading-[1.8] max-w-[400px]"
-            >
-              Milhares de infoprodutores usando a HOTZFY para vender todos os dias. 
-              Junte-se a eles.
-            </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-[13px] text-[hsl(160_15%_40%)] leading-[1.8] max-w-[340px]"
+                >
+                  Milhares de infoprodutores usando a HOTZFY para vender todos os dias.
+                </motion.p>
+              </div>
+
+              {/* Right — live notification feed */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                className="w-[240px] shrink-0"
+              >
+                <p className="text-[8px] font-bold text-[hsl(160_15%_30%)] uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" />
+                    <span className="relative rounded-full h-1.5 w-1.5 bg-[hsl(160_60%_50%)]" />
+                  </span>
+                  Vendas ao vivo
+                </p>
+                <NotificationFeed />
+              </motion.div>
+            </div>
           </div>
 
-          {/* Live counters */}
+          {/* Bottom — stats + features */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="grid grid-cols-4 gap-2.5 mb-4">
               {[
-                { value: 10847, label: "Produtores ativos", icon: Users, prefix: "", suffix: "+" },
-                { value: 52400000, label: "Volume processado", icon: TrendingUp, prefix: "R$ ", suffix: "", format: true },
-                { value: 284, label: "Vendas na última hora", icon: Zap, prefix: "", suffix: "" },
-                { value: 99, label: "Uptime do sistema", icon: Activity, prefix: "", suffix: ".9%" },
+                { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
+                { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M", format: true },
+                { value: 284, label: "Vendas/hora", icon: Zap, prefix: "", suffix: "" },
+                { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
               ].map((stat) => (
-                <div key={stat.label} className="p-4 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)] group hover:border-[hsl(160_40%_25%)] transition-all">
-                  <div className="flex items-center gap-2 mb-2">
-                    <stat.icon className="h-4 w-4 text-[hsl(160_50%_40%)]" />
-                    <span className="text-[8px] font-bold text-[hsl(160_15%_35%)] uppercase tracking-wider">{stat.label}</span>
-                  </div>
-                  <p className="text-[22px] xl:text-[26px] font-display font-black text-foreground tabular-nums leading-none">
+                <div key={stat.label} className="p-3 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
+                  <stat.icon className="h-3.5 w-3.5 text-[hsl(160_50%_40%)] mb-2" />
+                  <p className="text-[18px] xl:text-[20px] font-display font-black text-foreground tabular-nums leading-none mb-1">
                     {stat.format ? (
-                      <>R$ <AnimatedCounter target={52} duration={2500} />M</>
+                      <><AnimatedCounter target={52} prefix="R$" suffix="M" duration={2500} /></>
                     ) : (
                       <AnimatedCounter target={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={2000} />
                     )}
                   </p>
+                  <p className="text-[7px] text-[hsl(160_15%_30%)] font-bold uppercase tracking-wider">{stat.label}</p>
                 </div>
               ))}
             </div>
 
             {/* Feature pills */}
-            <div className="flex flex-wrap gap-2 mb-5">
+            <div className="flex flex-wrap gap-1.5 mb-4">
               {[
-                { icon: CreditCard, label: "Checkout inteligente" },
-                { icon: GraduationCap, label: "Área de membros" },
+                { icon: CreditCard, label: "Checkout" },
+                { icon: GraduationCap, label: "Membros" },
                 { icon: Shield, label: "Anti-fraude" },
-                { icon: QrCode, label: "PIX instantâneo" },
+                { icon: QrCode, label: "PIX" },
                 { icon: BarChart2, label: "Analytics" },
                 { icon: BadgeCheck, label: "Afiliados" },
               ].map(f => (
-                <div key={f.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(160_12%_9%)] border border-[hsl(160_15%_14%)] text-[9px] font-bold text-[hsl(160_20%_45%)] uppercase tracking-wider">
+                <div key={f.label} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(160_12%_9%)] border border-[hsl(160_15%_14%)] text-[8px] font-bold text-[hsl(160_20%_40%)] uppercase tracking-wider">
                   <f.icon className="h-3 w-3 text-[hsl(160_50%_40%)]" />
                   {f.label}
                 </div>
@@ -713,12 +729,12 @@ export default function Auth() {
             </div>
 
             {/* Status bar */}
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[hsl(160_12%_8%)] border border-[hsl(160_15%_14%)]">
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute h-full w-full rounded-full bg-[hsl(160_60%_50%)] opacity-60" />
                 <span className="relative rounded-full h-2 w-2 bg-[hsl(160_60%_50%)]" />
               </span>
-              <span className="text-[10px] font-bold text-[hsl(160_30%_45%)]">Todos os sistemas operacionais</span>
+              <span className="text-[10px] font-bold text-[hsl(160_30%_45%)]">Sistemas online</span>
               <span className="text-[hsl(160_15%_20%)]">·</span>
               <span className="text-[10px] text-[hsl(160_15%_30%)] font-medium">Checkout · Saque · API</span>
             </div>
