@@ -173,6 +173,7 @@ export default function AdminDashboard() {
     return (localStorage.getItem("admin-theme") as AdminTheme) || "dark-green";
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const themeConfig = ADMIN_THEMES[adminTheme];
 
@@ -327,7 +328,7 @@ export default function AdminDashboard() {
     activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
   };
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   return (
     <div
