@@ -25,12 +25,8 @@ export default function Admin() {
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
 
-  // Force dark mode on admin
-  useEffect(() => {
-    const prev = theme;
-    setTheme("dark");
-    return () => setTheme(prev as "light" | "dark");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Admin panel uses scoped "dark" className; do NOT call setTheme globally
+  // to prevent layout recomputation (flickering). See memory: design/charts-stability.
 
   const [transactions, setTransactions] = useState<AdminTx[]>([]);
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
