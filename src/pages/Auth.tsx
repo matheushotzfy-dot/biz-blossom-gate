@@ -15,10 +15,12 @@ import {
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
   Activity, Mail, Phone, User, FileText,
   Heart, Target, Zap, Globe, BadgeCheck, QrCode,
+  DollarSign, Sparkles, Star, Play, Smartphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import authHeroImg from "@/assets/auth-hero.jpg";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -629,202 +631,135 @@ export default function Auth() {
         </div>
 
         {/* ═══ RIGHT: Product Preview ═══ */}
-        <div className="relative hidden overflow-hidden border-l border-border/40 lg:block">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/5" />
-          <div className="relative z-10 flex min-h-screen flex-col gap-4 p-6 xl:p-8">
-            <motion.section
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55 }}
-              className="relative overflow-hidden rounded-3xl p-6 xl:p-8 mesh-gradient-hero noise-overlay scan-line"
-            >
-              <div className="absolute -inset-16 pointer-events-none">
-                <motion.div animate={{ x: [0, 24, 0], y: [0, -14, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute -left-10 top-0 h-72 w-72 rounded-full bg-primary/10 blur-[140px]" />
-                <motion.div animate={{ x: [0, -20, 0], y: [0, 20, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute right-0 top-8 h-80 w-80 rounded-full bg-info/10 blur-[150px]" />
+        <div className="relative hidden overflow-hidden lg:block">
+          {/* Background layers */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+          <div className="absolute inset-0 dot-grid opacity-10 pointer-events-none" />
+
+          <div className="relative z-10 flex min-h-screen flex-col">
+            {/* ─── Hero Image Section ─── */}
+            <div className="relative flex-1 min-h-0">
+              <div className="absolute inset-0 overflow-hidden">
+                <img
+                  src={authHeroImg}
+                  alt="Empreendedora feliz usando a plataforma HOTZFY"
+                  className="h-full w-full object-cover object-top"
+                  width={960}
+                  height={1280}
+                />
+                {/* Gradient overlays for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
               </div>
 
-              <div className="relative z-10">
-                <div className="mb-8 flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary glow-primary">
-                      <Rocket className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-heading uppercase tracking-[0.24em] text-foreground/85">HOTZFY Control Center</p>
-                      <p className="text-[12px] text-muted-foreground">Receita, checkout e segurança em uma visão só.</p>
-                    </div>
+              {/* Floating sale notifications overlay */}
+              <div className="absolute top-6 right-6 xl:right-8 z-20 w-[280px]">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="mb-3 flex items-center gap-2"
+                >
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 backdrop-blur-xl px-2.5 py-1 text-[9px] font-heading uppercase tracking-[0.18em] text-success shadow-lg shadow-success/10">
+                    <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full rounded-full bg-success animate-ping opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-success" /></span>
+                    Vendas ao vivo
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/10 px-3 py-1.5 shadow-[0_0_16px_hsl(var(--success)/0.15)]">
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
-                      <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-35" />
-                      <span className="relative h-2 w-2 rounded-full bg-success" />
-                    </span>
-                    <span className="text-[8px] font-heading uppercase tracking-[0.22em] text-success">Tempo real</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-[1.6fr_0.95fr] gap-6">
-                  <div>
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="h-px max-w-[46px] flex-1 bg-gradient-to-r from-primary/40 to-transparent" />
-                      <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida de Hoje</p>
-                      <div className="h-px max-w-[46px] flex-1 bg-gradient-to-l from-primary/40 to-transparent" />
-                    </div>
-                    <div className="mb-4 flex items-end gap-4">
-                      <span className="text-5xl xl:text-7xl font-heading leading-[0.85] tracking-[-0.06em] text-foreground glow-value">
-                        R$ <AnimatedCounter target={128480} />
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/10 px-3 py-1.5 text-[10px] font-heading uppercase tracking-[0.18em] text-success">
-                        <TrendingUp className="h-3 w-3" /> +18,4%
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2.5">
-                      {[
-                        { icon: CreditCard, text: "328 pagamentos aprovados" },
-                        { icon: QrCode, text: "PIX liderando hoje" },
-                        { icon: BarChart2, text: "conversão 9,4%" },
-                        { icon: BadgeCheck, text: "saques em dia" },
-                      ].map((chip) => (
-                        <span key={chip.text} className="glass-panel inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground">
-                          <chip.icon className="h-3.5 w-3.5 text-primary" />
-                          {chip.text}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="glass-panel rounded-3xl p-4">
-                    <div className="mb-4 flex items-center justify-between">
-                      <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Segurança operacional</p>
-                      <Shield className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="space-y-3">
-                      {securitySignals.map((signal) => (
-                        <div key={signal.title} className="rounded-2xl border border-border/40 bg-background/45 px-3 py-2.5">
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                              <signal.icon className="h-3.5 w-3.5" />
-                            </div>
-                            <div>
-                              <p className="text-[11px] font-semibold text-foreground/90">{signal.title}</p>
-                              <p className="text-[10px] text-muted-foreground">{signal.detail}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                </motion.div>
+                <div className="space-y-2">
+                  <NotificationFeed />
                 </div>
               </div>
-            </motion.section>
 
-            <div className="grid min-h-0 flex-1 grid-cols-5 gap-4">
-              <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.08 }} className="col-span-3 flex min-h-0 flex-col rounded-3xl panel-enterprise overflow-hidden p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Fluxo de vendas do dia</p>
-                    <p className="text-[12px] text-muted-foreground">Picos por hora e distribuição por meio de pagamento.</p>
-                  </div>
-                  <div className="inline-flex items-center gap-1 rounded-full glass-panel p-1 text-[10px] font-heading uppercase tracking-[0.16em]">
-                    <span className="rounded-full bg-primary px-3 py-1 text-primary-foreground">Hoje</span>
-                    <span className="px-3 py-1 text-muted-foreground">24h</span>
-                  </div>
-                </div>
-
-                <div className="grid flex-1 grid-rows-[1fr_auto] gap-4">
-                  <div className="rounded-2xl border border-border/40 bg-background/45 p-4">
-                    <div className="flex h-full items-end gap-[3px]">
-                      {PREVIEW_BARS.map((height, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ height: 0 }}
-                          animate={{ height: `${height}%` }}
-                          transition={{ delay: 0.15 + index * 0.025, duration: 0.35, ease: "easeOut" }}
-                          className="flex-1 rounded-t-md bg-primary/70 hover:bg-primary transition-colors"
-                          style={{ minHeight: 3 }}
-                        />
-                      ))}
-                    </div>
-                    <div className="mt-3 flex justify-between text-[8px] font-medium text-muted-foreground">
-                      {["00h", "06h", "12h", "18h", "23h"].map((label) => <span key={label}>{label}</span>)}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    {paymentMix.map((payment) => (
-                      <div key={payment.label} className="rounded-2xl border border-border/40 bg-background/45 p-3">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[9px] font-heading uppercase tracking-[0.16em] text-muted-foreground">{payment.label}</span>
-                          <span className="text-[9px] font-semibold text-foreground/80">{payment.pct}%</span>
-                        </div>
-                        <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-muted/60">
-                          <motion.div initial={{ width: 0 }} animate={{ width: `${payment.pct}%` }} transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }} className={cn("h-full rounded-full", payment.colorClass)} />
-                        </div>
-                        <p className="font-heading text-[13px] text-foreground">{payment.value}</p>
-                      </div>
-                    ))}
+              {/* Floating revenue counter - top left */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="absolute top-6 left-6 xl:left-8 z-20"
+              >
+                <div className="rounded-2xl border border-primary/20 bg-card/90 backdrop-blur-2xl p-4 shadow-2xl shadow-primary/10">
+                  <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground mb-1">Receita Hoje</p>
+                  <p className="font-heading text-3xl xl:text-4xl tracking-[-0.05em] text-foreground glow-value">
+                    R$ <AnimatedCounter target={128480} />
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <TrendingUp className="h-3 w-3 text-success" />
+                    <span className="text-[10px] font-semibold text-success">+18,4% vs ontem</span>
                   </div>
                 </div>
               </motion.div>
 
-              <div className="col-span-2 flex min-h-0 flex-col gap-4">
-                <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.12 }} className="flex min-h-0 flex-1 flex-col rounded-3xl panel-enterprise p-5">
-                  <div className="mb-4 flex items-center justify-between">
+              {/* Floating quick stats - bottom area over image */}
+              <div className="absolute bottom-0 left-0 right-0 z-20 p-6 xl:p-8">
+                {/* Platform features showcase */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  className="mb-4"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary backdrop-blur-xl glow-primary">
+                      <Rocket className="h-5 w-5" />
+                    </div>
                     <div>
-                      <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Vendas ao vivo</p>
-                      <p className="text-[12px] text-muted-foreground">Atividade entrando no checkout em tempo real.</p>
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-2.5 py-1 text-[9px] font-heading uppercase tracking-[0.18em] text-success">
-                      <span className="h-1.5 w-1.5 rounded-full bg-success" /> live
+                      <p className="text-[13px] font-heading text-foreground">Tudo que você precisa pra vender</p>
+                      <p className="text-[11px] text-muted-foreground">Checkout, PIX, cartão, boleto, área de membros e mais.</p>
                     </div>
                   </div>
-                  <div className="min-h-0 flex-1 overflow-hidden">
-                    <NotificationFeed />
-                  </div>
-                </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.16 }} className="rounded-3xl panel-enterprise p-5">
-                  <div className="mb-4 flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      <Shield className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">Confiabilidade</p>
-                      <p className="text-[12px] text-foreground/80">Checkout estável, observabilidade e proteção contínua.</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-4 gap-2.5">
                     {[
-                      { icon: Shield, label: "Fraude", value: "0 bloqueios críticos" },
-                      { icon: Lock, label: "Acesso", value: "2FA disponível" },
-                      { icon: Globe, label: "API", value: "98 ms médio" },
-                      { icon: CheckCircle2, label: "Status", value: "99,9% online" },
-                    ].map((item) => (
-                      <div key={item.label} className="rounded-2xl border border-border/40 bg-background/45 p-3">
-                        <item.icon className="mb-2 h-3.5 w-3.5 text-primary" />
-                        <p className="text-[8px] font-heading uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
-                        <p className="mt-1 text-[11px] font-semibold text-foreground/85">{item.value}</p>
-                      </div>
+                      { icon: CreditCard, label: "Checkout Pro", detail: "PIX, cartão & boleto", color: "text-primary", bg: "bg-primary/10 border-primary/15" },
+                      { icon: Users, label: "Afiliados", detail: "Recrute e pague auto", color: "text-info", bg: "bg-info/10 border-info/15" },
+                      { icon: GraduationCap, label: "Área Membros", detail: "Cursos & conteúdo", color: "text-warning", bg: "bg-warning/10 border-warning/15" },
+                      { icon: BarChart2, label: "Analytics", detail: "Relatórios completos", color: "text-success", bg: "bg-success/10 border-success/15" },
+                    ].map((feature, i) => (
+                      <motion.div
+                        key={feature.label}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 + i * 0.08 }}
+                        className={cn("rounded-2xl border bg-card/80 backdrop-blur-2xl p-3 shadow-lg", feature.bg)}
+                      >
+                        <feature.icon className={cn("h-4 w-4 mb-2", feature.color)} />
+                        <p className="text-[11px] font-semibold text-foreground">{feature.label}</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">{feature.detail}</p>
+                      </motion.div>
                     ))}
                   </div>
                 </motion.div>
+
+                {/* Bottom metrics bar */}
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9, duration: 0.4 }}
+                  className="grid grid-cols-4 gap-2.5"
+                >
+                  {desktopMetrics.map((metric, i) => (
+                    <motion.div
+                      key={metric.label}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 1 + i * 0.06 }}
+                      className="rounded-2xl border border-border/40 bg-card/85 backdrop-blur-2xl p-3.5 shadow-lg"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary shrink-0">
+                          <metric.icon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-[8px] font-heading uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</p>
+                          <p className="font-heading text-[16px] leading-none text-foreground mt-0.5">{metric.value}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
             </div>
-
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.2 }} className="grid grid-cols-4 gap-3">
-              {desktopMetrics.map((metric) => (
-                <div key={metric.label} className="panel-enterprise-subtle card-premium flex items-center gap-3 p-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary shrink-0">
-                    <metric.icon className="h-4.5 w-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</p>
-                    <p className="mt-1 font-heading text-[18px] leading-none text-foreground">{metric.value}</p>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
           </div>
         </div>
       </div>
