@@ -23,7 +23,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --card-foreground: 220 30% 8%;
     --popover: 0 0% 99%;
     --popover-foreground: 220 30% 8%;
-    --primary: 145 95% 42%;
+    --primary: 156 100% 36%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 18% 88%;
     --secondary-foreground: 220 24% 12%;
@@ -35,19 +35,19 @@ input[type="number"]::-webkit-inner-spin-button {
     --destructive-foreground: 0 0% 100%;
     --border: 210 18% 76%;
     --input: 210 18% 78%;
-    --ring: 145 95% 42%;
+    --ring: 156 100% 36%;
     --radius: 0.75rem;
 
     --sidebar-background: 220 22% 96%;
     --sidebar-foreground: 220 16% 24%;
-    --sidebar-primary: 145 95% 42%;
+    --sidebar-primary: 156 100% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 20% 90%;
     --sidebar-accent-foreground: 220 20% 12%;
     --sidebar-border: 210 18% 82%;
-    --sidebar-ring: 145 95% 42%;
+    --sidebar-ring: 156 100% 36%;
 
-    --chart-1: 145 95% 42%;
+    --chart-1: 156 100% 36%;
     --chart-2: 200 78% 48%;
     --chart-3: 35 92% 50%;
     --chart-4: 258 54% 54%;
