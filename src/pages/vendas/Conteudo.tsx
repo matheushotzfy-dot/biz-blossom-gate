@@ -6,11 +6,10 @@ import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useTran
 import {
   Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
   Link as LinkIcon, Search, Copy, MoreVertical,
-  Globe, Lock, Image as ImageIcon, X, Check,
-  Video, DollarSign, PlayCircle, Sparkles, Clock,
-  TrendingUp, Users, Zap, ArrowRight, Grid3X3, List,
-  BarChart3, Star, Flame, Crown, ChevronRight, GraduationCap,
-  Award, Rocket, Target, Activity, Shield,
+  Globe, Lock, Image as ImageIcon, X,
+  Video, DollarSign, PlayCircle, Sparkles,
+  Users, Grid3X3, List,
+  ChevronRight, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -362,7 +361,7 @@ export default function AdminConteudo() {
       <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* CINEMATIC HERO                                                  */}
+      {/* CINEMATIC HERO — Clean & Focused                                 */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -375,23 +374,23 @@ export default function AdminConteudo() {
         <div className="absolute -inset-16 pointer-events-none">
           <motion.div animate={{ x: [0, 25, 0], y: [0, -15, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[160px]" />
           <motion.div animate={{ x: [0, -20, 0], y: [0, 25, 0] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[400px] h-[400px] bg-info/6 rounded-full blur-[140px]" />
-          <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/4 rounded-full blur-[180px]" />
         </div>
 
         <div className="relative z-10 p-6 sm:p-8 lg:p-10">
-          {/* Top bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
-            <div className="flex items-center gap-3">
+          {/* Header row */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3.5">
               <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ duration: 0.6, delay: 0.1, type: "spring" }}>
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-                  <GraduationCap className="h-5 w-5 text-primary-foreground" />
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
+                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
                 </div>
               </motion.div>
               <div>
-                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Área de Membros</span>
+                <h1 className="text-xl sm:text-2xl font-heading font-black text-foreground tracking-[-0.03em]">Área de Membros</h1>
+                <p className="text-[11px] text-muted-foreground/40 font-display mt-0.5">Gerencie seus cursos e conteúdos</p>
               </div>
               {publishedCourses > 0 && (
-                <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm shadow-[0_0_16px_rgba(34,197,94,0.08)]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm shadow-[0_0_16px_rgba(34,197,94,0.08)] ml-1">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
                     <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success))]" />
@@ -405,90 +404,34 @@ export default function AdminConteudo() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
               onClick={openNew}
-              className="h-10 px-5 rounded-xl text-sm font-display font-bold flex items-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all duration-300"
+              className="h-11 px-6 rounded-xl text-sm font-display font-bold flex items-center gap-2.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all duration-300"
             >
-              <Plus className="h-4 w-4" /> Novo Curso
+              <Plus className="h-4.5 w-4.5" /> Novo Curso
             </motion.button>
           </div>
 
-          {/* Big number + tagline */}
-          <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-primary/40 to-transparent" />
-              <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Seus Cursos</p>
-              <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-primary/40 to-transparent" />
-            </div>
-            <div className="flex items-end gap-4 mb-3">
-              <span className="text-6xl sm:text-7xl lg:text-8xl font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_80px_hsl(var(--primary)/0.2)]">
-                <AnimatedNumber value={totalCourses} />
+          {/* Quick summary pills */}
+          {totalCourses > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="flex flex-wrap items-center gap-2 mt-6"
+            >
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <BookOpen className="h-3 w-3 text-primary/60" /> {totalCourses} curso{totalCourses !== 1 ? "s" : ""}
               </span>
-              <span className="text-lg font-heading text-muted-foreground/25 mb-1.5">curso{totalCourses !== 1 ? "s" : ""}</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 mt-5">
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
-                <Flame className="h-3 w-3 text-success" /> {publishedCourses} publicados
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
-                <Layers className="h-3 w-3" /> {totalModules} módulos
-              </motion.span>
-              <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.56 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
-                <Video className="h-3 w-3 text-info" /> {totalLessons} aulas
-              </motion.span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <Layers className="h-3 w-3 text-info/60" /> {totalModules} módulos
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display glass-panel rounded-full px-3.5 py-1.5">
+                <Video className="h-3 w-3 text-warning/60" /> {totalLessons} aulas
+              </span>
               {totalStudents > 0 && (
-                <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.64 }} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5">
-                  <Users className="h-3 w-3 text-primary" /> {totalStudents} alunos
-                </motion.span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display glass-panel rounded-full px-3.5 py-1.5">
+                  <Users className="h-3 w-3 text-primary/60" /> {totalStudents} alunos
+                </span>
               )}
-            </div>
-          </motion.div>
-
-          {/* KPI Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            {[
-              { label: "Cursos", value: totalCourses, icon: BookOpen, color: "primary" },
-              { label: "Publicados", value: publishedCourses, icon: Globe, color: "success" },
-              { label: "Módulos", value: totalModules, icon: Layers, color: "info" },
-              { label: "Aulas", value: totalLessons, icon: Video, color: "warning" },
-              { label: "Alunos", value: totalStudents, icon: Users, color: "primary" },
-            ].map((item, idx) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.25 + idx * 0.06 }}
-                className="group rounded-2xl glass-panel p-4 card-premium overflow-hidden relative"
-              >
-                <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
-                <div className="relative z-10 flex items-start justify-between">
-                  <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-2">{item.label}</p>
-                    <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>
-                      <AnimatedNumber value={item.value} />
-                    </p>
-                  </div>
-                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
-                    <item.icon className="h-4 w-4" />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Revenue highlight */}
-          {totalRevenue > 0 && (
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-4 rounded-2xl glass-panel p-4 flex items-center justify-between card-premium">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-success/8 border border-success/10 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-success/60" />
-                </div>
-                <div>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30">Receita Total dos Cursos</p>
-                  <p className="text-lg font-heading tabular-nums text-success tracking-tight">{fmt(totalRevenue)}</p>
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-display font-bold text-success/50 bg-success/5 px-3 py-1.5 rounded-lg border border-success/10">
-                <TrendingUp className="h-3 w-3" /> Ativo
-              </div>
             </motion.div>
           )}
         </div>
@@ -702,7 +645,7 @@ export default function AdminConteudo() {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="min-w-[200px] rounded-xl p-1.5">
-                            <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><ArrowRight className="h-4 w-4" /> Gerenciar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><ChevronRight className="h-4 w-4" /> Gerenciar</DropdownMenuItem>
                             <DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(c); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><Edit className="h-4 w-4" /> Configurações</DropdownMenuItem>
                             <DropdownMenuItem onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published ?? false); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
                               {c.is_published ? <><EyeOff className="h-4 w-4" /> Despublicar</> : <><Eye className="h-4 w-4" /> Publicar</>}
