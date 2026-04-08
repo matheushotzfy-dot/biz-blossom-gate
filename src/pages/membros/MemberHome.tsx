@@ -560,8 +560,8 @@ function ContentRow({ title, subtitle, icon, accent, children }: {
 function WideCard({ course }: { course: CourseWithProgress }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   return (
-    <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[320px] sm:w-[400px] snap-start block">
-      <div className="relative rounded-xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/20 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10">
+    <Link to={`/membros-area/curso/${course.id}`} className="group shrink-0 w-[340px] sm:w-[420px] snap-start block">
+      <div className="relative rounded-2xl overflow-hidden bg-card ring-1 ring-border/10 group-hover:ring-primary/25 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:scale-[1.02]">
         <div className="aspect-[2/1] relative overflow-hidden">
           {course.thumbnail_url ? (
             <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
@@ -570,15 +570,16 @@ function WideCard({ course }: { course: CourseWithProgress }) {
               <GraduationCap className="h-14 w-14 text-primary/10" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-card/40 to-transparent" />
           {/* Play button */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <div className="h-14 w-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform duration-500">
+            <div className="h-14 w-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-2xl shadow-foreground/30 scale-90 group-hover:scale-100 transition-transform duration-500 ring-2 ring-foreground/20">
               <Play className="h-6 w-6 text-background ml-0.5 fill-current" />
             </div>
           </div>
           {/* Info overlay on hover */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-10">
+          <div className="absolute bottom-0 left-0 right-0 p-3.5 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-10">
             <div className="flex items-center gap-2 text-[10px] text-foreground/50 font-display">
               <span className="flex items-center gap-1"><Layers className="h-2.5 w-2.5" /> {course.modules.length} módulos</span>
               <span>•</span>
@@ -588,12 +589,12 @@ function WideCard({ course }: { course: CourseWithProgress }) {
         </div>
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground/5">
-          <div className="h-full bg-primary rounded-r-full relative transition-all" style={{ width: `${pct}%` }}>
-            {pct > 5 && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]" />}
+          <div className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-r-full relative transition-all" style={{ width: `${pct}%` }}>
+            {pct > 5 && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.6)] ring-1 ring-primary/30" />}
           </div>
         </div>
       </div>
-      <div className="mt-2.5 px-0.5">
+      <div className="mt-3 px-0.5">
         <h3 className="text-sm font-display font-bold text-foreground truncate group-hover:text-primary transition-colors">{course.title}</h3>
         <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground/40 font-display tabular-nums">
           <span>{pct}% concluído</span>
