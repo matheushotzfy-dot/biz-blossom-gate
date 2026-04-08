@@ -228,25 +228,40 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
         {/* ═══ PLATFORM TABS ═══ */}
         <div className="px-7 pb-3">
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
             {PLATFORMS.map(p => {
               const isActive = activePlatform === p.id;
               const count = pixels.filter(px => px.platform === p.id).length;
               return (
                 <button key={p.id} onClick={() => setActivePlatform(p.id)}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-display font-bold transition-all duration-300 whitespace-nowrap shrink-0 relative",
+                    "flex items-center gap-2.5 px-4 py-3 rounded-2xl text-[11px] font-display font-bold transition-all duration-300 whitespace-nowrap shrink-0 relative group/tab",
                     isActive
-                      ? "bg-primary/10 text-primary ring-1 ring-primary/15 shadow-md shadow-primary/5"
-                      : "text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-muted/6"
-                  )}>
-                  <p.LogoComp className={cn("h-3.5 w-3.5", isActive ? p.color : "")} />
-                  {p.label}
+                      ? "ring-1 shadow-lg"
+                      : "text-muted-foreground/35 hover:text-muted-foreground/60 hover:bg-muted/8 ring-1 ring-transparent hover:ring-border/10"
+                  )}
+                  style={isActive ? {
+                    background: `linear-gradient(135deg, ${p.brandColor}12 0%, ${p.brandColor}06 100%)`,
+                    color: p.brandColor,
+                    boxShadow: `0 4px 20px ${p.brandColor}15`,
+                    borderColor: `${p.brandColor}20`,
+                  } : {}}>
+                  <div className={cn(
+                    "h-7 w-7 rounded-lg flex items-center justify-center transition-all shrink-0",
+                    isActive ? "" : "bg-muted/6"
+                  )} style={isActive ? { background: `${p.brandColor}15` } : {}}>
+                    <p.LogoComp className={cn("h-4 w-4 transition-all", isActive ? "" : "opacity-40")}
+                      style={isActive ? { color: p.brandColor } : {}} />
+                  </div>
+                  <span className="hidden sm:inline">{p.label}</span>
+                  <span className="sm:hidden">{p.label.split(" ")[0]}</span>
                   {count > 0 && (
                     <span className={cn(
-                      "text-[8px] px-1.5 py-0.5 rounded-lg font-numbers font-black min-w-[18px] text-center",
-                      isActive ? "bg-primary/15 text-primary" : "bg-muted/8 text-muted-foreground/25"
-                    )}>{count}</span>
+                      "text-[8px] px-1.5 py-0.5 rounded-md font-numbers font-black min-w-[18px] text-center",
+                      isActive ? "" : "bg-muted/8 text-muted-foreground/25"
+                    )} style={isActive ? { background: `${p.brandColor}18`, color: p.brandColor } : {}}>
+                      {count}
+                    </span>
                   )}
                 </button>
               );
