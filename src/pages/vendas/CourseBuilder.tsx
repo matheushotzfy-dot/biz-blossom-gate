@@ -1159,6 +1159,122 @@ export default function CourseBuilder() {
           selectedLessonId={selectedLesson?.id || null}
         />
       </div>
+
+      {/* ═══ Delete Confirmation Dialog ═══ */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="rounded-2xl border-border/15 bg-card/98 backdrop-blur-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display font-black text-lg">
+              Excluir {deleteTarget?.type === "module" ? "módulo" : "aula"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground/60 font-display text-sm">
+              {deleteTarget?.type === "module"
+                ? `Tem certeza que deseja excluir o módulo "${deleteTarget.label}" e todas as suas aulas? Esta ação não pode ser desfeita.`
+                : `Tem certeza que deseja excluir a aula "${deleteTarget?.label}"? Esta ação não pode ser desfeita.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingItem} className="rounded-xl font-display font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deletingItem}
+              className="rounded-xl font-display font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            >
+              {deletingItem && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deletingItem ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ═══ Course Settings Sheet ═══ */}
+      <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-display font-black text-xl flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
+                <Settings className="h-5 w-5 text-primary/60" />
+              </div>
+              Configurações do Curso
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            {/* Thumbnail */}
+            <div>
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">Thumbnail</Label>
+              <div
+                onClick={() => thumbnailInputRef.current?.click()}
+                className="relative rounded-2xl border-2 border-dashed border-border/25 hover:border-primary/30 transition-all cursor-pointer overflow-hidden h-44 group"
+              >
+                {course?.thumbnail_url ? (
+                  <>
+                    <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-foreground/50" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-muted/5">
+                    <ImageIcon className="h-10 w-10 text-primary/20 mb-3" />
+                    <p className="text-sm font-display font-bold text-muted-foreground/40">
+                      {uploadingThumbnail ? "Enviando..." : "Clique para enviar"}
+                    </p>
+                    <p className="text-xs text-muted-foreground/25 mt-1">JPG, PNG até 5MB</p>
+                  </div>
+                )}
+              </div>
+              <input ref={thumbnailInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbnailUpload(f); }} />
+            </div>
+
+            {/* Title */}
+            <div>
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">Título do Curso</Label>
+              <input
+                value={courseTitle}
+                onChange={e => setCourseTitle(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-card/50 border border-border/20 text-sm font-display font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all"
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label className="text-xs font-display font-bold text-foreground/60 uppercase tracking-[0.08em] mb-2.5 block">Descrição</Label>
+              <textarea
+                value={courseDescription}
+                onChange={e => setCourseDescription(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 rounded-xl bg-card/50 border border-border/20 text-sm font-display text-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all resize-none"
+                placeholder="Descreva o conteúdo deste curso..."
+              />
+            </div>
+
+            {/* Stats */}
+            <div className="rounded-xl bg-muted/5 border border-border/10 p-4">
+              <p className="text-[10px] font-display font-bold uppercase tracking-[0.1em] text-muted-foreground/30 mb-3">Informações</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center">
+                  <p className="text-lg font-display font-black text-foreground tabular-nums">{modules.length}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display">Módulos</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-display font-black text-foreground tabular-nums">{totalLessons}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display">Aulas</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-display font-black text-primary tabular-nums">{studentCount}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display">Alunos</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Save */}
+            <Button onClick={saveCourseSettings} className="w-full h-12 rounded-xl font-display font-bold text-sm gap-2 shadow-lg shadow-primary/15">
+              <CheckCircle2 className="h-4 w-4" /> Salvar Configurações
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
