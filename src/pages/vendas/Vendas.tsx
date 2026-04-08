@@ -199,12 +199,13 @@ function ProgressRing({ value, max = 100, size = 56, strokeWidth = 4, color = "p
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const pct = Math.min(value / max, 1);
+  const strokeColor = color.startsWith("hsl") ? color : `hsl(var(--${color}))`;
   return (
     <svg width={size} height={size} className="shrink-0 -rotate-90">
       <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted)/0.08)" strokeWidth={strokeWidth} />
       <motion.circle
         cx={size / 2} cy={size / 2} r={radius} fill="none"
-        stroke={`hsl(var(--${color}))`} strokeWidth={strokeWidth}
+        stroke={strokeColor} strokeWidth={strokeWidth}
         strokeLinecap="round"
         initial={{ strokeDashoffset: circumference }}
         animate={{ strokeDashoffset: circumference * (1 - pct) }}
@@ -928,29 +929,37 @@ export default function Vendas() {
                 label: "Taxa de Aprovação",
                 value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
                 sub: `${m.approved.length} de ${dateFiltered.length}`,
-                color: m.conversion >= 80 ? "success" : m.conversion >= 50 ? "warning" : "destructive",
+                iconGradient: "from-red-500/90 to-orange-400/90",
+                iconGlow: "shadow-[0_0_18px_rgba(239,68,68,0.25)]",
+                valueColor: "text-foreground",
                 icon: Target,
-                ring: { value: m.conversion, max: 100 },
+                ring: { value: m.conversion, max: 100, ringColor: m.conversion >= 80 ? "hsl(var(--success))" : m.conversion >= 50 ? "hsl(var(--warning))" : "hsl(var(--destructive))" },
               },
               {
                 label: "Ticket Médio",
                 value: hidden ? HIDE : fmt(m.avgTicket),
                 sub: <DeltaBadge cur={m.avgTicket} prev={p.avgTicket} />,
-                color: "primary",
+                iconGradient: "from-emerald-500/90 to-teal-400/90",
+                iconGlow: "shadow-[0_0_18px_rgba(16,185,129,0.25)]",
+                valueColor: "text-foreground",
                 icon: Receipt,
               },
               {
                 label: "Método Líder",
                 value: dominantMethod.label,
                 sub: hidden ? HIDE : fmtCompact(dominantMethod.value),
-                color: dominantMethod.color,
+                iconGradient: "from-amber-500/90 to-yellow-400/90",
+                iconGlow: "shadow-[0_0_18px_rgba(245,158,11,0.25)]",
+                valueColor: "text-amber-400",
                 icon: Crown,
               },
               {
                 label: "Pico de Vendas",
                 value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
                 sub: peakHour !== null ? `${rawPeakSales} vendas` : "sem dados",
-                color: "info",
+                iconGradient: "from-violet-500/90 to-purple-400/90",
+                iconGlow: "shadow-[0_0_18px_rgba(139,92,246,0.25)]",
+                valueColor: "text-foreground",
                 icon: Clock,
               },
             ].map((item, idx) => (
@@ -961,21 +970,20 @@ export default function Vendas() {
                 transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
               >
-                <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
-                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", `text-${item.color === "primary" ? "foreground" : item.color}`)}>{item.value}</p>
-                    <div className="mt-2 text-[10px] text-muted-foreground/25 font-mono">{item.sub}</div>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40 mb-2.5">{item.label}</p>
+                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.valueColor)}>{item.value}</p>
+                    <div className="mt-2 text-[10px] text-muted-foreground/30 font-mono">{item.sub}</div>
                   </div>
                   {item.ring ? (
                     <div className="relative floating">
-                      <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.color} />
-                      <item.icon className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4", `text-${item.color}/50`)} />
+                      <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.ring.ringColor} />
+                      <item.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                     </div>
                   ) : (
-                    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
-                      <item.icon className="h-5 w-5" />
+                    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-gradient-to-br", item.iconGradient, item.iconGlow)}>
+                      <item.icon className="h-5 w-5 text-foreground" />
                     </div>
                   )}
                 </div>
