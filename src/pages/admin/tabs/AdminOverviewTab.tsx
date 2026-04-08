@@ -233,12 +233,12 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-emerald-500/50 to-transparent" />
           </div>
 
-          <div className="text-center mb-8">
-            <p className="text-[52px] sm:text-[68px] lg:text-[88px] font-black leading-[0.85] tracking-[-0.04em] text-white"
+          <div className="text-center mb-6 sm:mb-8">
+            <p className="text-[36px] sm:text-[52px] lg:text-[68px] xl:text-[88px] font-black leading-[0.85] tracking-[-0.04em] text-white"
               style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 0 120px rgba(16,185,129,0.25), 0 0 60px rgba(16,185,129,0.1)" }}>
               {fmtCurrency(takeRateTotal)}
             </p>
-            <p className="text-[12px] text-white/25 mt-4 font-medium">
+            <p className="text-[11px] sm:text-[12px] text-white/30 mt-3 sm:mt-4 font-medium">
               Take Rate: <span className="text-emerald-400 font-bold">{takeRatePct}%</span> · TPV: <span className="text-white/50 font-bold">{fmtCurrency(totalVolume)}</span>
             </p>
           </div>
