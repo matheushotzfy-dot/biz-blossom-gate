@@ -106,6 +106,15 @@ export default function CourseBuilder() {
   const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
   const [studentCount, setStudentCount] = useState(0);
   const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
+  const [deletingItem, setDeletingItem] = useState(false);
+  const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDescription, setCourseDescription] = useState("");
+  const [courseCategory, setCourseCategory] = useState("");
+  const [courseThumbnail, setCourseThumbnail] = useState("");
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
