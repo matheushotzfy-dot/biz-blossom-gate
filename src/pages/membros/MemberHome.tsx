@@ -148,35 +148,37 @@ export default function MemberHome() {
   return (
     <div className="pb-24 bg-background">
       {/* ═══ CINEMATIC HERO — Netflix Billboard ═══ */}
-      <div className="relative h-[65vh] min-h-[480px] max-h-[720px] overflow-hidden">
+      <div className="relative h-[68vh] min-h-[520px] max-h-[780px] overflow-hidden">
         {/* Background image with crossfade */}
         <AnimatePresence mode="wait">
           <motion.div
             key={featured.id}
-            initial={{ opacity: 0, scale: 1.08 }}
+            initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease }}
+            transition={{ duration: 1.4, ease }}
             className="absolute inset-0"
           >
             {featured.thumbnail_url ? (
               <img src={featured.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/12 via-background to-background">
-                <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-background to-background">
+                <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
               </div>
             )}
           </motion.div>
         </AnimatePresence>
 
-        {/* Cinematic overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/50 to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_30%,hsl(var(--background))_100%)]" />
-        <div className="absolute inset-0 shadow-[inset_0_-120px_120px_-60px_hsl(var(--background))]" />
+        {/* Cinematic overlays — multi-layer for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_20%,hsl(var(--background))_100%)]" />
+        <div className="absolute inset-0 shadow-[inset_0_-140px_140px_-60px_hsl(var(--background))]" />
+        {/* Film grain for cinema feel */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")" }} />
 
         {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-12 max-w-[1440px] mx-auto">
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-12 xl:p-16 max-w-[1440px] mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={featured.id}
@@ -187,64 +189,64 @@ export default function MemberHome() {
               className="max-w-2xl"
             >
               {/* Badges */}
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <div className="flex items-center gap-2.5 mb-4 flex-wrap">
                 {continueWatching.length > 0 && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.1em] bg-primary text-primary-foreground shadow-lg shadow-primary/25">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[10px] font-display font-black uppercase tracking-[0.1em] bg-primary text-primary-foreground shadow-lg shadow-primary/30 backdrop-blur-sm">
                     <Play className="h-3 w-3 fill-current" /> Continue assistindo
                   </span>
                 )}
                 {featured.category && (
-                  <span className="px-2.5 py-1.5 rounded-md text-[10px] font-display font-bold bg-foreground/10 backdrop-blur-xl text-foreground/70 uppercase tracking-wider">
+                  <span className="px-3 py-1.5 rounded-lg text-[10px] font-display font-bold bg-foreground/10 backdrop-blur-2xl text-foreground/70 uppercase tracking-wider ring-1 ring-foreground/5">
                     {featured.category}
                   </span>
                 )}
                 {featuredPct === 100 && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[10px] font-display font-black bg-success/15 text-success uppercase tracking-wider">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-display font-black bg-success/15 text-success uppercase tracking-wider ring-1 ring-success/20 backdrop-blur-sm">
                     <CheckCircle2 className="h-3 w-3" /> Concluído
                   </span>
                 )}
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-black text-foreground leading-[1.05] tracking-[-0.04em] mb-3 drop-shadow-[0_2px_20px_hsl(var(--background)/0.5)]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-display font-black text-foreground leading-[1.02] tracking-[-0.04em] mb-3 drop-shadow-[0_4px_30px_hsl(var(--background)/0.6)]">
                 {featured.title}
               </h1>
 
               {featured.description && (
-                <p className="text-sm sm:text-base text-foreground/60 line-clamp-2 mb-5 leading-relaxed max-w-xl font-display">{featured.description}</p>
+                <p className="text-sm sm:text-base text-foreground/55 line-clamp-2 mb-6 leading-relaxed max-w-xl font-display">{featured.description}</p>
               )}
 
               {/* Stats row */}
-              <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <div className="flex items-center gap-3.5 mb-6 flex-wrap">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-36 sm:w-48">
-                    <div className="h-1.5 rounded-full bg-foreground/10 overflow-hidden">
+                  <div className="w-40 sm:w-52">
+                    <div className="h-1.5 rounded-full bg-foreground/8 overflow-hidden backdrop-blur-sm">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${featuredPct}%` }}
                         transition={{ duration: 1.2, delay: 0.3, ease }}
-                        className="h-full bg-primary rounded-full"
-                        style={{ boxShadow: featuredPct > 0 ? "0 0 12px hsl(var(--primary) / 0.4)" : "none" }}
+                        className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full"
+                        style={{ boxShadow: featuredPct > 0 ? "0 0 16px hsl(var(--primary) / 0.5)" : "none" }}
                       />
                     </div>
                   </div>
-                  <span className="text-xs text-foreground/40 font-display font-bold tabular-nums">{featuredPct}%</span>
+                  <span className="text-xs text-foreground/50 font-display font-bold tabular-nums">{featuredPct}%</span>
                 </div>
                 <span className="text-xs text-foreground/30 font-display tabular-nums">{featured.completedLessons}/{featured.totalLessons} aulas</span>
-                <span className="text-xs text-foreground/20">•</span>
+                <span className="text-xs text-foreground/15">•</span>
                 <span className="text-xs text-foreground/30 font-display tabular-nums">{featured.modules.length} módulos</span>
               </div>
 
               {/* CTA Buttons */}
               <div className="flex items-center gap-3">
                 <Link to={`/membros-area/curso/${featured.id}`}
-                  className="group inline-flex items-center gap-2.5 h-12 sm:h-14 px-7 sm:px-9 rounded-xl bg-foreground text-background text-sm sm:text-base font-display font-black hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-2xl relative overflow-hidden">
+                  className="group inline-flex items-center gap-2.5 h-12 sm:h-14 px-8 sm:px-10 rounded-xl bg-foreground text-background text-sm sm:text-base font-display font-black hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-2xl shadow-foreground/20 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <Play className="h-5 w-5 fill-current relative z-10" />
                   <span className="relative z-10">{featuredPct > 0 && featuredPct < 100 ? "Continuar" : "Assistir"}</span>
                 </Link>
                 <Link to={`/membros-area/curso/${featured.id}`}
-                  className="inline-flex items-center gap-2 h-12 sm:h-14 px-6 sm:px-7 rounded-xl bg-foreground/10 backdrop-blur-xl text-foreground/80 text-sm font-display font-bold border border-foreground/10 hover:bg-foreground/15 hover:text-foreground transition-all active:scale-[0.97]">
+                  className="inline-flex items-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl bg-foreground/8 backdrop-blur-2xl text-foreground/80 text-sm font-display font-bold border border-foreground/10 hover:bg-foreground/15 hover:text-foreground hover:border-foreground/15 transition-all active:scale-[0.97]">
                   <Info className="h-4 w-4" />
                   <span>Detalhes</span>
                 </Link>
@@ -254,14 +256,14 @@ export default function MemberHome() {
 
           {/* Hero pagination dots */}
           {heroItems.length > 1 && (
-            <div className="absolute bottom-6 right-6 sm:right-8 lg:right-12 flex items-center gap-1.5">
+            <div className="absolute bottom-6 right-6 sm:right-8 lg:right-12 flex items-center gap-2">
               {heroItems.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setHeroIdx(i)}
                   className={cn(
-                    "h-1 rounded-full transition-all duration-500",
-                    i === heroIdx ? "w-8 bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]" : "w-1.5 bg-foreground/20 hover:bg-foreground/40"
+                    "rounded-full transition-all duration-500",
+                    i === heroIdx ? "h-1.5 w-10 bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.5)]" : "h-1.5 w-1.5 bg-foreground/20 hover:bg-foreground/40"
                   )}
                 />
               ))}
