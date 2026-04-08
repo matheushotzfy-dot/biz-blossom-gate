@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Play, Clock, CheckCircle2, Lock, Search, BookOpen, TrendingUp, ShoppingBag } from "lucide-react";
+import { Play, Clock, CheckCircle2, Lock, Search, BookOpen, TrendingUp, GraduationCap, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -83,8 +83,19 @@ export default function MemberArea() {
     setLoading(false);
   };
 
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  const categories = useMemo(() => {
+    const cats = new Set(courses.map(c => c.category).filter(Boolean));
+    return Array.from(cats) as string[];
+  }, [courses]);
+
   const continueWatching = courses.filter(c => c.completedLessons > 0 && c.completedLessons < c.totalLessons);
-  const filtered = courses.filter(c => c.title.toLowerCase().includes(search.toLowerCase()));
+  const filtered = courses.filter(c => {
+    const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = categoryFilter === "all" || c.category === categoryFilter;
+    return matchSearch && matchCategory;
+  });
   const totalCompleted = courses.reduce((a, c) => a + c.completedLessons, 0);
   const totalLessons = courses.reduce((a, c) => a + c.totalLessons, 0);
   const overallPct = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
@@ -99,7 +110,7 @@ export default function MemberArea() {
 
   return (
     <PageShell>
-      <PageTitle icon={<ShoppingBag className="h-6 w-6" />} title="Minhas Compras" subtitle="Cursos e conteúdos que você adquiriu" />
+      <PageTitle icon={<GraduationCap className="h-6 w-6" />} title="Área de Membros" subtitle="Seus cursos e conteúdos exclusivos" />
 
       {/* Progress Bar */}
       {courses.length > 0 && (
@@ -125,15 +136,42 @@ export default function MemberArea() {
         </GlowPanel>
       )}
 
-      {/* Search */}
-      <div className="relative max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
-        <Input
-          placeholder="Buscar cursos..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="pl-9 rounded-xl h-10 bg-muted/10 border-border/20"
-        />
+      {/* Search & Category Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="relative max-w-xs flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+          <Input
+            placeholder="Buscar cursos..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-9 rounded-xl h-10 bg-muted/10 border-border/20"
+          />
+        </div>
+        {categories.length > 1 && (
+          <div className="flex items-center gap-1 flex-wrap">
+            <button
+              onClick={() => setCategoryFilter("all")}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-display font-bold transition-all",
+                categoryFilter === "all" ? "bg-primary/10 text-primary ring-1 ring-primary/15" : "text-muted-foreground/40 hover:text-muted-foreground/60 hover:bg-muted/10"
+              )}
+            >
+              Todos
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-display font-bold transition-all capitalize",
+                  categoryFilter === cat ? "bg-primary/10 text-primary ring-1 ring-primary/15" : "text-muted-foreground/40 hover:text-muted-foreground/60 hover:bg-muted/10"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {courses.length === 0 ? (
