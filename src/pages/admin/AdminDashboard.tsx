@@ -173,6 +173,7 @@ export default function AdminDashboard() {
     return (localStorage.getItem("admin-theme") as AdminTheme) || "dark-green";
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const themeConfig = ADMIN_THEMES[adminTheme];
 
