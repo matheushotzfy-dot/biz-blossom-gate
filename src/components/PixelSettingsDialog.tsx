@@ -1,6 +1,6 @@
 /**
- * Pixel Settings Dialog — Cinematic Enterprise v3
- * Premium conversion pixel management with immersive dark UI.
+ * Pixel Settings Dialog — Cinematic Enterprise v4
+ * Premium conversion pixel management with real platform logos.
  */
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,12 +51,55 @@ const ALL_EVENTS = [
   "GenerateLead", "BoletoGenerated", "PixGenerated",
 ];
 
-const PLATFORMS: { id: Platform; label: string; color: string; bg: string; ring: string; icon: typeof Globe; fields: string[] }[] = [
-  { id: "facebook", label: "Facebook", color: "text-[hsl(220,80%,55%)]", bg: "bg-[hsl(220,80%,55%)]/12", ring: "ring-[hsl(220,80%,55%)]/20", icon: Globe, fields: ["pixel_id", "api_token", "domain"] },
-  { id: "google_ads", label: "Google Ads", color: "text-warning", bg: "bg-warning/12", ring: "ring-warning/20", icon: Target, fields: ["pixel_id", "api_token"] },
-  { id: "google_analytics", label: "Analytics", color: "text-[hsl(25,90%,55%)]", bg: "bg-[hsl(25,90%,55%)]/12", ring: "ring-[hsl(25,90%,55%)]/20", icon: BarChart3, fields: ["pixel_id"] },
-  { id: "tiktok", label: "TikTok", color: "text-[hsl(340,70%,60%)]", bg: "bg-[hsl(340,70%,60%)]/12", ring: "ring-[hsl(340,70%,60%)]/20", icon: Activity, fields: ["pixel_id", "api_token"] },
-  { id: "kwai", label: "Kwai", color: "text-[hsl(25,85%,55%)]", bg: "bg-[hsl(25,85%,55%)]/12", ring: "ring-[hsl(25,85%,55%)]/20", icon: Signal, fields: ["pixel_id", "api_token"] },
+/* ─── Platform SVG Logos ─── */
+function FacebookLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  );
+}
+function GoogleLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  );
+}
+function TikTokLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34A6.34 6.34 0 009.49 21.64a6.34 6.34 0 006.34-6.34V9.42a8.16 8.16 0 004.77 1.53V7.5a4.83 4.83 0 01-1.01-.81z"/>
+    </svg>
+  );
+}
+function KwaiLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 3.42-2.06 4.51.5.65.86 1.36 1.08 2.14.3 1.08.22 2.15-.22 3.1a4.5 4.5 0 01-2.33 2.2c-.65.28-1.34.35-2.03.24-.9-.14-1.64-.6-2.23-1.26-.72-.82-1.12-1.83-1.13-2.93 0-.38.06-.76.16-1.13.24-.82.7-1.52 1.3-2.08-.42-.38-.78-.8-1.06-1.28-.55-.94-.74-1.97-.58-3.05.12-.8.46-1.5.96-2.1.67-.8 1.55-1.28 2.6-1.43.78-.11 1.54-.01 2.26.3.93.4 1.62 1.08 2.08 1.98.32.63.47 1.3.43 1.99a5.7 5.7 0 01-.23.8z"/>
+    </svg>
+  );
+}
+function AnalyticsLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" fill="#F9AB00" opacity="0.2"/>
+      <rect x="3" y="14" width="4" height="8" rx="1" fill="#F9AB00"/>
+      <rect x="10" y="9" width="4" height="13" rx="1" fill="#E37400"/>
+      <rect x="17" y="4" width="4" height="18" rx="1" fill="#F9AB00"/>
+    </svg>
+  );
+}
+
+const PLATFORMS: { id: Platform; label: string; color: string; bg: string; ring: string; brandColor: string; LogoComp: React.FC<{className?: string}>; fields: string[] }[] = [
+  { id: "facebook", label: "Facebook Pixel", color: "text-[#1877F2]", bg: "bg-[#1877F2]/10", ring: "ring-[#1877F2]/15", brandColor: "#1877F2", LogoComp: FacebookLogo, fields: ["pixel_id", "api_token", "domain"] },
+  { id: "google_ads", label: "Google Ads", color: "text-[#4285F4]", bg: "bg-[#4285F4]/10", ring: "ring-[#4285F4]/15", brandColor: "#4285F4", LogoComp: GoogleLogo, fields: ["pixel_id", "api_token"] },
+  { id: "google_analytics", label: "Google Analytics", color: "text-[#E37400]", bg: "bg-[#E37400]/10", ring: "ring-[#E37400]/15", brandColor: "#E37400", LogoComp: AnalyticsLogo, fields: ["pixel_id"] },
+  { id: "tiktok", label: "TikTok Pixel", color: "text-[#FF004F]", bg: "bg-[#FF004F]/10", ring: "ring-[#FF004F]/15", brandColor: "#FF004F", LogoComp: TikTokLogo, fields: ["pixel_id", "api_token"] },
+  { id: "kwai", label: "Kwai Pixel", color: "text-[#FF6B2C]", bg: "bg-[#FF6B2C]/10", ring: "ring-[#FF6B2C]/15", brandColor: "#FF6B2C", LogoComp: KwaiLogo, fields: ["pixel_id", "api_token"] },
 ];
 
 const ease = [0.16, 1, 0.3, 1] as const;
