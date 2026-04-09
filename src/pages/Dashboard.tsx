@@ -638,26 +638,33 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, bar: "bg-success", iconBg: "bg-success/10 text-success", borderHover: "hover:border-success/20" },
-              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, bar: "bg-info", iconBg: "bg-info/10 text-info", borderHover: "hover:border-info/20" },
-              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", bar: "bg-primary", iconBg: "bg-primary/10 text-primary", borderHover: "hover:border-primary/20" },
-              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, bar: "bg-warning", iconBg: "bg-warning/10 text-warning", borderHover: "hover:border-warning/20" },
+              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, accentFrom: "from-emerald-500", accentTo: "to-green-400", iconBg: "bg-emerald-500/[0.08]", iconText: "text-emerald-400", glowColor: "bg-emerald-500" },
+              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, accentFrom: "from-blue-500", accentTo: "to-cyan-400", iconBg: "bg-blue-500/[0.08]", iconText: "text-blue-400", glowColor: "bg-blue-500" },
+              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", accentFrom: "from-primary", accentTo: "to-emerald-400", iconBg: "bg-primary/[0.08]", iconText: "text-primary", glowColor: "bg-primary" },
+              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, accentFrom: "from-amber-500", accentTo: "to-orange-400", iconBg: "bg-amber-500/[0.08]", iconText: "text-amber-400", glowColor: "bg-amber-500" },
             ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className={cn("group relative rounded-xl border border-border/25 bg-card/90 p-4 overflow-hidden flex flex-col justify-between min-h-[128px] transition-all duration-300", item.borderHover)}>
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", item.bar)} />
-                <div className="pl-2.5 flex flex-col h-full relative z-10 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">{item.label}</span>
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", item.iconBg)}>
-                      <item.icon className="h-3.5 w-3.5" />
+              <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + idx * 0.05, type: "spring", stiffness: 260, damping: 20 }}
+                className="group relative rounded-2xl overflow-hidden min-h-[136px] flex flex-col justify-between transition-all duration-300"
+                style={{ background: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.7) 100%)", boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.03), inset 0 -1px 0 0 rgba(0,0,0,0.1), 0 4px 24px -8px rgba(0,0,0,0.4)" }}>
+                {/* Gradient accent bar */}
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b", item.accentFrom, item.accentTo)} />
+                {/* Top glass shine */}
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
+                {/* Ambient glow */}
+                <div className={cn("absolute -top-12 -right-12 w-28 h-28 rounded-full blur-3xl opacity-[0.04] transition-opacity duration-500 group-hover:opacity-[0.08]", item.glowColor)} />
+                
+                <div className="p-4 pl-5 flex flex-col h-full relative z-10 min-w-0">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/50">{item.label}</span>
+                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/[0.04]", item.iconBg, item.iconText)}>
+                      <item.icon className="h-4 w-4" />
                     </div>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-xl font-heading font-black tabular-nums tracking-tight text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground/30 font-mono">{item.helper}</p>
+                    <p className="text-[22px] font-heading font-black tabular-nums tracking-[-0.02em] text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
+                    <p className="mt-2 text-[10px] text-muted-foreground/35 font-mono tracking-wide">{item.helper}</p>
                   </div>
                 </div>
               </motion.div>
