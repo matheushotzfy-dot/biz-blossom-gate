@@ -570,7 +570,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Executive KPI strip */}
+          {/* Executive KPI strip — Glassmorphic style */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Total Faturado", numValue: revenue, formatter: fmt, color: "primary", icon: ShoppingCart },
@@ -579,13 +579,16 @@ export default function Dashboard() {
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 + idx * 0.06 }}
-                className="group relative rounded-xl border border-border/50 bg-card/95 p-5 overflow-hidden transition-all hover:border-primary/20 hover:shadow-[0_0_24px_rgba(0,220,130,0.08)] card-premium">
-                <div className="flex items-start justify-between">
+                className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:bg-white/[0.06] hover:shadow-[0_8px_40px_rgba(16,185,129,0.12)]">
+                {/* Glass reflection effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.05] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute -top-12 -right-12 h-24 w-24 rounded-full bg-primary/[0.06] blur-[40px] pointer-events-none group-hover:bg-primary/[0.12] transition-all duration-500" />
+                <div className="relative flex items-start justify-between">
                   <div>
                     <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-2">{item.label}</p>
                     <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${item.color}/8 border-${item.color}/15 text-${item.color}/60`)}>
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border backdrop-blur-sm", `bg-${item.color}/8 border-${item.color}/15 text-${item.color}/60`)}>
                     <item.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
