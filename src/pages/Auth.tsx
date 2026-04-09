@@ -14,7 +14,7 @@ import {
   Rocket, Eye, EyeOff, Shield, GraduationCap, BarChart2, CreditCard,
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
   Mail, Phone, User, FileText,
-  Heart, Target, Zap,
+  Heart, Target, Zap, KeyRound, RotateCcw, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -106,11 +106,78 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockoutUntil, setLockoutUntil] = useState<number>(0);
+  const [recoveryMode, setRecoveryMode] = useState<"idle" | "email" | "code" | "done">("idle");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryError, setRecoveryError] = useState("");
   const navigate = useNavigate();
 
   const pwStrength = getPasswordStrength(password);
 
   useEffect(() => { setStep(1); }, [isLogin]);
+  useEffect(() => { if (!isLogin) setRecoveryMode("idle"); }, [isLogin]);
+
+  const handleRecoveryStart = async () => {
+    const targetEmail = recoveryEmail || email;
+    if (!targetEmail.includes("@")) { toast.error("Informe um e-mail válido"); return; }
+    setRecoveryLoading(true);
+    setRecoveryError("");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (error) throw error;
+      setRecoveryEmail(targetEmail);
+      setRecoveryMode("code");
+      toast.success("Código enviado para seu e-mail!");
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao enviar código. Tente novamente.");
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
+
+  const handleRecoveryVerify = async () => {
+    if (!recoveryCode.trim()) { setRecoveryError("Informe o código"); return; }
+    if (newPassword.length < 8) { setRecoveryError("Senha deve ter no mínimo 8 caracteres"); return; }
+    if (newPassword !== confirmNewPassword) { setRecoveryError("As senhas não coincidem"); return; }
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword)) { setRecoveryError("Senha deve ter maiúscula, minúscula e número"); return; }
+    setRecoveryLoading(true);
+    setRecoveryError("");
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: recoveryEmail,
+        token: recoveryCode.trim(),
+        type: "recovery",
+      });
+      if (verifyError) {
+        if (verifyError.message?.includes("expired")) setRecoveryError("Código expirado. Solicite um novo.");
+        else setRecoveryError("Código inválido!");
+        setRecoveryLoading(false);
+        return;
+      }
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) throw updateError;
+      setRecoveryMode("done");
+      toast.success("Senha alterada com sucesso!");
+      setTimeout(() => {
+        setRecoveryMode("idle");
+        setRecoveryCode("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+        setRecoveryEmail("");
+      }, 3000);
+    } catch (err: any) {
+      setRecoveryError(err?.message || "Erro ao alterar senha.");
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
+
+  const newPwStrength = getPasswordStrength(newPassword);
 
   const handleDocumentChange = (value: string) => {
     const formatted = formatDocument(value);
@@ -375,22 +442,128 @@ export default function Auth() {
                     >
                       {isLogin ? (
                         <form onSubmit={handleSubmit} className="space-y-4">
-                          <div>
-                            <Label htmlFor="email" className={labelCls}><Mail className="h-3 w-3 text-primary/80" />E-mail</Label>
-                            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
-                          </div>
-                          <div>
-                            <Label htmlFor="password" className={labelCls}><Lock className="h-3 w-3 text-primary/80" />Senha</Label>
-                            <div className="relative">
-                              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={cn(inputCls, "pr-12")} required minLength={8} />
-                              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                              </button>
-                            </div>
-                          </div>
-                          <Button type="submit" disabled={loading} className="h-12 w-full rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.16em] shadow-lg shadow-primary/15 hover:brightness-110">
-                            {loading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <>Entrar na plataforma <ArrowRight className="ml-2 h-4 w-4" /></>}
-                          </Button>
+                          <AnimatePresence mode="wait">
+                            <motion.div key={recoveryMode} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
+                              {recoveryMode === "idle" ? (
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="email" className={labelCls}><Mail className="h-3 w-3 text-primary/80" />E-mail</Label>
+                                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="password" className={labelCls}><Lock className="h-3 w-3 text-primary/80" />Senha</Label>
+                                    <div className="relative">
+                                      <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={cn(inputCls, "pr-12")} required minLength={8} />
+                                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end -mt-1">
+                                    <button type="button" onClick={() => { setRecoveryEmail(email); setRecoveryMode("email"); }} className="text-[11px] font-semibold text-primary hover:underline underline-offset-2 transition-colors">
+                                      Esqueceu a senha?
+                                    </button>
+                                  </div>
+                                  <Button type="submit" disabled={loading} className="h-12 w-full rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.16em] shadow-lg shadow-primary/15 hover:brightness-110">
+                                    {loading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <>Entrar na plataforma <ArrowRight className="ml-2 h-4 w-4" /></>}
+                                  </Button>
+                                </div>
+                              ) : recoveryMode === "email" ? (
+                                <div className="space-y-4">
+                                  <div className="flex items-center gap-3 mb-1">
+                                    <div className="h-10 w-10 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                                      <KeyRound className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                      <p className="text-[13px] font-display font-bold text-foreground">Recuperar senha</p>
+                                      <p className="text-[10px] text-muted-foreground">Enviaremos um código para seu e-mail</p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="recovery-email" className={labelCls}><Mail className="h-3 w-3 text-primary/80" />E-mail da conta</Label>
+                                    <Input id="recovery-email" type="email" value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
+                                  </div>
+                                  <div className="flex gap-3">
+                                    <Button type="button" variant="outline" onClick={() => setRecoveryMode("idle")} className="h-11 flex-1 rounded-2xl border-border/60 bg-background/50 font-heading uppercase tracking-[0.14em] text-muted-foreground hover:bg-muted/30">
+                                      Voltar
+                                    </Button>
+                                    <Button type="button" onClick={handleRecoveryStart} disabled={recoveryLoading} className="h-11 flex-1 rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.14em] shadow-lg shadow-primary/15 hover:brightness-110">
+                                      {recoveryLoading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <>Enviar código <ArrowRight className="ml-2 h-4 w-4" /></>}
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : recoveryMode === "code" ? (
+                                <div className="space-y-4">
+                                  <div className="flex items-center gap-3 mb-1">
+                                    <div className="h-10 w-10 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                                      <Shield className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                      <p className="text-[13px] font-display font-bold text-foreground">Nova senha</p>
+                                      <p className="text-[10px] text-muted-foreground">Código enviado para <strong className="text-foreground">{recoveryEmail}</strong></p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="new-password" className={labelCls}><Lock className="h-3 w-3 text-primary/80" />Nova senha</Label>
+                                    <div className="relative">
+                                      <Input id="new-password" type={showPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" className={cn(inputCls, "pr-12")} required minLength={8} />
+                                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                      </button>
+                                    </div>
+                                    {newPassword.length > 0 && (
+                                      <div className="mt-2 space-y-1.5">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex flex-1 gap-1">
+                                            {[1, 2, 3].map((index) => (
+                                              <div key={index} className={cn("h-1.5 flex-1 rounded-full", index <= newPwStrength.score ? newPwStrength.color : "bg-muted/70")} />
+                                            ))}
+                                          </div>
+                                          <span className={cn("text-[9px] font-heading uppercase tracking-[0.18em]", newPwStrength.text)}>{newPwStrength.label}</span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="confirm-new-password" className={labelCls}><Shield className="h-3 w-3 text-primary/80" />Confirmar nova senha</Label>
+                                    <Input id="confirm-new-password" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="••••••••" className={cn(inputCls, confirmNewPassword && newPassword !== confirmNewPassword && "border-destructive/60 ring-2 ring-destructive/10")} required minLength={8} />
+                                    {confirmNewPassword && newPassword !== confirmNewPassword && <p className="mt-1 text-[10px] font-medium text-destructive">As senhas não coincidem</p>}
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="recovery-code" className={labelCls}><KeyRound className="h-3 w-3 text-primary/80" />Código de verificação</Label>
+                                    <Input id="recovery-code" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" maxLength={6} className={cn(inputCls, "text-center text-lg font-heading tracking-[0.4em]", recoveryError && "border-destructive/60 ring-2 ring-destructive/10")} required />
+                                    {recoveryError && (
+                                      <p className="mt-1.5 text-[10px] font-semibold text-destructive flex items-center gap-1">
+                                        <AlertTriangle className="h-3 w-3" />
+                                        {recoveryError}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <button type="button" onClick={handleRecoveryStart} disabled={recoveryLoading} className="text-[10px] text-primary hover:underline underline-offset-2 font-semibold flex items-center gap-1">
+                                    <RotateCcw className="h-3 w-3" /> Reenviar código
+                                  </button>
+                                  <div className="flex gap-3">
+                                    <Button type="button" variant="outline" onClick={() => { setRecoveryMode("idle"); setRecoveryCode(""); setNewPassword(""); setConfirmNewPassword(""); setRecoveryError(""); }} className="h-11 flex-1 rounded-2xl border-border/60 bg-background/50 font-heading uppercase tracking-[0.14em] text-muted-foreground hover:bg-muted/30">
+                                      Cancelar
+                                    </Button>
+                                    <Button type="button" onClick={handleRecoveryVerify} disabled={recoveryLoading || recoveryCode.length < 6} className="h-11 flex-1 rounded-2xl bg-primary text-primary-foreground font-heading uppercase tracking-[0.14em] shadow-lg shadow-primary/15 hover:brightness-110">
+                                      {recoveryLoading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <>Confirmar <ArrowRight className="ml-2 h-4 w-4" /></>}
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-center py-6 space-y-4">
+                                  <div className="mx-auto h-16 w-16 rounded-full bg-success/15 flex items-center justify-center ring-4 ring-success/10">
+                                    <CheckCircle2 className="h-8 w-8 text-success" />
+                                  </div>
+                                  <div>
+                                    <p className="text-[16px] font-display font-bold text-foreground">Senha alterada!</p>
+                                    <p className="text-[12px] text-muted-foreground mt-1">Agora você pode fazer login com a nova senha.</p>
+                                  </div>
+                                </div>
+                              )}
+                            </motion.div>
+                          </AnimatePresence>
                         </form>
                       ) : (
                         <div className="space-y-4">
