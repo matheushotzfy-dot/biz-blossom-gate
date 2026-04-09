@@ -570,26 +570,29 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Executive KPI strip — Glassmorphic style */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Executive KPI strip — Ultra Glass */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: "Total Faturado", numValue: revenue, formatter: fmt, color: "primary", icon: ShoppingCart },
               { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), color: "success", icon: TrendingUp },
               { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, color: "info", icon: Target },
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 + idx * 0.06 }}
-                className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:bg-white/[0.06] hover:shadow-[0_8px_40px_rgba(16,185,129,0.12)]">
-                {/* Glass reflection effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.05] via-transparent to-transparent pointer-events-none" />
-                <div className="absolute -top-12 -right-12 h-24 w-24 rounded-full bg-primary/[0.06] blur-[40px] pointer-events-none group-hover:bg-primary/[0.12] transition-all duration-500" />
+              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
+                className="group relative rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-5 overflow-hidden transition-all duration-500 hover:border-primary/30 hover:shadow-[0_12px_50px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                {/* Top glass shine line */}
+                <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
+                {/* Atmospheric corner glow */}
+                <div className="absolute -top-16 -right-16 h-32 w-32 rounded-full bg-primary/[0.07] blur-[50px] pointer-events-none group-hover:bg-primary/[0.15] transition-all duration-700" />
+                <div className="absolute -bottom-10 -left-10 h-20 w-20 rounded-full bg-primary/[0.04] blur-[30px] pointer-events-none group-hover:bg-primary/[0.08] transition-all duration-700" />
                 <div className="relative flex items-start justify-between">
-                  <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-2">{item.label}</p>
-                    <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                  <div className="flex-1">
+                    <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-white/30 mb-3">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading tabular-nums tracking-[-0.03em] leading-none", item.color === "primary" ? "text-white" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border backdrop-blur-sm", `bg-${item.color}/8 border-${item.color}/15 text-${item.color}/60`)}>
-                    <item.icon className="h-4.5 w-4.5" />
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-md shadow-lg", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
+                    <item.icon className="h-5 w-5" />
                   </div>
                 </div>
               </motion.div>
