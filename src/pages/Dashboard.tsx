@@ -769,61 +769,52 @@ export default function Dashboard() {
       </section>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
-        <DialogContent className="sm:max-w-md border-border/40 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[440px] border-border/30 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden rounded-2xl">
           {detailTx && (() => {
-            const statusMap: Record<string, { label: string; color: string }> = {
-              completed: { label: "Aprovada", color: "bg-success/15 text-success" },
-              pending: { label: "Pendente", color: "bg-warning/15 text-warning" },
-              failed: { label: "Falhou", color: "bg-destructive/15 text-destructive" },
-              refunded: { label: "Reembolso", color: "bg-info/15 text-info" },
-              chargeback: { label: "Chargeback", color: "bg-destructive/15 text-destructive" },
+            const statusMap: Record<string, { label: string; color: string; bg: string; border: string }> = {
+              completed: { label: "Aprovada", color: "text-success", bg: "bg-success/10", border: "border-success/20" },
+              pending: { label: "Pendente", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
+              failed: { label: "Falhou", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20" },
+              refunded: { label: "Reembolso", color: "text-info", bg: "bg-info/10", border: "border-info/20" },
+              chargeback: { label: "Chargeback", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20" },
             };
-            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "bg-muted text-foreground" };
+            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "text-foreground", bg: "bg-muted/10", border: "border-border/20" };
             const productName = productsData?.find(p => p.id === detailTx.product_id)?.name;
 
             return (
               <div>
-                {/* Header */}
-                <div className="px-6 pt-6 pb-4 border-b border-border/30">
-                  <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</p>
-                    <span className={`rounded-lg px-2.5 py-1 text-[11px] font-bold ${s.color}`}>{s.label}</span>
+                {/* Header com valor e status */}
+                <div className="relative px-6 pt-7 pb-5 border-b border-border/20 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none" />
+                  <div className="relative flex items-start justify-between">
+                    <div>
+                      <p className="text-3xl font-heading font-black text-foreground tabular-nums tracking-tight">{fmt(Number(detailTx.amount))}</p>
+                      {productName && <p className="text-[13px] text-muted-foreground mt-1.5">{productName}</p>}
+                    </div>
+                    <span className={cn("rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>{s.label}</span>
                   </div>
-                  {productName && <p className="text-[13px] text-muted-foreground mt-1">{productName}</p>}
                 </div>
 
-                {/* Details grid */}
-                <div className="px-6 py-4 space-y-3">
-                  {detailTx.customer_name && (
-                    <div className="flex items-center gap-3">
-                      <User className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                {/* Dados do cliente */}
+                <div className="px-6 py-5 space-y-4">
+                  {[
+                    { show: !!detailTx.customer_name, icon: User, label: "Cliente", value: detailTx.customer_name },
+                    { show: !!detailTx.customer_email, icon: Mail, label: "Email", value: detailTx.customer_email },
+                    { show: !!detailTx.customer_phone, icon: Phone, label: "Telefone", value: detailTx.customer_phone },
+                  ].filter(f => f.show).map((field, i) => (
+                    <div key={i} className="flex items-center gap-3.5">
+                      <div className="h-9 w-9 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center shrink-0">
+                        <field.icon className="h-4 w-4 text-primary/70" />
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Cliente</p>
-                        <p className="text-sm font-medium text-foreground truncate">{detailTx.customer_name}</p>
+                        <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50">{field.label}</p>
+                        <p className="text-[13px] font-semibold text-foreground truncate mt-0.5">{field.value}</p>
                       </div>
                     </div>
-                  )}
-                  {detailTx.customer_email && (
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Email</p>
-                        <p className="text-sm font-medium text-foreground truncate">{detailTx.customer_email}</p>
-                      </div>
-                    </div>
-                  )}
-                  {detailTx.customer_phone && (
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Telefone</p>
-                        <p className="text-sm font-medium text-foreground">{detailTx.customer_phone}</p>
-                      </div>
-                    </div>
-                  )}
+                  ))}
 
                   {/* Financial breakdown */}
-                  <div className="rounded-xl border border-border/30 bg-muted/5 p-3 mt-1 space-y-2">
+                  <div className="rounded-xl border border-border/20 bg-muted/5 p-4 space-y-2.5">
                     <div className="flex justify-between text-[12px]">
                       <span className="text-muted-foreground">Bruto</span>
                       <span className="font-semibold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</span>
@@ -832,24 +823,24 @@ export default function Dashboard() {
                       <span className="text-muted-foreground">Taxas</span>
                       <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
                     </div>
-                    <div className="border-t border-border/20 pt-2 flex justify-between text-[13px]">
-                      <span className="font-semibold text-foreground">Líquido</span>
-                      <span className="font-bold text-primary tabular-nums">{fmt(Number(detailTx.net_amount))}</span>
+                    <div className="border-t border-border/15 pt-2.5 flex justify-between text-[13px]">
+                      <span className="font-bold text-foreground">Líquido</span>
+                      <span className="font-black text-primary tabular-nums text-[15px]">{fmt(Number(detailTx.net_amount))}</span>
                     </div>
                   </div>
 
-                  {/* Meta */}
-                  <div className="flex items-center gap-4 pt-1 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1">
+                  {/* Meta info */}
+                  <div className="flex items-center gap-3 pt-1">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/20 bg-muted/5 px-3 py-1">
                       <CreditCard className="h-3 w-3" />
                       {detailTx.payment_method === "credit_card" ? "Cartão" : detailTx.payment_method === "pix" ? "PIX" : detailTx.payment_method || "—"}
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/20 bg-muted/5 px-3 py-1">
                       <Clock3 className="h-3 w-3" />
                       {new Date(detailTx.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
                     </span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/40 font-mono truncate pt-1">ID: {detailTx.id}</p>
+                  <p className="text-[9px] text-muted-foreground/30 font-mono truncate pt-1">ID: {detailTx.id}</p>
                 </div>
               </div>
             );
