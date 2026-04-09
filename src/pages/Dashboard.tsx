@@ -432,20 +432,49 @@ export default function Dashboard() {
             <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
             <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
             <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
-            <div className="relative p-8 md:p-10 text-center">
-              <div className="mx-auto mb-6 h-24 w-24 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10"><Rocket className="h-12 w-12 text-primary" /></div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-5"><Flame className="h-4 w-4 text-primary" /><span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Ativado</span></div>
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 leading-tight tracking-[-0.04em]">MODO ESCALA<br /><span className="text-gradient">ATIVADO!</span></h2>
-              <div className="space-y-4 text-sm text-muted-foreground leading-relaxed mb-6">
-                <p className="font-bold text-foreground text-base">AGORA É SANGUE NOS OLHOS!</p>
-                <p>O futuro de luxo já está lá, falta <strong className="text-foreground">VOCÊ</strong> alcançar — e sabemos que irá conseguir!</p>
-                <p>E estaremos <strong className="text-primary">juntos com você</strong> nessa jornada!</p>
+             <div className="relative p-8 md:p-10 text-center">
+              {/* Animated rings */}
+              <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '2.5s' }} />
+                <div className="absolute inset-2 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center ring-4 ring-primary/15 shadow-lg shadow-primary/20">
+                  <Rocket className="h-10 w-10 text-primary drop-shadow-lg" />
+                </div>
               </div>
+
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
+                <Flame className="h-4 w-4 text-primary animate-pulse" />
+                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3 leading-tight tracking-[-0.04em]">
+                MODO ESCALA<br /><span className="text-gradient">ATIVADO! 🔥</span>
+              </h2>
+
+              <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-6">
+                <p className="font-bold text-foreground text-base">Você atingiu a elite dos vendedores!</p>
+                <p>R$ 2.000 em 24h comprovam: você tem <strong className="text-primary">mentalidade de escala</strong>. Poucos chegam aqui — e você é um deles.</p>
+                <p>A partir de agora, cada venda te aproxima do <strong className="text-foreground">próximo nível</strong>. Sem limites.</p>
+              </div>
+
+              {/* Perks grid */}
+              <div className="grid grid-cols-2 gap-2.5 mb-5">
+                <div className="rounded-xl bg-primary/5 border border-primary/15 p-3 text-left">
+                  <div className="flex items-center gap-2 mb-1.5"><Zap className="h-4 w-4 text-primary" /><span className="text-xs font-bold text-foreground">Boost Visual</span></div>
+                  <p className="text-[10px] text-muted-foreground leading-snug">Dashboard com visual exclusivo de alta performance</p>
+                </div>
+                <div className="rounded-xl bg-primary/5 border border-primary/15 p-3 text-left">
+                  <div className="flex items-center gap-2 mb-1.5"><TrendingUp className="h-4 w-4 text-primary" /><span className="text-xs font-bold text-foreground">Status Elite</span></div>
+                  <p className="text-[10px] text-muted-foreground leading-snug">Badge permanente que marca sua conquista</p>
+                </div>
+              </div>
+
               <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-6">
                 <div className="flex items-start gap-3"><ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" /><div className="text-left"><p className="text-sm font-bold text-foreground mb-1">Suporte Prioritário Ativado</p><p className="text-xs text-muted-foreground">No Modo Escala, o suporte e a fluidez da plataforma estarão 100% disponíveis para você. Qualquer ajuda para escalar que precisar, pode nos chamar!</p></div></div>
               </div>
-              <p className="text-lg font-display font-black text-primary mb-6">RUMO À LUA!</p>
-              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">BORA ESCALAR!</button>
+
+              <p className="text-base font-display font-black text-primary mb-5 tracking-wide">O CÉU NÃO É O LIMITE 🚀</p>
+              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR!</button>
             </div>
           </div>
         </div>
