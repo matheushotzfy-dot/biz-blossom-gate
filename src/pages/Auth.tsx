@@ -223,7 +223,7 @@ export default function Auth() {
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
       </div>
 
-      <div className="relative lg:grid lg:grid-cols-[minmax(430px,42vw)_1fr]">
+      <div className="relative lg:grid lg:grid-cols-[minmax(480px,55vw)_1fr]">
         {/* ═══ LEFT: Auth Panel ═══ */}
         <div className="relative border-r border-border/40 bg-background/80 backdrop-blur-xl">
           <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-5 backdrop-blur-xl md:px-8">
