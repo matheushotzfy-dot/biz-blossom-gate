@@ -670,9 +670,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-4 md:p-5 flex flex-col overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-          <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/[0.10] to-transparent pointer-events-none" />
-          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/[0.06] blur-[60px] pointer-events-none" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl ultra-glass glass-shine p-4 md:p-5 flex flex-col overflow-hidden">
+          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/[0.05] blur-[60px] pointer-events-none" />
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
@@ -687,15 +686,15 @@ export default function Dashboard() {
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
             ].map((action) => (
               <Link key={action.href} to={action.href}
-                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/25 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(16,185,129,0.08)] active:scale-[0.985]">
+                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/10 bg-card/30 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/25 hover:bg-primary/[0.05] hover:shadow-[0_0_20px_hsl(var(--primary)/0.08)] active:scale-[0.985]">
                 <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/15 shadow-lg">
                   <action.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] md:text-[11px] text-white/20 hidden md:block">{action.desc}</p>
+                  <p className="text-[10px] md:text-[11px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-white/10 hidden md:block group-hover:text-primary/40 transition-colors" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-primary/40 transition-colors" />
               </Link>
             ))}
           </div>
