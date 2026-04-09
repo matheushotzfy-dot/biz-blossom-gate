@@ -453,20 +453,13 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
+        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10 overflow-hidden"
       >
-        {/* Atmospheric glow effects */}
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-32 -left-32 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" />
-          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-48 w-[60%] rounded-full bg-primary/5 blur-[120px]" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none z-0" />
           <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
                   <BarChart3 className="h-4.5 w-4.5 text-primary" />
                 </div>
                 <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Dashboard</span>
@@ -511,7 +504,7 @@ export default function Dashboard() {
                 {PERIOD_PRESETS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)] glow-primary" : "text-muted-foreground/35 hover:text-foreground/70"
+                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground/35 hover:text-foreground/70"
                     )}>
                     {opt.label}
                   </button>
@@ -534,7 +527,7 @@ export default function Dashboard() {
                   <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
-              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", privacy.hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", privacy.hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
                 {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
             </div>
@@ -579,16 +572,13 @@ export default function Dashboard() {
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl ultra-glass glass-shine shimmer-sweep p-5 overflow-hidden transition-all duration-500">
-                {/* Atmospheric corner glow */}
-                <div className={cn("absolute -top-16 -right-16 h-32 w-32 rounded-full blur-[50px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.06] group-hover:bg-${item.color}/[0.18]`)} />
-                <div className={cn("absolute -bottom-10 -left-10 h-20 w-20 rounded-full blur-[30px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.03] group-hover:bg-${item.color}/[0.10]`)} />
+                className="group relative rounded-2xl border border-border/30 bg-card/95 p-5 overflow-hidden transition-all duration-300 hover:border-primary/20">
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
                     <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50 mb-3">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading tabular-nums tracking-[-0.03em] leading-none glow-value", `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className={cn("text-[26px] font-heading tabular-nums tracking-[-0.03em] leading-none", `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-md shadow-lg glow-primary", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
@@ -602,8 +592,7 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl ultra-glass glass-shine p-4 md:p-6 min-h-[280px] relative overflow-hidden">
-          <div className="absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/30 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -625,7 +614,7 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl ultra-glass glass-shine p-4 md:p-5 overflow-hidden">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-border/30 bg-card/95 p-4 md:p-5 overflow-hidden">
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -641,16 +630,13 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className="group relative rounded-xl ultra-glass glass-shine shimmer-sweep p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all duration-500">
-                {/* Atmospheric corner glow */}
-                <div className={cn("absolute -top-12 -right-12 h-24 w-24 rounded-full blur-[40px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.06] group-hover:bg-${item.color}/[0.18]`)} />
-                <div className={cn("absolute -bottom-8 -left-8 h-16 w-16 rounded-full blur-[30px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.03] group-hover:bg-${item.color}/[0.10]`)} />
+                className="group relative rounded-xl border border-border/30 bg-card/95 p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all duration-300 hover:border-primary/20">
                 {/* Left accent bar */}
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
                 <div className="pl-1.5 flex flex-col h-full relative z-10 min-w-0">
                   <div className="flex items-center justify-between mb-auto">
                     <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground/40">{item.label}</span>
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border backdrop-blur-md shadow-lg", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
                   </div>
@@ -670,8 +656,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl ultra-glass glass-shine p-4 md:p-5 flex flex-col overflow-hidden">
-          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/[0.05] blur-[60px] pointer-events-none" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-border/30 bg-card/95 p-4 md:p-5 flex flex-col overflow-hidden">
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
@@ -701,7 +686,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-xl ultra-glass glass-shine flex flex-col overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-xl border border-border/30 bg-card/95 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
@@ -952,13 +937,13 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className="group relative rounded-xl ultra-glass glass-shine p-3 overflow-hidden transition-all duration-500 hover:border-primary/25">
+    <div className="group relative rounded-xl border border-border/30 bg-card/95 p-3 overflow-hidden transition-all duration-300 hover:border-primary/20">
       <div className="relative z-10">
         <div className="mb-1.5 flex items-center gap-2">
           <span className={s.text}>{icon}</span>
           <span className="text-[10px] text-muted-foreground/40 font-semibold uppercase tracking-wider">{label}</span>
         </div>
-        <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums glow-value ${s.valueTxt}`}>{value}</p>
+        <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
       </div>
     </div>
   );
