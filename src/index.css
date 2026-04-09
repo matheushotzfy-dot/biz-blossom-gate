@@ -17,34 +17,34 @@ input[type="number"]::-webkit-inner-spin-button {
 
 @layer base {
   :root {
-    --background: 220 20% 93%;
+    --background: 160 12% 90%;
     --foreground: 220 30% 8%;
-    --card: 0 0% 99%;
+    --card: 155 8% 96%;
     --card-foreground: 220 30% 8%;
-    --popover: 0 0% 99%;
+    --popover: 155 8% 96%;
     --popover-foreground: 220 30% 8%;
     --primary: 156 100% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 18% 88%;
+    --secondary: 158 14% 86%;
     --secondary-foreground: 220 24% 12%;
-    --muted: 210 16% 84%;
+    --muted: 155 10% 82%;
     --muted-foreground: 220 12% 38%;
-    --accent: 150 40% 88%;
+    --accent: 152 28% 86%;
     --accent-foreground: 150 60% 18%;
     --destructive: 0 76% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 18% 76%;
-    --input: 210 18% 78%;
+    --border: 155 14% 78%;
+    --input: 155 12% 80%;
     --ring: 156 100% 36%;
     --radius: 0.75rem;
 
-    --sidebar-background: 220 22% 96%;
+    --sidebar-background: 158 14% 93%;
     --sidebar-foreground: 220 16% 24%;
     --sidebar-primary: 156 100% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 90%;
+    --sidebar-accent: 155 16% 88%;
     --sidebar-accent-foreground: 220 20% 12%;
-    --sidebar-border: 210 18% 82%;
+    --sidebar-border: 155 12% 80%;
     --sidebar-ring: 156 100% 36%;
 
     --chart-1: 156 100% 36%;
@@ -59,10 +59,10 @@ input[type="number"]::-webkit-inner-spin-button {
     --info: 210 92% 48%;
     --info-foreground: 0 0% 100%;
 
-    --tooltip-bg: rgba(250, 250, 252, 0.98);
-    --tooltip-border: rgba(0, 0, 0, 0.12);
+    --tooltip-bg: rgba(242, 248, 245, 0.98);
+    --tooltip-border: rgba(0, 180, 100, 0.15);
     --tooltip-text: #0a0a0a;
-    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.08), 0 24px 48px rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 1px 3px rgba(0, 80, 50, 0.05), 0 8px 24px rgba(0, 80, 50, 0.07), 0 24px 48px rgba(0, 80, 50, 0.04);
   }
 
   .dark {
