@@ -658,7 +658,6 @@ export default function Dashboard() {
         {/* Quick actions */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-border/30 bg-card/95 p-4 md:p-5 flex flex-col overflow-hidden">
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
-          <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
