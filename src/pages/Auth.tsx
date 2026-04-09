@@ -579,110 +579,61 @@ export default function Auth() {
             <img
               src={authHeroImg}
               alt="Empreendedora usando a plataforma HOTZFY"
-              className="h-full w-full object-cover object-[center_15%]"
+              className="h-full w-full object-cover object-[center_10%]"
               width={960}
               height={1280}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--background))] via-[hsl(var(--background)/0.6)] to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--background)/0.4)] via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-[hsl(var(--background))] to-transparent" />
+            {/* Only darken the bottom for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
           </div>
 
-          <div className="relative z-10 flex min-h-screen flex-col justify-between p-6 xl:p-8">
-            {/* Top — live badge */}
+          {/* All content pinned to bottom — face stays clean */}
+          <div className="relative z-10 flex min-h-screen flex-col justify-end p-6 xl:p-8">
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex justify-end pt-2"
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="space-y-4"
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/10 backdrop-blur-xl px-3.5 py-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full rounded-full bg-success animate-ping opacity-40" />
-                  <span className="relative h-2 w-2 rounded-full bg-success" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-success">Ao vivo</span>
-              </div>
-            </motion.div>
-
-            {/* Center — testimonial / social proof */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="flex flex-col items-center text-center px-4"
-            >
-              <div className="flex -space-x-3 mb-4">
-                {["bg-primary", "bg-info", "bg-warning", "bg-success", "bg-primary/70"].map((bg, i) => (
-                  <div key={i} className={cn("h-10 w-10 rounded-full border-[3px] border-background flex items-center justify-center text-[11px] font-bold text-foreground/90", bg)}>
-                    {["L", "C", "T", "J", "F"][i]}
-                  </div>
-                ))}
-              </div>
-              <p className="text-[13px] font-medium text-foreground/70 leading-relaxed max-w-[240px]">
-                Mais de <span className="text-foreground font-bold">52 mil produtores</span> já faturaram na plataforma
-              </p>
-            </motion.div>
-
-            {/* Bottom — big numbers + features */}
-            <div className="space-y-5">
-              {/* Revenue */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/50 mb-1">Volume total processado</p>
-                <p className="font-heading text-[36px] xl:text-[42px] tracking-[-0.04em] leading-none text-foreground">
+              {/* Volume */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50 mb-1">Volume total processado</p>
+                <p className="font-heading text-[38px] xl:text-[46px] tracking-[-0.04em] leading-none text-white">
                   R$ <AnimatedCounter target={847} suffix="M" />
                 </p>
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="inline-flex items-center gap-1 rounded-md bg-success/15 px-2 py-1">
-                    <TrendingUp className="h-3 w-3 text-success" />
-                    <span className="text-[10px] font-bold text-success">+34%</span>
-                  </div>
-                  <span className="text-[10px] text-foreground/40">últimos 12 meses</span>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 px-2 py-0.5">
+                    <TrendingUp className="h-3 w-3 text-emerald-400" />
+                    <span className="text-[10px] font-bold text-emerald-400">+34%</span>
+                  </span>
+                  <span className="text-[10px] text-white/40">últimos 12 meses</span>
                 </div>
-              </motion.div>
+              </div>
 
-              {/* KPI row */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.5 }}
-                className="grid grid-cols-3 gap-3"
-              >
+              {/* Divider */}
+              <div className="h-px bg-white/10" />
+
+              {/* KPIs */}
+              <div className="flex gap-6">
                 {[
-                  { value: "52K+", sub: "Produtores" },
-                  { value: "4.2M", sub: "Transações" },
-                  { value: "99.9%", sub: "Uptime" },
+                  { value: "52K+", label: "Produtores" },
+                  { value: "4.2M", label: "Transações" },
+                  { value: "99.9%", label: "Uptime" },
                 ].map((kpi) => (
-                  <div key={kpi.sub} className="rounded-xl border border-foreground/8 bg-foreground/5 backdrop-blur-md p-3 text-center">
-                    <p className="font-heading text-[18px] xl:text-[20px] tracking-[-0.02em] text-foreground">{kpi.value}</p>
-                    <p className="text-[9px] font-medium text-foreground/40 mt-0.5 uppercase tracking-[0.1em]">{kpi.sub}</p>
+                  <div key={kpi.label}>
+                    <p className="font-heading text-[20px] xl:text-[22px] tracking-[-0.02em] text-white">{kpi.value}</p>
+                    <p className="text-[9px] font-medium text-white/40 uppercase tracking-[0.1em] mt-0.5">{kpi.label}</p>
                   </div>
                 ))}
-              </motion.div>
+              </div>
 
-              {/* Trust bar */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1, duration: 0.4 }}
-                className="flex items-center justify-center gap-4 pt-1"
-              >
-                {[
-                  { icon: Shield, text: "PCI DSS" },
-                  { icon: Lock, text: "SSL 256-bit" },
-                  { icon: CheckCircle2, text: "LGPD" },
-                ].map((trust) => (
-                  <div key={trust.text} className="flex items-center gap-1.5">
-                    <trust.icon className="h-3 w-3 text-foreground/30" />
-                    <span className="text-[9px] font-medium text-foreground/35 uppercase tracking-[0.08em]">{trust.text}</span>
-                  </div>
+              {/* Trust */}
+              <div className="flex items-center gap-4 pt-1">
+                {["PCI DSS", "SSL 256-bit", "LGPD"].map((t) => (
+                  <span key={t} className="text-[8px] font-medium text-white/25 uppercase tracking-[0.12em]">{t}</span>
                 ))}
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
