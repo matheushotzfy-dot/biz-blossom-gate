@@ -769,78 +769,90 @@ export default function Dashboard() {
       </section>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
-        <DialogContent className="sm:max-w-[440px] border-border/30 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden rounded-2xl">
+        <DialogContent className="sm:max-w-[460px] border-border/20 bg-card backdrop-blur-xl p-0 gap-0 overflow-hidden rounded-2xl shadow-2xl">
           {detailTx && (() => {
-            const statusMap: Record<string, { label: string; color: string; bg: string; border: string }> = {
-              completed: { label: "Aprovada", color: "text-success", bg: "bg-success/10", border: "border-success/20" },
-              pending: { label: "Pendente", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
-              failed: { label: "Falhou", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20" },
-              refunded: { label: "Reembolso", color: "text-info", bg: "bg-info/10", border: "border-info/20" },
-              chargeback: { label: "Chargeback", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20" },
+            const statusMap: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
+              completed: { label: "Aprovada", color: "text-success", bg: "bg-success/10", border: "border-success/20", dot: "bg-success" },
+              pending: { label: "Pendente", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20", dot: "bg-warning" },
+              failed: { label: "Falhou", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", dot: "bg-destructive" },
+              refunded: { label: "Reembolso", color: "text-info", bg: "bg-info/10", border: "border-info/20", dot: "bg-info" },
+              chargeback: { label: "Chargeback", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", dot: "bg-destructive" },
             };
-            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "text-foreground", bg: "bg-muted/10", border: "border-border/20" };
+            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "text-foreground", bg: "bg-muted/10", border: "border-border/20", dot: "bg-muted-foreground" };
             const productName = productsData?.find(p => p.id === detailTx.product_id)?.name;
 
             return (
               <div>
-                {/* Header com valor e status */}
-                <div className="relative px-6 pt-7 pb-5 border-b border-border/20 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none" />
-                  <div className="relative flex items-start justify-between">
-                    <div>
-                      <p className="text-3xl font-heading font-black text-foreground tabular-nums tracking-tight">{fmt(Number(detailTx.amount))}</p>
-                      {productName && <p className="text-[13px] text-muted-foreground mt-1.5">{productName}</p>}
+                {/* Header */}
+                <div className="relative px-7 pt-8 pb-6 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-primary/[0.02] to-transparent pointer-events-none" />
+                  <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2.5 mb-4">
+                      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
+                        {s.label}
+                      </span>
+                      {detailTx.payment_method && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold text-muted-foreground border border-border/20 bg-muted/5">
+                          <CreditCard className="h-3 w-3" />
+                          {detailTx.payment_method === "credit_card" ? "Cartão" : detailTx.payment_method === "pix" ? "PIX" : detailTx.payment_method}
+                        </span>
+                      )}
                     </div>
-                    <span className={cn("rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>{s.label}</span>
+                    <p className="text-4xl font-heading font-black text-foreground tabular-nums tracking-tight leading-none">{fmt(Number(detailTx.amount))}</p>
+                    {productName && <p className="text-[13px] text-muted-foreground/70 mt-2">{productName}</p>}
                   </div>
                 </div>
 
+                <div className="h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
+
                 {/* Dados do cliente */}
-                <div className="px-6 py-5 space-y-4">
+                <div className="px-7 py-5 space-y-3.5">
                   {[
                     { show: !!detailTx.customer_name, icon: User, label: "Cliente", value: detailTx.customer_name },
                     { show: !!detailTx.customer_email, icon: Mail, label: "Email", value: detailTx.customer_email },
                     { show: !!detailTx.customer_phone, icon: Phone, label: "Telefone", value: detailTx.customer_phone },
                   ].filter(f => f.show).map((field, i) => (
-                    <div key={i} className="flex items-center gap-3.5">
-                      <div className="h-9 w-9 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center shrink-0">
+                    <div key={i} className="flex items-center gap-3.5 group">
+                      <div className="h-10 w-10 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/12 transition-colors">
                         <field.icon className="h-4 w-4 text-primary/70" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50">{field.label}</p>
+                        <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/40">{field.label}</p>
                         <p className="text-[13px] font-semibold text-foreground truncate mt-0.5">{field.value}</p>
                       </div>
                     </div>
                   ))}
+                </div>
 
-                  {/* Financial breakdown */}
-                  <div className="rounded-xl border border-border/20 bg-muted/5 p-4 space-y-2.5">
-                    <div className="flex justify-between text-[12px]">
-                      <span className="text-muted-foreground">Bruto</span>
+                <div className="h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
+
+                {/* Financial breakdown */}
+                <div className="px-7 py-5">
+                  <div className="rounded-xl border border-border/15 bg-gradient-to-b from-muted/5 to-transparent p-4 space-y-3">
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="text-muted-foreground/70">Valor bruto</span>
                       <span className="font-semibold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</span>
                     </div>
-                    <div className="flex justify-between text-[12px]">
-                      <span className="text-muted-foreground">Taxas</span>
-                      <span className="font-semibold text-destructive tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="text-muted-foreground/70">Taxas da plataforma</span>
+                      <span className="font-semibold text-destructive/80 tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
                     </div>
-                    <div className="border-t border-border/15 pt-2.5 flex justify-between text-[13px]">
-                      <span className="font-bold text-foreground">Líquido</span>
-                      <span className="font-black text-primary tabular-nums text-[15px]">{fmt(Number(detailTx.net_amount))}</span>
+                    <div className="border-t border-border/10 pt-3 flex justify-between items-center">
+                      <span className="text-[13px] font-bold text-foreground">Valor líquido</span>
+                      <span className="font-black text-primary tabular-nums text-[18px] font-heading tracking-tight">{fmt(Number(detailTx.net_amount))}</span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Meta info */}
-                  <div className="flex items-center gap-3 pt-1">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/20 bg-muted/5 px-3 py-1">
-                      <CreditCard className="h-3 w-3" />
-                      {detailTx.payment_method === "credit_card" ? "Cartão" : detailTx.payment_method === "pix" ? "PIX" : detailTx.payment_method || "—"}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/20 bg-muted/5 px-3 py-1">
-                      <Clock3 className="h-3 w-3" />
-                      {new Date(detailTx.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
-                    </span>
-                  </div>
-                  <p className="text-[9px] text-muted-foreground/30 font-mono truncate pt-1">ID: {detailTx.id}</p>
+                {/* Footer */}
+                <div className="px-7 pb-6 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
+                    <Clock3 className="h-3 w-3" />
+                    {new Date(detailTx.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                  </span>
+                  <p className="text-[9px] text-muted-foreground/25 font-mono truncate max-w-[180px]">ID: {detailTx.id}</p>
                 </div>
               </div>
             );
