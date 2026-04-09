@@ -991,8 +991,13 @@ export default function Vendas() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
+                  className="group relative rounded-2xl border border-border/20 bg-card/60 backdrop-blur-2xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.15)]"
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.03), 0 4px 24px -8px hsl(var(--background) / 0.4)" }}
                 >
+                  {/* Top shine line */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent z-20" />
+                  {/* Inner glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
                   <div className="relative z-10 flex items-start justify-between">
                     {mirrored ? <>{iconEl}{textEl}</> : <>{textEl}{iconEl}</>}
                   </div>
