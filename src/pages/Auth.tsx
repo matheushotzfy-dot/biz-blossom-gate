@@ -13,9 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Rocket, Eye, EyeOff, Shield, GraduationCap, BarChart2, CreditCard,
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
-  Activity, Mail, Phone, User, FileText,
-  Heart, Target, Zap, Globe, BadgeCheck, QrCode,
-  DollarSign, Sparkles, Star, Play, Smartphone,
+  Mail, Phone, User, FileText,
+  Heart, Target,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
