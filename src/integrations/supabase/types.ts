@@ -2536,6 +2536,10 @@ export type Database = {
           matched_value: string
         }[]
       }
+      check_signup_conflicts: {
+        Args: { _document_number: string; _email: string; _phone: string }
+        Returns: string
+      }
       check_velocity: {
         Args: { _email?: string; _ip?: string; _rule_type?: string }
         Returns: {
