@@ -600,10 +600,10 @@ export default function Dashboard() {
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, accentFrom: balance < 0 ? "from-amber-500" : "from-emerald-500", accentTo: balance < 0 ? "to-orange-400" : "to-teal-400", valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: balance < 0 ? "bg-amber-500/[0.08]" : "bg-emerald-500/[0.08]", iconText: balance < 0 ? "text-amber-400" : "text-emerald-400", iconBorder: balance < 0 ? "border-amber-500/15" : "border-emerald-500/15", glowColor: balance < 0 ? "bg-amber-500" : "bg-emerald-500" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/[0.10]"
-                style={{ boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.04), 0 4px 24px -8px rgba(0,0,0,0.25)" }}>
+                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 border border-border/[0.15] bg-card/[0.45] backdrop-blur-2xl hover:bg-card/[0.60] hover:border-border/[0.25]"
+                style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--border) / 0.08), 0 4px 24px -8px hsl(var(--background) / 0.5)" }}>
                 {/* Top shine line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/[0.12] to-transparent" />
                 {/* Ambient corner glow */}
                 <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.05] transition-opacity duration-500 group-hover:opacity-[0.10]", item.glowColor)} />
                 
