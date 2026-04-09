@@ -639,20 +639,19 @@ export default function Dashboard() {
           </motion.div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            {[
-              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
-              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
-              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", color: "primary" },
-              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
-            ].map((item, idx) => (
+            {([
+              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, bar: "bg-success", iconBg: "bg-success/10 text-success", borderHover: "hover:border-success/20" },
+              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, bar: "bg-info", iconBg: "bg-info/10 text-info", borderHover: "hover:border-info/20" },
+              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "Por transação", bar: "bg-primary", iconBg: "bg-primary/10 text-primary", borderHover: "hover:border-primary/20" },
+              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, bar: "bg-warning", iconBg: "bg-warning/10 text-warning", borderHover: "hover:border-warning/20" },
+            ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className="group relative rounded-xl border border-border/25 bg-card/90 p-4 overflow-hidden flex flex-col justify-between min-h-[128px] transition-all duration-300 hover:border-primary/20">
-                {/* Left accent bar */}
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", `bg-${item.color}`)} />
+                className={cn("group relative rounded-xl border border-border/25 bg-card/90 p-4 overflow-hidden flex flex-col justify-between min-h-[128px] transition-all duration-300", item.borderHover)}>
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", item.bar)} />
                 <div className="pl-2.5 flex flex-col h-full relative z-10 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">{item.label}</span>
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", `bg-${item.color}/10 text-${item.color}`)}>
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", item.iconBg)}>
                       <item.icon className="h-3.5 w-3.5" />
                     </div>
                   </div>
