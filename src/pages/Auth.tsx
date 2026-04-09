@@ -14,7 +14,7 @@ import {
   Rocket, Eye, EyeOff, Shield, GraduationCap, BarChart2, CreditCard,
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
   Mail, Phone, User, FileText,
-  Heart, Target,
+  Heart, Target, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
