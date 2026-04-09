@@ -648,15 +648,14 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-emerald-500 to-green-400", ringColor: "ring-emerald-500/25", valueColor: "text-emerald-400", dotColor: "bg-emerald-400", borderAccent: "border-l-emerald-500/40" },
-              { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-blue-500 to-cyan-400", ringColor: "ring-blue-500/25", valueColor: "text-blue-400", dotColor: "bg-blue-400", borderAccent: "border-l-blue-500/40" },
-              { icon: Wallet, label: "TICKET MÉDIO", numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-emerald-600 to-teal-400", ringColor: "ring-emerald-500/25", valueColor: "text-primary", dotColor: "bg-primary", borderAccent: "border-l-emerald-600/40" },
-              { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", ringColor: "ring-amber-500/25", valueColor: "text-amber-400", dotColor: "bg-amber-400", borderAccent: "border-l-amber-500/40" },
+              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-[#32BCAD] to-[#4DD0C8]", ringColor: "ring-[#32BCAD]/25", valueColor: "text-[#32BCAD]", dotColor: "bg-[#32BCAD]", borderAccent: "border-l-[#32BCAD]/50" },
+              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-blue-500 to-cyan-400", ringColor: "ring-blue-500/25", valueColor: "text-blue-400", dotColor: "bg-blue-400", borderAccent: "border-l-blue-500/40" },
+              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-emerald-600 to-teal-400", ringColor: "ring-emerald-500/25", valueColor: "text-primary", dotColor: "bg-primary", borderAccent: "border-l-emerald-600/40" },
+              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", ringColor: "ring-amber-500/25", valueColor: "text-amber-400", dotColor: "bg-amber-400", borderAccent: "border-l-amber-500/40" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
                 className={cn("group relative rounded-2xl border-l-[3px] p-4 md:p-5 overflow-hidden transition-all duration-300 hover:translate-y-[-2px]", item.borderAccent)}
-                style={{ background: "linear-gradient(160deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.75) 100%)", border: undefined, boxShadow: "0 1px 0 0 rgba(255,255,255,0.02) inset, 0 8px 32px -8px rgba(0,0,0,0.5), 0 2px 8px -2px rgba(0,0,0,0.2)" }}
-                >
+                style={{ background: "linear-gradient(160deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.75) 100%)", border: undefined, boxShadow: "0 1px 0 0 rgba(255,255,255,0.02) inset, 0 8px 32px -8px rgba(0,0,0,0.5), 0 2px 8px -2px rgba(0,0,0,0.2)" }}>
                 {/* Ambient glow */}
                 <div className={cn("absolute -top-14 -right-14 w-32 h-32 rounded-full blur-[60px] opacity-[0.05] group-hover:opacity-[0.10] transition-opacity duration-700 bg-gradient-to-br", item.iconGradient)} />
                 {/* Top shine */}
@@ -664,28 +663,36 @@ export default function Dashboard() {
 
                 <div className="relative z-10">
                   {/* Header */}
-                  <div className="flex items-center gap-2.5 mb-4">
+                  <div className="flex items-center gap-2.5 mb-5">
                     <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 shadow-lg", item.iconGradient, item.ringColor)}
                       style={{ boxShadow: "0 4px 12px -4px rgba(0,0,0,0.4)" }}>
-                      <item.icon className="h-4 w-4 text-white drop-shadow-sm" />
+                      {item.isPix ? (
+                        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
+                          <path d="M13.37 18.63a3.57 3.57 0 0 1-2.54-1.05l-3.15-3.15a.5.5 0 0 0-.71 0l-3.15 3.15A3.57 3.57 0 0 1 1.28 18.63h-.78l3.98 3.98a3.2 3.2 0 0 0 4.53 0l4.01-4.01h-.65v.03Z" fill="white"/>
+                          <path d="M3.82 6.42l3.15 3.15a.5.5 0 0 0 .71 0l3.15-3.15a3.57 3.57 0 0 1 2.54-1.05h.65L10.01 1.39a3.2 3.2 0 0 0-4.53 0L1.5 5.37h.78a3.57 3.57 0 0 1 2.54 1.05Z" fill="white"/>
+                          <path d="M22.61 9.52l-2.01-2.01a.2.2 0 0 1-.05.01h-1.93a2.08 2.08 0 0 0-1.48.61l-3.15 3.15a1.99 1.99 0 0 1-2.83 0l-3.15-3.15a2.08 2.08 0 0 0-1.48-.61H4.6a.2.2 0 0 1-.05-.01L2.54 9.52a3.2 3.2 0 0 0 0 4.53l2.01 2.01a.2.2 0 0 1 .05-.01h1.93a2.08 2.08 0 0 0 1.48-.61l3.15-3.15a2.05 2.05 0 0 1 2.83 0l3.15 3.15a2.08 2.08 0 0 0 1.48.61h1.93a.2.2 0 0 1 .05.01l2.01-2.01a3.2 3.2 0 0 0 0-4.53v-.01Z" fill="white"/>
+                          <path d="M18.62 5.37a3.57 3.57 0 0 1 2.54 1.05l2.01 2.01-.01-.05-3.98-3.98a3.2 3.2 0 0 0-4.53 0l-4.01 4.01h.65a3.57 3.57 0 0 1 2.54 1.05l3.15 3.15a.5.5 0 0 0 .71 0l3.15-3.15a2.08 2.08 0 0 1 1.48-.61h1.93" fill="white" fillOpacity="0"/>
+                        </svg>
+                      ) : (
+                        item.icon && <item.icon className="h-4 w-4 text-white drop-shadow-sm" />
+                      )}
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/55 leading-tight">{item.label}</span>
-                    </div>
+                    <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.14em] text-muted-foreground/60 leading-tight">{item.label}</span>
                   </div>
 
                   {/* Value */}
-                  <p className="text-[24px] md:text-[28px] font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-2.5">
+                  <p className="text-[26px] md:text-[30px] font-display font-black tabular-nums tracking-[-0.04em] text-foreground leading-none mb-3"
+                    style={{ fontFeatureSettings: "'tnum' 1, 'ss01' 1" }}>
                     {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
                   </p>
 
                   {/* Meta */}
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] px-2 py-0.5">
+                    <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] px-2.5 py-0.5">
                       <div className={cn("h-1.5 w-1.5 rounded-full animate-pulse", item.dotColor)} />
-                      <span className={cn("text-[11px] font-mono font-semibold tabular-nums", item.valueColor)}>{item.helper}</span>
+                      <span className={cn("text-[11px] font-numbers font-bold tabular-nums tracking-tight", item.valueColor)}>{item.helper}</span>
                     </div>
-                    {item.sub && <span className="text-[10px] text-muted-foreground/30 font-mono">{item.sub}</span>}
+                    {item.sub && <span className="text-[10px] text-muted-foreground/30 font-numbers tracking-wide">{item.sub}</span>}
                   </div>
                 </div>
               </motion.div>
