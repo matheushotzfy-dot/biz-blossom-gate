@@ -588,70 +588,64 @@ export default function Auth() {
           </div>
 
           {/* Content overlay — bottom-aligned, editorial style */}
-          <div className="relative z-10 flex min-h-screen flex-col justify-end p-8 xl:p-10">
-            {/* Revenue highlight — single clean card */}
+          <div className="relative z-10 flex min-h-screen flex-col justify-end p-6 xl:p-8">
+            {/* Revenue highlight */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="mb-6"
+              className="mb-5"
             >
-              <div className="inline-flex items-center gap-2 mb-4">
-                <div className="h-2.5 w-2.5 rounded-full bg-success" />
-                <span className="text-[11px] font-medium text-foreground/70">Plataforma operando agora</span>
+              <div className="inline-flex items-center gap-2 mb-3 rounded-full bg-foreground/8 backdrop-blur-md px-3 py-1.5">
+                <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/80">Ao vivo</span>
               </div>
-              <p className="font-heading text-[52px] xl:text-[64px] tracking-[-0.04em] leading-[0.9] text-foreground">
+              <p className="font-heading text-[40px] xl:text-[48px] tracking-[-0.04em] leading-[0.9] text-foreground drop-shadow-sm">
                 R$ <AnimatedCounter target={128480} />
               </p>
-              <p className="mt-2 text-[14px] text-foreground/60">processados hoje por produtores na HOTZFY</p>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="inline-flex items-center gap-1.5 rounded-lg bg-success/15 px-3 py-1.5">
-                  <TrendingUp className="h-3.5 w-3.5 text-success" />
-                  <span className="text-[12px] font-semibold text-success">+18,4%</span>
+              <p className="mt-1.5 text-[12px] text-foreground/55 font-medium">volume processado hoje na plataforma</p>
+              <div className="flex items-center gap-2.5 mt-3">
+                <div className="inline-flex items-center gap-1 rounded-md bg-success/15 backdrop-blur-sm px-2.5 py-1">
+                  <TrendingUp className="h-3 w-3 text-success" />
+                  <span className="text-[11px] font-bold text-success">+18,4%</span>
                 </div>
-                <span className="text-[12px] text-foreground/50">vs. ontem</span>
+                <span className="text-[11px] text-foreground/40">vs. ontem</span>
               </div>
             </motion.div>
 
-            {/* Simple stats row */}
+            {/* Stats */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.5 }}
-              className="grid grid-cols-3 gap-4 mb-6"
+              className="flex gap-6 mb-5"
             >
               {[
-                { value: "10.847", label: "Produtores ativos" },
-                { value: "92%", label: "Taxa de aprovação" },
-                { value: "99.9%", label: "Uptime da plataforma" },
+                { value: "10.847", label: "Produtores" },
+                { value: "92%", label: "Aprovação" },
+                { value: "99.9%", label: "Uptime" },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <p className="font-heading text-[22px] xl:text-[26px] tracking-[-0.03em] text-foreground">{stat.value}</p>
-                  <p className="text-[11px] text-foreground/50 mt-0.5">{stat.label}</p>
+                  <p className="font-heading text-[20px] xl:text-[24px] tracking-[-0.03em] text-foreground">{stat.value}</p>
+                  <p className="text-[10px] text-foreground/45 font-medium mt-0.5">{stat.label}</p>
                 </div>
               ))}
             </motion.div>
 
-            {/* Feature pills — compact, not cards */}
+            {/* Feature pills */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.4 }}
-              className="flex flex-wrap gap-2"
+              className="flex flex-wrap gap-1.5"
             >
-              {[
-                { icon: CreditCard, label: "Checkout inteligente" },
-                { icon: Users, label: "Programa de afiliados" },
-                { icon: GraduationCap, label: "Área de membros" },
-                { icon: Shield, label: "Anti-fraude ativo" },
-              ].map((feature) => (
-                <div
-                  key={feature.label}
-                  className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/5 backdrop-blur-sm px-4 py-2"
+              {["Checkout", "Afiliados", "Área de membros", "Anti-fraude"].map((label) => (
+                <span
+                  key={label}
+                  className="rounded-md border border-foreground/8 bg-foreground/5 backdrop-blur-sm px-3 py-1.5 text-[10px] font-medium text-foreground/60"
                 >
-                  <feature.icon className="h-3.5 w-3.5 text-foreground/60" />
-                  <span className="text-[11px] font-medium text-foreground/70">{feature.label}</span>
-                </div>
+                  {label}
+                </span>
               ))}
             </motion.div>
           </div>
