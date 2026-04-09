@@ -159,10 +159,14 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-xl border border-border/50 bg-card/95 overflow-hidden transition-all hover:border-border/70 hover:shadow-sm",
+        "relative group rounded-2xl border border-border/20 bg-card/80 backdrop-blur-2xl overflow-hidden transition-all duration-300 hover:border-primary/20 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.12)]",
         className
       )}
     >
+      {/* Top glass shine line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent z-10" />
+      {/* Inner gradient glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.015] via-transparent to-primary/[0.01] pointer-events-none" />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
@@ -174,17 +178,17 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
 }) {
   return (
     <GlowCard delay={delay} className="p-5">
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${color}`)} />
-      <div className="flex items-start justify-between mb-3 pl-2">
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", `bg-${color}/8 border-${color}/12 text-${color}`)}>
+      <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-full", `bg-${color}`)} style={{ boxShadow: `0 0 10px hsl(var(--${color})/0.3)` }} />
+      <div className="flex items-start justify-between mb-3.5 pl-3">
+        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border backdrop-blur-sm transition-transform duration-300 group-hover:scale-110", `bg-${color}/8 border-${color}/15 text-${color}`)}>
           <Icon className="h-4.5 w-4.5" />
         </div>
         {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
       </div>
-      <div className="pl-2">
-        <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/50 mb-1.5">{label}</p>
-        <div className="flex items-end gap-2">
-          <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">
+      <div className="pl-3">
+        <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/45 mb-2">{label}</p>
+        <div className="flex items-end gap-2.5">
+          <span className="text-[22px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">
             {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
           </span>
           {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
@@ -363,7 +367,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.15), ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl bg-card/50 backdrop-blur-lg border border-border/10 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/15 hover:shadow-lg hover:shadow-primary/5"
+      className="rounded-2xl bg-card/60 backdrop-blur-2xl border border-border/15 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/20 hover:shadow-[0_8px_32px_-8px_hsl(var(--primary)/0.1)]"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
@@ -768,7 +772,8 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        className="relative mb-14 rounded-3xl border border-border/15 p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line overflow-hidden"
+        style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 8px 48px -12px hsl(var(--background) / 0.5)" }}
       >
         {/* Animated floating orbs — extended beyond bounds for smooth fade */}
         <div className="absolute -inset-16 pointer-events-none">
@@ -987,8 +992,13 @@ export default function Vendas() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative rounded-2xl glass-panel animated-border p-5 overflow-hidden card-premium"
+                  className="group relative rounded-2xl border border-border/20 bg-card/60 backdrop-blur-2xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.15)]"
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.03), 0 4px 24px -8px hsl(var(--background) / 0.4)" }}
                 >
+                  {/* Top shine line */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent z-20" />
+                  {/* Inner glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
                   <div className="relative z-10 flex items-start justify-between">
                     {mirrored ? <>{iconEl}{textEl}</> : <>{textEl}{iconEl}</>}
                   </div>
@@ -1034,7 +1044,7 @@ export default function Vendas() {
             <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
         </div>
-        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden scan-line">
+        <div className="rounded-2xl border border-border/20 bg-card/70 backdrop-blur-2xl p-6 relative overflow-hidden" style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.03), 0 4px 32px -8px hsl(var(--background) / 0.4)" }}>
           <div className="absolute -top-40 right-0 w-72 h-72 bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute -bottom-32 left-10 w-48 h-48 bg-info/3 rounded-full blur-[80px] pointer-events-none" />
           <div className="relative z-10">
@@ -1300,7 +1310,7 @@ export default function Vendas() {
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/8 bg-card/30 backdrop-blur-xl card-premium shadow-[0_2px_24px_hsl(var(--background)/0.2)]">
+        <div className="overflow-hidden rounded-2xl border border-border/15 bg-card/70 backdrop-blur-2xl shadow-[0_4px_32px_-8px_hsl(var(--background)/0.4)]">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
             <p className="text-[10px] text-muted-foreground/15 font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
