@@ -159,10 +159,14 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-xl border border-border/50 bg-card/95 overflow-hidden transition-all hover:border-border/70 hover:shadow-sm",
+        "relative group rounded-2xl border border-border/20 bg-card/80 backdrop-blur-2xl overflow-hidden transition-all duration-300 hover:border-primary/20 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.12)]",
         className
       )}
     >
+      {/* Top glass shine line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent z-10" />
+      {/* Inner gradient glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.015] via-transparent to-primary/[0.01] pointer-events-none" />
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
