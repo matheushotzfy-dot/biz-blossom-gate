@@ -638,7 +638,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {[
               { icon: Zap, label: "PIX", numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}% · ${pixApprovedCount}/${pixTotalCount}`, color: "success" },
               { icon: CreditCard, label: "CARTÃO", numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}% · ${cardApprovedCount}/${cardTotalCount}`, color: "info" },
@@ -646,25 +646,19 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className="group relative rounded-2xl border border-border/20 bg-card/80 backdrop-blur-2xl p-4 md:p-5 overflow-hidden flex flex-col justify-between min-h-[140px] transition-all duration-300 hover:border-primary/25 hover:shadow-[0_0_30px_hsl(var(--primary)/0.06)]"
-                style={{ boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.04), 0 2px 12px -4px rgba(0,0,0,0.3)" }}>
-                {/* Left accent bar with glow */}
-                <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-full", `bg-${item.color}`)} />
-                <div className={cn("absolute left-0 top-3 bottom-3 w-[6px] rounded-full blur-sm opacity-50", `bg-${item.color}`)} />
-                {/* Glass shine line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-                {/* Subtle corner glow */}
-                <div className={cn("absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-[0.07]", `bg-${item.color}`)} />
-                <div className="pl-2 flex flex-col h-full relative z-10 min-w-0">
-                  <div className="flex items-center justify-between mb-auto">
-                    <span className="text-[9px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/35">{item.label}</span>
-                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border backdrop-blur-sm", `bg-${item.color}/8 border-${item.color}/15 text-${item.color}`)}>
-                      <item.icon className="h-4 w-4" />
+                className="group relative rounded-xl border border-border/25 bg-card/90 p-4 overflow-hidden flex flex-col justify-between min-h-[128px] transition-all duration-300 hover:border-primary/20">
+                {/* Left accent bar */}
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", `bg-${item.color}`)} />
+                <div className="pl-2.5 flex flex-col h-full relative z-10 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">{item.label}</span>
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", `bg-${item.color}/10 text-${item.color}`)}>
+                      <item.icon className="h-3.5 w-3.5" />
                     </div>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-[24px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
-                    <p className="mt-2 text-[10px] text-muted-foreground/25 font-mono tracking-wide">{item.helper}</p>
+                    <p className="text-xl font-heading font-black tabular-nums tracking-tight text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/30 font-mono">{item.helper}</p>
                   </div>
                 </div>
               </motion.div>
