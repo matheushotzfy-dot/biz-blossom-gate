@@ -76,7 +76,12 @@ function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: num
     };
     requestAnimationFrame(tick);
   }, [value, duration]);
-  return <>{formatter(display)}</>;
+  return (
+    <span className="relative inline-grid">
+      <span className="invisible col-start-1 row-start-1">{formatter(value)}</span>
+      <span className="col-start-1 row-start-1">{formatter(display)}</span>
+    </span>
+  );
 }
 
 const PERIOD_PRESETS = [
