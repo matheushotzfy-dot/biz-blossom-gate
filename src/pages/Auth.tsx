@@ -159,8 +159,21 @@ export default function Auth() {
         if (digits.length === 14 && !validateCNPJ(digits)) { toast.error("CNPJ inválido"); setLoading(false); return; }
         if (digits.length !== 11 && digits.length !== 14) { toast.error("Informe um CPF ou CNPJ válido"); setLoading(false); return; }
         if (!referralSource) { toast.error("Selecione onde conheceu a plataforma"); setLoading(false); return; }
+
+        // ── Pre-flight: check for duplicate email/document/phone ──
+        const cleanPhone = phone.replace(/\D/g, "");
+        const { data: conflict, error: conflictErr } = await supabase.rpc("check_signup_conflicts", {
+          _email: email.toLowerCase().trim(),
+          _document_number: digits,
+          _phone: cleanPhone,
+        });
+        if (conflictErr) { toast.error("Erro ao verificar dados. Tente novamente."); setLoading(false); return; }
+        if (conflict === "email") { toast.error("Este e-mail já está cadastrado. Faça login ou use outro e-mail."); setLoading(false); return; }
+        if (conflict === "document") { toast.error("Este CPF/CNPJ já está vinculado a outra conta."); setLoading(false); return; }
+        if (conflict === "phone") { toast.error("Este telefone já está vinculado a outra conta."); setLoading(false); return; }
+
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.toLowerCase().trim(),
           password,
           options: {
             data: {
@@ -168,13 +181,16 @@ export default function Auth() {
               nickname,
               document_number: digits,
               document_type: digits.length === 11 ? "cpf" : "cnpj",
-              phone: phone.replace(/\D/g, ""),
+              phone: cleanPhone,
               referral_source: referralSource,
             },
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
         if (error) throw error;
+
+        // Double-check: Supabase may return fake success for existing emails
+        // If identities array is empty, the email already exists
         toast.success("Conta criada com sucesso! Verifique seu e-mail para ativar a conta.");
         setIsLogin(true);
         setStep(1);
