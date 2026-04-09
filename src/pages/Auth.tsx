@@ -13,9 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Rocket, Eye, EyeOff, Shield, GraduationCap, BarChart2, CreditCard,
   Users, TrendingUp, CheckCircle2, ArrowRight, Lock,
-  Activity, Mail, Phone, User, FileText,
-  Heart, Target, Zap, Globe, BadgeCheck, QrCode,
-  DollarSign, Sparkles, Star, Play, Smartphone,
+  Mail, Phone, User, FileText,
+  Heart, Target,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -89,64 +88,7 @@ function AnimatedCounter({ target, prefix = "", suffix = "", duration = 2000 }: 
 }
 
 /* ─── Live preview data ─── */
-const SALE_NAMES = ["Lucas M.", "Carla F.", "Thiago B.", "Juliana R.", "Felipe S.", "Amanda L.", "Bruno C.", "Isabela T.", "Marcos P.", "Fernanda A."];
-const SALE_AMOUNTS = [97, 197, 297, 497, 697, 997, 1297, 1497, 47, 147];
-const PREVIEW_BARS = [34, 51, 39, 62, 48, 74, 57, 86, 69, 81, 76, 95, 72, 88, 79, 92, 84, 73, 89, 78, 94, 82, 68, 58];
 
-function NotificationFeed() {
-  const [notifications, setNotifications] = useState<{ id: number; name: string; amount: number; time: string }[]>([]);
-  const counterRef = useRef(0);
-  const TIMES = ["agora", "1min", "2min", "3min", "5min"];
-
-  useEffect(() => {
-    const spawn = () => {
-      counterRef.current += 1;
-      const id = counterRef.current;
-      setNotifications((prev) => [
-        {
-          id,
-          name: SALE_NAMES[id % SALE_NAMES.length],
-          amount: SALE_AMOUNTS[id % SALE_AMOUNTS.length],
-          time: TIMES[id % TIMES.length],
-        },
-        ...prev,
-      ].slice(0, 4));
-    };
-
-    spawn();
-    const interval = setInterval(spawn, 3800);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="space-y-2.5">
-      <AnimatePresence mode="popLayout">
-        {notifications.map((notification) => (
-          <motion.div
-            key={notification.id}
-            layout
-            initial={{ opacity: 0, x: 24, y: 8 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: -16, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="panel-enterprise-subtle card-premium flex items-center gap-3 p-3"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary shrink-0">
-              <Zap className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Venda aprovada</p>
-              <p className="truncate text-[11px] font-semibold text-foreground/85">
-                {notification.name} · <span className="text-primary">R$ {notification.amount},00</span>
-              </p>
-            </div>
-            <span className="text-[9px] font-medium text-muted-foreground/70 shrink-0">{notification.time}</span>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -268,8 +210,8 @@ export default function Auth() {
   const securitySignals = [
     { icon: Shield, title: "Anti-fraude ativo", detail: "análise em tempo real" },
     { icon: Lock, title: "2FA pronto", detail: "camadas extras de proteção" },
-    { icon: BadgeCheck, title: "LGPD", detail: "governança e consentimento" },
-    { icon: Activity, title: "Monitoramento 24/7", detail: "checkout e saques online" },
+    { icon: Shield, title: "LGPD", detail: "governança e consentimento" },
+    { icon: Shield, title: "Monitoramento 24/7", detail: "checkout e saques online" },
   ];
 
   return (
@@ -617,7 +559,7 @@ export default function Auth() {
                 {[
                   { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
                   { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M" },
-                  { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
+                  { value: 99, label: "Uptime", icon: Shield, prefix: "", suffix: ".9%" },
                 ].map((item) => (
                   <div key={item.label} className="panel-enterprise-subtle p-3 text-center">
                     <item.icon className="mx-auto mb-1.5 h-3.5 w-3.5 text-primary/80" />
@@ -632,180 +574,86 @@ export default function Auth() {
 
         {/* ═══ RIGHT: Product Preview ═══ */}
         <div className="relative hidden overflow-hidden lg:block">
-          <div className="relative z-10 flex min-h-screen flex-col">
-            {/* ─── Hero Image Section ─── */}
-            <div className="relative flex-1 min-h-0">
-              {/* Image */}
-              <div className="absolute inset-0 overflow-hidden">
-                <img
-                  src={authHeroImg}
-                  alt="Empreendedora feliz usando a plataforma HOTZFY"
-                  className="h-full w-full object-cover object-[center_15%] scale-[1.08]"
-                  width={960}
-                  height={1280}
-                />
-                {/* Cinematic overlays — richer depth */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/15" />
-                <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-transparent to-background" />
-                <div className="absolute inset-0 mix-blend-overlay bg-gradient-to-br from-primary/10 via-transparent to-info/5" />
-                <div className="absolute inset-0 noise-overlay opacity-20 pointer-events-none" />
-                {/* Rich atmospheric glows */}
-                <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-[130px] pointer-events-none animate-pulse-glow" />
-                <div className="absolute bottom-1/4 right-0 h-96 w-96 rounded-full bg-primary/8 blur-[160px] pointer-events-none" />
-                <div className="absolute top-1/3 right-1/4 h-48 w-48 rounded-full bg-info/6 blur-[100px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
-              </div>
+          {/* Full-bleed hero image */}
+          <div className="absolute inset-0">
+            <img
+              src={authHeroImg}
+              alt="Empreendedora usando a plataforma HOTZFY"
+              className="h-full w-full object-cover object-[center_15%]"
+              width={960}
+              height={1280}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-transparent" />
+          </div>
 
-              {/* ─── Floating Revenue Card — top left ─── */}
-              <motion.div
-                initial={{ opacity: 0, y: -16, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute top-5 left-5 xl:top-7 xl:left-7 z-20"
-              >
-                <div className="rounded-2xl border border-primary/25 bg-card/90 backdrop-blur-2xl p-5 shadow-[0_12px_48px_hsl(var(--primary)/0.15)]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                    <p className="text-[9px] font-heading uppercase tracking-[0.24em] text-primary/80">Receita Hoje</p>
-                  </div>
-                  <p className="font-heading text-[38px] xl:text-[44px] tracking-[-0.06em] leading-none text-foreground">
-                    R$ <AnimatedCounter target={128480} />
-                  </p>
-                  {/* Mini sparkline chart */}
-                  <div className="flex items-end gap-[2px] mt-2.5 h-6">
-                    {[28, 42, 36, 55, 48, 62, 44, 70, 58, 76, 64, 82, 72, 88, 78, 94].map((h, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ delay: 0.5 + i * 0.04, duration: 0.4 }}
-                        className="flex-1 rounded-full bg-primary/40"
-                        style={{ minWidth: 2 }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
-                    <div className="inline-flex items-center gap-1 rounded-full bg-success/12 px-2 py-0.5">
-                      <TrendingUp className="h-3 w-3 text-success" />
-                      <span className="text-[10px] font-bold text-success">+18,4%</span>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">vs ontem</span>
-                  </div>
+          {/* Content overlay — bottom-aligned, editorial style */}
+          <div className="relative z-10 flex min-h-screen flex-col justify-end p-8 xl:p-10">
+            {/* Revenue highlight — single clean card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="mb-6"
+            >
+              <div className="inline-flex items-center gap-2 mb-4">
+                <div className="h-2.5 w-2.5 rounded-full bg-success" />
+                <span className="text-[11px] font-medium text-foreground/70">Plataforma operando agora</span>
+              </div>
+              <p className="font-heading text-[52px] xl:text-[64px] tracking-[-0.04em] leading-[0.9] text-foreground">
+                R$ <AnimatedCounter target={128480} />
+              </p>
+              <p className="mt-2 text-[14px] text-foreground/60">processados hoje por produtores na HOTZFY</p>
+              <div className="flex items-center gap-3 mt-4">
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-success/15 px-3 py-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-success" />
+                  <span className="text-[12px] font-semibold text-success">+18,4%</span>
                 </div>
-              </motion.div>
-
-              {/* ─── Floating Sale Notifications — top right ─── */}
-              <div className="absolute top-5 right-5 xl:top-7 xl:right-7 z-20 w-[260px] xl:w-[280px]">
-                <motion.div
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5, duration: 0.5 }}
-                  className="mb-2.5 flex items-center justify-end"
-                >
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/12 backdrop-blur-xl px-3 py-1.5 shadow-[0_4px_20px_hsl(var(--success)/0.15)]">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute h-full w-full rounded-full bg-success animate-ping opacity-50" />
-                      <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-                    </span>
-                    <span className="text-[9px] font-heading uppercase tracking-[0.2em] text-success">Vendas ao vivo</span>
-                  </div>
-                </motion.div>
-                <NotificationFeed />
+                <span className="text-[12px] text-foreground/50">vs. ontem</span>
               </div>
+            </motion.div>
 
-              {/* ─── Center floating social proof ─── */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.2, duration: 0.5 }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
-              >
-                <div className="flex items-center gap-3 rounded-full border border-primary/20 bg-card/70 backdrop-blur-2xl px-5 py-3 shadow-[0_8px_32px_hsl(var(--primary)/0.12)]">
-                  <div className="flex -space-x-2">
-                    {["bg-primary/60", "bg-info/60", "bg-warning/60", "bg-success/60"].map((bg, i) => (
-                      <div key={i} className={cn("h-7 w-7 rounded-full border-2 border-card/80 flex items-center justify-center text-[9px] font-bold text-foreground/80", bg)}>
-                        {["L", "C", "T", "J"][i]}
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold text-foreground">+10.847 produtores</p>
-                    <p className="text-[9px] text-muted-foreground">usando a plataforma agora</p>
-                  </div>
+            {/* Simple stats row */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="grid grid-cols-3 gap-4 mb-6"
+            >
+              {[
+                { value: "10.847", label: "Produtores ativos" },
+                { value: "92%", label: "Taxa de aprovação" },
+                { value: "99.9%", label: "Uptime da plataforma" },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <p className="font-heading text-[22px] xl:text-[26px] tracking-[-0.03em] text-foreground">{stat.value}</p>
+                  <p className="text-[11px] text-foreground/50 mt-0.5">{stat.label}</p>
                 </div>
-              </motion.div>
+              ))}
+            </motion.div>
 
-              {/* ─── Bottom Content Area ─── */}
-              <div className="absolute bottom-0 left-0 right-0 z-20 p-5 xl:p-7">
-                {/* Feature cards */}
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                  className="mb-3"
+            {/* Feature pills — compact, not cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.4 }}
+              className="flex flex-wrap gap-2"
+            >
+              {[
+                { icon: CreditCard, label: "Checkout inteligente" },
+                { icon: Users, label: "Programa de afiliados" },
+                { icon: GraduationCap, label: "Área de membros" },
+                { icon: Shield, label: "Anti-fraude ativo" },
+              ].map((feature) => (
+                <div
+                  key={feature.label}
+                  className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/5 backdrop-blur-sm px-4 py-2"
                 >
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-primary/20 bg-primary/12 text-primary glow-primary">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <p className="text-[12px] font-heading text-foreground tracking-[-0.02em]">Tudo pra sua operação digital</p>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { icon: CreditCard, label: "Checkout Pro", detail: "PIX, cartão & boleto", color: "text-primary", border: "border-primary/20", glow: "shadow-primary/8" },
-                      { icon: Users, label: "Afiliados", detail: "Recrute e pague auto", color: "text-info", border: "border-info/20", glow: "shadow-info/8" },
-                      { icon: GraduationCap, label: "Área Membros", detail: "Cursos & conteúdo", color: "text-warning", border: "border-warning/20", glow: "shadow-warning/8" },
-                      { icon: BarChart2, label: "Analytics", detail: "Relatórios completos", color: "text-success", border: "border-success/20", glow: "shadow-success/8" },
-                    ].map((feature, i) => (
-                      <motion.div
-                        key={feature.label}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 + i * 0.07 }}
-                        className={cn(
-                          "group rounded-xl border bg-card/80 backdrop-blur-2xl p-3 transition-all duration-300",
-                          "hover:bg-card/90 hover:shadow-lg cursor-default",
-                          feature.border, `hover:${feature.glow}`
-                        )}
-                      >
-                        <feature.icon className={cn("h-4 w-4 mb-1.5", feature.color)} />
-                        <p className="text-[10px] font-semibold text-foreground leading-tight">{feature.label}</p>
-                        <p className="text-[8px] text-muted-foreground mt-0.5 leading-tight">{feature.detail}</p>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Bottom metrics */}
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1, duration: 0.4 }}
-                  className="grid grid-cols-4 gap-2"
-                >
-                  {desktopMetrics.map((metric, i) => (
-                    <motion.div
-                      key={metric.label}
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 1.1 + i * 0.05 }}
-                      className="rounded-xl border border-border/35 bg-card/80 backdrop-blur-2xl p-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary shrink-0">
-                          <metric.icon className="h-3.5 w-3.5" />
-                        </div>
-                        <div>
-                          <p className="text-[7px] font-heading uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</p>
-                          <p className="font-heading text-[14px] leading-none text-foreground mt-0.5">{metric.value}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-            </div>
+                  <feature.icon className="h-3.5 w-3.5 text-foreground/60" />
+                  <span className="text-[11px] font-medium text-foreground/70">{feature.label}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </div>
