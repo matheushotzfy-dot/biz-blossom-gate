@@ -554,19 +554,18 @@ export default function Dashboard() {
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 mt-5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
-                <Check className="h-3 w-3 text-success" /> {approved.length} aprovadas
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
-                <Clock3 className="h-3 w-3 text-warning" /> {pending.length} pendentes
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
-                <Target className="h-3 w-3" /> {conversion.toFixed(1)}% conversão
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground rounded-full border border-border/40 bg-card/80 px-3 py-1.5">
-                <Wallet className="h-3 w-3 text-primary" /> saldo {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
-              </span>
+            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+              {[
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/20", bg: "bg-success/5" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/20", bg: "bg-info/5" },
+                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/20", bg: "bg-primary/5" },
+              ].map((chip, i) => (
+                <span key={i} className={`inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 rounded-full border ${chip.border} ${chip.bg} backdrop-blur-sm px-3.5 py-1.5 transition-colors hover:border-primary/30`}>
+                  <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
+                  {chip.label}
+                </span>
+              ))}
             </div>
           </motion.div>
 
