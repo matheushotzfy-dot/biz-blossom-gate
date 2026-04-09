@@ -594,25 +594,26 @@ export default function Dashboard() {
           {/* Executive KPI strip — Ultra Glass */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {([
-              { label: "Total Faturado", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentFrom: "from-emerald-500", accentTo: "to-green-400", valueColor: "text-primary", iconBg: "bg-emerald-500/[0.08]", iconText: "text-emerald-400", iconBorder: "border-emerald-500/15", glowColor: "bg-emerald-500" },
-              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentFrom: "from-green-500", accentTo: "to-emerald-400", valueColor: "text-success", iconBg: "bg-green-500/[0.08]", iconText: "text-green-400", iconBorder: "border-green-500/15", glowColor: "bg-green-500" },
-              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentFrom: "from-blue-500", accentTo: "to-cyan-400", valueColor: "text-info", iconBg: "bg-blue-500/[0.08]", iconText: "text-blue-400", iconBorder: "border-blue-500/15", glowColor: "bg-blue-500" },
-              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, accentFrom: balance < 0 ? "from-amber-500" : "from-emerald-500", accentTo: balance < 0 ? "to-orange-400" : "to-teal-400", valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: balance < 0 ? "bg-amber-500/[0.08]" : "bg-emerald-500/[0.08]", iconText: balance < 0 ? "text-amber-400" : "text-emerald-400", iconBorder: balance < 0 ? "border-amber-500/15" : "border-emerald-500/15", glowColor: balance < 0 ? "bg-amber-500" : "bg-emerald-500" },
+              { label: "Total Faturado", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
+              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", iconBg: "bg-success/10", iconText: "text-success", iconBorder: "border-success/20", glowColor: "bg-success" },
+              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-info/10", iconText: "text-info", iconBorder: "border-info/20", glowColor: "bg-info" },
+              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: balance < 0 ? "bg-warning/10" : "bg-primary/10", iconText: balance < 0 ? "text-warning" : "text-primary", iconBorder: balance < 0 ? "border-warning/20" : "border-primary/20", glowColor: balance < 0 ? "bg-warning" : "bg-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 border border-border/[0.15] bg-card/[0.45] backdrop-blur-2xl hover:bg-card/[0.60] hover:border-border/[0.25]"
-                style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--border) / 0.08), 0 4px 24px -8px hsl(var(--background) / 0.5)" }}>
+                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 glass-panel border border-border/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5">
                 {/* Top shine line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/[0.12] to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+                {/* Inner glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
                 {/* Ambient corner glow */}
-                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.05] transition-opacity duration-500 group-hover:opacity-[0.10]", item.glowColor)} />
+                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]", item.glowColor)} />
                 
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/45 mb-3">{item.label}</p>
+                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 mb-3">{item.label}</p>
                     <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border", item.iconBg, item.iconBorder, item.iconText)}>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-sm", item.iconBg, item.iconBorder, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
