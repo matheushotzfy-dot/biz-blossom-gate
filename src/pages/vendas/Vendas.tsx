@@ -772,7 +772,8 @@ export default function Vendas() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line"
+        className="relative mb-14 rounded-3xl border border-border/15 p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line overflow-hidden"
+        style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 8px 48px -12px hsl(var(--background) / 0.5)" }}
       >
         {/* Animated floating orbs — extended beyond bounds for smooth fade */}
         <div className="absolute -inset-16 pointer-events-none">
@@ -1043,7 +1044,7 @@ export default function Vendas() {
             <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
           </div>
         </div>
-        <div className="rounded-2xl glass-panel animated-border p-6 relative overflow-hidden scan-line">
+        <div className="rounded-2xl border border-border/20 bg-card/70 backdrop-blur-2xl p-6 relative overflow-hidden" style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.03), 0 4px 32px -8px hsl(var(--background) / 0.4)" }}>
           <div className="absolute -top-40 right-0 w-72 h-72 bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute -bottom-32 left-10 w-48 h-48 bg-info/3 rounded-full blur-[80px] pointer-events-none" />
           <div className="relative z-10">
@@ -1309,7 +1310,7 @@ export default function Vendas() {
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/8 bg-card/30 backdrop-blur-xl card-premium shadow-[0_2px_24px_hsl(var(--background)/0.2)]">
+        <div className="overflow-hidden rounded-2xl border border-border/15 bg-card/70 backdrop-blur-2xl shadow-[0_4px_32px_-8px_hsl(var(--background)/0.4)]">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
             <p className="text-[10px] text-muted-foreground/15 font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
