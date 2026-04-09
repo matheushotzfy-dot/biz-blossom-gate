@@ -602,7 +602,7 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-4 md:p-6 min-h-[280px] relative overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl ultra-glass glass-shine p-4 md:p-6 min-h-[280px] relative overflow-hidden">
           <div className="absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
@@ -625,7 +625,7 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-4 md:p-5 overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl ultra-glass glass-shine p-4 md:p-5 overflow-hidden">
             <div className="grid grid-cols-1 gap-2">
               <SmallMetric icon={<Percent className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -641,25 +641,22 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length} solicitações`, color: "warning" },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + idx * 0.04 }}
-                className="group relative rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all duration-500 hover:border-primary/30 hover:shadow-[0_12px_50px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.06)]"
-                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                {/* Top glass shine line */}
-                <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
+                className="group relative rounded-xl ultra-glass glass-shine shimmer-sweep p-3.5 md:p-4 overflow-hidden flex flex-col justify-between min-h-[130px] transition-all duration-500">
                 {/* Atmospheric corner glow */}
-                <div className={cn("absolute -top-12 -right-12 h-24 w-24 rounded-full blur-[40px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.08] group-hover:bg-${item.color}/[0.18]`)} />
-                <div className={cn("absolute -bottom-8 -left-8 h-16 w-16 rounded-full blur-[30px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.04] group-hover:bg-${item.color}/[0.10]`)} />
+                <div className={cn("absolute -top-12 -right-12 h-24 w-24 rounded-full blur-[40px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.06] group-hover:bg-${item.color}/[0.18]`)} />
+                <div className={cn("absolute -bottom-8 -left-8 h-16 w-16 rounded-full blur-[30px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.03] group-hover:bg-${item.color}/[0.10]`)} />
                 {/* Left accent bar */}
                 <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", `bg-${item.color}`)} />
-                <div className="pl-1.5 flex flex-col h-full relative z-10">
+                <div className="pl-1.5 flex flex-col h-full relative z-10 min-w-0">
                   <div className="flex items-center justify-between mb-auto">
-                    <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-white/30">{item.label}</span>
+                    <span className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground/40">{item.label}</span>
                     <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border backdrop-blur-md shadow-lg", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
                       <item.icon className="h-4 w-4" />
                     </div>
                   </div>
                   <div className="mt-auto">
                     <p className="text-[22px] font-heading tabular-nums tracking-tight text-foreground leading-none">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}</p>
-                    <p className="mt-1.5 text-[10px] text-white/20 font-mono">{item.helper}</p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/30 font-mono">{item.helper}</p>
                   </div>
                 </div>
               </motion.div>
