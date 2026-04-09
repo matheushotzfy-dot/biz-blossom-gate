@@ -56,8 +56,6 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { motion } from "framer-motion";
-import pixLogoTeal from "@/assets/pix-logo-official.png";
-import pixLogoWhite from "@/assets/pix-logo-official-white.png";
 
 /* ─────────────────────── Animated Number ─────────────────────── */
 function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
@@ -962,17 +960,13 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
 }
 
 function PixLogoMark({ className, variant = "teal" }: { className?: string; variant?: "teal" | "white" }) {
+  const fill = variant === "white" ? "#FFFFFF" : "#32BCAD";
   return (
-    <img
-      src={variant === "white" ? pixLogoWhite : pixLogoTeal}
-      alt=""
-      aria-hidden="true"
-      width={64}
-      height={64}
-      loading="lazy"
-      decoding="async"
-      className={cn("select-none object-contain", className)}
-    />
+    <svg viewBox="0 0 512 512" fill="none" aria-hidden="true" className={cn("select-none", className)}>
+      <path d="M346.5 392.5c-20.1 0-38.9-7.8-53.1-22L216.5 293.6c-5.6-5.6-14.6-5.6-20.2 0l-76.7 76.7c-14.2 14.2-33.1 22-53.1 22H46.9l97 97c20.3 20.3 53.3 20.3 73.6 0l97-97h32.0z" fill={fill}/>
+      <path d="M66.5 119.5h-19.6l97 97c20.3 20.3 53.3 20.3 73.6 0l97-97h-32.0c-20.1 0-38.9 7.8-53.1 22l-76.9 76.9c-5.6 5.6-14.6 5.6-20.2 0l-76.7-76.7c-14.2-14.2-33.1-22-53.1-22h34.0z" fill={fill}/>
+      <path d="M488.4 236.2l-52.2-52.2c-.9.5-1.9 1-2.9 1.4h-33.9c-12.4 0-24.1 4.8-32.8 13.6l-76.9 76.9c-8 8-18.5 12-28.9 12s-21-4-28.9-12l-76.7-76.7c-8.8-8.8-20.4-13.6-32.8-13.6H91.4c-1-.4-2-.9-2.9-1.4l-52 52c-20.3 20.3-20.3 53.3 0 73.6l52 52c.9-.5 1.9-1 2.9-1.4H123.4c12.4 0 24.1-4.8 32.8-13.6l76.7-76.7c15.4-15.4 42.5-15.4 57.9 0l76.9 76.9c8.8 8.8 20.4 13.6 32.8 13.6h33.9c1 .4 2 .9 2.9 1.4l52.2-52.2c20.3-20.3 20.3-53.3 0-73.6z" fill={fill}/>
+    </svg>
   );
 }
 
