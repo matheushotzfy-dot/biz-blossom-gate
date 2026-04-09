@@ -600,17 +600,15 @@ export default function Dashboard() {
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, accentFrom: balance < 0 ? "from-amber-500" : "from-emerald-500", accentTo: balance < 0 ? "to-orange-400" : "to-teal-400", valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: balance < 0 ? "bg-amber-500/[0.08]" : "bg-emerald-500/[0.08]", iconText: balance < 0 ? "text-amber-400" : "text-emerald-400", iconBorder: balance < 0 ? "border-amber-500/15" : "border-emerald-500/15", glowColor: balance < 0 ? "bg-amber-500" : "bg-emerald-500" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300"
-                style={{ background: "linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.6) 100%)", boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.03), inset 0 -1px 0 0 rgba(0,0,0,0.08), 0 4px 24px -8px rgba(0,0,0,0.35)" }}>
-                {/* Gradient accent bar */}
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b", item.accentFrom, item.accentTo)} />
+                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/[0.10]"
+                style={{ boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.04), 0 4px 24px -8px rgba(0,0,0,0.25)" }}>
                 {/* Top shine line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 {/* Ambient corner glow */}
-                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.04] transition-opacity duration-500 group-hover:opacity-[0.08]", item.glowColor)} />
+                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.05] transition-opacity duration-500 group-hover:opacity-[0.10]", item.glowColor)} />
                 
                 <div className="relative z-10 flex items-start justify-between">
-                  <div className="flex-1 pl-1">
+                  <div className="flex-1">
                     <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/45 mb-3">{item.label}</p>
                     <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
