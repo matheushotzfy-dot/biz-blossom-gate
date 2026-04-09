@@ -952,14 +952,13 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className="group relative rounded-xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-3 overflow-hidden transition-all duration-500 hover:border-primary/25 hover:shadow-[0_8px_30px_rgba(16,185,129,0.1)]" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-      <div className="absolute top-0 left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-white/[0.10] to-transparent pointer-events-none" />
+    <div className="group relative rounded-xl ultra-glass glass-shine p-3 overflow-hidden transition-all duration-500 hover:border-primary/25">
       <div className="relative z-10">
         <div className="mb-1.5 flex items-center gap-2">
           <span className={s.text}>{icon}</span>
-          <span className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">{label}</span>
+          <span className="text-[10px] text-muted-foreground/40 font-semibold uppercase tracking-wider">{label}</span>
         </div>
-        <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
+        <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums glow-value ${s.valueTxt}`}>{value}</p>
       </div>
     </div>
   );
