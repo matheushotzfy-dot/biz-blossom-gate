@@ -88,64 +88,7 @@ function AnimatedCounter({ target, prefix = "", suffix = "", duration = 2000 }: 
 }
 
 /* ─── Live preview data ─── */
-const SALE_NAMES = ["Lucas M.", "Carla F.", "Thiago B.", "Juliana R.", "Felipe S.", "Amanda L.", "Bruno C.", "Isabela T.", "Marcos P.", "Fernanda A."];
-const SALE_AMOUNTS = [97, 197, 297, 497, 697, 997, 1297, 1497, 47, 147];
-const PREVIEW_BARS = [34, 51, 39, 62, 48, 74, 57, 86, 69, 81, 76, 95, 72, 88, 79, 92, 84, 73, 89, 78, 94, 82, 68, 58];
 
-function NotificationFeed() {
-  const [notifications, setNotifications] = useState<{ id: number; name: string; amount: number; time: string }[]>([]);
-  const counterRef = useRef(0);
-  const TIMES = ["agora", "1min", "2min", "3min", "5min"];
-
-  useEffect(() => {
-    const spawn = () => {
-      counterRef.current += 1;
-      const id = counterRef.current;
-      setNotifications((prev) => [
-        {
-          id,
-          name: SALE_NAMES[id % SALE_NAMES.length],
-          amount: SALE_AMOUNTS[id % SALE_AMOUNTS.length],
-          time: TIMES[id % TIMES.length],
-        },
-        ...prev,
-      ].slice(0, 4));
-    };
-
-    spawn();
-    const interval = setInterval(spawn, 3800);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="space-y-2.5">
-      <AnimatePresence mode="popLayout">
-        {notifications.map((notification) => (
-          <motion.div
-            key={notification.id}
-            layout
-            initial={{ opacity: 0, x: 24, y: 8 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: -16, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="panel-enterprise-subtle card-premium flex items-center gap-3 p-3"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary shrink-0">
-              <Zap className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Venda aprovada</p>
-              <p className="truncate text-[11px] font-semibold text-foreground/85">
-                {notification.name} · <span className="text-primary">R$ {notification.amount},00</span>
-              </p>
-            </div>
-            <span className="text-[9px] font-medium text-muted-foreground/70 shrink-0">{notification.time}</span>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -267,8 +210,8 @@ export default function Auth() {
   const securitySignals = [
     { icon: Shield, title: "Anti-fraude ativo", detail: "análise em tempo real" },
     { icon: Lock, title: "2FA pronto", detail: "camadas extras de proteção" },
-    { icon: BadgeCheck, title: "LGPD", detail: "governança e consentimento" },
-    { icon: Activity, title: "Monitoramento 24/7", detail: "checkout e saques online" },
+    { icon: Shield, title: "LGPD", detail: "governança e consentimento" },
+    { icon: Shield, title: "Monitoramento 24/7", detail: "checkout e saques online" },
   ];
 
   return (
@@ -616,7 +559,7 @@ export default function Auth() {
                 {[
                   { value: 10847, label: "Produtores", icon: Users, prefix: "", suffix: "+" },
                   { value: 52, label: "Processados", icon: TrendingUp, prefix: "R$", suffix: "M" },
-                  { value: 99, label: "Uptime", icon: Activity, prefix: "", suffix: ".9%" },
+                  { value: 99, label: "Uptime", icon: Shield, prefix: "", suffix: ".9%" },
                 ].map((item) => (
                   <div key={item.label} className="panel-enterprise-subtle p-3 text-center">
                     <item.icon className="mx-auto mb-1.5 h-3.5 w-3.5 text-primary/80" />
