@@ -570,21 +570,29 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Executive KPI strip — Ultra Glass */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { label: "Total Faturado", numValue: revenue, formatter: fmt, color: "primary", icon: ShoppingCart },
-              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), color: "success", icon: TrendingUp },
-              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, color: "info", icon: Target },
-              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
-            ].map((item, idx) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {([
+              { label: "Total Faturado", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentFrom: "from-emerald-500", accentTo: "to-green-400", valueColor: "text-primary", iconBg: "bg-emerald-500/[0.08]", iconText: "text-emerald-400", iconBorder: "border-emerald-500/15", glowColor: "bg-emerald-500" },
+              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentFrom: "from-green-500", accentTo: "to-emerald-400", valueColor: "text-success", iconBg: "bg-green-500/[0.08]", iconText: "text-green-400", iconBorder: "border-green-500/15", glowColor: "bg-green-500" },
+              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentFrom: "from-blue-500", accentTo: "to-cyan-400", valueColor: "text-info", iconBg: "bg-blue-500/[0.08]", iconText: "text-blue-400", iconBorder: "border-blue-500/15", glowColor: "bg-blue-500" },
+              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, accentFrom: balance < 0 ? "from-amber-500" : "from-emerald-500", accentTo: balance < 0 ? "to-orange-400" : "to-teal-400", valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: balance < 0 ? "bg-amber-500/[0.08]" : "bg-emerald-500/[0.08]", iconText: balance < 0 ? "text-amber-400" : "text-emerald-400", iconBorder: balance < 0 ? "border-amber-500/15" : "border-emerald-500/15", glowColor: balance < 0 ? "bg-amber-500" : "bg-emerald-500" },
+            ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl border border-border/30 bg-card/95 p-5 overflow-hidden transition-all duration-300 hover:border-primary/20">
+                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300"
+                style={{ background: "linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.6) 100%)", boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.03), inset 0 -1px 0 0 rgba(0,0,0,0.08), 0 4px 24px -8px rgba(0,0,0,0.35)" }}>
+                {/* Gradient accent bar */}
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b", item.accentFrom, item.accentTo)} />
+                {/* Top shine line */}
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+                {/* Ambient corner glow */}
+                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.04] transition-opacity duration-500 group-hover:opacity-[0.08]", item.glowColor)} />
+                
                 <div className="relative z-10 flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50 mb-3">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading tabular-nums tracking-[-0.03em] leading-none", `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                  <div className="flex-1 pl-1">
+                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/45 mb-3">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border", item.iconBg, item.iconBorder, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
