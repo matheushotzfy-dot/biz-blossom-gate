@@ -587,51 +587,50 @@ export default function Auth() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
           </div>
 
-          {/* All content pinned to bottom — face stays clean */}
+          {/* Content pinned to bottom — face stays clean */}
           <div className="relative z-10 flex min-h-screen flex-col justify-end p-6 xl:p-8">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="space-y-4"
+              className="space-y-3"
             >
-              {/* Volume */}
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50 mb-1">Volume total processado</p>
-                <p className="font-heading text-[38px] xl:text-[46px] tracking-[-0.04em] leading-none text-white">
-                  R$ <AnimatedCounter target={847} suffix="M" />
+              {/* Headline */}
+              <div className="mb-1">
+                <p className="font-heading text-[22px] xl:text-[26px] tracking-[-0.03em] leading-[1.1] text-white">
+                  Tudo que você precisa<br />para vender online.
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 px-2 py-0.5">
-                    <TrendingUp className="h-3 w-3 text-emerald-400" />
-                    <span className="text-[10px] font-bold text-emerald-400">+34%</span>
-                  </span>
-                  <span className="text-[10px] text-white/40">últimos 12 meses</span>
-                </div>
+                <p className="text-[11px] text-white/45 mt-1.5 max-w-[260px] leading-relaxed">
+                  Checkout, pagamentos, área de membros e muito mais em uma única plataforma.
+                </p>
               </div>
 
-              {/* Divider */}
-              <div className="h-px bg-white/10" />
-
-              {/* KPIs */}
-              <div className="flex gap-6">
+              {/* Feature cards — 2x2 grid */}
+              <div className="grid grid-cols-2 gap-2">
                 {[
-                  { value: "52K+", label: "Produtores" },
-                  { value: "4.2M", label: "Transações" },
-                  { value: "99.9%", label: "Uptime" },
-                ].map((kpi) => (
-                  <div key={kpi.label}>
-                    <p className="font-heading text-[20px] xl:text-[22px] tracking-[-0.02em] text-white">{kpi.value}</p>
-                    <p className="text-[9px] font-medium text-white/40 uppercase tracking-[0.1em] mt-0.5">{kpi.label}</p>
-                  </div>
+                  { icon: Zap, title: "Saque automático", desc: "Receba no PIX em minutos" },
+                  { icon: CreditCard, title: "Checkout otimizado", desc: "PIX, cartão e boleto" },
+                  { icon: GraduationCap, title: "Área de membros", desc: "Cursos e conteúdo protegido" },
+                  { icon: Shield, title: "Anti-fraude", desc: "Proteção em tempo real" },
+                ].map((f, i) => (
+                  <motion.div
+                    key={f.title}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 + i * 0.08 }}
+                    className="rounded-xl border border-white/8 bg-white/5 backdrop-blur-md p-3 group hover:bg-white/8 transition-colors"
+                  >
+                    <f.icon className="h-4 w-4 text-primary mb-2" />
+                    <p className="text-[11px] font-semibold text-white leading-tight">{f.title}</p>
+                    <p className="text-[9px] text-white/40 mt-0.5 leading-tight">{f.desc}</p>
+                  </motion.div>
                 ))}
               </div>
 
-              {/* Trust */}
-              <div className="flex items-center gap-4 pt-1">
-                {["PCI DSS", "SSL 256-bit", "LGPD"].map((t) => (
-                  <span key={t} className="text-[8px] font-medium text-white/25 uppercase tracking-[0.12em]">{t}</span>
-                ))}
+              {/* Bottom trust line */}
+              <div className="flex items-center gap-3 pt-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="text-[9px] font-medium text-white/35 uppercase tracking-[0.1em]">Plataforma online · PCI DSS · LGPD · SSL 256-bit</span>
               </div>
             </motion.div>
           </div>
