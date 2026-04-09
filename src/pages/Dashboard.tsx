@@ -433,48 +433,37 @@ export default function Dashboard() {
             <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
             <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
              <div className="relative p-8 md:p-10 text-center">
-              {/* Animated rings */}
-              <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '2.5s' }} />
-                <div className="absolute inset-2 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
-                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center ring-4 ring-primary/15 shadow-lg shadow-primary/20">
-                  <Rocket className="h-10 w-10 text-primary drop-shadow-lg" />
+              {/* Animated icon */}
+              <div className="mx-auto mb-7 relative h-32 w-32 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
+                <div className="absolute inset-3 rounded-full bg-primary/8 animate-ping" style={{ animationDuration: '3.5s', animationDelay: '0.4s' }} />
+                <div className="relative h-24 w-24 rounded-full bg-gradient-to-br from-primary/30 via-primary/15 to-transparent flex items-center justify-center ring-2 ring-primary/20 shadow-2xl shadow-primary/25">
+                  <Rocket className="h-11 w-11 text-primary drop-shadow-lg" />
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-5 py-2 mb-5">
                 <Flame className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
+                <span className="text-[11px] font-bold text-primary uppercase tracking-widest">Modo Escala Desbloqueado</span>
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3 leading-tight tracking-[-0.04em]">
+              <h2 className="text-3xl md:text-4xl font-display font-black text-foreground mb-2 leading-[1.1] tracking-[-0.04em]">
                 MODO ESCALA<br /><span className="text-gradient">ATIVADO! 🔥</span>
               </h2>
 
-              <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-6">
-                <p className="font-bold text-foreground text-base">Você atingiu a elite dos vendedores!</p>
-                <p>R$ 2.000 em 24h comprovam: você tem <strong className="text-primary">mentalidade de escala</strong>. Poucos chegam aqui — e você é um deles.</p>
-                <p>A partir de agora, cada venda te aproxima do <strong className="text-foreground">próximo nível</strong>. Sem limites.</p>
+              <p className="text-xs text-muted-foreground/60 mb-5 font-mono tracking-wide">R$ 2.000+ em 24h • Top Seller</p>
+
+              <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-7">
+                <p className="font-bold text-foreground text-[15px]">Você é a elite. Ponto.</p>
+                <p>Poucos vendedores alcançam esse marco. Você tem <strong className="text-primary">mentalidade de escala</strong> — e a plataforma agora reconhece isso.</p>
+                <p>Cada venda te aproxima do <strong className="text-foreground">próximo nível</strong>. Continue dominando.</p>
               </div>
 
-              {/* Perks grid */}
-              <div className="grid grid-cols-2 gap-2.5 mb-5">
-                <div className="rounded-xl bg-primary/5 border border-primary/15 p-3 text-left">
-                  <div className="flex items-center gap-2 mb-1.5"><Zap className="h-4 w-4 text-primary" /><span className="text-xs font-bold text-foreground">Boost Visual</span></div>
-                  <p className="text-[10px] text-muted-foreground leading-snug">Dashboard com visual exclusivo de alta performance</p>
-                </div>
-                <div className="rounded-xl bg-primary/5 border border-primary/15 p-3 text-left">
-                  <div className="flex items-center gap-2 mb-1.5"><TrendingUp className="h-4 w-4 text-primary" /><span className="text-xs font-bold text-foreground">Status Elite</span></div>
-                  <p className="text-[10px] text-muted-foreground leading-snug">Badge permanente que marca sua conquista</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-6">
+              <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-7">
                 <div className="flex items-start gap-3"><ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" /><div className="text-left"><p className="text-sm font-bold text-foreground mb-1">Suporte Prioritário Ativado</p><p className="text-xs text-muted-foreground">No Modo Escala, o suporte e a fluidez da plataforma estarão 100% disponíveis para você. Qualquer ajuda para escalar que precisar, pode nos chamar!</p></div></div>
               </div>
 
-              <p className="text-base font-display font-black text-primary mb-5 tracking-wide">O CÉU NÃO É O LIMITE 🚀</p>
-              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR!</button>
+              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR! 🚀</button>
             </div>
           </div>
         </div>
