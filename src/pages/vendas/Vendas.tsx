@@ -367,7 +367,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.15), ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl bg-card/50 backdrop-blur-lg border border-border/10 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/15 hover:shadow-lg hover:shadow-primary/5"
+      className="rounded-2xl bg-card/60 backdrop-blur-2xl border border-border/15 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/20 hover:shadow-[0_8px_32px_-8px_hsl(var(--primary)/0.1)]"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
