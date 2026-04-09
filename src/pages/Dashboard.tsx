@@ -56,6 +56,8 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { motion } from "framer-motion";
+import pixLogoTeal from "@/assets/pix-logo-official.png";
+import pixLogoWhite from "@/assets/pix-logo-official-white.png";
 
 /* ─────────────────────── Animated Number ─────────────────────── */
 function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
@@ -640,7 +642,7 @@ export default function Dashboard() {
         <div className="xl:col-span-4 flex flex-col gap-3">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-border/30 bg-card/95 p-4 md:p-5 overflow-hidden">
             <div className="grid grid-cols-1 gap-2">
-              <SmallMetric icon={<svg viewBox="0 0 512 512" className="h-3.5 w-3.5" fill="none"><path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.886 76.886c14.192 14.192 33.064 22 53.12 22h8.186l-97.044 97.044c-20.307 20.306-53.254 20.306-73.56 0L133.182 391.19h-20.612Z" fill="currentColor"/><path d="M399.45 120.81c-20.056 0-38.928 7.808-53.12 22l-76.886 76.886c-5.558 5.558-14.592 5.558-20.15 0l-76.693-76.693c-14.192-14.192-33.064-22-53.12-22h-20.61l97.232-97.232c20.306-20.307 53.253-20.307 73.56 0l97.044 97.044h-33.257Z" fill="currentColor"/><path d="M488.426 236.177l-52.24-52.24c-.903.53-1.86.998-2.862 1.395h-33.874c-12.396 0-24.06 4.828-32.842 13.61l-76.886 76.886c-7.975 7.975-18.454 11.963-28.932 11.963s-20.957-3.988-28.932-11.963l-76.693-76.693c-8.782-8.782-20.446-13.61-32.842-13.61H91.35c-1.002-.397-1.96-.866-2.862-1.395l-52.046 52.046c-20.307 20.306-20.307 53.253 0 73.56l52.046 52.046c.903-.53 1.86-.998 2.862-1.395h31.973c12.396 0 24.06-4.828 32.842-13.61l76.693-76.692c15.395-15.395 42.468-15.395 57.864 0l76.886 76.886c8.782 8.782 20.446 13.61 32.842 13.61h33.874c1.002.397 1.96.866 2.862 1.395l52.24-52.24c20.307-20.306 20.307-53.253 0-73.56Z" fill="currentColor"/></svg>} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
+              <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
               <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
             </div>
@@ -667,11 +669,7 @@ export default function Dashboard() {
                     <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 shadow-lg", item.iconGradient, item.ringColor)}
                       style={{ boxShadow: "0 4px 12px -4px rgba(0,0,0,0.4)" }}>
                       {item.isPix ? (
-                        <svg viewBox="0 0 512 512" className="h-[18px] w-[18px]" fill="none">
-                          <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.886 76.886c14.192 14.192 33.064 22 53.12 22h8.186l-97.044 97.044c-20.307 20.306-53.254 20.306-73.56 0L133.182 391.19h-20.612Z" fill="white"/>
-                          <path d="M399.45 120.81c-20.056 0-38.928 7.808-53.12 22l-76.886 76.886c-5.558 5.558-14.592 5.558-20.15 0l-76.693-76.693c-14.192-14.192-33.064-22-53.12-22h-20.61l97.232-97.232c20.306-20.307 53.253-20.307 73.56 0l97.044 97.044h-33.257Z" fill="white"/>
-                          <path d="M488.426 236.177l-52.24-52.24c-.903.53-1.86.998-2.862 1.395h-33.874c-12.396 0-24.06 4.828-32.842 13.61l-76.886 76.886c-7.975 7.975-18.454 11.963-28.932 11.963s-20.957-3.988-28.932-11.963l-76.693-76.693c-8.782-8.782-20.446-13.61-32.842-13.61H91.35c-1.002-.397-1.96-.866-2.862-1.395l-52.046 52.046c-20.307 20.306-20.307 53.253 0 73.56l52.046 52.046c.903-.53 1.86-.998 2.862-1.395h31.973c12.396 0 24.06-4.828 32.842-13.61l76.693-76.692c15.395-15.395 42.468-15.395 57.864 0l76.886 76.886c8.782 8.782 20.446 13.61 32.842 13.61h33.874c1.002.397 1.96.866 2.862 1.395l52.24-52.24c20.307-20.306 20.307-53.253 0-73.56Z" fill="white"/>
-                        </svg>
+                        <PixLogoMark className="h-[18px] w-[18px] drop-shadow-sm" variant="white" />
                       ) : (
                         item.icon && <item.icon className="h-4 w-4 text-white drop-shadow-sm" />
                       )}
@@ -960,6 +958,21 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
         </div>
       </div>
     </div>
+  );
+}
+
+function PixLogoMark({ className, variant = "teal" }: { className?: string; variant?: "teal" | "white" }) {
+  return (
+    <img
+      src={variant === "white" ? pixLogoWhite : pixLogoTeal}
+      alt=""
+      aria-hidden="true"
+      width={64}
+      height={64}
+      loading="lazy"
+      decoding="async"
+      className={cn("select-none object-contain", className)}
+    />
   );
 }
 
