@@ -579,19 +579,16 @@ export default function Dashboard() {
               { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, color: balance < 0 ? "warning" : "primary", icon: Wallet },
             ].map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-2xl p-5 overflow-hidden transition-all duration-500 hover:border-primary/30 hover:shadow-[0_12px_50px_rgba(16,185,129,0.15),inset_0_1px_0_rgba(255,255,255,0.06)]"
-                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                {/* Top glass shine line */}
-                <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
+                className="group relative rounded-2xl ultra-glass glass-shine shimmer-sweep p-5 overflow-hidden transition-all duration-500">
                 {/* Atmospheric corner glow */}
-                <div className="absolute -top-16 -right-16 h-32 w-32 rounded-full bg-primary/[0.07] blur-[50px] pointer-events-none group-hover:bg-primary/[0.15] transition-all duration-700" />
-                <div className="absolute -bottom-10 -left-10 h-20 w-20 rounded-full bg-primary/[0.04] blur-[30px] pointer-events-none group-hover:bg-primary/[0.08] transition-all duration-700" />
-                <div className="relative flex items-start justify-between">
+                <div className={cn("absolute -top-16 -right-16 h-32 w-32 rounded-full blur-[50px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.06] group-hover:bg-${item.color}/[0.18]`)} />
+                <div className={cn("absolute -bottom-10 -left-10 h-20 w-20 rounded-full blur-[30px] pointer-events-none transition-all duration-700", `bg-${item.color}/[0.03] group-hover:bg-${item.color}/[0.10]`)} />
+                <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-white/30 mb-3">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading tabular-nums tracking-[-0.03em] leading-none", item.color === "primary" ? "text-white" : `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50 mb-3">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading tabular-nums tracking-[-0.03em] leading-none glow-value", `text-${item.color}`)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-md shadow-lg", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-md shadow-lg glow-primary", `bg-${item.color}/10 border-${item.color}/20 text-${item.color}`)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
