@@ -346,6 +346,51 @@ input[type="number"]::-webkit-inner-spin-button {
     border-radius: inherit;
   }
 
+  /* Ultra Glass card — premium mirrored effect using semantic tokens */
+  .ultra-glass {
+    background: linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(var(--card) / 0.5) 50%, hsl(var(--card) / 0.3));
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid hsl(var(--border) / 0.15);
+    box-shadow: 0 4px 32px hsl(var(--background) / 0.3), inset 0 1px 0 hsl(var(--foreground) / 0.04), inset 0 -1px 0 hsl(var(--background) / 0.2);
+  }
+  .ultra-glass:hover {
+    border-color: hsl(var(--primary) / 0.25);
+    box-shadow: 0 8px 48px hsl(var(--primary) / 0.12), inset 0 1px 0 hsl(var(--foreground) / 0.06), inset 0 -1px 0 hsl(var(--background) / 0.2);
+  }
+  .glass-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.08), transparent);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .shimmer-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer-sweep::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.04), hsl(var(--foreground) / 0.03), transparent);
+    animation: shimmer-sweep-anim 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes shimmer-sweep-anim {
+    0% { left: -60%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+
   /* Premium row hover glow */
   .row-glow:hover {
     background: linear-gradient(90deg, hsl(var(--primary) / 0.04), transparent 70%) !important;
