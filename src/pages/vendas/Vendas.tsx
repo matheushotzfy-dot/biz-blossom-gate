@@ -851,17 +851,17 @@ export default function Vendas() {
                 </div>
                 <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Minhas Vendas</span>
               </motion.div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/8 px-3 py-1.5">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                  <span className="relative h-2 w-2 rounded-full bg-success" />
                 </span>
                 <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
+              <div className="inline-flex items-center rounded-full border border-border/30 bg-muted/10 p-0.5">
                 {PERIODS.map((opt) => (
                   <button
                     key={opt.label}
