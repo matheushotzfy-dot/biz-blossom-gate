@@ -1353,8 +1353,8 @@ export default function Vendas() {
                   </table>
                 </div>
                 {visibleCount < sortedFiltered.length && (
-                  <div className="border-t border-border/4 p-4 text-center">
-                    <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-1.5 rounded-full text-[11px] font-display font-bold text-muted-foreground/20 hover:text-foreground active:scale-[0.97]">
+                  <div className="border-t border-border/20 p-4 text-center">
+                    <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="gap-1.5 rounded-full text-[11px] font-display font-bold text-muted-foreground hover:text-foreground active:scale-[0.97]">
                       <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({sortedFiltered.length - visibleCount})
                     </Button>
                   </div>
@@ -1368,14 +1368,14 @@ export default function Vendas() {
             {loading ? (
               <div className="p-14 text-center">
                 <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary/10 border-t-primary" />
-                <p className="text-[11px] text-muted-foreground/12 font-display mt-2">Carregando…</p>
+                <p className="text-[11px] text-muted-foreground font-display mt-2">Carregando…</p>
               </div>
             ) : visibleItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <div className="h-14 w-14 rounded-2xl bg-muted/4 border border-border/6 flex items-center justify-center mb-3">
-                  <ShoppingCart className="h-6 w-6 text-muted-foreground/8" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/10 border border-border/20 flex items-center justify-center mb-3">
+                  <ShoppingCart className="h-6 w-6 text-muted-foreground/30" />
                 </div>
-                <p className="text-[12px] font-display font-bold text-muted-foreground/15">Nenhuma venda</p>
+                <p className="text-[12px] font-display font-bold text-muted-foreground">Nenhuma venda</p>
               </div>
             ) : (
               <>
@@ -1383,7 +1383,7 @@ export default function Vendas() {
                   <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
                 ))}
                 {visibleCount < sortedFiltered.length && (
-                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-1.5 rounded-full text-[10px] font-display font-bold text-muted-foreground/20 hover:text-foreground active:scale-[0.97]">
+                  <Button variant="ghost" size="sm" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)} className="w-full gap-1.5 rounded-full text-[10px] font-display font-bold text-muted-foreground hover:text-foreground active:scale-[0.97]">
                     <ChevronDown className="h-3 w-3" /> Mais {sortedFiltered.length - visibleCount}
                   </Button>
                 )}
