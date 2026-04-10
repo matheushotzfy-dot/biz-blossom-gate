@@ -330,15 +330,9 @@ export default function Auth() {
           </div>
 
           <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="mx-auto w-full max-w-[470px] px-4 py-3 md:px-8 md:py-4">
+            <div className="mx-auto w-full max-w-[470px] px-4 pt-1 pb-2 md:px-8 md:pt-1 md:pb-3">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="w-full">
-              <div className={cn("mb-6", !isLogin && "mb-1 md:mb-2")}>
-                {isLogin && (
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-[9px] font-heading uppercase tracking-[0.22em] text-primary">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Acesso seguro
-                  </div>
-                )}
+              <div className={cn("mb-2", !isLogin && "mb-0.5")}>
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={isLogin ? "login" : `signup-${step}`}
@@ -718,7 +712,7 @@ export default function Auth() {
                     </motion.div>
                   </AnimatePresence>
 
-                  <div className="relative my-5">
+                  <div className="relative my-3">
                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border/50" /></div>
                     <div className="relative flex justify-center">
                       <span className="bg-card px-3 text-[8px] font-heading uppercase tracking-[0.18em] text-muted-foreground">
@@ -727,27 +721,27 @@ export default function Auth() {
                     </div>
                   </div>
 
-                  <button type="button" onClick={() => setIsLogin(!isLogin)} className="h-11 w-full rounded-2xl border border-border/60 bg-background/50 text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground hover:border-primary/20 hover:text-foreground">
+                  <button type="button" onClick={() => setIsLogin(!isLogin)} className="h-10 w-full rounded-2xl border border-border/60 bg-background/50 text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground hover:border-primary/20 hover:text-foreground">
                     {isLogin ? "Criar conta grátis" : "Entrar na minha conta"}
                   </button>
 
                   {isLogin && (
-                    <div className="mt-5 grid grid-cols-2 gap-2 border-t border-border/40 pt-5 sm:grid-cols-4">
+                    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border/40 pt-3 sm:grid-cols-4">
                       {[
                         { icon: Shield, label: "SSL 256-bit" },
                         { icon: Shield, label: "Anti-fraude" },
                         { icon: Lock, label: "Criptografado" },
                         { icon: CheckCircle2, label: "LGPD" },
                       ].map((badge) => (
-                        <div key={badge.label} className="rounded-xl border border-border/50 bg-background/45 px-2 py-3 text-center">
-                          <badge.icon className="mx-auto mb-1 h-3.5 w-3.5 text-primary/80" />
-                          <span className="text-[8px] font-heading uppercase tracking-[0.14em] text-muted-foreground">{badge.label}</span>
+                        <div key={badge.label} className="rounded-xl border border-border/50 bg-background/45 px-2 py-2 text-center">
+                          <badge.icon className="mx-auto mb-1 h-3 w-3 text-primary/80" />
+                          <span className="text-[7px] font-heading uppercase tracking-[0.12em] text-muted-foreground">{badge.label}</span>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">
+                  <p className="mt-3 text-center text-[9px] leading-relaxed text-muted-foreground">
                     Ao continuar, você concorda com os <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Termos de Uso</a> e a <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Política de Privacidade</a>.
                   </p>
                 </div>
