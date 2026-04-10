@@ -723,7 +723,10 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-border/30 bg-card/95 p-4 md:p-5 flex flex-col overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-border/30 bg-card/95 p-4 md:p-5 flex flex-col overflow-hidden">
+          <div className="absolute -top-16 -left-16 h-32 w-32 rounded-full bg-primary/6 blur-[80px] pointer-events-none" />
+          <div className="absolute -bottom-12 -right-12 h-28 w-28 rounded-full bg-info/5 blur-[60px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent" />
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
@@ -738,22 +741,25 @@ export default function Dashboard() {
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
             ].map((action) => (
               <Link key={action.href} to={action.href}
-                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/10 bg-card/30 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/25 hover:bg-primary/[0.05] hover:shadow-[0_0_20px_hsl(var(--primary)/0.08)] active:scale-[0.985]">
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/15 shadow-lg">
+                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/15 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/30 hover:bg-primary/[0.06] hover:shadow-[0_0_24px_hsl(var(--primary)/0.10)] active:scale-[0.985]"
+                style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.5) 0%, hsl(var(--card) / 0.25) 100%)" }}>
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/12 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-lg shadow-primary/5 group-hover:shadow-primary/15 transition-shadow">
                   <action.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] md:text-[11px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
+                  <p className="text-[10px] md:text-[11px] text-muted-foreground/45 hidden md:block">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-primary/40 transition-colors" />
+                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-primary/50 transition-colors" />
               </Link>
             ))}
           </div>
         </motion.div>
 
         {/* Activity feed */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-xl border border-border/30 bg-card/95 flex flex-col overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-2xl border border-border/30 bg-card/95 flex flex-col overflow-hidden">
+          <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-primary/6 blur-[70px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent" />
           <div className="flex items-center justify-between px-5 pt-4 pb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
