@@ -330,9 +330,9 @@ export default function Auth() {
           </div>
 
           <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="flex min-h-full items-start justify-center px-4 pt-0 pb-4 md:px-8 md:pt-0">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className={cn("w-full max-w-[470px]", !isLogin && "-mt-14 md:-mt-20")}>
-              <div className={cn("mb-6", !isLogin && "mb-2 md:mb-3")}>
+            <div className="flex min-h-full items-start justify-center px-4 pt-0 pb-3 md:px-8 md:pt-0 md:pb-4">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className={cn("w-full max-w-[470px]", !isLogin && "-mt-24 md:-mt-32")}>
+              <div className={cn("mb-6", !isLogin && "mb-1 md:mb-2")}>
                 {isLogin && (
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-[9px] font-heading uppercase tracking-[0.22em] text-primary">
                     <CheckCircle2 className="h-3 w-3" />
@@ -347,7 +347,10 @@ export default function Auth() {
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.24 }}
                   >
-                    <h1 className="text-[28px] sm:text-[34px] font-heading leading-[1.02] tracking-[-0.05em] text-foreground">
+                    <h1 className={cn(
+                      "font-heading leading-[1.02] tracking-[-0.05em] text-foreground",
+                      isLogin ? "text-[28px] sm:text-[34px]" : "text-[24px] sm:text-[29px]"
+                    )}>
                       {isLogin ? (
                         <>Acesse sua <span className="text-primary">operação</span></>
                       ) : step === 1 ? (
@@ -360,7 +363,10 @@ export default function Auth() {
                         <>Confirme e <span className="text-primary">comece</span></>
                       )}
                     </h1>
-                    <p className="mt-2 max-w-[420px] text-[13px] leading-relaxed text-muted-foreground">
+                    <p className={cn(
+                      "max-w-[420px] leading-relaxed text-muted-foreground",
+                      isLogin ? "mt-2 text-[13px]" : "mt-1 text-[12px]"
+                    )}>
                       {isLogin
                         ? "Faturamento, vendas, checkout e saques em uma visão única."
                         : step === 1
@@ -376,8 +382,8 @@ export default function Auth() {
               </div>
 
               {!isLogin && (
-                <div className="mb-6">
-                  <div className="flex items-center gap-1.5">
+                <div className="mb-3 md:mb-4">
+                  <div className="flex items-center gap-1">
                     {SIGNUP_STEPS.map((signupStep, index) => {
                       const StepIcon = signupStep.icon;
                       const active = step === signupStep.id;
@@ -385,23 +391,23 @@ export default function Auth() {
                       return (
                         <div key={signupStep.id} className="flex flex-1 items-center">
                           <div className={cn(
-                            "flex items-center gap-2 rounded-xl px-2.5 py-2 transition-all",
+                            "flex items-center gap-1.5 rounded-xl px-2 py-1.5 transition-all",
                             active ? "border border-primary/20 bg-primary/10 text-primary" : done ? "border border-success/20 bg-success/10 text-success" : "border border-border/50 bg-card/60 text-muted-foreground"
                           )}>
                             <div className={cn(
-                              "flex h-6 w-6 items-center justify-center rounded-lg",
+                              "flex h-5 w-5 items-center justify-center rounded-lg",
                               active ? "bg-primary/15" : done ? "bg-success/15" : "bg-muted/60"
                             )}>
-                              {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <StepIcon className="h-3.5 w-3.5" />}
+                              {done ? <CheckCircle2 className="h-3 w-3" /> : <StepIcon className="h-3 w-3" />}
                             </div>
-                            <span className="hidden text-[8px] font-heading uppercase tracking-[0.18em] sm:block">{signupStep.label}</span>
+                            <span className="hidden text-[7px] font-heading uppercase tracking-[0.16em] sm:block">{signupStep.label}</span>
                           </div>
                           {index < SIGNUP_STEPS.length - 1 && <div className="mx-1 h-px flex-1 bg-border/60" />}
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted/60">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted/60">
                     <motion.div animate={{ width: `${(step / 4) * 100}%` }} transition={{ duration: 0.4 }} className="h-full rounded-full bg-primary" />
                   </div>
                 </div>
@@ -410,8 +416,8 @@ export default function Auth() {
               <div className="relative overflow-hidden rounded-[28px] panel-enterprise noise-overlay scan-line">
                 <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
                 <div className="absolute -right-12 top-0 h-32 w-32 rounded-full bg-primary/12 blur-3xl" />
-                <div className="relative z-10 p-6 md:p-7">
-                  <div className="mb-5 rounded-2xl glass-panel p-1">
+                <div className={cn("relative z-10 p-6 md:p-7", !isLogin && "p-5 md:p-6")}>
+                  <div className={cn("mb-5 rounded-2xl glass-panel p-1", !isLogin && "mb-3")}>
                     <div className="grid grid-cols-2 gap-1">
                       {[
                         { mode: true, label: "Entrar", icon: Lock },
