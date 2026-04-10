@@ -1042,11 +1042,13 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className="group relative rounded-xl border border-border/30 bg-card/95 p-3 overflow-hidden transition-all duration-300 hover:border-primary/20">
+    <div className="group relative rounded-xl border border-border/30 p-3 overflow-hidden transition-all duration-300 hover:border-primary/25"
+      style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
+      <div className={cn("absolute -top-8 -right-8 w-20 h-20 rounded-full blur-[40px] opacity-[0.06] group-hover:opacity-[0.12] transition-opacity", s.text === "text-success" ? "bg-success" : s.text === "text-destructive" ? "bg-destructive" : "bg-info")} />
       <div className="relative z-10">
         <div className="mb-1.5 flex items-center gap-2">
           <span className={s.text}>{icon}</span>
-          <span className="text-[10px] text-muted-foreground/40 font-semibold uppercase tracking-wider">{label}</span>
+          <span className="text-[10px] text-muted-foreground/50 font-semibold uppercase tracking-wider">{label}</span>
         </div>
         <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
       </div>
