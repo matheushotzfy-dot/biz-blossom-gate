@@ -477,18 +477,19 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-2xl border border-border/60 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
+        className="relative mb-10 rounded-2xl border border-emerald-500/40 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line shadow-2xl shadow-emerald-500/10"
       >
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-36 -left-32 h-96 w-96 rounded-full bg-emerald-400/45 blur-[140px]" />
-          <div className="absolute -bottom-28 -right-28 h-80 w-80 rounded-full bg-emerald-300/30 blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-[75%] rounded-full bg-emerald-400/25 blur-[160px]" />
-          <div className="absolute top-0 right-1/4 h-64 w-64 rounded-full bg-emerald-500/30 blur-[110px]" />
-          <div className="absolute bottom-1/4 left-1/3 h-56 w-56 rounded-full bg-emerald-300/22 blur-[120px]" />
-          <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full bg-teal-300/18 blur-[100px]" />
-          <div className="absolute -top-10 left-1/2 h-40 w-[80%] -translate-x-1/2 rounded-full bg-emerald-400/20 blur-[170px]" />
+          <div className="absolute -top-40 -left-36 h-[28rem] w-[28rem] rounded-full bg-emerald-400/55 blur-[150px]" />
+          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-emerald-300/40 blur-[130px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-[80%] rounded-full bg-emerald-400/35 blur-[170px]" />
+          <div className="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-emerald-500/40 blur-[120px]" />
+          <div className="absolute bottom-1/4 left-1/3 h-64 w-64 rounded-full bg-emerald-300/30 blur-[130px]" />
+          <div className="absolute top-1/3 right-1/3 h-56 w-56 rounded-full bg-teal-300/25 blur-[110px]" />
+          <div className="absolute -top-10 left-1/2 h-48 w-[85%] -translate-x-1/2 rounded-full bg-emerald-400/30 blur-[180px]" />
+          <div className="absolute bottom-0 left-0 h-40 w-[60%] rounded-full bg-green-400/20 blur-[140px]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/[0.18] via-emerald-500/[0.08] to-teal-400/[0.14] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/[0.25] via-emerald-500/[0.12] to-teal-400/[0.20] pointer-events-none z-0" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -624,17 +625,17 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-primary/20 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-lg shadow-primary/5">
-          <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/20 blur-[110px] pointer-events-none" />
-          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-teal-400/15 blur-[90px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-emerald-400/10 blur-[120px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-emerald-500/30 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-xl shadow-emerald-500/8">
+          <div className="absolute -top-28 -left-28 h-64 w-64 rounded-full bg-emerald-400/30 blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-teal-400/25 blur-[100px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-[60%] rounded-full bg-emerald-400/20 blur-[130px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
@@ -661,9 +662,10 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-primary/20 bg-card p-4 md:p-5 relative overflow-hidden shadow-lg shadow-primary/5">
-            <div className="absolute -top-16 -right-16 h-36 w-36 rounded-full bg-emerald-400/15 blur-[80px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 relative overflow-hidden shadow-xl shadow-emerald-500/8">
+            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-emerald-400/25 blur-[90px] pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-teal-400/18 blur-[70px] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -681,8 +683,9 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", valueColor: "text-amber-400", dotColor: "bg-amber-400", accentBorder: "border-t-amber-500" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-2xl border border-border/50 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border relative overflow-hidden shadow-md shadow-primary/3", item.accentBorder)}>
-                <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-emerald-400/8 blur-[60px] pointer-events-none" />
+                className={cn("rounded-2xl border border-emerald-500/20 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-emerald-400/40 relative overflow-hidden shadow-lg shadow-emerald-500/6", item.accentBorder)}>
+                <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-emerald-400/18 blur-[70px] pointer-events-none" />
+                <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-teal-400/12 blur-[50px] pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4">
                   <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
                     {item.isPix ? (
@@ -714,10 +717,11 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-primary/15 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary/5">
-          <div className="absolute -top-20 -left-20 h-44 w-44 rounded-full bg-emerald-400/12 blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full bg-teal-400/10 blur-[80px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-xl shadow-emerald-500/8">
+          <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/22 blur-[110px] pointer-events-none" />
+          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-teal-400/18 blur-[90px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-emerald-400/12 blur-[100px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
@@ -763,9 +767,10 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-primary/15 bg-card flex flex-col relative overflow-hidden shadow-lg shadow-primary/5">
-          <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-400/12 blur-[90px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/25 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-emerald-500/25 bg-card flex flex-col relative overflow-hidden shadow-xl shadow-emerald-500/8">
+          <div className="absolute -top-20 -right-20 h-52 w-52 rounded-full bg-emerald-400/22 blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-teal-400/15 blur-[80px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/45 to-transparent" />
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
