@@ -1201,39 +1201,48 @@ export default function Vendas() {
               </div>
               <h3 className="text-xs font-heading uppercase tracking-[0.14em] text-foreground/70">Horário de Pico</h3>
             </div>
-            <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
+              <span className="text-[10px] text-muted-foreground/40 font-display">· {peakHour !== null ? `${metrics.hours[peakHour]} ${metrics.hours[peakHour] === 1 ? "venda" : "vendas"}` : ""}</span>
+            </div>
           </div>
 
-          <div className="flex h-[160px] items-end gap-[2px]">
-            {metrics.hours.map((count, hour) => {
-              const intensity = count / maxHour;
-              const active = peakHour !== null && hour === peakHour;
+          <div className="relative pt-8">
+            <div className="flex h-[140px] items-end gap-px">
+              {metrics.hours.map((count, hour) => {
+                const intensity = count / maxHour;
+                const active = peakHour !== null && hour === peakHour;
 
-              return (
-                <div key={hour} className="group relative flex h-full flex-1 flex-col items-center justify-end">
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${Math.max(intensity * 100, 2)}%` }}
-                    transition={{ duration: 0.45, delay: 0.22 + hour * 0.02, ease: [0.16, 1, 0.3, 1] }}
-                    className={cn(
-                      "w-full rounded-t-sm transition-colors",
-                      active ? "bg-primary" : intensity > 0.5 ? "bg-primary/35" : intensity > 0 ? "bg-primary/12 group-hover:bg-primary/20" : "bg-muted/6"
-                    )}
-                  />
+                return (
+                  <div
+                    key={hour}
+                    className="group/bar relative flex h-full flex-1 flex-col items-center justify-end"
+                  >
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max(intensity * 100, 3)}%` }}
+                      transition={{ duration: 0.45, delay: 0.22 + hour * 0.02, ease: [0.16, 1, 0.3, 1] }}
+                      className={cn(
+                        "w-full rounded-t-sm transition-colors",
+                        active ? "bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]" : intensity > 0.5 ? "bg-primary/40" : intensity > 0 ? "bg-primary/15 group-hover/bar:bg-primary/25" : "bg-muted/8"
+                      )}
+                    />
 
-                  <div className="pointer-events-none absolute -top-12 left-1/2 z-20 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <div className="whitespace-nowrap rounded-lg border border-border/20 bg-popover px-3 py-1.5 text-[10px] font-display font-bold text-foreground shadow-2xl">
-                      <span className="font-mono text-primary">{String(hour).padStart(2, "0")}h</span>
-                      <span className="mx-1.5 text-muted-foreground/40">·</span>
-                      <span>{count} {count === 1 ? "venda" : "vendas"}</span>
+                    {/* Tooltip — hidden by default, only visible on desktop hover */}
+                    <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 scale-90 opacity-0 transition-all duration-150 group-hover/bar:scale-100 group-hover/bar:opacity-100 hidden md:block">
+                      <div className="whitespace-nowrap rounded-lg border border-border/20 bg-popover/95 backdrop-blur-sm px-2.5 py-1 text-[10px] font-display font-bold text-foreground shadow-xl">
+                        <span className="font-mono text-primary">{String(hour).padStart(2, "0")}h</span>
+                        <span className="mx-1 text-muted-foreground/40">·</span>
+                        <span>{count}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
-          <div className="mt-2 flex justify-between text-[8px] font-mono text-muted-foreground/35">
+          <div className="mt-2 flex justify-between text-[8px] font-mono text-muted-foreground/35 px-0.5">
             <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
           </div>
 
