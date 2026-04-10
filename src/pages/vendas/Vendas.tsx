@@ -897,31 +897,47 @@ export default function Vendas() {
               </motion.span>
               {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-6">
+            <div className="flex flex-wrap items-center gap-2 mt-8">
               {[
-                { icon: CalendarDays, text: periodLabel },
-                { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
-                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}` },
+                { icon: CalendarDays, text: periodLabel, accent: "primary" },
+                { icon: Check, text: `${m.approved.length} aprovadas`, accent: "success" },
+                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, accent: "warning" },
               ].map((chip, i) => (
                 <motion.span
                   key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.08 }}
-                  className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.4 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className={cn(
+                    "relative inline-flex items-center gap-2 text-[11px] font-display font-semibold rounded-full px-4 py-2 overflow-hidden transition-all duration-300 cursor-default group",
+                    "bg-card/50 backdrop-blur-2xl border border-border/15",
+                    "hover:border-primary/25 hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)]",
+                    `text-${chip.accent}/80`
+                  )}
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 2px 8px -2px hsl(var(--background) / 0.3)" }}
                 >
-                  <chip.icon className={cn("h-3 w-3", chip.iconColor)} /> {chip.text}
+                  {/* Inner shine */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+                  <div className={cn("h-5 w-5 rounded-full flex items-center justify-center", `bg-${chip.accent}/10 border border-${chip.accent}/15`)}>
+                    <chip.icon className="h-2.5 w-2.5" />
+                  </div>
+                  <span className="relative z-10">{chip.text}</span>
                 </motion.span>
               ))}
               {lastSaleText && (
                 <motion.span
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.65 }}
-                  className="inline-flex items-center gap-2 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative inline-flex items-center gap-2.5 text-[11px] text-primary/70 font-display font-semibold rounded-full px-4 py-2 bg-primary/[0.06] backdrop-blur-2xl border border-primary/15 overflow-hidden"
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--primary) / 0.08), 0 0 16px -4px hsl(var(--primary) / 0.12)" }}
                 >
-                  <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" /></span>
-                  última {lastSaleText}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+                    <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                  </span>
+                  <span className="relative z-10">última {lastSaleText}</span>
                 </motion.span>
               )}
             </div>
