@@ -330,15 +330,9 @@ export default function Auth() {
           </div>
 
           <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="mx-auto w-full max-w-[470px] px-4 py-3 md:px-8 md:py-4">
+            <div className="mx-auto w-full max-w-[470px] px-4 pt-1 pb-2 md:px-8 md:pt-1 md:pb-3">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="w-full">
-              <div className={cn("mb-6", !isLogin && "mb-1 md:mb-2")}>
-                {isLogin && (
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-[9px] font-heading uppercase tracking-[0.22em] text-primary">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Acesso seguro
-                  </div>
-                )}
+              <div className={cn("mb-2", !isLogin && "mb-0.5")}>
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={isLogin ? "login" : `signup-${step}`}
