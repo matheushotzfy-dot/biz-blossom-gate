@@ -621,8 +621,8 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-primary/15 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
-          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/8 blur-[100px] pointer-events-none" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/50 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
           <div className="absolute -bottom-16 -right-16 h-32 w-32 rounded-full bg-info/6 blur-[80px] pointer-events-none" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
@@ -656,69 +656,45 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-primary/20 p-4 md:p-5 overflow-hidden"
-            style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.98) 0%, hsl(var(--card) / 0.85) 100%)" }}>
-            <div className="absolute -top-14 -right-14 h-36 w-36 rounded-full bg-primary/12 blur-[70px] pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-success/10 blur-[50px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-            <div className="flex items-center gap-2 mb-3 relative z-10">
-              <div className="h-6 w-6 rounded-md bg-primary/12 flex items-center justify-center border border-primary/20">
-                <Percent className="h-3 w-3 text-primary" />
-              </div>
-              <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-foreground/60 font-bold">Métricas de Conversão</span>
-            </div>
-            <div className="grid grid-cols-1 gap-2 relative z-10">
+          {/* Conversion metrics - clean */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-4 md:p-5">
+            <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
+            <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
               <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
             </div>
           </motion.div>
 
+          {/* KPI tiles - clean */}
           <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-[#32BCAD] to-[#4DD0C8]", ringColor: "ring-[#32BCAD]/25", valueColor: "text-[#32BCAD]", dotColor: "bg-[#32BCAD]", borderAccent: "border-l-[#32BCAD]/60", glowColor: "#32BCAD" },
-              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-blue-500 to-cyan-400", ringColor: "ring-blue-500/25", valueColor: "text-blue-400", dotColor: "bg-blue-400", borderAccent: "border-l-blue-500/50", glowColor: "#3b82f6" },
-              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-emerald-600 to-teal-400", ringColor: "ring-emerald-500/25", valueColor: "text-primary", dotColor: "bg-primary", borderAccent: "border-l-primary/50", glowColor: "hsl(162, 76%, 42%)" },
-              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", ringColor: "ring-amber-500/25", valueColor: "text-amber-400", dotColor: "bg-amber-400", borderAccent: "border-l-amber-500/50", glowColor: "#f59e0b" },
+              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-[#32BCAD] to-[#4DD0C8]", valueColor: "text-[#32BCAD]", dotColor: "bg-[#32BCAD]", accentBorder: "border-t-[#32BCAD]" },
+              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-blue-500 to-cyan-400", valueColor: "text-blue-400", dotColor: "bg-blue-400", accentBorder: "border-t-blue-500" },
+              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-emerald-600 to-teal-400", valueColor: "text-primary", dotColor: "bg-primary", accentBorder: "border-t-primary" },
+              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", valueColor: "text-amber-400", dotColor: "bg-amber-400", accentBorder: "border-t-amber-500" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("group relative rounded-2xl border-l-[3px] p-4 md:p-5 overflow-hidden transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl border border-border/20", item.borderAccent)}
-                style={{ background: "linear-gradient(160deg, hsl(var(--card) / 0.98) 0%, hsl(var(--card) / 0.82) 100%)", boxShadow: "0 1px 0 0 rgba(255,255,255,0.03) inset, 0 8px 32px -8px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.15)" }}>
-                {/* Ambient glow */}
-                <div className={cn("absolute -top-14 -right-14 w-36 h-36 rounded-full blur-[60px] opacity-[0.12] group-hover:opacity-[0.22] transition-opacity duration-700 bg-gradient-to-br", item.iconGradient)} />
-                {/* Top shine */}
-                <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-                {/* Bottom accent glow */}
-                <div className={cn("absolute -bottom-8 left-1/2 -translate-x-1/2 w-24 h-16 rounded-full blur-[40px] opacity-[0.08] bg-gradient-to-br", item.iconGradient)} />
-
-                <div className="relative z-10">
-                  {/* Header */}
-                  <div className="flex items-center gap-2.5 mb-5">
-                    <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300", item.iconGradient, item.ringColor)}
-                      style={{ boxShadow: `0 4px 16px -4px rgba(0,0,0,0.4), 0 0 20px -4px ${item.glowColor}22` }}>
-                      {item.isPix ? (
-                        <PixLogoMark className="h-[18px] w-[18px] drop-shadow-sm" variant="white" />
-                      ) : (
-                        item.icon && <item.icon className="h-4 w-4 text-white drop-shadow-sm" />
-                      )}
-                    </div>
-                    <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.14em] text-muted-foreground/70 leading-tight">{item.label}</span>
+                className={cn("rounded-2xl border border-border/50 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border", item.accentBorder)}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
+                    {item.isPix ? (
+                      <PixLogoMark className="h-4 w-4" variant="white" />
+                    ) : (
+                      item.icon && <item.icon className="h-3.5 w-3.5 text-white" />
+                    )}
                   </div>
-
-                  {/* Value */}
-                  <p className="text-[26px] md:text-[30px] font-display font-black tabular-nums tracking-[-0.04em] text-foreground leading-none mb-3"
-                    style={{ fontFeatureSettings: "'tnum' 1, 'ss01' 1" }}>
-                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
-                  </p>
-
-                  {/* Meta */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 rounded-full bg-accent/30 px-2.5 py-0.5 border border-border/15">
-                      <div className={cn("h-1.5 w-1.5 rounded-full animate-pulse shadow-[0_0_8px_currentColor]", item.dotColor)} />
-                      <span className={cn("text-[11px] font-numbers font-bold tabular-nums tracking-tight", item.valueColor)}>{item.helper}</span>
-                    </div>
-                    {item.sub && <span className="text-[10px] text-muted-foreground/40 font-numbers tracking-wide">{item.sub}</span>}
+                  <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.12em] text-muted-foreground/70">{item.label}</span>
+                </div>
+                <p className="text-[24px] md:text-[28px] font-display font-black tabular-nums tracking-[-0.04em] text-foreground leading-none mb-2.5">
+                  {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <div className={cn("h-1.5 w-1.5 rounded-full", item.dotColor)} />
+                    <span className={cn("text-[11px] font-bold tabular-nums", item.valueColor)}>{item.helper}</span>
                   </div>
+                  {item.sub && <span className="text-[10px] text-muted-foreground/50">{item.sub}</span>}
                 </div>
               </motion.div>
             ))}
@@ -730,136 +706,111 @@ export default function Dashboard() {
       {/* ACTIONS + ACTIVITY                                               */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
-        {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-primary/15 p-4 md:p-5 flex flex-col overflow-hidden"
-          style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.98) 0%, hsl(var(--card) / 0.88) 100%)" }}>
-          <div className="absolute -top-20 -left-20 h-44 w-44 rounded-full bg-primary/12 blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-info/10 blur-[80px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-          
-          <div className="flex items-center gap-2 mb-4 relative z-10">
-            <div className="h-7 w-7 rounded-lg bg-primary/12 flex items-center justify-center border border-primary/20">
+        {/* Quick actions - clean, no glow */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-4 md:p-5 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
             </div>
-            <span className="text-[10px] font-heading uppercase tracking-[0.18em] text-foreground/70 font-bold">Ações Rápidas</span>
+            <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold">Ações Rápidas</span>
           </div>
           
-          <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
+          <div className="grid grid-cols-2 gap-2 flex-1">
             {[
-              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" },
-              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" },
-              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" },
-              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" },
-              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" },
-              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" },
-              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" },
-              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" },
-              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" },
-              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" },
+              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
+              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
+              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" as const },
+              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
+              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
+              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
+              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" as const },
+              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
+              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
             ].map((action) => {
-              const toneColors: Record<string, { iconBg: string; iconText: string; iconBorder: string; hoverBorder: string; hoverBg: string; hoverShadow: string; glow: string }> = {
-                primary: { iconBg: "bg-primary/15", iconText: "text-primary", iconBorder: "border-primary/25", hoverBorder: "hover:border-primary/40", hoverBg: "hover:bg-primary/[0.08]", hoverShadow: "hover:shadow-[0_4px_24px_hsl(var(--primary)/0.15)]", glow: "bg-primary" },
-                success: { iconBg: "bg-success/15", iconText: "text-success", iconBorder: "border-success/25", hoverBorder: "hover:border-success/40", hoverBg: "hover:bg-success/[0.08]", hoverShadow: "hover:shadow-[0_4px_24px_hsl(var(--success)/0.15)]", glow: "bg-success" },
-                info: { iconBg: "bg-info/15", iconText: "text-info", iconBorder: "border-info/25", hoverBorder: "hover:border-info/40", hoverBg: "hover:bg-info/[0.08]", hoverShadow: "hover:shadow-[0_4px_24px_hsl(var(--info)/0.15)]", glow: "bg-info" },
-                warning: { iconBg: "bg-warning/15", iconText: "text-warning", iconBorder: "border-warning/25", hoverBorder: "hover:border-warning/40", hoverBg: "hover:bg-warning/[0.08]", hoverShadow: "hover:shadow-[0_4px_24px_hsl(var(--warning)/0.15)]", glow: "bg-warning" },
+              const colors: Record<string, { bg: string; text: string; hoverBg: string }> = {
+                primary: { bg: "bg-primary/10", text: "text-primary", hoverBg: "hover:bg-primary/[0.06]" },
+                success: { bg: "bg-success/10", text: "text-success", hoverBg: "hover:bg-success/[0.06]" },
+                info: { bg: "bg-info/10", text: "text-info", hoverBg: "hover:bg-info/[0.06]" },
+                warning: { bg: "bg-warning/10", text: "text-warning", hoverBg: "hover:bg-warning/[0.06]" },
               };
-              const t = toneColors[action.tone] || toneColors.primary;
+              const c = colors[action.tone] || colors.primary;
               return (
                 <Link key={action.href} to={action.href}
-                  className={cn("group relative flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/20 p-2.5 md:p-3.5 transition-all duration-300 active:scale-[0.985] hover:translate-y-[-1px]", t.hoverBorder, t.hoverBg, t.hoverShadow)}
-                  style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.3) 100%)" }}>
-                  <div className={cn("absolute -top-6 -right-6 w-16 h-16 rounded-full blur-[30px] opacity-0 group-hover:opacity-[0.12] transition-opacity duration-500", t.glow)} />
-                  <div className={cn("h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center shrink-0 border shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl", t.iconBg, t.iconText, t.iconBorder)}>
-                    <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                  className={cn("group flex items-center gap-2.5 rounded-xl border border-border/30 p-3 transition-colors duration-200 hover:border-border/60", c.hoverBg)}>
+                  <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
+                    <action.icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] md:text-[11px] text-muted-foreground/50 hidden md:block">{action.desc}</p>
+                    <p className="text-[12px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
+                    <p className="text-[10px] text-muted-foreground/50 hidden md:block">{action.desc}</p>
                   </div>
-                  <ChevronRight className={cn("h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/15 hidden md:block transition-all duration-300 group-hover:translate-x-0.5", `group-hover:${t.iconText}`)} />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-muted-foreground/40 transition-colors" />
                 </Link>
               );
             })}
           </div>
         </motion.div>
 
-        {/* Activity feed */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-2xl border border-primary/15 flex flex-col overflow-hidden"
-          style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.98) 0%, hsl(var(--card) / 0.88) 100%)" }}>
-          <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
-          <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-success/8 blur-[60px] pointer-events-none" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-24 w-[40%] rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 relative z-10">
-            <div className="flex items-center gap-2.5">
-              <div className="h-7 w-7 rounded-lg bg-primary/12 flex items-center justify-center border border-primary/20">
-                <Activity className="h-3.5 w-3.5 text-primary" />
-              </div>
+        {/* Activity feed - clean */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/50 bg-card flex flex-col">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
+            <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
-                <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />
+                <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
+                <span className="relative h-2 w-2 rounded-full bg-primary" />
               </span>
-              <p className="text-[11px] font-heading text-foreground/70 font-bold">Tempo real</p>
+              <p className="text-[12px] font-heading text-foreground/70 font-bold">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-primary/60 hover:text-primary transition-colors flex items-center gap-1">
-              Ver tudo <ChevronRight className="h-3 w-3" />
-            </Link>
+            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1 relative z-10">
+          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-border/20">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
-                <div className="h-14 w-14 rounded-2xl bg-primary/8 flex items-center justify-center mb-3 border border-primary/15">
-                  <Activity className="h-6 w-6 text-primary/40" />
-                </div>
+                <Activity className="h-8 w-8 text-muted-foreground/20 mb-3" />
                 <p className="text-sm text-muted-foreground/40 font-display font-bold">Sem movimentações ainda</p>
-                <p className="text-[11px] text-muted-foreground/25 mt-1">As transações aparecerão aqui</p>
               </div>
             ) : (
               activity.map((item) => {
-                const txStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string; glowBg: string; borderColor: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success border-success/20", iconBg: "bg-success/12", iconText: "text-success", glowBg: "bg-success", borderColor: "border-l-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning border-warning/20", iconBg: "bg-warning/12", iconText: "text-warning", glowBg: "bg-warning", borderColor: "border-l-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive border-destructive/20", iconBg: "bg-destructive/12", iconText: "text-destructive", glowBg: "bg-destructive", borderColor: "border-l-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info border-info/20", iconBg: "bg-info/12", iconText: "text-info", glowBg: "bg-info", borderColor: "border-l-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive border-destructive/20", iconBg: "bg-destructive/12", iconText: "text-destructive", glowBg: "bg-destructive", borderColor: "border-l-destructive" },
-                  default: { label: "Status", pill: "bg-muted/20 text-foreground border-border/20", iconBg: "bg-muted/20", iconText: "text-muted-foreground", glowBg: "bg-muted", borderColor: "border-l-muted-foreground" },
+                const txStyles: Record<string, { label: string; pillBg: string; pillText: string; iconBg: string; iconText: string }> = {
+                  completed: { label: "Aprovada", pillBg: "bg-success/15", pillText: "text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  pending: { label: "Pendente", pillBg: "bg-warning/15", pillText: "text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  failed: { label: "Falhou", pillBg: "bg-destructive/15", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  refunded: { label: "Reembolso", pillBg: "bg-info/15", pillText: "text-info", iconBg: "bg-info/10", iconText: "text-info" },
+                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/15", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  default: { label: "Status", pillBg: "bg-muted/30", pillText: "text-muted-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
                 };
-                const wdStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string; glowBg: string; borderColor: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning border-warning/20", iconBg: "bg-warning/12", iconText: "text-warning", glowBg: "bg-warning", borderColor: "border-l-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success border-success/20", iconBg: "bg-success/12", iconText: "text-success", glowBg: "bg-success", borderColor: "border-l-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive border-destructive/20", iconBg: "bg-destructive/12", iconText: "text-destructive", glowBg: "bg-destructive", borderColor: "border-l-destructive" },
-                  default: { label: "Saque", pill: "bg-muted/20 text-foreground border-border/20", iconBg: "bg-muted/20", iconText: "text-muted-foreground", glowBg: "bg-muted", borderColor: "border-l-muted-foreground" },
+                const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; iconBg: string; iconText: string }> = {
+                  pending: { label: "Em análise", pillBg: "bg-warning/15", pillText: "text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  approved: { label: "Aprovado", pillBg: "bg-success/15", pillText: "text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/15", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  default: { label: "Saque", pillBg: "bg-muted/30", pillText: "text-muted-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
                 };
-                const styles = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
+                const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
                 const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
 
                 return (
-                  <div key={item.id}
-                    className={cn("group relative flex items-center gap-3 rounded-xl border-l-[3px] px-3.5 py-3 transition-all duration-300 hover:bg-accent/30 hover:translate-x-0.5", styles.borderColor)}>
-                    <div className={cn("absolute -top-4 -right-4 w-20 h-20 rounded-full blur-[40px] opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500", styles.glowBg)} />
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border border-border/20 shadow-md transition-all duration-300 group-hover:scale-105", styles.iconBg, styles.iconText)}>
-                      {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
+                  <div key={item.id} className="group flex items-center gap-3 px-5 py-3 hover:bg-accent/30 transition-colors">
+                    <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", s.iconBg, s.iconText)}>
+                      {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-[14px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                        <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold", styles.pill)}>
-                          <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse shadow-[0_0_6px_currentColor]", styles.iconText)} />
-                          {styles.label}
+                        <p className="text-[13px] font-display font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                        <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText)}>
+                          {s.label}
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/55 truncate mt-0.5 font-display">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {fullTx && (
-                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/30 hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20" title="Ver detalhes">
+                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent transition-all" title="Ver detalhes">
                           <Eye className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <span className="text-[10px] text-muted-foreground/30 font-mono tabular-nums min-w-[28px] text-right">{timeAgo(item.createdAt)}</span>
+                      <span className="text-[10px] text-muted-foreground/35 font-mono tabular-nums">{timeAgo(item.createdAt)}</span>
                     </div>
                   </div>
                 );
@@ -1078,28 +1029,22 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
 }
 
 function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactNode; label: string; value: string; tone?: "success" | "info" | "destructive" }) {
-  const tStyles: Record<string, { text: string; valueTxt: string; border: string; glow: string; iconBg: string; barBg: string }> = {
-    success: { text: "text-success", valueTxt: "text-success", border: "border-l-success/60", glow: "bg-success", iconBg: "bg-success/12", barBg: "from-success/20 to-success/5" },
-    info: { text: "text-info", valueTxt: "text-foreground", border: "border-l-info/60", glow: "bg-info", iconBg: "bg-info/12", barBg: "from-info/20 to-info/5" },
-    destructive: { text: "text-destructive", valueTxt: "text-destructive", border: "border-l-destructive/60", glow: "bg-destructive", iconBg: "bg-destructive/12", barBg: "from-destructive/20 to-destructive/5" },
+  const tStyles: Record<string, { text: string; valueTxt: string; iconBg: string }> = {
+    success: { text: "text-success", valueTxt: "text-success", iconBg: "bg-success/10" },
+    info: { text: "text-info", valueTxt: "text-foreground", iconBg: "bg-info/10" },
+    destructive: { text: "text-destructive", valueTxt: "text-destructive", iconBg: "bg-destructive/10" },
   };
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className={cn("group relative rounded-xl border-l-[3px] p-3.5 overflow-hidden transition-all duration-300 hover:translate-x-1 hover:shadow-lg", s.border)}
-      style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.75) 100%)", boxShadow: "0 1px 0 0 rgba(255,255,255,0.02) inset, 0 4px 16px -4px rgba(0,0,0,0.25)" }}>
-      <div className={cn("absolute -top-10 -right-10 w-28 h-28 rounded-full blur-[50px] opacity-[0.10] group-hover:opacity-[0.20] transition-opacity duration-500", s.glow)} />
-      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent" />
-      <div className={cn("absolute inset-0 bg-gradient-to-r opacity-30 pointer-events-none", s.barBg)} />
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-border/20 shadow-md group-hover:scale-105 transition-transform", s.iconBg)}>
-            <span className={s.text}>{icon}</span>
-          </div>
-          <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-[0.12em]">{label}</span>
+    <div className="flex items-center justify-between rounded-lg border border-border/30 bg-accent/20 px-3.5 py-3 transition-colors hover:bg-accent/40">
+      <div className="flex items-center gap-2.5">
+        <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", s.iconBg)}>
+          <span className={s.text}>{icon}</span>
         </div>
-        <p className={`text-xl md:text-2xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
+        <span className="text-[11px] text-muted-foreground/70 font-semibold">{label}</span>
       </div>
+      <p className={`text-lg font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
     </div>
   );
 }
