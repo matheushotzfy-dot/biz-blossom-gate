@@ -1137,71 +1137,74 @@ export default function Vendas() {
   </section>
 
  {/* ════════ TRANSACTIONS TABLE ════════ */}
- <motion.section
-  initial={{ opacity: 0, y: 12 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.4, delay: 0.25 }}
- >
-  <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between mb-4">
-  <div className="flex items-center gap-3">
-  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
-  <Layers className="h-4 w-4" />
-  </div>
-  <h2 className="text-[11px] font-heading text-foreground/80 uppercase tracking-[0.18em]">Transações</h2>
-  </div>
-  <div className="relative w-full xl:w-80">
-  <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
-  <input
-  id="vendas-search"
-  value={search}
-  onChange={(e) => setSearch(e.target.value)}
-  placeholder="Buscar nome, e-mail ou ID…"
-  className="h-10 w-full rounded-full border border-border/60 bg-background/75 pl-10 pr-12 text-[12px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/20 transition-all"
-  />
-  {search ? (
-  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
-  <X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground transition-colors" />
-  </button>
-  ) : (
-  <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-0.5 text-[8px] text-muted-foreground/40 md:inline">⌘K</kbd>
-  )}
-  </div>
-  </div>
-
-  {/* Status filter pills */}
-  <div className="flex gap-1.5 overflow-x-auto mb-4 pb-1">
-  {statusTabs.map((tab) => {
-  const active = statusFilter === tab.value;
-  return (
-  <button
-  key={tab.value}
-  onClick={() => setStatusFilter(tab.value)}
-  className={cn(
-  "inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[10px] font-heading font-bold transition-all duration-200 active:scale-[0.97] border",
-  active
-  ? "bg-card text-foreground border-border/60 shadow-sm"
-  : "text-muted-foreground hover:text-foreground border-transparent hover:border-border/40 hover:bg-accent/35"
-  )}
+  <motion.section
+   initial={{ opacity: 0, y: 12 }}
+   animate={{ opacity: 1, y: 0 }}
+   transition={{ duration: 0.4, delay: 0.25 }}
   >
-  {tab.label}
-  <span className={cn("text-[9px] tabular-nums px-1.5 py-0.5 rounded-full", active ? "bg-primary/10 text-primary" : "bg-muted/10 text-muted-foreground/60")}>{tab.count}</span>
-  </button>
-  );
-  })}
-  </div>
+   <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between mb-4">
+   <div className="flex items-center gap-3">
+   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+   <Layers className="h-4 w-4" />
+   </div>
+   <div>
+   <h2 className="text-[12px] font-heading font-bold text-foreground">Transações</h2>
+   <p className="text-[9px] text-muted-foreground/50 mt-0.5">Histórico completo de vendas</p>
+   </div>
+   </div>
+   <div className="relative w-full xl:w-80">
+   <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
+   <input
+   id="vendas-search"
+   value={search}
+   onChange={(e) => setSearch(e.target.value)}
+   placeholder="Buscar nome, e-mail ou ID…"
+   className="h-10 w-full rounded-xl border border-border/50 bg-background/75 pl-10 pr-12 text-[12px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/20 transition-all"
+   />
+   {search ? (
+   <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
+   <X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground transition-colors" />
+   </button>
+   ) : (
+   <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-0.5 text-[8px] text-muted-foreground/40 md:inline">⌘K</kbd>
+   )}
+   </div>
+   </div>
 
-  <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
-  <div className="flex items-center justify-between px-6 py-3 border-b border-border/30">
-  <p className="text-[10px] text-muted-foreground/60">
-  {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
-  </p>
-  {!hidden && sortedFiltered.length > 0 && (
-  <p className="text-[11px] font-display font-bold text-primary tabular-nums">{fmt(filteredNetTotal)}</p>
-  )}
-  </div>
+   {/* Status filter pills */}
+   <div className="flex gap-1.5 overflow-x-auto mb-4 pb-1">
+   {statusTabs.map((tab) => {
+   const active = statusFilter === tab.value;
+   return (
+   <button
+   key={tab.value}
+   onClick={() => setStatusFilter(tab.value)}
+   className={cn(
+   "inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-[10px] font-heading font-bold transition-all duration-200 active:scale-[0.97] border",
+   active
+   ? "bg-card text-foreground border-border/50 shadow-sm"
+   : "text-muted-foreground hover:text-foreground border-transparent hover:border-border/30 hover:bg-accent/25"
+   )}
+   >
+   {tab.label}
+   <span className={cn("text-[9px] tabular-nums px-1.5 py-0.5 rounded-md", active ? "bg-primary/10 text-primary" : "bg-muted/10 text-muted-foreground/50")}>{tab.count}</span>
+   </button>
+   );
+   })}
+   </div>
 
-  {/* Desktop Table */}
-  <div className="hidden md:block">
+   <div className="overflow-hidden rounded-2xl border border-border/50 bg-card">
+   <div className="flex items-center justify-between px-5 py-3 border-b border-border/20">
+   <p className="text-[10px] text-muted-foreground/50">
+   {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
+   </p>
+   {!hidden && sortedFiltered.length > 0 && (
+   <p className="text-[11px] font-bold text-primary tabular-nums">{fmt(filteredNetTotal)}</p>
+   )}
+   </div>
+
+   {/* Desktop Table */}
+   <div className="hidden md:block">
   {loading ? (
   <div className="p-20 text-center">
   <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-primary/10 border-t-primary" />
