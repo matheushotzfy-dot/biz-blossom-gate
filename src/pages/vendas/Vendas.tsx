@@ -859,27 +859,26 @@ export default function Vendas() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none z-0" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
 
-        <div className="relative">
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-                  <DollarSign className="h-5 w-5" />
+        <div className="relative z-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+                  <DollarSign className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50">Painel de performance</p>
-                  <h1 className="mt-1 text-2xl font-heading font-black tracking-tight text-foreground sm:text-3xl">Minhas Vendas</h1>
-                </div>
+                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Minhas Vendas</span>
+              </motion.div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                </span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
-
-              <span className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/[0.08] px-3 py-1.5 text-[10px] font-heading uppercase tracking-[0.2em] text-success">
-                <span className="h-2 w-2 rounded-full bg-success" />
-                Tempo real
-              </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-full border border-border/15 bg-background/70 p-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
                 {PERIODS.map((opt) => (
                   <button
                     key={opt.label}
@@ -889,10 +888,10 @@ export default function Vendas() {
                       setCustomRange(undefined);
                     }}
                     className={cn(
-                      "rounded-full px-3.5 py-2 text-[10px] font-heading transition-colors duration-300",
+                      "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground/70 hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground/35 hover:text-foreground/70"
                     )}
                   >
                     {opt.label}
