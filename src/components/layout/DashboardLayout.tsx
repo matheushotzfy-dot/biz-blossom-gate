@@ -68,10 +68,11 @@ function DashboardLayoutInner() {
 
           <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 overflow-hidden">
-            <div className="absolute left-1/2 top-[-150px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] opacity-45" />
+            <div className="absolute left-1/2 top-[-150px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[120px] opacity-50" />
+            <div className="absolute left-[18%] top-8 h-40 w-40 rounded-full bg-info/8 blur-[110px] opacity-40" />
           </div>
 
-          <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/30 bg-background/80 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
+          <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
             <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
               <Menu className="h-4 w-4 text-muted-foreground" />
             </SidebarTrigger>
