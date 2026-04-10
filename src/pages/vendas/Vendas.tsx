@@ -845,15 +845,18 @@ export default function Vendas() {
       {/* HERO — CLEAN PREMIUM OVERVIEW                                  */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="mb-10 overflow-hidden rounded-[32px] border border-border/15 bg-card px-5 py-6 sm:px-7 sm:py-7 lg:px-8"
-        style={{
-          boxShadow: "0 24px 50px -38px hsl(var(--foreground) / 0.24)",
-          backgroundImage: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background) / 0.98) 100%), radial-gradient(circle at top right, hsl(var(--primary) / 0.10), transparent 28%), radial-gradient(circle at bottom left, hsl(var(--info) / 0.08), transparent 26%)",
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
       >
+        {/* Atmospheric glow effects (same as Dashboard) */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute -top-32 -left-32 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" />
+          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-48 w-[60%] rounded-full bg-primary/5 blur-[120px]" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none z-0" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
 
         <div className="relative">
