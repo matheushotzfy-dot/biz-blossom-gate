@@ -13,7 +13,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
 import { usePrefetchDashboardData } from "@/hooks/useQueryData";
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "react-router-dom";
 
 function DashboardLayoutInner() {
@@ -67,19 +66,32 @@ function DashboardLayoutInner() {
           <AppSidebar />
 
           <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
-          {/* ─── ATMOSPHERIC BACKGROUND ─── */}
-          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-            {/* Top glow cluster */}
-            <div className="absolute left-1/2 top-[-180px] h-[26rem] w-[52rem] -translate-x-1/2 rounded-full bg-primary/14 blur-[160px] opacity-60" />
-            <div className="absolute left-[12%] top-4 h-56 w-56 rounded-full bg-info/10 blur-[130px] opacity-50" />
-            <div className="absolute right-[8%] top-16 h-44 w-44 rounded-full bg-success/8 blur-[120px] opacity-40" />
-            {/* Mid accent */}
-            <div className="absolute left-[-5%] top-[38%] h-80 w-80 rounded-full bg-primary/8 blur-[170px] opacity-35" />
-            <div className="absolute right-[-8%] top-[52%] h-72 w-72 rounded-full bg-info/6 blur-[150px] opacity-30" />
-            {/* Bottom warmth */}
-            <div className="absolute left-[30%] bottom-[5%] h-64 w-[28rem] rounded-full bg-primary/6 blur-[160px] opacity-25" />
-            {/* Dot grid texture */}
-            <div className="absolute inset-0 dot-grid opacity-[0.025]" />
+          {/* ─── REFINED BACKGROUND ─── */}
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+            <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/30" />
+
+            <div className="absolute inset-x-0 top-0 h-28 border-b border-border/35 bg-card/20" />
+
+            <div
+              className="absolute inset-0 opacity-45"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, hsl(var(--border) / 0.16) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border) / 0.12) 1px, transparent 1px)",
+                backgroundSize: "72px 72px",
+                maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 92%)",
+              }}
+            />
+
+            <div className="absolute -left-32 top-[-7rem] h-[24rem] w-[48rem] rotate-[-10deg] rounded-[3rem] border border-border/40 bg-card/55 shadow-2xl" />
+            <div className="absolute right-[-12rem] top-20 h-[21rem] w-[34rem] rotate-[10deg] rounded-[3rem] border border-border/30 bg-background/75 shadow-xl" />
+
+            <div className="absolute left-[12%] top-[24%] h-[18rem] w-[18rem] rounded-full border border-border/30 bg-card/40" />
+            <div className="absolute right-[10%] bottom-[10%] h-[20rem] w-[20rem] rounded-full border border-border/25 bg-secondary/18" />
+
+            <div className="absolute inset-x-[14%] top-[18%] h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+            <div className="absolute inset-x-[20%] bottom-[18%] h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
+
+            <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-secondary/40 via-secondary/10 to-transparent" />
           </div>
 
           <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
