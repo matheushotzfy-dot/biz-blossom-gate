@@ -478,11 +478,12 @@ export default function Dashboard() {
         className="relative mb-10 rounded-2xl border border-border/60 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
       >
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-28 -left-24 h-56 w-56 rounded-full bg-primary/7 blur-[110px]" />
-          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-info/4 blur-[90px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-[58%] rounded-full bg-primary/3 blur-[130px]" />
+          <div className="absolute -top-28 -left-24 h-56 w-56 rounded-full bg-primary/15 blur-[110px]" />
+          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-info/8 blur-[90px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-[58%] rounded-full bg-primary/6 blur-[130px]" />
+          <div className="absolute top-0 right-1/4 h-32 w-32 rounded-full bg-primary/10 blur-[80px]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.02] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-info/[0.04] pointer-events-none z-0" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
