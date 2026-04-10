@@ -361,7 +361,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.3), ease: [0.16, 1, 0.3, 1] }}
       onClick={onClick}
-      className="group cursor-pointer border-b border-border/[0.04] row-glow transition-all duration-200"
+      className="group cursor-pointer border-b border-border/20 transition-colors duration-200 hover:bg-muted/5"
     >
       <td className="py-4 px-5">
         <div className="flex items-center gap-3">
@@ -370,17 +370,17 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
           </Avatar>
           <div className="min-w-0">
             <p className="text-[12px] font-display font-semibold text-foreground truncate leading-tight">{name}</p>
-            {tx.customer_email && <p className="text-[10px] text-muted-foreground/30 truncate mt-0.5 font-mono">{tx.customer_email}</p>}
+            {tx.customer_email && <p className="text-[10px] text-muted-foreground truncate mt-0.5 font-mono">{tx.customer_email}</p>}
           </div>
         </div>
       </td>
       <td className="py-4 px-4">
-        <span className="text-[11px] text-muted-foreground/40 truncate block max-w-[140px] font-display">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
+        <span className="text-[11px] text-muted-foreground truncate block max-w-[140px] font-display">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
       </td>
       <td className="py-4 px-4">
         <div>
           <span className="text-[13px] font-display font-bold text-foreground tabular-nums tracking-tight">{fmt(Number(tx.amount))}</span>
-          <p className="text-[9px] text-muted-foreground/20 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
+          <p className="text-[9px] text-muted-foreground tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
         </div>
       </td>
       <td className="py-4 px-4">
@@ -396,15 +396,15 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
       </td>
       <td className="py-4 px-4">
         <div className="flex flex-col">
-          <span className="text-[11px] text-muted-foreground/35 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
-          <span className="text-[9px] text-muted-foreground/20 tabular-nums font-mono">{fmtTime(tx.created_at)}</span>
+          <span className="text-[11px] text-muted-foreground tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
+          <span className="text-[9px] text-muted-foreground/60 tabular-nums font-mono">{fmtTime(tx.created_at)}</span>
         </div>
       </td>
       <td className="py-4 px-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             <button className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-muted/20 active:scale-95">
-              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
+              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/20">
