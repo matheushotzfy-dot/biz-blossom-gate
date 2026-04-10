@@ -224,7 +224,7 @@ export default function Dashboard() {
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
-  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
+  const { approved, pending, refunded, chargebacks, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _pending = filteredTx.filter((t) => t.status === "pending");
     const _refunded = filteredTx.filter((t) => t.status === "refunded");
