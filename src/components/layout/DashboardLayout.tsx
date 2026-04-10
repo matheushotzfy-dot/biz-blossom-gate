@@ -66,33 +66,19 @@ function DashboardLayoutInner() {
  <AppSidebar />
 
  <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
- {/* ─── REFINED BACKGROUND ─── */}
- <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
- <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/30" />
-
- <div className="absolute inset-x-0 top-0 h-28 border-b border-border/35 bg-card/20" />
-
- <div
- className="absolute inset-0 opacity-45"
- style={{
- backgroundImage:
- "linear-gradient(to right, hsl(var(--border) / 0.16) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border) / 0.12) 1px, transparent 1px)",
- backgroundSize: "72px 72px",
- maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 92%)",
- }}
- />
-
- <div className="absolute -left-32 top-[-7rem] h-[24rem] w-[48rem] rotate-[-10deg] rounded-[3rem] border border-border/40 bg-card/55 shadow-2xl" />
- <div className="absolute right-[-12rem] top-20 h-[21rem] w-[34rem] rotate-[10deg] rounded-[3rem] border border-border/30 bg-background/75 shadow-xl" />
-
- <div className="absolute left-[12%] top-[24%] h-[18rem] w-[18rem] rounded-full border border-border/30 bg-card/40" />
- <div className="absolute right-[10%] bottom-[10%] h-[20rem] w-[20rem] rounded-full border border-border/25 bg-secondary/18" />
-
- <div className="absolute inset-x-[14%] top-[18%] h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
- <div className="absolute inset-x-[20%] bottom-[18%] h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
-
- <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-secondary/40 via-secondary/10 to-transparent" />
- </div>
+  {/* ─── CLEAN BACKGROUND ─── */}
+  <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+  <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
+  <div
+  className="absolute inset-0 opacity-30"
+  style={{
+  backgroundImage:
+  "linear-gradient(to right, hsl(var(--border) / 0.1) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border) / 0.08) 1px, transparent 1px)",
+  backgroundSize: "64px 64px",
+  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.5), transparent 80%)",
+  }}
+  />
+  </div>
 
  <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
  <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
