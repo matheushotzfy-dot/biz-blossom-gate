@@ -480,13 +480,14 @@ export default function Dashboard() {
         className="relative mb-10 rounded-2xl border border-border/60 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
       >
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-28 -left-24 h-72 w-72 rounded-full bg-primary/25 blur-[120px]" />
-          <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-info/15 blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-52 w-[65%] rounded-full bg-primary/12 blur-[140px]" />
-          <div className="absolute top-0 right-1/4 h-44 w-44 rounded-full bg-primary/18 blur-[90px]" />
-          <div className="absolute bottom-1/4 left-1/3 h-36 w-36 rounded-full bg-success/10 blur-[100px]" />
+          <div className="absolute -top-32 -left-28 h-80 w-80 rounded-full bg-primary/35 blur-[130px]" />
+          <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-emerald-400/20 blur-[110px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-60 w-[70%] rounded-full bg-emerald-400/18 blur-[150px]" />
+          <div className="absolute top-0 right-1/4 h-52 w-52 rounded-full bg-primary/25 blur-[100px]" />
+          <div className="absolute bottom-1/4 left-1/3 h-44 w-44 rounded-full bg-emerald-300/15 blur-[110px]" />
+          <div className="absolute top-1/3 right-1/3 h-36 w-36 rounded-full bg-teal-400/12 blur-[90px]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.10] via-transparent to-info/[0.07] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.14] via-primary/[0.06] to-teal-500/[0.10] pointer-events-none z-0" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
