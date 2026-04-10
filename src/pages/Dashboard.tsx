@@ -717,7 +717,6 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-primary/15 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary/5">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-xl shadow-emerald-500/8">
           <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/22 blur-[110px] pointer-events-none" />
           <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-teal-400/18 blur-[90px] pointer-events-none" />
