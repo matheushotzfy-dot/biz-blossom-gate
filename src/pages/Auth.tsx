@@ -299,10 +299,7 @@ export default function Auth() {
 
  return (
  <div className="h-screen overflow-hidden bg-background text-foreground">
- <div className="fixed inset-0 dot-grid opacity-20 pointer-events-none" />
  <div className="fixed inset-0 pointer-events-none overflow-hidden">
- <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
- <div className="absolute right-0 top-1/4 h-96 w-96 rounded-full bg-info/10 blur-3xl" />
  <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
  </div>
 
