@@ -1029,28 +1029,22 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
 }
 
 function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactNode; label: string; value: string; tone?: "success" | "info" | "destructive" }) {
-  const tStyles: Record<string, { text: string; valueTxt: string; border: string; glow: string; iconBg: string; barBg: string }> = {
-    success: { text: "text-success", valueTxt: "text-success", border: "border-l-success/60", glow: "bg-success", iconBg: "bg-success/12", barBg: "from-success/20 to-success/5" },
-    info: { text: "text-info", valueTxt: "text-foreground", border: "border-l-info/60", glow: "bg-info", iconBg: "bg-info/12", barBg: "from-info/20 to-info/5" },
-    destructive: { text: "text-destructive", valueTxt: "text-destructive", border: "border-l-destructive/60", glow: "bg-destructive", iconBg: "bg-destructive/12", barBg: "from-destructive/20 to-destructive/5" },
+  const tStyles: Record<string, { text: string; valueTxt: string; iconBg: string }> = {
+    success: { text: "text-success", valueTxt: "text-success", iconBg: "bg-success/10" },
+    info: { text: "text-info", valueTxt: "text-foreground", iconBg: "bg-info/10" },
+    destructive: { text: "text-destructive", valueTxt: "text-destructive", iconBg: "bg-destructive/10" },
   };
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className={cn("group relative rounded-xl border-l-[3px] p-3.5 overflow-hidden transition-all duration-300 hover:translate-x-1 hover:shadow-lg", s.border)}
-      style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.75) 100%)", boxShadow: "0 1px 0 0 rgba(255,255,255,0.02) inset, 0 4px 16px -4px rgba(0,0,0,0.25)" }}>
-      <div className={cn("absolute -top-10 -right-10 w-28 h-28 rounded-full blur-[50px] opacity-[0.10] group-hover:opacity-[0.20] transition-opacity duration-500", s.glow)} />
-      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent" />
-      <div className={cn("absolute inset-0 bg-gradient-to-r opacity-30 pointer-events-none", s.barBg)} />
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-border/20 shadow-md group-hover:scale-105 transition-transform", s.iconBg)}>
-            <span className={s.text}>{icon}</span>
-          </div>
-          <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-[0.12em]">{label}</span>
+    <div className="flex items-center justify-between rounded-lg border border-border/30 bg-accent/20 px-3.5 py-3 transition-colors hover:bg-accent/40">
+      <div className="flex items-center gap-2.5">
+        <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", s.iconBg)}>
+          <span className={s.text}>{icon}</span>
         </div>
-        <p className={`text-xl md:text-2xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
+        <span className="text-[11px] text-muted-foreground/70 font-semibold">{label}</span>
       </div>
+      <p className={`text-lg font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
     </div>
   );
 }
