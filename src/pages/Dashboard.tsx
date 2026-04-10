@@ -662,9 +662,10 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-primary/20 bg-card p-4 md:p-5 relative overflow-hidden shadow-lg shadow-primary/5">
-            <div className="absolute -top-16 -right-16 h-36 w-36 rounded-full bg-emerald-400/15 blur-[80px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 relative overflow-hidden shadow-xl shadow-emerald-500/8">
+            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-emerald-400/25 blur-[90px] pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-teal-400/18 blur-[70px] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
