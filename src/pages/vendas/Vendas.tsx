@@ -215,7 +215,7 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
   );
 }
 
-/* ─── Clean Card ─── */
+/* ─── Glass Card (matches Dashboard style) ─── */
 function GlowCard({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number; animated?: boolean }) {
   return (
     <motion.div
@@ -223,43 +223,57 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/15 bg-card/95 shadow-[0_18px_40px_-32px_hsl(var(--foreground)/0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-border/25 hover:shadow-[0_22px_48px_-30px_hsl(var(--foreground)/0.24)]",
+        "group relative overflow-hidden rounded-2xl border border-border/30 bg-card/95 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5",
         className
       )}
     >
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
       <div className="relative">{children}</div>
     </motion.div>
   );
 }
 
-/* ─── KPI Tile ─── */
+/* ─── KPI Tile (Dashboard-style glass-panel) ─── */
 function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "primary", delay = 0, formatter = fmt }: {
   label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: AccentTone; delay?: number; formatter?: (v: number) => string;
 }) {
   const accent = ACCENT_STYLES[color as AccentTone] ?? ACCENT_STYLES.primary;
+  const glowColors: Record<string, string> = { primary: "bg-primary", success: "bg-success", warning: "bg-warning", info: "bg-info", destructive: "bg-destructive" };
+  const glowBg = glowColors[color] || "bg-primary";
 
   return (
-    <GlowCard delay={delay} className="min-h-[176px] p-5 sm:p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl border", accent.iconWrap)}>
-          <Icon className="h-5 w-5" />
-        </div>
-        {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
-      </div>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative rounded-2xl overflow-hidden p-5 sm:p-6 transition-all duration-300 glass-panel border border-border/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 min-h-[176px]"
+    >
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
+      <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]", glowBg)} />
 
-      <div className="mt-5">
-        <p className="mb-2.5 text-[9px] font-heading uppercase tracking-[0.24em] text-muted-foreground/45">{label}</p>
-        <div className="flex flex-wrap items-end gap-2.5">
-          <span className="text-[24px] leading-none tracking-tight text-foreground font-heading font-black tabular-nums sm:text-[28px]">
-            {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
-          </span>
-          {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-3">
+          <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl border", accent.iconWrap)}>
+            <Icon className="h-5 w-5" />
+          </div>
+          {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
         </div>
-      </div>
 
-      <div className={cn("mt-5 h-1 w-16 rounded-full", accent.rail)} />
-    </GlowCard>
+        <div className="mt-5">
+          <p className="mb-2.5 text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60">{label}</p>
+          <div className="flex flex-wrap items-end gap-2.5">
+            <span className={cn("text-[26px] leading-none tracking-[-0.03em] text-foreground font-heading font-black tabular-nums sm:text-[28px]")}>
+              {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
+            </span>
+            {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
+          </div>
+        </div>
+
+        <div className={cn("mt-5 h-1 w-16 rounded-full", accent.rail)} />
+      </div>
+    </motion.div>
   );
 }
 
@@ -831,38 +845,40 @@ export default function Vendas() {
       {/* HERO — CLEAN PREMIUM OVERVIEW                                  */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="mb-10 overflow-hidden rounded-[32px] border border-border/15 bg-card px-5 py-6 sm:px-7 sm:py-7 lg:px-8"
-        style={{
-          boxShadow: "0 24px 50px -38px hsl(var(--foreground) / 0.24)",
-          backgroundImage: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background) / 0.98) 100%), radial-gradient(circle at top right, hsl(var(--primary) / 0.10), transparent 28%), radial-gradient(circle at bottom left, hsl(var(--info) / 0.08), transparent 26%)",
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
       >
+        {/* Atmospheric glow effects (same as Dashboard) */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute -top-32 -left-32 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" />
+          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-48 w-[60%] rounded-full bg-primary/5 blur-[120px]" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none z-0" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
 
-        <div className="relative">
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-                  <DollarSign className="h-5 w-5" />
+        <div className="relative z-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+                  <DollarSign className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50">Painel de performance</p>
-                  <h1 className="mt-1 text-2xl font-heading font-black tracking-tight text-foreground sm:text-3xl">Minhas Vendas</h1>
-                </div>
+                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Minhas Vendas</span>
+              </motion.div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                </span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
-
-              <span className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/[0.08] px-3 py-1.5 text-[10px] font-heading uppercase tracking-[0.2em] text-success">
-                <span className="h-2 w-2 rounded-full bg-success" />
-                Tempo real
-              </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-full border border-border/15 bg-background/70 p-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
                 {PERIODS.map((opt) => (
                   <button
                     key={opt.label}
@@ -872,10 +888,10 @@ export default function Vendas() {
                       setCustomRange(undefined);
                     }}
                     className={cn(
-                      "rounded-full px-3.5 py-2 text-[10px] font-heading transition-colors duration-300",
+                      "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground/70 hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground/35 hover:text-foreground/70"
                     )}
                   >
                     {opt.label}
@@ -885,23 +901,18 @@ export default function Vendas() {
 
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button
-                    className={cn(
-                      "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[10px] font-heading transition-colors duration-300",
-                      isCustom
-                        ? "border-primary/20 bg-primary/[0.08] text-primary"
-                        : "border-border/15 bg-background/70 text-muted-foreground/70 hover:text-foreground"
-                    )}
-                  >
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    {isCustom && customRange?.from
-                      ? customRange.to
-                        ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}`
-                        : format(customRange.from, "dd/MM/yyyy")
-                      : "Período customizado"}
+                  <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
+                    isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                  )}>
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays className="h-3 w-3" />
+                      {isCustom && customRange?.from
+                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                        : "Custom"}
+                    </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 p-0 shadow-2xl">
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
                   <Calendar
                     mode="range"
                     selected={customRange}
@@ -922,213 +933,85 @@ export default function Vendas() {
                   />
                 </PopoverContent>
               </Popover>
-
-              <button
-                onClick={toggleHidden}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border border-border/15 bg-background/70 transition-colors duration-300",
-                  hidden ? "text-primary" : "text-muted-foreground/70 hover:text-foreground"
-                )}
-                title={hidden ? "Mostrar valores" : "Ocultar valores"}
-              >
-                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+                {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
-
               <button
                 onClick={() => setShowExportDialog(true)}
-                className="inline-flex h-10 items-center gap-2 rounded-full border border-border/15 bg-background/70 px-4 text-[10px] font-heading text-muted-foreground/70 transition-colors duration-300 hover:text-foreground"
+                className="h-8 rounded-full border border-border/10 px-3.5 text-[10px] font-heading text-muted-foreground/30 hover:text-foreground hover:border-border/20 transition-all active:scale-[0.97] inline-flex items-center gap-1.5"
               >
-                <Download className="h-3.5 w-3.5" />
+                <Download className="h-3 w-3" />
                 Exportar
               </button>
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08 }}
-              className="rounded-[28px] border border-border/15 bg-background/70 p-5 sm:p-6"
-              style={{ boxShadow: "0 22px 48px -40px hsl(var(--foreground) / 0.22)" }}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary/[0.08] px-3 py-1 text-[10px] font-heading uppercase tracking-[0.2em] text-primary">
-                  Receita líquida
+          {/* MAIN FOCAL POINT — Revenue (Dashboard style) */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
+                {isCustom && customRange?.from
+                  ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                  : `Receita líquida — ${periodLabel}`}
+              </p>
+              {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
+            </div>
+            <div className="flex items-end gap-5 mb-3">
+              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82]">
+                {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+              {[
+                { icon: Check, label: `${m.approved.length} aprovadas`, color: "text-success", border: "border-success/20", bg: "bg-success/5" },
+                { icon: Clock, label: `${m.pending.length} pendentes`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
+                { icon: Target, label: `${m.conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/20", bg: "bg-info/5" },
+                { icon: Receipt, label: `ticket ${hidden ? HIDE : fmt(m.avgTicket)}`, color: "text-primary", border: "border-primary/20", bg: "bg-primary/5" },
+                { icon: DollarSign, label: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
+              ].map((chip, i) => (
+                <span key={i} className={`inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 rounded-full border ${chip.border} ${chip.bg} backdrop-blur-sm px-3.5 py-1.5 transition-colors hover:border-primary/30`}>
+                  <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
+                  {chip.label}
                 </span>
-                {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
-              </div>
+              ))}
+              {lastSaleText && (
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-primary rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm px-3.5 py-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  última venda {lastSaleText}
+                </span>
+              )}
+            </div>
+          </motion.div>
 
-              <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <div className="text-4xl font-heading font-black leading-[0.9] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-                    {hidden ? (
-                      "R$ •••••••"
-                    ) : (
-                      <span style={{ textShadow: "0 12px 28px hsl(var(--primary) / 0.10)" }}>
-                        <AnimatedNumber value={m.totalNet} />
-                      </span>
-                    )}
+          {/* Executive KPI strip — Ultra Glass (Dashboard style) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {([
+              { label: "Faturamento Bruto", numValue: m.totalGross, formatter: fmt, icon: Banknote, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
+              { label: "Vendas Aprovadas", numValue: m.approved.length, formatter: (v: number) => String(Math.round(v)), icon: ShoppingCart, valueColor: "text-success", iconBg: "bg-success/10", iconText: "text-success", iconBorder: "border-success/20", glowColor: "bg-success" },
+              { label: "Taxa Conversão", numValue: m.conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-info/10", iconText: "text-info", iconBorder: "border-info/20", glowColor: "bg-info" },
+              { label: "Clientes Únicos", numValue: m.uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
+            ] as const).map((item, idx) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
+                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 glass-panel border border-border/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
+                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]", item.glowColor)} />
+                
+                <div className="relative z-10 flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 mb-3">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{hidden ? HIDE : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground/70">
-                    Um visual mais limpo para ler sua operação com clareza, foco nos números e menos ruído visual.
-                  </p>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-sm", item.iconBg, item.iconBorder, item.iconText)}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3 sm:min-w-[300px]">
-                  {[
-                    { label: "Ticket médio", value: hidden ? HIDE : fmt(m.avgTicket), tone: "primary" as AccentTone, icon: Receipt },
-                    { label: "Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), tone: "destructive" as AccentTone, icon: Percent },
-                    { label: "Clientes", value: hidden ? HIDE : String(m.uniqueCustomers), tone: "info" as AccentTone, icon: Users },
-                    { label: "Pendentes", value: String(m.pending.length), tone: "warning" as AccentTone, icon: Clock },
-                  ].map((stat) => {
-                    const accent = ACCENT_STYLES[stat.tone];
-                    const Icon = stat.icon;
-
-                    return (
-                      <div key={stat.label} className="rounded-2xl border border-border/12 bg-card/80 p-3.5">
-                        <div className="mb-3 flex items-center justify-between gap-2">
-                          <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/45">{stat.label}</span>
-                          <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>
-                            <Icon className="h-3.5 w-3.5" />
-                          </div>
-                        </div>
-                        <div className={cn("text-sm font-heading font-black tracking-tight", accent.text)}>{stat.value}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {[
-                  { icon: CalendarDays, text: periodLabel, tone: "primary" as AccentTone },
-                  { icon: Check, text: `${m.approved.length} aprovadas`, tone: "success" as AccentTone },
-                  { icon: DollarSign, text: `Bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, tone: "warning" as AccentTone },
-                ].map((chip) => {
-                  const accent = ACCENT_STYLES[chip.tone];
-                  const Icon = chip.icon;
-
-                  return (
-                    <span
-                      key={chip.text}
-                      className={cn(
-                        "inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-display font-semibold",
-                        accent.surface,
-                        accent.text
-                      )}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {chip.text}
-                    </span>
-                  );
-                })}
-
-                {lastSaleText && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.08] px-3.5 py-2 text-[11px] font-display font-semibold text-primary">
-                    <span className="h-2 w-2 rounded-full bg-primary" />
-                    última venda {lastSaleText}
-                  </span>
-                )}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.14 }}
-              className="rounded-[28px] border border-border/15 bg-background/70 p-5"
-              style={{ boxShadow: "0 22px 48px -40px hsl(var(--foreground) / 0.22)" }}
-            >
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground/45">Visão rápida</p>
-                  <h2 className="mt-2 text-xl font-heading font-black tracking-tight text-foreground">Resumo do período</h2>
-                </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-                  <Activity className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  {
-                    label: "Taxa de aprovação",
-                    value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
-                    helper: `${m.approved.length} vendas concluídas`,
-                    tone: (m.conversion >= 80 ? "success" : m.conversion >= 50 ? "warning" : "destructive") as AccentTone,
-                    icon: Target,
-                  },
-                  {
-                    label: "Método líder",
-                    value: dominantMethod.value > 0 ? dominantMethod.label : "Sem destaque",
-                    helper: hidden ? HIDE : dominantMethod.value > 0 ? `${fmtCompact(dominantMethod.value)} · ${dominantMethod.count}x` : "Sem volume suficiente",
-                    tone: (dominantMethod.value === 0
-                      ? "primary"
-                      : dominantMethod.label === "PIX"
-                        ? "success"
-                        : dominantMethod.label === "Cartão"
-                          ? "info"
-                          : "warning") as AccentTone,
-                    icon: dominantMethod.value === 0 ? Layers : dominantMethod.label === "PIX" ? Smartphone : dominantMethod.label === "Cartão" ? CreditCard : FileText,
-                  },
-                  {
-                    label: "Pico de vendas",
-                    value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
-                    helper: peakHour !== null ? `${rawPeakSales} vendas na hora mais forte` : "Sem pico relevante",
-                    tone: "primary" as AccentTone,
-                    icon: Flame,
-                  },
-                ].map((item) => {
-                  const accent = ACCENT_STYLES[item.tone];
-                  const Icon = item.icon;
-
-                  return (
-                    <div key={item.label} className="rounded-2xl border border-border/12 bg-card/80 p-4">
-                      <div className="flex items-start gap-3">
-                        <div className={cn("mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border", accent.iconWrap)}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40">{item.label}</p>
-                          <div className={cn("mt-2 text-2xl font-heading font-black leading-none tracking-tight", accent.text)}>{item.value}</div>
-                          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/60">{item.helper}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                {paymentMix.map((pm) => {
-                  const accent = ACCENT_STYLES[pm.color as AccentTone];
-                  const share = pm.total > 0 ? Math.round((pm.value / pm.total) * 100) : 0;
-
-                  return (
-                    <div key={pm.label} className="rounded-2xl border border-border/12 bg-card/80 px-3 py-3">
-                      <div className={cn("mb-2 flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>{pm.icon}</div>
-                      <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/45">{pm.label}</p>
-                      <p className={cn("mt-2 text-sm font-heading font-black", accent.text)}>{hidden ? HIDE : `${share}%`}</p>
-                      <p className="mt-1 text-[10px] text-muted-foreground/60">{pm.count} vendas</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
+              </motion.div>
+            ))}
           </div>
+
         </div>
       </motion.section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* KPI GRID                                                        */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="mb-10 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiTile label="Faturamento Bruto" value={m.totalGross} icon={Banknote} delta={{ cur: m.totalGross, prev: p.totalGross }} sparkData={metrics.dailyGrossArr} hidden={hidden} color="primary" delay={0} />
-        <KpiTile label="Vendas Aprovadas" value={m.approved.length} icon={ShoppingCart} delta={{ cur: m.approved.length, prev: p.approved.length }} sparkData={metrics.dailyCountArr} hidden={hidden} color="success" delay={0.05} formatter={(v) => Math.round(v).toString()} />
-        <KpiTile label="Clientes Únicos" value={m.uniqueCustomers} icon={Users} hidden={hidden} color="info" delay={0.1} formatter={(v) => Math.round(v).toString()} />
-        <KpiTile label="Total em Taxas" value={m.totalFees} icon={Percent} hidden={hidden} color="destructive" delay={0.15} />
-      </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* REVENUE TIMELINE                                                */}
