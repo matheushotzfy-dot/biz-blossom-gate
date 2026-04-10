@@ -909,18 +909,15 @@ export default function Vendas() {
   <p className="mt-0.5 text-[10px] text-muted-foreground/50">Comparativo com o período anterior</p>
   </div>
   </div>
-  <div className="flex flex-wrap gap-4 text-[11px] tabular-nums">
-  <span className="inline-flex items-center gap-2">
-  <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-  Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span>
-  </span>
-  <span className="inline-flex items-center gap-2 text-muted-foreground/60">
-  <span className="h-2.5 w-2.5 rounded-full border border-dashed border-muted-foreground/30" />
-  Anterior
-  </span>
-  <span className="inline-flex items-center gap-1 text-destructive/60">
-  <AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}
-  </span>
+   <div className="flex flex-wrap gap-4 text-[11px] tabular-nums">
+   <span className="inline-flex items-center gap-2">
+   <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+   Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span>
+   </span>
+   <span className="inline-flex items-center gap-2 text-muted-foreground/60">
+   <span className="h-2.5 w-2.5 rounded-full border border-dashed border-muted-foreground/30" />
+   Anterior
+   </span>
   </div>
  </div>
 
