@@ -1255,26 +1255,26 @@ export default function Vendas() {
       >
         <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-card/50 border border-border/10 flex items-center justify-center">
-              <Layers className="h-4 w-4 text-muted-foreground/40" />
+            <div className="h-8 w-8 rounded-xl bg-muted/10 border border-border/30 flex items-center justify-center">
+              <Layers className="h-4 w-4 text-muted-foreground" />
             </div>
             <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.1em]">Transações</h2>
           </div>
           <div className="relative w-full xl:w-80">
-            <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/15" />
+            <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50" />
             <input
               id="vendas-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar nome, e-mail ou ID…"
-              className="h-10 w-full rounded-xl border border-border/8 bg-card/30 pl-10 pr-12 text-[12px] text-foreground placeholder:text-muted-foreground/15 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 transition-all font-display"
+              className="h-10 w-full rounded-xl border border-border/40 bg-card pl-10 pr-12 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all font-display"
             />
             {search ? (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
                 <X className="h-3.5 w-3.5 text-muted-foreground/20 hover:text-foreground transition-colors" />
               </button>
             ) : (
-              <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/8 bg-muted/8 px-1.5 py-0.5 text-[8px] text-muted-foreground/15 md:inline font-mono">⌘K</kbd>
+              <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-0.5 text-[8px] text-muted-foreground/50 md:inline font-mono">⌘K</kbd>
             )}
           </div>
         </div>
@@ -1290,20 +1290,20 @@ export default function Vendas() {
                 className={cn(
                   "inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[10px] font-display font-bold transition-all duration-300 active:scale-[0.97] border",
                   active
-                    ? "bg-primary text-primary-foreground border-primary/20 shadow-[0_2px_12px_rgba(16,185,129,0.2)]"
-                    : "text-muted-foreground/25 hover:text-foreground/60 border-transparent hover:border-border/10 hover:bg-card/30"
+                    ? "bg-primary text-primary-foreground border-primary/30"
+                    : "text-muted-foreground hover:text-foreground border-transparent hover:border-border/30 hover:bg-muted/10"
                 )}
               >
                 {tab.label}
-                <span className={cn("text-[9px] tabular-nums px-1.5 py-0.5 rounded-full", active ? "bg-primary-foreground/20 text-primary-foreground/80" : "bg-muted/8 text-muted-foreground/15")}>{tab.count}</span>
+                <span className={cn("text-[9px] tabular-nums px-1.5 py-0.5 rounded-full", active ? "bg-primary-foreground/20 text-primary-foreground/80" : "bg-muted/10 text-muted-foreground")}>{tab.count}</span>
               </button>
             );
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/15 bg-card/70 shadow-[0_4px_32px_-8px_hsl(var(--background)/0.4)]">
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
-            <p className="text-[10px] text-muted-foreground/15 font-mono">
+        <div className="overflow-hidden rounded-2xl border border-border/40 bg-card">
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border/20">
+            <p className="text-[10px] text-muted-foreground font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
             </p>
             {!hidden && sortedFiltered.length > 0 && (
