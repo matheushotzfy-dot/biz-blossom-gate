@@ -88,6 +88,70 @@ const STATUS: Record<string, { label: string; fg: string; dot: string; bg: strin
   chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/15" },
 };
 
+type AccentTone = "primary" | "success" | "warning" | "info" | "destructive";
+
+const ACCENT_STYLES: Record<AccentTone, {
+  rail: string;
+  text: string;
+  softText: string;
+  iconWrap: string;
+  pill: string;
+  surface: string;
+  glowGradient: string;
+  glowShadow: string;
+}> = {
+  primary: {
+    rail: "bg-primary",
+    text: "text-primary",
+    softText: "text-primary/80",
+    iconWrap: "bg-primary/12 border-primary/15 text-primary",
+    pill: "border-primary/15 bg-primary/[0.08] text-primary",
+    surface: "border-primary/15 bg-primary/[0.06]",
+    glowGradient: "from-primary/[0.14] via-primary/[0.04] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--primary) / 0.22)",
+  },
+  success: {
+    rail: "bg-success",
+    text: "text-success",
+    softText: "text-success/80",
+    iconWrap: "bg-success/12 border-success/15 text-success",
+    pill: "border-success/15 bg-success/[0.08] text-success",
+    surface: "border-success/15 bg-success/[0.06]",
+    glowGradient: "from-success/[0.16] via-success/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--success) / 0.22)",
+  },
+  warning: {
+    rail: "bg-warning",
+    text: "text-warning",
+    softText: "text-warning/80",
+    iconWrap: "bg-warning/12 border-warning/15 text-warning",
+    pill: "border-warning/15 bg-warning/[0.08] text-warning",
+    surface: "border-warning/15 bg-warning/[0.06]",
+    glowGradient: "from-warning/[0.18] via-warning/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--warning) / 0.22)",
+  },
+  info: {
+    rail: "bg-info",
+    text: "text-info",
+    softText: "text-info/80",
+    iconWrap: "bg-info/12 border-info/15 text-info",
+    pill: "border-info/15 bg-info/[0.08] text-info",
+    surface: "border-info/15 bg-info/[0.06]",
+    glowGradient: "from-info/[0.16] via-info/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--info) / 0.22)",
+  },
+  destructive: {
+    rail: "bg-destructive",
+    text: "text-destructive",
+    softText: "text-destructive/80",
+    iconWrap: "bg-destructive/12 border-destructive/15 text-destructive",
+    pill: "border-destructive/15 bg-destructive/[0.08] text-destructive",
+    surface: "border-destructive/15 bg-destructive/[0.06]",
+    glowGradient: "from-destructive/[0.16] via-destructive/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--destructive) / 0.22)",
+  },
+};
+
 /* ─────────────────────── Animated Number ─────────────────────── */
 function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
   const [display, setDisplay] = useState(value);
