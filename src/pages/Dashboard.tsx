@@ -1048,23 +1048,26 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
 }
 
 function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactNode; label: string; value: string; tone?: "success" | "info" | "destructive" }) {
-  const tStyles: Record<string, { text: string; valueTxt: string }> = {
-    success: { text: "text-success", valueTxt: "text-success" },
-    info: { text: "text-info", valueTxt: "text-foreground" },
-    destructive: { text: "text-destructive", valueTxt: "text-destructive" },
+  const tStyles: Record<string, { text: string; valueTxt: string; border: string; glow: string; iconBg: string }> = {
+    success: { text: "text-success", valueTxt: "text-success", border: "border-l-success/50", glow: "bg-success", iconBg: "bg-success/10" },
+    info: { text: "text-info", valueTxt: "text-foreground", border: "border-l-info/50", glow: "bg-info", iconBg: "bg-info/10" },
+    destructive: { text: "text-destructive", valueTxt: "text-destructive", border: "border-l-destructive/50", glow: "bg-destructive", iconBg: "bg-destructive/10" },
   };
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className="group relative rounded-xl border border-border/30 p-3 overflow-hidden transition-all duration-300 hover:border-primary/25"
-      style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
-      <div className={cn("absolute -top-8 -right-8 w-20 h-20 rounded-full blur-[40px] opacity-[0.06] group-hover:opacity-[0.12] transition-opacity", s.text === "text-success" ? "bg-success" : s.text === "text-destructive" ? "bg-destructive" : "bg-info")} />
+    <div className={cn("group relative rounded-xl border-l-[3px] p-3.5 overflow-hidden transition-all duration-300 hover:translate-x-0.5", s.border)}
+      style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.90) 0%, hsl(var(--card) / 0.70) 100%)", boxShadow: "0 1px 0 0 rgba(255,255,255,0.02) inset, 0 4px 16px -4px rgba(0,0,0,0.3)" }}>
+      <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-[50px] opacity-[0.08] group-hover:opacity-[0.16] transition-opacity duration-500", s.glow)} />
+      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
       <div className="relative z-10">
-        <div className="mb-1.5 flex items-center gap-2">
-          <span className={s.text}>{icon}</span>
-          <span className="text-[10px] text-muted-foreground/50 font-semibold uppercase tracking-wider">{label}</span>
+        <div className="mb-2 flex items-center gap-2.5">
+          <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center border border-border/15", s.iconBg)}>
+            <span className={s.text}>{icon}</span>
+          </div>
+          <span className="text-[10px] text-muted-foreground/55 font-bold uppercase tracking-[0.12em]">{label}</span>
         </div>
-        <p className={`text-lg md:text-xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
+        <p className={`text-xl md:text-2xl font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
       </div>
     </div>
   );
