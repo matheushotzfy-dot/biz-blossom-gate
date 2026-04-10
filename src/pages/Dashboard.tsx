@@ -774,62 +774,71 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl border border-border/60 bg-card shadow-sm flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              <p className="text-[12px] font-heading text-foreground/70 font-bold">Tempo real</p>
+        {/* Activity feed */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/50 bg-card flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/20">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
+                <Activity className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-[12px] font-heading font-bold text-foreground">Tempo Real</h3>
+                <p className="text-[9px] text-muted-foreground/50 mt-0.5">Últimas movimentações</p>
+              </div>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
+            <Link to="/financeiro/extrato" className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors px-2.5 py-1 rounded-lg hover:bg-primary/5">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-border/20">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {activity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-14 text-center">
-                <Activity className="h-8 w-8 text-muted-foreground/20 mb-3" />
-                <p className="text-sm text-muted-foreground/40 font-display font-bold">Sem movimentações ainda</p>
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="h-14 w-14 rounded-2xl border border-border/20 bg-muted/5 flex items-center justify-center mb-4">
+                  <Activity className="h-6 w-6 text-muted-foreground/20" />
+                </div>
+                <p className="text-[12px] font-bold text-muted-foreground/50">Sem movimentações ainda</p>
+                <p className="text-[10px] text-muted-foreground/30 mt-1">As vendas aparecerão aqui em tempo real</p>
               </div>
             ) : (
-              activity.map((item) => {
+              activity.map((item, idx) => {
                 const txStyles: Record<string, { label: string; pillBg: string; pillText: string; iconBg: string; iconText: string }> = {
-                  completed: { label: "Aprovada", pillBg: "bg-success/15", pillText: "text-success", iconBg: "bg-success/10", iconText: "text-success" },
-                  pending: { label: "Pendente", pillBg: "bg-warning/15", pillText: "text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  failed: { label: "Falhou", pillBg: "bg-destructive/15", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  refunded: { label: "Reembolso", pillBg: "bg-info/15", pillText: "text-info", iconBg: "bg-info/10", iconText: "text-info" },
-                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/15", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Status", pillBg: "bg-muted/30", pillText: "text-muted-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
+                  completed: { label: "Aprovada", pillBg: "bg-success/10", pillText: "text-success", iconBg: "bg-success/8", iconText: "text-success" },
+                  pending: { label: "Pendente", pillBg: "bg-warning/10", pillText: "text-warning", iconBg: "bg-warning/8", iconText: "text-warning" },
+                  failed: { label: "Falhou", pillBg: "bg-destructive/10", pillText: "text-destructive", iconBg: "bg-destructive/8", iconText: "text-destructive" },
+                  refunded: { label: "Reembolso", pillBg: "bg-info/10", pillText: "text-info", iconBg: "bg-info/8", iconText: "text-info" },
+                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/10", pillText: "text-destructive", iconBg: "bg-destructive/8", iconText: "text-destructive" },
+                  default: { label: "Status", pillBg: "bg-muted/20", pillText: "text-muted-foreground", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
                 };
                 const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; iconBg: string; iconText: string }> = {
-                  pending: { label: "Em análise", pillBg: "bg-warning/15", pillText: "text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  approved: { label: "Aprovado", pillBg: "bg-success/15", pillText: "text-success", iconBg: "bg-success/10", iconText: "text-success" },
-                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/15", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Saque", pillBg: "bg-muted/30", pillText: "text-muted-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
+                  pending: { label: "Em análise", pillBg: "bg-warning/10", pillText: "text-warning", iconBg: "bg-warning/8", iconText: "text-warning" },
+                  approved: { label: "Aprovado", pillBg: "bg-success/10", pillText: "text-success", iconBg: "bg-success/8", iconText: "text-success" },
+                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/10", pillText: "text-destructive", iconBg: "bg-destructive/8", iconText: "text-destructive" },
+                  default: { label: "Saque", pillBg: "bg-muted/20", pillText: "text-muted-foreground", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
                 };
                 const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
                 const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
+                const isLast = idx === activity.length - 1;
 
                 return (
-                  <div key={item.id} className="group flex items-center gap-3 px-5 py-3 hover:bg-muted/20 transition-colors">
-                    <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", s.iconBg, s.iconText)}>
+                  <div key={item.id} className={cn("group flex items-center gap-3 px-5 py-3.5 hover:bg-muted/8 transition-colors", !isLast && "border-b border-border/10")}>
+                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0", s.iconBg, s.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-[13px] font-display font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                        <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText)}>
+                        <p className="text-[13px] font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                        <span className={cn("rounded-md px-2 py-0.5 text-[9px] font-bold border", s.pillBg, s.pillText, s.pillText.replace("text-", "border-") + "/15")}>
                           {s.label}
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5">{item.kind === "transaction" ? `Venda · ${item.label}` : item.label}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {fullTx && (
-                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent transition-all" title="Ver detalhes">
+                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-accent/50 transition-all" title="Ver detalhes">
                           <Eye className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <span className="text-[10px] text-muted-foreground/35 font-mono tabular-nums">{timeAgo(item.createdAt)}</span>
+                      <span className="text-[9px] text-muted-foreground/30 tabular-nums">{timeAgo(item.createdAt)}</span>
                     </div>
                   </div>
                 );
