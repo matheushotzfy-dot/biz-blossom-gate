@@ -475,51 +475,49 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
+        className="relative mb-10 rounded-2xl border border-border/60 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
       >
-        {/* Atmospheric glow effects */}
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-32 -left-32 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" />
-          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-48 w-[60%] rounded-full bg-primary/5 blur-[120px]" />
+          <div className="absolute -top-28 -left-24 h-56 w-56 rounded-full bg-primary/7 blur-[110px]" />
+          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-info/4 blur-[90px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-[58%] rounded-full bg-primary/3 blur-[130px]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none z-0" />
-          <div className="relative z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.02] pointer-events-none z-0" />
+        <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-accent/60">
                   <BarChart3 className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Dashboard</span>
+                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/85">Dashboard</span>
               </motion.div>
               {nickname && (
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 backdrop-blur-sm">
-                  <Crown className="h-3 w-3 text-primary" />
-                  <span className="text-[10px] font-heading text-primary">{nickname}</span>
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-accent/50 px-3 py-1.5 backdrop-blur-sm">
+                  <Crown className="h-3 w-3 text-primary/85" />
+                  <span className="text-[10px] font-heading text-foreground/80">{nickname}</span>
                 </div>
               )}
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-secondary/70 px-3 py-1.5 backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-20" />
+                  <span className="relative h-2 w-2 rounded-full bg-success" />
                 </span>
-                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-foreground/60">Tempo Real</span>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              {/* Scale Mode Button */}
               {scaleModeUnlocked ? (
-                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"}`}>
+                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "border border-border/60 bg-accent text-foreground shadow-sm" : "border border-border/60 bg-secondary/70 text-foreground/70 hover:bg-accent/70 hover:text-foreground"}`}>
                   {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
-                  <Flame className={`h-3.5 w-3.5 ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
+                  <Flame className={`h-3.5 w-3.5 text-primary ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
                   <span className="leading-tight">Escala</span>
                 </button>
               ) : (
-                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading border border-primary/30 bg-primary/10 text-primary cursor-not-allowed">
+                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading border border-border/60 bg-secondary/70 text-foreground/65 cursor-not-allowed">
                   {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
-                  <Lock className="h-3.5 w-3.5" />
+                  <Lock className="h-3.5 w-3.5 text-primary" />
                   <span className="leading-tight">Escala</span>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     <p className="text-[11px] font-bold text-foreground mb-1">Modo Escala Bloqueado</p>
@@ -528,12 +526,11 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Period selector */}
-              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
+              <div className="inline-flex items-center rounded-full border border-border/50 bg-secondary/50 p-0.5">
                 {PERIOD_PRESETS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground/35 hover:text-foreground/70"
+                      !isCustom && selectedPeriod.label === opt.label ? "border border-border/60 bg-accent text-foreground shadow-sm" : "text-muted-foreground/65 hover:text-foreground/80"
                     )}>
                     {opt.label}
                   </button>
@@ -542,7 +539,7 @@ export default function Dashboard() {
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
-                    isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                    isCustom ? "border-border/60 bg-accent/70 text-foreground" : "border-border/50 bg-secondary/50 text-muted-foreground/60 hover:text-foreground hover:bg-accent/30"
                   )}>
                     <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
@@ -556,13 +553,12 @@ export default function Dashboard() {
                   <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
-              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", privacy.hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full border border-border/50 transition-all active:scale-[0.97]", privacy.hidden ? "bg-accent/70 text-primary" : "bg-secondary/40 text-muted-foreground/45 hover:bg-accent/30 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
                 {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
 
-          {/* MAIN FOCAL POINT — Revenue */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
             <div className="flex items-center gap-3 mb-4">
               <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
@@ -576,14 +572,14 @@ export default function Dashboard() {
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+            <div className="mt-5 flex flex-wrap items-center gap-2.5">
               {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/20", bg: "bg-success/5" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/20", bg: "bg-info/5" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/20", bg: "bg-primary/5" },
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
+                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 rounded-full border ${chip.border} ${chip.bg} backdrop-blur-sm px-3.5 py-1.5 transition-colors hover:border-primary/30`}>
+                <span key={i} className={`inline-flex items-center gap-2 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-1.5 text-[11px] font-semibold text-foreground/78 backdrop-blur-sm`}>
                   <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
                   {chip.label}
                 </span>
@@ -591,29 +587,25 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Executive KPI strip — Ultra Glass */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "Total Faturado", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
-              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", iconBg: "bg-success/10", iconText: "text-success", iconBorder: "border-success/20", glowColor: "bg-success" },
-              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-info/10", iconText: "text-info", iconBorder: "border-info/20", glowColor: "bg-info" },
-              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: balance < 0 ? "bg-warning/10" : "bg-primary/10", iconText: balance < 0 ? "text-warning" : "text-primary", iconBorder: balance < 0 ? "border-warning/20" : "border-primary/20", glowColor: balance < 0 ? "bg-warning" : "bg-primary" },
+              { label: "Total Faturado", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", iconBg: "bg-secondary/80", iconText: "text-primary", iconBorder: "border-border/60", glowColor: "bg-primary" },
+              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", iconBg: "bg-secondary/80", iconText: "text-success", iconBorder: "border-border/60", glowColor: "bg-success" },
+              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-secondary/80", iconText: "text-info", iconBorder: "border-border/60", glowColor: "bg-info" },
+              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, valueColor: balance < 0 ? "text-warning" : "text-primary", iconBg: "bg-secondary/80", iconText: balance < 0 ? "text-warning" : "text-primary", iconBorder: "border-border/60", glowColor: balance < 0 ? "bg-warning" : "bg-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 glass-panel border border-border/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5">
-                {/* Top shine line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-                {/* Inner glow */}
+                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/90 p-5 backdrop-blur-xl transition-all duration-300 hover:border-border/70">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.05] to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
-                {/* Ambient corner glow */}
-                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]", item.glowColor)} />
-                
+                <div className={cn("absolute -top-10 -right-10 h-24 w-24 rounded-full blur-3xl opacity-[0.03] transition-opacity duration-500 group-hover:opacity-[0.06]", item.glowColor)} />
+
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 mb-3">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className="mb-3 text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-sm", item.iconBg, item.iconBorder, item.iconText)}>
+                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border backdrop-blur-sm", item.iconBg, item.iconBorder, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
