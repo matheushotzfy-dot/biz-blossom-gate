@@ -621,7 +621,7 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/30 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-primary/15 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
           <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/8 blur-[100px] pointer-events-none" />
           <div className="absolute -bottom-16 -right-16 h-32 w-32 rounded-full bg-info/6 blur-[80px] pointer-events-none" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
