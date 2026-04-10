@@ -2,150 +2,149 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export function PageShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative animate-fade-in">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 overflow-hidden">
-        <div className="mx-auto h-full w-full max-w-[1180px]">
-          <div className="absolute left-1/2 top-[-140px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] opacity-45" />
-        </div>
-      </div>
+ return (
+ <div className="relative animate-fade-in">
+ <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 overflow-hidden">
+ <div className="mx-auto h-full w-full max-w-[1180px]">
+ </div>
+ </div>
 
-      <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-4 md:space-y-6 pb-6 md:pb-10">{children}</div>
-    </div>
-  );
+ <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-4 md:space-y-6 pb-6 md:pb-10">{children}</div>
+ </div>
+ );
 }
 
 export function Panel({ children, className, onClick, style, accent }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties; accent?: string }) {
-  return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
-        "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
-        "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
-        className,
-      )}
-      onClick={onClick}
-      style={style}
-    >
-      {accent && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />}
-      {children}
-    </div>
-  );
+ return (
+ <div
+ className={cn(
+ "relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
+ "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
+ "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
+ className,
+ )}
+ onClick={onClick}
+ style={style}
+ >
+ {accent && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />}
+ {children}
+ </div>
+ );
 }
 
 export function GlowPanel({ children, className, onClick, style, glow = "primary" }: {
-  children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties; glow?: "primary" | "info" | "warning" | "success"
+ children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties; glow?: "primary" | "info" | "warning" | "success"
 }) {
-  const glowColors: Record<string, string> = {
-    primary: "from-primary/10 via-primary/[0.03] to-transparent",
-    info: "from-info/10 via-info/[0.03] to-transparent",
-    warning: "from-warning/10 via-warning/[0.03] to-transparent",
-    success: "from-success/10 via-success/[0.03] to-transparent",
-  };
+ const glowColors: Record<string, string> = {
+ primary: "from-primary/10 via-primary/[0.03] to-transparent",
+ info: "from-info/10 via-info/[0.03] to-transparent",
+ warning: "from-warning/10 via-warning/[0.03] to-transparent",
+ success: "from-success/10 via-success/[0.03] to-transparent",
+ };
 
-  return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
-        "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
-        "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
-        className,
-      )}
-      onClick={onClick}
-      style={style}
-    >
-      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glowColors[glow])} />
-      <div className="relative z-[1]">{children}</div>
-    </div>
-  );
+ return (
+ <div
+ className={cn(
+ "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-xl transition-all duration-300",
+ "shadow-[0_2px_12px_hsl(var(--foreground)/0.04)]",
+ "hover:border-border/65 hover:bg-card/55 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)]",
+ className,
+ )}
+ onClick={onClick}
+ style={style}
+ >
+ <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glowColors[glow])} />
+ <div className="relative z-[1]">{children}</div>
+ </div>
+ );
 }
 
 export function SectionHeader({ icon, title, subtitle, action }: { icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3.5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card/45 backdrop-blur-xl">
-          <span className="text-primary">{icon}</span>
-        </div>
-        <div>
-          <h3 className="text-[15px] font-display font-bold leading-tight text-foreground">{title}</h3>
-          {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>}
-        </div>
-      </div>
-      {action}
-    </div>
-  );
+ return (
+ <div className="flex items-center justify-between">
+ <div className="flex items-center gap-3.5">
+ <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card/45 backdrop-blur-xl">
+ <span className="text-primary">{icon}</span>
+ </div>
+ <div>
+ <h3 className="text-[15px] font-display font-bold leading-tight text-foreground">{title}</h3>
+ {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>}
+ </div>
+ </div>
+ {action}
+ </div>
+ );
 }
 
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
-  return (
-    <div className="flex items-center gap-3 md:gap-4">
-      <div className="flex h-11 w-11 md:h-13 md:w-13 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
-        <span className="text-primary">{icon}</span>
-      </div>
-      <div className="space-y-0.5 md:space-y-1 min-w-0">
-        <h1 className="font-display text-lg md:text-2xl font-black leading-none tracking-[-0.03em] text-foreground truncate">{title}</h1>
-        <p className="text-[12px] md:text-[13px] text-muted-foreground/80 truncate">{subtitle}</p>
-      </div>
-    </div>
-  );
+ return (
+ <div className="flex items-center gap-3 md:gap-4">
+ <div className="flex h-11 w-11 md:h-13 md:w-13 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/40 bg-card/45 backdrop-blur-xl">
+ <span className="text-primary">{icon}</span>
+ </div>
+ <div className="space-y-0.5 md:space-y-1 min-w-0">
+ <h1 className="font-display text-lg md:text-2xl font-black leading-none tracking-[-0.03em] text-foreground truncate">{title}</h1>
+ <p className="text-[12px] md:text-[13px] text-muted-foreground/80 truncate">{subtitle}</p>
+ </div>
+ </div>
+ );
 }
 
 export function KpiCard({ label, value, sub, icon, color, bg, accent }: {
-  label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string; accent?: string;
+ label: string; value: string; sub?: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string; accent?: string;
 }) {
-  const Icon = icon;
-  return (
-    <GlowPanel className="relative overflow-hidden p-3.5 md:p-5">
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent || "bg-primary")} />
-      <div className="pl-1.5 md:pl-2">
-        <div className="mb-2 md:mb-3 flex items-center justify-between">
-          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
-          <div className={cn("flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg md:rounded-xl border border-border/30", bg)}>
-            <Icon className={cn("h-3.5 w-3.5 md:h-[18px] md:w-[18px]", color)} />
-          </div>
-        </div>
-        <p className="font-display text-lg md:text-2xl font-black leading-none text-foreground tabular-nums tracking-[-0.03em]">{value}</p>
-        {sub && <p className="mt-1 md:mt-1.5 text-[10px] md:text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
-      </div>
-    </GlowPanel>
-  );
+ const Icon = icon;
+ return (
+ <GlowPanel className="relative overflow-hidden p-3.5 md:p-5">
+ <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent || "bg-primary")} />
+ <div className="pl-1.5 md:pl-2">
+ <div className="mb-2 md:mb-3 flex items-center justify-between">
+ <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+ <div className={cn("flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg md:rounded-xl border border-border/30", bg)}>
+ <Icon className={cn("h-3.5 w-3.5 md:h-[18px] md:w-[18px]", color)} />
+ </div>
+ </div>
+ <p className="font-display text-lg md:text-2xl font-black leading-none text-foreground tabular-nums tracking-[-0.03em]">{value}</p>
+ {sub && <p className="mt-1 md:mt-1.5 text-[10px] md:text-[11px] font-medium text-muted-foreground/60">{sub}</p>}
+ </div>
+ </GlowPanel>
+ );
 }
 
 export function DataTable({ headers, children }: { headers: string[]; children: React.ReactNode }) {
-  return (
-    <Panel className="overflow-hidden p-0">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border/35 bg-muted/15">
-              {headers.map((h) => (
-                <th key={h} className="p-4 text-left text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>{children}</tbody>
-        </table>
-      </div>
-    </Panel>
-  );
+ return (
+ <Panel className="overflow-hidden p-0">
+ <div className="overflow-x-auto">
+ <table className="w-full text-sm">
+ <thead>
+ <tr className="border-b border-border/35 bg-muted/15">
+ {headers.map((h) => (
+ <th key={h} className="p-4 text-left text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">
+ {h}
+ </th>
+ ))}
+ </tr>
+ </thead>
+ <tbody>{children}</tbody>
+ </table>
+ </div>
+ </Panel>
+ );
 }
 
 export function EmptyState({ icon, title, subtitle, action }: { icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return (
-    <div className="py-16 text-center">
-      <div className="relative mx-auto mb-4">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-border/30 bg-card/40">
-          <span className="text-muted-foreground/25">{icon}</span>
-        </div>
-      </div>
-      <p className="font-display text-[15px] font-bold text-foreground/70">{title}</p>
-      {subtitle && <p className="mx-auto mt-1.5 max-w-xs text-[12px] text-muted-foreground/50">{subtitle}</p>}
-      {action && <div className="mt-4">{action}</div>}
-    </div>
-  );
+ return (
+ <div className="py-16 text-center">
+ <div className="relative mx-auto mb-4">
+ <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-border/30 bg-card/40">
+ <span className="text-muted-foreground/25">{icon}</span>
+ </div>
+ </div>
+ <p className="font-display text-[15px] font-bold text-foreground/70">{title}</p>
+ {subtitle && <p className="mx-auto mt-1.5 max-w-xs text-[12px] text-muted-foreground/50">{subtitle}</p>}
+ {action && <div className="mt-4">{action}</div>}
+ </div>
+ );
 }
 
 /**
@@ -153,97 +152,97 @@ export function EmptyState({ icon, title, subtitle, action }: { icon: React.Reac
  * Replaces VendasKpi, ExtratoKpi, and inline KPI cards for consistency.
  */
 export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", large, delay = 0 }: {
-  label: string; value: string; sub?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  tone?: "primary" | "info" | "warning" | "success" | "destructive";
-  large?: boolean; delay?: number;
+ label: string; value: string; sub?: string;
+ icon: React.ComponentType<{ className?: string }>;
+ tone?: "primary" | "info" | "warning" | "success" | "destructive";
+ large?: boolean; delay?: number;
 }) {
-  const toneStyles: Record<string, { bg: string; color: string }> = {
-    primary: { bg: "bg-primary/10", color: "text-primary" },
-    info: { bg: "bg-info/10", color: "text-info" },
-    warning: { bg: "bg-warning/10", color: "text-warning" },
-    success: { bg: "bg-success/10", color: "text-success" },
-    destructive: { bg: "bg-destructive/10", color: "text-destructive" },
-  };
-  const t = toneStyles[tone] || toneStyles.primary;
+ const toneStyles: Record<string, { bg: string; color: string }> = {
+ primary: { bg: "bg-primary/10", color: "text-primary" },
+ info: { bg: "bg-info/10", color: "text-info" },
+ warning: { bg: "bg-warning/10", color: "text-warning" },
+ success: { bg: "bg-success/10", color: "text-success" },
+ destructive: { bg: "bg-destructive/10", color: "text-destructive" },
+ };
+ const t = toneStyles[tone] || toneStyles.primary;
 
-  const accentBar: Record<string, string> = {
-    primary: "bg-primary",
-    info: "bg-info",
-    warning: "bg-warning",
-    success: "bg-success",
-    destructive: "bg-destructive",
-  };
+ const accentBar: Record<string, string> = {
+ primary: "bg-primary",
+ info: "bg-info",
+ warning: "bg-warning",
+ success: "bg-success",
+ destructive: "bg-destructive",
+ };
 
-  return (
-    <div
-      className={cn(
-        "group relative rounded-xl md:rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
-        "hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300",
-        large ? "p-4 md:p-6" : "p-3.5 md:p-5"
-      )}
-      style={{ animationDelay: `${delay * 60}ms` }}
-    >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBar[tone] || accentBar.primary)} />
-      <div className="pl-1.5">
-        <div className="flex items-center justify-between mb-2 md:mb-3">
-          <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
-          <div className={cn("h-8 w-8 md:h-9 md:w-9 rounded-lg md:rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
-            <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", t.color)} />
-          </div>
-        </div>
-        <p className={cn(
-          "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
-          large ? "text-2xl md:text-4xl" : "text-lg md:text-2xl"
-        )}>{value}</p>
-        {sub && <p className="text-[10px] md:text-[11px] text-muted-foreground/60 mt-1 md:mt-1.5 font-medium">{sub}</p>}
-      </div>
-    </div>
-  );
+ return (
+ <div
+ className={cn(
+ "group relative rounded-xl md:rounded-2xl bg-card/50 backdrop-blur-xl border border-border/40 overflow-hidden",
+ "hover:border-border/60 hover:shadow-[0_6px_20px_hsl(var(--foreground)/0.06)] transition-all duration-300",
+ large ? "p-4 md:p-6" : "p-3.5 md:p-5"
+ )}
+ style={{ animationDelay: `${delay * 60}ms` }}
+ >
+ <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBar[tone] || accentBar.primary)} />
+ <div className="pl-1.5">
+ <div className="flex items-center justify-between mb-2 md:mb-3">
+ <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{label}</span>
+ <div className={cn("h-8 w-8 md:h-9 md:w-9 rounded-lg md:rounded-xl flex items-center justify-center ring-1 ring-border/20", t.bg)}>
+ <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", t.color)} />
+ </div>
+ </div>
+ <p className={cn(
+ "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
+ large ? "text-2xl md:text-4xl" : "text-lg md:text-2xl"
+ )}>{value}</p>
+ {sub && <p className="text-[10px] md:text-[11px] text-muted-foreground/60 mt-1 md:mt-1.5 font-medium">{sub}</p>}
+ </div>
+ </div>
+ );
 }
 
 /**
  * PageSkeleton — Loading skeleton for page content
  */
 export function PageSkeleton({ rows = 3, kpis = 4 }: { rows?: number; kpis?: number }) {
-  return (
-    <div className="space-y-6 animate-pulse">
-      {/* Title skeleton */}
-      <div className="flex items-center gap-4">
-        <div className="h-13 w-13 rounded-2xl bg-muted/30" />
-        <div className="space-y-2">
-          <div className="h-6 w-48 rounded-lg bg-muted/30" />
-          <div className="h-4 w-32 rounded-lg bg-muted/20" />
-        </div>
-      </div>
-      {/* KPI skeletons */}
-      {kpis > 0 && (
-        <div className={cn("grid gap-3", kpis <= 2 ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4")}>
-          {Array.from({ length: kpis }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border/30 bg-card/30 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="h-3 w-20 rounded bg-muted/30" />
-                <div className="h-9 w-9 rounded-xl bg-muted/20" />
-              </div>
-              <div className="h-7 w-28 rounded-lg bg-muted/30" />
-              <div className="h-3 w-16 rounded bg-muted/20 mt-2" />
-            </div>
-          ))}
-        </div>
-      )}
-      {/* Row skeletons */}
-      <div className="rounded-2xl border border-border/30 bg-card/30 p-5 space-y-4">
-        {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-muted/20 shrink-0" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/4 rounded bg-muted/30" />
-              <div className="h-3 w-1/2 rounded bg-muted/20" />
-            </div>
-            <div className="h-6 w-20 rounded-lg bg-muted/20" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+ return (
+ <div className="space-y-6 animate-pulse">
+ {/* Title skeleton */}
+ <div className="flex items-center gap-4">
+ <div className="h-13 w-13 rounded-2xl bg-muted/30" />
+ <div className="space-y-2">
+ <div className="h-6 w-48 rounded-lg bg-muted/30" />
+ <div className="h-4 w-32 rounded-lg bg-muted/20" />
+ </div>
+ </div>
+ {/* KPI skeletons */}
+ {kpis > 0 && (
+ <div className={cn("grid gap-3", kpis <= 2 ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4")}>
+ {Array.from({ length: kpis }).map((_, i) => (
+ <div key={i} className="rounded-2xl border border-border/30 bg-card/30 p-5">
+ <div className="flex items-center justify-between mb-3">
+ <div className="h-3 w-20 rounded bg-muted/30" />
+ <div className="h-9 w-9 rounded-xl bg-muted/20" />
+ </div>
+ <div className="h-7 w-28 rounded-lg bg-muted/30" />
+ <div className="h-3 w-16 rounded bg-muted/20 mt-2" />
+ </div>
+ ))}
+ </div>
+ )}
+ {/* Row skeletons */}
+ <div className="rounded-2xl border border-border/30 bg-card/30 p-5 space-y-4">
+ {Array.from({ length: rows }).map((_, i) => (
+ <div key={i} className="flex items-center gap-4">
+ <div className="h-10 w-10 rounded-xl bg-muted/20 shrink-0" />
+ <div className="flex-1 space-y-2">
+ <div className="h-4 w-3/4 rounded bg-muted/30" />
+ <div className="h-3 w-1/2 rounded bg-muted/20" />
+ </div>
+ <div className="h-6 w-20 rounded-lg bg-muted/20" />
+ </div>
+ ))}
+ </div>
+ </div>
+ );
 }

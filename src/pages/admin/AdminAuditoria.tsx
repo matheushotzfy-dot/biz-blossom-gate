@@ -6,164 +6,164 @@ import { Shield, Search, FileText, Clock, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface AuditLog {
-  id: string;
-  admin_user_id: string;
-  action: string;
-  entity_type: string;
-  entity_id: string | null;
-  details: Record<string, unknown>;
-  created_at: string;
+ id: string;
+ admin_user_id: string;
+ action: string;
+ entity_type: string;
+ entity_id: string | null;
+ details: Record<string, unknown>;
+ created_at: string;
 }
 
 export default function AdminAuditoria() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+ const { user } = useAuth();
+ const navigate = useNavigate();
+ const [logs, setLogs] = useState<AuditLog[]>([]);
+ const [search, setSearch] = useState("");
+ const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    // Use server-side RPC instead of direct table query to avoid RLS recursion
-    supabase.rpc("current_user_has_role", { _role: "admin" })
-      .then(({ data }) => {
-        if (data !== true) { navigate("/admin-matheus"); return; }
-        loadLogs();
-      });
-  }, [user]);
+ useEffect(() => {
+ if (!user) return;
+ // Use server-side RPC instead of direct table query to avoid RLS recursion
+ supabase.rpc("current_user_has_role", { _role: "admin" })
+ .then(({ data }) => {
+ if (data !== true) { navigate("/admin-matheus"); return; }
+ loadLogs();
+ });
+ }, [user]);
 
-  const loadLogs = async () => {
-    const { data } = await supabase
-      .from("audit_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200);
-    if (data) setLogs(data as AuditLog[]);
-    setLoading(false);
-  };
+ const loadLogs = async () => {
+ const { data } = await supabase
+ .from("audit_logs")
+ .select("*")
+ .order("created_at", { ascending: false })
+ .limit(200);
+ if (data) setLogs(data as AuditLog[]);
+ setLoading(false);
+ };
 
-  const filtered = logs.filter((l) => {
-    if (!search) return true;
-    const s = search.toLowerCase();
-    return l.action.toLowerCase().includes(s) || l.entity_type.toLowerCase().includes(s) || (l.entity_id?.toLowerCase().includes(s));
-  });
+ const filtered = logs.filter((l) => {
+ if (!search) return true;
+ const s = search.toLowerCase();
+ return l.action.toLowerCase().includes(s) || l.entity_type.toLowerCase().includes(s) || (l.entity_id?.toLowerCase().includes(s));
+ });
 
-  const actionColor: Record<string, string> = {
-    approve: "text-emerald-400 bg-emerald-500/10",
-    reject: "text-red-400 bg-red-500/10",
-    block: "text-red-400 bg-red-500/10",
-    update: "text-blue-400 bg-blue-500/10",
-    create: "text-violet-400 bg-violet-500/10",
-    delete: "text-red-400 bg-red-500/10",
-  };
+ const actionColor: Record<string, string> = {
+ approve: "text-emerald-400 bg-emerald-500/10",
+ reject: "text-red-400 bg-red-500/10",
+ block: "text-red-400 bg-red-500/10",
+ update: "text-blue-400 bg-blue-500/10",
+ create: "text-violet-400 bg-violet-500/10",
+ delete: "text-red-400 bg-red-500/10",
+ };
 
-  const getActionStyle = (action: string) => {
-    const key = Object.keys(actionColor).find(k => action.toLowerCase().includes(k));
-    return key ? actionColor[key] : "text-foreground/70 bg-foreground/5";
-  };
+ const getActionStyle = (action: string) => {
+ const key = Object.keys(actionColor).find(k => action.toLowerCase().includes(k));
+ return key ? actionColor[key] : "text-foreground/70 bg-foreground/5";
+ };
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-      <div className="h-8 w-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+ if (loading) return (
+ <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+ <div className="h-8 w-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+ </div>
+ );
 
-  return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      <header className="h-16 border-b border-white/[0.06] flex items-center justify-between px-6 bg-[#050505]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Shield className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-white">Auditoria</h1>
-            <p className="text-[10px] text-white/30">Trilha de auditoria completa</p>
-          </div>
-        </div>
-        <a href="/admin-matheus/dashboard" className="text-xs text-white/40 hover:text-white/70 transition-colors">
-          ← Voltar ao Dashboard
-        </a>
-      </header>
+ return (
+ <div className="min-h-screen bg-[#050505] text-white">
+ <header className="h-16 border-b border-white/[0.06] flex items-center justify-between px-6 bg-[#050505]/80 backdrop-blur-md sticky top-0 z-50">
+ <div className="flex items-center gap-3">
+ <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+ <Shield className="h-5 w-5 text-white" />
+ </div>
+ <div>
+ <h1 className="text-sm font-bold text-white">Auditoria</h1>
+ <p className="text-[10px] text-white/30">Trilha de auditoria completa</p>
+ </div>
+ </div>
+ <a href="/admin-matheus/dashboard" className="text-xs text-white/40 hover:text-white/70 transition-colors">
+ ← Voltar ao Dashboard
+ </a>
+ </header>
 
-      <div className="max-w-[1400px] mx-auto p-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { label: "Total de Logs", value: logs.length },
-            { label: "Hoje", value: logs.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length },
-            { label: "Admins Ativos", value: new Set(logs.map(l => l.admin_user_id)).size },
-            { label: "Entidades", value: new Set(logs.map(l => l.entity_type)).size },
-          ].map(s => (
-            <div key={s.label} className="rounded-2xl bg-white/[0.02] border border-white/[0.05] p-5">
-              <p className="text-[10px] uppercase tracking-wider text-white/25 font-medium">{s.label}</p>
-              <p className="text-xl font-bold text-white mt-1">{s.value}</p>
-            </div>
-          ))}
-        </div>
+ <div className="max-w-[1400px] mx-auto p-6 space-y-6">
+ {/* Stats */}
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+ {[
+ { label: "Total de Logs", value: logs.length },
+ { label: "Hoje", value: logs.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length },
+ { label: "Admins Ativos", value: new Set(logs.map(l => l.admin_user_id)).size },
+ { label: "Entidades", value: new Set(logs.map(l => l.entity_type)).size },
+ ].map(s => (
+ <div key={s.label} className="rounded-2xl bg-white/[0.02] border border-white/[0.05] p-5">
+ <p className="text-[10px] uppercase tracking-wider text-white/25 font-medium">{s.label}</p>
+ <p className="text-xl font-bold text-white mt-1">{s.value}</p>
+ </div>
+ ))}
+ </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
-          <Input
-            placeholder="Buscar por ação, entidade..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-white/[0.03] border-white/[0.06] text-white placeholder:text-white/20"
-          />
-        </div>
+ {/* Search */}
+ <div className="relative max-w-md">
+ <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+ <Input
+ placeholder="Buscar por ação, entidade..."
+ value={search}
+ onChange={(e) => setSearch(e.target.value)}
+ className="pl-10 bg-white/[0.03] border-white/[0.06] text-white placeholder:text-white/20"
+ />
+ </div>
 
-        {/* Logs Table */}
-        <div className="rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-          <div className="p-5 border-b border-white/[0.05] flex items-center gap-2">
-            <Activity className="h-4 w-4 text-indigo-400" />
-            <h3 className="text-sm font-semibold text-white">Histórico de Ações</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.05] text-white/30 text-xs">
-                  <th className="text-left p-4 font-medium">Data</th>
-                  <th className="text-left p-4 font-medium">Ação</th>
-                  <th className="text-left p-4 font-medium">Entidade</th>
-                  <th className="text-left p-4 font-medium">ID</th>
-                  <th className="text-left p-4 font-medium">Detalhes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-white/20 text-xs">
-                      <FileText className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                      Nenhum log de auditoria encontrado
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((log) => (
-                    <tr key={log.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center gap-2 text-xs text-white/40">
-                          <Clock className="h-3 w-3" />
-                          {new Date(log.created_at).toLocaleString("pt-BR")}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${getActionStyle(log.action)}`}>
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="p-4 text-xs text-white/50 font-medium">{log.entity_type}</td>
-                      <td className="p-4 font-mono text-xs text-white/30">{log.entity_id?.slice(0, 8) || "—"}</td>
-                      <td className="p-4 text-xs text-white/30 max-w-[200px] truncate">
-                        {Object.keys(log.details).length > 0 ? JSON.stringify(log.details) : "—"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+ {/* Logs Table */}
+ <div className="rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+ <div className="p-5 border-b border-white/[0.05] flex items-center gap-2">
+ <Activity className="h-4 w-4 text-indigo-400" />
+ <h3 className="text-sm font-semibold text-white">Histórico de Ações</h3>
+ </div>
+ <div className="overflow-x-auto">
+ <table className="w-full text-sm">
+ <thead>
+ <tr className="border-b border-white/[0.05] text-white/30 text-xs">
+ <th className="text-left p-4 font-medium">Data</th>
+ <th className="text-left p-4 font-medium">Ação</th>
+ <th className="text-left p-4 font-medium">Entidade</th>
+ <th className="text-left p-4 font-medium">ID</th>
+ <th className="text-left p-4 font-medium">Detalhes</th>
+ </tr>
+ </thead>
+ <tbody>
+ {filtered.length === 0 ? (
+ <tr>
+ <td colSpan={5} className="p-8 text-center text-white/20 text-xs">
+ <FileText className="h-8 w-8 mx-auto mb-2 opacity-20" />
+ Nenhum log de auditoria encontrado
+ </td>
+ </tr>
+ ) : (
+ filtered.map((log) => (
+ <tr key={log.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+ <td className="p-4">
+ <div className="flex items-center gap-2 text-xs text-white/40">
+ <Clock className="h-3 w-3" />
+ {new Date(log.created_at).toLocaleString("pt-BR")}
+ </div>
+ </td>
+ <td className="p-4">
+ <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${getActionStyle(log.action)}`}>
+ {log.action}
+ </span>
+ </td>
+ <td className="p-4 text-xs text-white/50 font-medium">{log.entity_type}</td>
+ <td className="p-4 font-mono text-xs text-white/30">{log.entity_id?.slice(0, 8) || "—"}</td>
+ <td className="p-4 text-xs text-white/30 max-w-[200px] truncate">
+ {Object.keys(log.details).length > 0 ? JSON.stringify(log.details) : "—"}
+ </td>
+ </tr>
+ ))
+ )}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+ );
 }
