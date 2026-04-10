@@ -1027,7 +1027,7 @@ export default function Vendas() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/20 bg-card/95 p-6 shadow-[0_20px_44px_-34px_hsl(var(--foreground)/0.22)]">
+        <div className="rounded-2xl border border-border/40 bg-card p-6">
           <RevenueChart data={metrics.chartData} hidden={hidden} />
         </div>
       </motion.section>
