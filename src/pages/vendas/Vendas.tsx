@@ -215,7 +215,7 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
   );
 }
 
-/* ─── Clean Card ─── */
+/* ─── Glass Card (matches Dashboard style) ─── */
 function GlowCard({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; glowColor?: string; delay?: number; animated?: boolean }) {
   return (
     <motion.div
@@ -223,11 +223,12 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/15 bg-card/95 shadow-[0_18px_40px_-32px_hsl(var(--foreground)/0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-border/25 hover:shadow-[0_22px_48px_-30px_hsl(var(--foreground)/0.24)]",
+        "group relative overflow-hidden rounded-2xl border border-border/30 bg-card/95 transition-all duration-300 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5",
         className
       )}
     >
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
       <div className="relative">{children}</div>
     </motion.div>
   );
