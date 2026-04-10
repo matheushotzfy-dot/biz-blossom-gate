@@ -477,18 +477,19 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-2xl border border-border/60 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line"
+        className="relative mb-10 rounded-2xl border border-emerald-500/40 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line shadow-2xl shadow-emerald-500/10"
       >
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-36 -left-32 h-96 w-96 rounded-full bg-emerald-400/45 blur-[140px]" />
-          <div className="absolute -bottom-28 -right-28 h-80 w-80 rounded-full bg-emerald-300/30 blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-[75%] rounded-full bg-emerald-400/25 blur-[160px]" />
-          <div className="absolute top-0 right-1/4 h-64 w-64 rounded-full bg-emerald-500/30 blur-[110px]" />
-          <div className="absolute bottom-1/4 left-1/3 h-56 w-56 rounded-full bg-emerald-300/22 blur-[120px]" />
-          <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full bg-teal-300/18 blur-[100px]" />
-          <div className="absolute -top-10 left-1/2 h-40 w-[80%] -translate-x-1/2 rounded-full bg-emerald-400/20 blur-[170px]" />
+          <div className="absolute -top-40 -left-36 h-[28rem] w-[28rem] rounded-full bg-emerald-400/55 blur-[150px]" />
+          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-emerald-300/40 blur-[130px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-[80%] rounded-full bg-emerald-400/35 blur-[170px]" />
+          <div className="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-emerald-500/40 blur-[120px]" />
+          <div className="absolute bottom-1/4 left-1/3 h-64 w-64 rounded-full bg-emerald-300/30 blur-[130px]" />
+          <div className="absolute top-1/3 right-1/3 h-56 w-56 rounded-full bg-teal-300/25 blur-[110px]" />
+          <div className="absolute -top-10 left-1/2 h-48 w-[85%] -translate-x-1/2 rounded-full bg-emerald-400/30 blur-[180px]" />
+          <div className="absolute bottom-0 left-0 h-40 w-[60%] rounded-full bg-green-400/20 blur-[140px]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/[0.18] via-emerald-500/[0.08] to-teal-400/[0.14] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/[0.25] via-emerald-500/[0.12] to-teal-400/[0.20] pointer-events-none z-0" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
