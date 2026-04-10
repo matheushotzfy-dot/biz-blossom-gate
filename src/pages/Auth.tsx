@@ -330,7 +330,7 @@ export default function Auth() {
           </div>
 
           <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="flex min-h-full items-center justify-center px-4 py-10 md:px-8">
+            <div className="flex min-h-full items-start justify-center px-4 py-6 md:px-8 md:py-8">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="w-full max-w-[470px]">
               <div className="mb-6">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-[9px] font-heading uppercase tracking-[0.22em] text-primary">
