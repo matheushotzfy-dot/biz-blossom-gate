@@ -624,10 +624,11 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/50 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden">
-          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 h-32 w-32 rounded-full bg-info/6 blur-[80px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-primary/20 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-lg shadow-primary/5">
+          <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/20 blur-[110px] pointer-events-none" />
+          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-teal-400/15 blur-[90px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-emerald-400/10 blur-[120px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -660,7 +661,9 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-4 md:p-5">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-primary/20 bg-card p-4 md:p-5 relative overflow-hidden shadow-lg shadow-primary/5">
+            <div className="absolute -top-16 -right-16 h-36 w-36 rounded-full bg-emerald-400/15 blur-[80px] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -678,7 +681,8 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", valueColor: "text-amber-400", dotColor: "bg-amber-400", accentBorder: "border-t-amber-500" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-2xl border border-border/50 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border", item.accentBorder)}>
+                className={cn("rounded-2xl border border-border/50 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border relative overflow-hidden shadow-md shadow-primary/3", item.accentBorder)}>
+                <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-emerald-400/8 blur-[60px] pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4">
                   <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
                     {item.isPix ? (
@@ -710,7 +714,10 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-4 md:p-5 flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-primary/15 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-lg shadow-primary/5">
+          <div className="absolute -top-20 -left-20 h-44 w-44 rounded-full bg-emerald-400/12 blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full bg-teal-400/10 blur-[80px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
@@ -756,7 +763,9 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/50 bg-card flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-primary/15 bg-card flex flex-col relative overflow-hidden shadow-lg shadow-primary/5">
+          <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-400/12 blur-[90px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/25 to-transparent" />
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
