@@ -67,9 +67,19 @@ function DashboardLayoutInner() {
           <AppSidebar />
 
           <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 overflow-hidden">
-            <div className="absolute left-1/2 top-[-150px] h-72 w-[44rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[120px] opacity-50" />
-            <div className="absolute left-[18%] top-8 h-40 w-40 rounded-full bg-info/8 blur-[110px] opacity-40" />
+          {/* ─── ATMOSPHERIC BACKGROUND ─── */}
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            {/* Top glow cluster */}
+            <div className="absolute left-1/2 top-[-180px] h-[26rem] w-[52rem] -translate-x-1/2 rounded-full bg-primary/14 blur-[160px] opacity-60" />
+            <div className="absolute left-[12%] top-4 h-56 w-56 rounded-full bg-info/10 blur-[130px] opacity-50" />
+            <div className="absolute right-[8%] top-16 h-44 w-44 rounded-full bg-success/8 blur-[120px] opacity-40" />
+            {/* Mid accent */}
+            <div className="absolute left-[-5%] top-[38%] h-80 w-80 rounded-full bg-primary/8 blur-[170px] opacity-35" />
+            <div className="absolute right-[-8%] top-[52%] h-72 w-72 rounded-full bg-info/6 blur-[150px] opacity-30" />
+            {/* Bottom warmth */}
+            <div className="absolute left-[30%] bottom-[5%] h-64 w-[28rem] rounded-full bg-primary/6 blur-[160px] opacity-25" />
+            {/* Dot grid texture */}
+            <div className="absolute inset-0 dot-grid opacity-[0.025]" />
           </div>
 
           <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
