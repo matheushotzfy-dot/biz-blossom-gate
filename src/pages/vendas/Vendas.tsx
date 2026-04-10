@@ -221,17 +221,14 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.35, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "relative group rounded-2xl border border-border/20 bg-card/80 backdrop-blur-2xl overflow-hidden transition-all duration-300 hover:border-primary/20 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.12)]",
+        "relative overflow-hidden rounded-2xl border border-border/15 bg-card/95 shadow-[0_18px_40px_-32px_hsl(var(--foreground)/0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-border/25 hover:shadow-[0_22px_48px_-30px_hsl(var(--foreground)/0.24)]",
         className
       )}
     >
-      {/* Top glass shine line */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent z-10" />
-      {/* Inner gradient glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.015] via-transparent to-primary/[0.01] pointer-events-none" />
-      <div className="relative z-10">{children}</div>
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+      <div className="relative">{children}</div>
     </motion.div>
   );
 }
@@ -243,24 +240,25 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
   const accent = ACCENT_STYLES[color as AccentTone] ?? ACCENT_STYLES.primary;
 
   return (
-    <GlowCard delay={delay} className="p-5 sm:p-6 min-h-[184px]">
-      <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", accent.rail)} style={{ boxShadow: accent.glowShadow }} />
-      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
-      <div className="relative z-10 pl-3">
-        <div className="mb-5 flex items-start justify-between gap-3">
-          <div className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-0.5", accent.iconWrap)}>
-            <Icon className="h-5 w-5" />
-          </div>
-          {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
+    <GlowCard delay={delay} className="min-h-[176px] p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl border", accent.iconWrap)}>
+          <Icon className="h-5 w-5" />
         </div>
-        <p className="text-[9px] font-heading uppercase tracking-[0.24em] text-muted-foreground/40 mb-2.5">{label}</p>
+        {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
+      </div>
+
+      <div className="mt-5">
+        <p className="mb-2.5 text-[9px] font-heading uppercase tracking-[0.24em] text-muted-foreground/45">{label}</p>
         <div className="flex flex-wrap items-end gap-2.5">
-          <span className="text-[24px] sm:text-[28px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">
+          <span className="text-[24px] leading-none tracking-tight text-foreground font-heading font-black tabular-nums sm:text-[28px]">
             {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
           </span>
           {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
         </div>
       </div>
+
+      <div className={cn("mt-5 h-1 w-16 rounded-full", accent.rail)} />
     </GlowCard>
   );
 }
@@ -434,7 +432,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.15), ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl bg-card/60 backdrop-blur-2xl border border-border/15 p-4 cursor-pointer active:scale-[0.985] transition-all hover:border-primary/20 hover:shadow-[0_8px_32px_-8px_hsl(var(--primary)/0.1)]"
+      className="cursor-pointer rounded-2xl border border-border/15 bg-card/95 p-4 shadow-[0_18px_36px_-30px_hsl(var(--foreground)/0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-border/25 active:scale-[0.985]"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
@@ -515,7 +513,7 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-border/15 bg-card/95 backdrop-blur-xl rounded-2xl">
+      <DialogContent className="sm:max-w-md border-border/15 bg-card/95 rounded-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-display font-bold"><Download className="h-4 w-4 text-primary" /> Exportar Vendas</DialogTitle>
           <DialogDescription className="text-muted-foreground/50 text-xs font-display">Configure os filtros de exportação</DialogDescription>
@@ -828,393 +826,304 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
-      {/* Subtle dot grid background */}
-      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none z-0" />
-
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1">
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HERO — REVENUE COMMAND CENTER                                   */}
+      {/* HERO — CLEAN PREMIUM OVERVIEW                                  */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative mb-14 rounded-3xl border border-border/15 p-6 sm:p-8 lg:p-10 mesh-gradient-hero noise-overlay scan-line overflow-hidden"
-        style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 8px 48px -12px hsl(var(--background) / 0.5)" }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="mb-10 overflow-hidden rounded-[32px] border border-border/15 bg-card px-5 py-6 sm:px-7 sm:py-7 lg:px-8"
+        style={{
+          boxShadow: "0 24px 50px -38px hsl(var(--foreground) / 0.24)",
+          backgroundImage: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background) / 0.98) 100%), radial-gradient(circle at top right, hsl(var(--primary) / 0.10), transparent 28%), radial-gradient(circle at bottom left, hsl(var(--info) / 0.08), transparent 26%)",
+        }}
       >
-        {/* Animated floating orbs — extended beyond bounds for smooth fade */}
-        <div className="absolute -inset-16 pointer-events-none">
-          <motion.div
-            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]"
-          />
-          <motion.div
-            animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]"
-          />
-          {/* Bottom green glow — wide and smooth */}
-          <motion.div
-            animate={{ opacity: [0.4, 0.65, 0.4] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-20 left-[10%] right-[10%] h-[200px] bg-primary/6 rounded-full blur-[120px]"
-          />
-          {/* Decorative grid dots */}
-          <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        </div>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
 
-        <div className="relative z-10">
-          {/* Top controls bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-14">
-            <div className="flex items-center gap-3">
-              <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "auto", opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="inline-flex items-center gap-2.5"
-              >
-                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center glow-primary">
-                  <Zap className="h-4.5 w-4.5 text-primary" />
+        <div className="relative">
+          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
+                  <DollarSign className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80 block leading-tight">Minhas Vendas</span>
+                  <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50">Painel de performance</p>
+                  <h1 className="mt-1 text-2xl font-heading font-black tracking-tight text-foreground sm:text-3xl">Minhas Vendas</h1>
                 </div>
-              </motion.div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
-                  <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
-                </span>
-                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
               </div>
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/[0.08] px-3 py-1.5 text-[10px] font-heading uppercase tracking-[0.2em] text-success">
+                <span className="h-2 w-2 rounded-full bg-success" />
+                Tempo real
+              </span>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {/* Period selector with premium pill style */}
-              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
+
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center rounded-full border border-border/15 bg-background/70 p-1">
                 {PERIODS.map((opt) => (
                   <button
                     key={opt.label}
-                    onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                    onClick={() => {
+                      setSelectedPeriod(opt);
+                      setIsCustom(false);
+                      setCustomRange(undefined);
+                    }}
                     className={cn(
-                      "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
+                      "rounded-full px-3.5 py-2 text-[10px] font-heading transition-colors duration-300",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)] glow-primary"
-                        : "text-muted-foreground/35 hover:text-foreground/70"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground/70 hover:text-foreground"
                     )}
                   >
                     {opt.label}
                   </button>
                 ))}
               </div>
+
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button className={cn(
-                    "h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
-                    isCustom ? "border-primary/20 bg-primary/8 text-primary shadow-[0_0_10px_rgba(16,185,129,0.15)]" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
-                  )}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3 w-3" />
-                      {isCustom && customRange?.from
-                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                        : "Custom"}
-                    </span>
+                  <button
+                    className={cn(
+                      "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[10px] font-heading transition-colors duration-300",
+                      isCustom
+                        ? "border-primary/20 bg-primary/[0.08] text-primary"
+                        : "border-border/15 bg-background/70 text-muted-foreground/70 hover:text-foreground"
+                    )}
+                  >
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    {isCustom && customRange?.from
+                      ? customRange.to
+                        ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}`
+                        : format(customRange.from, "dd/MM/yyyy")
+                      : "Período customizado"}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 p-0 shadow-2xl">
+                  <Calendar
+                    mode="range"
+                    selected={customRange}
+                    onSelect={(range) => {
+                      setCustomRange(range);
+                      setIsCustom(true);
+                      if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300);
+                    }}
+                    numberOfMonths={1}
+                    locale={ptBR}
+                    disabled={(date) => date > new Date()}
+                    className="pointer-events-auto p-3"
+                    classNames={{
+                      day_selected: "bg-primary text-primary-foreground",
+                      day_range_middle: "bg-primary/10 text-foreground",
+                      day_range_end: "bg-primary text-primary-foreground",
+                    }}
+                  />
                 </PopoverContent>
               </Popover>
-              <span className="w-px h-5 bg-border/8 mx-1 hidden sm:block" />
-              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8 glow-primary" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
-                {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
+
+              <button
+                onClick={toggleHidden}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full border border-border/15 bg-background/70 transition-colors duration-300",
+                  hidden ? "text-primary" : "text-muted-foreground/70 hover:text-foreground"
+                )}
+                title={hidden ? "Mostrar valores" : "Ocultar valores"}
+              >
+                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="h-8 rounded-full px-3.5 text-[10px] font-heading text-muted-foreground/25 transition-all hover:text-foreground border border-transparent hover:border-border/10 active:scale-[0.97] inline-flex items-center gap-1.5">
-                <Download className="h-3 w-3" /> Exportar
+
+              <button
+                onClick={() => setShowExportDialog(true)}
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-border/15 bg-background/70 px-4 text-[10px] font-heading text-muted-foreground/70 transition-colors duration-300 hover:text-foreground"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Exportar
               </button>
             </div>
           </div>
 
-          {/* MAIN FOCAL POINT — Net Revenue with executive side intelligence */}
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_360px] xl:items-stretch">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="relative overflow-hidden rounded-[30px] border border-border/15 bg-card/45 backdrop-blur-2xl px-6 py-7 sm:px-8 sm:py-8"
-              style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), inset 0 -1px 0 0 hsl(var(--background) / 0.12), 0 12px 48px -20px hsl(var(--background) / 0.55)" }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="rounded-[28px] border border-border/15 bg-background/70 p-5 sm:p-6"
+              style={{ boxShadow: "0 22px 48px -40px hsl(var(--foreground) / 0.22)" }}
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
-              <div className="absolute -left-20 top-8 h-48 w-48 rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
-              <div className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-info/8 blur-[110px] pointer-events-none" />
-
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
-                  <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
-                  <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
-                </div>
-
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                  <div>
-                    <div className="flex items-end gap-5 mb-3">
-                      <motion.span
-                        className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1),0_4px_24px_hsl(var(--background)/0.5)]"
-                        initial={{ scale: 0.95 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                      >
-                        {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
-                      </motion.span>
-                      {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
-                    </div>
-
-                    <p className="max-w-2xl text-[13px] leading-relaxed text-muted-foreground/55 font-display">
-                      Visão consolidada da sua operação com foco em receita líquida, velocidade de conversão e comportamento do período selecionado.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 self-start lg:w-[270px]">
-                    {[
-                      { label: "Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), tone: "destructive" as AccentTone, icon: Percent },
-                      { label: "Clientes", value: hidden ? HIDE : String(m.uniqueCustomers), tone: "info" as AccentTone, icon: Users },
-                      { label: "PIX", value: hidden ? HIDE : fmtCompact(m.pixRev), tone: "success" as AccentTone, icon: Smartphone },
-                      { label: "Cartão", value: hidden ? HIDE : fmtCompact(m.cardRev), tone: "primary" as AccentTone, icon: CreditCard },
-                    ].map((mini) => {
-                      const accent = ACCENT_STYLES[mini.tone];
-                      return (
-                        <div
-                          key={mini.label}
-                          className="relative overflow-hidden rounded-2xl border border-border/12 bg-background/25 px-3.5 py-3 backdrop-blur-xl"
-                          style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--foreground) / 0.03), ${accent.glowShadow}` }}
-                        >
-                          <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
-                          <div className="relative z-10">
-                            <div className="mb-3 flex items-center justify-between gap-2">
-                              <span className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/45">{mini.label}</span>
-                              <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>
-                                <mini.icon className="h-3.5 w-3.5" />
-                              </div>
-                            </div>
-                            <div className={cn("text-[16px] font-heading font-black tabular-nums tracking-tight", accent.softText)}>{mini.value}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-8 flex flex-wrap items-center gap-2">
-                  {[
-                    { icon: CalendarDays, text: periodLabel, accent: "primary" as AccentTone },
-                    { icon: Check, text: `${m.approved.length} aprovadas`, accent: "success" as AccentTone },
-                    { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, accent: "warning" as AccentTone },
-                  ].map((chip, i) => {
-                    const accent = ACCENT_STYLES[chip.accent];
-                    return (
-                      <motion.span
-                        key={i}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ delay: 0.4 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative inline-flex items-center gap-2 text-[11px] font-display font-semibold rounded-full px-4 py-2 overflow-hidden transition-all duration-300 cursor-default group border border-border/15 bg-card/50 backdrop-blur-2xl hover:border-primary/25 hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)]"
-                        style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--foreground) / 0.04), ${accent.glowShadow}` }}
-                      >
-                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-                        <div className={cn("h-5 w-5 rounded-full flex items-center justify-center border", accent.iconWrap)}>
-                          <chip.icon className="h-2.5 w-2.5" />
-                        </div>
-                        <span className={cn("relative z-10", accent.softText)}>{chip.text}</span>
-                      </motion.span>
-                    );
-                  })}
-                  {lastSaleText && (
-                    <motion.span
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                      className="relative inline-flex items-center gap-2.5 text-[11px] font-display font-semibold rounded-full px-4 py-2 border overflow-hidden border-primary/15 bg-primary/[0.06] text-primary/80 backdrop-blur-2xl"
-                      style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--primary) / 0.08), ${ACCENT_STYLES.primary.glowShadow}` }}
-                    >
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-                      <span className="relative flex h-2 w-2">
-                        <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
-                        <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
-                      </span>
-                      <span className="relative z-10">última {lastSaleText}</span>
-                    </motion.span>
-                  )}
-                </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary/[0.08] px-3 py-1 text-[10px] font-heading uppercase tracking-[0.2em] text-primary">
+                  Receita líquida
+                </span>
+                {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
               </div>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 18 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="relative overflow-hidden rounded-[30px] border border-border/15 bg-card/50 p-5 backdrop-blur-2xl"
-              style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 10px 40px -16px hsl(var(--background) / 0.5)" }}
-            >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
-              <div className="absolute -right-10 top-0 h-40 w-40 rounded-full bg-warning/10 blur-[90px] pointer-events-none" />
-              <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-primary/10 blur-[90px] pointer-events-none" />
-
-              <div className="relative z-10">
-                <div className="mb-5 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40">Command Center</p>
-                    <h3 className="mt-2 text-xl font-heading font-black tracking-tight text-foreground">Snapshot Executivo</h3>
+              <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <div className="text-4xl font-heading font-black leading-[0.9] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+                    {hidden ? (
+                      "R$ •••••••"
+                    ) : (
+                      <span style={{ textShadow: "0 12px 28px hsl(var(--primary) / 0.10)" }}>
+                        <AnimatedNumber value={m.totalNet} />
+                      </span>
+                    )}
                   </div>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary glow-primary">
-                    <Radar className="h-5 w-5" />
-                  </div>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground/70">
+                    Um visual mais limpo para ler sua operação com clareza, foco nos números e menos ruído visual.
+                  </p>
                 </div>
 
-                <div className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3 sm:min-w-[300px]">
                   {[
-                    {
-                      label: "Método dominante",
-                      value: dominantMethod.label,
-                      helper: hidden ? HIDE : `${fmtCompact(dominantMethod.value)} · ${dominantMethod.count}x`,
-                      tone: dominantMethod.label === "PIX" ? "success" : dominantMethod.label === "Cartão" ? "info" : "warning",
-                      icon: dominantMethod.label === "PIX" ? Smartphone : dominantMethod.label === "Cartão" ? CreditCard : FileText,
-                    },
-                    {
-                      label: "Taxa de aprovação",
-                      value: `${m.conversion.toFixed(1)}%`,
-                      helper: `${m.approved.length} vendas concluídas`,
-                      tone: m.conversion >= 80 ? "success" : m.conversion >= 50 ? "warning" : "destructive",
-                      icon: Target,
-                    },
-                    {
-                      label: "Pico operacional",
-                      value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
-                      helper: peakHour !== null ? `${rawPeakSales} vendas na hora mais quente` : "Sem tráfego relevante no período",
-                      tone: "primary",
-                      icon: Flame,
-                    },
-                  ].map((item) => {
-                    const accent = ACCENT_STYLES[item.tone as AccentTone];
+                    { label: "Ticket médio", value: hidden ? HIDE : fmt(m.avgTicket), tone: "primary" as AccentTone, icon: Receipt },
+                    { label: "Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), tone: "destructive" as AccentTone, icon: Percent },
+                    { label: "Clientes", value: hidden ? HIDE : String(m.uniqueCustomers), tone: "info" as AccentTone, icon: Users },
+                    { label: "Pendentes", value: String(m.pending.length), tone: "warning" as AccentTone, icon: Clock },
+                  ].map((stat) => {
+                    const accent = ACCENT_STYLES[stat.tone];
+                    const Icon = stat.icon;
+
                     return (
-                      <div
-                        key={item.label}
-                        className="relative overflow-hidden rounded-2xl border border-border/12 bg-background/25 p-4"
-                        style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--foreground) / 0.03), ${accent.glowShadow}` }}
-                      >
-                        <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
-                        <div className="relative z-10 flex items-start gap-3">
-                          <div className={cn("mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border", accent.iconWrap)}>
-                            <item.icon className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40">{item.label}</p>
-                            <div className={cn("mt-2 text-[26px] font-heading font-black leading-none tracking-tight", accent.text)}>{item.value}</div>
-                            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/55 font-display">{item.helper}</p>
+                      <div key={stat.label} className="rounded-2xl border border-border/12 bg-card/80 p-3.5">
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/45">{stat.label}</span>
+                          <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>
+                            <Icon className="h-3.5 w-3.5" />
                           </div>
                         </div>
+                        <div className={cn("text-sm font-heading font-black tracking-tight", accent.text)}>{stat.value}</div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </motion.div>
-          </div>
 
-          {/* Executive Strip — Ultra-Premium glassmorphism cards */}
-          <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              {
-                label: "Taxa de Aprovação",
-                value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
-                sub: `${m.approved.length} de ${dateFiltered.length}`,
-                gradient: "from-emerald-500/90 to-teal-400/90",
-                glowShadow: "shadow-[0_0_24px_rgba(16,185,129,0.3)]",
-                valueColor: m.conversion >= 80 ? "text-success" : m.conversion >= 50 ? "text-warning" : "text-destructive",
-                icon: Target,
-                ring: { value: m.conversion, max: 100, ringColor: m.conversion >= 80 ? "hsl(var(--success))" : m.conversion >= 50 ? "hsl(var(--warning))" : "hsl(var(--destructive))" },
-                accentColor: "success",
-              },
-              {
-                label: "Ticket Médio",
-                value: hidden ? HIDE : fmt(m.avgTicket),
-                sub: <DeltaBadge cur={m.avgTicket} prev={p.avgTicket} />,
-                gradient: "from-emerald-500/90 to-teal-400/90",
-                glowShadow: "shadow-[0_0_24px_rgba(16,185,129,0.25)]",
-                valueColor: "text-foreground",
-                icon: Receipt,
-                accentColor: "primary",
-              },
-              {
-                label: "Método Líder",
-                value: dominantMethod.label,
-                sub: hidden ? HIDE : fmtCompact(dominantMethod.value),
-                gradient: "from-amber-500/90 to-yellow-400/90",
-                glowShadow: "shadow-[0_0_24px_rgba(245,158,11,0.25)]",
-                valueColor: "text-warning",
-                icon: Crown,
-                accentColor: "warning",
-              },
-              {
-                label: "Pico de Vendas",
-                value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
-                sub: peakHour !== null ? `${rawPeakSales} vendas` : "sem dados",
-                gradient: "from-violet-500/90 to-purple-400/90",
-                glowShadow: "shadow-[0_0_24px_rgba(139,92,246,0.25)]",
-                valueColor: "text-info",
-                icon: Clock,
-                accentColor: "info",
-              },
-            ].map((item, idx) => {
-              const iconEl = item.ring ? (
-                <div className="relative floating">
-                  <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.ring.ringColor} />
-                  <item.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+              <div className="mt-6 flex flex-wrap gap-2.5">
+                {[
+                  { icon: CalendarDays, text: periodLabel, tone: "primary" as AccentTone },
+                  { icon: Check, text: `${m.approved.length} aprovadas`, tone: "success" as AccentTone },
+                  { icon: DollarSign, text: `Bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, tone: "warning" as AccentTone },
+                ].map((chip) => {
+                  const accent = ACCENT_STYLES[chip.tone];
+                  const Icon = chip.icon;
+
+                  return (
+                    <span
+                      key={chip.text}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-display font-semibold",
+                        accent.surface,
+                        accent.text
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {chip.text}
+                    </span>
+                  );
+                })}
+
+                {lastSaleText && (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.08] px-3.5 py-2 text-[11px] font-display font-semibold text-primary">
+                    <span className="h-2 w-2 rounded-full bg-primary" />
+                    última venda {lastSaleText}
+                  </span>
+                )}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.14 }}
+              className="rounded-[28px] border border-border/15 bg-background/70 p-5"
+              style={{ boxShadow: "0 22px 48px -40px hsl(var(--foreground) / 0.22)" }}
+            >
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground/45">Visão rápida</p>
+                  <h2 className="mt-2 text-xl font-heading font-black tracking-tight text-foreground">Resumo do período</h2>
                 </div>
-              ) : (
-                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-gradient-to-br", item.gradient, item.glowShadow)}>
-                  <item.icon className="h-5 w-5 text-foreground" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
+                  <Activity className="h-5 w-5" />
                 </div>
-              );
-              return (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative rounded-2xl border border-border/15 bg-card/50 backdrop-blur-2xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:shadow-[0_8px_48px_-12px_hsl(var(--primary)/0.18)]"
-                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), inset 0 -1px 0 0 hsl(var(--background) / 0.1), 0 4px 24px -8px hsl(var(--background) / 0.4)" }}
-                >
-                  {/* Left accent bar */}
-                  <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", `bg-${item.accentColor}`)} style={{ boxShadow: `0 0 12px hsl(var(--${item.accentColor})/0.35)` }} />
-                  {/* Top shine line */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.07] to-transparent z-20" />
-                  {/* Radial inner glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-primary/[0.015] pointer-events-none" />
-                  <div className="relative z-10 pl-2">
-                    <div className="flex items-start justify-between mb-4">
-                      <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40">{item.label}</p>
-                      {iconEl}
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    label: "Taxa de aprovação",
+                    value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
+                    helper: `${m.approved.length} vendas concluídas`,
+                    tone: (m.conversion >= 80 ? "success" : m.conversion >= 50 ? "warning" : "destructive") as AccentTone,
+                    icon: Target,
+                  },
+                  {
+                    label: "Método líder",
+                    value: dominantMethod.value > 0 ? dominantMethod.label : "Sem destaque",
+                    helper: hidden ? HIDE : dominantMethod.value > 0 ? `${fmtCompact(dominantMethod.value)} · ${dominantMethod.count}x` : "Sem volume suficiente",
+                    tone: (dominantMethod.value === 0
+                      ? "primary"
+                      : dominantMethod.label === "PIX"
+                        ? "success"
+                        : dominantMethod.label === "Cartão"
+                          ? "info"
+                          : "warning") as AccentTone,
+                    icon: dominantMethod.value === 0 ? Layers : dominantMethod.label === "PIX" ? Smartphone : dominantMethod.label === "Cartão" ? CreditCard : FileText,
+                  },
+                  {
+                    label: "Pico de vendas",
+                    value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
+                    helper: peakHour !== null ? `${rawPeakSales} vendas na hora mais forte` : "Sem pico relevante",
+                    tone: "primary" as AccentTone,
+                    icon: Flame,
+                  },
+                ].map((item) => {
+                  const accent = ACCENT_STYLES[item.tone];
+                  const Icon = item.icon;
+
+                  return (
+                    <div key={item.label} className="rounded-2xl border border-border/12 bg-card/80 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className={cn("mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border", accent.iconWrap)}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40">{item.label}</p>
+                          <div className={cn("mt-2 text-2xl font-heading font-black leading-none tracking-tight", accent.text)}>{item.value}</div>
+                          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/60">{item.helper}</p>
+                        </div>
+                      </div>
                     </div>
-                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-tight leading-none mb-2", item.valueColor)}>{item.value}</p>
-                    <div className="text-[10px] text-muted-foreground/30 font-mono">{item.sub}</div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 grid grid-cols-3 gap-2">
+                {paymentMix.map((pm) => {
+                  const accent = ACCENT_STYLES[pm.color as AccentTone];
+                  const share = pm.total > 0 ? Math.round((pm.value / pm.total) * 100) : 0;
+
+                  return (
+                    <div key={pm.label} className="rounded-2xl border border-border/12 bg-card/80 px-3 py-3">
+                      <div className={cn("mb-2 flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>{pm.icon}</div>
+                      <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/45">{pm.label}</p>
+                      <p className={cn("mt-2 text-sm font-heading font-black", accent.text)}>{hidden ? HIDE : `${share}%`}</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground/60">{pm.count} vendas</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
           </div>
         </div>
       </motion.section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* KPI GRID — Rich & animated                                      */}
+      {/* KPI GRID                                                        */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="mb-10 grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <section className="mb-10 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiTile label="Faturamento Bruto" value={m.totalGross} icon={Banknote} delta={{ cur: m.totalGross, prev: p.totalGross }} sparkData={metrics.dailyGrossArr} hidden={hidden} color="primary" delay={0} />
         <KpiTile label="Vendas Aprovadas" value={m.approved.length} icon={ShoppingCart} delta={{ cur: m.approved.length, prev: p.approved.length }} sparkData={metrics.dailyCountArr} hidden={hidden} color="success" delay={0.05} formatter={(v) => Math.round(v).toString()} />
         <KpiTile label="Clientes Únicos" value={m.uniqueCustomers} icon={Users} hidden={hidden} color="info" delay={0.1} formatter={(v) => Math.round(v).toString()} />
@@ -1222,84 +1131,91 @@ export default function Vendas() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* REVENUE TIMELINE — Premium chart                                */}
+      {/* REVENUE TIMELINE                                                */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: 0.45, delay: 0.18 }}
         className="mb-10"
       >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/12 flex items-center justify-center">
-              <Activity className="h-4.5 w-4.5 text-primary" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/12 bg-primary/10 text-primary">
+              <Activity className="h-4.5 w-4.5" />
             </div>
             <div>
-              <h2 className="text-sm font-heading text-foreground/80 uppercase tracking-[0.12em]">Evolução de Receita</h2>
-              <p className="text-[9px] text-muted-foreground/25 font-display mt-0.5">Comparativo com período anterior</p>
+              <h2 className="text-sm font-heading uppercase tracking-[0.12em] text-foreground/80">Evolução de Receita</h2>
+              <p className="mt-0.5 text-[10px] text-muted-foreground/50">Comparativo com o período anterior</p>
             </div>
           </div>
-          <div className="flex gap-5 text-[11px] font-display tabular-nums">
-            <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]" /> Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span></span>
-            <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/15 border border-dashed border-muted-foreground/25" /> Anterior</span>
-            <span className="text-destructive/60 inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}</span>
+
+          <div className="flex flex-wrap gap-4 text-[11px] font-display tabular-nums">
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+              Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-muted-foreground/70">
+              <span className="h-2.5 w-2.5 rounded-full border border-dashed border-muted-foreground/40" />
+              Anterior
+            </span>
+            <span className="inline-flex items-center gap-1 text-destructive/70">
+              <AlertTriangle className="h-3 w-3" /> Taxas {hidden ? HIDE : `-${fmtCompact(m.totalFees)}`}
+            </span>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/20 bg-card/70 backdrop-blur-2xl p-6 relative overflow-hidden" style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.03), 0 4px 32px -8px hsl(var(--background) / 0.4)" }}>
-          <div className="absolute -top-40 right-0 w-72 h-72 bg-primary/3 rounded-full blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-32 left-10 w-48 h-48 bg-info/3 rounded-full blur-[80px] pointer-events-none" />
-          <div className="relative z-10">
-            <RevenueChart data={metrics.chartData} hidden={hidden} />
-          </div>
+
+        <div className="rounded-2xl border border-border/20 bg-card/95 p-6 shadow-[0_20px_44px_-34px_hsl(var(--foreground)/0.22)]">
+          <RevenueChart data={metrics.chartData} hidden={hidden} />
         </div>
       </motion.section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* INTELLIGENCE PANELS — 3 Column Bento                           */}
+      {/* INTELLIGENCE PANELS                                             */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="mb-10 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        {/* Payment Intelligence */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="primary" delay={0.1} animated>
-          <div className="flex items-center gap-2.5 mb-6">
-            <div className="h-8 w-8 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
-              <PieChart className="h-4 w-4 text-primary" />
+        <GlowCard className="xl:col-span-4 p-6" delay={0.1}>
+          <div className="mb-6 flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-primary/10 bg-primary/8 text-primary">
+              <PieChart className="h-4 w-4" />
             </div>
-            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Meios de Pagamento</h3>
+            <h3 className="text-xs font-heading uppercase tracking-[0.14em] text-foreground/70">Meios de Pagamento</h3>
           </div>
+
           <div className="space-y-5">
             {paymentMix.map((pm, idx) => {
               const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
               const isDominant = pm.label === dominantMethod.label && pm.value > 0;
+              const accent = ACCENT_STYLES[pm.color as AccentTone];
+
               return (
                 <motion.div
                   key={pm.label}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 + idx * 0.1 }}
+                  transition={{ duration: 0.35, delay: 0.24 + idx * 0.08 }}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border", `bg-${pm.color}/8 border-${pm.color}/12 text-${pm.color}`)}>
+                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border", accent.iconWrap)}>
                         {pm.icon}
                       </div>
                       <div>
                         <span className="text-[12px] font-display font-bold text-foreground">{pm.label}</span>
-                        {isDominant && <Crown className="h-3 w-3 text-warning/70 inline ml-1.5" />}
+                        {isDominant && <Crown className="ml-1.5 inline h-3 w-3 text-warning" />}
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-[15px] font-display font-black tabular-nums text-foreground block leading-none">{hidden ? HIDE : fmtCompact(pm.value)}</span>
-                      <span className="text-[9px] text-muted-foreground/20 font-mono">{pct.toFixed(0)}% · {pm.count}x</span>
+                      <span className="block text-[15px] font-display font-black leading-none text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</span>
+                      <span className="text-[9px] font-mono text-muted-foreground/45">{pct.toFixed(0)}% · {pm.count}x</span>
                     </div>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted/6">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted/10">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.8, delay: 0.4 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                      className={cn("h-full rounded-full", `bg-${pm.color}`)}
-                      style={{ boxShadow: `0 0 8px hsl(var(--${pm.color})/0.3)` }}
+                      transition={{ duration: 0.65, delay: 0.3 + idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                      className={cn("h-full rounded-full", accent.rail)}
                     />
                   </div>
                 </motion.div>
@@ -1307,32 +1223,31 @@ export default function Vendas() {
             })}
           </div>
 
-          {/* Health section integrated below */}
-          <div className="mt-7 pt-6 border-t border-border/6">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="h-3.5 w-3.5 text-muted-foreground/30" />
-              <h4 className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/30">Saúde Operacional</h4>
+          <div className="mt-7 border-t border-border/10 pt-6">
+            <div className="mb-4 flex items-center gap-2">
+              <Shield className="h-3.5 w-3.5 text-muted-foreground/40" />
+              <h4 className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/45">Saúde operacional</h4>
             </div>
+
             <div className="space-y-3">
-              {healthItems.map(h => {
-                const bad = h.value > h.threshold;
-                const warn = h.value > h.threshold * 0.7;
-                const statusColor = bad ? "destructive" : warn ? "warning" : "success";
+              {healthItems.map((h) => {
+                const tone: AccentTone = h.value > h.threshold ? "destructive" : h.value > h.threshold * 0.7 ? "warning" : "success";
+                const accent = ACCENT_STYLES[tone];
                 const Icon = h.icon;
+
                 return (
                   <div key={h.label} className="flex items-center gap-3">
-                    <Icon className={cn("h-3.5 w-3.5 shrink-0", `text-${statusColor}/50`)} />
-                    <span className="text-[11px] font-display font-semibold text-foreground/50 w-20 shrink-0">{h.label}</span>
-                    <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-muted/6">
+                    <Icon className={cn("h-3.5 w-3.5 shrink-0", accent.text)} />
+                    <span className="w-20 shrink-0 text-[11px] font-display font-semibold text-foreground/60">{h.label}</span>
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/10">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(h.value * (100 / h.threshold), 100)}%` }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                        className={cn("h-full rounded-full", `bg-${statusColor}`)}
-                        style={{ boxShadow: bad ? `0 0 6px hsl(var(--${statusColor})/0.3)` : "none" }}
+                        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn("h-full rounded-full", accent.rail)}
                       />
                     </div>
-                    <span className={cn("text-[11px] font-display font-bold tabular-nums w-12 text-right", `text-${statusColor}`)}>{h.value.toFixed(1)}%</span>
+                    <span className={cn("w-12 text-right text-[11px] font-display font-bold tabular-nums", accent.text)}>{h.value.toFixed(1)}%</span>
                   </div>
                 );
               })}
@@ -1340,21 +1255,21 @@ export default function Vendas() {
           </div>
         </GlowCard>
 
-        {/* Top Products */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="warning" delay={0.15} animated>
-          <div className="flex items-center gap-2.5 mb-6">
-            <div className="h-8 w-8 rounded-xl bg-warning/8 border border-warning/10 flex items-center justify-center">
-              <Award className="h-4 w-4 text-warning" />
+        <GlowCard className="xl:col-span-4 p-6" delay={0.15}>
+          <div className="mb-6 flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-warning/10 bg-warning/8 text-warning">
+              <Award className="h-4 w-4" />
             </div>
-            <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Top Produtos</h3>
+            <h3 className="text-xs font-heading uppercase tracking-[0.14em] text-foreground/70">Top Produtos</h3>
           </div>
+
           {metrics.topProducts.length === 0 ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center text-center">
-              <div className="h-16 w-16 rounded-2xl bg-muted/5 border border-border/6 flex items-center justify-center mb-4">
-                <Package className="h-7 w-7 text-muted-foreground/8" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-border/10 bg-muted/5">
+                <Package className="h-7 w-7 text-muted-foreground/20" />
               </div>
-              <p className="text-[12px] text-muted-foreground/20 font-display font-semibold">Sem produtos neste período</p>
-              <p className="text-[10px] text-muted-foreground/12 font-display mt-1">As vendas aparecerão aqui</p>
+              <p className="text-[12px] font-display font-semibold text-muted-foreground/55">Sem produtos neste período</p>
+              <p className="mt-1 text-[10px] text-muted-foreground/45">As vendas aparecerão aqui</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -1362,30 +1277,30 @@ export default function Vendas() {
                 const maxRev = metrics.topProducts[0]?.revenue || 1;
                 const pct = (prod.revenue / maxRev) * 100;
                 const medals = ["🥇", "🥈", "🥉"];
+
                 return (
                   <motion.div
                     key={prod.id}
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.35 + index * 0.08 }}
+                    transition={{ duration: 0.35, delay: 0.28 + index * 0.08 }}
                   >
-                    <div className="flex items-center justify-between gap-3 mb-1.5">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-sm shrink-0">{medals[index] || `${index + 1}`}</span>
-                        <p className="text-[12px] font-display font-semibold text-foreground truncate">{prod.name}</p>
+                    <div className="mb-1.5 flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <span className="shrink-0 text-sm">{medals[index] || `${index + 1}`}</span>
+                        <p className="truncate text-[12px] font-display font-semibold text-foreground">{prod.name}</p>
                       </div>
-                      <div className="flex items-baseline gap-2 shrink-0">
+                      <div className="flex shrink-0 items-baseline gap-2">
                         <span className="text-[14px] font-display font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(prod.revenue)}</span>
-                        <span className="text-[9px] text-muted-foreground/20 font-mono">{prod.sales}x</span>
+                        <span className="text-[9px] font-mono text-muted-foreground/45">{prod.sales}x</span>
                       </div>
                     </div>
-                    <div className="h-1 overflow-hidden rounded-full bg-muted/5 ml-7">
+                    <div className="ml-7 h-1 overflow-hidden rounded-full bg-muted/10">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.6, delay: 0.4 + index * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                        className={cn("h-full rounded-full", index === 0 ? "bg-warning" : "bg-primary/40")}
-                        style={index === 0 ? { boxShadow: "0 0 8px hsl(var(--warning)/0.3)" } : {}}
+                        transition={{ duration: 0.55, delay: 0.34 + index * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn("h-full rounded-full", index === 0 ? "bg-warning" : "bg-primary/35")}
                       />
                     </div>
                   </motion.div>
@@ -1395,36 +1310,38 @@ export default function Vendas() {
           )}
         </GlowCard>
 
-        {/* Peak Hours Heatmap + Quick Stats */}
-        <GlowCard className="xl:col-span-4 p-6" glowColor="info" delay={0.2} animated>
-          <div className="flex items-center justify-between mb-6">
+        <GlowCard className="xl:col-span-4 p-6" delay={0.2}>
+          <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-info/8 border border-info/10 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-info" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-info/10 bg-info/8 text-info">
+                <Clock className="h-4 w-4" />
               </div>
-              <h3 className="text-xs font-heading text-foreground/70 uppercase tracking-[0.14em]">Horário de Pico</h3>
+              <h3 className="text-xs font-heading uppercase tracking-[0.14em] text-foreground/70">Horário de Pico</h3>
             </div>
             <span className="text-lg font-display font-black text-primary tabular-nums">{peakHour !== null ? `${String(peakHour).padStart(2, "0")}h` : "—"}</span>
           </div>
+
           <div className="flex h-[160px] items-end gap-[2px]">
             {metrics.hours.map((count, hour) => {
               const intensity = count / maxHour;
               const active = peakHour !== null && hour === peakHour;
+
               return (
                 <div key={hour} className="group relative flex h-full flex-1 flex-col items-center justify-end">
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${Math.max(intensity * 100, 2)}%` }}
-                    transition={{ duration: 0.5, delay: 0.3 + hour * 0.02, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.45, delay: 0.22 + hour * 0.02, ease: [0.16, 1, 0.3, 1] }}
                     className={cn(
                       "w-full rounded-t-sm transition-colors",
-                      active ? "bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]" : intensity > 0.5 ? "bg-primary/35" : intensity > 0 ? "bg-primary/12 group-hover:bg-primary/25" : "bg-muted/4"
+                      active ? "bg-primary" : intensity > 0.5 ? "bg-primary/35" : intensity > 0 ? "bg-primary/12 group-hover:bg-primary/20" : "bg-muted/6"
                     )}
                   />
-                  <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <div className="rounded-lg bg-popover border border-border/20 px-3 py-1.5 text-[10px] font-display font-bold text-foreground shadow-2xl whitespace-nowrap">
+
+                  <div className="pointer-events-none absolute -top-12 left-1/2 z-20 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="whitespace-nowrap rounded-lg border border-border/20 bg-popover px-3 py-1.5 text-[10px] font-display font-bold text-foreground shadow-2xl">
                       <span className="font-mono text-primary">{String(hour).padStart(2, "0")}h</span>
-                      <span className="text-muted-foreground/40 mx-1.5">·</span>
+                      <span className="mx-1.5 text-muted-foreground/40">·</span>
                       <span>{count} {count === 1 ? "venda" : "vendas"}</span>
                     </div>
                   </div>
@@ -1432,23 +1349,24 @@ export default function Vendas() {
               );
             })}
           </div>
-          <div className="mt-2 flex justify-between text-[8px] text-muted-foreground/15 font-mono">
+
+          <div className="mt-2 flex justify-between text-[8px] font-mono text-muted-foreground/35">
             <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
           </div>
 
-          {/* Quick stats */}
-          <div className="mt-6 pt-5 border-t border-border/6 grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-card/30 border border-border/6 p-3.5">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Users className="h-3.5 w-3.5 text-info/50" />
-                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Clientes</p>
+          <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border/10 pt-5">
+            <div className="rounded-xl border border-border/10 bg-card/80 p-3.5">
+              <div className="mb-1.5 flex items-center gap-2">
+                <Users className="h-3.5 w-3.5 text-info/60" />
+                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/40">Clientes</p>
               </div>
               <p className="text-xl font-display font-black text-foreground tabular-nums">{hidden ? HIDE : m.uniqueCustomers}</p>
             </div>
-            <div className="rounded-xl bg-card/30 border border-border/6 p-3.5">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Clock className="h-3.5 w-3.5 text-warning/50" />
-                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Pendentes</p>
+
+            <div className="rounded-xl border border-border/10 bg-card/80 p-3.5">
+              <div className="mb-1.5 flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5 text-warning/60" />
+                <p className="text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground/40">Pendentes</p>
               </div>
               <p className={cn("text-xl font-display font-black tabular-nums", m.pending.length > 0 ? "text-warning" : "text-foreground")}>{m.pending.length}</p>
             </div>
@@ -1478,7 +1396,7 @@ export default function Vendas() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar nome, e-mail ou ID…"
-              className="h-10 w-full rounded-xl border border-border/8 bg-card/30 backdrop-blur-lg pl-10 pr-12 text-[12px] text-foreground placeholder:text-muted-foreground/15 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 transition-all font-display"
+              className="h-10 w-full rounded-xl border border-border/8 bg-card/30 pl-10 pr-12 text-[12px] text-foreground placeholder:text-muted-foreground/15 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 transition-all font-display"
             />
             {search ? (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 active:scale-90">
@@ -1512,7 +1430,7 @@ export default function Vendas() {
           })}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border/15 bg-card/70 backdrop-blur-2xl shadow-[0_4px_32px_-8px_hsl(var(--background)/0.4)]">
+        <div className="overflow-hidden rounded-2xl border border-border/15 bg-card/70 shadow-[0_4px_32px_-8px_hsl(var(--background)/0.4)]">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/4 bg-card/20">
             <p className="text-[10px] text-muted-foreground/15 font-mono">
               {sortedFiltered.length === 0 ? "Nenhuma transação" : `${Math.min(visibleCount, sortedFiltered.length)} de ${sortedFiltered.length}`}
