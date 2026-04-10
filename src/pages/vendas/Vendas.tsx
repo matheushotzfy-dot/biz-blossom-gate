@@ -88,6 +88,70 @@ const STATUS: Record<string, { label: string; fg: string; dot: string; bg: strin
   chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/15" },
 };
 
+type AccentTone = "primary" | "success" | "warning" | "info" | "destructive";
+
+const ACCENT_STYLES: Record<AccentTone, {
+  rail: string;
+  text: string;
+  softText: string;
+  iconWrap: string;
+  pill: string;
+  surface: string;
+  glowGradient: string;
+  glowShadow: string;
+}> = {
+  primary: {
+    rail: "bg-primary",
+    text: "text-primary",
+    softText: "text-primary/80",
+    iconWrap: "bg-primary/12 border-primary/15 text-primary",
+    pill: "border-primary/15 bg-primary/[0.08] text-primary",
+    surface: "border-primary/15 bg-primary/[0.06]",
+    glowGradient: "from-primary/[0.14] via-primary/[0.04] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--primary) / 0.22)",
+  },
+  success: {
+    rail: "bg-success",
+    text: "text-success",
+    softText: "text-success/80",
+    iconWrap: "bg-success/12 border-success/15 text-success",
+    pill: "border-success/15 bg-success/[0.08] text-success",
+    surface: "border-success/15 bg-success/[0.06]",
+    glowGradient: "from-success/[0.16] via-success/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--success) / 0.22)",
+  },
+  warning: {
+    rail: "bg-warning",
+    text: "text-warning",
+    softText: "text-warning/80",
+    iconWrap: "bg-warning/12 border-warning/15 text-warning",
+    pill: "border-warning/15 bg-warning/[0.08] text-warning",
+    surface: "border-warning/15 bg-warning/[0.06]",
+    glowGradient: "from-warning/[0.18] via-warning/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--warning) / 0.22)",
+  },
+  info: {
+    rail: "bg-info",
+    text: "text-info",
+    softText: "text-info/80",
+    iconWrap: "bg-info/12 border-info/15 text-info",
+    pill: "border-info/15 bg-info/[0.08] text-info",
+    surface: "border-info/15 bg-info/[0.06]",
+    glowGradient: "from-info/[0.16] via-info/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--info) / 0.22)",
+  },
+  destructive: {
+    rail: "bg-destructive",
+    text: "text-destructive",
+    softText: "text-destructive/80",
+    iconWrap: "bg-destructive/12 border-destructive/15 text-destructive",
+    pill: "border-destructive/15 bg-destructive/[0.08] text-destructive",
+    surface: "border-destructive/15 bg-destructive/[0.06]",
+    glowGradient: "from-destructive/[0.16] via-destructive/[0.05] to-transparent",
+    glowShadow: "0 0 18px hsl(var(--destructive) / 0.22)",
+  },
+};
+
 /* ─────────────────────── Animated Number ─────────────────────── */
 function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
   const [display, setDisplay] = useState(value);
@@ -174,21 +238,24 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
 
 /* ─── KPI Tile ─── */
 function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "primary", delay = 0, formatter = fmt }: {
-  label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
+  label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: AccentTone; delay?: number; formatter?: (v: number) => string;
 }) {
+  const accent = ACCENT_STYLES[color as AccentTone] ?? ACCENT_STYLES.primary;
+
   return (
-    <GlowCard delay={delay} className="p-5">
-      <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-full", `bg-${color}`)} style={{ boxShadow: `0 0 10px hsl(var(--${color})/0.3)` }} />
-      <div className="flex items-start justify-between mb-3.5 pl-3">
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border backdrop-blur-sm transition-transform duration-300 group-hover:scale-110", `bg-${color}/8 border-${color}/15 text-${color}`)}>
-          <Icon className="h-4.5 w-4.5" />
+    <GlowCard delay={delay} className="p-5 sm:p-6 min-h-[184px]">
+      <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", accent.rail)} style={{ boxShadow: accent.glowShadow }} />
+      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
+      <div className="relative z-10 pl-3">
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <div className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-0.5", accent.iconWrap)}>
+            <Icon className="h-5 w-5" />
+          </div>
+          {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
         </div>
-        {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
-      </div>
-      <div className="pl-3">
-        <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/45 mb-2">{label}</p>
-        <div className="flex items-end gap-2.5">
-          <span className="text-[22px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">
+        <p className="text-[9px] font-heading uppercase tracking-[0.24em] text-muted-foreground/40 mb-2.5">{label}</p>
+        <div className="flex flex-wrap items-end gap-2.5">
+          <span className="text-[24px] sm:text-[28px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">
             {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
           </span>
           {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
@@ -874,77 +941,193 @@ export default function Vendas() {
             </div>
           </div>
 
-          {/* MAIN FOCAL POINT — Net Revenue with dramatic presentation */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-10"
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
-              <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
-              <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
-            </div>
-            <div className="flex items-end gap-5 mb-3">
-              <motion.span
-                className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1),0_4px_24px_hsl(var(--background)/0.5)]"
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
-              </motion.span>
-              {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
-            </div>
-            <div className="flex flex-wrap items-center gap-2 mt-8">
-              {[
-                { icon: CalendarDays, text: periodLabel, accent: "primary" },
-                { icon: Check, text: `${m.approved.length} aprovadas`, accent: "success" },
-                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, accent: "warning" },
-              ].map((chip, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.4 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className={cn(
-                    "relative inline-flex items-center gap-2 text-[11px] font-display font-semibold rounded-full px-4 py-2 overflow-hidden transition-all duration-300 cursor-default group",
-                    "bg-card/50 backdrop-blur-2xl border border-border/15",
-                    "hover:border-primary/25 hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)]",
-                    `text-${chip.accent}/80`
-                  )}
-                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 2px 8px -2px hsl(var(--background) / 0.3)" }}
-                >
-                  {/* Inner shine */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-                  <div className={cn("h-5 w-5 rounded-full flex items-center justify-center", `bg-${chip.accent}/10 border border-${chip.accent}/15`)}>
-                    <chip.icon className="h-2.5 w-2.5" />
+          {/* MAIN FOCAL POINT — Net Revenue with executive side intelligence */}
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_360px] xl:items-stretch">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="relative overflow-hidden rounded-[30px] border border-border/15 bg-card/45 backdrop-blur-2xl px-6 py-7 sm:px-8 sm:py-8"
+              style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), inset 0 -1px 0 0 hsl(var(--background) / 0.12), 0 12px 48px -20px hsl(var(--background) / 0.55)" }}
+            >
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
+              <div className="absolute -left-20 top-8 h-48 w-48 rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
+              <div className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-info/8 blur-[110px] pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
+                  <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Receita Líquida do Período</p>
+                  <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
+                </div>
+
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                  <div>
+                    <div className="flex items-end gap-5 mb-3">
+                      <motion.span
+                        className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1),0_4px_24px_hsl(var(--background)/0.5)]"
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                      >
+                        {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
+                      </motion.span>
+                      {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
+                    </div>
+
+                    <p className="max-w-2xl text-[13px] leading-relaxed text-muted-foreground/55 font-display">
+                      Visão consolidada da sua operação com foco em receita líquida, velocidade de conversão e comportamento do período selecionado.
+                    </p>
                   </div>
-                  <span className="relative z-10">{chip.text}</span>
-                </motion.span>
-              ))}
-              {lastSaleText && (
-                <motion.span
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative inline-flex items-center gap-2.5 text-[11px] text-primary/70 font-display font-semibold rounded-full px-4 py-2 bg-primary/[0.06] backdrop-blur-2xl border border-primary/15 overflow-hidden"
-                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--primary) / 0.08), 0 0 16px -4px hsl(var(--primary) / 0.12)" }}
-                >
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
-                    <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
-                  </span>
-                  <span className="relative z-10">última {lastSaleText}</span>
-                </motion.span>
-              )}
-            </div>
-          </motion.div>
+
+                  <div className="grid grid-cols-2 gap-3 self-start lg:w-[270px]">
+                    {[
+                      { label: "Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), tone: "destructive" as AccentTone, icon: Percent },
+                      { label: "Clientes", value: hidden ? HIDE : String(m.uniqueCustomers), tone: "info" as AccentTone, icon: Users },
+                      { label: "PIX", value: hidden ? HIDE : fmtCompact(m.pixRev), tone: "success" as AccentTone, icon: Smartphone },
+                      { label: "Cartão", value: hidden ? HIDE : fmtCompact(m.cardRev), tone: "primary" as AccentTone, icon: CreditCard },
+                    ].map((mini) => {
+                      const accent = ACCENT_STYLES[mini.tone];
+                      return (
+                        <div
+                          key={mini.label}
+                          className="relative overflow-hidden rounded-2xl border border-border/12 bg-background/25 px-3.5 py-3 backdrop-blur-xl"
+                          style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--foreground) / 0.03), ${accent.glowShadow}` }}
+                        >
+                          <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
+                          <div className="relative z-10">
+                            <div className="mb-3 flex items-center justify-between gap-2">
+                              <span className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/45">{mini.label}</span>
+                              <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>
+                                <mini.icon className="h-3.5 w-3.5" />
+                              </div>
+                            </div>
+                            <div className={cn("text-[16px] font-heading font-black tabular-nums tracking-tight", accent.softText)}>{mini.value}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mt-8 flex flex-wrap items-center gap-2">
+                  {[
+                    { icon: CalendarDays, text: periodLabel, accent: "primary" as AccentTone },
+                    { icon: Check, text: `${m.approved.length} aprovadas`, accent: "success" as AccentTone },
+                    { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, accent: "warning" as AccentTone },
+                  ].map((chip, i) => {
+                    const accent = ACCENT_STYLES[chip.accent];
+                    return (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ delay: 0.4 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative inline-flex items-center gap-2 text-[11px] font-display font-semibold rounded-full px-4 py-2 overflow-hidden transition-all duration-300 cursor-default group border border-border/15 bg-card/50 backdrop-blur-2xl hover:border-primary/25 hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)]"
+                        style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--foreground) / 0.04), ${accent.glowShadow}` }}
+                      >
+                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+                        <div className={cn("h-5 w-5 rounded-full flex items-center justify-center border", accent.iconWrap)}>
+                          <chip.icon className="h-2.5 w-2.5" />
+                        </div>
+                        <span className={cn("relative z-10", accent.softText)}>{chip.text}</span>
+                      </motion.span>
+                    );
+                  })}
+                  {lastSaleText && (
+                    <motion.span
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                      className="relative inline-flex items-center gap-2.5 text-[11px] font-display font-semibold rounded-full px-4 py-2 border overflow-hidden border-primary/15 bg-primary/[0.06] text-primary/80 backdrop-blur-2xl"
+                      style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--primary) / 0.08), ${ACCENT_STYLES.primary.glowShadow}` }}
+                    >
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+                        <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                      </span>
+                      <span className="relative z-10">última {lastSaleText}</span>
+                    </motion.span>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="relative overflow-hidden rounded-[30px] border border-border/15 bg-card/50 p-5 backdrop-blur-2xl"
+              style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 10px 40px -16px hsl(var(--background) / 0.5)" }}
+            >
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
+              <div className="absolute -right-10 top-0 h-40 w-40 rounded-full bg-warning/10 blur-[90px] pointer-events-none" />
+              <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-primary/10 blur-[90px] pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="mb-5 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40">Command Center</p>
+                    <h3 className="mt-2 text-xl font-heading font-black tracking-tight text-foreground">Snapshot Executivo</h3>
+                  </div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary glow-primary">
+                    <Radar className="h-5 w-5" />
+                  </div>
+                </div>
+
+                <div className="space-y-3.5">
+                  {[
+                    {
+                      label: "Método dominante",
+                      value: dominantMethod.label,
+                      helper: hidden ? HIDE : `${fmtCompact(dominantMethod.value)} · ${dominantMethod.count}x`,
+                      tone: dominantMethod.label === "PIX" ? "success" : dominantMethod.label === "Cartão" ? "info" : "warning",
+                      icon: dominantMethod.label === "PIX" ? Smartphone : dominantMethod.label === "Cartão" ? CreditCard : FileText,
+                    },
+                    {
+                      label: "Taxa de aprovação",
+                      value: `${m.conversion.toFixed(1)}%`,
+                      helper: `${m.approved.length} vendas concluídas`,
+                      tone: m.conversion >= 80 ? "success" : m.conversion >= 50 ? "warning" : "destructive",
+                      icon: Target,
+                    },
+                    {
+                      label: "Pico operacional",
+                      value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
+                      helper: peakHour !== null ? `${rawPeakSales} vendas na hora mais quente` : "Sem tráfego relevante no período",
+                      tone: "primary",
+                      icon: Flame,
+                    },
+                  ].map((item) => {
+                    const accent = ACCENT_STYLES[item.tone as AccentTone];
+                    return (
+                      <div
+                        key={item.label}
+                        className="relative overflow-hidden rounded-2xl border border-border/12 bg-background/25 p-4"
+                        style={{ boxShadow: `inset 0 1px 0 0 hsl(var(--foreground) / 0.03), ${accent.glowShadow}` }}
+                      >
+                        <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
+                        <div className="relative z-10 flex items-start gap-3">
+                          <div className={cn("mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border", accent.iconWrap)}>
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40">{item.label}</p>
+                            <div className={cn("mt-2 text-[26px] font-heading font-black leading-none tracking-tight", accent.text)}>{item.value}</div>
+                            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/55 font-display">{item.helper}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </div>
 
           {/* Executive Strip — Ultra-Premium glassmorphism cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
                 label: "Taxa de Aprovação",
