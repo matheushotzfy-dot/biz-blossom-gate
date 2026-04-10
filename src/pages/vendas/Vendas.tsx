@@ -874,7 +874,7 @@ export default function Vendas() {
                       "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
                       !isCustom && selectedPeriod.label === opt.label
                         ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground/35 hover:text-foreground/70"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {opt.label}
@@ -885,7 +885,7 @@ export default function Vendas() {
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
-                    isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                    isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/30 text-muted-foreground hover:text-foreground hover:border-border/50"
                   )}>
                     <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
@@ -895,7 +895,7 @@ export default function Vendas() {
                     </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-card p-0 shadow-2xl">
                   <Calendar
                     mode="range"
                     selected={customRange}
@@ -916,12 +916,12 @@ export default function Vendas() {
                   />
                 </PopoverContent>
               </Popover>
-              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/30", hidden ? "text-primary bg-primary/8" : "text-muted-foreground hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
                 {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
               <button
                 onClick={() => setShowExportDialog(true)}
-                className="h-8 rounded-full border border-border/10 px-3.5 text-[10px] font-heading text-muted-foreground/30 hover:text-foreground hover:border-border/20 transition-all active:scale-[0.97] inline-flex items-center gap-1.5"
+                className="h-8 rounded-full border border-border/30 px-3.5 text-[10px] font-heading text-muted-foreground hover:text-foreground hover:border-border/50 transition-all active:scale-[0.97] inline-flex items-center gap-1.5"
               >
                 <Download className="h-3 w-3" />
                 Exportar
