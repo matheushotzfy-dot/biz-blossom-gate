@@ -897,93 +897,105 @@ export default function Vendas() {
               </motion.span>
               {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
             </div>
-            <div className="flex flex-wrap items-center gap-2.5 mt-6">
+            <div className="flex flex-wrap items-center gap-2 mt-8">
               {[
-                { icon: CalendarDays, text: periodLabel },
-                { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
-                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}` },
+                { icon: CalendarDays, text: periodLabel, accent: "primary" },
+                { icon: Check, text: `${m.approved.length} aprovadas`, accent: "success" },
+                { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, accent: "warning" },
               ].map((chip, i) => (
                 <motion.span
                   key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.08 }}
-                  className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.4 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className={cn(
+                    "relative inline-flex items-center gap-2 text-[11px] font-display font-semibold rounded-full px-4 py-2 overflow-hidden transition-all duration-300 cursor-default group",
+                    "bg-card/50 backdrop-blur-2xl border border-border/15",
+                    "hover:border-primary/25 hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)]",
+                    `text-${chip.accent}/80`
+                  )}
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), 0 2px 8px -2px hsl(var(--background) / 0.3)" }}
                 >
-                  <chip.icon className={cn("h-3 w-3", chip.iconColor)} /> {chip.text}
+                  {/* Inner shine */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+                  <div className={cn("h-5 w-5 rounded-full flex items-center justify-center", `bg-${chip.accent}/10 border border-${chip.accent}/15`)}>
+                    <chip.icon className="h-2.5 w-2.5" />
+                  </div>
+                  <span className="relative z-10">{chip.text}</span>
                 </motion.span>
               ))}
               {lastSaleText && (
                 <motion.span
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.65 }}
-                  className="inline-flex items-center gap-2 text-[11px] text-muted-foreground/35 font-display glass-panel rounded-full px-3.5 py-1.5"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative inline-flex items-center gap-2.5 text-[11px] text-primary/70 font-display font-semibold rounded-full px-4 py-2 bg-primary/[0.06] backdrop-blur-2xl border border-primary/15 overflow-hidden"
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--primary) / 0.08), 0 0 16px -4px hsl(var(--primary) / 0.12)" }}
                 >
-                  <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" /></span>
-                  última {lastSaleText}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+                    <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                  </span>
+                  <span className="relative z-10">última {lastSaleText}</span>
                 </motion.span>
               )}
             </div>
           </motion.div>
 
-          {/* Executive Strip — Premium glassmorphism cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Executive Strip — Ultra-Premium glassmorphism cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
                 label: "Taxa de Aprovação",
                 value: hidden ? HIDE : `${m.conversion.toFixed(1)}%`,
                 sub: `${m.approved.length} de ${dateFiltered.length}`,
-                iconGradient: "from-red-500/90 to-orange-400/90",
-                iconGlow: "shadow-[0_0_18px_rgba(239,68,68,0.25)]",
-                valueColor: "text-foreground",
+                gradient: "from-emerald-500/90 to-teal-400/90",
+                glowShadow: "shadow-[0_0_24px_rgba(16,185,129,0.3)]",
+                valueColor: m.conversion >= 80 ? "text-success" : m.conversion >= 50 ? "text-warning" : "text-destructive",
                 icon: Target,
                 ring: { value: m.conversion, max: 100, ringColor: m.conversion >= 80 ? "hsl(var(--success))" : m.conversion >= 50 ? "hsl(var(--warning))" : "hsl(var(--destructive))" },
+                accentColor: "success",
               },
               {
                 label: "Ticket Médio",
                 value: hidden ? HIDE : fmt(m.avgTicket),
                 sub: <DeltaBadge cur={m.avgTicket} prev={p.avgTicket} />,
-                iconGradient: "from-emerald-500/90 to-teal-400/90",
-                iconGlow: "shadow-[0_0_18px_rgba(16,185,129,0.25)]",
+                gradient: "from-emerald-500/90 to-teal-400/90",
+                glowShadow: "shadow-[0_0_24px_rgba(16,185,129,0.25)]",
                 valueColor: "text-foreground",
                 icon: Receipt,
+                accentColor: "primary",
               },
               {
                 label: "Método Líder",
                 value: dominantMethod.label,
                 sub: hidden ? HIDE : fmtCompact(dominantMethod.value),
-                iconGradient: "from-amber-500/90 to-yellow-400/90",
-                iconGlow: "shadow-[0_0_18px_rgba(245,158,11,0.25)]",
-                valueColor: "text-amber-400",
+                gradient: "from-amber-500/90 to-yellow-400/90",
+                glowShadow: "shadow-[0_0_24px_rgba(245,158,11,0.25)]",
+                valueColor: "text-warning",
                 icon: Crown,
+                accentColor: "warning",
               },
               {
                 label: "Pico de Vendas",
                 value: peakHour !== null ? `${String(peakHour).padStart(2, "0")}:00` : "—",
                 sub: peakHour !== null ? `${rawPeakSales} vendas` : "sem dados",
-                iconGradient: "from-violet-500/90 to-purple-400/90",
-                iconGlow: "shadow-[0_0_18px_rgba(139,92,246,0.25)]",
-                valueColor: "text-foreground",
+                gradient: "from-violet-500/90 to-purple-400/90",
+                glowShadow: "shadow-[0_0_24px_rgba(139,92,246,0.25)]",
+                valueColor: "text-info",
                 icon: Clock,
+                accentColor: "info",
               },
             ].map((item, idx) => {
-              const mirrored = idx % 2 === 1;
               const iconEl = item.ring ? (
                 <div className="relative floating">
                   <ProgressRing value={item.ring.value} max={item.ring.max} size={52} strokeWidth={3} color={item.ring.ringColor} />
                   <item.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 </div>
               ) : (
-                <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-gradient-to-br", item.iconGradient, item.iconGlow)}>
+                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-gradient-to-br", item.gradient, item.glowShadow)}>
                   <item.icon className="h-5 w-5 text-foreground" />
-                </div>
-              );
-              const textEl = (
-                <div className={mirrored ? "text-right" : ""}>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40 mb-2.5">{item.label}</p>
-                  <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none", item.valueColor)}>{item.value}</p>
-                  <div className="mt-2 text-[10px] text-muted-foreground/30 font-mono">{item.sub}</div>
                 </div>
               );
               return (
@@ -992,15 +1004,22 @@ export default function Vendas() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative rounded-2xl border border-border/20 bg-card/60 backdrop-blur-2xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.15)]"
-                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.03), 0 4px 24px -8px hsl(var(--background) / 0.4)" }}
+                  className="group relative rounded-2xl border border-border/15 bg-card/50 backdrop-blur-2xl p-5 overflow-hidden transition-all duration-300 hover:border-primary/25 hover:shadow-[0_8px_48px_-12px_hsl(var(--primary)/0.18)]"
+                  style={{ boxShadow: "inset 0 1px 0 0 hsl(var(--foreground) / 0.04), inset 0 -1px 0 0 hsl(var(--background) / 0.1), 0 4px 24px -8px hsl(var(--background) / 0.4)" }}
                 >
+                  {/* Left accent bar */}
+                  <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", `bg-${item.accentColor}`)} style={{ boxShadow: `0 0 12px hsl(var(--${item.accentColor})/0.35)` }} />
                   {/* Top shine line */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent z-20" />
-                  {/* Inner glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
-                  <div className="relative z-10 flex items-start justify-between">
-                    {mirrored ? <>{iconEl}{textEl}</> : <>{textEl}{iconEl}</>}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.07] to-transparent z-20" />
+                  {/* Radial inner glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-primary/[0.015] pointer-events-none" />
+                  <div className="relative z-10 pl-2">
+                    <div className="flex items-start justify-between mb-4">
+                      <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/40">{item.label}</p>
+                      {iconEl}
+                    </div>
+                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-tight leading-none mb-2", item.valueColor)}>{item.value}</p>
+                    <div className="text-[10px] text-muted-foreground/30 font-mono">{item.sub}</div>
                   </div>
                 </motion.div>
               );
