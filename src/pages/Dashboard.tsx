@@ -245,9 +245,11 @@ export default function Dashboard() {
 
     const _chargebackRate = filteredTx.length > 0 ? (_chargebacks.length / filteredTx.length) * 100 : 0;
 
+    const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
+
     return {
       approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
-      revenue: _revenue, conversion: _conversion,
+      revenue: _revenue, conversion: _conversion, uniqueCustomers: _uniqueCustomers,
       pixConversion: _pixConversion, cardConversion: _cardConversion, chargebackRate: _chargebackRate,
       pixRevenue: _pixRevenue, cardRevenue: _cardRevenue,
       pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
