@@ -621,7 +621,10 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/30 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/30 bg-card/95 p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/8 blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 h-32 w-32 rounded-full bg-info/6 blur-[80px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -637,7 +640,7 @@ export default function Dashboard() {
                   if (!active || !payload?.length) return null;
                   const value = payload[0].value as number;
                   return (
-                    <div className="rounded-xl border border-primary/20 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl shadow-primary/10">
+                    <div className="rounded-xl border border-primary/25 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl shadow-primary/15">
                       <p className="text-[10px] font-heading uppercase tracking-[0.15em] text-muted-foreground mb-1">{label}</p>
                       <p className="text-lg font-heading font-black text-primary tabular-nums tracking-tight">
                         R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -653,8 +656,10 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl border border-border/30 bg-card/95 p-4 md:p-5 overflow-hidden">
-            <div className="grid grid-cols-1 gap-2">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-border/30 bg-card/95 p-4 md:p-5 overflow-hidden">
+            <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-primary/6 blur-[60px] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+            <div className="grid grid-cols-1 gap-2 relative z-10">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
               <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
