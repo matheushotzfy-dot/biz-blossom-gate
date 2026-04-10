@@ -155,20 +155,16 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
 
   return (
     <button type="button" className="mt-5 block w-full text-left group/rev" onClick={onOpenRewards}>
-      <div className="relative overflow-hidden rounded-2xl border border-sidebar-primary/20 bg-gradient-to-br from-sidebar-primary/[0.08] via-sidebar/95 to-sidebar-accent/30 p-4 shadow-xl shadow-sidebar-primary/5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-sidebar-primary/35 hover:shadow-sidebar-primary/10">
-        {/* Ambient glow */}
-        <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-sidebar-primary/10 blur-[50px] pointer-events-none group-hover/rev:bg-sidebar-primary/15 transition-colors duration-500" />
-        <div className="absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-sidebar-primary/5 blur-[40px] pointer-events-none" />
-        {/* Noise texture */}
-        <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{ backgroundImage: "radial-gradient(hsl(var(--sidebar-foreground)) 0.5px, transparent 0.5px)", backgroundSize: "12px 12px" }} />
+      <div className="relative overflow-hidden rounded-2xl border border-sidebar-border/70 bg-gradient-to-br from-sidebar-accent/90 via-sidebar-background to-sidebar-accent/70 p-4 shadow-lg shadow-black/20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-sidebar-primary/20">
+        <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-sidebar-primary/6 blur-[50px] pointer-events-none group-hover/rev:bg-sidebar-primary/10 transition-colors duration-500" />
+        <div className="absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-sidebar-primary/4 blur-[40px] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.012] pointer-events-none" style={{ backgroundImage: "radial-gradient(hsl(var(--sidebar-foreground)) 0.5px, transparent 0.5px)", backgroundSize: "12px 12px" }} />
 
         <div className="relative z-10">
-          {/* Header row with ring */}
           <div className="flex items-center gap-3 mb-3">
-            {/* Mini completion ring */}
             <div className="relative h-11 w-11 shrink-0">
               <svg className="h-11 w-11 -rotate-90" viewBox="0 0 44 44">
-                <circle cx="22" cy="22" r="18" fill="none" stroke="hsl(var(--sidebar-border) / 0.15)" strokeWidth="2.5" />
+                <circle cx="22" cy="22" r="18" fill="none" stroke="hsl(var(--sidebar-border) / 0.2)" strokeWidth="2.5" />
                 <circle
                   cx="22" cy="22" r="18" fill="none"
                   stroke="hsl(var(--sidebar-primary))"
@@ -176,7 +172,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
                   strokeDasharray={circ}
                   strokeDashoffset={offset}
                   className="transition-[stroke-dashoffset] duration-1000 ease-out"
-                  style={{ filter: "drop-shadow(0 0 4px hsl(var(--sidebar-primary) / 0.4))" }}
+                  style={{ filter: "drop-shadow(0 0 4px hsl(var(--sidebar-primary) / 0.25))" }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
@@ -185,30 +181,27 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-sidebar-foreground/40">Faturamento Total</p>
+              <p className="text-[9px] font-display font-bold uppercase tracking-[0.2em] text-sidebar-foreground/45">Faturamento Total</p>
               <p className="mt-0.5 text-[17px] font-display font-black leading-none tracking-[-0.03em] text-sidebar-accent-foreground tabular-nums">
                 {formatRevenue(revenue)}
               </p>
             </div>
           </div>
 
-          {/* Milestone labels */}
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-display font-bold text-sidebar-primary tabular-nums">{milestone.current.label}</span>
-            <span className="text-[9px] font-display font-bold text-sidebar-foreground/30">Meta: {milestone.next.label}</span>
+            <span className="text-[10px] font-display font-bold text-sidebar-primary/90 tabular-nums">{milestone.current.label}</span>
+            <span className="text-[9px] font-display font-bold text-sidebar-foreground/35">Meta: {milestone.next.label}</span>
           </div>
 
-          {/* Progress bar */}
-          <div className="relative h-2 rounded-full bg-sidebar-border/20 overflow-hidden ring-1 ring-sidebar-border/10">
+          <div className="relative h-2 rounded-full bg-sidebar-border/25 overflow-hidden ring-1 ring-sidebar-border/15">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sidebar-primary via-sidebar-primary/80 to-sidebar-primary/60 transition-[width] duration-1000 ease-out relative"
-              style={{ width: `${pct}%`, boxShadow: "0 0 8px hsl(var(--sidebar-primary) / 0.35)" }}
+              className="h-full rounded-full bg-gradient-to-r from-sidebar-primary via-sidebar-primary/85 to-sidebar-primary/70 transition-[width] duration-1000 ease-out relative"
+              style={{ width: `${pct}%`, boxShadow: "0 0 6px hsl(var(--sidebar-primary) / 0.24)" }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer" />
             </div>
           </div>
 
-          {/* Bottom row */}
           <div className="flex items-center justify-between mt-2.5">
             <p className="text-[11px] font-display font-black text-sidebar-primary tabular-nums">{pct.toFixed(0)}%</p>
             <span className="text-[9px] font-display font-bold text-sidebar-primary/60 flex items-center gap-1 group-hover/rev:text-sidebar-primary transition-colors">
