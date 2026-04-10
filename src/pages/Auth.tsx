@@ -298,7 +298,7 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="h-screen overflow-hidden bg-background text-foreground">
       <div className="fixed inset-0 dot-grid opacity-20 pointer-events-none" />
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
@@ -306,10 +306,10 @@ export default function Auth() {
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
       </div>
 
-      <div className="relative lg:grid lg:grid-cols-[70%_30%]">
+      <div className="relative h-full lg:grid lg:grid-cols-[70%_30%]">
         {/* ═══ LEFT: Auth Panel ═══ */}
-        <div className="relative border-r border-border/40 bg-background/80 backdrop-blur-xl">
-          <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-5 backdrop-blur-xl md:px-8">
+        <div className="relative flex flex-col h-full border-r border-border/40 bg-background/80 backdrop-blur-xl overflow-hidden">
+          <div className="shrink-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-5 backdrop-blur-xl md:px-8">
             <a href="/" className="flex items-center gap-3 hover:opacity-90">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/12 text-primary glow-primary">
                 <Rocket className="h-4.5 w-4.5" />
