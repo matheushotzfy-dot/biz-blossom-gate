@@ -238,21 +238,24 @@ function GlowCard({ children, className, delay = 0 }: { children: React.ReactNod
 
 /* ─── KPI Tile ─── */
 function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "primary", delay = 0, formatter = fmt }: {
-  label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: string; delay?: number; formatter?: (v: number) => string;
+  label: string; value: number; icon: any; delta?: { cur: number; prev: number }; sparkData?: number[]; hidden: boolean; color?: AccentTone; delay?: number; formatter?: (v: number) => string;
 }) {
+  const accent = ACCENT_STYLES[color as AccentTone] ?? ACCENT_STYLES.primary;
+
   return (
-    <GlowCard delay={delay} className="p-5">
-      <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-full", `bg-${color}`)} style={{ boxShadow: `0 0 10px hsl(var(--${color})/0.3)` }} />
-      <div className="flex items-start justify-between mb-3.5 pl-3">
-        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border backdrop-blur-sm transition-transform duration-300 group-hover:scale-110", `bg-${color}/8 border-${color}/15 text-${color}`)}>
-          <Icon className="h-4.5 w-4.5" />
+    <GlowCard delay={delay} className="p-5 sm:p-6 min-h-[184px]">
+      <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", accent.rail)} style={{ boxShadow: accent.glowShadow }} />
+      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80 pointer-events-none", accent.glowGradient)} />
+      <div className="relative z-10 pl-3">
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <div className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-0.5", accent.iconWrap)}>
+            <Icon className="h-5 w-5" />
+          </div>
+          {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
         </div>
-        {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
-      </div>
-      <div className="pl-3">
-        <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/45 mb-2">{label}</p>
-        <div className="flex items-end gap-2.5">
-          <span className="text-[22px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">
+        <p className="text-[9px] font-heading uppercase tracking-[0.24em] text-muted-foreground/40 mb-2.5">{label}</p>
+        <div className="flex flex-wrap items-end gap-2.5">
+          <span className="text-[24px] sm:text-[28px] font-heading font-black tabular-nums tracking-tight text-foreground leading-none">
             {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
           </span>
           {delta && !hidden && <DeltaBadge cur={delta.cur} prev={delta.prev} />}
