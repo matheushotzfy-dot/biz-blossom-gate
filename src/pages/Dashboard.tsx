@@ -674,25 +674,27 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", ringColor: "ring-amber-500/25", valueColor: "text-amber-400", dotColor: "bg-amber-400", borderAccent: "border-l-amber-500/40" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("group relative rounded-2xl border-l-[3px] p-4 md:p-5 overflow-hidden transition-all duration-300 hover:translate-y-[-2px]", item.borderAccent)}
-                style={{ background: "linear-gradient(160deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.75) 100%)", border: undefined, boxShadow: "0 1px 0 0 rgba(255,255,255,0.02) inset, 0 8px 32px -8px rgba(0,0,0,0.5), 0 2px 8px -2px rgba(0,0,0,0.2)" }}>
-                {/* Ambient glow */}
-                <div className={cn("absolute -top-14 -right-14 w-32 h-32 rounded-full blur-[60px] opacity-[0.05] group-hover:opacity-[0.10] transition-opacity duration-700 bg-gradient-to-br", item.iconGradient)} />
+                className={cn("group relative rounded-2xl border-l-[3px] p-4 md:p-5 overflow-hidden transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl", item.borderAccent)}
+                style={{ background: "linear-gradient(160deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.75) 100%)", boxShadow: "0 1px 0 0 rgba(255,255,255,0.03) inset, 0 8px 32px -8px rgba(0,0,0,0.5), 0 2px 8px -2px rgba(0,0,0,0.2)" }}>
+                {/* Ambient glow — stronger */}
+                <div className={cn("absolute -top-14 -right-14 w-36 h-36 rounded-full blur-[60px] opacity-[0.10] group-hover:opacity-[0.20] transition-opacity duration-700 bg-gradient-to-br", item.iconGradient)} />
                 {/* Top shine */}
-                <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+                <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                {/* Bottom accent glow */}
+                <div className={cn("absolute -bottom-8 left-1/2 -translate-x-1/2 w-24 h-16 rounded-full blur-[40px] opacity-[0.06] bg-gradient-to-br", item.iconGradient)} />
 
                 <div className="relative z-10">
                   {/* Header */}
                   <div className="flex items-center gap-2.5 mb-5">
                     <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 shadow-lg", item.iconGradient, item.ringColor)}
-                      style={{ boxShadow: "0 4px 12px -4px rgba(0,0,0,0.4)" }}>
+                      style={{ boxShadow: "0 4px 16px -4px rgba(0,0,0,0.5)" }}>
                       {item.isPix ? (
                         <PixLogoMark className="h-[18px] w-[18px] drop-shadow-sm" variant="white" />
                       ) : (
                         item.icon && <item.icon className="h-4 w-4 text-white drop-shadow-sm" />
                       )}
                     </div>
-                    <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.14em] text-muted-foreground/60 leading-tight">{item.label}</span>
+                    <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.14em] text-muted-foreground/65 leading-tight">{item.label}</span>
                   </div>
 
                   {/* Value */}
@@ -703,11 +705,11 @@ export default function Dashboard() {
 
                   {/* Meta */}
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] px-2.5 py-0.5">
-                      <div className={cn("h-1.5 w-1.5 rounded-full animate-pulse", item.dotColor)} />
+                    <div className="flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-0.5 border border-white/[0.04]">
+                      <div className={cn("h-1.5 w-1.5 rounded-full animate-pulse shadow-[0_0_8px_currentColor]", item.dotColor)} />
                       <span className={cn("text-[11px] font-numbers font-bold tabular-nums tracking-tight", item.valueColor)}>{item.helper}</span>
                     </div>
-                    {item.sub && <span className="text-[10px] text-muted-foreground/30 font-numbers tracking-wide">{item.sub}</span>}
+                    {item.sub && <span className="text-[10px] text-muted-foreground/35 font-numbers tracking-wide">{item.sub}</span>}
                   </div>
                 </div>
               </motion.div>
