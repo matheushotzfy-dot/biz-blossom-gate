@@ -952,13 +952,13 @@ export default function Vendas() {
                 { icon: Receipt, label: `ticket ${hidden ? HIDE : fmt(m.avgTicket)}`, color: "text-primary", border: "border-primary/20", bg: "bg-primary/5" },
                 { icon: DollarSign, label: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 rounded-full border ${chip.border} ${chip.bg} backdrop-blur-sm px-3.5 py-1.5 transition-colors hover:border-primary/30`}>
+                <span key={i} className={`inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-1.5`}>
                   <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
                   {chip.label}
                 </span>
               ))}
               {lastSaleText && (
-                <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-primary rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm px-3.5 py-1.5">
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-primary rounded-full border border-primary/20 bg-primary/8 px-3.5 py-1.5">
                   <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                   última venda {lastSaleText}
                 </span>
@@ -966,27 +966,23 @@ export default function Vendas() {
             </div>
           </motion.div>
 
-          {/* Executive KPI strip — Ultra Glass (Dashboard style) */}
+          {/* Executive KPI strip — Flat Professional */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {([
-              { label: "Faturamento Bruto", numValue: m.totalGross, formatter: fmt, icon: Banknote, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
-              { label: "Vendas Aprovadas", numValue: m.approved.length, formatter: (v: number) => String(Math.round(v)), icon: ShoppingCart, valueColor: "text-success", iconBg: "bg-success/10", iconText: "text-success", iconBorder: "border-success/20", glowColor: "bg-success" },
-              { label: "Taxa Conversão", numValue: m.conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-info/10", iconText: "text-info", iconBorder: "border-info/20", glowColor: "bg-info" },
-              { label: "Clientes Únicos", numValue: m.uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
+              { label: "Faturamento Bruto", numValue: m.totalGross, formatter: fmt, icon: Banknote, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", topBorder: "border-t-primary" },
+              { label: "Vendas Aprovadas", numValue: m.approved.length, formatter: (v: number) => String(Math.round(v)), icon: ShoppingCart, valueColor: "text-success", iconBg: "bg-success/10", iconText: "text-success", iconBorder: "border-success/20", topBorder: "border-t-success" },
+              { label: "Taxa Conversão", numValue: m.conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-info/10", iconText: "text-info", iconBorder: "border-info/20", topBorder: "border-t-info" },
+              { label: "Clientes Únicos", numValue: m.uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", topBorder: "border-t-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 glass-panel border border-border/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5">
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
-                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]", item.glowColor)} />
-                
-                <div className="relative z-10 flex items-start justify-between">
+                className={cn("rounded-2xl p-5 border border-border/40 bg-muted/5 border-t-2", item.topBorder)}>
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 mb-3">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{hidden ? HIDE : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className="text-[10px] font-heading font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">{item.label}</p>
+                    <p className={cn("text-[24px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{hidden ? HIDE : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-sm", item.iconBg, item.iconBorder, item.iconText)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", item.iconBg, item.iconBorder, item.iconText)}>
+                    <item.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
               </motion.div>
