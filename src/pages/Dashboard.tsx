@@ -412,21 +412,19 @@ export default function Dashboard() {
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-28 left-[4%] h-80 w-80 rounded-full bg-primary/14 blur-[140px]" />
-        <div className="absolute top-[24%] right-[-6%] h-[26rem] w-[26rem] rounded-full bg-info/10 blur-[170px]" />
-        <div className="absolute bottom-[8%] left-[28%] h-72 w-72 rounded-full bg-success/10 blur-[150px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
+        <div className="absolute inset-0 ambient-grid opacity-[0.12] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.5),transparent_88%)]" />
+        <div className="absolute inset-x-[10%] top-8 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
+        <div className="absolute inset-x-[16%] bottom-8 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
       </div>
 
-      {/* ─── GREEN FIRE BORDER EFFECT ─── */}
+      {/* ─── SCALE MODE FRAME ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="absolute rounded-full bg-primary/60" style={{ width: `${Math.random() * 6 + 2}px`, height: `${Math.random() * 6 + 2}px`, left: `${Math.random() * 100}%`, bottom: `${Math.random() * 30}%`, animation: `fireParticle ${1 + Math.random() * 2}s ease-out ${Math.random() * 0.5}s forwards` }} />
-          ))}
+          <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <div className="absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="absolute inset-y-8 left-0 w-px bg-gradient-to-b from-transparent via-primary/35 to-transparent" />
+          <div className="absolute inset-y-8 right-0 w-px bg-gradient-to-b from-transparent via-primary/35 to-transparent" />
         </div>
       )}
 
@@ -482,68 +480,62 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 overflow-hidden mesh-gradient-hero noise-overlay scan-line animated-border glass-shine"
+        className="relative mb-10 overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8 lg:p-10"
       >
-        <div className="absolute inset-0 dot-grid opacity-30 pointer-events-none z-0" />
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-44 -left-32 h-[30rem] w-[30rem] rounded-full bg-primary/22 blur-[165px]" />
-          <div className="absolute -bottom-32 -right-28 h-[26rem] w-[26rem] rounded-full bg-info/16 blur-[145px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-[82%] rounded-full bg-accent/50 blur-[175px]" />
-          <div className="absolute top-0 right-[18%] h-72 w-72 rounded-full bg-primary/18 blur-[125px]" />
-          <div className="absolute bottom-[16%] left-[28%] h-72 w-72 rounded-full bg-success/14 blur-[135px]" />
-          <div className="absolute top-[32%] right-[28%] h-64 w-64 rounded-full bg-info/14 blur-[115px]" />
-          <div className="absolute -top-6 left-1/2 h-52 w-[88%] -translate-x-1/2 rounded-full bg-primary/14 blur-[185px]" />
-          <div className="absolute bottom-0 left-0 h-44 w-[62%] rounded-full bg-success/12 blur-[150px]" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/18 via-transparent to-info/14 pointer-events-none z-0" />
+        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.08]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-secondary/35 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
         <div className="relative z-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
-            <div className="flex items-center gap-3">
-              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl glass-panel glow-primary">
-                  <BarChart3 className="h-4.5 w-4.5 text-primary" />
+          <div className="mb-8 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
+                  <BarChart3 className="h-4.5 w-4.5" />
                 </div>
-                <span className="text-[12px] font-heading uppercase tracking-[0.18em] text-foreground/85">Dashboard</span>
+                <span className="text-[11px] font-heading uppercase tracking-[0.18em] text-foreground/80">Dashboard</span>
               </motion.div>
               {nickname && (
-                <div className="inline-flex items-center gap-2 rounded-full glass-panel px-3.5 py-1.5">
-                  <Crown className="h-3 w-3 text-primary/85" />
-                  <span className="text-[10px] font-heading text-foreground/80">{nickname}</span>
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
+                  <Crown className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-[11px] font-semibold text-foreground/80">{nickname}</span>
                 </div>
               )}
-              <div className="inline-flex items-center gap-2 rounded-full glass-panel px-3.5 py-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-20" />
-                  <span className="relative h-2 w-2 rounded-full bg-success" />
-                </span>
-                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-foreground/60">Tempo Real</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
+                <span className="h-2 w-2 rounded-full bg-success" />
+                <span className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Em tempo real</span>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
               {scaleModeUnlocked ? (
-                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "glass-panel text-foreground shadow-sm glow-primary" : "glass-panel text-foreground/70 hover:text-foreground hover:border-primary/25"}`}>
-                  {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
-                  <Flame className={`h-3.5 w-3.5 text-primary ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span className="leading-tight">Escala</span>
+                <button
+                  onClick={activateScaleMode}
+                  className={cn(
+                    "inline-flex h-9 items-center gap-2 rounded-full border px-4 text-[11px] font-heading transition-colors active:scale-[0.97]",
+                    scaleMode
+                      ? "border-primary/30 bg-primary/10 text-foreground"
+                      : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:text-foreground"
+                  )}
+                >
+                  <Flame className={cn("h-3.5 w-3.5", scaleMode ? "text-primary" : "text-muted-foreground")} />
+                  <span className="leading-none">Escala</span>
                 </button>
               ) : (
-                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading glass-panel text-foreground/65 cursor-not-allowed">
-                  {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
-                  <Lock className="h-3.5 w-3.5 text-primary" />
-                  <span className="leading-tight">Escala</span>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                <div className="group relative inline-flex h-9 items-center gap-2 rounded-full border border-border/60 bg-background/75 px-4 text-[11px] font-heading text-muted-foreground cursor-not-allowed">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span className="leading-none">Escala</span>
+                  <div className="absolute top-full left-1/2 z-50 mt-3 w-60 -translate-x-1/2 rounded-xl border border-border/60 bg-card p-3 text-center shadow-lg opacity-0 transition-opacity pointer-events-none group-hover:opacity-100">
                     <p className="text-[11px] font-bold text-foreground mb-1">Modo Escala Bloqueado</p>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 em 24h.</p>
                   </div>
                 </div>
               )}
 
-              <div className="inline-flex items-center rounded-full glass-panel p-0.5">
+              <div className="inline-flex items-center rounded-full border border-border/60 bg-background/75 p-1 shadow-sm">
                 {PERIOD_PRESETS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground/70 hover:text-foreground/85 hover:bg-accent/40"
+                    className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-colors active:scale-[0.97]",
+                      !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/35"
                     )}>
                     {opt.label}
                   </button>
@@ -551,8 +543,8 @@ export default function Dashboard() {
               </div>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
-                    isCustom ? "glass-panel text-foreground glow-primary" : "glass-panel text-muted-foreground/70 hover:text-foreground hover:border-primary/20"
+                  <button className={cn("h-9 rounded-full border px-3.5 text-[10px] font-heading transition-colors active:scale-[0.97]",
+                    isCustom ? "border-primary/30 bg-primary/10 text-foreground" : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:text-foreground"
                   )}>
                     <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
@@ -562,63 +554,64 @@ export default function Dashboard() {
                     </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/60 bg-popover p-0 shadow-lg">
                   <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
-              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full glass-panel transition-all active:scale-[0.97]", privacy.hidden ? "text-primary glow-primary" : "text-muted-foreground/55 hover:text-foreground hover:border-primary/20")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={privacy.toggle} className={cn("flex h-9 w-9 items-center justify-center rounded-full border transition-colors active:scale-[0.97]", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
                 {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
-                {isCustom && customRange?.from
-                  ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-                  : `Receita — ${selectedPeriod.label}`}
-              </p>
-            </div>
-            <div className="flex items-end gap-5 mb-3">
-              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] glow-value">
-                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-              </span>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
+            <p className="mb-4 text-[11px] font-heading uppercase tracking-[0.18em] text-muted-foreground">
+              {isCustom && customRange?.from
+                ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                : `Receita — ${selectedPeriod.label}`}
+            </p>
+
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[88px]">
+                  {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+                </span>
+                <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+                  Visão consolidada das vendas, conversão e saldo do período selecionado, sem ruído visual.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
               {[
                 { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
                 { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
                 { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
                 { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-2 rounded-full glass-panel ${chip.border} ${chip.bg} px-3.5 py-1.5 text-[11px] font-semibold text-foreground/78 card-premium`}>
+                <span key={i} className={`inline-flex items-center gap-2 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-2 text-[11px] font-semibold text-foreground/80`}>
                   <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
                   {chip.label}
                 </span>
               ))}
+              </div>
             </div>
           </motion.div>
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", borderColor: "border-success/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--success)/0.4)]", iconBg: "bg-success/12", iconText: "text-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", borderColor: "border-info/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--info)/0.4)]", iconBg: "bg-info/12", iconText: "text-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentBorder: "border-t-success", iconBg: "bg-success/10", iconText: "text-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentBorder: "border-t-info", iconBg: "bg-info/10", iconText: "text-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-3xl border-2 p-5 transition-all duration-300 hover:scale-[1.02] glass-panel card-premium shimmer-sweep", item.borderColor, item.glowShadow)}
-                style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
-                <div className="absolute -top-14 right-0 h-24 w-24 rounded-full bg-primary/12 blur-[55px] pointer-events-none" />
-
+                className={cn("group relative overflow-hidden rounded-3xl border border-border/60 border-t-2 bg-background/80 p-5 shadow-sm transition-colors", item.accentBorder)}>
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
+                    <p className="text-[26px] font-heading font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border border-border/20 backdrop-blur-sm", item.iconBg, item.iconText)}>
+                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
@@ -632,18 +625,15 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-3xl glass-panel card-premium noise-overlay p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-xl">
-          <div className="absolute inset-0 dot-grid opacity-20 pointer-events-none" />
-          <div className="absolute -top-28 -left-28 h-64 w-64 rounded-full bg-primary/14 blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-info/12 blur-[100px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-[60%] rounded-full bg-success/10 blur-[130px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-6 min-h-[280px] relative overflow-hidden">
+          <div className="absolute inset-0 ambient-grid opacity-[0.05] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
@@ -653,29 +643,25 @@ export default function Dashboard() {
                   if (!active || !payload?.length) return null;
                   const value = payload[0].value as number;
                   return (
-                    <div className="rounded-xl border border-primary/25 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl shadow-primary/15">
+                    <div className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-lg">
                       <p className="text-[10px] font-heading uppercase tracking-[0.15em] text-muted-foreground mb-1">{label}</p>
-                      <p className="text-lg font-heading font-black text-primary tabular-nums tracking-tight">
+                      <p className="text-lg font-heading font-black text-foreground tabular-nums tracking-tight">
                         R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   );
                 }}
-                cursor={{ stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 1.5, strokeDasharray: "6 4" }}
+                cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
               />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
+              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.25} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl glass-panel card-premium noise-overlay p-4 md:p-5 relative overflow-hidden shadow-xl">
-            <div className="absolute inset-0 dot-grid opacity-20 pointer-events-none" />
-            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-primary/14 blur-[90px] pointer-events-none" />
-            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-info/10 blur-[70px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
-            <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-5">
+            <p className="mb-3 text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -686,35 +672,47 @@ export default function Dashboard() {
           {/* KPI tiles - clean */}
           <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-success/80 to-success/60", valueColor: "text-success", dotColor: "bg-success", accentBorder: "border-t-success" },
-              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-info/80 to-info/60", valueColor: "text-info", dotColor: "bg-info", accentBorder: "border-t-info" },
-              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-primary/80 to-primary/60", valueColor: "text-primary", dotColor: "bg-primary", accentBorder: "border-t-primary" },
-              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning/80 to-warning/60", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
+              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, tone: "success" as const, accentBorder: "border-t-success" },
+              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, tone: "info" as const, accentBorder: "border-t-info" },
+              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", tone: "primary" as const, accentBorder: "border-t-primary" },
+              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", tone: "warning" as const, accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-3xl border border-border/40 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-primary/25 relative overflow-hidden shadow-lg glass-panel card-premium", item.accentBorder)}>
-                <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-primary/12 blur-[70px] pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-info/8 blur-[50px] pointer-events-none" />
+              <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + idx * 0.05 }}
+                className={cn("rounded-3xl border border-border/60 border-t-2 bg-background/80 p-4 shadow-sm md:p-5", item.accentBorder)}>
+                {(() => {
+                  const tones: Record<typeof item.tone, { bg: string; text: string; dot: string }> = {
+                    primary: { bg: "bg-primary/10", text: "text-primary", dot: "bg-primary" },
+                    success: { bg: "bg-success/10", text: "text-success", dot: "bg-success" },
+                    info: { bg: "bg-info/10", text: "text-info", dot: "bg-info" },
+                    warning: { bg: "bg-warning/10", text: "text-warning", dot: "bg-warning" },
+                  };
+                  const tone = tones[item.tone];
+
+                  return (
+                    <>
                 <div className="flex items-center gap-2 mb-4">
-                  <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
+                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", tone.bg, tone.text)}>
                     {item.isPix ? (
                       <PixLogoMark className="h-4 w-4" />
                     ) : (
-                      item.icon && <item.icon className="h-3.5 w-3.5 text-primary-foreground" />
+                      item.icon && <item.icon className="h-3.5 w-3.5" />
                     )}
                   </div>
-                  <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.12em] text-muted-foreground/70">{item.label}</span>
+                  <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.12em] text-muted-foreground">{item.label}</span>
                 </div>
                 <p className="text-[24px] md:text-[28px] font-display font-black tabular-nums tracking-[-0.04em] text-foreground leading-none mb-2.5">
                   {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5">
-                    <div className={cn("h-1.5 w-1.5 rounded-full", item.dotColor)} />
-                    <span className={cn("text-[11px] font-bold tabular-nums", item.valueColor)}>{item.helper}</span>
+                    <div className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
+                    <span className={cn("text-[11px] font-bold tabular-nums", tone.text)}>{item.helper}</span>
                   </div>
-                  {item.sub && <span className="text-[10px] text-muted-foreground/50">{item.sub}</span>}
+                  {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
                 </div>
+                    </>
+                  );
+                })()}
               </motion.div>
             ))}
           </div>
@@ -726,17 +724,12 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl glass-panel card-premium noise-overlay p-4 md:p-5 flex flex-col relative overflow-hidden shadow-xl">
-          <div className="absolute inset-0 dot-grid opacity-20 pointer-events-none" />
-          <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-primary/12 blur-[110px] pointer-events-none" />
-          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-info/10 blur-[90px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-success/8 blur-[100px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-5 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <div className="h-8 w-8 rounded-xl glass-panel glow-primary flex items-center justify-center">
-              <Zap className="h-3.5 w-3.5 text-primary" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-secondary text-primary">
+              <Zap className="h-3.5 w-3.5" />
             </div>
-            <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold">Ações Rápidas</span>
+            <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Ações Rápidas</span>
           </div>
           
           <div className="grid grid-cols-2 gap-2 flex-1">
@@ -761,7 +754,7 @@ export default function Dashboard() {
               const c = colors[action.tone] || colors.primary;
               return (
                 <Link key={action.href} to={action.href}
-                  className={cn("group relative flex items-center gap-2.5 rounded-2xl ultra-glass glass-shine p-3 transition-all duration-200 row-glow card-premium hover:border-primary/20", c.hoverBg)}>
+                  className={cn("group relative flex items-center gap-2.5 rounded-2xl border border-border/50 bg-background/75 p-3 transition-colors duration-200 hover:border-border/70", c.hoverBg)}>
                   <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
                     <action.icon className="h-4 w-4" />
                   </div>
@@ -777,17 +770,10 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl glass-panel card-premium noise-overlay flex flex-col relative overflow-hidden shadow-xl">
-          <div className="absolute inset-0 dot-grid opacity-20 pointer-events-none" />
-          <div className="absolute -top-20 -right-20 h-52 w-52 rounded-full bg-primary/12 blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-info/10 blur-[80px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl border border-border/60 bg-card shadow-sm flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
-                <span className="relative h-2 w-2 rounded-full bg-primary" />
-              </span>
+              <span className="h-2 w-2 rounded-full bg-primary" />
               <p className="text-[12px] font-heading text-foreground/70 font-bold">Tempo real</p>
             </div>
             <Link to="/financeiro/extrato" className="text-[11px] font-heading text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
@@ -819,7 +805,7 @@ export default function Dashboard() {
                 const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
 
                 return (
-                  <div key={item.id} className="group flex items-center gap-3 px-5 py-3 hover:bg-accent/30 transition-colors row-glow">
+                  <div key={item.id} className="group flex items-center gap-3 px-5 py-3 hover:bg-muted/20 transition-colors">
                     <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", s.iconBg, s.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
@@ -1045,7 +1031,7 @@ function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; labe
   };
 
   return (
-    <div className="flex items-center gap-3.5 rounded-2xl ultra-glass px-4 py-3.5 transition-all duration-300 hover:border-primary/20 hover:bg-card/80 card-premium">
+    <div className="flex items-center gap-3.5 rounded-2xl border border-border/50 bg-background/70 px-4 py-3.5 transition-colors duration-200 hover:bg-accent/25">
       <div className={`h-10 w-10 rounded-xl flex items-center justify-center ring-1 ${styles[tone].bg} ${styles[tone].text} ${styles[tone].ring}`}>{icon}</div>
       <span className="flex-1 text-[13px] font-semibold text-foreground/80">{label}</span>
       <span className="text-base font-display font-black text-foreground tabular-nums tracking-tight">{value}</span>
@@ -1062,7 +1048,7 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className="flex items-center justify-between rounded-2xl ultra-glass px-3.5 py-3 transition-all duration-300 hover:border-primary/20 hover:bg-card/80 card-premium">
+    <div className="flex items-center justify-between rounded-2xl border border-border/50 bg-background/70 px-3.5 py-3 transition-colors duration-200 hover:bg-accent/25">
       <div className="flex items-center gap-2.5">
         <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", s.iconBg)}>
           <span className={s.text}>{icon}</span>
