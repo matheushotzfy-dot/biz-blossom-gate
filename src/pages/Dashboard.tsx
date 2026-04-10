@@ -656,9 +656,11 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-border/30 bg-card/95 p-4 md:p-5 overflow-hidden">
-            <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-primary/6 blur-[60px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-border/30 p-4 md:p-5 overflow-hidden"
+            style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
+            <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-primary/10 blur-[70px] pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-success/8 blur-[50px] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
             <div className="grid grid-cols-1 gap-2 relative z-10">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -723,74 +725,86 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-border/30 bg-card/95 p-4 md:p-5 flex flex-col overflow-hidden">
-          <div className="absolute -top-16 -left-16 h-32 w-32 rounded-full bg-primary/6 blur-[80px] pointer-events-none" />
-          <div className="absolute -bottom-12 -right-12 h-28 w-28 rounded-full bg-info/5 blur-[60px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-2xl border border-border/30 p-4 md:p-5 flex flex-col overflow-hidden scan-line"
+          style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
+          <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-primary/10 blur-[90px] pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full bg-info/7 blur-[70px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           <div className="grid grid-cols-2 gap-2 md:gap-2.5 flex-1 relative z-10">
             {[
-              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
-              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
-              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
-              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório" },
-              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
-              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
-              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações" },
-              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta" },
-              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação" },
-              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
-            ].map((action) => (
-              <Link key={action.href} to={action.href}
-                className="group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/15 p-2.5 md:p-3.5 transition-all duration-300 hover:border-primary/30 hover:bg-primary/[0.06] hover:shadow-[0_0_24px_hsl(var(--primary)/0.10)] active:scale-[0.985]"
-                style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.5) 0%, hsl(var(--card) / 0.25) 100%)" }}>
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/12 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-lg shadow-primary/5 group-hover:shadow-primary/15 transition-shadow">
-                  <action.icon className="h-4 w-4 md:h-5 md:w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
-                  <p className="text-[10px] md:text-[11px] text-muted-foreground/45 hidden md:block">{action.desc}</p>
-                </div>
-                <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-primary/50 transition-colors" />
-              </Link>
-            ))}
+              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" },
+              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" },
+              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" },
+              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" },
+              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" },
+              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" },
+              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" },
+              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" },
+              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" },
+            ].map((action) => {
+              const toneColors: Record<string, { iconBg: string; iconText: string; iconBorder: string; hoverBorder: string; hoverBg: string; hoverShadow: string }> = {
+                primary: { iconBg: "bg-primary/12", iconText: "text-primary", iconBorder: "border-primary/20", hoverBorder: "hover:border-primary/30", hoverBg: "hover:bg-primary/[0.06]", hoverShadow: "hover:shadow-[0_0_24px_hsl(var(--primary)/0.12)]" },
+                success: { iconBg: "bg-success/12", iconText: "text-success", iconBorder: "border-success/20", hoverBorder: "hover:border-success/30", hoverBg: "hover:bg-success/[0.06]", hoverShadow: "hover:shadow-[0_0_24px_hsl(var(--success)/0.12)]" },
+                info: { iconBg: "bg-info/12", iconText: "text-info", iconBorder: "border-info/20", hoverBorder: "hover:border-info/30", hoverBg: "hover:bg-info/[0.06]", hoverShadow: "hover:shadow-[0_0_24px_hsl(var(--info)/0.12)]" },
+                warning: { iconBg: "bg-warning/12", iconText: "text-warning", iconBorder: "border-warning/20", hoverBorder: "hover:border-warning/30", hoverBg: "hover:bg-warning/[0.06]", hoverShadow: "hover:shadow-[0_0_24px_hsl(var(--warning)/0.12)]" },
+              };
+              const t = toneColors[action.tone] || toneColors.primary;
+              return (
+                <Link key={action.href} to={action.href}
+                  className={cn("group flex items-center gap-2.5 md:gap-3 rounded-xl border border-border/15 p-2.5 md:p-3.5 transition-all duration-300 active:scale-[0.985]", t.hoverBorder, t.hoverBg, t.hoverShadow)}
+                  style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.5) 0%, hsl(var(--card) / 0.25) 100%)" }}>
+                  <div className={cn("h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center shrink-0 border shadow-lg", t.iconBg, t.iconText, t.iconBorder)}>
+                    <action.icon className="h-4 w-4 md:h-5 md:w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] md:text-sm font-display font-bold text-foreground leading-tight">{action.label}</p>
+                    <p className="text-[10px] md:text-[11px] text-muted-foreground/45 hidden md:block">{action.desc}</p>
+                  </div>
+                  <ChevronRight className={cn("h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/20 hidden md:block transition-colors", `group-hover:${t.iconText}`)} />
+                </Link>
+              );
+            })}
           </div>
         </motion.div>
 
         {/* Activity feed */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-2xl border border-border/30 bg-card/95 flex flex-col overflow-hidden">
-          <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-primary/6 blur-[70px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent" />
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="relative rounded-2xl border border-border/30 flex flex-col overflow-hidden scan-line"
+          style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
+          <div className="absolute -top-16 -right-16 h-36 w-36 rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
+          <div className="absolute -bottom-12 -left-12 h-28 w-28 rounded-full bg-success/6 blur-[60px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 relative z-10">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
-                <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+                <span className="relative h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
               </span>
-              <p className="text-[12px] font-heading text-muted-foreground/40">Tempo real</p>
+              <p className="text-[12px] font-heading text-foreground/60">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-muted-foreground/25 hover:text-primary transition-colors">Ver tudo</Link>
+            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-muted-foreground/35 hover:text-primary transition-colors">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1.5">
+          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-2.5 space-y-1.5 relative z-10">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
                 <p className="text-sm text-muted-foreground/30 font-display">Sem movimentações ainda</p>
               </div>
             ) : (
               activity.map((item) => {
-                const txStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
-                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
-                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", iconBg: "bg-info/10", iconText: "text-info" },
-                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Status", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
+                const txStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string; glowBg: string }> = {
+                  completed: { label: "Aprovada", pill: "bg-success/15 text-success", iconBg: "bg-success/12", iconText: "text-success", glowBg: "bg-success" },
+                  pending: { label: "Pendente", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/12", iconText: "text-warning", glowBg: "bg-warning" },
+                  failed: { label: "Falhou", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/12", iconText: "text-destructive", glowBg: "bg-destructive" },
+                  refunded: { label: "Reembolso", pill: "bg-info/15 text-info", iconBg: "bg-info/12", iconText: "text-info", glowBg: "bg-info" },
+                  chargeback: { label: "Chargeback", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/12", iconText: "text-destructive", glowBg: "bg-destructive" },
+                  default: { label: "Status", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground", glowBg: "bg-muted" },
                 };
-                const wdStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string }> = {
-                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", iconBg: "bg-success/10", iconText: "text-success" },
-                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Saque", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground" },
+                const wdStyles: Record<string, { label: string; pill: string; iconBg: string; iconText: string; glowBg: string }> = {
+                  pending: { label: "Em análise", pill: "bg-warning/15 text-warning", iconBg: "bg-warning/12", iconText: "text-warning", glowBg: "bg-warning" },
+                  approved: { label: "Aprovado", pill: "bg-success/15 text-success", iconBg: "bg-success/12", iconText: "text-success", glowBg: "bg-success" },
+                  rejected: { label: "Rejeitado", pill: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/12", iconText: "text-destructive", glowBg: "bg-destructive" },
+                  default: { label: "Saque", pill: "bg-muted text-foreground", iconBg: "bg-muted/20", iconText: "text-muted-foreground", glowBg: "bg-muted" },
                 };
                 const styles = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
                 const borderColor: Record<string, string> = { completed: "border-l-success", pending: "border-l-warning", failed: "border-l-destructive", refunded: "border-l-info", chargeback: "border-l-destructive", approved: "border-l-success", rejected: "border-l-destructive" };
@@ -798,16 +812,16 @@ export default function Dashboard() {
 
                 return (
                   <div key={item.id}
-                    className={cn("group relative flex items-center gap-3 rounded-xl border-l-[3px] px-3.5 py-3 transition-all duration-300 hover:bg-primary/[0.03]", borderColor[item.status] || "border-l-muted-foreground")}>
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/10 shadow-sm", styles.iconBg, styles.iconText)}>
+                    className={cn("group relative flex items-center gap-3 rounded-xl border-l-[3px] px-3.5 py-3 transition-all duration-300 hover:bg-white/[0.02]", borderColor[item.status] || "border-l-muted-foreground")}>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border border-border/15 shadow-md", styles.iconBg, styles.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4.5 w-4.5" /> : <Wallet className="h-4.5 w-4.5" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="text-[14px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                        <span className={cn("h-2 w-2 rounded-full shadow-[0_0_6px_currentColor] animate-pulse", styles.iconBg, styles.iconText)} />
+                        <span className={cn("h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] animate-pulse", styles.iconText)} />
                       </div>
-                      <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 font-display">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5 font-display">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {fullTx && (
