@@ -901,23 +901,18 @@ export default function Vendas() {
 
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button
-                    className={cn(
-                      "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[10px] font-heading transition-colors duration-300",
-                      isCustom
-                        ? "border-primary/20 bg-primary/[0.08] text-primary"
-                        : "border-border/15 bg-background/70 text-muted-foreground/70 hover:text-foreground"
-                    )}
-                  >
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    {isCustom && customRange?.from
-                      ? customRange.to
-                        ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}`
-                        : format(customRange.from, "dd/MM/yyyy")
-                      : "Período customizado"}
+                  <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
+                    isCustom ? "border-primary/20 bg-primary/8 text-primary" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
+                  )}>
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays className="h-3 w-3" />
+                      {isCustom && customRange?.from
+                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                        : "Custom"}
+                    </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 p-0 shadow-2xl">
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
                   <Calendar
                     mode="range"
                     selected={customRange}
@@ -938,23 +933,14 @@ export default function Vendas() {
                   />
                 </PopoverContent>
               </Popover>
-
-              <button
-                onClick={toggleHidden}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border border-border/15 bg-background/70 transition-colors duration-300",
-                  hidden ? "text-primary" : "text-muted-foreground/70 hover:text-foreground"
-                )}
-                title={hidden ? "Mostrar valores" : "Ocultar valores"}
-              >
-                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
+                {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
-
               <button
                 onClick={() => setShowExportDialog(true)}
-                className="inline-flex h-10 items-center gap-2 rounded-full border border-border/15 bg-background/70 px-4 text-[10px] font-heading text-muted-foreground/70 transition-colors duration-300 hover:text-foreground"
+                className="h-8 rounded-full border border-border/10 px-3.5 text-[10px] font-heading text-muted-foreground/30 hover:text-foreground hover:border-border/20 transition-all active:scale-[0.97] inline-flex items-center gap-1.5"
               >
-                <Download className="h-3.5 w-3.5" />
+                <Download className="h-3 w-3" />
                 Exportar
               </button>
             </div>
