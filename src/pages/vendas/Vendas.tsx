@@ -1316,19 +1316,19 @@ export default function Vendas() {
             {loading ? (
               <div className="p-20 text-center">
                 <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-primary/10 border-t-primary" />
-                <p className="text-[11px] text-muted-foreground/15 font-display mt-2">Carregando transações…</p>
+                <p className="text-[11px] text-muted-foreground font-display mt-2">Carregando transações…</p>
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-border/4">
+                      <tr className="border-b border-border/20 bg-muted/5">
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
-                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Produto</th>
+                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground">Produto</th>
                         <SortHead label="Valor" field="amount" sort={sort} onSort={handleSort} />
-                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Método</th>
-                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground/20">Status</th>
+                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground">Método</th>
+                        <th className="px-4 py-3.5 text-left text-[10px] font-display font-bold uppercase tracking-wider text-muted-foreground">Status</th>
                         <SortHead label="Data" field="date" sort={sort} onSort={handleSort} />
                         <th className="w-8" />
                       </tr>
@@ -1338,11 +1338,11 @@ export default function Vendas() {
                         <tr>
                           <td colSpan={7} className="py-24">
                             <div className="flex flex-col items-center justify-center">
-                              <div className="h-16 w-16 rounded-2xl bg-muted/4 border border-border/6 flex items-center justify-center mb-4">
-                                <ShoppingCart className="h-7 w-7 text-muted-foreground/8" />
+                              <div className="h-16 w-16 rounded-2xl bg-muted/10 border border-border/20 flex items-center justify-center mb-4">
+                                <ShoppingCart className="h-7 w-7 text-muted-foreground/30" />
                               </div>
-                              <p className="text-[13px] font-display font-bold text-muted-foreground/15">Nenhuma venda encontrada</p>
-                              <p className="text-[10px] text-muted-foreground/10 font-display mt-1">Ajuste os filtros ou selecione outro período</p>
+                              <p className="text-[13px] font-display font-bold text-muted-foreground">Nenhuma venda encontrada</p>
+                              <p className="text-[10px] text-muted-foreground/60 font-display mt-1">Ajuste os filtros ou selecione outro período</p>
                             </div>
                           </td>
                         </tr>
