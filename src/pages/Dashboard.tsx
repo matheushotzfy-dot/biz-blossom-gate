@@ -224,7 +224,7 @@ export default function Dashboard() {
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
-  const { approved, pending, refunded, chargebacks, revenue, conversion, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
+  const { approved, pending, refunded, chargebacks, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _pending = filteredTx.filter((t) => t.status === "pending");
     const _refunded = filteredTx.filter((t) => t.status === "refunded");
@@ -245,9 +245,11 @@ export default function Dashboard() {
 
     const _chargebackRate = filteredTx.length > 0 ? (_chargebacks.length / filteredTx.length) * 100 : 0;
 
+    const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
+
     return {
       approved: _approved, pending: _pending, refunded: _refunded, chargebacks: _chargebacks,
-      revenue: _revenue, conversion: _conversion,
+      revenue: _revenue, conversion: _conversion, uniqueCustomers: _uniqueCustomers,
       pixConversion: _pixConversion, cardConversion: _cardConversion, chargebackRate: _chargebackRate,
       pixRevenue: _pixRevenue, cardRevenue: _cardRevenue,
       pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
@@ -590,24 +592,22 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "Total Faturado", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", iconGradient: "from-primary/20 to-primary/5", iconBg: "bg-primary/12", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary", shadowColor: "shadow-primary/8" },
-              { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", iconGradient: "from-success/20 to-success/5", iconBg: "bg-success/12", iconText: "text-success", iconBorder: "border-success/20", glowColor: "bg-success", shadowColor: "shadow-success/8" },
-              { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconGradient: "from-info/20 to-info/5", iconBg: "bg-info/12", iconText: "text-info", iconBorder: "border-info/20", glowColor: "bg-info", shadowColor: "shadow-info/8" },
-              { label: "Saldo Disponível", numValue: Math.abs(balance), formatter: fmt, icon: Wallet, valueColor: balance < 0 ? "text-warning" : "text-primary", iconGradient: balance < 0 ? "from-warning/20 to-warning/5" : "from-primary/20 to-primary/5", iconBg: balance < 0 ? "bg-warning/12" : "bg-primary/12", iconText: balance < 0 ? "text-warning" : "text-primary", iconBorder: balance < 0 ? "border-warning/20" : "border-primary/20", glowColor: balance < 0 ? "bg-warning" : "bg-primary", shadowColor: balance < 0 ? "shadow-warning/8" : "shadow-primary/8" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", borderColor: "border-success/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--success)/0.4)]", iconBg: "bg-success/12", iconText: "text-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", borderColor: "border-info/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--info)/0.4)]", iconBg: "bg-info/12", iconText: "text-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-2xl border border-border/40 p-5 backdrop-blur-xl transition-all duration-300 hover:shadow-xl", item.shadowColor)}
+                className={cn("group relative overflow-hidden rounded-2xl border-2 p-5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02]", item.borderColor, item.glowShadow)}
                 style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
-                <div className={cn("absolute inset-0 bg-gradient-to-br pointer-events-none opacity-100", item.iconGradient)} />
-                <div className={cn("absolute -top-12 -right-12 h-28 w-28 rounded-full blur-3xl opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.18]", item.glowColor)} />
+                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">{item.label}</p>
+                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">{item.label}</p>
                     <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border backdrop-blur-sm shadow-lg", item.iconBg, item.iconBorder, item.iconText)}>
+                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border border-border/20 backdrop-blur-sm", item.iconBg, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
