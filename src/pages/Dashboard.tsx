@@ -724,12 +724,17 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-secondary text-primary">
-              <Zap className="h-3.5 w-3.5" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-5 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
+                <Zap className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-[12px] font-heading font-bold text-foreground">Ações Rápidas</h3>
+                <p className="text-[9px] text-muted-foreground/50 mt-0.5">Acesso direto às ferramentas</p>
+              </div>
             </div>
-            <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Ações Rápidas</span>
           </div>
           
           <div className="grid grid-cols-2 gap-2 flex-1">
@@ -745,24 +750,24 @@ export default function Dashboard() {
               { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
             ].map((action) => {
-              const colors: Record<string, { bg: string; text: string; hoverBg: string }> = {
-                primary: { bg: "bg-primary/10", text: "text-primary", hoverBg: "hover:bg-primary/[0.06]" },
-                success: { bg: "bg-success/10", text: "text-success", hoverBg: "hover:bg-success/[0.06]" },
-                info: { bg: "bg-info/10", text: "text-info", hoverBg: "hover:bg-info/[0.06]" },
-                warning: { bg: "bg-warning/10", text: "text-warning", hoverBg: "hover:bg-warning/[0.06]" },
+              const colors: Record<string, { bg: string; text: string; border: string }> = {
+                primary: { bg: "bg-primary/8", text: "text-primary", border: "hover:border-primary/20" },
+                success: { bg: "bg-success/8", text: "text-success", border: "hover:border-success/20" },
+                info: { bg: "bg-info/8", text: "text-info", border: "hover:border-info/20" },
+                warning: { bg: "bg-warning/8", text: "text-warning", border: "hover:border-warning/20" },
               };
               const c = colors[action.tone] || colors.primary;
               return (
                 <Link key={action.href} to={action.href}
-                  className={cn("group relative flex items-center gap-2.5 rounded-2xl border border-border/50 bg-background/75 p-3 transition-colors duration-200 hover:border-border/70", c.hoverBg)}>
-                  <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
-                    <action.icon className="h-4 w-4" />
+                  className={cn("group relative flex items-center gap-2.5 rounded-xl border border-border/30 bg-background/60 p-3 transition-all duration-200 hover:bg-background/90 active:scale-[0.98]", c.border)}>
+                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
+                    <action.icon className="h-3.5 w-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[12px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] text-muted-foreground/50 hidden md:block">{action.desc}</p>
+                    <p className="text-[11px] font-bold text-foreground leading-tight">{action.label}</p>
+                    <p className="text-[9px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-muted-foreground/40 transition-colors" />
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/15 hidden md:block group-hover:text-muted-foreground/40 group-hover:translate-x-0.5 transition-all" />
                 </Link>
               );
             })}
