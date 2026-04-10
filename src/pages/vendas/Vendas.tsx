@@ -436,7 +436,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.15), ease: [0.16, 1, 0.3, 1] }}
-      className="cursor-pointer rounded-2xl border border-border/15 bg-card/95 p-4 shadow-[0_18px_36px_-30px_hsl(var(--foreground)/0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-border/25 active:scale-[0.985]"
+      className="cursor-pointer rounded-2xl border border-border/30 bg-card p-4 transition-colors duration-200 hover:border-border/50"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
@@ -446,7 +446,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
           </Avatar>
           <div className="min-w-0">
             <p className="text-[12px] font-display font-bold text-foreground truncate leading-tight">{name}</p>
-            <p className="text-[10px] text-muted-foreground/30 truncate mt-0.5 font-display">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
+            <p className="text-[10px] text-muted-foreground truncate mt-0.5 font-display">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
           </div>
         </div>
         <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-display font-bold shrink-0 border", st.fg, st.bg, st.border)}>
@@ -457,13 +457,13 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
         <div>
           <p className="text-xl font-display font-black text-foreground tabular-nums tracking-tight leading-none">{fmt(Number(tx.amount))}</p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[10px] text-muted-foreground/30 font-display font-semibold">{methodLabels[tx.payment_method || ""] || "—"}</span>
-            <span className="text-[10px] text-muted-foreground/10">·</span>
-            <span className="text-[10px] text-muted-foreground/30 truncate max-w-[100px] font-display">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
+            <span className="text-[10px] text-muted-foreground font-display font-semibold">{methodLabels[tx.payment_method || ""] || "—"}</span>
+            <span className="text-[10px] text-muted-foreground/30">·</span>
+            <span className="text-[10px] text-muted-foreground truncate max-w-[100px] font-display">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
           </div>
         </div>
         <div className="text-right flex flex-col items-end gap-1.5">
-          <span className="text-[10px] text-muted-foreground/30 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
+          <span className="text-[10px] text-muted-foreground tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
           {tx.customer_phone && (
             <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-7 w-7 rounded-lg bg-success/8 flex items-center justify-center text-success hover:bg-success/15 transition-colors active:scale-95 border border-success/10">
               <MessageCircle className="h-3 w-3" />
