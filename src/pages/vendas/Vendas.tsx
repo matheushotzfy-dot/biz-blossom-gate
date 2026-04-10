@@ -946,94 +946,69 @@ export default function Vendas() {
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_360px]">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08 }}
-              className="rounded-[28px] border border-border/15 bg-background/70 p-5 sm:p-6"
-              style={{ boxShadow: "0 22px 48px -40px hsl(var(--foreground) / 0.22)" }}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary/[0.08] px-3 py-1 text-[10px] font-heading uppercase tracking-[0.2em] text-primary">
-                  Receita líquida
+          {/* MAIN FOCAL POINT — Revenue (Dashboard style) */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
+                {isCustom && customRange?.from
+                  ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                  : `Receita líquida — ${periodLabel}`}
+              </p>
+              {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
+            </div>
+            <div className="flex items-end gap-5 mb-3">
+              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82]">
+                {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5 mt-5">
+              {[
+                { icon: Check, label: `${m.approved.length} aprovadas`, color: "text-success", border: "border-success/20", bg: "bg-success/5" },
+                { icon: Clock, label: `${m.pending.length} pendentes`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
+                { icon: Target, label: `${m.conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/20", bg: "bg-info/5" },
+                { icon: Receipt, label: `ticket ${hidden ? HIDE : fmt(m.avgTicket)}`, color: "text-primary", border: "border-primary/20", bg: "bg-primary/5" },
+                { icon: DollarSign, label: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/5" },
+              ].map((chip, i) => (
+                <span key={i} className={`inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 rounded-full border ${chip.border} ${chip.bg} backdrop-blur-sm px-3.5 py-1.5 transition-colors hover:border-primary/30`}>
+                  <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
+                  {chip.label}
                 </span>
-                {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
-              </div>
+              ))}
+              {lastSaleText && (
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-primary rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm px-3.5 py-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  última venda {lastSaleText}
+                </span>
+              )}
+            </div>
+          </motion.div>
 
-              <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <div className="text-4xl font-heading font-black leading-[0.9] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-                    {hidden ? (
-                      "R$ •••••••"
-                    ) : (
-                      <span style={{ textShadow: "0 12px 28px hsl(var(--primary) / 0.10)" }}>
-                        <AnimatedNumber value={m.totalNet} />
-                      </span>
-                    )}
+          {/* Executive KPI strip — Ultra Glass (Dashboard style) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {([
+              { label: "Faturamento Bruto", numValue: m.totalGross, formatter: fmt, icon: Banknote, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
+              { label: "Vendas Aprovadas", numValue: m.approved.length, formatter: (v: number) => String(Math.round(v)), icon: ShoppingCart, valueColor: "text-success", iconBg: "bg-success/10", iconText: "text-success", iconBorder: "border-success/20", glowColor: "bg-success" },
+              { label: "Taxa Conversão", numValue: m.conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", iconBg: "bg-info/10", iconText: "text-info", iconBorder: "border-info/20", glowColor: "bg-info" },
+              { label: "Clientes Únicos", numValue: m.uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", iconBg: "bg-primary/10", iconText: "text-primary", iconBorder: "border-primary/20", glowColor: "bg-primary" },
+            ] as const).map((item, idx) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
+                className="group relative rounded-2xl overflow-hidden p-5 transition-all duration-300 glass-panel border border-border/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
+                <div className={cn("absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]", item.glowColor)} />
+                
+                <div className="relative z-10 flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-[9px] font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 mb-3">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", item.valueColor)}>{hidden ? HIDE : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground/70">
-                    Um visual mais limpo para ler sua operação com clareza, foco nos números e menos ruído visual.
-                  </p>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border backdrop-blur-sm", item.iconBg, item.iconBorder, item.iconText)}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3 sm:min-w-[300px]">
-                  {[
-                    { label: "Ticket médio", value: hidden ? HIDE : fmt(m.avgTicket), tone: "primary" as AccentTone, icon: Receipt },
-                    { label: "Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), tone: "destructive" as AccentTone, icon: Percent },
-                    { label: "Clientes", value: hidden ? HIDE : String(m.uniqueCustomers), tone: "info" as AccentTone, icon: Users },
-                    { label: "Pendentes", value: String(m.pending.length), tone: "warning" as AccentTone, icon: Clock },
-                  ].map((stat) => {
-                    const accent = ACCENT_STYLES[stat.tone];
-                    const Icon = stat.icon;
-
-                    return (
-                      <div key={stat.label} className="rounded-2xl border border-border/12 bg-card/80 p-3.5">
-                        <div className="mb-3 flex items-center justify-between gap-2">
-                          <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/45">{stat.label}</span>
-                          <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl border", accent.iconWrap)}>
-                            <Icon className="h-3.5 w-3.5" />
-                          </div>
-                        </div>
-                        <div className={cn("text-sm font-heading font-black tracking-tight", accent.text)}>{stat.value}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {[
-                  { icon: CalendarDays, text: periodLabel, tone: "primary" as AccentTone },
-                  { icon: Check, text: `${m.approved.length} aprovadas`, tone: "success" as AccentTone },
-                  { icon: DollarSign, text: `Bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}`, tone: "warning" as AccentTone },
-                ].map((chip) => {
-                  const accent = ACCENT_STYLES[chip.tone];
-                  const Icon = chip.icon;
-
-                  return (
-                    <span
-                      key={chip.text}
-                      className={cn(
-                        "inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-display font-semibold",
-                        accent.surface,
-                        accent.text
-                      )}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {chip.text}
-                    </span>
-                  );
-                })}
-
-                {lastSaleText && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.08] px-3.5 py-2 text-[11px] font-display font-semibold text-primary">
-                    <span className="h-2 w-2 rounded-full bg-primary" />
-                    última venda {lastSaleText}
-                  </span>
-                )}
-              </div>
-            </motion.div>
+              </motion.div>
+            ))}
+          </div>
 
             <motion.div
               initial={{ opacity: 0, y: 18 }}
