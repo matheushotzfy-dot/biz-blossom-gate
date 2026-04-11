@@ -2,10 +2,9 @@ import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import {
-  Package, Plus, Trash2, MoreVertical,
+  Package, Plus, Trash2, MoreHorizontal,
   Copy, CheckCircle2, Settings2, Palette, Star,
   ExternalLink, Search, X, Crosshair, Loader2,
-  TrendingUp, ShoppingBag, Clock,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -14,10 +13,15 @@ import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
 const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+
+const STATUS_MAP: Record<string, { label: string; dot: string }> = {
+  active: { label: "Ativo", dot: "bg-emerald-500" },
+  inactive: { label: "Inativo", dot: "bg-muted-foreground/30" },
+  pending_review: { label: "Revisão", dot: "bg-amber-500" },
+};
 
 export default function Produtos() {
   const { user } = useAuth();
@@ -41,7 +45,6 @@ export default function Produtos() {
 
   const activeCount = products.filter(p => p.status === "active").length;
   const pendingCount = products.filter(p => p.status === "pending_review").length;
-  const inactiveCount = products.filter(p => p.status === "inactive").length;
 
   const confirmDelete = async () => {
     if (!user || !deleteTarget) return;
@@ -67,239 +70,214 @@ export default function Produtos() {
     }
   };
 
-  const statusLabel = (s: string) => s === "active" ? "Ativo" : s === "inactive" ? "Inativo" : "Em revisão";
-  const statusColor = (s: string) => s === "active"
-    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-    : s === "inactive"
-    ? "bg-red-500/10 text-red-500 border-red-500/20"
-    : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
-
-  const tabs = [
-    { label: "Todos", value: "all" as const, count: products.length },
-    { label: "Ativos", value: "active" as const, count: activeCount },
-    { label: "Em revisão", value: "pending_review" as const, count: pendingCount },
-    { label: "Inativos", value: "inactive" as const, count: inactiveCount },
-  ];
-
-  const kpis = [
-    { icon: ShoppingBag, label: "Total", value: products.length, color: "text-primary" },
-    { icon: TrendingUp, label: "Ativos", value: activeCount, color: "text-emerald-500" },
-    { icon: Clock, label: "Revisão", value: pendingCount, color: "text-amber-500" },
+  const tabs: { label: string; value: typeof statusFilter; count?: number }[] = [
+    { label: "Todos", value: "all", count: products.length },
+    { label: "Ativos", value: "active", count: activeCount },
+    { label: "Em revisão", value: "pending_review", count: pendingCount },
+    { label: "Inativos", value: "inactive" },
   ];
 
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
-      {/* ── Header ── */}
-      <div className="flex items-end justify-between gap-4 mb-8 flex-wrap">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-black text-foreground tracking-tight font-display">Meus Produtos</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            Gerencie seu catálogo de produtos digitais
+          <h1 className="text-lg font-semibold text-foreground tracking-[-0.02em]">Produtos</h1>
+          <p className="text-[13px] text-muted-foreground/70 mt-0.5">
+            {products.length} produto{products.length !== 1 && "s"} · {activeCount} ativo{activeCount !== 1 && "s"}
           </p>
         </div>
         <button
           onClick={() => navigate("/vendas/produtos/novo/editar")}
-          className="h-10 px-5 rounded-xl text-[13px] font-bold flex items-center gap-2 bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98] transition-all shadow-sm shadow-primary/20"
+          className="h-8 px-3.5 rounded-lg text-[13px] font-medium flex items-center gap-1.5 bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80 transition-colors"
         >
-          <Plus className="h-4 w-4" /> Novo produto
+          <Plus className="h-3.5 w-3.5" /> Novo produto
         </button>
       </div>
 
-      {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-xl border border-border/50 bg-card px-4 py-3">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1">{kpi.label}</p>
-            <p className="text-xl font-bold text-foreground font-numbers tabular-nums">{kpi.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Toolbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-        <div className="flex items-center gap-1 bg-muted/30 rounded-xl p-1">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div className="flex items-center border-b border-border/50">
           {tabs.map(t => (
             <button
               key={t.value}
               onClick={() => setStatusFilter(t.value)}
               className={cn(
-                "px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all duration-200",
+                "px-3 pb-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors",
                 statusFilter === t.value
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
-              {t.count > 0 && (
-                <span className={cn(
-                  "ml-1 text-[10px] tabular-nums",
-                  statusFilter === t.value ? "text-primary" : "text-muted-foreground/40"
-                )}>{t.count}</span>
+              {t.count != null && t.count > 0 && (
+                <span className="ml-1.5 text-[11px] tabular-nums text-muted-foreground/50">{t.count}</span>
               )}
             </button>
           ))}
         </div>
 
-        <div className="sm:ml-auto relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+        <div className="sm:ml-auto relative w-full sm:w-56">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar produto…"
-            className="h-9 w-full rounded-xl border border-border/50 bg-muted/20 pl-9 pr-8 text-[13px] placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-background transition-all"
+            placeholder="Buscar…"
+            className="h-8 w-full rounded-lg border border-border/60 bg-background pl-8 pr-7 text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring/30 transition-shadow"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
-              <X className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2">
+              <X className="h-3 w-3 text-muted-foreground/40 hover:text-muted-foreground" />
             </button>
           )}
         </div>
       </div>
 
-      {/* ── Product List ── */}
+      {/* Table */}
       {filtered.length === 0 ? (
-        <div className="py-24 flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-muted/30 flex items-center justify-center">
-            <Package className="h-7 w-7 text-muted-foreground/20" />
-          </div>
+        <div className="py-20 flex flex-col items-center gap-3">
+          <Package className="h-8 w-8 text-muted-foreground/20" />
           <div className="text-center">
-            <p className="text-sm font-semibold text-foreground mb-1">
-              {search || statusFilter !== "all" ? "Nenhum resultado encontrado" : "Nenhum produto criado"}
+            <p className="text-sm font-medium text-foreground">
+              {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum produto"}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground/60 mt-0.5">
               {search || statusFilter !== "all" ? "Tente ajustar seus filtros" : "Crie seu primeiro produto digital"}
             </p>
           </div>
           {!search && statusFilter === "all" && (
             <button
               onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-1 h-9 px-4 rounded-xl text-[13px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:brightness-110 transition-all"
+              className="mt-1 h-8 px-3.5 rounded-lg text-[13px] font-medium flex items-center gap-1.5 bg-foreground text-background hover:bg-foreground/90 transition-colors"
             >
-              <Plus className="h-4 w-4" /> Criar produto
+              <Plus className="h-3.5 w-3.5" /> Criar produto
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="rounded-lg border border-border/60 overflow-hidden">
+          {/* Table header — desktop */}
+          <div className="hidden sm:grid grid-cols-[1fr_100px_80px_40px] items-center px-4 h-9 bg-muted/30 border-b border-border/40 text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">
+            <span>Produto</span>
+            <span className="text-right">Preço</span>
+            <span className="text-center">Status</span>
+            <span />
+          </div>
+
           {filtered.map((p, i) => (
-            <motion.div
+            <div
               key={p.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, delay: i * 0.03 }}
-              className="group relative rounded-xl border border-border/50 bg-card hover:bg-accent/30 transition-colors duration-150 cursor-pointer"
+              className={cn(
+                "group grid sm:grid-cols-[1fr_100px_80px_40px] items-center px-4 cursor-pointer transition-colors hover:bg-muted/20",
+                i !== filtered.length - 1 && "border-b border-border/30"
+              )}
               onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
             >
-
-              <div className="flex items-center gap-4 px-4 py-3">
-                {/* Thumbnail */}
+              {/* Product info */}
+              <div className="flex items-center gap-3 py-3 min-w-0">
                 {p.image_url ? (
-                  <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover ring-1 ring-border/30 shrink-0" />
+                  <img src={p.image_url} alt="" className="h-9 w-9 rounded-md object-cover shrink-0" />
                 ) : (
-                  <div className="h-10 w-10 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
+                  <div className="h-9 w-9 rounded-md bg-muted/50 flex items-center justify-center shrink-0">
                     <Package className="h-4 w-4 text-muted-foreground/30" />
                   </div>
                 )}
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[13px] font-semibold text-foreground truncate">
-                      {p.name}
-                    </p>
-                    <span className={cn(
-                      "shrink-0 hidden sm:inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold border",
-                      statusColor(p.status)
-                    )}>
-                      {statusLabel(p.status)}
-                    </span>
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-foreground truncate leading-tight">{p.name}</p>
                   {p.description && (
-                    <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5 max-w-[320px] hidden sm:block">{p.description}</p>
+                    <p className="text-[11px] text-muted-foreground/50 truncate mt-px max-w-[300px]">{p.description}</p>
                   )}
-                </div>
-
-                {/* Price */}
-                <div className="hidden sm:block text-right mr-2">
-                  <span className="text-sm font-bold text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
-                </div>
-
-                {/* Quick actions */}
-                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                  {p.checkout_url && (
-                    <button
-                      onClick={() => copyCheckout(p)}
-                      className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-200",
-                        "text-muted-foreground/30 hover:text-primary hover:bg-primary/5",
-                        "sm:opacity-0 sm:group-hover:opacity-100"
-                      )}
-                      title="Copiar link"
-                    >
-                      <AnimatePresence mode="wait">
-                        {copiedId === p.id ? (
-                          <motion.span key="ok" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }}>
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                          </motion.span>
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </AnimatePresence>
-                    </button>
-                  )}
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-200",
-                        "text-muted-foreground/30 hover:text-foreground hover:bg-muted/50",
-                        "sm:opacity-0 sm:group-hover:opacity-100"
-                      )}>
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" sideOffset={4} className="w-48 rounded-xl p-1 border border-border/60 bg-popover shadow-lg">
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
-                        <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
-                        <Palette className="h-3.5 w-3.5 text-muted-foreground" />
-                        Checkout Builder
-                      </DropdownMenuItem>
-                      {p.checkout_url && (
-                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
-                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-                          Ver checkout
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
-                        <Crosshair className="h-3.5 w-3.5 text-muted-foreground" />
-                        Pixels
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
-                        <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                        Área de Membros
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="my-1" />
-                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[13px] text-destructive cursor-pointer rounded-lg px-2.5 py-2 font-medium focus:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between px-4 pb-3 pt-0 sm:hidden">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-sm font-bold text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
-                  <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border", statusColor(p.status))}>
-                    {statusLabel(p.status)}
+              {/* Price — mobile inline, desktop column */}
+              <div className="hidden sm:block text-right">
+                <span className="text-[13px] font-medium text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
+              </div>
+
+              {/* Status */}
+              <div className="hidden sm:flex justify-center">
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_MAP[p.status]?.dot || "bg-muted-foreground/30")} />
+                  {STATUS_MAP[p.status]?.label || p.status}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-muted/40 opacity-0 group-hover:opacity-100 transition-all">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={4} className="w-44 rounded-lg p-1 border-border/60 shadow-lg">
+                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Settings2 className="h-3.5 w-3.5 text-muted-foreground/60" /> Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Palette className="h-3.5 w-3.5 text-muted-foreground/60" /> Checkout Builder
+                    </DropdownMenuItem>
+                    {p.checkout_url && (
+                      <>
+                        <DropdownMenuItem onClick={() => copyCheckout(p)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                          {copiedId === p.id
+                            ? <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Copiado!</>
+                            : <><Copy className="h-3.5 w-3.5 text-muted-foreground/60" /> Copiar link</>
+                          }
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/60" /> Ver checkout
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Crosshair className="h-3.5 w-3.5 text-muted-foreground/60" /> Pixels
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Star className="h-3.5 w-3.5 text-muted-foreground/60" /> Área de Membros
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[13px] text-destructive cursor-pointer rounded-md px-2 py-1.5 focus:text-destructive">
+                      <Trash2 className="h-3.5 w-3.5" /> Excluir
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Mobile bottom row */}
+              <div className="flex items-center justify-between pb-3 sm:hidden col-span-full" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-3">
+                  <span className="text-[13px] font-medium text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_MAP[p.status]?.dot || "bg-muted-foreground/30")} />
+                    {STATUS_MAP[p.status]?.label || p.status}
                   </span>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={4} className="w-44 rounded-lg p-1 border-border/60 shadow-lg">
+                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Settings2 className="h-3.5 w-3.5 text-muted-foreground/60" /> Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Palette className="h-3.5 w-3.5 text-muted-foreground/60" /> Checkout Builder
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[13px] cursor-pointer rounded-md px-2 py-1.5">
+                      <Crosshair className="h-3.5 w-3.5 text-muted-foreground/60" /> Pixels
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[13px] text-destructive cursor-pointer rounded-md px-2 py-1.5 focus:text-destructive">
+                      <Trash2 className="h-3.5 w-3.5" /> Excluir
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}
@@ -307,17 +285,17 @@ export default function Produtos() {
       {pixelProduct && <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(v) => { if (!v) setPixelProduct(null); }} />}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="rounded-2xl max-w-md">
+        <AlertDialogContent className="rounded-lg max-w-sm">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-black text-lg">Excluir produto</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
+            <AlertDialogTitle className="text-base font-semibold">Excluir produto</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px]">
               Tem certeza? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="rounded-xl">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2">
-              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+            <AlertDialogCancel disabled={deleting} className="rounded-lg text-[13px] h-8">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="rounded-lg h-8 text-[13px] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5">
+              {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {deleting ? "Excluindo…" : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
