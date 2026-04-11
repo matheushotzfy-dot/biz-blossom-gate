@@ -296,14 +296,10 @@ export default function Produtos() {
                 </div>
               </div>
 
-              {/* Mobile meta row */}
-              <div className="flex items-center justify-between px-5 pb-3.5 pt-0 sm:hidden">
-                <div className="flex items-center gap-3">
-                  <span className="text-[14px] font-black text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
-                  <span className={cn(
-                    "px-2 py-0.5 rounded-md text-[10px] font-semibold border",
-                    statusColor(p.status)
-                  )}>
+              <div className="flex items-center justify-between px-4 pb-3 pt-0 sm:hidden">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm font-bold text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
+                  <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border", statusColor(p.status))}>
                     {statusLabel(p.status)}
                   </span>
                 </div>
