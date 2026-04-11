@@ -226,7 +226,7 @@ export default function Produtos() {
 
                 {/* Price */}
                 <div className="hidden sm:block text-right mr-2">
-                  <span className="text-[15px] font-black text-foreground font-numbers tabular-nums tracking-tight">{fmt(Number(p.price))}</span>
+                  <span className="text-sm font-bold text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
                 </div>
 
                 {/* Quick actions */}
