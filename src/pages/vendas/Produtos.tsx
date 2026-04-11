@@ -2,12 +2,38 @@ import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import {
-  Package, Plus, Trash2, MoreHorizontal,
-  Copy, CheckCircle2, Settings2, Palette, Star,
-  ExternalLink, Search, X, Crosshair, Loader2,
+  Package,
+  Plus,
+  Trash2,
+  MoreHorizontal,
+  Copy,
+  CheckCircle2,
+  Settings2,
+  Palette,
+  Star,
+  ExternalLink,
+  Search,
+  X,
+  Crosshair,
+  Loader2,
 } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,19 +42,35 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 
-const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+const fmt = (v: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-const STATUS_CFG: Record<string, { label: string; color: string; ping: string }> = {
-  active:         { label: "Ativo",   color: "text-emerald-400", ping: "bg-emerald-400" },
-  inactive:       { label: "Inativo", color: "text-muted-foreground/50", ping: "bg-muted-foreground/40" },
-  pending_review: { label: "Revisão", color: "text-amber-400",  ping: "bg-amber-400" },
+type Product = Tables<"products">;
+
+const STATUS_MAP: Record<string, { label: string; tone: string; dot: string; ping?: boolean }> = {
+  active: {
+    label: "Ativo",
+    tone: "text-success",
+    dot: "bg-success",
+    ping: true,
+  },
+  inactive: {
+    label: "Inativo",
+    tone: "text-muted-foreground",
+    dot: "bg-muted-foreground/60",
+  },
+  pending_review: {
+    label: "Revisão",
+    tone: "text-warning",
+    dot: "bg-warning",
+  },
 };
 
 export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: products = [], refetch: loadProducts } = useProducts();
-  const [pixelProduct, setPixelProduct] = useState<Tables<"products"> | null>(null);
+  const [pixelProduct, setPixelProduct] = useState<Product | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending_review">("all");
@@ -37,35 +79,52 @@ export default function Produtos() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return products.filter(p => {
-      if (statusFilter !== "all" && p.status !== statusFilter) return false;
+
+    return products.filter((product) => {
+      if (statusFilter !== "all" && product.status !== statusFilter) return false;
       if (!search) return true;
-      return p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q);
+
+      return (
+        product.name.toLowerCase().includes(q) ||
+        product.description?.toLowerCase().includes(q)
+      );
     });
   }, [products, search, statusFilter]);
 
-  const activeCount = products.filter(p => p.status === "active").length;
-  const pendingCount = products.filter(p => p.status === "pending_review").length;
+  const activeCount = products.filter((product) => product.status === "active").length;
+  const pendingCount = products.filter((product) => product.status === "pending_review").length;
 
   const confirmDelete = async () => {
     if (!user || !deleteTarget) return;
+
     setDeleting(true);
-    const { error } = await supabase.from("products").delete().eq("id", deleteTarget).eq("user_id", user.id);
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", deleteTarget)
+      .eq("user_id", user.id);
+
     setDeleting(false);
     setDeleteTarget(null);
-    if (error) { toast.error("Erro ao excluir produto"); return; }
-    toast.success("Produto removido"); loadProducts();
+
+    if (error) {
+      toast.error("Erro ao excluir produto");
+      return;
+    }
+
+    toast.success("Produto removido");
+    loadProducts();
   };
 
   const getCheckoutLink = (url: string) => `${window.location.origin}/pay/${url.split("/").pop()!}`;
 
-  const copyCheckout = (p: Tables<"products">) => {
-    if (p.checkout_url) {
-      navigator.clipboard.writeText(getCheckoutLink(p.checkout_url));
-      setCopiedId(p.id);
-      toast.success("Link copiado!");
-      setTimeout(() => setCopiedId(null), 2000);
-    }
+  const copyCheckout = (product: Product) => {
+    if (!product.checkout_url) return;
+
+    navigator.clipboard.writeText(getCheckoutLink(product.checkout_url));
+    setCopiedId(product.id);
+    toast.success("Link copiado!");
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const tabs: { label: string; value: typeof statusFilter; count?: number }[] = [
@@ -75,225 +134,323 @@ export default function Produtos() {
     { label: "Inativos", value: "inactive" },
   ];
 
-  return (
-    <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">Produtos</h1>
-        <button
-          onClick={() => navigate("/vendas/produtos/novo/editar")}
-          className="h-[30px] px-3 rounded-md text-[11px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.97] transition-all"
-        >
-          <Plus className="h-3 w-3" strokeWidth={2.5} /> Novo Produto
-        </button>
-      </div>
+  const renderStatus = (status: string) => {
+    const current = STATUS_MAP[status] || STATUS_MAP.inactive;
 
-      {/* Tabs + Search */}
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex items-center relative">
-          {tabs.map(t => (
-            <button
-              key={t.value}
-              onClick={() => setStatusFilter(t.value)}
+    return (
+      <span className={cn("inline-flex items-center gap-2 text-[11px] font-medium", current.tone)}>
+        <span className="relative flex h-2 w-2">
+          {current.ping && (
+            <span
               className={cn(
-                "relative px-2.5 pb-2 text-[11px] font-medium transition-colors",
-                statusFilter === t.value ? "text-foreground" : "text-muted-foreground/30 hover:text-muted-foreground/50"
+                "absolute inline-flex h-full w-full rounded-full animate-ping opacity-70",
+                current.dot,
               )}
+            />
+          )}
+          <span className={cn("relative inline-flex h-2 w-2 rounded-full", current.dot)} />
+        </span>
+        {current.label}
+      </span>
+    );
+  };
+
+  const renderMenu = (product: Product, triggerClassName: string) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className={triggerClassName}>
+          <MoreHorizontal className="h-4 w-4" strokeWidth={1.7} />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        align="end"
+        sideOffset={6}
+        className="w-44 rounded-xl border border-border/60 bg-popover p-1.5 shadow-lg"
+      >
+        <DropdownMenuItem
+          onClick={() => navigate(`/vendas/produtos/${product.id}/editar`)}
+          className="gap-2 rounded-lg px-2.5 py-2 text-[12px] cursor-pointer"
+        >
+          <Settings2 className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.7} />
+          Editar
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => navigate(`/vendas/produtos/${product.id}/checkout-builder`)}
+          className="gap-2 rounded-lg px-2.5 py-2 text-[12px] cursor-pointer"
+        >
+          <Palette className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.7} />
+          Checkout Builder
+        </DropdownMenuItem>
+
+        {product.checkout_url && (
+          <>
+            <DropdownMenuItem
+              onClick={() => copyCheckout(product)}
+              className="gap-2 rounded-lg px-2.5 py-2 text-[12px] cursor-pointer"
             >
-              {t.label}
-              {t.count != null && t.count > 0 && (
-                <span className="ml-1 text-[10px] tabular-nums opacity-40">{t.count}</span>
+              {copiedId === product.id ? (
+                <>
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success" strokeWidth={1.8} />
+                  Copiado!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.7} />
+                  Copiar link
+                </>
               )}
-              {statusFilter === t.value && (
-                <motion.div
-                  layoutId="prod-tab"
-                  className="absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full bg-primary"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-                />
-              )}
-            </button>
-          ))}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-border/20" />
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => window.open(getCheckoutLink(product.checkout_url!), "_blank")}
+              className="gap-2 rounded-lg px-2.5 py-2 text-[12px] cursor-pointer"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.7} />
+              Ver checkout
+            </DropdownMenuItem>
+          </>
+        )}
+
+        <DropdownMenuItem
+          onClick={() => setPixelProduct(product)}
+          className="gap-2 rounded-lg px-2.5 py-2 text-[12px] cursor-pointer"
+        >
+          <Crosshair className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.7} />
+          Pixels
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => navigate(`/vendas/conteudo/${product.id}/builder`)}
+          className="gap-2 rounded-lg px-2.5 py-2 text-[12px] cursor-pointer"
+        >
+          <Star className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.7} />
+          Área de membros
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="my-1" />
+
+        <DropdownMenuItem
+          onClick={() => setDeleteTarget(product.id)}
+          className="gap-2 rounded-lg px-2.5 py-2 text-[12px] text-destructive focus:text-destructive cursor-pointer"
+        >
+          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+          Excluir
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  return (
+    <div className="mx-auto w-full max-w-[1440px] pb-20 md:pb-16">
+      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold tracking-[-0.03em] text-foreground">Produtos</h1>
+          <span className="inline-flex h-6 items-center rounded-md border border-border/60 bg-card px-2.5 text-[12px] font-medium text-muted-foreground">
+            {products.length}
+          </span>
         </div>
 
-        <div className="relative w-44">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/20" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar…"
-            className="h-[30px] w-full rounded-md border border-border/30 bg-card/40 pl-7 pr-6 text-[11px] placeholder:text-muted-foreground/20 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
-          />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2">
-              <X className="h-3 w-3 text-muted-foreground/25" />
-            </button>
-          )}
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar produto..."
+              className="h-9 w-full rounded-lg border border-border/60 bg-card/60 pl-9 pr-9 text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground/70 transition-colors hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={2} />
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={() => navigate("/vendas/produtos/novo/editar")}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-gradient-to-b from-primary to-primary/90 px-4 text-[13px] font-semibold text-primary-foreground shadow-sm transition-all hover:brightness-110 active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.2} />
+            Novo Produto
+          </button>
         </div>
       </div>
 
-      {/* Table */}
+      <div className="mb-4 border-b border-border/40">
+        <div className="flex items-center gap-5 overflow-x-auto">
+          {tabs.map((tab) => {
+            const active = statusFilter === tab.value;
+
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setStatusFilter(tab.value)}
+                className={cn(
+                  "relative flex shrink-0 items-center gap-2 pb-3 text-[13px] font-medium transition-colors",
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground/80",
+                )}
+              >
+                <span>{tab.label}</span>
+                {tab.count != null && (
+                  <span
+                    className={cn(
+                      "inline-flex h-5 items-center rounded-md px-1.5 text-[11px] tabular-nums",
+                      active
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted/40 text-muted-foreground",
+                    )}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+                {active && (
+                  <motion.div
+                    layoutId="products-tab-indicator"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary"
+                    transition={{ type: "spring", bounce: 0.12, duration: 0.45 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {filtered.length === 0 ? (
-        <div className="py-16 flex flex-col items-center gap-2">
-          <Package className="h-6 w-6 text-muted-foreground/15" />
-          <p className="text-[12px] font-medium text-foreground">
-            {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum produto"}
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-border/50 bg-card/20 px-6 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border/60 bg-card/70">
+            <Package className="h-5 w-5 text-muted-foreground/70" strokeWidth={1.7} />
+          </div>
+          <p className="text-sm font-medium text-foreground">
+            {search || statusFilter !== "all" ? "Nenhum resultado encontrado" : "Nenhum produto ainda"}
           </p>
-          <p className="text-[11px] text-muted-foreground/30">
-            {search || statusFilter !== "all" ? "Ajuste seus filtros" : "Crie seu primeiro produto"}
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            {search || statusFilter !== "all"
+              ? "Tente ajustar os filtros para encontrar o que procura."
+              : "Crie seu primeiro produto para começar a vender."}
           </p>
           {!search && statusFilter === "all" && (
             <button
               onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-1.5 h-[30px] px-3 rounded-md text-[11px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
+              className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg border border-primary/20 bg-gradient-to-b from-primary to-primary/90 px-4 text-[13px] font-semibold text-primary-foreground shadow-sm transition-all hover:brightness-110"
             >
-              <Plus className="h-3 w-3" strokeWidth={2.5} /> Criar produto
+              <Plus className="h-4 w-4" strokeWidth={2.2} />
+              Criar produto
             </button>
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-border/25 overflow-hidden">
-          {/* Header row */}
-          <div className="hidden sm:grid grid-cols-[1fr_100px_80px_36px] items-center px-3 h-8 border-b border-border/20 text-[10px] font-semibold text-muted-foreground/30 uppercase tracking-[0.08em]">
+        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/20">
+          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_110px_140px_44px] items-center px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             <span>Produto</span>
+            <span className="text-right">Status</span>
             <span className="text-right">Preço</span>
-            <span className="text-center">Status</span>
             <span />
           </div>
 
-          {filtered.map((p, i) => {
-            const st = STATUS_CFG[p.status] || STATUS_CFG.inactive;
-            return (
+          <div className="divide-y divide-border/40">
+            {filtered.map((product) => (
               <div
-                key={p.id}
-                onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
-                className={cn(
-                  "group grid sm:grid-cols-[1fr_100px_80px_36px] items-center px-3 py-3 cursor-pointer hover:bg-muted/[0.04] transition-colors duration-150",
-                  i !== filtered.length - 1 && "border-b border-border/15"
-                )}
+                key={product.id}
+                onClick={() => navigate(`/vendas/produtos/${product.id}/editar`)}
+                className="group grid cursor-pointer items-center px-5 py-3 transition-colors hover:bg-muted/15 sm:grid-cols-[minmax(0,1fr)_110px_140px_44px]"
               >
-                {/* Product */}
-                <div className="flex items-center gap-3 min-w-0">
-                  {p.image_url ? (
-                    <img src={p.image_url} alt="" className="h-9 w-9 rounded-md object-cover ring-1 ring-inset ring-foreground/[0.06] shrink-0" />
-                  ) : (
-                    <div className="h-9 w-9 rounded-md bg-muted/15 ring-1 ring-inset ring-foreground/[0.03] flex items-center justify-center shrink-0">
-                      <Package className="h-3.5 w-3.5 text-muted-foreground/15" />
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-medium text-foreground truncate leading-tight">{p.name}</p>
-                    {p.description && (
-                      <p className="text-[11px] text-muted-foreground/30 truncate mt-px max-w-[260px]">{p.description}</p>
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-muted/20 ring-1 ring-inset ring-border/60">
+                    {product.image_url ? (
+                      <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <Package className="h-4 w-4 text-muted-foreground/70" strokeWidth={1.7} />
+                      </div>
                     )}
+                    <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-foreground/5" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium tracking-[-0.01em] text-foreground">
+                      {product.name}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {product.description || "Sem descrição cadastrada"}
+                    </p>
                   </div>
                 </div>
 
-                {/* Price */}
-                <div className="hidden sm:block text-right">
-                  <span className="text-[13px] font-medium text-foreground tabular-nums tracking-tight font-mono">{fmt(Number(p.price))}</span>
-                </div>
+                <div className="hidden justify-end sm:flex">{renderStatus(product.status)}</div>
 
-                {/* Status with ping dot */}
-                <div className="hidden sm:flex justify-center">
-                  <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-medium", st.color)}>
-                    <span className="relative flex h-1.5 w-1.5">
-                      {p.status === "active" && (
-                        <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-50", st.ping)} />
-                      )}
-                      <span className={cn("relative inline-flex rounded-full h-1.5 w-1.5", st.ping)} />
-                    </span>
-                    {st.label}
+                <div className="hidden text-right sm:block">
+                  <span className="font-mono text-sm font-semibold tabular-nums tracking-[-0.02em] text-foreground">
+                    {fmt(Number(product.price))}
                   </span>
                 </div>
 
-                {/* Actions */}
-                <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground/15 hover:text-foreground/60 opacity-0 group-hover:opacity-100 transition-all duration-150">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" sideOffset={4} className="w-40 rounded-lg p-1 border-border/30 shadow-lg">
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                        <Settings2 className="h-3 w-3 text-muted-foreground/40" /> Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                        <Palette className="h-3 w-3 text-muted-foreground/40" /> Checkout
-                      </DropdownMenuItem>
-                      {p.checkout_url && (
-                        <>
-                          <DropdownMenuItem onClick={() => copyCheckout(p)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                            {copiedId === p.id
-                              ? <><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Copiado!</>
-                              : <><Copy className="h-3 w-3 text-muted-foreground/40" /> Copiar link</>}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                            <ExternalLink className="h-3 w-3 text-muted-foreground/40" /> Abrir
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                        <Crosshair className="h-3 w-3 text-muted-foreground/40" /> Pixels
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                        <Star className="h-3 w-3 text-muted-foreground/40" /> Membros
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[11px] text-destructive cursor-pointer rounded-md px-2 py-1.5 focus:text-destructive">
-                        <Trash2 className="h-3 w-3" /> Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <div className="hidden justify-end sm:flex" onClick={(e) => e.stopPropagation()}>
+                  {renderMenu(
+                    product,
+                    "flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-foreground opacity-0 transition-all hover:border-border/60 hover:bg-card hover:text-foreground group-hover:opacity-100",
+                  )}
                 </div>
 
-                {/* Mobile row */}
-                <div className="flex items-center justify-between pt-1.5 sm:hidden col-span-full" onClick={e => e.stopPropagation()}>
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-[12px] font-medium text-foreground tabular-nums font-mono">{fmt(Number(p.price))}</span>
-                    <span className={cn("inline-flex items-center gap-1 text-[10px] font-medium", st.color)}>
-                      <span className={cn("h-1.5 w-1.5 rounded-full", st.ping)} />
-                      {st.label}
+                <div
+                  className="col-span-full mt-2 flex items-center justify-between sm:hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center gap-3">
+                    {renderStatus(product.status)}
+                    <span className="font-mono text-sm font-semibold tabular-nums tracking-[-0.02em] text-foreground">
+                      {fmt(Number(product.price))}
                     </span>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground/30">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" sideOffset={4} className="w-40 rounded-lg p-1 border-border/30 shadow-lg">
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                        <Settings2 className="h-3 w-3 text-muted-foreground/40" /> Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[11px] cursor-pointer rounded-md px-2 py-1.5">
-                        <Crosshair className="h-3 w-3 text-muted-foreground/40" /> Pixels
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[11px] text-destructive cursor-pointer rounded-md px-2 py-1.5 focus:text-destructive">
-                        <Trash2 className="h-3 w-3" /> Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+
+                  {renderMenu(
+                    product,
+                    "flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 bg-card/70 text-muted-foreground transition-colors hover:text-foreground",
+                  )}
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       )}
 
-      {pixelProduct && <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(v) => { if (!v) setPixelProduct(null); }} />}
+      {pixelProduct && (
+        <PixelSettingsDialog
+          product={pixelProduct}
+          open={!!pixelProduct}
+          onOpenChange={(open) => {
+            if (!open) setPixelProduct(null);
+          }}
+        />
+      )}
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="rounded-xl max-w-sm">
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent className="max-w-sm rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-semibold">Excluir produto</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px]">Tem certeza? Esta ação não pode ser desfeita.</AlertDialogDescription>
+            <AlertDialogDescription className="text-[13px]">
+              Tem certeza? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="rounded-lg text-[13px] h-8">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="rounded-lg h-8 text-[13px] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5">
+            <AlertDialogCancel disabled={deleting} className="h-8 rounded-lg text-[13px]">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="h-8 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90"
+            >
               {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {deleting ? "Excluindo…" : "Excluir"}
             </AlertDialogAction>
