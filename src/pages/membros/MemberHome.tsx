@@ -3,10 +3,9 @@ import { Link, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import {
-  Play, BookOpen, ChevronRight, GraduationCap,
-  CheckCircle2, Search, X,
+  GraduationCap, Search, X, ChevronRight, CheckCircle2, Play,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type ModuleInfo = { id: string; title: string; banner_url: string | null; sort_order: number; lessonCount: number };
@@ -21,7 +20,7 @@ export default function MemberHome() {
   const [courses, setCourses] = useState<CourseWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "in_progress" | "completed" | "not_started">("all");
 
   useEffect(() => { if (user) loadCourses(); }, [user]);
 
@@ -58,27 +57,42 @@ export default function MemberHome() {
     setLoading(false);
   };
 
-  const totalCompleted = courses.reduce((a, c) => a + c.completedLessons, 0);
-  const totalLessons = courses.reduce((a, c) => a + c.totalLessons, 0);
-  const overallPct = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
-  const continueWatching = courses.filter(c => c.completedLessons > 0 && c.completedLessons < c.totalLessons);
-  const categories = [...new Set(courses.map(c => c.category).filter(Boolean))];
+  const getStatus = (c: CourseWithProgress) => {
+    if (c.totalLessons === 0) return "not_started";
+    if (c.completedLessons === c.totalLessons) return "completed";
+    if (c.completedLessons > 0) return "in_progress";
+    return "not_started";
+  };
+
+  const inProgressCount = courses.filter(c => getStatus(c) === "in_progress").length;
+  const completedCount = courses.filter(c => getStatus(c) === "completed").length;
+  const notStartedCount = courses.filter(c => getStatus(c) === "not_started").length;
 
   const filtered = useMemo(() => {
     let result = courses;
+    if (statusFilter !== "all") result = result.filter(c => getStatus(c) === statusFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(c => c.title.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q));
     }
-    if (activeFilter) result = result.filter(c => c.category === activeFilter);
     return result;
-  }, [courses, search, activeFilter]);
+  }, [courses, search, statusFilter]);
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
     return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
   }, []);
   const displayName = user?.email?.split("@")[0] || "Aluno";
+
+  const tabs = [
+    { label: "Todos", value: "all" as const, count: courses.length },
+    { label: "Em andamento", value: "in_progress" as const, count: inProgressCount },
+    { label: "Concluídos", value: "completed" as const, count: completedCount },
+    { label: "Não iniciados", value: "not_started" as const, count: notStartedCount },
+  ];
+
+  const statusLabel = (s: string) => s === "completed" ? "Concluído" : s === "in_progress" ? "Em andamento" : "Não iniciado";
+  const statusDot = (s: string) => s === "completed" ? "bg-emerald-500" : s === "in_progress" ? "bg-primary" : "bg-muted-foreground/30";
 
   if (loading) return (
     <div className="min-h-[60vh] flex items-center justify-center">
@@ -88,7 +102,7 @@ export default function MemberHome() {
 
   if (courses.length === 0) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
-      <GraduationCap className="h-12 w-12 text-muted-foreground/20 mb-4" />
+      <GraduationCap className="h-10 w-10 text-muted-foreground/20 mb-4" />
       <h2 className="text-xl font-bold text-foreground mb-1">{greeting}, {displayName}</h2>
       <p className="text-sm text-muted-foreground max-w-sm">
         Quando você adquirir um produto, seus cursos aparecerão aqui.
@@ -97,70 +111,42 @@ export default function MemberHome() {
   );
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-24">
+    <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
       {/* Header */}
-      <div className="py-6 sm:py-8">
-        <h1 className="text-2xl font-bold text-foreground">{greeting}, {displayName}</h1>
-        <p className="text-[13px] text-muted-foreground mt-0.5">
-          {continueWatching.length > 0
-            ? `${continueWatching.length} curso${continueWatching.length > 1 ? "s" : ""} em andamento`
-            : `${courses.length} curso${courses.length > 1 ? "s" : ""} disponíve${courses.length > 1 ? "is" : "l"}`}
-        </p>
+      <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">{greeting}, {displayName}</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">{courses.length} curso{courses.length !== 1 && "s"} disponíve{courses.length !== 1 ? "is" : "l"}</p>
+        </div>
       </div>
 
-      {/* Progress summary */}
-      {totalLessons > 0 && (
-        <div className="flex items-center gap-4 mb-6 p-4 rounded-xl border border-border bg-card">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[13px] font-medium text-foreground">Progresso geral</span>
-              <span className="text-[13px] font-semibold text-foreground tabular-nums">{overallPct}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-muted overflow-hidden">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${overallPct}%` }} />
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-6 pl-4 border-l border-border">
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground tabular-nums">{totalCompleted}</p>
-              <p className="text-[11px] text-muted-foreground">concluídas</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground tabular-nums">{totalLessons}</p>
-              <p className="text-[11px] text-muted-foreground">total</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toolbar: filters + search */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-        <div className="flex items-center gap-0.5 overflow-x-auto">
-          <button
-            onClick={() => setActiveFilter(null)}
-            className={cn(
-              "px-3 py-2 text-[13px] font-medium transition-colors relative shrink-0",
-              !activeFilter ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Todos
-            {!activeFilter && <motion.div layoutId="member-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
-          </button>
-          {categories.map(cat => (
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div className="flex items-center gap-0.5 border-b border-border/40 sm:border-0">
+          {tabs.map(t => (
             <button
-              key={cat}
-              onClick={() => setActiveFilter(activeFilter === cat ? null : cat)}
+              key={t.value}
+              onClick={() => setStatusFilter(t.value)}
               className={cn(
-                "px-3 py-2 text-[13px] font-medium transition-colors relative shrink-0",
-                activeFilter === cat ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                "px-3 py-2 text-[13px] font-medium transition-colors relative",
+                statusFilter === t.value ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {cat}
-              {activeFilter === cat && <motion.div layoutId="member-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
+              {t.label}
+              {t.count > 0 && (
+                <span className={cn(
+                  "ml-1.5 text-[11px] tabular-nums",
+                  statusFilter === t.value ? "text-primary font-semibold" : "text-muted-foreground/50"
+                )}>{t.count}</span>
+              )}
+              {statusFilter === t.value && (
+                <motion.div layoutId="member-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+              )}
             </button>
           ))}
         </div>
-        <div className="sm:ml-auto relative w-full sm:w-56">
+
+        <div className="sm:ml-auto relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
           <input
             value={search}
@@ -176,106 +162,91 @@ export default function MemberHome() {
         </div>
       </div>
 
-      {/* Continue watching */}
-      {continueWatching.length > 0 && !search && !activeFilter && (
-        <section className="mb-8">
-          <h2 className="text-[15px] font-semibold text-foreground mb-3">Continue assistindo</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {continueWatching.map(c => {
-              const pct = c.totalLessons > 0 ? Math.round((c.completedLessons / c.totalLessons) * 100) : 0;
-              return (
-                <Link key={c.id} to={`/membros-area/curso/${c.id}`}
-                  className="group flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors">
-                  <div className="h-14 w-20 rounded-lg overflow-hidden shrink-0 bg-muted">
-                    {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                        <GraduationCap className="h-5 w-5 text-muted-foreground/20" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-foreground truncate">{c.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                      </div>
-                      <span className="text-[11px] text-muted-foreground tabular-nums shrink-0">{pct}%</span>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/30 shrink-0 group-hover:text-foreground transition-colors" />
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Course list */}
-      <section>
-        {!search && !activeFilter && (
-          <h2 className="text-[15px] font-semibold text-foreground mb-3">Todos os cursos</h2>
-        )}
-        {search && (
-          <p className="text-[13px] text-muted-foreground mb-3">
-            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} para "{search}"
+      {/* Course List */}
+      {filtered.length === 0 ? (
+        <div className="py-20 flex flex-col items-center gap-3">
+          <GraduationCap className="h-10 w-10 text-muted-foreground/20" />
+          <p className="text-sm text-muted-foreground">
+            {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum curso encontrado"}
           </p>
-        )}
-
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <Search className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Nenhum curso encontrado</p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          {/* Table header */}
+          <div className="hidden sm:grid grid-cols-[1fr_160px_100px_40px] items-center px-5 py-2.5 border-b border-border/50 bg-muted/30">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Curso</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Progresso</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Status</span>
+            <span />
           </div>
-        ) : (
-          <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border/50">
+
+          {/* Rows */}
+          <div className="divide-y divide-border/40">
             {filtered.map(c => {
               const pct = c.totalLessons > 0 ? Math.round((c.completedLessons / c.totalLessons) * 100) : 0;
-              const isFinished = pct === 100 && c.totalLessons > 0;
+              const status = getStatus(c);
               return (
-                <Link key={c.id} to={`/membros-area/curso/${c.id}`}
-                  className="group flex items-center gap-4 px-4 sm:px-5 py-4 hover:bg-muted/20 transition-colors">
-                  {/* Thumbnail */}
-                  <div className="h-16 w-24 sm:h-20 sm:w-32 rounded-lg overflow-hidden shrink-0 bg-muted">
+                <Link
+                  key={c.id}
+                  to={`/membros-area/curso/${c.id}`}
+                  className="group grid grid-cols-1 sm:grid-cols-[1fr_160px_100px_40px] items-center px-5 py-3.5 hover:bg-muted/20 transition-colors"
+                >
+                  {/* Course info */}
+                  <div className="flex items-center gap-3 min-w-0">
                     {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                      <img src={c.thumbnail_url} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                        <GraduationCap className="h-6 w-6 text-muted-foreground/15" />
+                      <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                        <GraduationCap className="h-4 w-4 text-muted-foreground/30" />
                       </div>
                     )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="text-[14px] font-semibold text-foreground truncate">{c.title}</h3>
-                        {c.description && (
-                          <p className="text-[12px] text-muted-foreground line-clamp-1 mt-0.5 hidden sm:block">{c.description}</p>
-                        )}
-                      </div>
-                      {isFinished && <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />}
-                    </div>
-                    <div className="flex items-center gap-3 mt-2">
-                      <div className="flex-1 max-w-[200px] h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div className={cn("h-full rounded-full transition-all", isFinished ? "bg-emerald-500" : "bg-primary")} style={{ width: `${pct}%` }} />
-                      </div>
-                      <span className="text-[11px] text-muted-foreground tabular-nums">{pct}%</span>
-                      <span className="text-[11px] text-muted-foreground/50 hidden sm:inline">
-                        {c.completedLessons}/{c.totalLessons} aulas · {c.modules.length} módulos
-                      </span>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">{c.title}</p>
+                      <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 max-w-[260px]">
+                        {c.modules.length} módulo{c.modules.length !== 1 && "s"} · {c.totalLessons} aula{c.totalLessons !== 1 && "s"}
+                      </p>
                     </div>
                   </div>
 
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/30 shrink-0 group-hover:text-foreground transition-colors hidden sm:block" />
+                  {/* Progress */}
+                  <div className="hidden sm:flex items-center gap-2.5">
+                    <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[100px]">
+                      <div
+                        className={cn("h-full rounded-full transition-all", status === "completed" ? "bg-emerald-500" : "bg-primary")}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-[12px] text-muted-foreground tabular-nums w-8">{pct}%</span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <span className={cn("h-2 w-2 rounded-full", statusDot(status))} />
+                    <span className="text-[12px] text-muted-foreground">{statusLabel(status)}</span>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="hidden sm:flex justify-end">
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                  </div>
+
+                  {/* Mobile meta */}
+                  <div className="flex items-center justify-between mt-2 sm:hidden">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(status))} />
+                        <span className="text-[11px] text-muted-foreground">{statusLabel(status)}</span>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground/50">{pct}%</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
+                  </div>
                 </Link>
               );
             })}
           </div>
-        )}
-      </section>
+        </div>
+      )}
     </div>
   );
 }
