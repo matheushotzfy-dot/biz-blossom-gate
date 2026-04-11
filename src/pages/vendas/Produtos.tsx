@@ -271,66 +271,33 @@ export default function Produtos() {
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" sideOffset={8} className="w-60 rounded-2xl p-1.5 shadow-2xl shadow-black/8 dark:shadow-black/25 border border-border/40 bg-popover backdrop-blur-2xl overflow-hidden">
-                      <div className="px-3 pt-2.5 pb-1.5">
-                        <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.12em]">Ações do produto</p>
-                      </div>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="group/item gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-primary/[0.06] dark:hover:bg-primary/10 transition-all duration-200">
-                        <div className="h-8 w-8 rounded-[10px] bg-primary/[0.06] dark:bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/[0.12] dark:group-hover/item:bg-primary/20 group-hover/item:scale-105 transition-all duration-200">
-                          <Settings2 className="h-4 w-4 text-primary/70" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span>Editar produto</span>
-                          <span className="text-[10px] text-muted-foreground/40 font-normal -mt-0.5">Configurações gerais</span>
-                        </div>
+                    <DropdownMenuContent align="end" sideOffset={4} className="w-48 rounded-xl p-1 border border-border/60 bg-popover shadow-lg">
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
+                        <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="group/item gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-primary/[0.06] dark:hover:bg-primary/10 transition-all duration-200">
-                        <div className="h-8 w-8 rounded-[10px] bg-violet-500/[0.08] dark:bg-violet-500/15 flex items-center justify-center shrink-0 group-hover/item:bg-violet-500/[0.14] dark:group-hover/item:bg-violet-500/25 group-hover/item:scale-105 transition-all duration-200">
-                          <Palette className="h-4 w-4 text-violet-500/80 dark:text-violet-400/80" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span>Checkout Builder</span>
-                          <span className="text-[10px] text-muted-foreground/40 font-normal -mt-0.5">Personalizar página</span>
-                        </div>
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
+                        <Palette className="h-3.5 w-3.5 text-muted-foreground" />
+                        Checkout Builder
                       </DropdownMenuItem>
                       {p.checkout_url && (
-                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="group/item gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-primary/[0.06] dark:hover:bg-primary/10 transition-all duration-200">
-                          <div className="h-8 w-8 rounded-[10px] bg-sky-500/[0.08] dark:bg-sky-500/15 flex items-center justify-center shrink-0 group-hover/item:bg-sky-500/[0.14] dark:group-hover/item:bg-sky-500/25 group-hover/item:scale-105 transition-all duration-200">
-                            <ExternalLink className="h-4 w-4 text-sky-500/80 dark:text-sky-400/80" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span>Ver checkout</span>
-                            <span className="text-[10px] text-muted-foreground/40 font-normal -mt-0.5">Abrir em nova aba</span>
-                          </div>
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                          Ver checkout
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="group/item gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-primary/[0.06] dark:hover:bg-primary/10 transition-all duration-200">
-                        <div className="h-8 w-8 rounded-[10px] bg-amber-500/[0.08] dark:bg-amber-500/15 flex items-center justify-center shrink-0 group-hover/item:bg-amber-500/[0.14] dark:group-hover/item:bg-amber-500/25 group-hover/item:scale-105 transition-all duration-200">
-                          <Crosshair className="h-4 w-4 text-amber-500/80 dark:text-amber-400/80" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span>Pixels</span>
-                          <span className="text-[10px] text-muted-foreground/40 font-normal -mt-0.5">Rastreamento</span>
-                        </div>
+                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
+                        <Crosshair className="h-3.5 w-3.5 text-muted-foreground" />
+                        Pixels
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="group/item gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-primary/[0.06] dark:hover:bg-primary/10 transition-all duration-200">
-                        <div className="h-8 w-8 rounded-[10px] bg-emerald-500/[0.08] dark:bg-emerald-500/15 flex items-center justify-center shrink-0 group-hover/item:bg-emerald-500/[0.14] dark:group-hover/item:bg-emerald-500/25 group-hover/item:scale-105 transition-all duration-200">
-                          <Star className="h-4 w-4 text-emerald-500/80 dark:text-emerald-400/80" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span>Área de Membros</span>
-                          <span className="text-[10px] text-muted-foreground/40 font-normal -mt-0.5">Conteúdo exclusivo</span>
-                        </div>
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2 text-[13px] cursor-pointer rounded-lg px-2.5 py-2 font-medium">
+                        <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                        Área de Membros
                       </DropdownMenuItem>
-                      <div className="mx-2 my-1.5 h-px bg-border/30" />
-                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="group/item gap-3 text-[13px] text-destructive cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-destructive/[0.06] dark:hover:bg-destructive/10 transition-all duration-200">
-                        <div className="h-8 w-8 rounded-[10px] bg-destructive/[0.08] dark:bg-destructive/15 flex items-center justify-center shrink-0 group-hover/item:bg-destructive/[0.14] dark:group-hover/item:bg-destructive/25 group-hover/item:scale-105 transition-all duration-200">
-                          <Trash2 className="h-4 w-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span>Excluir</span>
-                          <span className="text-[10px] text-destructive/40 font-normal -mt-0.5">Ação irreversível</span>
-                        </div>
+                      <DropdownMenuSeparator className="my-1" />
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[13px] text-destructive cursor-pointer rounded-lg px-2.5 py-2 font-medium focus:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Excluir
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
