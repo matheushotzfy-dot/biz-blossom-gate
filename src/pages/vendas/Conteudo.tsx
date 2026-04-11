@@ -382,10 +382,13 @@ export default function AdminConteudo() {
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
       {/* ── Header ── */}
-      <div className="flex items-end justify-between gap-4 mb-8 flex-wrap">
+      <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 className="text-2xl font-black text-foreground tracking-tight">Área de Membros</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Gerencie cursos, módulos e aulas</p>
+          <h1 className="text-[22px] font-bold text-foreground">Área de Membros</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            {courses.length} curso{courses.length !== 1 ? "s" : ""}
+            {totalStudents > 0 && <> · {totalStudents} aluno{totalStudents !== 1 ? "s" : ""}</>}
+          </p>
         </div>
         <button
           onClick={openNew}
@@ -395,26 +398,9 @@ export default function AdminConteudo() {
         </button>
       </div>
 
-      {/* ── Summary Strip ── */}
-      {courses.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-border/60 bg-border/30 mb-6">
-          {[
-            { label: "Cursos", value: courses.length, accent: "text-primary" },
-            { label: "Módulos", value: totalModules, accent: "text-foreground" },
-            { label: "Aulas", value: totalLessonsCount, accent: "text-foreground" },
-            { label: "Alunos ativos", value: totalStudents, accent: "text-primary" },
-          ].map((s, i) => (
-            <div key={i} className="bg-card px-4 py-3.5 sm:px-5 sm:py-4">
-              <p className="text-[11px] text-muted-foreground/60 font-medium uppercase tracking-wider mb-0.5">{s.label}</p>
-              <p className={cn("text-lg sm:text-xl font-bold tabular-nums", s.accent)}>{s.value}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* ── Toolbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-        <div className="flex items-center gap-0.5 border-b border-border/40 sm:border-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div className="flex items-center gap-0.5">
           {tabs.map(t => (
             <button
               key={t.value}
@@ -437,18 +423,17 @@ export default function AdminConteudo() {
             </button>
           ))}
         </div>
-
-        <div className="sm:ml-auto relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+        <div className="sm:ml-auto relative w-full sm:w-56">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar…"
-            className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-8 text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-shadow"
+            className="h-8 w-full rounded-md border border-border/60 bg-card pl-8 pr-7 text-[12px] placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-shadow"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
-              <X className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2">
+              <X className="h-3 w-3 text-muted-foreground/40" />
             </button>
           )}
         </div>
@@ -456,154 +441,166 @@ export default function AdminConteudo() {
 
       {/* ── Course List ── */}
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Carregando cursos...</p>
+        <div className="py-20 flex items-center justify-center">
+          <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 flex flex-col items-center gap-3">
-          <GraduationCap className="h-10 w-10 text-muted-foreground/20" />
+        <div className="py-20 flex flex-col items-center gap-2">
           <p className="text-sm text-muted-foreground">
             {search || filter !== "all" ? "Nenhum resultado" : "Nenhum curso criado"}
           </p>
           {!search && filter === "all" && (
             <button
               onClick={openNew}
-              className="mt-2 h-9 px-4 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+              className="mt-1 text-[13px] font-medium text-primary hover:underline"
             >
-              <Plus className="h-4 w-4" /> Criar primeiro curso
+              Criar primeiro curso →
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-2.5">
-          {filtered.map((c) => {
-            const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
-            const product = products.find(p => p.id === c.product_id);
-            const revenue = getCourseRevenue(c);
-            const students = studentCounts[c.id] || 0;
-            const isLive = !!c.is_published;
+        <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
+          {/* Table header */}
+          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border/40 bg-muted/20">
+            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Curso</span>
+            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Conteúdo</span>
+            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Alunos</span>
+            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Status</span>
+            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Receita</span>
+            <span />
+          </div>
 
-            return (
-              <div
-                key={c.id}
-                onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                className={cn(
-                  "group relative rounded-xl border bg-card overflow-hidden transition-all duration-200 cursor-pointer",
-                  isLive
-                    ? "border-primary/20 hover:border-primary/40 hover:shadow-[0_0_24px_-8px_hsl(var(--primary)/0.12)]"
-                    : "border-border/60 hover:border-border hover:shadow-sm"
-                )}
-              >
-                {/* Live accent bar */}
-                {isLive && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary to-primary/60" />}
+          <div className="divide-y divide-border/30">
+            {filtered.map((c) => {
+              const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
+              const product = products.find(p => p.id === c.product_id);
+              const revenue = getCourseRevenue(c);
+              const students = studentCounts[c.id] || 0;
+              const isLive = !!c.is_published;
 
-                <div className="flex items-stretch">
-                  {/* Thumbnail */}
-                  <div className="hidden sm:block w-[120px] shrink-0">
-                    {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/5 to-muted/30 flex items-center justify-center min-h-[88px]">
-                        <GraduationCap className="h-7 w-7 text-primary/15" />
-                      </div>
-                    )}
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                  className="group grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 py-3 sm:py-0 sm:h-[56px] hover:bg-muted/10 transition-colors cursor-pointer"
+                >
+                  {/* Course */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-md overflow-hidden shrink-0 bg-muted/30">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center">
+                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground/25" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium text-foreground truncate">{c.title}</p>
+                      <p className="text-[11px] text-muted-foreground/50 truncate">
+                        {product ? product.name : c.description || "—"}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0 px-4 sm:px-5 py-3.5 sm:py-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-[14px] font-semibold text-foreground truncate">{c.title}</h3>
-                          {isLive && (
-                            <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-bold text-primary uppercase tracking-wider">
-                              <span className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-                              Live
-                            </span>
-                          )}
-                          {!isLive && (
-                            <span className="shrink-0 text-[10px] font-medium text-muted-foreground/40 uppercase tracking-wider">Rascunho</span>
-                          )}
-                        </div>
-                        <p className="text-[12px] text-muted-foreground/60 truncate max-w-[420px]">
-                          {product ? product.name : c.description || "Sem descrição"}
-                        </p>
-                      </div>
+                  {/* Conteúdo */}
+                  <div className="hidden sm:block">
+                    <p className="text-[12px] text-muted-foreground tabular-nums">{stats.modules}m · {stats.lessons}a</p>
+                  </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                  {/* Alunos */}
+                  <div className="hidden sm:block">
+                    <p className="text-[12px] text-muted-foreground tabular-nums">{students > 0 ? students : "—"}</p>
+                  </div>
+
+                  {/* Status */}
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <span className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      isLive ? "bg-primary" : "bg-muted-foreground/25"
+                    )} />
+                    <span className="text-[12px] text-muted-foreground">{isLive ? "Live" : "Draft"}</span>
+                  </div>
+
+                  {/* Receita */}
+                  <div className="hidden sm:block">
+                    <p className={cn("text-[12px] tabular-nums", revenue > 0 ? "text-foreground font-medium" : "text-muted-foreground/30")}>
+                      {revenue > 0 ? fmt(revenue) : "—"}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground/25 hover:text-foreground transition-colors">
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 rounded-lg">
+                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
+                          <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
+                          <Edit className="h-3.5 w-3.5" /> Configurações
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
+                          {isLive ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                        </DropdownMenuItem>
                         {isLive && (
-                          <button
-                            onClick={() => copyMemberLink(c.id)}
-                            className={cn(
-                              "h-7 px-2.5 rounded-md text-[11px] font-medium flex items-center gap-1.5 transition-colors",
-                              copiedId === c.id
-                                ? "bg-success/10 text-success"
-                                : "text-primary hover:bg-primary/5"
-                            )}
-                          >
-                            {copiedId === c.id ? <CheckCircle2 className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                            {copiedId === c.id ? "Copiado" : "Link"}
-                          </button>
+                          <>
+                            <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-2 text-[12px] cursor-pointer">
+                              <Copy className="h-3.5 w-3.5" /> Copiar link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
+                              <PlayCircle className="h-3.5 w-3.5" /> Ver área
+                            </DropdownMenuItem>
+                          </>
                         )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-muted/40 transition-colors">
-                              <MoreVertical className="h-4 w-4" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                            <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
-                              <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
-                              <Edit className="h-3.5 w-3.5" /> Configurações
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
-                              {isLive ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
-                            </DropdownMenuItem>
-                            {isLive && (
-                              <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
-                                <PlayCircle className="h-3.5 w-3.5" /> Ver área
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
-                              <Trash2 className="h-3.5 w-3.5" /> Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                          <Trash2 className="h-3.5 w-3.5" /> Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
 
-                    {/* Meta chips */}
-                    <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 text-[11px] font-medium text-muted-foreground">
-                        <Layers className="h-2.5 w-2.5 text-primary/50" /> {stats.modules} módulo{stats.modules !== 1 && "s"}
+                  {/* Mobile meta */}
+                  <div className="flex items-center justify-between mt-1.5 sm:hidden">
+                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-primary" : "bg-muted-foreground/25")} />
+                        {isLive ? "Live" : "Draft"}
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 text-[11px] font-medium text-muted-foreground">
-                        <Video className="h-2.5 w-2.5 text-muted-foreground/50" /> {stats.lessons} aula{stats.lessons !== 1 && "s"}
-                      </span>
-                      {students > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/8 text-[11px] font-medium text-primary">
-                          <Users className="h-2.5 w-2.5" /> {students} aluno{students !== 1 && "s"}
-                        </span>
-                      )}
-                      {revenue > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-success/8 text-[11px] font-semibold text-success tabular-nums">
-                          {fmt(revenue)}
-                        </span>
-                      )}
-                      <span className="text-[10px] text-muted-foreground/30 tabular-nums ml-auto hidden sm:inline">
-                        {new Date(c.created_at).toLocaleDateString("pt-BR")}
-                      </span>
+                      <span>{stats.modules}m · {stats.lessons}a</span>
+                      {revenue > 0 && <span className="font-medium text-foreground">{fmt(revenue)}</span>}
+                    </div>
+                    <div onClick={e => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground/30">
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44 rounded-lg">
+                          <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
+                            <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
+                            <Edit className="h-3.5 w-3.5" /> Configurações
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                            <Trash2 className="h-3.5 w-3.5" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
