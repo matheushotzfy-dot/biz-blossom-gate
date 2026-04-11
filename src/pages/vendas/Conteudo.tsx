@@ -374,12 +374,18 @@ export default function AdminConteudo() {
   const statusLabel = (isPublished: boolean) => isPublished ? "Publicado" : "Rascunho";
   const statusDot = (isPublished: boolean) => isPublished ? "bg-success" : "bg-muted-foreground/30";
 
+  const totalStudents = Object.values(studentCounts).reduce((a, c) => a + c, 0);
+  const totalModules = Object.values(courseStats).reduce((a, s) => a + s.modules, 0);
+  const totalLessonsCount = Object.values(courseStats).reduce((a, s) => a + s.lessons, 0);
+  const totalRevenue = courses.reduce((a, c) => a + getCourseRevenue(c), 0);
+
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
-      <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
+      {/* ── Header ── */}
+      <div className="flex items-end justify-between gap-4 mb-8 flex-wrap">
         <div>
           <h1 className="text-2xl font-black text-foreground tracking-tight">Área de Membros</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">{courses.length} curso{courses.length !== 1 && "s"} cadastrado{courses.length !== 1 && "s"}</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Gerencie cursos, módulos e aulas</p>
         </div>
         <button
           onClick={openNew}
@@ -389,7 +395,25 @@ export default function AdminConteudo() {
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+      {/* ── Summary Strip ── */}
+      {courses.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-border/60 bg-border/30 mb-6">
+          {[
+            { label: "Cursos", value: courses.length, accent: "text-primary" },
+            { label: "Módulos", value: totalModules, accent: "text-foreground" },
+            { label: "Aulas", value: totalLessonsCount, accent: "text-foreground" },
+            { label: "Alunos ativos", value: totalStudents, accent: "text-primary" },
+          ].map((s, i) => (
+            <div key={i} className="bg-card px-4 py-3.5 sm:px-5 sm:py-4">
+              <p className="text-[11px] text-muted-foreground/60 font-medium uppercase tracking-wider mb-0.5">{s.label}</p>
+              <p className={cn("text-lg sm:text-xl font-bold tabular-nums", s.accent)}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Toolbar ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="flex items-center gap-0.5 border-b border-border/40 sm:border-0">
           {tabs.map(t => (
             <button
@@ -430,6 +454,7 @@ export default function AdminConteudo() {
         </div>
       </div>
 
+      {/* ── Course List ── */}
       {isLoading ? (
         <div className="py-20 flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -451,149 +476,134 @@ export default function AdminConteudo() {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="hidden sm:grid grid-cols-[1fr_150px_110px_120px_40px] items-center px-5 py-2.5 border-b border-border/50 bg-muted/30">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Curso</span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Conteúdo</span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Status</span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Acesso</span>
-            <span />
-          </div>
+        <div className="space-y-2.5">
+          {filtered.map((c) => {
+            const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
+            const product = products.find(p => p.id === c.product_id);
+            const revenue = getCourseRevenue(c);
+            const students = studentCounts[c.id] || 0;
+            const isLive = !!c.is_published;
 
-          <div className="divide-y divide-border/40">
-            {filtered.map((c) => {
-              const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
-              const product = products.find(p => p.id === c.product_id);
+            return (
+              <div
+                key={c.id}
+                onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                className={cn(
+                  "group relative rounded-xl border bg-card overflow-hidden transition-all duration-200 cursor-pointer",
+                  isLive
+                    ? "border-primary/20 hover:border-primary/40 hover:shadow-[0_0_24px_-8px_hsl(var(--primary)/0.12)]"
+                    : "border-border/60 hover:border-border hover:shadow-sm"
+                )}
+              >
+                {/* Live accent bar */}
+                {isLive && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary to-primary/60" />}
 
-              return (
-                <div
-                  key={c.id}
-                  className="group grid grid-cols-1 sm:grid-cols-[1fr_150px_110px_120px_40px] items-center px-5 py-3.5 hover:bg-muted/20 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-stretch">
+                  {/* Thumbnail */}
+                  <div className="hidden sm:block w-[120px] shrink-0">
                     {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" loading="lazy" />
+                      <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
-                        <GraduationCap className="h-4 w-4 text-muted-foreground/30" />
+                      <div className="w-full h-full bg-gradient-to-br from-primary/5 to-muted/30 flex items-center justify-center min-h-[88px]">
+                        <GraduationCap className="h-7 w-7 text-primary/15" />
                       </div>
                     )}
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-foreground truncate">{c.title}</p>
-                      <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 max-w-[320px]">
-                        {product ? `Vinculado a ${product.name}` : c.description || "Sem descrição"}
-                      </p>
-                    </div>
                   </div>
 
-                  <div className="hidden sm:block">
-                    <span className="text-[12px] text-foreground">{stats.modules} módulo{stats.modules !== 1 && "s"}</span>
-                    <span className="text-[11px] text-muted-foreground/50 mx-1.5">·</span>
-                    <span className="text-[12px] text-muted-foreground">{stats.lessons} aula{stats.lessons !== 1 && "s"}</span>
-                  </div>
-
-                  <div className="hidden sm:flex items-center gap-1.5">
-                    <span className={cn("h-2 w-2 rounded-full", statusDot(!!c.is_published))} />
-                    <span className="text-[12px] text-muted-foreground">{statusLabel(!!c.is_published)}</span>
-                  </div>
-
-                  <div className="hidden sm:block" onClick={e => e.stopPropagation()}>
-                    {c.is_published ? (
-                      <button
-                        onClick={() => copyMemberLink(c.id)}
-                        className="inline-flex items-center gap-1.5 text-[11px] text-primary hover:underline font-medium"
-                      >
-                        <AnimatePresence mode="wait">
-                          {copiedId === c.id ? (
-                            <motion.span key="ok" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                              <CheckCircle2 className="h-3 w-3 text-success" />
-                            </motion.span>
-                          ) : (
-                            <Copy className="h-3 w-3" />
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 px-4 sm:px-5 py-3.5 sm:py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-[14px] font-semibold text-foreground truncate">{c.title}</h3>
+                          {isLive && (
+                            <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-bold text-primary uppercase tracking-wider">
+                              <span className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+                              Live
+                            </span>
                           )}
-                        </AnimatePresence>
-                        Copiar link
-                      </button>
-                    ) : (
-                      <span className="text-[11px] text-muted-foreground/40">—</span>
-                    )}
-                  </div>
-
-                  <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-muted/40 transition-colors">
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
-                          <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
-                          <Edit className="h-3.5 w-3.5" /> Configurações
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
-                          {c.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
-                        </DropdownMenuItem>
-                        {c.is_published && (
-                          <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
-                            <PlayCircle className="h-3.5 w-3.5" /> Ver área
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
-                          <Trash2 className="h-3.5 w-3.5" /> Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-2 sm:hidden">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(!!c.is_published))} />
-                        <span className="text-[11px] text-muted-foreground">{statusLabel(!!c.is_published)}</span>
+                          {!isLive && (
+                            <span className="shrink-0 text-[10px] font-medium text-muted-foreground/40 uppercase tracking-wider">Rascunho</span>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-muted-foreground/60 truncate max-w-[420px]">
+                          {product ? product.name : c.description || "Sem descrição"}
+                        </p>
                       </div>
-                      <span className="text-[11px] text-muted-foreground/50 truncate">
-                        {stats.modules} módulo{stats.modules !== 1 && "s"} · {stats.lessons} aula{stats.lessons !== 1 && "s"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                      {c.is_published && (
-                        <button onClick={() => copyMemberLink(c.id)} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-primary">
-                          <Copy className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40">
-                            <MoreVertical className="h-4 w-4" />
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                        {isLive && (
+                          <button
+                            onClick={() => copyMemberLink(c.id)}
+                            className={cn(
+                              "h-7 px-2.5 rounded-md text-[11px] font-medium flex items-center gap-1.5 transition-colors",
+                              copiedId === c.id
+                                ? "bg-success/10 text-success"
+                                : "text-primary hover:bg-primary/5"
+                            )}
+                          >
+                            {copiedId === c.id ? <CheckCircle2 className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {copiedId === c.id ? "Copiado" : "Link"}
                           </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                          <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
-                            <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
-                            <Edit className="h-3.5 w-3.5" /> Configurações
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
-                            {c.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
-                            <Trash2 className="h-3.5 w-3.5" /> Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-muted/40 transition-colors">
+                              <MoreVertical className="h-4 w-4" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-lg">
+                            <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
+                              <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
+                              <Edit className="h-3.5 w-3.5" /> Configurações
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
+                              {isLive ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                            </DropdownMenuItem>
+                            {isLive && (
+                              <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
+                                <PlayCircle className="h-3.5 w-3.5" /> Ver área
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                              <Trash2 className="h-3.5 w-3.5" /> Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+
+                    {/* Meta chips */}
+                    <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 text-[11px] font-medium text-muted-foreground">
+                        <Layers className="h-2.5 w-2.5 text-primary/50" /> {stats.modules} módulo{stats.modules !== 1 && "s"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 text-[11px] font-medium text-muted-foreground">
+                        <Video className="h-2.5 w-2.5 text-muted-foreground/50" /> {stats.lessons} aula{stats.lessons !== 1 && "s"}
+                      </span>
+                      {students > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/8 text-[11px] font-medium text-primary">
+                          <Users className="h-2.5 w-2.5" /> {students} aluno{students !== 1 && "s"}
+                        </span>
+                      )}
+                      {revenue > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-success/8 text-[11px] font-semibold text-success tabular-nums">
+                          {fmt(revenue)}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-muted-foreground/30 tabular-nums ml-auto hidden sm:inline">
+                        {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                      </span>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
