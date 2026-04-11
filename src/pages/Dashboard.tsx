@@ -724,13 +724,22 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-6">
         {/* Quick actions — premium grid */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-card/80 p-1.5 flex flex-col">
-          <div className="grid grid-cols-2 gap-1.5 flex-1">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card overflow-hidden flex flex-col shadow-sm">
+          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-[11px] font-heading font-bold uppercase tracking-[0.12em] text-foreground/60">Ações Rápidas</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground/30 font-medium">10 atalhos</span>
+          </div>
+          <div className="grid grid-cols-2 gap-px bg-border/8 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
               { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
               { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
-              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" as const },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório completo", tone: "primary" as const },
               { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
               { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
               { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
@@ -738,24 +747,24 @@ export default function Dashboard() {
               { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
             ].map((action) => {
-              const colors: Record<string, { bg: string; text: string; hoverBg: string }> = {
-                primary: { bg: "bg-primary/6", text: "text-primary", hoverBg: "hover:bg-primary/[0.04]" },
-                success: { bg: "bg-success/6", text: "text-success", hoverBg: "hover:bg-success/[0.04]" },
-                info: { bg: "bg-info/6", text: "text-info", hoverBg: "hover:bg-info/[0.04]" },
-                warning: { bg: "bg-warning/6", text: "text-warning", hoverBg: "hover:bg-warning/[0.04]" },
+              const colors: Record<string, { bg: string; text: string; hoverBg: string; ring: string }> = {
+                primary: { bg: "bg-primary/8", text: "text-primary", hoverBg: "hover:bg-primary/[0.03]", ring: "ring-primary/10" },
+                success: { bg: "bg-success/8", text: "text-success", hoverBg: "hover:bg-success/[0.03]", ring: "ring-success/10" },
+                info: { bg: "bg-info/8", text: "text-info", hoverBg: "hover:bg-info/[0.03]", ring: "ring-info/10" },
+                warning: { bg: "bg-warning/8", text: "text-warning", hoverBg: "hover:bg-warning/[0.03]", ring: "ring-warning/10" },
               };
               const c = colors[action.tone] || colors.primary;
               return (
                 <Link key={action.href} to={action.href}
-                  className={cn("group relative flex items-center gap-3 rounded-xl bg-background/40 p-3.5 transition-all duration-200 active:scale-[0.97]", c.hoverBg)}>
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset ring-white/[0.04]", c.bg, c.text)}>
-                    <action.icon className="h-4 w-4" />
+                  className={cn("group relative flex items-center gap-3.5 bg-card p-4 md:p-5 transition-all duration-200 active:scale-[0.98]", c.hoverBg)}>
+                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset transition-transform duration-200 group-hover:scale-105", c.bg, c.text, c.ring)}>
+                    <action.icon className="h-[18px] w-[18px]" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[9px] text-muted-foreground/35 mt-0.5 hidden md:block">{action.desc}</p>
+                    <p className="text-[13px] font-bold text-foreground leading-tight">{action.label}</p>
+                    <p className="text-[10px] text-muted-foreground/40 mt-0.5 leading-snug">{action.desc}</p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/10 hidden md:block group-hover:text-muted-foreground/30 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/10 shrink-0 group-hover:text-muted-foreground/30 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
               );
             })}
@@ -763,7 +772,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed — premium */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/50 bg-card flex flex-col overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl border border-border/60 bg-card flex flex-col overflow-hidden shadow-sm">
           {/* Header with live dot */}
           <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
             <div className="flex items-center gap-2.5">
@@ -776,14 +785,14 @@ export default function Dashboard() {
             <Link to="/financeiro/extrato" className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors px-2.5 py-1 rounded-lg hover:bg-primary/5">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto max-h-[480px]">
+          <div className="flex-1 min-h-0 overflow-y-auto max-h-[520px]">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="h-14 w-14 rounded-2xl border border-border/20 bg-muted/5 flex items-center justify-center mb-4">
-                  <Activity className="h-6 w-6 text-muted-foreground/20" />
+                <div className="h-16 w-16 rounded-2xl border border-border/15 bg-muted/5 flex items-center justify-center mb-4">
+                  <Activity className="h-7 w-7 text-muted-foreground/15" />
                 </div>
-                <p className="text-[12px] font-bold text-muted-foreground/50">Sem movimentações ainda</p>
-                <p className="text-[10px] text-muted-foreground/30 mt-1">As vendas aparecerão aqui em tempo real</p>
+                <p className="text-[13px] font-bold text-muted-foreground/40">Sem movimentações ainda</p>
+                <p className="text-[11px] text-muted-foreground/25 mt-1.5 max-w-[200px]">As vendas aparecerão aqui em tempo real</p>
               </div>
             ) : (
               activity.map((item, idx) => {
@@ -807,7 +816,7 @@ export default function Dashboard() {
 
                 return (
                   <div key={item.id} className={cn("group flex items-center gap-3.5 px-5 py-4 hover:bg-muted/6 transition-all duration-200 cursor-default", !isLast && "border-b border-border/8")}>
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset ring-white/[0.04]", s.iconBg, s.iconText)}>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset ring-border/10", s.iconBg, s.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
                     <div className="min-w-0 flex-1">
