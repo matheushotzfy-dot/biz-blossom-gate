@@ -8,7 +8,7 @@ import {
  Link as LinkIcon, Search, Copy, MoreVertical,
  Globe, Lock, Image as ImageIcon, X,
  Video, DollarSign, PlayCircle, Sparkles,
- Users, Grid3X3, List,
+ Users, Grid3X3, List, CheckCircle2,
  ChevronRight, GraduationCap, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -285,433 +285,343 @@ export default function AdminConteudo() {
 
  const getCourseRevenue = (c: Course) => c.product_id ? (revenueByProduct[c.product_id] || 0) : 0;
 
- const [search, setSearch] = useState("");
- const [filter, setFilter] = useState<FilterId>("all");
- const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
- const [wizardOpen, setWizardOpen] = useState(false);
- const [editCourseData, setEditCourseData] = useState<any>(null);
- const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
- const [deletingCourse, setDeletingCourse] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<FilterId>("all");
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editCourseData, setEditCourseData] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deletingCourse, setDeletingCourse] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
- const reloadCourses = () => invalidateAll(["courses", "products"]);
+  const reloadCourses = () => invalidateAll(["courses", "products"]);
 
- const openNew = () => {
- setEditCourseData(null);
- setWizardOpen(true);
- };
+  const openNew = () => {
+    setEditCourseData(null);
+    setWizardOpen(true);
+  };
 
- const openEdit = (c: Course) => {
- const sourceCourse = coursesRaw.find((item: any) => item.id === c.id);
- setEditCourseData({
- ...c,
- modules: (sourceCourse?.modules || []).map((module: any) => ({
- id: module.id,
- title: module.title,
- banner_url: module.banner_url ?? null,
- lessonsCount: module.lessons?.length ?? 0,
- })),
- });
- setWizardOpen(true);
- };
+  const openEdit = (c: Course) => {
+    const sourceCourse = coursesRaw.find((item: any) => item.id === c.id);
+    setEditCourseData({
+      ...c,
+      modules: (sourceCourse?.modules || []).map((module: any) => ({
+        id: module.id,
+        title: module.title,
+        banner_url: module.banner_url ?? null,
+        lessonsCount: module.lessons?.length ?? 0,
+      })),
+    });
+    setWizardOpen(true);
+  };
 
- // saveCourse is now handled by the wizard component
+  const togglePublish = async (id: string, cur: boolean) => {
+    if (!user) return;
+    await supabase.from("courses").update({ is_published: !cur }).eq("id", id).eq("user_id", user.id);
+    reloadCourses();
+    toast.success(cur ? "Despublicado" : "Publicado!");
+  };
 
- const togglePublish = async (id: string, cur: boolean) => {
- if (!user) return;
- await supabase.from("courses").update({ is_published: !cur }).eq("id", id).eq("user_id", user.id);
- reloadCourses();
- toast.success(cur ? "Despublicado" : "Publicado!");
- };
+  const deleteCourse = async (id: string) => {
+    setDeleteTarget(id);
+  };
 
- const deleteCourse = async (id: string) => {
- setDeleteTarget(id);
- };
+  const confirmDeleteCourse = async () => {
+    if (!user || !deleteTarget) return;
+    setDeletingCourse(true);
+    const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", deleteTarget);
+    if (courseModules && courseModules.length > 0) {
+      await supabase.from("lessons").delete().in("module_id", courseModules.map(m => m.id));
+      await supabase.from("modules").delete().eq("course_id", deleteTarget);
+    }
+    await supabase.from("user_access").delete().eq("course_id", deleteTarget);
+    await supabase.from("courses").delete().eq("id", deleteTarget).eq("user_id", user.id);
+    setDeletingCourse(false);
+    setDeleteTarget(null);
+    reloadCourses();
+    toast.success("Curso excluído!");
+  };
 
- const confirmDeleteCourse = async () => {
- if (!user || !deleteTarget) return;
- setDeletingCourse(true);
- const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", deleteTarget);
- if (courseModules && courseModules.length > 0) {
- await supabase.from("lessons").delete().in("module_id", courseModules.map(m => m.id));
- await supabase.from("modules").delete().eq("course_id", deleteTarget);
- }
- await supabase.from("user_access").delete().eq("course_id", deleteTarget);
- await supabase.from("courses").delete().eq("id", deleteTarget).eq("user_id", user.id);
- setDeletingCourse(false);
- setDeleteTarget(null);
- reloadCourses();
- toast.success("Curso excluído!");
- };
+  const filtered = useMemo(() => {
+    return courses.filter(c => {
+      const q = search.toLowerCase();
+      const matchSearch = c.title.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q);
+      const matchFilter = filter === "all" || (filter === "published" ? c.is_published : !c.is_published);
+      return !!matchSearch && matchFilter;
+    });
+  }, [courses, search, filter]);
 
- const filtered = useMemo(() => {
- return courses.filter(c => {
- const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
- const matchFilter = filter === "all" || (filter === "published" ? c.is_published : !c.is_published);
- return matchSearch && matchFilter;
- });
- }, [courses, search, filter]);
+  const getMemberLink = (courseId: string) => `${window.location.origin}/membros-area/curso/${courseId}`;
 
- const getMemberLink = (courseId: string) => `${window.location.origin}/membros-area/curso/${courseId}`;
+  const copyMemberLink = (courseId: string) => {
+    navigator.clipboard.writeText(getMemberLink(courseId));
+    setCopiedId(courseId);
+    toast.success("Link copiado!");
+    window.setTimeout(() => {
+      setCopiedId(current => current === courseId ? null : current);
+    }, 2000);
+  };
 
- const totalCourses = courses.length;
- const publishedCourses = courses.filter(c => c.is_published).length;
- const totalModules = Object.values(courseStats).reduce((a, s) => a + s.modules, 0);
- const totalLessons = Object.values(courseStats).reduce((a, s) => a + s.lessons, 0);
- const totalRevenue = courses.reduce((a, c) => a + getCourseRevenue(c), 0);
- const totalStudents = Object.values(studentCounts).reduce((a, c) => a + c, 0);
+  const totalCourses = courses.length;
+  const publishedCourses = courses.filter(c => c.is_published).length;
+  const draftCourses = totalCourses - publishedCourses;
 
- const FILTERS: { id: FilterId; label: string; icon: any; count: number }[] = [
- { id: "all", label: "Todos", icon: BookOpen, count: totalCourses },
- { id: "published", label: "Publicados", icon: Globe, count: publishedCourses },
- { id: "draft", label: "Rascunhos", icon: Lock, count: totalCourses - publishedCourses },
- ];
+  const tabs = [
+    { label: "Todos", value: "all" as const, count: totalCourses },
+    { label: "Publicados", value: "published" as const, count: publishedCourses },
+    { label: "Rascunhos", value: "draft" as const, count: draftCourses },
+  ];
 
- return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
- {/* ════════════════════════════════════════════════════════════════ */}
- {/* CINEMATIC HERO — Clean & Focused */}
- {/* ════════════════════════════════════════════════════════════════ */}
- <motion.section
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ duration: 0.6 }}
- className="relative mb-8 rounded-3xl overflow-hidden"
- >
- {/* Mesh gradient background */}
- <div className="absolute inset-0 border border-border/60 bg-card shadow-sm" />
- <div className="absolute -inset-16 pointer-events-none">
- <motion.div animate={{ x: [0, 25, 0], y: [0, -15, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[160px]" />
- <motion.div animate={{ x: [0, -20, 0], y: [0, 25, 0] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[400px] h-[400px] bg-info/6 rounded-full blur-[140px]" />
- </div>
+  const statusLabel = (isPublished: boolean) => isPublished ? "Publicado" : "Rascunho";
+  const statusDot = (isPublished: boolean) => isPublished ? "bg-success" : "bg-muted-foreground/30";
 
- <div className="relative z-10 p-6 sm:p-8 lg:p-10">
- {/* Header row */}
- <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
- <div className="flex items-center gap-3.5">
- <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ duration: 0.6, delay: 0.1, type: "spring" }}>
- <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
- <GraduationCap className="h-6 w-6 text-primary-foreground" />
- </div>
- </motion.div>
- <div>
- <h1 className="text-xl sm:text-2xl font-heading font-black text-foreground tracking-[-0.03em]">Área de Membros</h1>
- <p className="text-[11px] text-muted-foreground/40 font-display mt-0.5">Gerencie seus cursos e conteúdos</p>
- </div>
- {publishedCourses > 0 && (
- <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm shadow-[0_0_16px_rgba(34,197,94,0.08)] ml-1">
- <span className="relative flex h-2 w-2">
- <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
- <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success))]" />
- </span>
- <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">{publishedCourses} Live</span>
- </div>
- )}
- </div>
- <motion.button
- initial={{ opacity: 0, x: 20 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ delay: 0.3 }}
- onClick={openNew}
- className="h-11 px-6 rounded-xl text-sm font-display font-bold flex items-center gap-2.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all duration-300"
- >
- <Plus className="h-4.5 w-4.5" /> Novo Curso
- </motion.button>
- </div>
+  return (
+    <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
+      <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Área de Membros</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">{courses.length} curso{courses.length !== 1 && "s"} cadastrado{courses.length !== 1 && "s"}</p>
+        </div>
+        <button
+          onClick={openNew}
+          className="h-9 px-4 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          <Plus className="h-4 w-4" /> Novo curso
+        </button>
+      </div>
 
- {/* Quick summary pills */}
- {totalCourses > 0 && (
- <motion.div
- initial={{ opacity: 0, y: 12 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.35 }}
- className="flex flex-wrap items-center gap-2 mt-6"
- >
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display border border-border/60 bg-card shadow-sm rounded-full px-3.5 py-1.5">
- <BookOpen className="h-3 w-3 text-primary/60" /> {totalCourses} curso{totalCourses !== 1 ? "s" : ""}
- </span>
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display border border-border/60 bg-card shadow-sm rounded-full px-3.5 py-1.5">
- <Layers className="h-3 w-3 text-info/60" /> {totalModules} módulos
- </span>
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display border border-border/60 bg-card shadow-sm rounded-full px-3.5 py-1.5">
- <Video className="h-3 w-3 text-warning/60" /> {totalLessons} aulas
- </span>
- {totalStudents > 0 && (
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-display border border-border/60 bg-card shadow-sm rounded-full px-3.5 py-1.5">
- <Users className="h-3 w-3 text-primary/60" /> {totalStudents} alunos
- </span>
- )}
- </motion.div>
- )}
- </div>
- </motion.section>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div className="flex items-center gap-0.5 border-b border-border/40 sm:border-0">
+          {tabs.map(t => (
+            <button
+              key={t.value}
+              onClick={() => setFilter(t.value)}
+              className={cn(
+                "px-3 py-2 text-[13px] font-medium transition-colors relative",
+                filter === t.value ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {t.label}
+              {t.count > 0 && (
+                <span className={cn(
+                  "ml-1.5 text-[11px] tabular-nums",
+                  filter === t.value ? "text-primary font-semibold" : "text-muted-foreground/50"
+                )}>{t.count}</span>
+              )}
+              {filter === t.value && (
+                <motion.div layoutId="content-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
 
- {/* ═══ Toolbar ═══ */}
- <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-6">
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
- <div className="flex items-center gap-3 flex-1">
- {/* Search */}
- <div className="relative flex-1 max-w-md group">
- <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/25 group-focus-within:text-primary/50 transition-colors" />
- <Input
- placeholder="Buscar cursos..."
- value={search}
- onChange={e => setSearch(e.target.value)}
- className="pl-11 h-11 rounded-xl bg-card/50 border-border/20 focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all text-sm font-display"
- />
- </div>
+        <div className="sm:ml-auto relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar…"
+            className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-8 text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-shadow"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
+              <X className="h-3.5 w-3.5 text-muted-foreground/40" />
+            </button>
+          )}
+        </div>
+      </div>
 
- {/* Filter pills */}
- <div className="flex items-center gap-1 p-1 rounded-xl bg-card/40 backdrop-blur-xl border border-border/15">
- {FILTERS.map(f => {
- const isActive = filter === f.id;
- return (
- <button
- key={f.id}
- onClick={() => setFilter(f.id)}
- className={cn(
- "relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-display font-bold transition-all duration-300 active:scale-[0.985]",
- isActive ? "text-foreground" : "text-muted-foreground/35 hover:text-muted-foreground/55"
- )}
- >
- {isActive && (
- <motion.div
- layoutId="content-filter-active"
- className="absolute inset-0 rounded-lg bg-card border border-border/30 shadow-sm"
- transition={{ type: "spring", bounce: 0.12, duration: 0.4 }}
- />
- )}
- <f.icon className="h-3.5 w-3.5 relative z-10" />
- <span className="relative z-10 hidden sm:inline">{f.label}</span>
- {f.count > 0 && (
- <span className={cn(
- "relative z-10 text-[10px] font-black px-1.5 py-0.5 rounded-md transition-colors",
- isActive ? "bg-primary/10 text-primary" : "bg-muted/10 text-muted-foreground/25"
- )}>{f.count}</span>
- )}
- </button>
- );
- })}
- </div>
- </div>
+      {isLoading ? (
+        <div className="py-20 flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground">Carregando cursos...</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-20 flex flex-col items-center gap-3">
+          <GraduationCap className="h-10 w-10 text-muted-foreground/20" />
+          <p className="text-sm text-muted-foreground">
+            {search || filter !== "all" ? "Nenhum resultado" : "Nenhum curso criado"}
+          </p>
+          {!search && filter === "all" && (
+            <button
+              onClick={openNew}
+              className="mt-2 h-9 px-4 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              <Plus className="h-4 w-4" /> Criar primeiro curso
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="hidden sm:grid grid-cols-[1fr_150px_110px_120px_40px] items-center px-5 py-2.5 border-b border-border/50 bg-muted/30">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Curso</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Conteúdo</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Status</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Acesso</span>
+            <span />
+          </div>
 
- {/* View mode */}
- <div className="flex items-center gap-1 p-1 rounded-lg bg-card/40 backdrop-blur-xl border border-border/15">
- {[
- { id: "grid" as const, icon: Grid3X3 },
- { id: "list" as const, icon: List },
- ].map(v => (
- <button
- key={v.id}
- onClick={() => setViewMode(v.id)}
- className={cn(
- "relative h-8 w-8 rounded-md flex items-center justify-center transition-all duration-300",
- viewMode === v.id ? "text-foreground" : "text-muted-foreground/25 hover:text-muted-foreground/45"
- )}
- >
- {viewMode === v.id && (
- <motion.div
- layoutId="content-view-mode"
- className="absolute inset-0 rounded-md bg-card border border-border/30 shadow-sm"
- transition={{ type: "spring", bounce: 0.12, duration: 0.4 }}
- />
- )}
- <v.icon className="h-3.5 w-3.5 relative z-10" />
- </button>
- ))}
- </div>
- </div>
- </motion.div>
+          <div className="divide-y divide-border/40">
+            {filtered.map((c) => {
+              const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
+              const product = products.find(p => p.id === c.product_id);
 
- {/* ═══ Content Grid ═══ */}
- {isLoading ? (
- <div className="py-24 text-center">
- <div className="inline-flex flex-col items-center gap-5">
- <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 flex items-center justify-center shadow-lg shadow-primary/10">
- <div className="h-7 w-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
- </div>
- <p className="text-base text-muted-foreground font-display font-bold">Carregando cursos...</p>
- </div>
- </div>
- ) : filtered.length === 0 ? (
- <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-24 text-center">
- <div className="inline-flex flex-col items-center gap-6 max-w-sm">
- <div className="h-28 w-28 rounded-3xl bg-gradient-to-br from-primary/8 via-info/5 to-primary/3 border border-border/15 flex items-center justify-center relative overflow-hidden">
- <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
- <GraduationCap className="h-14 w-14 text-primary/15" />
- </div>
- <div>
- <h3 className="text-xl font-display font-black text-foreground/40 mb-2">
- {search || filter !== "all" ? "Nenhum curso encontrado" : "Crie seu primeiro curso"}
- </h3>
- <p className="text-sm text-muted-foreground/60 leading-relaxed">
- {search || filter !== "all" ? "Tente alterar os filtros de busca" : "Monte aulas incríveis e entregue conteúdo premium aos seus alunos"}
- </p>
- </div>
- {!search && filter === "all" && (
- <Button onClick={openNew} className="gap-2.5 rounded-2xl font-display font-bold shadow-xl shadow-primary/20 h-12 px-7 text-base">
- <Sparkles className="h-5 w-5" /> Criar Curso
- </Button>
- )}
- </div>
- </motion.div>
- ) : (
- <AnimatePresence mode="wait">
- <motion.div
- key={`${filter}-${viewMode}`}
- initial={{ opacity: 0, y: 12 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, y: -12 }}
- transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
- >
- {viewMode === "grid" ? (
- <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
- {filtered.map((c, i) => {
- const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
- const product = products.find(p => p.id === c.product_id);
- const revenue = getCourseRevenue(c);
- return (
- <CourseCard
- key={c.id}
- course={c}
- stats={stats}
- product={product}
- revenue={revenue}
- studentCount={studentCounts[c.id] || 0}
- onEdit={() => openEdit(c)}
- onNavigate={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
- onTogglePublish={() => togglePublish(c.id, c.is_published ?? false)}
- onDelete={() => deleteCourse(c.id)}
- onCopyLink={() => { navigator.clipboard.writeText(getMemberLink(c.id)); toast.success("Link copiado!"); }}
- getMemberLink={getMemberLink(c.id)}
- index={i}
- />
- );
- })}
- </div>
- ) : (
- /* ── List View ── */
- <div className="rounded-2xl border border-border/15 bg-card/40 backdrop-blur-xl overflow-hidden">
- <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3.5 border-b border-border/10 text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground/30">
- <span>Curso</span><span>Status</span><span>Conteúdo</span><span>Produto</span><span>Receita</span><span></span>
- </div>
- {filtered.map((c, i) => {
- const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
- const product = products.find(p => p.id === c.product_id);
- const revenue = getCourseRevenue(c);
- return (
- <motion.div
- key={c.id}
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ delay: i * 0.03 }}
- className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 sm:gap-4 items-center px-5 sm:px-6 py-4 sm:py-5 border-b border-border/8 hover:bg-primary/[0.015] transition-all duration-300 cursor-pointer group"
- onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
- >
- <div className="flex items-center gap-4 min-w-0">
- <div className="h-12 w-20 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/10">
- {c.thumbnail_url ? (
- <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" loading="lazy" />
- ) : (
- <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
- <GraduationCap className="h-5 w-5 text-primary/10" />
- </div>
- )}
- </div>
- <div className="min-w-0">
- <p className="text-sm font-display font-bold text-foreground truncate">{c.title}</p>
- <p className="text-[10px] text-muted-foreground/40 truncate mt-0.5 tabular-nums">{new Date(c.created_at).toLocaleDateString("pt-BR")}</p>
- </div>
- </div>
- <div>
- <span className={cn(
- "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-display font-bold border",
- c.is_published ? "bg-success/8 text-success border-success/10" : "bg-muted/6 text-muted-foreground/40 border-border/10"
- )}>
- <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse" : "bg-muted-foreground/20")} />
- {c.is_published ? "Live" : "Rascunho"}
- </span>
- </div>
- <div className="flex items-center gap-2.5 text-xs text-muted-foreground/50">
- <span className="flex items-center gap-1"><Layers className="h-3 w-3 text-primary/40" /> {stats.modules}</span>
- <span className="flex items-center gap-1"><Video className="h-3 w-3 text-info/40" /> {stats.lessons}</span>
- </div>
- <div>
- {product ? (
- <span className="text-xs font-display font-bold text-primary/80 truncate block">{product.name}</span>
- ) : (
- <span className="text-xs text-muted-foreground/15">—</span>
- )}
- </div>
- <div>
- <span className="text-sm font-display font-bold text-foreground tabular-nums">{fmt(revenue)}</span>
- </div>
- <div>
- <DropdownMenu>
- <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
- <button className="h-8 w-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/15">
- <MoreVertical className="h-4 w-4 text-muted-foreground/30" />
- </button>
- </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="min-w-[200px] rounded-xl p-1.5">
- <DropdownMenuItem onClick={e => { e.stopPropagation(); navigate(`/vendas/conteudo/${c.id}/builder`); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><ChevronRight className="h-4 w-4" /> Gerenciar</DropdownMenuItem>
- <DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(c); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><Edit className="h-4 w-4" /> Configurações</DropdownMenuItem>
- <DropdownMenuItem onClick={e => { e.stopPropagation(); togglePublish(c.id, c.is_published ?? false); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display">
- {c.is_published ? <><EyeOff className="h-4 w-4" /> Despublicar</> : <><Eye className="h-4 w-4" /> Publicar</>}
- </DropdownMenuItem>
- <DropdownMenuItem onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(getMemberLink(c.id)); toast.success("Link copiado!"); }} className="gap-3 text-sm cursor-pointer rounded-lg py-2.5 px-3 font-display"><Copy className="h-4 w-4" /> Copiar link</DropdownMenuItem>
- <DropdownMenuSeparator />
- <DropdownMenuItem onClick={e => { e.stopPropagation(); deleteCourse(c.id); }} className="gap-3 text-sm cursor-pointer text-destructive focus:text-destructive rounded-lg py-2.5 px-3 font-display"><Trash2 className="h-4 w-4" /> Excluir</DropdownMenuItem>
- </DropdownMenuContent>
- </DropdownMenu>
- </div>
- </motion.div>
- );
- })}
- </div>
- )}
- </motion.div>
- </AnimatePresence>
- )}
+              return (
+                <div
+                  key={c.id}
+                  className="group grid grid-cols-1 sm:grid-cols-[1fr_150px_110px_120px_40px] items-center px-5 py-3.5 hover:bg-muted/20 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {c.thumbnail_url ? (
+                      <img src={c.thumbnail_url} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" loading="lazy" />
+                    ) : (
+                      <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                        <GraduationCap className="h-4 w-4 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">{c.title}</p>
+                      <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 max-w-[320px]">
+                        {product ? `Vinculado a ${product.name}` : c.description || "Sem descrição"}
+                      </p>
+                    </div>
+                  </div>
 
- {/* Results footer */}
- {!isLoading && filtered.length > 0 && (
- <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex items-center justify-between px-1 mt-4">
- <p className="text-xs text-muted-foreground/40 font-display font-semibold">{filtered.length} curso{filtered.length > 1 ? "s" : ""}</p>
- {totalRevenue > 0 && <p className="text-xs font-display font-bold text-primary/60 tabular-nums">{fmt(totalRevenue)} total</p>}
- </motion.div>
- )}
+                  <div className="hidden sm:block">
+                    <span className="text-[12px] text-foreground">{stats.modules} módulo{stats.modules !== 1 && "s"}</span>
+                    <span className="text-[11px] text-muted-foreground/50 mx-1.5">·</span>
+                    <span className="text-[12px] text-muted-foreground">{stats.lessons} aula{stats.lessons !== 1 && "s"}</span>
+                  </div>
 
- {/* ═══ Course Creation Wizard ═══ */}
- <CourseCreationWizard
- open={wizardOpen}
- onOpenChange={setWizardOpen}
- products={products}
- editCourse={editCourseData}
- onSaved={reloadCourses}
- />
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <span className={cn("h-2 w-2 rounded-full", statusDot(!!c.is_published))} />
+                    <span className="text-[12px] text-muted-foreground">{statusLabel(!!c.is_published)}</span>
+                  </div>
 
- {/* Delete confirmation dialog */}
- <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
- <AlertDialogContent className="rounded-2xl border-border/15 bg-card/98 backdrop-blur-2xl max-w-md">
- <AlertDialogHeader>
- <AlertDialogTitle className="font-display font-black text-lg">Excluir curso</AlertDialogTitle>
- <AlertDialogDescription className="text-muted-foreground/60 font-display text-sm">
- Tem certeza que deseja excluir este curso e todo seu conteúdo? Módulos, aulas e acessos de alunos serão removidos permanentemente.
- </AlertDialogDescription>
- </AlertDialogHeader>
- <AlertDialogFooter>
- <AlertDialogCancel disabled={deletingCourse} className="rounded-xl font-display font-bold">Cancelar</AlertDialogCancel>
- <AlertDialogAction
- onClick={confirmDeleteCourse}
- disabled={deletingCourse}
- className="rounded-xl font-display font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
- >
- {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
- {deletingCourse ? "Excluindo..." : "Excluir"}
- </AlertDialogAction>
- </AlertDialogFooter>
- </AlertDialogContent>
- </AlertDialog>
- </div>
- );
+                  <div className="hidden sm:block" onClick={e => e.stopPropagation()}>
+                    {c.is_published ? (
+                      <button
+                        onClick={() => copyMemberLink(c.id)}
+                        className="inline-flex items-center gap-1.5 text-[11px] text-primary hover:underline font-medium"
+                      >
+                        <AnimatePresence mode="wait">
+                          {copiedId === c.id ? (
+                            <motion.span key="ok" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                              <CheckCircle2 className="h-3 w-3 text-success" />
+                            </motion.span>
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </AnimatePresence>
+                        Copiar link
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground/40">—</span>
+                    )}
+                  </div>
+
+                  <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-muted/40 transition-colors">
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 rounded-lg">
+                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
+                          <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
+                          <Edit className="h-3.5 w-3.5" /> Configurações
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
+                          {c.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                        </DropdownMenuItem>
+                        {c.is_published && (
+                          <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
+                            <PlayCircle className="h-3.5 w-3.5" /> Ver área
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                          <Trash2 className="h-3.5 w-3.5" /> Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-2 sm:hidden">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(!!c.is_published))} />
+                        <span className="text-[11px] text-muted-foreground">{statusLabel(!!c.is_published)}</span>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground/50 truncate">
+                        {stats.modules} módulo{stats.modules !== 1 && "s"} · {stats.lessons} aula{stats.lessons !== 1 && "s"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                      {c.is_published && (
+                        <button onClick={() => copyMemberLink(c.id)} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-primary">
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40">
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 rounded-lg">
+                          <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
+                            <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
+                            <Edit className="h-3.5 w-3.5" /> Configurações
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
+                            {c.is_published ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                            <Trash2 className="h-3.5 w-3.5" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <CourseCreationWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        products={products}
+        editCourse={editCourseData}
+        onSaved={reloadCourses}
+      />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="rounded-xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-bold text-lg">Excluir curso</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              Tem certeza? Módulos, aulas e acessos vinculados serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingCourse} className="rounded-lg">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2">
+              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deletingCourse ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 }
