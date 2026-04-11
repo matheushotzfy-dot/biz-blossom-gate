@@ -154,50 +154,56 @@ export default function Produtos() {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[1fr_120px_100px_110px_40px] items-center px-5 py-2.5 border-b border-border/50 bg-muted/30">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Produto</span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Preço</span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Status</span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Checkout</span>
+          <div className="hidden sm:grid grid-cols-[1fr_130px_110px_120px_44px] items-center px-6 py-3 border-b border-border/40 bg-muted/20">
+            <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest">Produto</span>
+            <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest">Preço</span>
+            <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest">Status</span>
+            <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest">Checkout</span>
             <span />
           </div>
 
           {/* Rows */}
-          <div className="divide-y divide-border/40">
-            {filtered.map((p) => (
-              <div
+          <div className="divide-y divide-border/30">
+            {filtered.map((p, i) => (
+              <motion.div
                 key={p.id}
-                className="group grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_110px_40px] items-center px-5 py-3.5 hover:bg-muted/20 transition-colors cursor-pointer"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: i * 0.03, ease: [0.16, 1, 0.3, 1] }}
+                className="group grid grid-cols-1 sm:grid-cols-[1fr_130px_110px_120px_44px] items-center px-6 py-4 hover:bg-accent/40 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer"
                 onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
               >
                 {/* Product info */}
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3.5 min-w-0">
                   {p.image_url ? (
-                    <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" />
+                    <div className="relative shrink-0">
+                      <img src={p.image_url} alt="" className="h-11 w-11 rounded-xl object-cover ring-1 ring-border/30 group-hover:ring-primary/20 transition-all duration-200" />
+                      <div className="absolute inset-0 rounded-xl bg-foreground/0 group-hover:bg-foreground/[0.03] transition-colors duration-200" />
+                    </div>
                   ) : (
-                    <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
-                      <Package className="h-4 w-4 text-muted-foreground/30" />
+                    <div className="h-11 w-11 rounded-xl bg-muted/40 flex items-center justify-center shrink-0 ring-1 ring-border/20 group-hover:ring-primary/15 group-hover:bg-accent/60 transition-all duration-200">
+                      <Package className="h-4.5 w-4.5 text-muted-foreground/25 group-hover:text-muted-foreground/40 transition-colors duration-200" />
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-foreground truncate">{p.name}</p>
+                    <p className="text-sm font-bold text-foreground tracking-[-0.01em] truncate group-hover:text-primary transition-colors duration-200">{p.name}</p>
                     {p.description && (
-                      <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 max-w-[260px]">{p.description}</p>
+                      <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5 max-w-[280px] font-medium">{p.description}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Price */}
                 <div className="hidden sm:block">
-                  <span className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(Number(p.price))}</span>
+                  <span className="text-sm font-bold text-foreground font-numbers tabular-nums tracking-tight">{fmt(Number(p.price))}</span>
                 </div>
 
                 {/* Status */}
-                <div className="hidden sm:flex items-center gap-1.5">
-                  <span className={cn("h-2 w-2 rounded-full", statusDot(p.status))} />
-                  <span className="text-[12px] text-muted-foreground">{statusLabel(p.status)}</span>
+                <div className="hidden sm:flex items-center gap-2">
+                  <span className={cn("h-2 w-2 rounded-full ring-2 ring-background", statusDot(p.status))} />
+                  <span className="text-xs text-muted-foreground font-medium">{statusLabel(p.status)}</span>
                 </div>
 
                 {/* Checkout link */}
@@ -205,12 +211,12 @@ export default function Produtos() {
                   {p.checkout_url ? (
                     <button
                       onClick={() => copyCheckout(p)}
-                      className="inline-flex items-center gap-1.5 text-[11px] text-primary hover:underline font-medium"
+                      className="inline-flex items-center gap-1.5 text-xs text-primary/80 hover:text-primary font-semibold transition-colors duration-150"
                     >
                       <AnimatePresence mode="wait">
                         {copiedId === p.id ? (
                           <motion.span key="ok" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                            <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                           </motion.span>
                         ) : (
                           <Copy className="h-3 w-3" />
@@ -219,7 +225,7 @@ export default function Produtos() {
                       Copiar link
                     </button>
                   ) : (
-                    <span className="text-[11px] text-muted-foreground/40">—</span>
+                    <span className="text-xs text-muted-foreground/30">—</span>
                   )}
                 </div>
 
@@ -227,30 +233,30 @@ export default function Produtos() {
                 <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-muted/40 transition-colors">
+                      <button className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-muted/50 opacity-0 group-hover:opacity-100 transition-all duration-200">
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[12px] cursor-pointer">
+                    <DropdownMenuContent align="end" className="w-52 rounded-xl p-1">
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2">
                         <Settings2 className="h-3.5 w-3.5" /> Editar produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[12px] cursor-pointer">
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2">
                         <Palette className="h-3.5 w-3.5" /> Checkout Builder
                       </DropdownMenuItem>
                       {p.checkout_url && (
-                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 text-[12px] cursor-pointer">
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2">
                           <ExternalLink className="h-3.5 w-3.5" /> Ver checkout
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[12px] cursor-pointer">
+                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2">
                         <Crosshair className="h-3.5 w-3.5" /> Pixels
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2">
                         <Star className="h-3.5 w-3.5" /> Área de Membros
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                      <DropdownMenuSeparator className="my-1" />
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2.5 text-[12px] text-destructive cursor-pointer rounded-lg py-2">
                         <Trash2 className="h-3.5 w-3.5" /> Excluir
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -258,42 +264,42 @@ export default function Produtos() {
                 </div>
 
                 {/* Mobile meta */}
-                <div className="flex items-center justify-between mt-2 sm:hidden">
+                <div className="flex items-center justify-between mt-2.5 sm:hidden">
                   <div className="flex items-center gap-3">
-                    <span className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(Number(p.price))}</span>
+                    <span className="text-sm font-bold text-foreground font-numbers tabular-nums">{fmt(Number(p.price))}</span>
                     <div className="flex items-center gap-1.5">
                       <span className={cn("h-1.5 w-1.5 rounded-full", statusDot(p.status))} />
-                      <span className="text-[11px] text-muted-foreground">{statusLabel(p.status)}</span>
+                      <span className="text-[11px] text-muted-foreground font-medium">{statusLabel(p.status)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                     {p.checkout_url && (
-                      <button onClick={() => copyCheckout(p)} className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-primary">
+                      <button onClick={() => copyCheckout(p)} className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-primary transition-colors">
                         <Copy className="h-3.5 w-3.5" />
                       </button>
                     )}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40">
+                        <button className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground/40">
                           <MoreVertical className="h-4 w-4" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                        <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[12px] cursor-pointer">
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
+                        <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[12px] cursor-pointer rounded-lg">
                           <Settings2 className="h-3.5 w-3.5" /> Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[12px] cursor-pointer">
+                        <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[12px] cursor-pointer rounded-lg">
                           <Palette className="h-3.5 w-3.5" /> Builder
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
+                        <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[12px] text-destructive cursor-pointer rounded-lg">
                           <Trash2 className="h-3.5 w-3.5" /> Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
