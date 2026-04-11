@@ -189,14 +189,12 @@ export default function Produtos() {
           {filtered.map((p, i) => (
             <motion.div
               key={p.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative rounded-2xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md hover:shadow-primary/[0.04] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: i * 0.03 }}
+              className="group relative rounded-xl border border-border/50 bg-card hover:bg-accent/30 transition-colors duration-150 cursor-pointer"
               onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
             >
-              {/* Accent line on hover */}
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
               <div className="flex items-center gap-4 px-5 py-4 sm:py-3.5">
                 {/* Thumbnail */}
