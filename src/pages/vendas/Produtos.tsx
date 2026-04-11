@@ -271,27 +271,48 @@ export default function Produtos() {
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5 shadow-lg border-border/50">
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5 font-medium">
-                        <Settings2 className="h-3.5 w-3.5 text-muted-foreground" /> Editar produto
+                    <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl p-2 shadow-2xl shadow-black/10 dark:shadow-black/30 border border-border/60 bg-popover/95 backdrop-blur-xl">
+                      <div className="px-2.5 py-2 mb-1">
+                        <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Gerenciar</p>
+                      </div>
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-accent/60 transition-colors duration-150">
+                        <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                          <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        Editar produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5 font-medium">
-                        <Palette className="h-3.5 w-3.5 text-muted-foreground" /> Checkout Builder
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-accent/60 transition-colors duration-150">
+                        <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                          <Palette className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        Checkout Builder
                       </DropdownMenuItem>
                       {p.checkout_url && (
-                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5 font-medium">
-                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" /> Ver checkout
+                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-accent/60 transition-colors duration-150">
+                          <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                          </div>
+                          Ver checkout
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5 font-medium">
-                        <Crosshair className="h-3.5 w-3.5 text-muted-foreground" /> Pixels
+                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-accent/60 transition-colors duration-150">
+                        <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                          <Crosshair className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        Pixels
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2.5 text-[12px] cursor-pointer rounded-lg py-2.5 font-medium">
-                        <Star className="h-3.5 w-3.5 text-muted-foreground" /> Área de Membros
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-3 text-[13px] cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-accent/60 transition-colors duration-150">
+                        <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                          <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
+                        Área de Membros
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator className="my-1" />
-                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2.5 text-[12px] text-destructive cursor-pointer rounded-lg py-2.5 font-medium">
-                        <Trash2 className="h-3.5 w-3.5" /> Excluir
+                      <DropdownMenuSeparator className="my-1.5 bg-border/40" />
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-3 text-[13px] text-destructive cursor-pointer rounded-xl py-2.5 px-2.5 font-medium hover:bg-destructive/10 transition-colors duration-150">
+                        <div className="h-7 w-7 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </div>
+                        Excluir
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
