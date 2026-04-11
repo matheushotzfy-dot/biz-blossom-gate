@@ -196,26 +196,20 @@ export default function Produtos() {
               onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
             >
 
-              <div className="flex items-center gap-4 px-5 py-4 sm:py-3.5">
+              <div className="flex items-center gap-4 px-4 py-3">
                 {/* Thumbnail */}
                 {p.image_url ? (
-                  <div className="relative shrink-0">
-                    <img
-                      src={p.image_url}
-                      alt=""
-                      className="h-14 w-14 sm:h-12 sm:w-12 rounded-xl object-cover ring-1 ring-border/20 group-hover:ring-primary/20 group-hover:scale-[1.03] transition-all duration-300"
-                    />
-                  </div>
+                  <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover ring-1 ring-border/30 shrink-0" />
                 ) : (
-                  <div className="h-14 w-14 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-muted/60 to-muted/30 flex items-center justify-center shrink-0 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-300">
-                    <Package className="h-5 w-5 text-muted-foreground/25 group-hover:text-primary/40 transition-colors duration-300" />
+                  <div className="h-10 w-10 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
+                    <Package className="h-4 w-4 text-muted-foreground/30" />
                   </div>
                 )}
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-[14px] font-bold text-foreground tracking-[-0.01em] truncate group-hover:text-primary transition-colors duration-200">
+                    <p className="text-[13px] font-semibold text-foreground truncate">
                       {p.name}
                     </p>
                     <span className={cn(
