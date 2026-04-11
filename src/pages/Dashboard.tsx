@@ -722,10 +722,10 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* ACTIONS + ACTIVITY                                               */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
-        {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-5 flex flex-col">
-          <div className="grid grid-cols-2 gap-2 flex-1">
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-6">
+        {/* Quick actions — premium grid */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-card/80 p-1.5 flex flex-col">
+          <div className="grid grid-cols-2 gap-1.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
               { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
@@ -738,24 +738,24 @@ export default function Dashboard() {
               { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
             ].map((action) => {
-              const colors: Record<string, { bg: string; text: string; border: string }> = {
-                primary: { bg: "bg-primary/8", text: "text-primary", border: "hover:border-primary/20" },
-                success: { bg: "bg-success/8", text: "text-success", border: "hover:border-success/20" },
-                info: { bg: "bg-info/8", text: "text-info", border: "hover:border-info/20" },
-                warning: { bg: "bg-warning/8", text: "text-warning", border: "hover:border-warning/20" },
+              const colors: Record<string, { bg: string; text: string; hoverBg: string }> = {
+                primary: { bg: "bg-primary/6", text: "text-primary", hoverBg: "hover:bg-primary/[0.04]" },
+                success: { bg: "bg-success/6", text: "text-success", hoverBg: "hover:bg-success/[0.04]" },
+                info: { bg: "bg-info/6", text: "text-info", hoverBg: "hover:bg-info/[0.04]" },
+                warning: { bg: "bg-warning/6", text: "text-warning", hoverBg: "hover:bg-warning/[0.04]" },
               };
               const c = colors[action.tone] || colors.primary;
               return (
                 <Link key={action.href} to={action.href}
-                  className={cn("group relative flex items-center gap-2.5 rounded-xl border border-border/30 bg-background/60 p-3 transition-all duration-200 hover:bg-background/90 active:scale-[0.98]", c.border)}>
-                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
-                    <action.icon className="h-3.5 w-3.5" />
+                  className={cn("group relative flex items-center gap-3 rounded-xl bg-background/40 p-3.5 transition-all duration-200 active:scale-[0.97]", c.hoverBg)}>
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset ring-white/[0.04]", c.bg, c.text)}>
+                    <action.icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[9px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
+                    <p className="text-[12px] font-bold text-foreground leading-tight">{action.label}</p>
+                    <p className="text-[9px] text-muted-foreground/35 mt-0.5 hidden md:block">{action.desc}</p>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground/15 hidden md:block group-hover:text-muted-foreground/40 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/10 hidden md:block group-hover:text-muted-foreground/30 group-hover:translate-x-0.5 transition-all" />
                 </Link>
               );
             })}
