@@ -15,14 +15,13 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 
 const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-const STATUS_MAP: Record<string, { label: string; dot: string }> = {
-  active: { label: "Ativo", dot: "bg-emerald-500" },
-  inactive: { label: "Inativo", dot: "bg-muted-foreground/30" },
-  pending_review: { label: "Revisão", dot: "bg-amber-500" },
+const STATUS_CFG: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+  active:         { label: "Ativo",   bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+  inactive:       { label: "Inativo", bg: "bg-muted/20",       text: "text-muted-foreground/60", dot: "bg-muted-foreground/40" },
+  pending_review: { label: "Revisão", bg: "bg-amber-500/10",   text: "text-amber-400",  dot: "bg-amber-400" },
 };
 
 export default function Produtos() {
@@ -58,10 +57,7 @@ export default function Produtos() {
     toast.success("Produto removido"); loadProducts();
   };
 
-  const getCheckoutLink = (url: string) => {
-    const slug = url.split("/").pop()!;
-    return `${window.location.origin}/pay/${slug}`;
-  };
+  const getCheckoutLink = (url: string) => `${window.location.origin}/pay/${url.split("/").pop()!}`;
 
   const copyCheckout = (p: Tables<"products">) => {
     if (p.checkout_url) {
@@ -79,227 +75,194 @@ export default function Produtos() {
     { label: "Inativos", value: "inactive" },
   ];
 
+  const s = (p: Tables<"products">) => STATUS_CFG[p.status] || STATUS_CFG.inactive;
+
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-foreground tracking-[-0.03em]">Produtos</h1>
-          <Badge variant="secondary" className="rounded-md text-[11px] font-medium px-2 py-0.5 bg-muted/60 text-muted-foreground border-none">
-            {products.length}
-          </Badge>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-baseline gap-2.5">
+          <h1 className="text-[17px] font-bold text-foreground tracking-[-0.04em]">Produtos</h1>
+          <span className="text-[12px] font-semibold text-muted-foreground/40 tabular-nums">{products.length}</span>
         </div>
         <button
           onClick={() => navigate("/vendas/produtos/novo/editar")}
-          className="h-9 px-4 rounded-lg text-[13px] font-semibold flex items-center gap-2 bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:bg-primary/90 active:scale-[0.97] transition-all duration-200"
+          className="h-8 px-3.5 rounded-lg text-[12px] font-bold flex items-center gap-1.5 bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:brightness-110 active:scale-[0.97] transition-all"
         >
-          <Plus className="h-4 w-4" /> Novo Produto
+          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> Novo Produto
         </button>
       </div>
 
       {/* ── Tabs + Search ── */}
-      <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
-        <div className="flex items-center gap-1 relative">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="flex items-center relative">
           {tabs.map(t => (
             <button
               key={t.value}
               onClick={() => setStatusFilter(t.value)}
               className={cn(
-                "relative px-3.5 pb-3 pt-1 text-[13px] font-medium transition-colors",
-                statusFilter === t.value
-                  ? "text-foreground"
-                  : "text-muted-foreground/50 hover:text-muted-foreground"
+                "relative px-3 pb-2.5 text-[12px] font-semibold transition-colors",
+                statusFilter === t.value ? "text-foreground" : "text-muted-foreground/35 hover:text-muted-foreground/60"
               )}
             >
               {t.label}
               {t.count != null && t.count > 0 && (
-                <span className={cn(
-                  "ml-1.5 text-[11px] tabular-nums",
-                  statusFilter === t.value ? "text-foreground/60" : "text-muted-foreground/30"
-                )}>{t.count}</span>
+                <span className="ml-1 text-[10px] tabular-nums opacity-50">{t.count}</span>
               )}
               {statusFilter === t.value && (
                 <motion.div
-                  layoutId="products-tab-indicator"
-                  className="absolute bottom-0 left-1 right-1 h-[2px] rounded-full bg-primary"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                  layoutId="prod-tab"
+                  className="absolute bottom-0 left-1.5 right-1.5 h-[2px] rounded-full bg-primary"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.45 }}
                 />
               )}
             </button>
           ))}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-border/40" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-border/30" />
         </div>
 
-        <div className="sm:ml-auto relative w-full sm:w-60">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/30" />
+        <div className="relative w-52">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/25" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar produto…"
-            className="h-9 w-full rounded-lg border border-border/50 bg-card pl-9 pr-8 text-[13px] placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+            placeholder="Buscar…"
+            className="h-8 w-full rounded-lg border border-border/40 bg-card/60 pl-7.5 pr-7 text-[12px] placeholder:text-muted-foreground/25 focus:outline-none focus:ring-1 focus:ring-primary/25 transition-all"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 active:scale-90">
-              <X className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-muted-foreground" />
+            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2">
+              <X className="h-3 w-3 text-muted-foreground/30 hover:text-muted-foreground" />
             </button>
           )}
         </div>
       </div>
 
-      {/* ── Table ── */}
+      {/* ── Products ── */}
       {filtered.length === 0 ? (
-        <div className="py-24 flex flex-col items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-muted/30 border border-border/40 flex items-center justify-center">
-            <Package className="h-5 w-5 text-muted-foreground/25" />
+        <div className="py-20 flex flex-col items-center gap-2.5">
+          <div className="h-11 w-11 rounded-xl bg-muted/20 border border-border/30 flex items-center justify-center">
+            <Package className="h-5 w-5 text-muted-foreground/20" />
           </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-foreground">
-              {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum produto"}
-            </p>
-            <p className="text-[13px] text-muted-foreground/50 mt-1">
-              {search || statusFilter !== "all" ? "Tente ajustar seus filtros" : "Crie seu primeiro produto digital"}
-            </p>
-          </div>
+          <p className="text-[13px] font-semibold text-foreground">
+            {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum produto"}
+          </p>
+          <p className="text-[12px] text-muted-foreground/40">
+            {search || statusFilter !== "all" ? "Ajuste seus filtros" : "Crie seu primeiro produto"}
+          </p>
           {!search && statusFilter === "all" && (
             <button
               onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-2 h-9 px-4 rounded-lg text-[13px] font-semibold flex items-center gap-2 bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:bg-primary/90 transition-all"
+              className="mt-1 h-8 px-3.5 rounded-lg text-[12px] font-bold flex items-center gap-1.5 bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:brightness-110 transition-all"
             >
-              <Plus className="h-4 w-4" /> Criar produto
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> Criar produto
             </button>
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-[3px]">
-          {/* Table header — desktop */}
-          <div className="hidden sm:grid grid-cols-[1fr_110px_90px_44px] items-center px-4 h-10 rounded-lg bg-muted/20 text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.08em]">
-            <span>Produto</span>
-            <span className="text-right">Preço</span>
-            <span className="text-center">Status</span>
-            <span />
-          </div>
-
-          {filtered.map((p) => (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="group grid sm:grid-cols-[1fr_110px_90px_44px] items-center px-4 cursor-pointer rounded-lg border border-transparent hover:border-border/40 hover:bg-card/80 transition-all duration-200"
-              onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
-            >
-              {/* Product info */}
-              <div className="flex items-center gap-3.5 py-3.5 min-w-0">
-                <div className="relative shrink-0">
+        <div className="flex flex-col gap-1.5">
+          {filtered.map((p) => {
+            const st = s(p);
+            return (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
+                className="group flex items-center gap-3 px-3.5 py-3 rounded-xl border border-border/30 bg-card/50 cursor-pointer hover:bg-card hover:border-border/50 hover:shadow-sm transition-all duration-200"
+              >
+                {/* Thumbnail */}
+                <div className="shrink-0">
                   {p.image_url ? (
                     <img
                       src={p.image_url}
                       alt=""
-                      className="h-10 w-10 rounded-lg object-cover ring-1 ring-inset ring-foreground/[0.06] transition-transform duration-300 group-hover:scale-105"
+                      className="h-[48px] w-[48px] rounded-lg object-cover ring-1 ring-inset ring-foreground/[0.08]"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-lg bg-muted/40 ring-1 ring-inset ring-foreground/[0.04] flex items-center justify-center">
-                      <Package className="h-4 w-4 text-muted-foreground/25" />
+                    <div className="h-[48px] w-[48px] rounded-lg bg-muted/20 ring-1 ring-inset ring-foreground/[0.04] flex items-center justify-center">
+                      <Package className="h-4.5 w-4.5 text-muted-foreground/20" />
                     </div>
                   )}
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-foreground truncate leading-tight tracking-[-0.01em]">{p.name}</p>
+
+                {/* Name + desc */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-foreground truncate leading-tight tracking-[-0.01em]">
+                    {p.name}
+                  </p>
                   {p.description && (
-                    <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5 max-w-[320px]">{p.description}</p>
+                    <p className="text-[11px] text-muted-foreground/35 truncate mt-0.5 max-w-[280px]">{p.description}</p>
                   )}
                 </div>
-              </div>
 
-              {/* Price */}
-              <div className="hidden sm:block text-right">
-                <span className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(Number(p.price))}</span>
-              </div>
-
-              {/* Status */}
-              <div className="hidden sm:flex justify-center">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/60">
-                  <span className={cn("h-[6px] w-[6px] rounded-full", STATUS_MAP[p.status]?.dot || "bg-muted-foreground/30")} />
-                  {STATUS_MAP[p.status]?.label || p.status}
-                </span>
-              </div>
-
-              {/* Actions */}
-              <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/20 hover:text-foreground hover:bg-muted/30 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" sideOffset={4} className="w-48 rounded-xl p-1.5 border-border/50 shadow-xl shadow-foreground/5">
-                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Settings2 className="h-3.5 w-3.5 text-muted-foreground/50" /> Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Palette className="h-3.5 w-3.5 text-muted-foreground/50" /> Checkout Builder
-                    </DropdownMenuItem>
-                    {p.checkout_url && (
-                      <>
-                        <DropdownMenuItem onClick={() => copyCheckout(p)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                          {copiedId === p.id
-                            ? <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Copiado!</>
-                            : <><Copy className="h-3.5 w-3.5 text-muted-foreground/50" /> Copiar link</>
-                          }
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/50" /> Ver checkout
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Crosshair className="h-3.5 w-3.5 text-muted-foreground/50" /> Pixels
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Star className="h-3.5 w-3.5 text-muted-foreground/50" /> Área de Membros
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1" />
-                    <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2.5 text-[13px] text-destructive cursor-pointer rounded-lg px-2.5 py-2 focus:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" /> Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {/* Mobile bottom row */}
-              <div className="flex items-center justify-between pb-3 sm:hidden col-span-full" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center gap-3">
-                  <span className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(Number(p.price))}</span>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
-                    <span className={cn("h-[6px] w-[6px] rounded-full", STATUS_MAP[p.status]?.dot || "bg-muted-foreground/30")} />
-                    {STATUS_MAP[p.status]?.label || p.status}
+                {/* Price — mono style */}
+                <div className="hidden sm:block shrink-0 text-right mr-1">
+                  <span className="text-[13px] font-bold text-foreground tabular-nums tracking-tight font-mono">
+                    {fmt(Number(p.price))}
                   </span>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/40">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" sideOffset={4} className="w-48 rounded-xl p-1.5 border-border/50 shadow-xl">
-                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Settings2 className="h-3.5 w-3.5 text-muted-foreground/50" /> Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Palette className="h-3.5 w-3.5 text-muted-foreground/50" /> Checkout Builder
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2.5 text-[13px] cursor-pointer rounded-lg px-2.5 py-2">
-                      <Crosshair className="h-3.5 w-3.5 text-muted-foreground/50" /> Pixels
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1" />
-                    <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2.5 text-[13px] text-destructive cursor-pointer rounded-lg px-2.5 py-2 focus:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" /> Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </motion.div>
-          ))}
+
+                {/* Status pill */}
+                <div className="hidden sm:block shrink-0">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.05em]",
+                    st.bg, st.text
+                  )}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+                    {st.label}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="shrink-0" onClick={e => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/20 hover:text-foreground hover:bg-muted/20 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-150">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" sideOffset={4} className="w-48 rounded-xl p-1.5 border-border/40 shadow-xl shadow-foreground/5">
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)} className="gap-2 text-[12px] cursor-pointer rounded-lg px-2.5 py-2">
+                        <Settings2 className="h-3.5 w-3.5 text-muted-foreground/40" /> Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/produtos/${p.id}/checkout-builder`)} className="gap-2 text-[12px] cursor-pointer rounded-lg px-2.5 py-2">
+                        <Palette className="h-3.5 w-3.5 text-muted-foreground/40" /> Checkout Builder
+                      </DropdownMenuItem>
+                      {p.checkout_url && (
+                        <>
+                          <DropdownMenuItem onClick={() => copyCheckout(p)} className="gap-2 text-[12px] cursor-pointer rounded-lg px-2.5 py-2">
+                            {copiedId === p.id
+                              ? <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Copiado!</>
+                              : <><Copy className="h-3.5 w-3.5 text-muted-foreground/40" /> Copiar link</>}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => window.open(getCheckoutLink(p.checkout_url!), "_blank")} className="gap-2 text-[12px] cursor-pointer rounded-lg px-2.5 py-2">
+                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40" /> Ver checkout
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      <DropdownMenuItem onClick={() => setPixelProduct(p)} className="gap-2 text-[12px] cursor-pointer rounded-lg px-2.5 py-2">
+                        <Crosshair className="h-3.5 w-3.5 text-muted-foreground/40" /> Pixels
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${p.id}/builder`)} className="gap-2 text-[12px] cursor-pointer rounded-lg px-2.5 py-2">
+                        <Star className="h-3.5 w-3.5 text-muted-foreground/40" /> Área de Membros
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="my-1" />
+                      <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2 text-[12px] text-destructive cursor-pointer rounded-lg px-2.5 py-2 focus:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" /> Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Mobile price+status */}
+                <div className="flex items-center gap-2 sm:hidden">
+                  <span className="text-[12px] font-bold text-foreground tabular-nums font-mono">{fmt(Number(p.price))}</span>
+                  <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
@@ -309,13 +272,11 @@ export default function Produtos() {
         <AlertDialogContent className="rounded-xl max-w-sm">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-semibold">Excluir produto</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px]">
-              Tem certeza? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
+            <AlertDialogDescription className="text-[13px]">Tem certeza? Esta ação não pode ser desfeita.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="rounded-lg text-[13px] h-9">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="rounded-lg h-9 text-[13px] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5">
+            <AlertDialogCancel disabled={deleting} className="rounded-lg text-[13px] h-8">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="rounded-lg h-8 text-[13px] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5">
               {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {deleting ? "Excluindo…" : "Excluir"}
             </AlertDialogAction>
