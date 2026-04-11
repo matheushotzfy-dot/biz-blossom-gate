@@ -573,7 +573,7 @@ export default function Dashboard() {
 
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[88px]">
+                <span className="block whitespace-nowrap text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[88px]">
                   {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
                 <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
