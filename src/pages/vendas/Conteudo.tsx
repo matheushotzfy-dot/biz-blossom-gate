@@ -8,7 +8,7 @@ import {
  Link as LinkIcon, Search, Copy, MoreVertical,
  Globe, Lock, Image as ImageIcon, X,
  Video, DollarSign, PlayCircle, Sparkles,
- Users, Grid3X3, List,
+ Users, Grid3X3, List, CheckCircle2,
  ChevronRight, GraduationCap, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
