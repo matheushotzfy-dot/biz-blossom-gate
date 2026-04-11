@@ -108,14 +108,9 @@ export default function Produtos() {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-2xl border border-border/50 bg-card p-4 flex items-center gap-3">
-            <div className={cn("h-10 w-10 rounded-xl bg-muted/50 flex items-center justify-center", kpi.color)}>
-              <kpi.icon className="h-[18px] w-[18px]" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-foreground font-numbers tabular-nums tracking-tight leading-none">{kpi.value}</p>
-              <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{kpi.label}</p>
-            </div>
+          <div key={kpi.label} className="rounded-xl border border-border/50 bg-card px-4 py-3">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1">{kpi.label}</p>
+            <p className="text-xl font-bold text-foreground font-numbers tabular-nums">{kpi.value}</p>
           </div>
         ))}
       </div>
