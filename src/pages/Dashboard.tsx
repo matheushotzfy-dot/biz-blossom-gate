@@ -762,13 +762,21 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Activity feed */}
+        {/* Activity feed — premium */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/50 bg-card flex flex-col overflow-hidden">
-          <div className="flex items-center justify-end px-5 pt-4 pb-3 border-b border-border/20">
+          {/* Header with live dot */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
+              </span>
+              <span className="text-[11px] font-heading font-bold uppercase tracking-[0.12em] text-foreground/60">Atividade Recente</span>
+            </div>
             <Link to="/financeiro/extrato" className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors px-2.5 py-1 rounded-lg hover:bg-primary/5">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto max-h-[480px]">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="h-14 w-14 rounded-2xl border border-border/20 bg-muted/5 flex items-center justify-center mb-4">
@@ -780,17 +788,17 @@ export default function Dashboard() {
             ) : (
               activity.map((item, idx) => {
                 const txStyles: Record<string, { label: string; pillBg: string; pillText: string; iconBg: string; iconText: string }> = {
-                  completed: { label: "Aprovada", pillBg: "bg-success/10", pillText: "text-success", iconBg: "bg-success/8", iconText: "text-success" },
-                  pending: { label: "Pendente", pillBg: "bg-warning/10", pillText: "text-warning", iconBg: "bg-warning/8", iconText: "text-warning" },
-                  failed: { label: "Falhou", pillBg: "bg-destructive/10", pillText: "text-destructive", iconBg: "bg-destructive/8", iconText: "text-destructive" },
-                  refunded: { label: "Reembolso", pillBg: "bg-info/10", pillText: "text-info", iconBg: "bg-info/8", iconText: "text-info" },
-                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/10", pillText: "text-destructive", iconBg: "bg-destructive/8", iconText: "text-destructive" },
+                  completed: { label: "Aprovada", pillBg: "bg-success/12", pillText: "text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  pending: { label: "Pendente", pillBg: "bg-warning/12", pillText: "text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  failed: { label: "Falhou", pillBg: "bg-destructive/12", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                  refunded: { label: "Reembolso", pillBg: "bg-info/12", pillText: "text-info", iconBg: "bg-info/10", iconText: "text-info" },
+                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/12", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
                   default: { label: "Status", pillBg: "bg-muted/20", pillText: "text-muted-foreground", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
                 };
                 const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; iconBg: string; iconText: string }> = {
-                  pending: { label: "Em análise", pillBg: "bg-warning/10", pillText: "text-warning", iconBg: "bg-warning/8", iconText: "text-warning" },
-                  approved: { label: "Aprovado", pillBg: "bg-success/10", pillText: "text-success", iconBg: "bg-success/8", iconText: "text-success" },
-                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/10", pillText: "text-destructive", iconBg: "bg-destructive/8", iconText: "text-destructive" },
+                  pending: { label: "Em análise", pillBg: "bg-warning/12", pillText: "text-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
+                  approved: { label: "Aprovado", pillBg: "bg-success/12", pillText: "text-success", iconBg: "bg-success/10", iconText: "text-success" },
+                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/12", pillText: "text-destructive", iconBg: "bg-destructive/10", iconText: "text-destructive" },
                   default: { label: "Saque", pillBg: "bg-muted/20", pillText: "text-muted-foreground", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
                 };
                 const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
@@ -798,14 +806,14 @@ export default function Dashboard() {
                 const isLast = idx === activity.length - 1;
 
                 return (
-                  <div key={item.id} className={cn("group flex items-center gap-3 px-5 py-3.5 hover:bg-muted/8 transition-colors", !isLast && "border-b border-border/10")}>
-                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0", s.iconBg, s.iconText)}>
+                  <div key={item.id} className={cn("group flex items-center gap-3.5 px-5 py-4 hover:bg-muted/6 transition-all duration-200 cursor-default", !isLast && "border-b border-border/8")}>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset ring-white/[0.04]", s.iconBg, s.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-[13px] font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                        <span className={cn("rounded-md px-2 py-0.5 text-[9px] font-bold border", s.pillBg, s.pillText, s.pillText.replace("text-", "border-") + "/15")}>
+                      <div className="flex items-center gap-2.5">
+                        <p className="text-[14px] font-black text-foreground tabular-nums font-heading tracking-[-0.02em]">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                        <span className={cn("rounded-full px-2.5 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText)}>
                           {s.label}
                         </span>
                       </div>
@@ -817,7 +825,7 @@ export default function Dashboard() {
                           <Eye className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <span className="text-[9px] text-muted-foreground/30 tabular-nums">{timeAgo(item.createdAt)}</span>
+                      <span className="text-[9px] text-muted-foreground/25 tabular-nums font-medium">{timeAgo(item.createdAt)}</span>
                     </div>
                   </div>
                 );
