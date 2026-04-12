@@ -605,15 +605,13 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-3xl border border-border/30 bg-gradient-to-br from-card via-card to-secondary/20 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.2)] md:p-6 min-h-[280px] relative overflow-hidden">
-          <div className="absolute inset-0 ambient-grid opacity-[0.05] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
@@ -623,9 +621,9 @@ export default function Dashboard() {
                   if (!active || !payload?.length) return null;
                   const value = payload[0].value as number;
                   return (
-                    <div className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-lg">
-                      <p className="text-[10px] font-heading uppercase tracking-[0.15em] text-muted-foreground mb-1">{label}</p>
-                      <p className="text-lg font-heading font-black text-foreground tabular-nums tracking-tight">
+                    <div className="rounded-lg border border-border bg-card px-3.5 py-2.5 shadow-xl">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
+                      <p className="text-base font-heading font-black text-foreground tabular-nums tracking-tight">
                         R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -633,15 +631,14 @@ export default function Dashboard() {
                 }}
                 cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
               />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.25} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }} />
+              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/30 bg-gradient-to-b from-card to-card/70 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.18)] md:p-5">
-            <p className="mb-3 text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Métricas de Conversão</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border bg-card p-4 md:p-5">
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -649,52 +646,42 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* KPI tiles - clean */}
           <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, tone: "success" as const, accentBorder: "border-t-success" },
-              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, tone: "info" as const, accentBorder: "border-t-info" },
-              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", tone: "primary" as const, accentBorder: "border-t-primary" },
-              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", tone: "warning" as const, accentBorder: "border-t-warning" },
-            ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + idx * 0.05 }}
-                className={cn("rounded-2xl border border-border/30 border-t-2 bg-gradient-to-b from-card to-card/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:border-border/50 md:p-5", item.accentBorder)}>
-                {(() => {
-                  const tones: Record<typeof item.tone, { bg: string; text: string; dot: string }> = {
-                    primary: { bg: "bg-primary/10", text: "text-primary", dot: "bg-primary" },
-                    success: { bg: "bg-success/10", text: "text-success", dot: "bg-success" },
-                    info: { bg: "bg-info/10", text: "text-info", dot: "bg-info" },
-                    warning: { bg: "bg-warning/10", text: "text-warning", dot: "bg-warning" },
-                  };
-                  const tone = tones[item.tone];
-
-                  return (
-                    <>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", tone.bg, tone.text)}>
-                    {item.isPix ? (
-                      <PixLogoMark className="h-4 w-4" />
-                    ) : (
-                      item.icon && <item.icon className="h-3.5 w-3.5" />
-                    )}
+              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, tone: "success" as const },
+              { icon: CreditCard, label: "Cartão", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, tone: "info" as const },
+              { icon: Wallet, label: "Ticket médio", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", tone: "primary" as const },
+              { icon: DollarSign, label: "Pendente", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", tone: "warning" as const },
+            ] as const).map((item, idx) => {
+              const tones: Record<typeof item.tone, { bg: string; text: string; dot: string }> = {
+                primary: { bg: "bg-primary/10", text: "text-primary", dot: "bg-primary" },
+                success: { bg: "bg-success/10", text: "text-success", dot: "bg-success" },
+                info: { bg: "bg-info/10", text: "text-info", dot: "bg-info" },
+                warning: { bg: "bg-warning/10", text: "text-warning", dot: "bg-warning" },
+              };
+              const tone = tones[item.tone];
+              return (
+                <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + idx * 0.05 }}
+                  className="rounded-xl border border-border bg-card p-4 md:p-5 transition-colors hover:bg-card/80">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", tone.bg, tone.text)}>
+                      {item.isPix ? <PixLogoMark className="h-3.5 w-3.5" /> : item.icon && <item.icon className="h-3.5 w-3.5" />}
+                    </div>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{item.label}</span>
                   </div>
-                  <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.12em] text-muted-foreground">{item.label}</span>
-                </div>
-                <p className="text-[24px] md:text-[28px] font-display font-black tabular-nums tracking-[-0.04em] text-foreground leading-none mb-2.5">
-                  {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <div className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
-                    <span className={cn("text-[11px] font-bold tabular-nums", tone.text)}>{item.helper}</span>
+                  <p className="text-xl md:text-2xl font-heading font-black tabular-nums tracking-tight text-foreground leading-none mb-2">
+                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
+                      <span className={cn("text-[11px] font-semibold tabular-nums", tone.text)}>{item.helper}</span>
+                    </div>
+                    {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
                   </div>
-                  {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
-                </div>
-                    </>
-                  );
-                })()}
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
