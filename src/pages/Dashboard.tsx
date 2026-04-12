@@ -728,16 +728,15 @@ export default function Dashboard() {
 
         {/* Activity feed */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-xl border border-border bg-card flex flex-col overflow-hidden">
-          {/* Header with live dot */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
-              <span className="text-[11px] font-heading font-bold uppercase tracking-[0.12em] text-foreground/60">Atividade Recente</span>
+              <span className="text-[12px] font-semibold text-foreground">Atividade Recente</span>
             </div>
-            <Link to="/financeiro/extrato" className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors px-2.5 py-1 rounded-lg hover:bg-primary/5">Ver tudo</Link>
+            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto max-h-[520px]">
