@@ -551,28 +551,33 @@ export default function Dashboard() {
         </div>
 
         {/* Revenue hero */}
-        <div className="mb-6 rounded-xl border border-border bg-card p-6 sm:p-8">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            {isCustom && customRange?.from
-              ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-              : `Receita — ${selectedPeriod.label}`}
-          </p>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <span className="block whitespace-nowrap text-4xl font-heading font-black leading-none tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
-              {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
-              ].map((chip, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/50 px-2.5 py-1.5 text-[11px] font-medium text-foreground/80">
-                  <chip.icon className={`h-3 w-3 ${chip.color}`} />
-                  {chip.label}
-                </span>
-              ))}
+        <div className="mb-6 rounded-2xl border border-border/60 bg-card relative overflow-hidden">
+          {/* Decorative gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-info/[0.03] pointer-events-none" />
+          <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full bg-primary/[0.08] blur-[100px] pointer-events-none" />
+          <div className="relative p-6 sm:p-8">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {isCustom && customRange?.from
+                ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                : `Receita — ${selectedPeriod.label}`}
+            </p>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <span className="block whitespace-nowrap text-4xl font-heading font-black leading-none tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
+                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
+                  { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
+                  { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
+                  { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
+                ].map((chip, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/40 bg-background/50 backdrop-blur-sm px-2.5 py-1.5 text-[11px] font-medium text-foreground/80">
+                    <chip.icon className={`h-3 w-3 ${chip.color}`} />
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -580,24 +585,30 @@ export default function Dashboard() {
         {/* Stat cards */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {([
-            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", iconBg: "bg-primary/10" },
-            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-primary", iconBg: "bg-primary/10" },
-            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", iconBg: "bg-info/10" },
-            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", iconBg: "bg-primary/10" },
-          ] as const).map((item, idx) => (
+            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, tone: "primary" as Tone },
+            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, tone: "success" as Tone },
+            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, tone: "info" as Tone },
+            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, tone: "primary" as Tone },
+          ] as const).map((item, idx) => {
+            const accentColors: Record<Tone, string> = { primary: "bg-primary", success: "bg-success", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive" };
+            return (
             <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.05 + idx * 0.05 }}
-              className="rounded-xl border border-border bg-card p-4 sm:p-5 transition-colors hover:bg-card/80">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{item.label}</p>
-                  <p className="text-2xl font-heading font-black leading-none tracking-tight text-foreground tabular-nums">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
-                </div>
-                <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", item.iconBg, item.color)}>
-                  <item.icon className="h-4 w-4" />
+              className="group relative rounded-2xl border border-border/60 bg-card p-4 sm:p-5 transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
+              {/* Left accent bar */}
+              <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColors[item.tone])} />
+              <div className="relative pl-1.5">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{item.label}</p>
+                    <p className="text-2xl font-heading font-black leading-none tracking-tight text-foreground tabular-nums">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                  </div>
+                  <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1 ring-border/20", toneMap[item.tone].bg, toneMap[item.tone].text)}>
+                    <item.icon className="h-4 w-4" />
+                  </div>
                 </div>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
       </motion.section>
 
@@ -605,35 +616,51 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-              <YAxis tickLine={false} axisLine={false} width={72} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (!active || !payload?.length) return null;
-                  const value = payload[0].value as number;
-                  return (
-                    <div className="rounded-lg border border-border bg-card px-3.5 py-2.5 shadow-xl">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
-                      <p className="text-base font-heading font-black text-foreground tabular-nums tracking-tight">
-                        R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                  );
-                }}
-                cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
-              />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }} />
-            </AreaChart>
-          </ResponsiveContainer>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/60 bg-card relative overflow-hidden">
+          {/* Chart header */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-border/30">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-3 w-3 text-primary" />
+              </div>
+              <span className="text-[12px] font-semibold text-foreground">Faturamento</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground font-medium">
+              {isCustom && customRange?.from
+                ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                : selectedPeriod.label}
+            </span>
+          </div>
+          <div className="p-4 md:p-5 min-h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={72} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const value = payload[0].value as number;
+                    return (
+                      <div className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-2xl">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
+                        <p className="text-base font-heading font-black text-foreground tabular-nums tracking-tight">
+                          R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    );
+                  }}
+                  cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
+                />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
