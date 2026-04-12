@@ -480,7 +480,7 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8 lg:p-10"
+        className="relative mb-10 overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-card via-card to-secondary/30 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.25)] sm:p-8 lg:p-10"
       >
         <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.08]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-secondary/35 to-transparent" />
@@ -605,7 +605,7 @@ export default function Dashboard() {
               { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-3xl border border-border/60 border-t-2 bg-background/80 p-5 shadow-sm transition-colors", item.accentBorder)}>
+                className={cn("group relative overflow-hidden rounded-2xl border border-border/30 border-t-2 bg-gradient-to-b from-card to-card/60 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:border-border/50", item.accentBorder)}>
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
                     <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
@@ -625,7 +625,7 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-6 min-h-[280px] relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-3xl border border-border/30 bg-gradient-to-br from-card via-card to-secondary/20 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.2)] md:p-6 min-h-[280px] relative overflow-hidden">
           <div className="absolute inset-0 ambient-grid opacity-[0.05] pointer-events-none" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
@@ -660,7 +660,7 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-5">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/30 bg-gradient-to-b from-card to-card/70 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.18)] md:p-5">
             <p className="mb-3 text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -678,7 +678,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", tone: "warning" as const, accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + idx * 0.05 }}
-                className={cn("rounded-3xl border border-border/60 border-t-2 bg-background/80 p-4 shadow-sm md:p-5", item.accentBorder)}>
+                className={cn("rounded-2xl border border-border/30 border-t-2 bg-gradient-to-b from-card to-card/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:border-border/50 md:p-5", item.accentBorder)}>
                 {(() => {
                   const tones: Record<typeof item.tone, { bg: string; text: string; dot: string }> = {
                     primary: { bg: "bg-primary/10", text: "text-primary", dot: "bg-primary" },
@@ -724,7 +724,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-6">
         {/* Quick actions — premium grid */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card overflow-hidden flex flex-col shadow-sm">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/30 bg-gradient-to-b from-card to-card/70 overflow-hidden flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
           <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -772,7 +772,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed — premium */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl border border-border/60 bg-card flex flex-col overflow-hidden shadow-sm">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl border border-border/30 bg-gradient-to-b from-card to-card/70 flex flex-col overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
           {/* Header with live dot */}
           <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
             <div className="flex items-center gap-2.5">
