@@ -664,7 +664,7 @@ export default function Dashboard() {
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-3">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border bg-card p-4 md:p-5">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/60 bg-card p-4 md:p-5">
             <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -687,24 +687,28 @@ export default function Dashboard() {
                 warning: { bg: "bg-warning/10", text: "text-warning", dot: "bg-warning" },
               };
               const tone = tones[item.tone];
+              const accentColors = { primary: "bg-primary", success: "bg-success", info: "bg-info", warning: "bg-warning" };
               return (
                 <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + idx * 0.05 }}
-                  className="rounded-xl border border-border bg-card p-4 md:p-5 transition-colors hover:bg-card/80">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", tone.bg, tone.text)}>
-                      {item.isPix ? <PixLogoMark className="h-3.5 w-3.5" /> : item.icon && <item.icon className="h-3.5 w-3.5" />}
+                  className="group relative rounded-2xl border border-border/60 bg-card p-4 md:p-5 transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
+                  <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColors[item.tone])} />
+                  <div className="relative pl-1.5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center ring-1 ring-border/20", tone.bg, tone.text)}>
+                        {item.isPix ? <PixLogoMark className="h-3.5 w-3.5" /> : item.icon && <item.icon className="h-3.5 w-3.5" />}
+                      </div>
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{item.label}</span>
                     </div>
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{item.label}</span>
-                  </div>
-                  <p className="text-xl md:text-2xl font-heading font-black tabular-nums tracking-tight text-foreground leading-none mb-2">
-                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <div className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
-                      <span className={cn("text-[11px] font-semibold tabular-nums", tone.text)}>{item.helper}</span>
+                    <p className="text-xl md:text-2xl font-heading font-black tabular-nums tracking-tight text-foreground leading-none mb-2">
+                      {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <div className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
+                        <span className={cn("text-[11px] font-semibold tabular-nums", tone.text)}>{item.helper}</span>
+                      </div>
+                      {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
                     </div>
-                    {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
                   </div>
                 </motion.div>
               );
@@ -718,10 +722,12 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/60 bg-card overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
+              <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <Zap className="h-3 w-3 text-primary" />
+              </div>
               <span className="text-[12px] font-semibold text-foreground">Ações Rápidas</span>
             </div>
           </div>
