@@ -1,89 +1,235 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowUpRight,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  Copy,
+  Crosshair,
+  ExternalLink,
+  Layers,
+  Loader2,
+  MoreHorizontal,
+  Package,
+  Palette,
+  Plus,
+  Search,
+  Settings2,
+  ShoppingBag,
+  Star,
+  Trash2,
+  TrendingUp,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
-import {
-  Package, Plus, Trash2, MoreHorizontal, Copy, CheckCircle2,
-  Settings2, Palette, Star, ExternalLink, Search, X, Crosshair,
-  Loader2, ShoppingBag, TrendingUp, Clock, Zap, ArrowUpRight,
-  BarChart3, Eye, Layers,
-} from "lucide-react";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import PixelSettingsDialog from "@/components/PixelSettingsDialog";
-import type { Tables } from "@/integrations/supabase/types";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import type { Tables } from "@/integrations/supabase/types";
+import PixelSettingsDialog from "@/components/PixelSettingsDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Product = Tables<"products">;
+type ProductStatus = Product["status"];
 
-const fmt = (v: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+type StatusMeta = {
+  label: string;
+  text: string;
+  dot: string;
+  soft: string;
+  pulse?: boolean;
+};
 
-const STATUS: Record<string, { label: string; bg: string; text: string; dot: string; ping?: boolean }> = {
-  active:         { label: "Ativo",   bg: "bg-success/[0.08]", text: "text-success",            dot: "bg-success", ping: true },
-  inactive:       { label: "Inativo", bg: "bg-muted/20",       text: "text-muted-foreground/60", dot: "bg-muted-foreground/40" },
-  pending_review: { label: "Revisão", bg: "bg-warning/[0.08]", text: "text-warning",            dot: "bg-warning" },
+const fmt = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+
+const STATUS: Record<string, StatusMeta> = {
+  active: {
+    label: "Ativo",
+    text: "text-success",
+    dot: "bg-success",
+    soft: "border-success/20 bg-success/10",
+    pulse: true,
+  },
+  inactive: {
+    label: "Inativo",
+    text: "text-muted-foreground/60",
+    dot: "bg-muted-foreground/45",
+    soft: "border-border/25 bg-muted/15",
+  },
+  pending_review: {
+    label: "Revisão",
+    text: "text-warning",
+    dot: "bg-warning",
+    soft: "border-warning/20 bg-warning/10",
+  },
 };
 
 const DELIVERY_LABELS: Record<string, string> = {
-  curso: "Curso Online",
+  curso: "Curso online",
   ebook: "E-book",
   mentoria: "Mentoria",
   software: "Software",
   servico: "Serviço",
 };
 
+function StatusIndicator({
+  status,
+  tone = "plain",
+}: {
+  status: ProductStatus;
+  tone?: "plain" | "soft";
+}) {
+  const meta = STATUS[status] || STATUS.inactive;
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5",
+        tone === "soft"
+          ? [
+              "rounded-full border px-2.5 py-1 text-[10px] font-semibold",
+              meta.soft,
+              meta.text,
+            ]
+          : ["text-[10px] font-semibold", meta.text]
+      )}
+    >
+      <span className="relative flex h-[6px] w-[6px]">
+        {meta.pulse && (
+          <span
+            className={cn(
+              "absolute inline-flex h-full w-full rounded-full animate-ping opacity-45",
+              meta.dot
+            )}
+          />
+        )}
+        <span className={cn("relative inline-flex h-[6px] w-[6px] rounded-full", meta.dot)} />
+      </span>
+      {meta.label}
+    </span>
+  );
+}
+
+function SummaryMetric({
+  label,
+  value,
+  icon: Icon,
+  valueClassName,
+  iconClassName,
+}: {
+  label: string;
+  value: string;
+  icon: typeof Layers;
+  valueClassName?: string;
+  iconClassName?: string;
+}) {
+  return (
+    <div className="bg-background/70 p-4 sm:p-4.5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/40">
+            {label}
+          </p>
+          <p className={cn("mt-2 text-xl font-numbers leading-none text-foreground", valueClassName)}>{value}</p>
+        </div>
+        <div
+          className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-xl border border-border/30 bg-card text-muted-foreground/55",
+            iconClassName
+          )}
+        >
+          <Icon className="h-4 w-4" strokeWidth={1.8} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: products = [], refetch: loadProducts } = useProducts();
+
   const [pixelProduct, setPixelProduct] = useState<Product | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"all" | "active" | "inactive" | "pending_review">("all");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return products.filter(p => {
-      if (tab !== "all" && p.status !== tab) return false;
-      return !search || p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q);
+    const query = search.toLowerCase();
+
+    return products.filter((product) => {
+      if (tab !== "all" && product.status !== tab) return false;
+
+      return (
+        !search ||
+        product.name.toLowerCase().includes(query) ||
+        product.description?.toLowerCase().includes(query)
+      );
     });
   }, [products, search, tab]);
 
-  const activeCount = products.filter(p => p.status === "active").length;
-  const pendingCount = products.filter(p => p.status === "pending_review").length;
-  const totalRevenue = products.reduce((s, p) => s + Number(p.price), 0);
+  const activeCount = products.filter((product) => product.status === "active").length;
+  const pendingCount = products.filter((product) => product.status === "pending_review").length;
+  const totalRevenue = products.reduce((sum, product) => sum + Number(product.price), 0);
 
-  const confirmDelete = async () => {
-    if (!user || !deleteTarget) return;
-    setDeleting(true);
-    const { error } = await supabase.from("products").delete().eq("id", deleteTarget).eq("user_id", user.id);
-    setDeleting(false); setDeleteTarget(null);
-    if (error) { toast.error("Erro ao excluir produto"); return; }
-    toast.success("Produto removido"); loadProducts();
-  };
-
-  const getLink = (url: string) => `${window.location.origin}/pay/${url.split("/").pop()!}`;
-
-  const copyLink = (p: Product) => {
-    if (!p.checkout_url) return;
-    navigator.clipboard.writeText(getLink(p.checkout_url));
-    setCopiedId(p.id);
-    toast.success("Link copiado!");
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+  const metrics = [
+    {
+      label: "Produtos",
+      value: String(products.length),
+      icon: Layers,
+      valueClassName: "text-foreground",
+      iconClassName: "text-info bg-info/8 border-info/15",
+    },
+    {
+      label: "Ativos",
+      value: String(activeCount),
+      icon: TrendingUp,
+      valueClassName: "text-success",
+      iconClassName: "text-success bg-success/8 border-success/15",
+    },
+    {
+      label: "Revisão",
+      value: String(pendingCount),
+      icon: Clock,
+      valueClassName: "text-warning",
+      iconClassName: "text-warning bg-warning/8 border-warning/15",
+    },
+    {
+      label: "Receita potencial",
+      value: fmt(totalRevenue),
+      icon: BarChart3,
+      valueClassName: "text-info",
+      iconClassName: "text-info bg-info/8 border-info/15",
+    },
+  ];
 
   const tabs = [
     { label: "Todos", value: "all" as const, count: products.length },
@@ -92,418 +238,446 @@ export default function Produtos() {
     { label: "Inativos", value: "inactive" as const },
   ];
 
-  const st = (p: Product) => STATUS[p.status] || STATUS.inactive;
+  const getLink = (url: string) => `${window.location.origin}/pay/${url.split("/").pop()!}`;
 
-  const menu = (p: Product, btnCls: string) => (
+  const copyLink = (product: Product) => {
+    if (!product.checkout_url) return;
+
+    navigator.clipboard.writeText(getLink(product.checkout_url));
+    setCopiedId(product.id);
+    toast.success("Link copiado!");
+    window.setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const confirmDelete = async () => {
+    if (!user || !deleteTarget) return;
+
+    setDeleting(true);
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", deleteTarget)
+      .eq("user_id", user.id);
+
+    setDeleting(false);
+    setDeleteTarget(null);
+
+    if (error) {
+      toast.error("Erro ao excluir produto");
+      return;
+    }
+
+    toast.success("Produto removido");
+    loadProducts();
+  };
+
+  const renderMenu = (product: Product, buttonClassName: string) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className={btnCls}><MoreHorizontal className="h-4 w-4" strokeWidth={1.6} /></button>
+        <button className={buttonClassName}>
+          <MoreHorizontal className="h-4 w-4" strokeWidth={1.6} />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={6} className="w-52 rounded-xl border-border/60 bg-popover/95 backdrop-blur-xl p-1.5 shadow-2xl">
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className="w-52 rounded-2xl border border-border/40 bg-popover p-1.5 shadow-xl"
+      >
         {[
-          { icon: Settings2, label: "Editar produto", fn: () => navigate(`/vendas/produtos/${p.id}/editar`) },
-          { icon: Palette, label: "Checkout Builder", fn: () => navigate(`/vendas/produtos/${p.id}/checkout-builder`) },
-          ...(p.checkout_url ? [
-            { icon: copiedId === p.id ? CheckCircle2 : Copy, label: copiedId === p.id ? "Copiado!" : "Copiar link", fn: () => copyLink(p) },
-            { icon: ExternalLink, label: "Ver checkout", fn: () => window.open(getLink(p.checkout_url!), "_blank") },
-          ] : []),
-          { icon: Crosshair, label: "Pixels & Tracking", fn: () => setPixelProduct(p) },
-          { icon: Star, label: "Área de membros", fn: () => navigate(`/vendas/conteudo/${p.id}/builder`) },
-        ].map((item, i) => (
-          <DropdownMenuItem key={i} onClick={item.fn} className="gap-2.5 rounded-lg px-3 py-2.5 text-[12px] cursor-pointer hover:bg-muted/30">
-            <item.icon className="h-3.5 w-3.5 text-muted-foreground/60" strokeWidth={1.7} /> {item.label}
+          { icon: Settings2, label: "Editar produto", fn: () => navigate(`/vendas/produtos/${product.id}/editar`) },
+          { icon: Palette, label: "Checkout Builder", fn: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`) },
+          ...(product.checkout_url
+            ? [
+                {
+                  icon: copiedId === product.id ? CheckCircle2 : Copy,
+                  label: copiedId === product.id ? "Copiado!" : "Copiar link",
+                  fn: () => copyLink(product),
+                },
+                {
+                  icon: ExternalLink,
+                  label: "Ver checkout",
+                  fn: () => window.open(getLink(product.checkout_url!), "_blank"),
+                },
+              ]
+            : []),
+          { icon: Crosshair, label: "Pixels & Tracking", fn: () => setPixelProduct(product) },
+          { icon: Star, label: "Área de membros", fn: () => navigate(`/vendas/conteudo/${product.id}/builder`) },
+        ].map((item) => (
+          <DropdownMenuItem
+            key={item.label}
+            onClick={item.fn}
+            className="gap-2.5 rounded-xl px-3 py-2.5 text-[12px] cursor-pointer hover:bg-muted/25"
+          >
+            <item.icon className="h-3.5 w-3.5 text-muted-foreground/55" strokeWidth={1.7} />
+            {item.label}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator className="my-1 bg-border/30" />
-        <DropdownMenuItem onClick={() => setDeleteTarget(p.id)} className="gap-2.5 rounded-lg px-3 py-2.5 text-[12px] text-destructive focus:text-destructive cursor-pointer">
-          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.7} /> Excluir produto
+        <DropdownMenuSeparator className="my-1 bg-border/25" />
+        <DropdownMenuItem
+          onClick={() => setDeleteTarget(product.id)}
+          className="gap-2.5 rounded-xl px-3 py-2.5 text-[12px] text-destructive focus:text-destructive cursor-pointer"
+        >
+          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.7} />
+          Excluir produto
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 
-  const kpis = [
-    { label: "Total", value: products.length, suffix: "", icon: Layers, color: "text-foreground", iconBg: "bg-primary/10 text-primary" },
-    { label: "Ativos", value: activeCount, suffix: "", icon: TrendingUp, color: "text-success", iconBg: "bg-success/10 text-success" },
-    { label: "Revisão", value: pendingCount, suffix: "", icon: Clock, color: "text-warning", iconBg: "bg-warning/10 text-warning" },
-    { label: "Receita", value: totalRevenue, suffix: "currency", icon: BarChart3, color: "text-primary", iconBg: "bg-primary/10 text-primary" },
-  ];
-
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 md:pb-16 space-y-5">
-
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* HERO HEADER                                                 */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl border border-border/50 bg-card"
+    <div className="mx-auto w-full max-w-[1480px] space-y-4 pb-20 md:pb-16">
+      <motion.section
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="overflow-hidden rounded-[28px] border border-border/40 bg-card"
       >
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -left-24 h-[400px] w-[400px] rounded-full bg-primary/[0.07] blur-[120px]" />
-          <div className="absolute -bottom-16 -right-16 h-[300px] w-[300px] rounded-full bg-info/[0.05] blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[200px] w-[600px] rounded-full bg-success/[0.03] blur-[140px]" />
-          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 0.5px, transparent 0.5px)", backgroundSize: "16px 16px" }} />
-        </div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-info/35 to-transparent" />
 
-        <div className="relative z-10 p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15">
-                <ShoppingBag className="h-5 w-5 text-primary" strokeWidth={1.8} />
+        <div className="p-5 sm:p-6 lg:p-7">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/35 bg-background/70 px-3 py-1.5">
+                <span className="h-2 w-2 rounded-full bg-info" />
+                <span className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/55">
+                  Catálogo digital
+                </span>
               </div>
+
               <div>
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-xl sm:text-2xl font-heading text-foreground">Meus Produtos</h1>
-                  <span className="inline-flex h-5 items-center rounded-md bg-primary/10 px-2 text-[10px] font-bold tabular-nums text-primary border border-primary/15">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-[28px] font-heading leading-none text-foreground sm:text-[34px]">
+                    Meus Produtos
+                  </h1>
+                  <span className="inline-flex items-center rounded-full border border-info/20 bg-info/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-info">
                     {products.length}
                   </span>
                 </div>
-                <p className="text-[12px] text-muted-foreground/50 mt-0.5">Gerencie e monitore seu catálogo digital</p>
+                <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-muted-foreground/55 sm:text-[14px]">
+                  Uma visão mais limpa, mais séria e mais bonita do seu catálogo — com foco em produto, preço e operação.
+                </p>
               </div>
             </div>
 
             <button
               onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="shrink-0 inline-flex h-9 sm:h-10 items-center gap-2 rounded-xl bg-gradient-to-b from-primary to-primary/80 px-4 sm:px-5 text-[12px] sm:text-[13px] font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:brightness-110 active:scale-[0.97]"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-info px-5 text-[13px] font-semibold text-info-foreground transition-all hover:brightness-105 active:scale-[0.98]"
             >
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-              <span className="hidden sm:inline">Novo Produto</span>
-              <span className="sm:hidden">Novo</span>
+              <Plus className="h-4 w-4" strokeWidth={2.2} />
+              Novo Produto
             </button>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-            {kpis.map((kpi, i) => (
-              <motion.div
-                key={kpi.label}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.08 + i * 0.05 }}
-                className="group relative rounded-xl border border-border/30 bg-background/40 backdrop-blur-sm p-3.5 overflow-hidden hover:border-border/60 transition-all duration-300"
-              >
-                <div className="absolute -top-8 -right-8 h-20 w-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-[30px] pointer-events-none bg-primary/10" />
-                <div className="relative z-10 flex items-center justify-between">
-                  <div>
-                    <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/40 mb-1.5">{kpi.label}</p>
-                    <p className={cn("text-lg sm:text-xl font-numbers leading-none", kpi.color)}>
-                      {kpi.suffix === "currency" ? fmt(kpi.value) : kpi.value}
-                    </p>
-                  </div>
-                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110", kpi.iconBg)}>
-                    <kpi.icon className="h-4 w-4" strokeWidth={1.8} />
-                  </div>
-                </div>
-              </motion.div>
+          <div className="mt-6 grid gap-px overflow-hidden rounded-2xl border border-border/25 bg-border/15 sm:grid-cols-2 xl:grid-cols-4">
+            {metrics.map((metric) => (
+              <SummaryMetric key={metric.label} {...metric} />
             ))}
           </div>
         </div>
-      </motion.div>
+      </motion.section>
 
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* TOOLBAR                                                     */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-0.5 rounded-xl border border-border/40 bg-card/50 p-1 overflow-x-auto">
-          {tabs.map(t => (
-            <button
-              key={t.value}
-              onClick={() => setTab(t.value)}
-              className={cn(
-                "relative shrink-0 px-3.5 py-2 rounded-lg text-[12px] font-semibold transition-all duration-200",
-                tab === t.value
-                  ? "bg-background text-foreground shadow-sm border border-border/50"
-                  : "text-muted-foreground/50 hover:text-muted-foreground/80"
-              )}
-            >
-              <span className="flex items-center gap-1.5">
-                {t.label}
-                {t.count != null && (
-                  <span className={cn(
-                    "inline-flex h-[16px] min-w-[16px] items-center justify-center rounded px-1 text-[9px] tabular-nums font-bold",
-                    tab === t.value ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground/40"
-                  )}>
-                    {t.count}
-                  </span>
+      <section className="overflow-hidden rounded-[28px] border border-border/40 bg-card">
+        <div className="flex flex-col gap-4 border-b border-border/20 px-4 py-4 sm:px-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex items-end gap-5 overflow-x-auto">
+            {tabs.map((item) => (
+              <button
+                key={item.value}
+                onClick={() => setTab(item.value)}
+                className={cn(
+                  "relative shrink-0 pb-2 text-[12px] font-semibold transition-colors",
+                  tab === item.value ? "text-foreground" : "text-muted-foreground/45 hover:text-muted-foreground/75"
                 )}
-              </span>
-            </button>
-          ))}
+              >
+                <span className="flex items-center gap-1.5">
+                  {item.label}
+                  {item.count != null && (
+                    <span
+                      className={cn(
+                        "rounded-full px-1.5 py-0.5 text-[9px] font-bold tabular-nums",
+                        tab === item.value ? "bg-info/10 text-info" : "bg-muted/20 text-muted-foreground/40"
+                      )}
+                    >
+                      {item.count}
+                    </span>
+                  )}
+                </span>
+                {tab === item.value && (
+                  <motion.span
+                    layoutId="products-clean-tab"
+                    className="absolute inset-x-0 bottom-0 h-px rounded-full bg-info"
+                    transition={{ type: "spring", bounce: 0.18, duration: 0.45 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 sm:w-60 sm:flex-none">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/35" />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar produto"
+                className="h-10 w-full rounded-xl border border-border/35 bg-background/75 pl-9 pr-9 text-[12px] text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:ring-2 focus:ring-info/15 focus:border-info/20"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/35 hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="hidden sm:flex items-center rounded-xl border border-border/35 bg-background/70 p-0.5">
+              {(["list", "grid"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-lg transition-all",
+                    viewMode === mode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground/35 hover:text-muted-foreground/70"
+                  )}
+                >
+                  {mode === "grid" ? (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <rect x="0.5" y="0.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                      <rect x="8.5" y="0.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                      <rect x="0.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                      <rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <rect x="0.5" y="1" width="13" height="3" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                      <rect x="0.5" y="5.5" width="13" height="3" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                      <rect x="0.5" y="10" width="13" height="3" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 sm:w-56 sm:flex-none">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/30" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar..."
-              className="h-9 w-full rounded-xl border border-border/40 bg-card/50 pl-9 pr-8 text-[12px] text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/25 transition-all"
-            />
-            {search && (
-              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground">
-                <X className="h-3.5 w-3.5" />
+        {filtered.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex min-h-[320px] flex-col items-center justify-center px-6 py-12 text-center"
+          >
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/35 bg-background/80">
+              <Package className="h-7 w-7 text-muted-foreground/25" strokeWidth={1.5} />
+            </div>
+            <p className="mt-5 text-[15px] font-semibold text-foreground">
+              {search || tab !== "all" ? "Nenhum resultado encontrado" : "Nenhum produto ainda"}
+            </p>
+            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-muted-foreground/50">
+              {search || tab !== "all"
+                ? "Ajuste seus filtros para localizar outros produtos."
+                : "Crie seu primeiro produto e comece a estruturar seu catálogo com mais presença visual."}
+            </p>
+            {!search && tab === "all" && (
+              <button
+                onClick={() => navigate("/vendas/produtos/novo/editar")}
+                className="mt-6 inline-flex h-10 items-center gap-2 rounded-xl bg-info px-4 text-[13px] font-semibold text-info-foreground transition-all hover:brightness-105"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.2} />
+                Criar produto
               </button>
             )}
-          </div>
+          </motion.div>
+        ) : viewMode === "list" ? (
+          <div>
+            <div className="hidden sm:grid grid-cols-[64px_minmax(0,1fr)_130px_90px_40px] items-center px-5 py-3 text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/30">
+              <span />
+              <span>Produto</span>
+              <span className="text-right">Preço</span>
+              <span className="text-center">Status</span>
+              <span />
+            </div>
 
-          <div className="hidden sm:flex items-center rounded-lg border border-border/40 bg-card/50 p-0.5">
-            {(["grid", "list"] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={cn(
-                  "h-8 w-8 flex items-center justify-center rounded-md transition-all",
-                  viewMode === mode ? "bg-background shadow-sm text-foreground" : "text-muted-foreground/30 hover:text-muted-foreground/60"
-                )}
-              >
-                {mode === "grid" ? (
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="0.5" y="0.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="8.5" y="0.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="0.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/></svg>
-                ) : (
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="0.5" y="1" width="13" height="3" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="0.5" y="5.5" width="13" height="3" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="0.5" y="10" width="13" height="3" rx="1" stroke="currentColor" strokeWidth="1.2"/></svg>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* CONTENT                                                     */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      {filtered.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-border/30 bg-card/20 text-center p-8"
-        >
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-border/40 bg-card/60 shadow-sm">
-            <Package className="h-7 w-7 text-muted-foreground/30" strokeWidth={1.5} />
-          </div>
-          <p className="text-[15px] font-display font-bold text-foreground mb-1">
-            {search || tab !== "all" ? "Nenhum resultado" : "Nenhum produto ainda"}
-          </p>
-          <p className="max-w-xs text-[13px] text-muted-foreground/50 leading-relaxed">
-            {search || tab !== "all" ? "Ajuste os filtros para encontrar seus produtos." : "Crie seu primeiro produto digital e comece a vender hoje."}
-          </p>
-          {!search && tab === "all" && (
-            <button
-              onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-6 inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-to-b from-primary to-primary/80 px-5 text-[13px] font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 active:scale-[0.97]"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.5} /> Criar meu primeiro produto
-            </button>
-          )}
-        </motion.div>
-      ) : viewMode === "grid" ? (
-        /* ─── GRID VIEW ─── */
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((p, i) => {
-              const s = st(p);
-              return (
+            <AnimatePresence initial={false} mode="popLayout">
+              {filtered.map((product) => (
                 <motion.div
-                  key={p.id}
+                  key={product.id}
                   layout
-                  initial={{ opacity: 0, y: 12, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.2) }}
-                  className="group relative rounded-2xl border border-border/40 bg-card overflow-hidden hover:border-border/70 hover:shadow-lg hover:shadow-primary/[0.04] transition-all duration-300 cursor-pointer"
-                  onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => navigate(`/vendas/produtos/${product.id}/editar`)}
+                  className="group grid cursor-pointer items-center gap-3 border-t border-border/15 px-4 py-3.5 transition-colors hover:bg-background/60 sm:grid-cols-[64px_minmax(0,1fr)_130px_90px_40px] sm:px-5"
                 >
-                  {/* Product Image */}
-                  <div className="relative aspect-[16/9] bg-gradient-to-br from-muted/30 to-muted/10 overflow-hidden">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-border/30 bg-background/75">
+                    {product.image_url ? (
+                      <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/20 border border-border/30">
-                          <Package className="h-6 w-6 text-muted-foreground/20" strokeWidth={1.5} />
-                        </div>
+                      <div className="flex h-full w-full items-center justify-center">
+                        <Package className="h-5 w-5 text-muted-foreground/20" strokeWidth={1.5} />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
+                    <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-foreground/[0.04]" />
+                  </div>
 
-                    <div className="absolute top-3 left-3">
-                      <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold backdrop-blur-md border border-border/20", s.bg, s.text)}>
-                        <span className="relative flex h-[5px] w-[5px]">
-                          {s.ping && <span className={cn("absolute inline-flex h-full w-full rounded-full animate-ping opacity-50", s.dot)} />}
-                          <span className={cn("relative inline-flex h-[5px] w-[5px] rounded-full", s.dot)} />
-                        </span>
-                        {s.label}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate text-[13px] font-semibold text-foreground sm:text-[14px]">{product.name}</h3>
+                      <span className="rounded-full border border-info/15 bg-info/8 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-info">
+                        {DELIVERY_LABELS[product.delivery_type] || product.delivery_type}
                       </span>
                     </div>
-
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={e => e.stopPropagation()}>
-                      {p.checkout_url && (
-                        <button
-                          onClick={() => copyLink(p)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-background/80 backdrop-blur-md border border-border/30 text-muted-foreground hover:text-foreground hover:bg-background transition-all shadow-sm"
-                        >
-                          {copiedId === p.id ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-                        </button>
-                      )}
-                      {menu(p,
-                        "flex h-7 w-7 items-center justify-center rounded-lg bg-background/80 backdrop-blur-md border border-border/30 text-muted-foreground hover:text-foreground hover:bg-background transition-all shadow-sm"
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-4">
-                    {p.delivery_type && (
-                      <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-2">
-                        {DELIVERY_LABELS[p.delivery_type] || p.delivery_type}
-                      </p>
-                    )}
-
-                    <h3 className="text-[14px] font-display font-bold text-foreground leading-tight line-clamp-1 mb-1 tracking-[-0.02em]">
-                      {p.name}
-                    </h3>
-
-                    {p.description && (
-                      <p className="text-[11px] text-muted-foreground/40 line-clamp-2 leading-relaxed mb-3">
-                        {p.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between pt-3 border-t border-border/20">
-                      <div>
-                        <p className="text-[9px] text-muted-foreground/30 font-semibold uppercase tracking-wider mb-0.5">Preço</p>
-                        <p className="font-numbers text-[15px] text-foreground leading-none">
-                          {fmt(Number(p.price))}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
-                        {p.checkout_url && (
-                          <button
-                            onClick={() => window.open(getLink(p.checkout_url!), "_blank")}
-                            className="flex h-8 items-center gap-1.5 rounded-lg border border-border/40 bg-background/60 px-2.5 text-[11px] font-semibold text-muted-foreground/60 hover:text-foreground hover:border-border/70 transition-all"
-                          >
-                            <Eye className="h-3 w-3" /> Ver
-                          </button>
-                        )}
-                        <button
-                          onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
-                          className="flex h-8 items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/15 px-2.5 text-[11px] font-bold text-primary hover:bg-primary/15 transition-all"
-                        >
-                          Editar <ArrowUpRight className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-      ) : (
-        /* ─── LIST VIEW ─── */
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="overflow-hidden rounded-2xl border border-border/40 bg-card/40"
-        >
-          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_120px_90px_90px_44px] items-center border-b border-border/30 px-5 py-2.5">
-            {["Produto", "Tipo", "Preço", "Status", ""].map((h, i) => (
-              <span key={i} className={cn("text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/30", i === 2 && "text-right", i === 3 && "text-center")}>
-                {h}
-              </span>
-            ))}
-          </div>
-
-          <AnimatePresence mode="popLayout">
-            {filtered.map((p) => {
-              const s = st(p);
-              return (
-                <motion.div
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={() => navigate(`/vendas/produtos/${p.id}/editar`)}
-                  className="group grid cursor-pointer items-center border-b border-border/15 px-5 py-3 transition-all duration-200 hover:bg-muted/[0.04] sm:grid-cols-[minmax(0,1fr)_120px_90px_90px_44px] last:border-b-0"
-                >
-                  <div className="flex min-w-0 items-center gap-3.5">
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-muted/10 ring-1 ring-inset ring-border/40 transition-transform duration-300 group-hover:scale-[1.05]">
-                      {p.image_url ? (
-                        <img src={p.image_url} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <Package className="h-4 w-4 text-muted-foreground/25" strokeWidth={1.5} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground leading-tight">{p.name}</p>
-                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground/35 max-w-[280px]">{p.description || "Sem descrição"}</p>
-                    </div>
-                  </div>
-
-                  <div className="hidden sm:block">
-                    <span className="text-[11px] text-muted-foreground/40 font-medium">
-                      {DELIVERY_LABELS[p.delivery_type] || p.delivery_type}
-                    </span>
+                    <p className="mt-1 truncate text-[11px] text-muted-foreground/45">{product.description || "Sem descrição"}</p>
                   </div>
 
                   <div className="hidden text-right sm:block">
-                    <span className="font-numbers text-[13px] text-foreground">{fmt(Number(p.price))}</span>
+                    <p className="text-[9px] font-heading uppercase tracking-[0.16em] text-muted-foreground/25">Preço</p>
+                    <p className="mt-1 font-numbers text-[14px] text-foreground">{fmt(Number(product.price))}</p>
                   </div>
 
                   <div className="hidden justify-center sm:flex">
-                    <span className={cn("inline-flex items-center gap-1.5 text-[10px] font-bold", s.text)}>
-                      <span className="relative flex h-[5px] w-[5px]">
-                        {s.ping && <span className={cn("absolute inline-flex h-full w-full rounded-full animate-ping opacity-50", s.dot)} />}
-                        <span className={cn("relative inline-flex h-[5px] w-[5px] rounded-full", s.dot)} />
-                      </span>
-                      {s.label}
-                    </span>
+                    <StatusIndicator status={product.status} />
                   </div>
 
-                  <div className="hidden justify-end sm:flex" onClick={e => e.stopPropagation()}>
-                    {menu(p,
-                      "flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/20 opacity-0 transition-all duration-200 hover:bg-muted/15 hover:text-foreground group-hover:opacity-100"
+                  <div className="hidden justify-end sm:flex" onClick={(event) => event.stopPropagation()}>
+                    {renderMenu(
+                      product,
+                      "flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground/25 opacity-0 transition-all hover:bg-background hover:text-foreground group-hover:opacity-100"
                     )}
                   </div>
 
-                  <div className="col-span-full mt-2 flex items-center justify-between sm:hidden" onClick={e => e.stopPropagation()}>
+                  <div className="col-span-full mt-1 flex items-center justify-between sm:hidden" onClick={(event) => event.stopPropagation()}>
                     <div className="flex items-center gap-2.5">
-                      <span className="font-numbers text-[13px] text-foreground">{fmt(Number(p.price))}</span>
-                      <span className={cn("inline-flex items-center gap-1 text-[10px] font-bold", s.text)}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
-                        {s.label}
-                      </span>
+                      <span className="font-numbers text-[13px] text-foreground">{fmt(Number(product.price))}</span>
+                      <StatusIndicator status={product.status} />
                     </div>
-                    {menu(p, "flex h-7 w-7 items-center justify-center rounded-lg border border-border/40 bg-card text-muted-foreground")}
+                    {renderMenu(
+                      product,
+                      "flex h-8 w-8 items-center justify-center rounded-xl border border-border/30 bg-background text-muted-foreground/60"
+                    )}
                   </div>
                 </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </motion.div>
-      )}
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="p-4 sm:p-5">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <AnimatePresence initial={false} mode="popLayout">
+                {filtered.map((product) => (
+                  <motion.article
+                    key={product.id}
+                    layout
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.22 }}
+                    onClick={() => navigate(`/vendas/produtos/${product.id}/editar`)}
+                    className="group cursor-pointer rounded-[24px] border border-border/30 bg-background/70 p-4 transition-all hover:border-info/20 hover:bg-background"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-[76px] w-[76px] shrink-0 overflow-hidden rounded-2xl border border-border/30 bg-card">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <Package className="h-6 w-6 text-muted-foreground/20" strokeWidth={1.5} />
+                          </div>
+                        )}
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-foreground/[0.04]" />
+                      </div>
 
-      {/* ════════ Modals ════════ */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/35">
+                              {DELIVERY_LABELS[product.delivery_type] || product.delivery_type}
+                            </p>
+                            <h3 className="mt-1 line-clamp-2 text-[15px] font-semibold leading-tight text-foreground">
+                              {product.name}
+                            </h3>
+                          </div>
+                          <div onClick={(event) => event.stopPropagation()}>
+                            {renderMenu(
+                              product,
+                              "flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground/35 transition-all hover:bg-card hover:text-foreground"
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="mt-2 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground/45">
+                          {product.description || "Sem descrição"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex items-end justify-between gap-3 border-t border-border/15 pt-3">
+                      <div>
+                        <p className="text-[9px] font-heading uppercase tracking-[0.16em] text-muted-foreground/25">Preço</p>
+                        <p className="mt-1 font-numbers text-[16px] text-foreground">{fmt(Number(product.price))}</p>
+                      </div>
+                      <StatusIndicator status={product.status} tone="soft" />
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
+                      {product.checkout_url && (
+                        <button
+                          onClick={() => window.open(getLink(product.checkout_url!), "_blank")}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border/35 bg-card px-3 text-[12px] font-semibold text-muted-foreground/65 transition-all hover:text-foreground"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          Checkout
+                        </button>
+                      )}
+                      <button
+                        onClick={() => navigate(`/vendas/produtos/${product.id}/editar`)}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-info px-3 text-[12px] font-semibold text-info-foreground transition-all hover:brightness-105"
+                      >
+                        Editar
+                        <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.8} />
+                      </button>
+                    </div>
+                  </motion.article>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
+      </section>
+
       {pixelProduct && (
-        <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={v => { if (!v) setPixelProduct(null); }} />
+        <PixelSettingsDialog
+          product={pixelProduct}
+          open={!!pixelProduct}
+          onOpenChange={(open) => {
+            if (!open) setPixelProduct(null);
+          }}
+        />
       )}
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={open => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-sm rounded-2xl border-border/50">
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent className="max-w-sm rounded-2xl border-border/40">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-display font-bold">Excluir produto</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground/60">Tem certeza? Esta ação não pode ser desfeita.</AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-semibold text-foreground">Excluir produto</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-muted-foreground/60">
+              Tem certeza? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="h-9 rounded-xl text-[13px]">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="h-9 gap-1.5 rounded-xl bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogCancel disabled={deleting} className="h-9 rounded-xl text-[13px]">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="h-9 gap-1.5 rounded-xl bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90"
+            >
               {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {deleting ? "Excluindo…" : "Excluir"}
             </AlertDialogAction>
