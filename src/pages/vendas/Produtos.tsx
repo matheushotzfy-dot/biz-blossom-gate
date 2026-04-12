@@ -102,14 +102,21 @@ export default function Produtos() {
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-24 md:pb-10">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-5 pb-6 pt-7 sm:px-7 md:pt-9">
-        <h1 className="font-display text-[26px] font-black tracking-[-0.03em] text-foreground sm:text-[30px]">Produtos</h1>
+      <div className="flex items-center justify-between px-5 pb-8 pt-8 sm:px-7 md:pt-10">
+        <div className="space-y-1">
+          <h1 className="font-display text-[28px] font-black tracking-[-0.04em] text-foreground sm:text-[34px]">
+            Meus Produtos
+          </h1>
+          <p className="text-[13px] text-muted-foreground/60">
+            {products.length} {products.length === 1 ? "produto" : "produtos"} no catálogo
+          </p>
+        </div>
         <button
           onClick={() => navigate("/vendas/produtos/novo/editar")}
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-bold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-md hover:shadow-primary/25 sm:h-11 sm:px-6 sm:text-[14px]"
+          className="inline-flex h-11 items-center gap-2.5 rounded-2xl bg-primary px-6 text-[13px] font-bold text-primary-foreground shadow-[0_2px_8px_hsl(var(--primary)/0.3)] transition-all duration-200 hover:bg-primary/90 hover:shadow-[0_4px_16px_hsl(var(--primary)/0.4)] hover:-translate-y-px sm:h-12 sm:px-7 sm:text-[14px]"
         >
-          <Plus className="h-4 w-4" strokeWidth={2.2} />
-          Adicionar produto
+          <Plus className="h-4.5 w-4.5" strokeWidth={2.4} />
+          Novo produto
         </button>
       </div>
 
