@@ -89,25 +89,29 @@ export function ProductActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        sideOffset={8}
-        className="w-52 rounded-2xl border border-border/40 bg-popover/95 p-1 shadow-2xl backdrop-blur-xl"
+        sideOffset={6}
+        className="min-w-[200px] rounded-xl border border-border/30 bg-card p-1.5 shadow-[0_12px_40px_-8px_hsl(var(--foreground)/0.15),0_4px_12px_-4px_hsl(var(--foreground)/0.08)]"
       >
         {extendedItems.map((item) => (
           <DropdownMenuItem
             key={item.label}
             onClick={item.action}
-            className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2 text-[12px] font-medium text-popover-foreground focus:bg-muted/35"
+            className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-foreground/80 transition-colors focus:bg-primary/8 focus:text-foreground"
           >
-            <item.icon className="h-3.5 w-3.5 text-muted-foreground/60" strokeWidth={1.7} />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-secondary/60">
+              <item.icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.8} />
+            </div>
             {item.label}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator className="my-1 bg-border/25" />
+        <DropdownMenuSeparator className="my-1.5 bg-border/20" />
         <DropdownMenuItem
           onClick={() => onDeleteProduct(product)}
-          className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2 text-[12px] font-medium text-destructive focus:bg-destructive/10 focus:text-destructive"
+          className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-destructive/80 transition-colors focus:bg-destructive/10 focus:text-destructive"
         >
-          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.7} />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-destructive/10">
+            <Trash2 className="h-3.5 w-3.5 text-destructive/70" strokeWidth={1.8} />
+          </div>
           Excluir produto
         </DropdownMenuItem>
       </DropdownMenuContent>
