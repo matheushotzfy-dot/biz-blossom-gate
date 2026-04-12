@@ -689,57 +689,45 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* ACTIONS + ACTIVITY                                               */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-6">
-        {/* Quick actions — premium grid */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/30 bg-gradient-to-b from-card to-card/70 overflow-hidden flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
-          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-[11px] font-heading font-bold uppercase tracking-[0.12em] text-foreground/60">Ações Rápidas</span>
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
+        {/* Quick actions */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-[12px] font-semibold text-foreground">Ações Rápidas</span>
             </div>
-            <span className="text-[10px] text-muted-foreground/30 font-medium">10 atalhos</span>
           </div>
-          <div className="grid grid-cols-2 gap-px bg-border/8 flex-1">
+          <div className="grid grid-cols-2 gap-px bg-border/40 flex-1">
             {[
-              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
-              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
-              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
-              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório completo", tone: "primary" as const },
-              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
-              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
-              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
-              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" as const },
-              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
-              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
-            ].map((action) => {
-              const colors: Record<string, { bg: string; text: string; hoverBg: string; ring: string }> = {
-                primary: { bg: "bg-primary/8", text: "text-primary", hoverBg: "hover:bg-primary/[0.03]", ring: "ring-primary/10" },
-                success: { bg: "bg-success/8", text: "text-success", hoverBg: "hover:bg-success/[0.03]", ring: "ring-success/10" },
-                info: { bg: "bg-info/8", text: "text-info", hoverBg: "hover:bg-info/[0.03]", ring: "ring-info/10" },
-                warning: { bg: "bg-warning/8", text: "text-warning", hoverBg: "hover:bg-warning/[0.03]", ring: "ring-warning/10" },
-              };
-              const c = colors[action.tone] || colors.primary;
-              return (
-                <Link key={action.href} to={action.href}
-                  className={cn("group relative flex items-center gap-3.5 bg-card p-4 md:p-5 transition-all duration-200 active:scale-[0.98]", c.hoverBg)}>
-                  <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-inset transition-transform duration-200 group-hover:scale-105", c.bg, c.text, c.ring)}>
-                    <action.icon className="h-[18px] w-[18px]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] text-muted-foreground/40 mt-0.5 leading-snug">{action.desc}</p>
-                  </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/10 shrink-0 group-hover:text-muted-foreground/30 group-hover:translate-x-0.5 transition-all duration-200" />
-                </Link>
-              );
-            })}
+              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
+              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
+              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento" },
+              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório completo" },
+              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro" },
+              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo" },
+              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações" },
+              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta" },
+              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação" },
+              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
+            ].map((action) => (
+              <Link key={action.href} to={action.href}
+                className="group flex items-center gap-3 bg-card p-4 transition-colors hover:bg-secondary/40">
+                <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
+                  <action.icon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold text-foreground leading-tight">{action.label}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{action.desc}</p>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0 group-hover:text-muted-foreground/50 transition-colors" />
+              </Link>
+            ))}
           </div>
         </motion.div>
 
-        {/* Activity feed — premium */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-3xl border border-border/30 bg-gradient-to-b from-card to-card/70 flex flex-col overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+        {/* Activity feed */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-xl border border-border bg-card flex flex-col overflow-hidden">
           {/* Header with live dot */}
           <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/15">
             <div className="flex items-center gap-2.5">
