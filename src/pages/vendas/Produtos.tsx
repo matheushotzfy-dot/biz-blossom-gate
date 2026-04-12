@@ -7,6 +7,7 @@ import {
   Clock3,
   LayoutGrid,
   Link2,
+  List,
   Loader2,
   Package,
   Plus,
