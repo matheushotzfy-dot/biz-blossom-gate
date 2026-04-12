@@ -20,7 +20,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
         <Table className="min-w-[800px] table-fixed">
           <TableHeader>
             <TableRow className="border-border/40 hover:bg-transparent">
-              <TableHead className="h-10 pl-5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+              <TableHead className="h-10 w-[40%] pl-5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
                 Produto
               </TableHead>
               <TableHead className="h-10 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
