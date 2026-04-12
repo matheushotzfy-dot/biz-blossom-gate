@@ -731,7 +731,7 @@ export default function Dashboard() {
               <span className="text-[12px] font-semibold text-foreground">Ações Rápidas</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-px bg-border/40 flex-1">
+          <div className="grid grid-cols-2 gap-px bg-border/20 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto" },
               { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas" },
@@ -745,15 +745,15 @@ export default function Dashboard() {
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras" },
             ].map((action) => (
               <Link key={action.href} to={action.href}
-                className="group flex items-center gap-3 bg-card p-4 transition-colors hover:bg-secondary/40">
-                <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
+                className="group flex items-center gap-3 bg-card p-4 transition-all duration-200 hover:bg-primary/[0.04]">
+                <div className="h-9 w-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all duration-300">
                   <action.icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-semibold text-foreground leading-tight">{action.label}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0 group-hover:text-muted-foreground/50 transition-colors" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/15 shrink-0 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all" />
               </Link>
             ))}
           </div>
