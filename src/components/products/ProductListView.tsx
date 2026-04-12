@@ -21,7 +21,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
   return (
     <>
       <div className="hidden md:block">
-        <div className="grid grid-cols-[minmax(0,1.7fr)_220px_180px_150px_48px] gap-4 px-5 py-3 text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/38">
+        <div className="grid grid-cols-[minmax(0,1.8fr)_240px_220px_170px_52px] gap-5 px-6 py-4 text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground/36 lg:px-7">
           <span>Produto</span>
           <span>Publicação</span>
           <span className="text-right">Monetização</span>
@@ -29,7 +29,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
           <span />
         </div>
 
-        <div className="border-t border-border/25">
+        <div className="border-t border-border/20">
           {products.map((product) => {
             const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
             const hasCheckout = Boolean(product.checkout_url);
@@ -39,59 +39,58 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
               <article
                 key={product.id}
                 onClick={() => handlers.onEditProduct(product)}
-                className="group grid cursor-pointer grid-cols-[minmax(0,1.7fr)_220px_180px_150px_48px] items-center gap-4 border-t border-border/25 px-5 py-4 transition-all hover:bg-background/50"
+                className="group grid cursor-pointer grid-cols-[minmax(0,1.8fr)_240px_220px_170px_52px] items-center gap-5 border-t border-border/20 px-6 py-5 transition-all hover:bg-background/55 lg:px-7"
               >
-                <div className="min-w-0 flex items-center gap-3.5">
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-border/45 bg-background">
+                <div className="min-w-0 flex items-center gap-4">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[20px] border border-border/40 bg-background shadow-[0_10px_24px_hsl(var(--background)/0.14)]">
                     {product.image_url ? (
                       <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
-                        <Package className="h-4.5 w-4.5 text-muted-foreground/25" strokeWidth={1.5} />
+                        <Package className="h-5 w-5 text-muted-foreground/25" strokeWidth={1.5} />
                       </div>
                     )}
-                    <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-foreground/[0.04]" />
+                    <div className="pointer-events-none absolute inset-0 rounded-[20px] ring-1 ring-inset ring-foreground/[0.04]" />
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 space-y-2">
                     <div className="flex items-center gap-2.5">
-                      <p className="truncate text-[13px] font-semibold text-foreground">{product.name}</p>
-                      <span className="rounded-full border border-border/40 bg-background/75 px-2 py-0.5 text-[10px] font-medium text-muted-foreground/65">
+                      <p className="truncate text-[15px] font-semibold text-foreground">{product.name}</p>
+                      <span className="rounded-full border border-border/35 bg-background/78 px-2.5 py-1 text-[10px] font-medium text-muted-foreground/66">
                         {deliveryLabel}
                       </span>
                     </div>
-                    <p className="mt-1 truncate text-[12px] text-muted-foreground/55">{product.description || "Sem descrição"}</p>
+                    <p className="truncate text-[13px] leading-6 text-muted-foreground/56">{product.description || "Sem descrição"}</p>
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <span
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-medium",
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium",
                       hasCheckout
-                        ? "border-success/20 bg-success/10 text-success"
-                        : "border-border/40 bg-secondary/50 text-muted-foreground/65"
+                        ? "border-primary/20 bg-primary/10 text-primary shadow-[0_0_16px_hsl(var(--primary)/0.05)]"
+                        : "border-border/35 bg-secondary/55 text-muted-foreground/66"
                     )}
                   >
-                    {hasCheckout && <ExternalLink className="h-3 w-3" strokeWidth={1.8} />}
-                    {!hasCheckout && <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />}
+                    {hasCheckout ? <ExternalLink className="h-3 w-3" strokeWidth={1.8} /> : <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />}
                     {hasCheckout ? "Checkout publicado" : "Sem checkout"}
                   </span>
-                  <p className="text-[11px] font-mono text-muted-foreground/40">{formatCompactDate(product.updated_at)}</p>
+                  <p className="text-[11px] font-mono text-muted-foreground/40">Atualizado {formatCompactDate(product.updated_at)}</p>
                 </div>
 
                 <div className="text-right">
-                  <p className="font-numbers text-[15px] font-semibold tabular-nums text-foreground">{formatCurrency(Number(product.price))}</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground/45">
+                  <p className="font-numbers text-[18px] font-semibold tracking-[-0.04em] tabular-nums text-foreground">{formatCurrency(Number(product.price))}</p>
+                  <p className="mt-1.5 text-[12px] text-muted-foreground/46">
                     {product.affiliate_enabled ? `${product.affiliate_commission}% com afiliados` : "Afiliados desativados"}
                   </p>
                 </div>
 
-                <div className="space-y-1.5 text-center">
+                <div className="space-y-2 text-center">
                   <div className="flex justify-center">
                     <ProductStatusIndicator status={product.status} tone="soft" />
                   </div>
-                  <p className="text-[11px] text-muted-foreground/40">{statusHelper}</p>
+                  <p className="text-[12px] text-muted-foreground/42">{statusHelper}</p>
                 </div>
 
                 <div className="flex justify-end" onClick={(event) => event.stopPropagation()}>
@@ -99,7 +98,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                     <ProductActionsMenu
                       copied={copiedId === product.id}
                       product={product}
-                      triggerClassName="h-9 w-9 rounded-xl border border-border/35 bg-background/75 text-muted-foreground/50 hover:bg-background hover:text-foreground"
+                      triggerClassName="h-10 w-10 rounded-2xl border border-border/35 bg-background/78 text-muted-foreground/50 hover:border-primary/20 hover:bg-background hover:text-foreground"
                       {...handlers}
                     />
                   </div>
@@ -110,7 +109,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
         </div>
       </div>
 
-      <div className="space-y-3 p-4 md:hidden">
+      <div className="space-y-4 p-4 md:hidden">
         {products.map((product) => {
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const hasCheckout = Boolean(product.checkout_url);
@@ -119,15 +118,15 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
             <article
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
-              className="cursor-pointer rounded-[24px] border border-border/40 bg-background/65 p-4 shadow-sm"
+              className="cursor-pointer rounded-[28px] border border-border/35 bg-background/72 p-4 shadow-[0_18px_40px_hsl(var(--background)/0.18)]"
             >
-              <div className="flex items-start gap-3">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-border/45 bg-background">
+              <div className="flex items-start gap-3.5">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[20px] border border-border/40 bg-background">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <Package className="h-4.5 w-4.5 text-muted-foreground/25" strokeWidth={1.5} />
+                      <Package className="h-5 w-5 text-muted-foreground/25" strokeWidth={1.5} />
                     </div>
                   )}
                 </div>
@@ -135,21 +134,21 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-[14px] font-semibold text-foreground">{product.name}</p>
-                      <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground/60">{product.description || "Sem descrição"}</p>
+                      <p className="truncate text-[15px] font-semibold text-foreground">{product.name}</p>
+                      <p className="mt-1 line-clamp-2 text-[13px] leading-6 text-muted-foreground/60">{product.description || "Sem descrição"}</p>
                     </div>
                     <div onClick={(event) => event.stopPropagation()}>
                       <ProductActionsMenu
                         copied={copiedId === product.id}
                         product={product}
-                        triggerClassName="h-8 w-8 rounded-xl border border-border/35 bg-background/75 text-muted-foreground/55"
+                        triggerClassName="h-9 w-9 rounded-2xl border border-border/35 bg-background/78 text-muted-foreground/55"
                         {...handlers}
                       />
                     </div>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-border/40 bg-background/75 px-2 py-0.5 text-[10px] font-medium text-muted-foreground/65">
+                  <div className="mt-3 flex flex-wrap items-center gap-2.5">
+                    <span className="rounded-full border border-border/35 bg-background/78 px-2.5 py-1 text-[10px] font-medium text-muted-foreground/66">
                       {deliveryLabel}
                     </span>
                     <ProductStatusIndicator status={product.status} tone="soft" />
@@ -157,18 +156,18 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border/25 pt-3">
-                <div className="rounded-2xl border border-border/35 bg-card/75 p-3">
-                  <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40">Monetização</p>
-                  <p className="mt-1 font-numbers text-[15px] font-semibold text-foreground">{formatCurrency(Number(product.price))}</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground/45">
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/20 pt-4">
+                <div className="rounded-[22px] border border-border/35 bg-card/76 p-3.5">
+                  <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/40">Monetização</p>
+                  <p className="mt-2 font-numbers text-[18px] font-semibold tracking-[-0.04em] text-foreground">{formatCurrency(Number(product.price))}</p>
+                  <p className="mt-1.5 text-[12px] text-muted-foreground/45">
                     {product.affiliate_enabled ? `${product.affiliate_commission}% afiliado` : "Sem afiliação"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-border/35 bg-card/75 p-3 text-right">
-                  <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40">Publicação</p>
-                  <p className="mt-1 text-[13px] font-medium text-foreground">{hasCheckout ? "Checkout publicado" : "Sem checkout"}</p>
-                  <p className="mt-1 text-[11px] font-mono text-muted-foreground/40">{formatCompactDate(product.updated_at)}</p>
+                <div className="rounded-[22px] border border-border/35 bg-card/76 p-3.5 text-right">
+                  <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/40">Publicação</p>
+                  <p className="mt-2 text-[14px] font-medium text-foreground">{hasCheckout ? "Checkout publicado" : "Sem checkout"}</p>
+                  <p className="mt-1.5 text-[11px] font-mono text-muted-foreground/40">{formatCompactDate(product.updated_at)}</p>
                 </div>
               </div>
             </article>
