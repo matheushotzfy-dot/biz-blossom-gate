@@ -410,13 +410,7 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
-        <div className="absolute inset-0 ambient-grid opacity-[0.12] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.5),transparent_88%)]" />
-        <div className="absolute inset-x-[10%] top-8 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
-        <div className="absolute inset-x-[16%] bottom-8 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
-      </div>
+    <div className="mx-auto w-full max-w-[1440px] pb-20 px-4 sm:px-6 relative">
 
       {/* ─── SCALE MODE FRAME ─── */}
       {fireEffect && (
@@ -474,150 +468,136 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HERO — DASHBOARD COMMAND CENTER                                  */}
+      {/* HERO — DASHBOARD                                                  */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-card via-card to-secondary/30 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.25)] sm:p-8 lg:p-10"
+        className="relative mb-6 pt-6"
       >
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.08]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-secondary/35 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
-        <div className="relative z-10">
-          <div className="mb-8 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <BarChart3 className="h-4.5 w-4.5" />
-                </div>
-                <span className="text-[11px] font-heading uppercase tracking-[0.18em] text-foreground/80">Dashboard</span>
-              </motion.div>
-              {nickname && (
-                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
-                  <Crown className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[11px] font-semibold text-foreground/80">{nickname}</span>
-                </div>
-              )}
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-success" />
-                <span className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Em tempo real</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {scaleModeUnlocked ? (
-                <button
-                  onClick={activateScaleMode}
-                  className={cn(
-                    "inline-flex h-9 items-center gap-2 rounded-full border px-4 text-[11px] font-heading transition-colors active:scale-[0.97]",
-                    scaleMode
-                      ? "border-primary/30 bg-primary/10 text-foreground"
-                      : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:text-foreground"
-                  )}
-                >
-                  <Flame className={cn("h-3.5 w-3.5", scaleMode ? "text-primary" : "text-muted-foreground")} />
-                  <span className="leading-none">Escala</span>
-                </button>
-              ) : (
-                <div className="group relative inline-flex h-9 items-center gap-2 rounded-full border border-border/60 bg-background/75 px-4 text-[11px] font-heading text-muted-foreground cursor-not-allowed">
-                  <Lock className="h-3.5 w-3.5" />
-                  <span className="leading-none">Escala</span>
-                  <div className="absolute top-full left-1/2 z-50 mt-3 w-60 -translate-x-1/2 rounded-xl border border-border/60 bg-card p-3 text-center shadow-lg opacity-0 transition-opacity pointer-events-none group-hover:opacity-100">
-                    <p className="text-[11px] font-bold text-foreground mb-1">Modo Escala Bloqueado</p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 em 24h.</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="inline-flex items-center rounded-full border border-border/60 bg-background/75 p-1 shadow-sm">
-                {PERIOD_PRESETS.map((opt) => (
-                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-colors active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/35"
-                    )}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn("h-9 rounded-full border px-3.5 text-[10px] font-heading transition-colors active:scale-[0.97]",
-                    isCustom ? "border-primary/30 bg-primary/10 text-foreground" : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:text-foreground"
-                  )}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3 w-3" />
-                      {isCustom && customRange?.from
-                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                        : "Custom"}
-                    </span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/60 bg-popover p-0 shadow-lg">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                </PopoverContent>
-              </Popover>
-              <button onClick={privacy.toggle} className={cn("flex h-9 w-9 items-center justify-center rounded-full border transition-colors active:scale-[0.97]", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border/60 bg-background/75 text-muted-foreground hover:border-border hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
-                {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
-              </button>
-            </div>
+        {/* Toolbar */}
+        <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-heading font-bold text-foreground tracking-tight">Dashboard</h1>
+            {nickname && (
+              <span className="text-sm text-muted-foreground">· {nickname}</span>
+            )}
+            <span className="inline-flex items-center gap-1.5 ml-1">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Live</span>
+            </span>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
-            <p className="mb-4 text-[11px] font-heading uppercase tracking-[0.18em] text-muted-foreground">
-              {isCustom && customRange?.from
-                ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-                : `Receita — ${selectedPeriod.label}`}
-            </p>
-
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <span className="block whitespace-nowrap text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[88px]">
-                  {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-                </span>
-                <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-                  Visão consolidada das vendas, conversão e saldo do período selecionado, sem ruído visual.
-                </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {scaleModeUnlocked ? (
+              <button
+                onClick={activateScaleMode}
+                className={cn(
+                  "inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-medium transition-colors",
+                  scaleMode
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Flame className="h-3.5 w-3.5" />
+                Escala
+              </button>
+            ) : (
+              <div className="group relative inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12px] font-medium text-muted-foreground/50 cursor-not-allowed">
+                <Lock className="h-3 w-3" />
+                Escala
+                <div className="absolute top-full left-1/2 z-50 mt-2 w-52 -translate-x-1/2 rounded-lg border border-border bg-card p-2.5 text-center shadow-xl opacity-0 transition-opacity pointer-events-none group-hover:opacity-100">
+                  <p className="text-[11px] font-semibold text-foreground mb-0.5">Modo Escala Bloqueado</p>
+                  <p className="text-[10px] text-muted-foreground">Liberado ao atingir R$ 2.000 em 24h.</p>
+                </div>
               </div>
+            )}
 
-              <div className="flex flex-wrap items-center gap-2.5">
+            <div className="inline-flex items-center rounded-lg border border-border bg-card p-0.5">
+              {PERIOD_PRESETS.map((opt) => (
+                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                  className={cn("rounded-md px-3 py-1.5 text-[11px] font-medium transition-all",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className={cn("h-8 rounded-lg border px-3 text-[11px] font-medium transition-colors",
+                  isCustom ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground"
+                )}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarDays className="h-3 w-3" />
+                    {isCustom && customRange?.from
+                      ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                      : "Custom"}
+                  </span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0 shadow-xl">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+              </PopoverContent>
+            </Popover>
+            <button onClick={privacy.toggle} className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-colors", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Revenue hero */}
+        <div className="mb-6 rounded-xl border border-border bg-card p-6 sm:p-8">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {isCustom && customRange?.from
+              ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+              : `Receita — ${selectedPeriod.label}`}
+          </p>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <span className="block whitespace-nowrap text-4xl font-heading font-black leading-none tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
+              {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
               {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
+                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-2 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-2 text-[11px] font-semibold text-foreground/80`}>
-                  <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
+                <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/50 px-2.5 py-1.5 text-[11px] font-medium text-foreground/80">
+                  <chip.icon className={`h-3 w-3 ${chip.color}`} />
                   {chip.label}
                 </span>
               ))}
-              </div>
             </div>
-          </motion.div>
-
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentBorder: "border-t-success", iconBg: "bg-success/10", iconText: "text-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentBorder: "border-t-info", iconBg: "bg-info/10", iconText: "text-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
-            ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-2xl border border-border/30 border-t-2 bg-gradient-to-b from-card to-card/60 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:border-border/50", item.accentBorder)}>
-                <div className="relative z-10 flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
-                    <p className="text-[26px] font-heading font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
-                  </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </div>
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {([
+            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", iconBg: "bg-primary/10" },
+            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-primary", iconBg: "bg-primary/10" },
+            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", iconBg: "bg-info/10" },
+            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", iconBg: "bg-primary/10" },
+          ] as const).map((item, idx) => (
+            <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.05 + idx * 0.05 }}
+              className="rounded-xl border border-border bg-card p-4 sm:p-5 transition-colors hover:bg-card/80">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{item.label}</p>
+                  <p className="text-2xl font-heading font-black leading-none tracking-tight text-foreground tabular-nums">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                </div>
+                <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", item.iconBg, item.color)}>
+                  <item.icon className="h-4 w-4" />
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </motion.section>
 
