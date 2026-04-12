@@ -1,4 +1,4 @@
-import { Package, Sparkles } from "lucide-react";
+import { ExternalLink, Sparkles } from "lucide-react";
 
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
@@ -10,134 +10,115 @@ type ProductGridViewProps = ProductMenuHandlers & {
   products: Product[];
 };
 
-/* Unique gradient combos so every card feels like a photo, not a grey box */
-const COVER_GRADIENTS = [
-  "from-primary/25 via-primary/10 to-accent/20",
-  "from-info/25 via-info/10 to-primary/15",
-  "from-chart-2/25 via-chart-2/10 to-info/15",
-  "from-warning/20 via-warning/8 to-primary/12",
-  "from-accent/25 via-primary/10 to-info/15",
-  "from-chart-4/20 via-chart-4/8 to-primary/12",
+/* Accent color combos for placeholder covers */
+const ACCENT_PAIRS = [
+  { bg: "from-emerald-500/20 to-emerald-900/40", icon: "text-emerald-400", ring: "ring-emerald-500/20" },
+  { bg: "from-sky-500/20 to-sky-900/40", icon: "text-sky-400", ring: "ring-sky-500/20" },
+  { bg: "from-violet-500/20 to-violet-900/40", icon: "text-violet-400", ring: "ring-violet-500/20" },
+  { bg: "from-amber-500/15 to-amber-900/35", icon: "text-amber-400", ring: "ring-amber-500/20" },
+  { bg: "from-rose-500/15 to-rose-900/35", icon: "text-rose-400", ring: "ring-rose-500/20" },
+  { bg: "from-cyan-500/20 to-cyan-900/40", icon: "text-cyan-400", ring: "ring-cyan-500/20" },
 ];
-
-/* Decorative mesh dots pattern */
-function MeshPattern() {
-  return (
-    <svg className="absolute inset-0 h-full w-full opacity-[0.07]" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="mesh" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1" fill="currentColor" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#mesh)" className="text-foreground" />
-    </svg>
-  );
-}
 
 export function ProductGridView({ products, copiedId, ...handlers }: ProductGridViewProps) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {products.map((product, i) => {
         const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
         const isActive = product.status === "active";
-        const gradient = COVER_GRADIENTS[i % COVER_GRADIENTS.length];
+        const accent = ACCENT_PAIRS[i % ACCENT_PAIRS.length];
+        const initial = product.name.charAt(0).toUpperCase();
 
         return (
           <article
             key={product.id}
             onClick={() => handlers.onEditProduct(product)}
             className={cn(
-              "group relative flex cursor-pointer flex-col overflow-hidden rounded-[20px] border border-border/25 bg-card transition-all duration-300",
-              "shadow-[0_1px_2px_hsl(var(--foreground)/0.02),0_4px_16px_hsl(var(--foreground)/0.03)]",
-              "hover:border-primary/25 hover:shadow-[0_8px_30px_hsl(var(--primary)/0.08),0_2px_8px_hsl(var(--foreground)/0.05)]",
-              "hover:-translate-y-1"
+              "group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/10 bg-card/80 backdrop-blur-sm",
+              "transition-all duration-300 ease-out",
+              "hover:border-border/25 hover:bg-card hover:shadow-[0_16px_48px_-12px_hsl(var(--foreground)/0.08)]",
+              "hover:-translate-y-0.5"
             )}
           >
             {/* ── Cover ── */}
-            <div className="relative aspect-[2/1] w-full overflow-hidden">
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-secondary/20">
               {product.image_url ? (
                 <>
                   <img
                     src={product.image_url}
                     alt={product.name}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                   />
-                  {/* Cinematic vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-40" />
+                  {/* Bottom fade for text readability */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-card/90 to-transparent" />
                 </>
               ) : (
-                /* Rich gradient cover instead of boring grey */
-                <div className={cn("relative flex h-full w-full items-end justify-start bg-gradient-to-br p-5", gradient)}>
-                  <MeshPattern />
-                  {/* Floating decorative blobs */}
-                  <div className="absolute right-6 top-6 h-16 w-16 rounded-full bg-primary/10 blur-2xl" />
-                  <div className="absolute bottom-4 left-1/2 h-12 w-24 rounded-full bg-foreground/[0.03] blur-xl" />
-                  {/* Product initial as hero element */}
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-foreground/[0.06] bg-card/70 shadow-lg backdrop-blur-md">
-                      <span className="font-display text-[18px] font-black text-foreground/70">
-                        {product.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-foreground/30">
-                        Produto
-                      </span>
-                      <span className="text-[11px] font-semibold text-foreground/50">
-                        {deliveryLabel}
-                      </span>
-                    </div>
-                  </div>
+                /* Minimal gradient placeholder */
+                <div className={cn("flex h-full w-full items-center justify-center bg-gradient-to-br", accent.bg)}>
+                  {/* Subtle grid pattern */}
+                  <div
+                    className="absolute inset-0 opacity-[0.04]"
+                    style={{
+                      backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+                      backgroundSize: "32px 32px",
+                    }}
+                  />
+                  {/* Large initial */}
+                  <span className={cn("relative text-[64px] font-black tracking-tighter opacity-30", accent.icon)}>
+                    {initial}
+                  </span>
                 </div>
               )}
 
-              {/* Status pill — always visible */}
+              {/* Status chip */}
               <div className="absolute left-3 top-3 z-10">
                 <ProductStatusIndicator status={product.status} tone="soft" />
               </div>
 
-              {/* Actions — appear on hover */}
+              {/* Actions menu — hover reveal */}
               <div
-                className="absolute right-3 top-3 z-10 translate-y-1 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100"
+                className="absolute right-3 top-3 z-10 opacity-0 transition-all duration-200 group-hover:opacity-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ProductActionsMenu
                   copied={copiedId === product.id}
                   product={product}
-                  triggerClassName="h-8 w-8 rounded-xl bg-card/80 backdrop-blur-lg border border-border/30 text-foreground/60 shadow-lg hover:bg-card hover:text-foreground transition-all"
+                  triggerClassName="h-8 w-8 rounded-lg bg-background/70 backdrop-blur-md border border-border/20 text-foreground/70 shadow-sm hover:bg-background hover:text-foreground transition-all"
                   {...handlers}
                 />
               </div>
             </div>
 
-            {/* ── Content ── */}
-            <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-              <h3 className="truncate font-display text-[16px] font-bold tracking-[-0.02em] text-foreground">
-                {product.name}
-              </h3>
-
-              {product.image_url && (
-                <p className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/55">
-                  <Sparkles className="h-3 w-3 text-primary/50" strokeWidth={1.8} />
+            {/* ── Body ── */}
+            <div className="flex flex-1 flex-col gap-3 p-4">
+              {/* Title + type */}
+              <div className="space-y-1">
+                <h3 className="truncate text-[15px] font-semibold leading-tight tracking-tight text-foreground">
+                  {product.name}
+                </h3>
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/50">
+                  <Sparkles className="h-3 w-3" strokeWidth={1.5} />
                   {deliveryLabel}
-                </p>
-              )}
+                </div>
+              </div>
 
-              {/* Price bar */}
-              <div className="mt-4 flex items-center justify-between rounded-xl border border-border/20 bg-secondary/30 px-3.5 py-2.5">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/50">
-                  Preço
-                </span>
-                <span className="font-numbers text-[18px] font-bold leading-none tracking-[-0.02em] text-foreground">
+              {/* Price row */}
+              <div className="mt-auto flex items-center justify-between pt-1">
+                <span className="font-numbers text-[20px] font-bold tracking-tight text-foreground">
                   {formatCurrency(Number(product.price))}
                 </span>
+                {product.checkout_url && (
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                    <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Bottom accent line */}
+            {/* Bottom accent on hover */}
             {isActive && (
-              <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             )}
           </article>
         );
