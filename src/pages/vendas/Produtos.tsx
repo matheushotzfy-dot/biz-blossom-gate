@@ -100,9 +100,9 @@ export default function Produtos() {
   };
 
   return (
-    <div className="mx-auto -mt-4 w-full max-w-[1440px] pb-24 md:-mt-6 md:pb-10">
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
       {/* ── Header ── */}
-      <div className="px-5 pt-0 sm:px-7 md:pt-0">
+      <div className="px-5 pt-1 sm:px-7 md:pt-1">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3.5">
