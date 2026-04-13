@@ -477,24 +477,24 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="dashboard-hero-surface relative mb-10 rounded-2xl p-8 sm:p-10 lg:p-14"
+        className="dashboard-hero-surface dashboard-command-panel relative mb-10 rounded-2xl p-8 sm:p-10 lg:p-14"
       >
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/20 bg-muted/20 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.03)]">
+                <div className="dashboard-icon-shell flex h-8 w-8 items-center justify-center rounded-lg">
                   <BarChart3 className="h-4.5 w-4.5 text-primary" />
                 </div>
                 <span className="text-[11px] font-heading uppercase tracking-[0.18em] text-foreground/55">Dashboard</span>
               </motion.div>
               {nickname && (
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-muted/20 px-2.5 py-1 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)]">
+                <div className="dashboard-meta-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
                   <Crown className="h-3 w-3 text-primary/60" />
                   <span className="text-[10px] font-heading text-foreground/55">{nickname}</span>
                 </div>
               )}
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-muted/16 px-2.5 py-1 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)]">
+              <div className="dashboard-meta-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-15" />
                   <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
@@ -522,11 +522,11 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className="inline-flex items-center rounded-full border border-border/35 bg-muted/15 p-0.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)]">
+              <div className="dashboard-toolbar-shell inline-flex items-center rounded-full p-0.5">
                 {PERIOD_PRESETS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "border border-border/55 bg-card text-foreground shadow-[0_8px_18px_hsl(var(--background)/0.14)]" : "text-muted-foreground/65 hover:text-foreground/85"
+                      !isCustom && selectedPeriod.label === opt.label ? "dashboard-segment-active text-foreground" : "dashboard-segment-muted"
                     )}>
                     {opt.label}
                   </button>
@@ -534,8 +534,8 @@ export default function Dashboard() {
               </div>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
-                    isCustom ? "border-border/55 bg-card text-foreground shadow-[0_8px_18px_hsl(var(--background)/0.14)]" : "border-border/40 bg-muted/12 text-muted-foreground/60 hover:border-border/55 hover:text-foreground hover:bg-muted/24"
+                  <button className={cn("dashboard-toolbar-button h-8 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
+                    isCustom ? "dashboard-toolbar-button-active text-foreground" : "dashboard-toolbar-button-muted hover:text-foreground"
                   )}>
                     <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
@@ -549,7 +549,7 @@ export default function Dashboard() {
                   <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
-              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full border transition-all active:scale-[0.97]", privacy.hidden ? "border-border/55 bg-card text-primary shadow-[0_8px_18px_hsl(var(--background)/0.14)]" : "border-border/40 bg-muted/12 text-muted-foreground/45 hover:border-border/55 hover:bg-muted/24 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={privacy.toggle} className={cn("dashboard-toolbar-button h-8 w-8 rounded-full transition-all active:scale-[0.97]", privacy.hidden ? "dashboard-toolbar-button-active text-primary" : "dashboard-toolbar-button-muted hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
                 {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
               </button>
             </div>
@@ -644,7 +644,7 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel rounded-2xl p-5">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel dashboard-conversion-panel rounded-2xl p-5">
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/35 font-bold mb-3.5">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -694,9 +694,9 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-10">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel rounded-2xl p-5 flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel dashboard-ops-panel rounded-2xl p-5 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <div className="h-6 w-6 rounded-md bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
+            <div className="dashboard-icon-shell h-6 w-6 rounded-md flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
             </div>
             <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40 font-bold">Ações Rápidas</span>
@@ -740,7 +740,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="dashboard-surface dashboard-side-panel rounded-2xl flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="dashboard-surface dashboard-side-panel dashboard-feed-panel rounded-2xl flex flex-col">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/10">
             <div className="flex items-center gap-2">
               <span className="relative flex h-1.5 w-1.5">
