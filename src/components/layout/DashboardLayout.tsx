@@ -65,13 +65,7 @@ function DashboardLayoutInner() {
  <div className="flex w-full h-full bg-background">
  <AppSidebar />
 
- <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
-  {/* ─── CLEAN BACKGROUND ─── */}
-   <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-   <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/[0.03]" />
-   <div className="absolute top-0 right-0 w-[50%] h-[40%] bg-primary/[0.02] rounded-full blur-[120px]" />
-   <div className="absolute bottom-0 left-0 w-[40%] h-[30%] bg-secondary/30 rounded-full blur-[100px]" />
-   </div>
+ <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0">
 
  <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
  <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">

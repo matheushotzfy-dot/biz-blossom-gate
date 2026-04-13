@@ -249,7 +249,7 @@ export default function LandingPage() {
  }, [mobileNav]);
 
  return (
- <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+ <div className="ambient-backdrop min-h-screen bg-background text-foreground overflow-x-hidden">
 
  {/* ═══ NAVBAR ═══ */}
  <motion.nav className={cn(
