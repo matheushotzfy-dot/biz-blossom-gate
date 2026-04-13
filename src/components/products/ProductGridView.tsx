@@ -1,8 +1,8 @@
-import { Copy, ExternalLink, MoreHorizontal, Sparkles } from "lucide-react";
+import { Copy, ExternalLink, Eye } from "lucide-react";
 
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
-import { DELIVERY_LABELS, formatCurrency, getCheckoutLink, type Product } from "./productPresentation";
+import { DELIVERY_LABELS, formatCurrency, formatCompactDate, getCheckoutLink, type Product } from "./productPresentation";
 import { cn } from "@/lib/utils";
 
 type ProductGridViewProps = ProductMenuHandlers & {
@@ -10,116 +10,107 @@ type ProductGridViewProps = ProductMenuHandlers & {
   products: Product[];
 };
 
-/* Accent color combos for placeholder covers */
-const ACCENT_PAIRS = [
-  { bg: "from-primary/20 to-primary/5", icon: "text-primary" },
-  { bg: "from-info/20 to-info/5", icon: "text-info" },
-  { bg: "from-warning/15 to-warning/5", icon: "text-warning" },
-  { bg: "from-success/20 to-success/5", icon: "text-success" },
-  { bg: "from-destructive/15 to-destructive/5", icon: "text-destructive" },
-  { bg: "from-info/20 to-primary/5", icon: "text-info" },
-];
-
 export function ProductGridView({ products, copiedId, ...handlers }: ProductGridViewProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      {products.map((product, i) => {
+    <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {products.map((product) => {
         const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
-        const accent = ACCENT_PAIRS[i % ACCENT_PAIRS.length];
-        const initial = product.name.charAt(0).toUpperCase();
         const checkoutLink = product.checkout_url ? getCheckoutLink(product.checkout_url) : null;
+        const initial = product.name.charAt(0).toUpperCase();
 
         return (
           <article
             key={product.id}
             onClick={() => handlers.onEditProduct(product)}
             className={cn(
-              "group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border/40 bg-card",
-              "transition-all duration-300 ease-out",
-              "hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5",
-              "hover:-translate-y-0.5"
+              "group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border/15 bg-card/80",
+              "transition-all duration-200",
+              "hover:border-border/30 hover:bg-card"
             )}
           >
-            {/* ── Cover — compact ── */}
-            <div className="relative h-32 w-full overflow-hidden bg-secondary/10">
+            {/* ── Thumbnail ── */}
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-secondary/20">
               {product.image_url ? (
-                <>
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent" />
-                </>
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
               ) : (
-                <div className={cn("flex h-full w-full items-center justify-center bg-gradient-to-br", accent.bg)}>
-                  <span className={cn("text-[48px] font-black tracking-tighter opacity-25 select-none", accent.icon)}>
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary/40 to-secondary/10">
+                  <span className="text-3xl font-black text-muted-foreground/10 select-none">
                     {initial}
                   </span>
                 </div>
               )}
 
-              {/* Status chip */}
-              <div className="absolute left-2.5 top-2.5 z-10">
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-60" />
+
+              {/* Status */}
+              <div className="absolute left-2 top-2 z-10">
                 <ProductStatusIndicator status={product.status} tone="soft" />
               </div>
 
-              {/* Actions menu — always visible */}
+              {/* Actions */}
               <div
-                className="absolute right-2.5 top-2.5 z-10"
+                className="absolute right-2 top-2 z-10 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ProductActionsMenu
                   copied={copiedId === product.id}
                   product={product}
-                  triggerClassName="h-7 w-7 rounded-lg bg-background/80 backdrop-blur-md border border-border/30 text-foreground/60 shadow-sm hover:bg-background hover:text-foreground transition-all"
+                  triggerClassName="h-6 w-6 rounded-md bg-background/70 backdrop-blur-sm border border-border/20 text-foreground/60 shadow-sm hover:bg-background hover:text-foreground"
                   {...handlers}
                 />
               </div>
+
+              {/* Hover preview button */}
+              <div className="absolute inset-0 z-[5] flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border/20 shadow-sm">
+                  <Eye className="h-3.5 w-3.5 text-foreground/70" strokeWidth={1.8} />
+                </div>
+              </div>
             </div>
 
-            {/* ── Body ── */}
-            <div className="flex flex-1 flex-col p-3.5">
-              {/* Title + type */}
-              <h3 className="truncate text-[14px] font-semibold leading-tight tracking-tight text-foreground mb-0.5">
+            {/* ── Content ── */}
+            <div className="flex flex-1 flex-col px-3 pt-2.5 pb-3">
+              <h3 className="truncate text-[13px] font-semibold leading-tight text-foreground">
                 {product.name}
               </h3>
-              <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground/50 mb-3">
-                <Sparkles className="h-2.5 w-2.5" strokeWidth={1.5} />
-                {deliveryLabel}
-              </div>
+              <span className="mt-0.5 text-[10px] text-muted-foreground/45">
+                {deliveryLabel} · {formatCompactDate(product.created_at)}
+              </span>
 
-              {/* Price + quick actions */}
-              <div className="mt-auto flex items-center justify-between">
-                <span className="font-numbers text-lg font-bold tracking-tight text-foreground">
+              {/* Footer */}
+              <div className="mt-auto flex items-end justify-between pt-3">
+                <span className="font-mono text-sm font-bold tabular-nums tracking-tight text-foreground">
                   {formatCurrency(Number(product.price))}
                 </span>
 
-                {/* Quick action buttons — always visible */}
-                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                  {checkoutLink && (
-                    <>
-                      <button
-                        onClick={() => handlers.onCopyLink(product)}
-                        className={cn(
-                          "flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/50 transition-all hover:bg-primary/10 hover:text-primary",
-                          copiedId === product.id && "text-primary bg-primary/10"
-                        )}
-                        title="Copiar link"
-                      >
-                        <Copy className="h-3.5 w-3.5" strokeWidth={2} />
-                      </button>
-                      <button
-                        onClick={() => handlers.onOpenCheckout(product)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/50 transition-all hover:bg-primary/10 hover:text-primary"
-                        title="Abrir checkout"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />
-                      </button>
-                    </>
-                  )}
-                </div>
+                {/* Quick actions */}
+                {checkoutLink && (
+                  <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => handlers.onCopyLink(product)}
+                      className={cn(
+                        "flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/35 transition-all hover:bg-secondary/60 hover:text-foreground",
+                        copiedId === product.id && "text-primary bg-primary/10"
+                      )}
+                      title="Copiar link"
+                    >
+                      <Copy className="h-3 w-3" strokeWidth={2} />
+                    </button>
+                    <button
+                      onClick={() => handlers.onOpenCheckout(product)}
+                      className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/35 transition-all hover:bg-secondary/60 hover:text-foreground"
+                      title="Abrir checkout"
+                    >
+                      <ExternalLink className="h-3 w-3" strokeWidth={2} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </article>
