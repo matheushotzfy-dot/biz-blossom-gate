@@ -103,19 +103,27 @@ export default function Produtos() {
     <div className="mx-auto w-full max-w-[1440px] pb-24 md:pb-10">
       {/* ── Header ── */}
       <div className="px-5 pt-8 sm:px-7 md:pt-10">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 shadow-[0_0_20px_hsl(var(--primary)/0.08)]">
                 <Box className="h-5 w-5 text-primary" strokeWidth={1.8} />
               </div>
               <div>
                 <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
                   Meus Produtos
                 </h1>
-                <p className="text-xs text-muted-foreground">
-                  {products.length} {products.length === 1 ? "produto cadastrado" : "produtos cadastrados"}
-                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-muted-foreground">
+                    {products.length} {products.length === 1 ? "produto cadastrado" : "produtos cadastrados"}
+                  </p>
+                  {activeCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-success/70">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                      {activeCount} ativo{activeCount !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
