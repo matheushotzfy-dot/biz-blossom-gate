@@ -66,33 +66,33 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --card: 224 47% 8%;
-    --card-foreground: 213 31% 91%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
+    --background: 240 6% 6%;
+    --foreground: 0 0% 93%;
+    --card: 240 5% 10%;
+    --card-foreground: 0 0% 93%;
+    --popover: 240 6% 6%;
+    --popover-foreground: 0 0% 93%;
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 2%;
-    --secondary: 224 47% 11%;
-    --secondary-foreground: 213 31% 91%;
-    --muted: 224 47% 11%;
-    --muted-foreground: 218 11% 50%;
-    --accent: 224 47% 13%;
-    --accent-foreground: 213 31% 91%;
+    --secondary: 240 4% 13%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 240 4% 13%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 93%;
     --destructive: 0 74% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 224 20% 16%;
-    --input: 224 47% 11%;
+    --border: 240 4% 18%;
+    --input: 240 4% 13%;
     --ring: 160 84% 39%;
 
-    --sidebar-background: 224 71% 3%;
-    --sidebar-foreground: 218 11% 58%;
+    --sidebar-background: 240 6% 5%;
+    --sidebar-foreground: 240 4% 50%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 2%;
-    --sidebar-accent: 224 47% 8%;
-    --sidebar-accent-foreground: 213 31% 91%;
-    --sidebar-border: 224 20% 13%;
+    --sidebar-accent: 240 5% 10%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 240 4% 14%;
     --sidebar-ring: 160 84% 39%;
 
     --success: 158 64% 42%;
@@ -102,9 +102,9 @@ input[type="number"]::-webkit-inner-spin-button {
     --info: 206 82% 62%;
     --info-foreground: 0 0% 100%;
 
-    --tooltip-bg: rgba(8, 12, 22, 0.98);
-    --tooltip-border: rgba(0, 200, 120, 0.10);
-    --tooltip-text: #cbd5e1;
+    --tooltip-bg: rgba(10, 10, 14, 0.98);
+    --tooltip-border: rgba(0, 200, 120, 0.08);
+    --tooltip-text: #a1a1aa;
     --card-shadow: none;
   }
 }
