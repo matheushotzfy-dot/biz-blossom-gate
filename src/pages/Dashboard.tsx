@@ -748,9 +748,9 @@ export default function Dashboard() {
                 <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
                 <span className="relative h-2 w-2 rounded-full bg-primary" />
               </span>
-              <p className="text-[12px] font-heading text-foreground/70 font-bold">Tempo real</p>
+              <p className="text-[12px] font-semibold text-foreground/70">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-heading text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
+            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-border/20">
