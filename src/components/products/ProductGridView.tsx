@@ -1,4 +1,11 @@
-import { Copy, ExternalLink, Eye, Package, Calendar, Users, Crosshair } from "lucide-react";
+import {
+  Calendar,
+  Crosshair,
+  ExternalLink,
+  Package,
+  Palette,
+  Users,
+} from "lucide-react";
 
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
@@ -10,180 +17,161 @@ type ProductGridViewProps = ProductMenuHandlers & {
   products: Product[];
 };
 
+const quickActionClassName =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border/18 bg-secondary/24 px-3 text-[11.5px] font-semibold text-foreground/72 transition-all duration-200 hover:border-primary/18 hover:bg-primary/6 hover:text-foreground";
+
 export function ProductGridView({ products, copiedId, ...handlers }: ProductGridViewProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {products.map((product, idx) => {
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {products.map((product) => {
         const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
         const checkoutLink = product.checkout_url ? getCheckoutLink(product.checkout_url) : null;
         const initial = product.name.charAt(0).toUpperCase();
         const hasAffiliate = product.affiliate_enabled;
         const price = Number(product.price);
+        const secondaryActionLabel = checkoutLink ? "Checkout" : "Builder";
 
         return (
           <article
             key={product.id}
             onClick={() => handlers.onEditProduct(product)}
             className={cn(
-              "group relative flex cursor-pointer flex-col overflow-hidden rounded-[20px]",
-              "border border-border/10",
-              "bg-gradient-to-b from-[hsl(var(--card))] to-[hsl(var(--card)/0.85)]",
-              "shadow-[0_4px_24px_-4px_hsl(var(--background)/0.5),inset_0_1px_0_hsl(var(--foreground)/0.04)]",
-              "transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:border-primary/20 hover:shadow-[0_20px_60px_-12px_hsl(var(--primary)/0.12),0_8px_24px_-8px_hsl(var(--background)/0.6),inset_0_1px_0_hsl(var(--primary)/0.06)] hover:-translate-y-1.5"
+              "group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[26px] border border-border/20 bg-card/95",
+              "shadow-[0_18px_40px_-30px_hsl(var(--foreground)/0.55),inset_0_1px_0_hsl(var(--foreground)/0.04)]",
+              "transition-all duration-300",
+              "hover:-translate-y-1 hover:border-primary/18 hover:shadow-[0_32px_80px_-42px_hsl(var(--foreground)/0.58),0_14px_36px_-28px_hsl(var(--primary)/0.18)]"
             )}
           >
-            {/* ── Top accent line ── */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/5 to-transparent opacity-80" />
 
-            {/* ── Thumbnail ── */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden">
+            <div className="relative aspect-[16/9] overflow-hidden border-b border-border/12 bg-secondary/30">
               {product.image_url ? (
                 <img
                   src={product.image_url}
                   alt={product.name}
                   loading="lazy"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.06] group-hover:brightness-110"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
               ) : (
-                <div className="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/6 via-secondary/25 to-accent/10 overflow-hidden">
-                  {/* Decorative pattern */}
-                  <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-[18px] border border-border/10 bg-gradient-to-br from-card to-card/60 shadow-[0_8px_32px_-4px_hsl(var(--background)/0.6),inset_0_1px_0_hsl(var(--foreground)/0.05)]">
-                    <span className="font-display text-2xl font-black bg-gradient-to-b from-primary/40 to-primary/15 bg-clip-text text-transparent select-none">
-                      {initial}
-                    </span>
+                <div className="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-secondary/60 via-secondary/25 to-primary/6">
+                  <div
+                    className="absolute inset-0 opacity-[0.035]"
+                    style={{
+                      backgroundImage: "radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)",
+                      backgroundSize: "22px 22px",
+                    }}
+                  />
+                  <div className="relative flex h-18 w-18 items-center justify-center rounded-[20px] border border-border/16 bg-card/85 shadow-[0_16px_40px_-24px_hsl(var(--foreground)/0.45)]">
+                    <span className="font-display text-[30px] font-black tracking-[-0.06em] text-primary/65">{initial}</span>
                   </div>
                 </div>
               )}
 
-              {/* Cinematic gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--card))] via-[hsl(var(--card)/0.15)] to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-b from-[hsl(var(--background)/0.3)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/75 via-background/10 to-transparent" />
 
-              {/* Status badge */}
-              <div className="absolute left-3 top-3 z-10">
+              <div className="absolute left-3 top-3">
                 <ProductStatusIndicator status={product.status} tone="soft" />
               </div>
 
-              {/* Actions menu */}
-              <div
-                className="absolute right-3 top-3 z-10 translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border/18 bg-background/72 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-foreground/72 backdrop-blur-xl">
+                  <Package className="h-2.5 w-2.5" strokeWidth={2.2} />
+                  {deliveryLabel}
+                </span>
+                {checkoutLink ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-success backdrop-blur-xl">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                    Checkout no ar
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex flex-1 flex-col p-4">
+              <div className="min-h-[74px]">
+                <h3 className="truncate font-display text-[16px] font-black tracking-[-0.03em] text-foreground transition-colors duration-200 group-hover:text-primary/90">
+                  {product.name}
+                </h3>
+                <p className="mt-1 max-h-10 overflow-hidden text-[12px] leading-5 text-muted-foreground/62">
+                  {product.description || "Sem descrição adicionada"}
+                </p>
+              </div>
+
+              <div className="mt-3 grid grid-cols-[1.35fr_1fr] gap-2.5">
+                <div className="rounded-2xl border border-border/18 bg-secondary/28 p-3">
+                  <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/44">Valor</p>
+                  <div className="mt-1.5 flex items-end gap-1.5">
+                    <span className="font-numbers text-[26px] font-black tracking-[-0.05em] text-success">
+                      {formatCurrency(price)}
+                    </span>
+                    <span className="pb-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/28">BRL</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground/50">
+                    {hasAffiliate ? `${product.affiliate_commission}% para afiliados` : "Venda direta"}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-border/18 bg-secondary/18 p-3">
+                  <p className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground/44">Publicação</p>
+                  <p className={cn("mt-1.5 text-[13px] font-semibold", checkoutLink ? "text-foreground" : "text-muted-foreground")}>
+                    {checkoutLink ? "Publicado" : "Em preparo"}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-5 text-muted-foreground/50">
+                    {hasAffiliate ? "Afiliados ativos" : "Sem afiliação"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                {hasAffiliate ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/6 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-primary">
+                    <Users className="h-2.5 w-2.5" strokeWidth={2} />
+                    Afiliados
+                  </span>
+                ) : null}
+                <span className="inline-flex items-center rounded-full border border-border/16 bg-secondary/16 px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.22em] text-muted-foreground/46">
+                  ID #{product.id.slice(0, 6)}
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2" onClick={(event) => event.stopPropagation()}>
+                <button
+                  type="button"
+                  onClick={() => handlers.onOpenPixels(product)}
+                  className={quickActionClassName}
+                >
+                  <Crosshair className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  Pixels
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    checkoutLink
+                      ? handlers.onOpenCheckout(product)
+                      : window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`)
+                  }
+                  className={quickActionClassName}
+                >
+                  {checkoutLink ? <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} /> : <Palette className="h-3.5 w-3.5" strokeWidth={1.8} />}
+                  {secondaryActionLabel}
+                </button>
+
                 <ProductActionsMenu
                   copied={copiedId === product.id}
                   product={product}
-                  triggerClassName="h-8 w-8 rounded-xl bg-background/70 backdrop-blur-xl border border-border/30 text-foreground/80 shadow-xl hover:bg-background hover:text-foreground hover:border-primary/20"
+                  triggerLabel="Ações"
+                  triggerClassName="h-10 w-full rounded-xl border border-border/18 bg-secondary/24 text-foreground/72 hover:border-primary/18 hover:bg-primary/6 hover:text-foreground"
                   {...handlers}
                 />
               </div>
 
-              {/* Hover preview */}
-              <div className="absolute inset-0 z-[5] flex items-center justify-center opacity-0 transition-all duration-400 group-hover:opacity-100">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-background/80 backdrop-blur-xl border border-border/30 shadow-2xl transition-all duration-400 scale-50 group-hover:scale-100">
-                  <Eye className="h-4.5 w-4.5 text-foreground/80" strokeWidth={1.6} />
-                </div>
-              </div>
-
-              {/* Checkout published indicator (bottom-left of image) */}
-              {checkoutLink && (
-                <div className="absolute left-3 bottom-3 z-10">
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/15 bg-success/10 backdrop-blur-md px-2 py-1 text-[9px] font-bold text-success shadow-[0_0_16px_hsl(var(--success)/0.1)]">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-success animate-ping opacity-50" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-                    </span>
-                    LIVE
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* ── Body ── */}
-            <div className="relative flex flex-1 flex-col px-4 pt-3 pb-3.5">
-              {/* Title + Description */}
-              <h3 className="truncate font-display text-[15px] font-extrabold leading-snug tracking-tight text-foreground group-hover:text-primary/90 transition-colors duration-300">
-                {product.name}
-              </h3>
-              <p className="mt-0.5 truncate text-[11px] leading-relaxed text-muted-foreground/55">
-                {product.description || "Sem descrição adicionada"}
-              </p>
-
-              {/* Tags row – aligned */}
-              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 rounded-md border border-border/12 bg-secondary/30 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/50">
-                  <Package className="h-2.5 w-2.5" strokeWidth={2.2} />
-                  {deliveryLabel}
-                </span>
-                {hasAffiliate && (
-                  <span className="inline-flex items-center gap-1 rounded-md border border-primary/12 bg-primary/5 px-2 py-0.5 text-[9px] font-bold text-primary/60">
-                    <Users className="h-2.5 w-2.5" strokeWidth={2.2} />
-                    {product.affiliate_commission}%
-                  </span>
-                )}
-              </div>
-
-              {/* Spacer to push price to bottom */}
-              <div className="flex-1 min-h-2" />
-
-              {/* Divider */}
-              <div className="my-2.5 h-px bg-border/12" />
-
-              {/* Price + Quick actions – bottom aligned */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-numbers text-lg font-black tabular-nums tracking-tight text-success">
-                    {formatCurrency(price)}
-                  </span>
-                  {price > 0 && (
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/30">BRL</span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => handlers.onOpenPixels(product)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/30 transition-all duration-200 hover:bg-primary/8 hover:text-primary/70"
-                    title="Pixels & Tracking"
-                  >
-                    <Crosshair className="h-3.5 w-3.5" strokeWidth={1.8} />
-                  </button>
-                  {checkoutLink && (
-                    <>
-                      <button
-                        onClick={() => handlers.onCopyLink(product)}
-                        className={cn(
-                          "flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200",
-                          copiedId === product.id
-                            ? "text-success bg-success/10"
-                            : "text-muted-foreground/30 hover:bg-primary/8 hover:text-primary/70"
-                        )}
-                        title="Copiar link"
-                      >
-                        <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />
-                      </button>
-                      <button
-                        onClick={() => handlers.onOpenCheckout(product)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/30 transition-all duration-200 hover:bg-primary/8 hover:text-primary/70"
-                        title="Abrir checkout"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Footer meta */}
-              <div className="mt-2 flex items-center justify-between text-[9px] text-muted-foreground/25">
-                <span className="inline-flex items-center gap-1">
-                  <Calendar className="h-2.5 w-2.5" strokeWidth={2} />
+              <div className="mt-3 flex items-center justify-between border-t border-border/12 pt-3 text-[10px] text-muted-foreground/34">
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-3 w-3" strokeWidth={2} />
                   {formatCompactDate(product.created_at)}
                 </span>
-                <span className="font-mono uppercase tracking-widest">
-                  ID #{product.id.slice(0, 6)}
-                </span>
+                <span className="font-heading uppercase tracking-[0.18em]">{deliveryLabel}</span>
               </div>
             </div>
           </article>
