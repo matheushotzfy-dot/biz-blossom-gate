@@ -1024,7 +1024,7 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   const s = tStyles[tone] || tStyles.info;
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border/30 bg-accent/20 px-3.5 py-3 transition-colors hover:bg-accent/40">
+    <div className="flex items-center justify-between rounded-lg border border-border/15 bg-accent/10 px-3 py-2.5 transition-colors hover:bg-accent/25">
       <div className="flex items-center gap-2.5">
         <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", s.iconBg)}>
           <span className={s.text}>{icon}</span>
