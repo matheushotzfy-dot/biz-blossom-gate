@@ -89,28 +89,31 @@ export function ProductActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        sideOffset={6}
-        className="min-w-[200px] rounded-xl border border-border/30 bg-card p-1.5 shadow-[0_12px_40px_-8px_hsl(var(--foreground)/0.15),0_4px_12px_-4px_hsl(var(--foreground)/0.08)]"
+        sideOffset={8}
+        className="min-w-[240px] rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-2 shadow-[0_20px_60px_-12px_hsl(var(--foreground)/0.25),0_8px_20px_-6px_hsl(var(--foreground)/0.12)]"
       >
+        <div className="px-3 py-2 mb-1">
+          <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50">Ações do produto</p>
+        </div>
         {extendedItems.map((item) => (
           <DropdownMenuItem
             key={item.label}
             onClick={item.action}
-            className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-foreground/80 transition-colors focus:bg-primary/8 focus:text-foreground"
+            className="cursor-pointer gap-3.5 rounded-xl px-3 py-3 text-[13.5px] font-semibold text-foreground/90 transition-all duration-200 focus:bg-primary/10 focus:text-foreground hover:translate-x-0.5"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-secondary/60">
-              <item.icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.8} />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-secondary/80 border border-border/30 shadow-sm">
+              <item.icon className="h-4 w-4 text-foreground/60" strokeWidth={1.8} />
             </div>
             {item.label}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator className="my-1.5 bg-border/20" />
+        <DropdownMenuSeparator className="my-2 bg-border/25" />
         <DropdownMenuItem
           onClick={() => onDeleteProduct(product)}
-          className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-destructive/80 transition-colors focus:bg-destructive/10 focus:text-destructive"
+          className="cursor-pointer gap-3.5 rounded-xl px-3 py-3 text-[13.5px] font-semibold text-destructive/90 transition-all duration-200 focus:bg-destructive/10 focus:text-destructive hover:translate-x-0.5"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-destructive/10">
-            <Trash2 className="h-3.5 w-3.5 text-destructive/70" strokeWidth={1.8} />
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-destructive/12 border border-destructive/15 shadow-sm">
+            <Trash2 className="h-4 w-4 text-destructive/80" strokeWidth={1.8} />
           </div>
           Excluir produto
         </DropdownMenuItem>
