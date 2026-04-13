@@ -66,33 +66,33 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 222 20% 14%;
-    --foreground: 210 20% 96%;
-    --card: 220 18% 18%;
-    --card-foreground: 210 20% 96%;
-    --popover: 222 20% 16%;
-    --popover-foreground: 210 20% 96%;
+    --background: 220 16% 18%;
+    --foreground: 210 20% 98%;
+    --card: 218 14% 22%;
+    --card-foreground: 210 20% 98%;
+    --popover: 220 16% 20%;
+    --popover-foreground: 210 20% 98%;
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 2%;
-    --secondary: 220 16% 20%;
+    --secondary: 220 14% 24%;
     --secondary-foreground: 210 14% 93%;
-    --muted: 220 14% 18%;
-    --muted-foreground: 215 14% 55%;
-    --accent: 218 18% 20%;
+    --muted: 218 12% 24%;
+    --muted-foreground: 215 14% 65%;
+    --accent: 218 14% 26%;
     --accent-foreground: 188 38% 88%;
     --destructive: 0 74% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 14% 24%;
-    --input: 220 16% 20%;
+    --border: 220 12% 30%;
+    --input: 220 14% 24%;
     --ring: 160 84% 39%;
 
-    --sidebar-background: 224 22% 12%;
-    --sidebar-foreground: 210 14% 70%;
+    --sidebar-background: 224 18% 16%;
+    --sidebar-foreground: 210 14% 78%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 2%;
-    --sidebar-accent: 222 18% 16%;
+    --sidebar-accent: 222 16% 20%;
     --sidebar-accent-foreground: 210 14% 94%;
-    --sidebar-border: 222 16% 18%;
+    --sidebar-border: 222 14% 24%;
     --sidebar-ring: 160 84% 39%;
 
     --success: 158 72% 38%;
