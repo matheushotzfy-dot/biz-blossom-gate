@@ -58,16 +58,16 @@ export function ProductActionsMenu({
   onOpenPixels,
 }: ProductActionsMenuProps) {
   const items: ActionItem[] = [
-    { icon: Settings2, label: "Editar produto", action: () => onEditProduct(product), iconColor: "text-emerald-400" },
-    { icon: Palette, label: "Checkout Builder", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`), iconColor: "text-muted-foreground" },
+    { icon: Settings2, label: "Editar produto", action: () => onEditProduct(product), iconColor: "text-primary" },
+    { icon: Palette, label: "Checkout Builder", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`), iconColor: "text-primary" },
     ...(product.checkout_url
       ? [
-          { icon: copied ? CheckCircle2 : Copy, label: copied ? "Link copiado!" : "Copiar link do checkout", action: () => onCopyLink(product), iconColor: copied ? "text-emerald-400" : "text-muted-foreground" },
-          { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product), iconColor: "text-muted-foreground" },
+          { icon: copied ? CheckCircle2 : Copy, label: copied ? "Link copiado!" : "Copiar link do checkout", action: () => onCopyLink(product), iconColor: "text-primary" },
+          { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product), iconColor: "text-primary" },
         ]
       : []),
-    { icon: Crosshair, label: "Pixels & Tracking", action: () => onOpenPixels(product), iconColor: "text-muted-foreground" },
-    { icon: Star, label: "Área de membros", action: () => onOpenMembers(product), iconColor: "text-muted-foreground" },
+    { icon: Crosshair, label: "Pixels & Tracking", action: () => onOpenPixels(product), iconColor: "text-primary" },
+    { icon: Star, label: "Área de membros", action: () => onOpenMembers(product), iconColor: "text-primary" },
   ];
 
   const labeledTrigger = Boolean(triggerLabel);
