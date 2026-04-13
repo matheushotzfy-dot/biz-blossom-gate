@@ -67,18 +67,11 @@ function DashboardLayoutInner() {
 
  <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0">
   {/* ─── CLEAN BACKGROUND ─── */}
-  <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-  <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
-  <div
-  className="absolute inset-0 opacity-30"
-  style={{
-  backgroundImage:
-  "linear-gradient(to right, hsl(var(--border) / 0.1) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border) / 0.08) 1px, transparent 1px)",
-  backgroundSize: "64px 64px",
-  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.5), transparent 80%)",
-  }}
-  />
-  </div>
+   <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+   <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/[0.03]" />
+   <div className="absolute top-0 right-0 w-[50%] h-[40%] bg-primary/[0.02] rounded-full blur-[120px]" />
+   <div className="absolute bottom-0 left-0 w-[40%] h-[30%] bg-secondary/30 rounded-full blur-[100px]" />
+   </div>
 
  <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
  <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
