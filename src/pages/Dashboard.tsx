@@ -663,8 +663,13 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel dashboard-conversion-panel rounded-2xl p-5">
-            <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/35 font-bold mb-3.5">Métricas de Conversão</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel dashboard-conversion-panel rounded-[20px] p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="h-7 w-7 rounded-lg bg-info/10 flex items-center justify-center">
+                <Percent className="h-3.5 w-3.5 text-info" />
+              </div>
+              <p className="text-[11px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40 font-bold">Conversão</p>
+            </div>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
