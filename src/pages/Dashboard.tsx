@@ -477,11 +477,10 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-14 rounded-2xl border border-border/50 bg-card p-7 sm:p-9 lg:p-12 overflow-hidden"
+        className="relative mb-20 rounded-2xl border border-border/40 bg-card p-9 sm:p-12 lg:p-16 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none z-0" />
         <div className="relative z-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-12">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-14">
             <div className="flex items-center gap-3">
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-accent/60">
@@ -556,16 +555,16 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-14">
-            <div className="flex items-center gap-3 mb-4">
-              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-16">
+            <div className="flex items-center gap-3 mb-5">
+              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/50">
                 {isCustom && customRange?.from
                   ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                   : `Receita — ${selectedPeriod.label}`}
               </p>
             </div>
             <div className="flex items-end gap-5 mb-3">
-              <span className="text-5xl sm:text-7xl lg:text-[110px] font-heading tabular-nums text-foreground leading-[0.82]">
+              <span className="text-6xl sm:text-8xl lg:text-[120px] font-heading tabular-nums text-foreground leading-[0.82]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
@@ -584,7 +583,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
             {([
               { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-foreground", iconBg: "bg-primary/8", iconText: "text-primary" },
               { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-foreground", iconBg: "bg-success/8", iconText: "text-success" },
@@ -592,10 +591,10 @@ export default function Dashboard() {
               { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-foreground", iconBg: "bg-primary/8", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-border/80">
+                className="group relative overflow-hidden rounded-2xl border border-border/30 bg-card p-6 transition-all duration-200 hover:border-border/60 hover:-translate-y-0.5">
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/45">{item.label}</p>
+                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/35">{item.label}</p>
                     <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
                   <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
@@ -611,8 +610,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-10">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/50 bg-card p-4 md:p-6 min-h-[300px] relative overflow-hidden">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-12 mb-16">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/30 bg-card p-5 md:p-7 min-h-[320px] relative overflow-hidden">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -638,15 +637,15 @@ export default function Dashboard() {
                 }}
                 cursor={{ stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 1.5, strokeDasharray: "6 4" }}
               />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={3} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
+              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={3.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 7, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} style={{ filter: "drop-shadow(0 0 4px hsl(var(--primary) / 0.3))" }} />
             </AreaChart>
           </ResponsiveContainer>
         </motion.div>
 
-        <div className="xl:col-span-4 flex flex-col gap-4">
+        <div className="xl:col-span-4 flex flex-col gap-5">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-4 md:p-5 relative overflow-hidden">
-            <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/60 font-bold mb-3">Métricas de Conversão</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/30 bg-card p-5 md:p-6 relative overflow-hidden">
+            <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/45 font-bold mb-4">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
               <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
@@ -655,7 +654,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* KPI tiles - clean */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             {([
               { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-success to-success/70", valueColor: "text-success", dotColor: "bg-success", accentBorder: "border-t-success" },
               { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-info to-info/70", valueColor: "text-info", dotColor: "bg-info", accentBorder: "border-t-info" },
@@ -663,7 +662,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning to-warning/70", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-2xl border border-border/50 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border/80 relative overflow-hidden", item.accentBorder)}>
+                className={cn("rounded-2xl border border-border/30 border-t-2 bg-card p-5 md:p-6 transition-all duration-200 hover:border-border/50 hover:-translate-y-0.5 relative overflow-hidden", item.accentBorder)}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner", item.iconGradient)}>
                     {item.isPix ? (
@@ -693,9 +692,9 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* ACTIONS + ACTIVITY                                               */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-10">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-2 mb-16">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/50 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/30 bg-card p-5 md:p-6 flex flex-col relative overflow-hidden">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
@@ -703,7 +702,7 @@ export default function Dashboard() {
             <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold">Ações Rápidas</span>
           </div>
           
-          <div className="grid grid-cols-2 gap-2 flex-1">
+          <div className="grid grid-cols-2 gap-3 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
               { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
@@ -741,7 +740,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/50 bg-card flex flex-col relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/30 bg-card flex flex-col relative overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
