@@ -97,8 +97,8 @@ export function ProductActionsMenu({
         className="w-[240px] rounded-2xl border border-border bg-secondary p-1.5 shadow-none"
       >
         {/* Product name header */}
-        <div className="px-3 py-2">
-          <p className="truncate text-[12px] font-bold tracking-tight text-sidebar-accent-foreground">{product.name}</p>
+        <div className="px-3 py-2.5">
+          <p className="truncate font-display text-[13px] font-extrabold tracking-tight text-foreground">{product.name}</p>
         </div>
 
         <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
@@ -109,7 +109,7 @@ export function ProductActionsMenu({
             <DropdownMenuItem
               key={item.label}
               onClick={item.action}
-              className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-sidebar-foreground transition-colors focus:bg-sidebar-accent focus:text-sidebar-accent-foreground data-[highlighted]:bg-sidebar-accent data-[highlighted]:text-sidebar-accent-foreground"
+              className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 transition-colors focus:bg-sidebar-accent focus:text-foreground data-[highlighted]:bg-sidebar-accent data-[highlighted]:text-foreground"
             >
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">
                 <item.icon className={cn("h-3.5 w-3.5", item.iconColor)} strokeWidth={1.8} />
@@ -124,7 +124,7 @@ export function ProductActionsMenu({
         {/* Delete action */}
         <DropdownMenuItem
           onClick={() => onDeleteProduct(product)}
-          className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-destructive transition-colors focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+          className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive transition-colors focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
         >
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10">
             <Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} />
