@@ -194,31 +194,35 @@ input[type="number"]::-webkit-inner-spin-button {
   .dashboard-page::before {
     content: '';
     position: absolute;
-    inset: -5rem -4rem -8rem;
+    inset: -6rem -4rem -10rem;
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle 760px at -8% 12%, hsl(var(--primary) / 0.18), transparent 62%),
-      radial-gradient(circle 720px at 108% 10%, hsl(var(--info) / 0.16), transparent 60%),
-      radial-gradient(circle 520px at 18% 88%, hsl(var(--primary) / 0.08), transparent 64%),
-      radial-gradient(circle 460px at 88% 82%, hsl(var(--info) / 0.07), transparent 62%),
-      radial-gradient(ellipse 74% 58% at 50% 30%, hsl(var(--background) / 0.82), transparent 72%),
-      linear-gradient(180deg, hsl(var(--background) / 0.04), transparent 18%, transparent 76%, hsl(var(--background) / 0.24));
+      radial-gradient(circle 860px at -10% 12%, hsl(var(--primary) / 0.19), transparent 58%),
+      radial-gradient(circle 820px at 110% 8%, hsl(var(--info) / 0.18), transparent 56%),
+      radial-gradient(circle 360px at 20% 22%, hsl(var(--primary) / 0.07), transparent 66%),
+      radial-gradient(circle 340px at 82% 78%, hsl(var(--info) / 0.06), transparent 66%),
+      radial-gradient(ellipse 72% 62% at 50% 30%, hsl(var(--background) / 0.84), transparent 72%),
+      linear-gradient(180deg, hsl(var(--background) / 0.02), transparent 16%, transparent 80%, hsl(var(--background) / 0.2));
     filter: saturate(105%);
   }
 
   .dashboard-page::after {
     content: '';
     position: absolute;
-    inset: -2rem -1rem -2rem;
+    inset: -2rem;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.12;
+    opacity: 0.08;
     background-image:
-      linear-gradient(180deg, hsl(var(--foreground) / 0.018), transparent 24%),
+      linear-gradient(180deg, hsl(var(--foreground) / 0.016), transparent 22%),
+      linear-gradient(hsl(var(--border) / 0.18) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.18) 1px, transparent 1px),
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-    background-repeat: no-repeat, repeat;
-    background-size: 100% 100%, 220px 220px;
+    background-repeat: no-repeat, repeat, repeat, repeat;
+    background-size: 100% 100%, 44px 44px, 44px 44px, 220px 220px;
+    background-position: 0 0, center, center, center;
+    mask-image: linear-gradient(180deg, black, rgba(0, 0, 0, 0.65));
   }
 
   .dashboard-page > * {
@@ -230,13 +234,13 @@ input[type="number"]::-webkit-inner-spin-button {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    border: 1px solid hsl(var(--border) / 0.3);
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.985) 54%, hsl(var(--card) / 0.96) 100%);
+    border: 1px solid hsl(var(--border) / 0.34);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.985) 52%, hsl(var(--card) / 0.96) 100%);
     box-shadow:
-      0 0 0 1px hsl(var(--foreground) / 0.015),
+      0 0 0 1px hsl(var(--foreground) / 0.014),
       inset 0 1px 0 hsl(var(--foreground) / 0.055),
       inset 0 -1px 0 hsl(var(--foreground) / 0.02),
-      0 26px 60px hsl(var(--background) / 0.34);
+      0 28px 80px hsl(var(--background) / 0.36);
   }
 
   .dashboard-hero-surface::before {
@@ -246,11 +250,11 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle 420px at 0% 0%, hsl(var(--primary) / 0.18), transparent 68%),
-      radial-gradient(circle 360px at 100% 0%, hsl(var(--info) / 0.16), transparent 66%),
-      linear-gradient(180deg, hsl(var(--foreground) / 0.042), transparent 18%),
-      linear-gradient(90deg, hsl(var(--primary) / 0.03), transparent 24%, transparent 72%, hsl(var(--info) / 0.03));
-    opacity: 0.95;
+      linear-gradient(180deg, hsl(var(--foreground) / 0.04), transparent 16%),
+      radial-gradient(circle 480px at 0% 0%, hsl(var(--primary) / 0.18), transparent 70%),
+      radial-gradient(circle 420px at 100% 0%, hsl(var(--info) / 0.16), transparent 70%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.03), transparent 20%, transparent 80%, hsl(var(--info) / 0.03));
+    opacity: 0.98;
   }
 
   .dashboard-hero-surface::after {
@@ -264,7 +268,7 @@ input[type="number"]::-webkit-inner-spin-button {
       linear-gradient(180deg, transparent 68%, hsl(var(--foreground) / 0.03)),
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
     background-repeat: no-repeat, repeat;
-    background-size: 100% 100%, 200px 200px;
+    background-size: 100% 100%, 240px 240px;
   }
 
   .dashboard-hero-surface > * {
@@ -276,12 +280,12 @@ input[type="number"]::-webkit-inner-spin-button {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    border: 1px solid hsl(var(--border) / 0.24);
-    background: linear-gradient(180deg, hsl(var(--card) / 0.995), hsl(var(--card) / 0.955));
+    border: 1px solid hsl(var(--border) / 0.26);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.965) 100%);
     box-shadow:
       0 0 0 1px hsl(var(--foreground) / 0.014),
       inset 0 1px 0 hsl(var(--foreground) / 0.045),
-      0 18px 44px hsl(var(--background) / 0.24);
+      0 18px 44px hsl(var(--background) / 0.28);
   }
 
   .dashboard-surface::before {
@@ -292,8 +296,8 @@ input[type="number"]::-webkit-inner-spin-button {
     pointer-events: none;
     background:
       linear-gradient(180deg, hsl(var(--foreground) / 0.03), transparent 18%),
-      radial-gradient(circle 260px at 0% 0%, hsl(var(--primary) / 0.08), transparent 56%),
-      radial-gradient(circle 220px at 100% 0%, hsl(var(--info) / 0.07), transparent 52%);
+      radial-gradient(circle 220px at 0% 0%, hsl(var(--primary) / 0.08), transparent 58%),
+      radial-gradient(circle 220px at 100% 0%, hsl(var(--info) / 0.08), transparent 56%);
     opacity: 0.95;
   }
 
@@ -308,10 +312,14 @@ input[type="number"]::-webkit-inner-spin-button {
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.6;
-    background:
-      linear-gradient(180deg, transparent 64%, hsl(var(--foreground) / 0.02)),
-      linear-gradient(90deg, hsl(var(--primary) / 0.035), transparent 24%, transparent 76%, hsl(var(--info) / 0.035));
+    opacity: 0.14;
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.045), transparent 20%, transparent 80%, hsl(var(--info) / 0.045));
+    background-size: 36px 36px, 36px 36px, 100% 100%;
+    background-position: center;
+    mask-image: linear-gradient(180deg, black, rgba(0, 0, 0, 0.45));
   }
 
   .dashboard-side-panel::after {
@@ -320,20 +328,41 @@ input[type="number"]::-webkit-inner-spin-button {
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.5;
+    opacity: 0.52;
     background:
       linear-gradient(135deg, hsl(var(--foreground) / 0.028), transparent 28%),
       radial-gradient(circle 220px at 100% 100%, hsl(var(--info) / 0.05), transparent 52%);
+  }
+
+  .dashboard-conversion-panel::after {
+    background:
+      linear-gradient(180deg, hsl(var(--foreground) / 0.03), transparent 20%),
+      radial-gradient(circle 240px at 100% 0%, hsl(var(--info) / 0.08), transparent 58%),
+      radial-gradient(circle 180px at 0% 100%, hsl(var(--primary) / 0.05), transparent 60%);
+  }
+
+  .dashboard-ops-panel::after {
+    background:
+      linear-gradient(180deg, hsl(var(--foreground) / 0.03), transparent 20%),
+      radial-gradient(circle 240px at 0% 0%, hsl(var(--primary) / 0.08), transparent 58%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.03), transparent 36%);
+  }
+
+  .dashboard-feed-panel::after {
+    background:
+      linear-gradient(180deg, hsl(var(--foreground) / 0.03), transparent 18%),
+      linear-gradient(90deg, hsl(var(--info) / 0.03), transparent 24%),
+      radial-gradient(circle 200px at 100% 100%, hsl(var(--info) / 0.05), transparent 58%);
   }
 
   .dashboard-tile {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    border: 1px solid hsl(var(--border) / 0.22);
-    background: linear-gradient(180deg, hsl(var(--card) / 0.99), hsl(var(--card) / 0.94));
+    border: 1px solid hsl(var(--border) / 0.24);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.95) 100%);
     box-shadow:
-      0 10px 24px hsl(var(--background) / 0.16),
+      0 14px 30px hsl(var(--background) / 0.18),
       inset 0 1px 0 hsl(var(--foreground) / 0.04);
   }
 
@@ -344,9 +373,9 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     pointer-events: none;
     background:
-      linear-gradient(180deg, hsl(var(--foreground) / 0.028), transparent 24%),
-      radial-gradient(circle 180px at 100% 0%, hsl(var(--foreground) / 0.024), transparent 34%),
-      linear-gradient(90deg, hsl(var(--primary) / 0.032), transparent 34%, transparent 66%, hsl(var(--info) / 0.032));
+      linear-gradient(180deg, hsl(var(--foreground) / 0.03), transparent 24%),
+      radial-gradient(circle 180px at 100% 0%, hsl(var(--foreground) / 0.022), transparent 34%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.03), transparent 34%, transparent 66%, hsl(var(--info) / 0.03));
     opacity: 0.92;
   }
 
@@ -371,11 +400,11 @@ input[type="number"]::-webkit-inner-spin-button {
   .dashboard-action-link {
     position: relative;
     overflow: hidden;
-    border: 1px solid hsl(var(--border) / 0.2);
-    background: linear-gradient(180deg, hsl(var(--card) / 0.975), hsl(var(--card) / 0.93));
+    border: 1px solid hsl(var(--border) / 0.22);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.94) 100%);
     box-shadow:
       inset 0 1px 0 hsl(var(--foreground) / 0.035),
-      0 8px 18px hsl(var(--background) / 0.08);
+      0 8px 18px hsl(var(--background) / 0.1);
   }
 
   .dashboard-action-link::before {
@@ -390,8 +419,8 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dashboard-action-link:hover {
-    border-color: hsl(var(--border) / 0.34);
-    background: linear-gradient(180deg, hsl(var(--card)), hsl(var(--card) / 0.95));
+    border-color: hsl(var(--primary) / 0.2);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.96) 100%);
     box-shadow:
       inset 0 1px 0 hsl(var(--foreground) / 0.04),
       0 12px 24px hsl(var(--background) / 0.14);
@@ -408,10 +437,72 @@ input[type="number"]::-webkit-inner-spin-button {
       linear-gradient(90deg, transparent 58%, hsl(var(--info) / 0.03));
   }
 
+  .dashboard-icon-shell {
+    border: 1px solid hsl(var(--border) / 0.32);
+    background: linear-gradient(180deg, hsl(var(--card) / 0.96), hsl(var(--card) / 0.88));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.04),
+      0 8px 18px hsl(var(--background) / 0.12);
+  }
+
+  .dashboard-meta-pill {
+    border: 1px solid hsl(var(--border) / 0.28);
+    background: linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.86));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.03);
+  }
+
+  .dashboard-toolbar-shell {
+    border: 1px solid hsl(var(--border) / 0.3);
+    background: linear-gradient(180deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.84));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.03),
+      0 10px 22px hsl(var(--background) / 0.12);
+  }
+
+  .dashboard-segment-active {
+    border: 1px solid hsl(var(--border) / 0.42);
+    background: hsl(var(--card));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.035),
+      0 10px 20px hsl(var(--background) / 0.16);
+  }
+
+  .dashboard-segment-muted {
+    color: hsl(var(--muted-foreground) / 0.8);
+  }
+
+  .dashboard-segment-muted:hover {
+    color: hsl(var(--foreground) / 0.86);
+    background: hsl(var(--foreground) / 0.035);
+  }
+
+  .dashboard-toolbar-button {
+    border: 1px solid hsl(var(--border) / 0.28);
+    background: linear-gradient(180deg, hsl(var(--card) / 0.84), hsl(var(--card) / 0.76));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.03);
+  }
+
+  .dashboard-toolbar-button:hover {
+    border-color: hsl(var(--border) / 0.38);
+    background: linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.84));
+  }
+
+  .dashboard-toolbar-button-active {
+    border-color: hsl(var(--border) / 0.44);
+    background: hsl(var(--card));
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.035),
+      0 10px 20px hsl(var(--background) / 0.16);
+  }
+
+  .dashboard-toolbar-button-muted {
+    color: hsl(var(--muted-foreground) / 0.82);
+  }
+
   .ambient-backdrop {
     position: relative;
     isolation: isolate;
-    background: hsl(var(--background));
+    background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   .ambient-backdrop::before {
@@ -421,18 +512,10 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     pointer-events: none;
     background:
-      /* Vignette — darker center, lit edges */
-      radial-gradient(ellipse 90% 80% at 50% 45%, transparent 20%, hsl(var(--background) / 0.7) 100%),
-      /* Green glow — left */
-      radial-gradient(circle 600px at 0% 15%, hsl(var(--primary) / 0.14), transparent 65%),
-      /* Blue glow — right */
-      radial-gradient(circle 500px at 100% 10%, hsl(var(--info) / 0.12), transparent 65%),
-      /* Green secondary — bottom left */
-      radial-gradient(circle 450px at 5% 90%, hsl(var(--primary) / 0.08), transparent 60%),
-      /* Blue secondary — bottom right */
-      radial-gradient(circle 400px at 95% 85%, hsl(var(--info) / 0.07), transparent 60%),
-      /* Soft center bloom */
-      radial-gradient(circle 700px at 50% 30%, hsl(var(--primary) / 0.045), transparent 55%);
+      radial-gradient(circle 920px at -12% 0%, hsl(var(--primary) / 0.12), transparent 58%),
+      radial-gradient(circle 860px at 112% 6%, hsl(var(--info) / 0.11), transparent 56%),
+      radial-gradient(ellipse 82% 62% at 50% 34%, hsl(var(--background) / 0.82), transparent 76%),
+      linear-gradient(180deg, hsl(var(--foreground) / 0.015), transparent 10%, transparent 82%, hsl(var(--foreground) / 0.025));
   }
 
   /* Noise grain */
@@ -442,10 +525,10 @@ input[type="number"]::-webkit-inner-spin-button {
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.03;
+    opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
-    background-size: 256px 256px;
+    background-size: 220px 220px;
   }
 
   .ambient-backdrop > * {

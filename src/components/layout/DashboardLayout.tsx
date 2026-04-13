@@ -65,17 +65,17 @@ function DashboardLayoutInner() {
  <div className="flex w-full h-full bg-background">
  <AppSidebar />
 
-  <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
+  <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
   {/* Ambient light blobs */}
   <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-  <div className="absolute -left-40 -top-20 h-[700px] w-[700px] rounded-full bg-primary/[0.15] blur-[300px]" />
-  <div className="absolute -right-40 -top-10 h-[600px] w-[600px] rounded-full bg-info/[0.12] blur-[280px]" />
-  <div className="absolute -left-20 bottom-0 h-[500px] w-[500px] rounded-full bg-primary/[0.08] blur-[250px]" />
-  <div className="absolute -right-20 bottom-10 h-[450px] w-[450px] rounded-full bg-info/[0.07] blur-[240px]" />
-  <div className="absolute left-1/2 top-1/3 -translate-x-1/2 h-[600px] w-[800px] rounded-full bg-background/70 blur-[200px]" />
+   <div className="absolute -left-56 -top-24 h-[780px] w-[780px] rounded-full bg-primary/[0.16] blur-[320px]" />
+   <div className="absolute -right-52 -top-16 h-[760px] w-[760px] rounded-full bg-info/[0.14] blur-[320px]" />
+   <div className="absolute left-[14%] top-[12%] h-[380px] w-[380px] rounded-full bg-primary/[0.06] blur-[180px]" />
+   <div className="absolute right-[10%] bottom-[16%] h-[340px] w-[340px] rounded-full bg-info/[0.05] blur-[170px]" />
+   <div className="absolute left-1/2 top-[42%] -translate-x-1/2 h-[820px] w-[980px] rounded-full bg-background/82 blur-[240px]" />
   </div>
 
- <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
+ <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/82 backdrop-blur-2xl shadow-[0_1px_0_hsl(var(--foreground)/0.04)] px-4 lg:px-6 sticky top-0">
  <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
  <Menu className="h-4 w-4 text-muted-foreground" />
  </SidebarTrigger>
