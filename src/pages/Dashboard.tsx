@@ -477,19 +477,20 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-2xl border border-emerald-500/40 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line shadow-2xl shadow-emerald-500/10"
+        className="relative mb-10 rounded-[20px] border border-primary/30 bg-card/90 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line shadow-2xl shadow-primary/8"
       >
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-40 -left-36 h-[28rem] w-[28rem] rounded-full bg-emerald-400/55 blur-[150px]" />
-          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-emerald-300/40 blur-[130px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-[80%] rounded-full bg-emerald-400/35 blur-[170px]" />
-          <div className="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-emerald-500/40 blur-[120px]" />
-          <div className="absolute bottom-1/4 left-1/3 h-64 w-64 rounded-full bg-emerald-300/30 blur-[130px]" />
-          <div className="absolute top-1/3 right-1/3 h-56 w-56 rounded-full bg-teal-300/25 blur-[110px]" />
-          <div className="absolute -top-10 left-1/2 h-48 w-[85%] -translate-x-1/2 rounded-full bg-emerald-400/30 blur-[180px]" />
-          <div className="absolute bottom-0 left-0 h-40 w-[60%] rounded-full bg-green-400/20 blur-[140px]" />
+          <div className="absolute -top-40 -left-36 h-[28rem] w-[28rem] rounded-full bg-primary/40 blur-[160px]" />
+          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/25 blur-[140px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-[80%] rounded-full bg-primary/20 blur-[180px]" />
+          <div className="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-primary/30 blur-[130px]" />
+          <div className="absolute bottom-1/4 left-1/3 h-64 w-64 rounded-full bg-primary/18 blur-[140px]" />
+          <div className="absolute top-1/3 right-1/3 h-56 w-56 rounded-full bg-primary/15 blur-[120px]" />
+          <div className="absolute -top-10 left-1/2 h-48 w-[85%] -translate-x-1/2 rounded-full bg-primary/22 blur-[190px]" />
+          <div className="absolute bottom-0 left-0 h-40 w-[60%] rounded-full bg-primary/12 blur-[150px]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/[0.25] via-emerald-500/[0.12] to-teal-400/[0.20] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.18] via-primary/[0.06] to-primary/[0.12] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.08),_transparent_60%)] pointer-events-none z-0" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -575,7 +576,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-end gap-5 mb-3">
-              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82]">
+              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] drop-shadow-[0_2px_12px_hsl(var(--primary)/0.15)]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
@@ -594,24 +595,25 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", borderColor: "border-success/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--success)/0.4)]", iconBg: "bg-success/12", iconText: "text-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", borderColor: "border-info/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--info)/0.4)]", iconBg: "bg-info/12", iconText: "text-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", borderColor: "border-primary/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--primary)/0.35)]", iconBg: "bg-primary/12", iconText: "text-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", borderColor: "border-success/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--success)/0.35)]", iconBg: "bg-success/12", iconText: "text-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", borderColor: "border-info/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--info)/0.35)]", iconBg: "bg-info/12", iconText: "text-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", borderColor: "border-primary/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--primary)/0.35)]", iconBg: "bg-primary/12", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-2xl border-2 p-5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02]", item.borderColor, item.glowShadow)}
-                style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                className={cn("group relative overflow-hidden rounded-[16px] border-2 p-5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl", item.borderColor, item.glowShadow)}
+                style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.96) 0%, hsl(var(--card) / 0.78) 100%)" }}>
+                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent pointer-events-none" />
 
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
                     <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className={cn("text-[28px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border border-border/20 backdrop-blur-sm", item.iconBg, item.iconText)}>
+                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border border-border/20 backdrop-blur-sm shadow-inner", item.iconBg, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
