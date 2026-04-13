@@ -477,20 +477,9 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 rounded-[20px] border border-primary/30 bg-card/90 p-6 sm:p-8 lg:p-10 overflow-hidden scan-line shadow-2xl shadow-primary/8"
+        className="relative mb-10 rounded-[20px] border border-border/60 bg-card p-6 sm:p-8 lg:p-10 overflow-hidden shadow-sm"
       >
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-40 -left-36 h-[28rem] w-[28rem] rounded-full bg-primary/40 blur-[160px]" />
-          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/25 blur-[140px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-[80%] rounded-full bg-primary/20 blur-[180px]" />
-          <div className="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-primary/30 blur-[130px]" />
-          <div className="absolute bottom-1/4 left-1/3 h-64 w-64 rounded-full bg-primary/18 blur-[140px]" />
-          <div className="absolute top-1/3 right-1/3 h-56 w-56 rounded-full bg-primary/15 blur-[120px]" />
-          <div className="absolute -top-10 left-1/2 h-48 w-[85%] -translate-x-1/2 rounded-full bg-primary/22 blur-[190px]" />
-          <div className="absolute bottom-0 left-0 h-40 w-[60%] rounded-full bg-primary/12 blur-[150px]" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.18] via-primary/[0.06] to-primary/[0.12] pointer-events-none z-0" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.08),_transparent_60%)] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none z-0" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -595,26 +584,22 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", borderColor: "border-primary/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--primary)/0.35)]", iconBg: "bg-primary/12", iconText: "text-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", borderColor: "border-success/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--success)/0.35)]", iconBg: "bg-success/12", iconText: "text-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", borderColor: "border-info/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--info)/0.35)]", iconBg: "bg-info/12", iconText: "text-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", borderColor: "border-primary/50", glowShadow: "shadow-[0_0_20px_-4px_hsl(var(--primary)/0.35)]", iconBg: "bg-primary/12", iconText: "text-primary" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-foreground", iconBg: "bg-primary/8", iconText: "text-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-foreground", iconBg: "bg-success/8", iconText: "text-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-foreground", iconBg: "bg-info/8", iconText: "text-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-foreground", iconBg: "bg-primary/8", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-[16px] border-2 p-5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl", item.borderColor, item.glowShadow)}
-                style={{ background: "linear-gradient(155deg, hsl(var(--card) / 0.96) 0%, hsl(var(--card) / 0.78) 100%)" }}>
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent pointer-events-none" />
-
+                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 transition-all duration-200 hover:border-border hover:shadow-md">
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">{item.label}</p>
-                    <p className={cn("text-[28px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/55">{item.label}</p>
+                    <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border border-border/20 backdrop-blur-sm shadow-inner", item.iconBg, item.iconText)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
+                    <item.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
               </motion.div>
@@ -627,11 +612,7 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[20px] border border-primary/25 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-xl shadow-primary/6">
-          <div className="absolute -top-28 -left-28 h-64 w-64 rounded-full bg-primary/20 blur-[130px] pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/15 blur-[110px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-[60%] rounded-full bg-primary/12 blur-[140px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-border/60 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-sm">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -647,7 +628,7 @@ export default function Dashboard() {
                   if (!active || !payload?.length) return null;
                   const value = payload[0].value as number;
                   return (
-                    <div className="rounded-xl border border-primary/25 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl shadow-primary/15">
+                    <div className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-lg">
                       <p className="text-[10px] font-heading uppercase tracking-[0.15em] text-muted-foreground mb-1">{label}</p>
                       <p className="text-lg font-heading font-black text-primary tabular-nums tracking-tight">
                         R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -664,10 +645,7 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-primary/22 bg-card p-4 md:p-5 relative overflow-hidden shadow-xl shadow-primary/6">
-            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-primary/18 blur-[100px] pointer-events-none" />
-            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-primary/12 blur-[80px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/60 bg-card p-4 md:p-5 relative overflow-hidden shadow-sm">
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -685,9 +663,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning to-warning/70", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-[16px] border border-primary/18 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-primary/35 hover:shadow-xl relative overflow-hidden shadow-lg shadow-primary/5", item.accentBorder)}>
-                <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-primary/12 blur-[80px] pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
+                className={cn("rounded-2xl border border-border/60 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border hover:shadow-md relative overflow-hidden shadow-sm", item.accentBorder)}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner", item.iconGradient)}>
                     {item.isPix ? (
@@ -719,11 +695,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-primary/22 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-xl shadow-primary/6">
-          <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-primary/16 blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-primary/12 blur-[100px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-primary/8 blur-[110px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border/60 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
@@ -769,10 +741,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-[20px] border border-primary/22 bg-card flex flex-col relative overflow-hidden shadow-xl shadow-primary/6">
-          <div className="absolute -top-20 -right-20 h-52 w-52 rounded-full bg-primary/16 blur-[110px] pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-primary/10 blur-[90px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/38 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border/60 bg-card flex flex-col relative overflow-hidden shadow-sm">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
