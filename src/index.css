@@ -198,13 +198,9 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle 860px at -10% 12%, hsl(var(--primary) / 0.19), transparent 58%),
-      radial-gradient(circle 820px at 110% 8%, hsl(var(--info) / 0.18), transparent 56%),
-      radial-gradient(circle 360px at 20% 22%, hsl(var(--primary) / 0.07), transparent 66%),
-      radial-gradient(circle 340px at 82% 78%, hsl(var(--info) / 0.06), transparent 66%),
-      radial-gradient(ellipse 72% 62% at 50% 30%, hsl(var(--background) / 0.84), transparent 72%),
-      linear-gradient(180deg, hsl(var(--background) / 0.02), transparent 16%, transparent 80%, hsl(var(--background) / 0.2));
-    filter: saturate(105%);
+      radial-gradient(circle 700px at -8% 10%, hsl(var(--primary) / 0.08), transparent 50%),
+      radial-gradient(circle 680px at 108% 6%, hsl(var(--info) / 0.07), transparent 48%),
+      radial-gradient(ellipse 70% 55% at 50% 30%, hsl(var(--background) / 0.9), transparent 65%);
   }
 
   .dashboard-page::after {
@@ -234,11 +230,11 @@ input[type="number"]::-webkit-inner-spin-button {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    border: 1px solid hsl(var(--primary) / 0.18);
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.98) 40%, hsl(var(--card) / 0.94) 100%);
+    border: 1px solid hsl(var(--border) / 0.4);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.98) 40%, hsl(var(--card) / 0.95) 100%);
     box-shadow:
       0 0 0 1px hsl(var(--foreground) / 0.02),
-      inset 0 1px 0 hsl(var(--primary) / 0.08),
+      inset 0 1px 0 hsl(var(--foreground) / 0.06),
       inset 0 -1px 0 hsl(var(--foreground) / 0.02),
       0 1px 2px hsl(var(--background) / 0.4),
       0 8px 24px hsl(var(--background) / 0.3),
@@ -252,11 +248,10 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     pointer-events: none;
     background:
-      linear-gradient(180deg, hsl(var(--primary) / 0.07), transparent 8%),
-      radial-gradient(circle 600px at -5% -10%, hsl(var(--primary) / 0.28), transparent 55%),
-      radial-gradient(circle 500px at 105% -5%, hsl(var(--info) / 0.22), transparent 55%),
-      radial-gradient(circle 300px at 50% 110%, hsl(var(--primary) / 0.06), transparent 50%),
-      linear-gradient(90deg, hsl(var(--primary) / 0.04), transparent 15%, transparent 85%, hsl(var(--info) / 0.04));
+      linear-gradient(180deg, hsl(var(--primary) / 0.05), transparent 10%),
+      radial-gradient(circle 500px at -5% -10%, hsl(var(--primary) / 0.16), transparent 50%),
+      radial-gradient(circle 450px at 105% -5%, hsl(var(--info) / 0.12), transparent 50%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.02), transparent 12%, transparent 88%, hsl(var(--info) / 0.02));
   }
 
   .dashboard-hero-surface::after {
@@ -529,10 +524,9 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle 920px at -12% 0%, hsl(var(--primary) / 0.12), transparent 58%),
-      radial-gradient(circle 860px at 112% 6%, hsl(var(--info) / 0.11), transparent 56%),
-      radial-gradient(ellipse 82% 62% at 50% 34%, hsl(var(--background) / 0.82), transparent 76%),
-      linear-gradient(180deg, hsl(var(--foreground) / 0.015), transparent 10%, transparent 82%, hsl(var(--foreground) / 0.025));
+      radial-gradient(circle 800px at -8% 2%, hsl(var(--primary) / 0.06), transparent 50%),
+      radial-gradient(circle 750px at 108% 4%, hsl(var(--info) / 0.05), transparent 48%),
+      radial-gradient(ellipse 80% 60% at 50% 36%, hsl(var(--background) / 0.92), transparent 70%);
   }
 
   /* Noise grain */
