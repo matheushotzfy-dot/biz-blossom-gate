@@ -232,23 +232,23 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
  to={item.url}
  end={item.exact}
  activeClassName=""
- className={cn(
- "group/nav relative flex min-h-14 w-full items-center gap-3 rounded-[20px] px-3.5 py-3 text-[14px] font-semibold transition-all duration-[240ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2.5",
- isActive
- ? "border border-primary/40 bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_0_20px_rgba(0,220,130,0.10),inset_0_1px_0_rgba(255,255,255,0.03)]"
- : "text-sidebar-foreground/78 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
- )}
+  className={cn(
+    "group/nav relative flex min-h-14 w-full items-center gap-3 rounded-[20px] px-3.5 py-3 text-[14px] font-semibold transition-all duration-[240ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2.5",
+    isActive
+      ? "border border-primary/30 bg-primary/10 text-foreground"
+      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+  )}
  >
  {isActive && (
  <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
  )}
  <span
- className={cn(
- "flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border transition-all duration-200",
- isActive
- ? "border-sidebar-primary/20 bg-sidebar-primary/12 text-sidebar-primary"
- : "border-transparent bg-sidebar-accent/55 text-sidebar-foreground/58 group-hover/nav:border-sidebar-border/60 group-hover/nav:text-sidebar-accent-foreground",
- )}
+  className={cn(
+    "flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border transition-all duration-200",
+    isActive
+      ? "border-primary/25 bg-primary/15 text-primary"
+      : "border-transparent bg-sidebar-accent text-sidebar-foreground group-hover/nav:border-sidebar-border group-hover/nav:text-sidebar-accent-foreground",
+  )}
  >
  <item.icon className="h-[18px] w-[18px]" />
  </span>
