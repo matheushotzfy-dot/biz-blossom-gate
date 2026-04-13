@@ -627,11 +627,11 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-emerald-500/30 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-xl shadow-emerald-500/8">
-          <div className="absolute -top-28 -left-28 h-64 w-64 rounded-full bg-emerald-400/30 blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-teal-400/25 blur-[100px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-[60%] rounded-full bg-emerald-400/20 blur-[130px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[20px] border border-primary/25 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-xl shadow-primary/6">
+          <div className="absolute -top-28 -left-28 h-64 w-64 rounded-full bg-primary/20 blur-[130px] pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-primary/15 blur-[110px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-[60%] rounded-full bg-primary/12 blur-[140px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -664,10 +664,10 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 relative overflow-hidden shadow-xl shadow-emerald-500/8">
-            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-emerald-400/25 blur-[90px] pointer-events-none" />
-            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-teal-400/18 blur-[70px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-primary/22 bg-card p-4 md:p-5 relative overflow-hidden shadow-xl shadow-primary/6">
+            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-primary/18 blur-[100px] pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-primary/12 blur-[80px] pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -679,15 +679,15 @@ export default function Dashboard() {
           {/* KPI tiles - clean */}
           <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-[#32BCAD] to-[#4DD0C8]", valueColor: "text-[#32BCAD]", dotColor: "bg-[#32BCAD]", accentBorder: "border-t-[#32BCAD]" },
-              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-blue-500 to-cyan-400", valueColor: "text-blue-400", dotColor: "bg-blue-400", accentBorder: "border-t-blue-500" },
-              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-emerald-600 to-teal-400", valueColor: "text-primary", dotColor: "bg-primary", accentBorder: "border-t-primary" },
-              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", valueColor: "text-amber-400", dotColor: "bg-amber-400", accentBorder: "border-t-amber-500" },
+              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-success to-success/70", valueColor: "text-success", dotColor: "bg-success", accentBorder: "border-t-success" },
+              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-info to-info/70", valueColor: "text-info", dotColor: "bg-info", accentBorder: "border-t-info" },
+              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-primary to-primary/70", valueColor: "text-primary", dotColor: "bg-primary", accentBorder: "border-t-primary" },
+              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning to-warning/70", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-2xl border border-emerald-500/20 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-emerald-400/40 relative overflow-hidden shadow-lg shadow-emerald-500/6", item.accentBorder)}>
-                <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-emerald-400/18 blur-[70px] pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-teal-400/12 blur-[50px] pointer-events-none" />
+                className={cn("rounded-[16px] border border-primary/18 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-primary/35 hover:shadow-xl relative overflow-hidden shadow-lg shadow-primary/5", item.accentBorder)}>
+                <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-primary/12 blur-[80px] pointer-events-none" />
+                <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4">
                   <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
                     {item.isPix ? (
