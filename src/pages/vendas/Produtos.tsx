@@ -105,8 +105,8 @@ export default function Produtos() {
       <div className="px-5 pt-1 sm:px-7 md:pt-1">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 shadow-[0_0_20px_hsl(var(--primary)/0.08)]">
+          <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-border">
                 <Box className="h-5 w-5 text-primary" strokeWidth={1.8} />
               </div>
               <div>
@@ -139,7 +139,7 @@ export default function Produtos() {
         {/* ── Toolbar ── */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs */}
-          <div className="flex items-center gap-0.5 rounded-lg border border-border/20 bg-secondary/30 p-0.5">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -174,7 +174,7 @@ export default function Produtos() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar..."
-              className="h-8 w-full rounded-lg border border-border/20 bg-secondary/30 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground/40 focus:border-primary/30 focus:outline-none focus:ring-1 focus:ring-primary/15 sm:w-52"
+              className="h-8 w-full rounded-lg border border-border bg-secondary pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-52"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
@@ -186,18 +186,18 @@ export default function Produtos() {
       </div>
 
       {/* ── Divider ── */}
-      <div className="mx-5 mt-5 h-px bg-border/15 sm:mx-7" />
+      <div className="mx-5 mt-5 h-px bg-border sm:mx-7" />
 
       {/* ── Product grid ── */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/15 bg-secondary/40">
-            <Package className="h-7 w-7 text-muted-foreground/25" strokeWidth={1.4} />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
+            <Package className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
           </div>
           <p className="mt-5 text-sm font-semibold text-foreground">
             {search || tab !== "all" ? "Nenhum resultado" : "Comece por aqui"}
           </p>
-          <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground/50">
+          <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
             {search || tab !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie seu primeiro produto e comece a faturar hoje."}
           </p>
           {!search && tab === "all" && (
