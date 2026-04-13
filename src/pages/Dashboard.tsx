@@ -477,8 +477,10 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="dashboard-hero-surface dashboard-command-panel relative mb-10 rounded-2xl p-8 sm:p-10 lg:p-14"
+        className="dashboard-hero-surface dashboard-command-panel relative mb-10 rounded-2xl p-8 sm:p-10 lg:p-14 overflow-hidden"
       >
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent z-20" />
         <div className="relative z-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -564,7 +566,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-end gap-5 mb-3">
-              <span className="text-5xl sm:text-7xl lg:text-[96px] font-heading font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.03em]">
+              <span className="text-5xl sm:text-7xl lg:text-[96px] font-heading font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.04em] drop-shadow-[0_2px_12px_hsl(var(--primary)/0.15)]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
@@ -575,7 +577,7 @@ export default function Dashboard() {
                 { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
                 { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-1.5 rounded-full border ${chip.border} ${chip.bg} px-3 py-1 text-[10px] font-semibold text-foreground/68 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.03)]`}>
+                <span key={i} className={`inline-flex items-center gap-1.5 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-1.5 text-[10px] font-semibold text-foreground/72 backdrop-blur-sm shadow-[0_2px_8px_hsl(var(--background)/0.15)]`}>
                   <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
                   {chip.label}
                 </span>
@@ -662,7 +664,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning to-warning/70", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("dashboard-tile dashboard-metric-tile rounded-xl border-t-2 p-4 md:p-5 transition-all duration-300 hover:border-border/30 hover:-translate-y-[1px]", item.accentBorder)}>
+                className={cn("dashboard-tile dashboard-metric-tile rounded-xl border-t-[3px] p-4 md:p-5 transition-all duration-300 hover:-translate-y-[2px]", item.accentBorder)}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner ring-1 ring-border/10", item.iconGradient)}>
                     {item.isPix ? (
