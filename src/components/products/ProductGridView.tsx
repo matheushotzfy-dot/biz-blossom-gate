@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, Eye, Package, Calendar, Users, Crosshair, Sparkles } from "lucide-react";
+import { Copy, ExternalLink, Eye, Package, Calendar, Users, Crosshair } from "lucide-react";
 
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
