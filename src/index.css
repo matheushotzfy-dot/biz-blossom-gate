@@ -190,9 +190,10 @@ input[type="number"]::-webkit-inner-spin-button {
     position: relative;
     isolation: isolate;
     background:
-      radial-gradient(120% 80% at 0% 0%, hsl(var(--primary) / 0.09), transparent 45%),
-      radial-gradient(80% 60% at 100% 0%, hsl(var(--info) / 0.07), transparent 36%),
-      radial-gradient(90% 70% at 50% 100%, hsl(var(--accent) / 0.12), transparent 44%),
+      radial-gradient(120% 80% at 0% 0%, hsl(var(--primary) / 0.12), transparent 45%),
+      radial-gradient(80% 60% at 100% 0%, hsl(var(--info) / 0.1), transparent 36%),
+      radial-gradient(90% 70% at 50% 100%, hsl(var(--accent) / 0.14), transparent 44%),
+      linear-gradient(135deg, hsl(var(--foreground) / 0.03), transparent 30%, transparent 70%, hsl(var(--primary) / 0.035)),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
@@ -206,22 +207,30 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .ambient-backdrop::before {
     z-index: -2;
-    opacity: 0.95;
+    opacity: 1;
     background:
-      radial-gradient(65% 44% at 14% 10%, hsl(var(--primary) / 0.1), transparent 70%),
-      radial-gradient(45% 36% at 86% 14%, hsl(var(--info) / 0.08), transparent 72%),
-      radial-gradient(72% 48% at 50% 100%, hsl(var(--accent) / 0.1), transparent 78%);
+      radial-gradient(65% 44% at 14% 10%, hsl(var(--primary) / 0.16), transparent 70%),
+      radial-gradient(45% 36% at 86% 14%, hsl(var(--info) / 0.12), transparent 72%),
+      radial-gradient(72% 48% at 50% 100%, hsl(var(--accent) / 0.13), transparent 78%),
+      radial-gradient(40% 26% at 32% 28%, hsl(var(--foreground) / 0.04), transparent 80%);
   }
 
   .ambient-backdrop::after {
     z-index: -1;
-    opacity: 0.22;
+    opacity: 0.32;
     background-image:
       linear-gradient(hsl(var(--border) / 0.24) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.2) 1px, transparent 1px);
-    background-size: 96px 96px;
+      linear-gradient(90deg, hsl(var(--border) / 0.2) 1px, transparent 1px),
+      radial-gradient(circle at 20% 20%, hsl(var(--foreground) / 0.08) 1px, transparent 1.5px),
+      radial-gradient(circle at 80% 30%, hsl(var(--primary) / 0.12) 1px, transparent 1.5px);
+    background-size: 96px 96px, 96px 96px, 144px 144px, 180px 180px;
     -webkit-mask-image: linear-gradient(180deg, transparent, black 14%, black 86%, transparent);
     mask-image: linear-gradient(180deg, transparent, black 14%, black 86%, transparent);
+  }
+
+  .ambient-backdrop > * {
+    position: relative;
+    z-index: 1;
   }
 
   .gradient-hero {
@@ -273,7 +282,8 @@ input[type="number"]::-webkit-inner-spin-button {
     border: 1px solid hsl(var(--sidebar-border) / 0.74);
     box-shadow:
       0 0 0 1px hsl(var(--sidebar-border) / 0.08),
-      0 20px 56px hsl(var(--background) / 0.18);
+      0 20px 56px hsl(var(--background) / 0.18),
+      inset 0 1px 0 hsl(var(--foreground) / 0.06);
   }
 
   .seller-shell::before {
@@ -293,7 +303,9 @@ input[type="number"]::-webkit-inner-spin-button {
     overflow: hidden;
     background: linear-gradient(180deg, hsl(var(--sidebar-accent) / 0.72), hsl(var(--card) / 0.96));
     border: 1px solid hsl(var(--sidebar-border) / 0.68);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.03);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.05),
+      0 10px 30px hsl(var(--background) / 0.12);
   }
 
   .seller-panel::before {
@@ -528,12 +540,23 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .panel-enterprise {
     @apply rounded-2xl border border-border/60;
-    background: hsl(var(--card) / 0.95);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, hsl(var(--card) / 0.98), hsl(var(--card) / 0.92));
     box-shadow:
       0 0 0 1px hsl(var(--primary) / 0.04),
       0 4px 24px hsl(var(--background) / 0.12),
       inset 0 1px 0 hsl(var(--primary) / 0.03);
     transition: border-color 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .panel-enterprise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, hsl(var(--foreground) / 0.035), transparent 22%),
+      radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.08), transparent 34%);
   }
   .panel-enterprise:hover {
     border-color: hsl(var(--primary) / 0.15);
@@ -545,9 +568,20 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .panel-enterprise-subtle {
     @apply rounded-xl border border-border/50;
-    background: hsl(var(--card) / 0.9);
-    box-shadow: 0 2px 8px hsl(var(--background) / 0.08);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, hsl(var(--card) / 0.94), hsl(var(--card) / 0.88));
+    box-shadow:
+      0 2px 8px hsl(var(--background) / 0.08),
+      inset 0 1px 0 hsl(var(--foreground) / 0.04);
     transition: border-color 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .panel-enterprise-subtle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, hsl(var(--foreground) / 0.025), transparent 34%);
   }
   .panel-enterprise-subtle:hover {
     border-color: hsl(var(--primary) / 0.12);
