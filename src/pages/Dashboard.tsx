@@ -591,7 +591,7 @@ export default function Dashboard() {
               { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-foreground", iconBg: "bg-primary/8", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className="group relative overflow-hidden rounded-xl border border-border/15 bg-card/80 p-5 transition-all duration-200 hover:border-border/30"
+                className="group relative overflow-hidden rounded-xl border border-border/15 bg-card/80 p-5 transition-all duration-200 hover:border-border/30">
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
                     <p className="mb-2.5 text-[9px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/30">{item.label}</p>
