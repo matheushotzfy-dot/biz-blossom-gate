@@ -66,13 +66,11 @@ function DashboardLayoutInner() {
  <AppSidebar />
 
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
-  {/* Ambient light blobs */}
+  {/* Ambient light blobs — kept subtle to avoid double-stacking with CSS ambient-backdrop */}
   <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-   <div className="absolute -left-56 -top-24 h-[780px] w-[780px] rounded-full bg-primary/[0.16] blur-[320px]" />
-   <div className="absolute -right-52 -top-16 h-[760px] w-[760px] rounded-full bg-info/[0.14] blur-[320px]" />
-   <div className="absolute left-[14%] top-[12%] h-[380px] w-[380px] rounded-full bg-primary/[0.06] blur-[180px]" />
-   <div className="absolute right-[10%] bottom-[16%] h-[340px] w-[340px] rounded-full bg-info/[0.05] blur-[170px]" />
-   <div className="absolute left-1/2 top-[42%] -translate-x-1/2 h-[820px] w-[980px] rounded-full bg-background/82 blur-[240px]" />
+   <div className="absolute -left-56 -top-24 h-[780px] w-[780px] rounded-full bg-primary/[0.06] blur-[380px]" />
+   <div className="absolute -right-52 -top-16 h-[760px] w-[760px] rounded-full bg-info/[0.05] blur-[380px]" />
+   <div className="absolute left-1/2 top-[42%] -translate-x-1/2 h-[820px] w-[980px] rounded-full bg-background/90 blur-[280px]" />
   </div>
 
  <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/82 backdrop-blur-2xl shadow-[0_1px_0_hsl(var(--foreground)/0.04)] px-4 lg:px-6 sticky top-0">
