@@ -65,7 +65,15 @@ function DashboardLayoutInner() {
  <div className="flex w-full h-full bg-background">
  <AppSidebar />
 
- <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0">
+  <SidebarInset className="relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
+  {/* Ambient light blobs */}
+  <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+  <div className="absolute -left-40 -top-20 h-[700px] w-[700px] rounded-full bg-primary/[0.15] blur-[300px]" />
+  <div className="absolute -right-40 -top-10 h-[600px] w-[600px] rounded-full bg-info/[0.12] blur-[280px]" />
+  <div className="absolute -left-20 bottom-0 h-[500px] w-[500px] rounded-full bg-primary/[0.08] blur-[250px]" />
+  <div className="absolute -right-20 bottom-10 h-[450px] w-[450px] rounded-full bg-info/[0.07] blur-[240px]" />
+  <div className="absolute left-1/2 top-1/3 -translate-x-1/2 h-[600px] w-[800px] rounded-full bg-background/70 blur-[200px]" />
+  </div>
 
  <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/88 backdrop-blur-xl px-4 lg:px-6 sticky top-0">
  <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
