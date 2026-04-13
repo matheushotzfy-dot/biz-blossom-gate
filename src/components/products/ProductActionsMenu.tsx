@@ -94,7 +94,7 @@ export function ProductActionsMenu({
         side="top"
         sideOffset={8}
         collisionPadding={16}
-        className="w-[240px] rounded-2xl border border-sidebar-border bg-sidebar p-1.5 shadow-none"
+        className="w-[240px] rounded-2xl border border-border bg-card p-1.5 shadow-none"
       >
         {/* Product name header */}
         <div className="px-3 py-2">
