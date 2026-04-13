@@ -66,33 +66,33 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 224 24% 10%;
+    --background: 222 20% 14%;
     --foreground: 210 20% 96%;
-    --card: 222 20% 13%;
+    --card: 220 18% 18%;
     --card-foreground: 210 20% 96%;
-    --popover: 224 24% 10%;
+    --popover: 222 20% 16%;
     --popover-foreground: 210 20% 96%;
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 2%;
-    --secondary: 222 18% 15%;
+    --secondary: 220 16% 20%;
     --secondary-foreground: 210 14% 93%;
-    --muted: 222 16% 13%;
+    --muted: 220 14% 18%;
     --muted-foreground: 215 14% 55%;
-    --accent: 218 20% 14%;
+    --accent: 218 18% 20%;
     --accent-foreground: 188 38% 88%;
     --destructive: 0 74% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 16% 17%;
-    --input: 222 18% 15%;
+    --border: 220 14% 24%;
+    --input: 220 16% 20%;
     --ring: 160 84% 39%;
 
-    --sidebar-background: 226 28% 8%;
+    --sidebar-background: 224 22% 12%;
     --sidebar-foreground: 210 14% 70%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 2%;
-    --sidebar-accent: 224 20% 12%;
+    --sidebar-accent: 222 18% 16%;
     --sidebar-accent-foreground: 210 14% 94%;
-    --sidebar-border: 224 18% 14%;
+    --sidebar-border: 222 16% 18%;
     --sidebar-ring: 160 84% 39%;
 
     --success: 158 72% 38%;
@@ -102,10 +102,10 @@ input[type="number"]::-webkit-inner-spin-button {
     --info: 206 82% 58%;
     --info-foreground: 0 0% 100%;
 
-    --tooltip-bg: rgba(10, 14, 22, 0.98);
+    --tooltip-bg: rgba(18, 22, 34, 0.98);
     --tooltip-border: rgba(0, 200, 120, 0.18);
     --tooltip-text: #eaf0f6;
-    --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.32), 0 12px 36px rgba(0, 0, 0, 0.36), 0 28px 60px rgba(0, 0, 0, 0.22);
+    --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.18);
   }
 }
 
