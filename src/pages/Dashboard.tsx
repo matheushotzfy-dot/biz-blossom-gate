@@ -689,11 +689,11 @@ export default function Dashboard() {
                 <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-primary/12 blur-[80px] pointer-events-none" />
                 <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-primary/8 blur-[60px] pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4">
-                  <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
+                  <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner", item.iconGradient)}>
                     {item.isPix ? (
                       <PixLogoMark className="h-4 w-4" variant="white" />
                     ) : (
-                      item.icon && <item.icon className="h-3.5 w-3.5 text-white" />
+                      item.icon && <item.icon className="h-3.5 w-3.5 text-primary-foreground" />
                     )}
                   </div>
                   <span className="text-[10px] font-display font-extrabold uppercase tracking-[0.12em] text-muted-foreground/70">{item.label}</span>
