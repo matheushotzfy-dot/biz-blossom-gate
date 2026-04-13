@@ -102,7 +102,7 @@ export default function Produtos() {
   return (
     <div className="mx-auto w-full max-w-[1440px] pb-24 md:pb-10">
       {/* ── Header ── */}
-      <div className="px-5 pt-8 sm:px-7 md:pt-10">
+      <div className="px-5 pt-3 sm:px-7 md:pt-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3.5">

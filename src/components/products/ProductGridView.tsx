@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, Eye, Package, Calendar, Users, Crosshair, Sparkles } from "lucide-react";
+import { Copy, ExternalLink, Eye, Package, Calendar, Users, Crosshair } from "lucide-react";
 
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
@@ -101,58 +101,50 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
             </div>
 
             {/* ── Body ── */}
-            <div className="relative flex flex-1 flex-col px-4 pt-3.5 pb-4">
-              {/* Title */}
+            <div className="relative flex flex-1 flex-col px-4 pt-3 pb-3.5">
+              {/* Title + Description */}
               <h3 className="truncate font-display text-[15px] font-extrabold leading-snug tracking-tight text-foreground group-hover:text-primary/90 transition-colors duration-300">
                 {product.name}
               </h3>
+              <p className="mt-0.5 truncate text-[11px] leading-relaxed text-muted-foreground/55">
+                {product.description || "Sem descrição adicionada"}
+              </p>
 
-              {/* Description */}
-              {product.description ? (
-                <p className="mt-0.5 truncate text-[11px] leading-relaxed text-muted-foreground/55">
-                  {product.description}
-                </p>
-              ) : (
-                <p className="mt-0.5 text-[11px] italic text-muted-foreground/25">Sem descrição adicionada</p>
-              )}
-
-              {/* Tags */}
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 rounded-lg border border-border/12 bg-secondary/30 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/50">
+              {/* Tags row – aligned */}
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 rounded-md border border-border/12 bg-secondary/30 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/50">
                   <Package className="h-2.5 w-2.5" strokeWidth={2.2} />
                   {deliveryLabel}
                 </span>
                 {hasAffiliate && (
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-primary/12 bg-primary/5 px-2.5 py-1 text-[9px] font-bold text-primary/60">
+                  <span className="inline-flex items-center gap-1 rounded-md border border-primary/12 bg-primary/5 px-2 py-0.5 text-[9px] font-bold text-primary/60">
                     <Users className="h-2.5 w-2.5" strokeWidth={2.2} />
-                    {product.affiliate_commission}% afiliado
+                    {product.affiliate_commission}%
                   </span>
                 )}
               </div>
 
-              {/* Elegant divider */}
-              <div className="my-3 flex items-center gap-2">
-                <div className="h-px flex-1 bg-gradient-to-r from-border/20 via-border/8 to-transparent" />
-                <Sparkles className="h-2.5 w-2.5 text-primary/15" strokeWidth={2} />
-                <div className="h-px flex-1 bg-gradient-to-l from-border/20 via-border/8 to-transparent" />
-              </div>
+              {/* Spacer to push price to bottom */}
+              <div className="flex-1 min-h-2" />
 
-              {/* Price + Actions row */}
+              {/* Divider */}
+              <div className="my-2.5 h-px bg-border/12" />
+
+              {/* Price + Quick actions – bottom aligned */}
               <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-numbers text-xl font-black tabular-nums tracking-tight text-success drop-shadow-[0_0_12px_hsl(var(--success)/0.15)]">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-numbers text-lg font-black tabular-nums tracking-tight text-success">
                     {formatCurrency(price)}
                   </span>
                   {price > 0 && (
-                    <span className="ml-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/25">BRL</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/30">BRL</span>
                   )}
                 </div>
 
-                {/* Quick action icons */}
                 <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => handlers.onOpenPixels(product)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/25 transition-all duration-200 hover:bg-primary/8 hover:text-primary/70 hover:shadow-[0_0_12px_hsl(var(--primary)/0.08)]"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/30 transition-all duration-200 hover:bg-primary/8 hover:text-primary/70"
                     title="Pixels & Tracking"
                   >
                     <Crosshair className="h-3.5 w-3.5" strokeWidth={1.8} />
@@ -164,8 +156,8 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
                         className={cn(
                           "flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200",
                           copiedId === product.id
-                            ? "text-success bg-success/10 ring-1 ring-success/25 shadow-[0_0_12px_hsl(var(--success)/0.1)]"
-                            : "text-muted-foreground/25 hover:bg-primary/8 hover:text-primary/70"
+                            ? "text-success bg-success/10"
+                            : "text-muted-foreground/30 hover:bg-primary/8 hover:text-primary/70"
                         )}
                         title="Copiar link"
                       >
@@ -173,7 +165,7 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
                       </button>
                       <button
                         onClick={() => handlers.onOpenCheckout(product)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/25 transition-all duration-200 hover:bg-primary/8 hover:text-primary/70"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/30 transition-all duration-200 hover:bg-primary/8 hover:text-primary/70"
                         title="Abrir checkout"
                       >
                         <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
@@ -184,7 +176,7 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
               </div>
 
               {/* Footer meta */}
-              <div className="mt-2.5 flex items-center justify-between text-[9px] text-muted-foreground/25">
+              <div className="mt-2 flex items-center justify-between text-[9px] text-muted-foreground/25">
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="h-2.5 w-2.5" strokeWidth={2} />
                   {formatCompactDate(product.created_at)}
