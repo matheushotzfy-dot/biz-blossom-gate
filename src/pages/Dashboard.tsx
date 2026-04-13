@@ -471,151 +471,140 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HERO — DASHBOARD COMMAND CENTER                                  */}
+      {/* TOOLBAR                                                            */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-         className="relative mb-8 rounded-2xl border border-border/50 bg-card/92 p-6 sm:p-8 lg:p-10 overflow-hidden"
-       >
-         <div className="absolute inset-0 pointer-events-none z-0">
-           <div className="absolute -top-40 -left-36 h-[28rem] w-[28rem] rounded-full bg-primary/[0.12] blur-[150px]" />
-           <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/[0.08] blur-[130px]" />
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-60 w-[60%] rounded-full bg-primary/[0.06] blur-[170px]" />
-         </div>
-         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-primary/[0.04] pointer-events-none z-0" />
-        <div className="relative z-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
-            <div className="flex items-center gap-3">
-              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/50 bg-accent/60">
-                  <BarChart3 className="h-4.5 w-4.5 text-primary" />
-                </div>
-                <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/85">Dashboard</span>
-              </motion.div>
-              {nickname && (
-                <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-accent/50 px-3 py-1.5 backdrop-blur-sm">
-                  <Crown className="h-3 w-3 text-primary/85" />
-                  <span className="text-[10px] font-heading text-foreground/80">{nickname}</span>
-                </div>
-              )}
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-secondary/70 px-3 py-1.5 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-20" />
-                  <span className="relative h-2 w-2 rounded-full bg-success" />
-                </span>
-                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-foreground/60">Tempo Real</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              {scaleModeUnlocked ? (
-                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "border border-border/60 bg-accent text-foreground shadow-sm" : "border border-border/60 bg-secondary/70 text-foreground/70 hover:bg-accent/70 hover:text-foreground"}`}>
-                  {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
-                  <Flame className={`h-3.5 w-3.5 text-primary ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
-                  <span className="leading-tight">Escala</span>
-                </button>
-              ) : (
-                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading border border-border/60 bg-secondary/70 text-foreground/65 cursor-not-allowed">
-                  {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
-                  <Lock className="h-3.5 w-3.5 text-primary" />
-                  <span className="leading-tight">Escala</span>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                    <p className="text-[11px] font-bold text-foreground mb-1">Modo Escala Bloqueado</p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">Liberado ao atingir R$ 2.000 em 24h.</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="inline-flex items-center rounded-full border border-border/50 bg-secondary/50 p-0.5">
-                {PERIOD_PRESETS.map((opt) => (
-                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "border border-border/60 bg-accent text-foreground shadow-sm" : "text-muted-foreground/65 hover:text-foreground/80"
-                    )}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
-                    isCustom ? "border-border/60 bg-accent/70 text-foreground" : "border-border/50 bg-secondary/50 text-muted-foreground/60 hover:text-foreground hover:bg-accent/30"
-                  )}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3 w-3" />
-                      {isCustom && customRange?.from
-                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                        : "Custom"}
-                    </span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                </PopoverContent>
-              </Popover>
-              <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-full border border-border/50 transition-all active:scale-[0.97]", privacy.hidden ? "bg-accent/70 text-primary" : "bg-secondary/40 text-muted-foreground/45 hover:bg-accent/30 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
-                {privacy.hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
-              </button>
-            </div>
+      <section className="pt-6 mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-heading font-bold text-foreground tracking-tight">Dashboard</h1>
+            {nickname && (
+              <span className="text-sm text-muted-foreground font-medium">· {nickname}</span>
+            )}
+            <span className="inline-flex items-center gap-1.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+              </span>
+              <span className="text-[10px] text-muted-foreground/60 font-medium">ao vivo</span>
+            </span>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground">
-                {isCustom && customRange?.from
-                  ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-                  : `Receita — ${selectedPeriod.label}`}
-              </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {scaleModeUnlocked ? (
+              <button onClick={activateScaleMode}
+                className={cn("inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-semibold transition-colors",
+                  scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground"
+                )}>
+                <Flame className="h-3.5 w-3.5" />
+                Escala
+              </button>
+            ) : (
+              <div className="group relative inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[11px] font-medium text-muted-foreground/50 cursor-not-allowed">
+                <Lock className="h-3 w-3" />
+                Escala
+                <div className="absolute top-full left-1/2 z-50 mt-2 w-52 -translate-x-1/2 rounded-lg border border-border bg-card p-2.5 text-center shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity">
+                  <p className="text-[11px] font-semibold text-foreground mb-0.5">Modo Escala Bloqueado</p>
+                  <p className="text-[10px] text-muted-foreground">Liberado ao atingir R$ 2.000 em 24h.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="inline-flex items-center rounded-lg border border-border bg-card p-0.5">
+              {PERIOD_PRESETS.map((opt) => (
+                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                  className={cn("rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-secondary text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                  {opt.label}
+                </button>
+              ))}
             </div>
-            <div className="flex items-end gap-5 mb-3">
-              <span className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82]">
-                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-              </span>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className={cn("h-8 rounded-lg border px-3 text-[11px] font-medium transition-colors",
+                  isCustom ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground"
+                )}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarDays className="h-3 w-3" />
+                    {isCustom && customRange?.from
+                      ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                      : "Personalizado"}
+                  </span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0 shadow-xl">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+              </PopoverContent>
+            </Popover>
+
+            <button onClick={privacy.toggle}
+              className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground"
+              )} title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}>
+              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Revenue + summary chips */}
+        <div className="mb-6">
+          <p className="text-[11px] font-medium text-muted-foreground mb-1">
+            {isCustom && customRange?.from
+              ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+              : `Receita — ${selectedPeriod.label}`}
+          </p>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <span className="text-4xl sm:text-5xl font-heading font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">
+              {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
               {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
+                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-2 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-1.5 text-[11px] font-semibold text-foreground/78 backdrop-blur-sm`}>
-                  <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
+                <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-card px-2.5 py-1.5 text-[11px] font-medium text-foreground/80">
+                  <chip.icon className={cn("h-3 w-3", chip.color)} />
                   {chip.label}
                 </span>
               ))}
             </div>
-          </motion.div>
-
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {([
-              { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
-              { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentColor: "bg-success", iconBg: "bg-success/8", iconText: "text-success" },
-              { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentColor: "bg-info", iconBg: "bg-info/8", iconText: "text-info" },
-              { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
-            ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 + idx * 0.06 }}
-                className="group relative rounded-xl border border-border/40 bg-card/90 backdrop-blur-sm p-4 sm:p-5 transition-all duration-300 hover:border-border/70 overflow-hidden">
-                {/* Thin top accent line */}
-                <div className={cn("absolute inset-x-0 top-0 h-[2px]", item.accentColor)} />
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55">{item.label}</p>
-                    <p className="text-2xl sm:text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
-                      {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
-                    </p>
-                  </div>
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg shrink-0", item.iconBg)}>
-                    <item.icon className={cn("h-4.5 w-4.5", item.iconText)} />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </div>
-      </motion.section>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {([
+            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, tone: "primary" as Tone },
+            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, tone: "success" as Tone },
+            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, tone: "info" as Tone },
+            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, tone: "primary" as Tone },
+          ] as const).map((item, idx) => {
+            const accentColors: Record<Tone, string> = { primary: "bg-primary", success: "bg-success", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive" };
+            return (
+              <div key={item.label}
+                className="group relative rounded-xl border border-border/50 bg-card p-4 sm:p-5 transition-colors hover:border-border overflow-hidden">
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColors[item.tone])} />
+                <div className="pl-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">{item.label}</p>
+                      <p className="text-2xl font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                        {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+                      </p>
+                    </div>
+                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg shrink-0", toneMap[item.tone].bg)}>
+                      <item.icon className={cn("h-4 w-4", toneMap[item.tone].text)} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + KPIs                                                     */}
