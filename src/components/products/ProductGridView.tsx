@@ -31,11 +31,11 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
             onClick={() => handlers.onEditProduct(product)}
             className={cn(
               "group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl",
-              "border border-border/12 bg-card",
-              "ring-1 ring-inset ring-foreground/[0.03]",
-              "shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.12)]",
+              "border border-border/10 bg-card/95",
+              "ring-1 ring-inset ring-foreground/[0.02]",
+              "shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.18)]",
               "transition-all duration-300 ease-out",
-              "hover:-translate-y-1 hover:border-primary/15 hover:shadow-[0_16px_40px_-12px_hsl(var(--primary)/0.12),0_6px_16px_-6px_hsl(var(--foreground)/0.1)]"
+              "hover:-translate-y-1 hover:border-primary/15 hover:shadow-[0_16px_40px_-12px_hsl(var(--primary)/0.12),0_6px_16px_-6px_hsl(var(--foreground)/0.12)]"
             )}
           >
             {/* Hover accent */}
@@ -59,7 +59,7 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
               )}
 
               {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/5 to-transparent opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent" />
 
               {/* Status pill */}
               <div className="absolute left-3 top-3 z-[2]">
