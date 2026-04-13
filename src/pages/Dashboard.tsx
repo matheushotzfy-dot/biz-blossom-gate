@@ -577,7 +577,7 @@ export default function Dashboard() {
                 { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
                 { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-1.5 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-1.5 text-[10px] font-semibold text-foreground/72 backdrop-blur-sm shadow-[0_2px_8px_hsl(var(--background)/0.15)]`}>
+                <span key={i} className={`inline-flex items-center gap-1.5 rounded-full border ${chip.border} ${chip.bg} px-3.5 py-1.5 text-[10px] font-semibold text-foreground/72 shadow-[0_2px_8px_hsl(var(--background)/0.15)]`}>
                   <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
                   {chip.label}
                 </span>
