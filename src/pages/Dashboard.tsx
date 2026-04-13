@@ -547,58 +547,72 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Revenue + summary chips */}
-        <div className="mb-6">
-          <p className="text-[11px] font-medium text-muted-foreground mb-1">
-            {isCustom && customRange?.from
-              ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-              : `Receita — ${selectedPeriod.label}`}
-          </p>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <span className="text-4xl sm:text-5xl font-heading font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">
-              {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
-              ].map((chip, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-card px-2.5 py-1.5 text-[11px] font-medium text-foreground/80">
-                  <chip.icon className={cn("h-3 w-3", chip.color)} />
-                  {chip.label}
+        {/* ─── HERO REVENUE CARD ─── */}
+        <div className="relative rounded-2xl border border-border/40 bg-card overflow-hidden mb-5">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-primary/[0.02] pointer-events-none" />
+          <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/[0.06] blur-[80px] pointer-events-none" />
+          <div className="relative px-6 py-5 sm:px-8 sm:py-6">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-2">
+                  {isCustom && customRange?.from
+                    ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                    : `Receita — ${selectedPeriod.label}`}
+                </p>
+                <span className="text-4xl sm:text-5xl font-heading font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">
+                  {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
-              ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
+                  { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
+                  { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
+                  { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
+                ].map((chip, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 bg-background/50 px-2.5 py-1.5 text-[11px] font-medium text-foreground/70 backdrop-blur-sm">
+                    <chip.icon className={cn("h-3 w-3", chip.color)} />
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Stat cards */}
+        {/* ─── STAT CARDS ─── */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {([
-            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, tone: "primary" as Tone },
-            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, tone: "success" as Tone },
-            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, tone: "info" as Tone },
-            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, tone: "primary" as Tone },
-          ] as const).map((item, idx) => {
+            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, tone: "primary" as Tone, trend: "+0%" },
+            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, tone: "success" as Tone, trend: `${approved.length}` },
+            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, tone: "info" as Tone, trend: "" },
+            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, tone: "primary" as Tone, trend: "" },
+          ] as const).map((item) => {
+            const toneGradients: Record<Tone, string> = {
+              primary: "from-primary/15 to-primary/5",
+              success: "from-success/15 to-success/5",
+              info: "from-info/15 to-info/5",
+              warning: "from-warning/15 to-warning/5",
+              destructive: "from-destructive/15 to-destructive/5",
+            };
             const accentColors: Record<Tone, string> = { primary: "bg-primary", success: "bg-success", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive" };
             return (
               <div key={item.label}
-                className="group relative rounded-xl border border-border/50 bg-card p-4 sm:p-5 transition-colors hover:border-border overflow-hidden">
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColors[item.tone])} />
-                <div className="pl-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">{item.label}</p>
-                      <p className="text-2xl font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
-                        {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
-                      </p>
-                    </div>
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg shrink-0", toneMap[item.tone].bg)}>
-                      <item.icon className={cn("h-4 w-4", toneMap[item.tone].text)} />
+                className="group relative rounded-2xl border border-border/40 bg-card p-5 sm:p-6 transition-all duration-300 hover:border-border/70 hover:shadow-lg hover:shadow-black/5 overflow-hidden">
+                {/* Top gradient accent */}
+                <div className={cn("absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r", toneGradients[item.tone])} />
+                {/* Glow on hover */}
+                <div className={cn("absolute -top-8 -right-8 h-20 w-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl", accentColors[item.tone], "bg-opacity-10")} />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">{item.label}</p>
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ring-1 ring-border/20", toneMap[item.tone].bg)}>
+                      <item.icon className={cn("h-[18px] w-[18px]", toneMap[item.tone].text)} />
                     </div>
                   </div>
+                  <p className="text-[28px] sm:text-3xl font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+                  </p>
                 </div>
               </div>
             );
@@ -609,78 +623,108 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <div className="xl:col-span-8 rounded-xl border border-border/50 bg-card p-4 md:p-6 min-h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-              <YAxis tickLine={false} axisLine={false} width={72} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (!active || !payload?.length) return null;
-                  const value = payload[0].value as number;
-                  return (
-                    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
-                      <p className="text-[10px] font-medium text-muted-foreground mb-0.5">{label}</p>
-                      <p className="text-sm font-heading font-black text-foreground tabular-nums">
-                        R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                  );
-                }}
-                cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
-              />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }} />
-            </AreaChart>
-          </ResponsiveContainer>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-6">
+        {/* Chart */}
+        <div className="xl:col-span-8 relative rounded-2xl border border-border/40 bg-card overflow-hidden min-h-[300px]">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent pointer-events-none" />
+          <div className="px-5 pt-5 pb-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-foreground">Evolução de Receita</p>
+                <p className="text-[10px] text-muted-foreground/50">{isCustom ? "Período personalizado" : selectedPeriod.label}</p>
+              </div>
+            </div>
+          </div>
+          <div className="px-2 pb-4" style={{ height: 260 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={72} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const value = payload[0].value as number;
+                    return (
+                      <div className="rounded-xl border border-border/60 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-xl">
+                        <p className="text-[10px] font-semibold text-muted-foreground/60 mb-1">{label}</p>
+                        <p className="text-base font-heading font-black text-foreground tabular-nums">
+                          R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    );
+                  }}
+                  cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
+                />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="xl:col-span-4 flex flex-col gap-3">
+        {/* Right column KPIs */}
+        <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Conversion metrics */}
-          <div className="rounded-xl border border-border/50 bg-card p-4 md:p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">Métricas de Conversão</p>
-            <div className="space-y-2">
-              <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
-              <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
-              <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
+          <div className="rounded-2xl border border-border/40 bg-card p-5 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-info/[0.03] to-transparent pointer-events-none" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-7 w-7 rounded-lg bg-info/10 flex items-center justify-center">
+                  <Percent className="h-3.5 w-3.5 text-info" />
+                </div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground/50">Conversão</p>
+              </div>
+              <div className="space-y-2.5">
+                <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
+                <SmallMetric icon={<CreditCard className="h-3.5 w-3.5" />} label="Conv. Cartão" value={`${cardConversion.toFixed(1)}%`} tone="info" />
+                <SmallMetric icon={<AlertTriangle className="h-3.5 w-3.5" />} label="Med. Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackRate > 1 ? "destructive" : "success"} />
+              </div>
             </div>
           </div>
 
-          {/* KPI tiles */}
+          {/* Payment method tiles */}
           <div className="grid grid-cols-2 gap-3">
             {([
               { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, tone: "success" as Tone },
               { icon: CreditCard, label: "Cartão", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, tone: "info" as Tone },
               { icon: Wallet, label: "Ticket Médio", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", tone: "primary" as Tone },
               { icon: DollarSign, label: "Pendente", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", tone: "warning" as Tone },
-            ] as const).map((item, idx) => {
-              const accentColors: Record<Tone, string> = { primary: "bg-primary", success: "bg-success", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive" };
+            ] as const).map((item) => {
+              const toneGradients: Record<Tone, string> = {
+                primary: "from-primary/[0.04] to-transparent",
+                success: "from-success/[0.04] to-transparent",
+                info: "from-info/[0.04] to-transparent",
+                warning: "from-warning/[0.04] to-transparent",
+                destructive: "from-destructive/[0.04] to-transparent",
+              };
               return (
-                <div key={item.label} className="rounded-xl border border-border/50 bg-card p-4 transition-colors hover:border-border relative overflow-hidden">
-                  <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColors[item.tone])} />
-                  <div className="pl-2">
+                <div key={item.label} className="group relative rounded-2xl border border-border/40 bg-card p-4 transition-all duration-300 hover:border-border/60 hover:shadow-lg hover:shadow-black/5 overflow-hidden">
+                  <div className={cn("absolute inset-0 bg-gradient-to-br pointer-events-none", toneGradients[item.tone])} />
+                  <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", toneMap[item.tone].bg)}>
+                      <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center ring-1 ring-border/20", toneMap[item.tone].bg)}>
                         {item.isPix ? (
                           <PixLogoMark className={cn("h-3.5 w-3.5", toneMap[item.tone].text)} />
                         ) : (
                           item.icon && <item.icon className={cn("h-3.5 w-3.5", toneMap[item.tone].text)} />
                         )}
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">{item.label}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/50">{item.label}</span>
                     </div>
-                    <p className="text-xl font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-2">
-                      {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
+                    <p className="text-xl font-heading font-black text-foreground tabular-nums tracking-tight leading-none mb-1.5">
+                      {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={fmt} />}
                     </p>
                     <div className="flex items-center gap-1.5">
-                      <span className={cn("text-[11px] font-semibold tabular-nums", toneMap[item.tone].text)}>{item.helper}</span>
-                      {item.sub && <span className="text-[10px] text-muted-foreground/50">{item.sub}</span>}
+                      <span className={cn("text-[11px] font-bold tabular-nums", toneMap[item.tone].text)}>{item.helper}</span>
+                      {item.sub && <span className="text-[10px] text-muted-foreground/40">{item.sub}</span>}
                     </div>
                   </div>
                 </div>
@@ -691,73 +735,80 @@ export default function Dashboard() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS + ACTIVITY                                               */}
+      {/* QUICK ACTIONS + ACTIVITY                                        */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
-        {/* Quick actions - clean, no glow */}
-        <div className="rounded-xl border border-border/50 bg-card p-4 md:p-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Zap className="h-3.5 w-3.5 text-primary" />
+      <section className="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-6">
+        {/* Quick Actions */}
+        <div className="xl:col-span-7 rounded-2xl border border-border/40 bg-card p-5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Zap className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground/50">Ações Rápidas</span>
             </div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">Ações Rápidas</span>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 flex-1">
-            {[
-              { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
-              { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
-              { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
-              { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" as const },
-              { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
-              { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
-              { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
-              { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" as const },
-              { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
-              { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
-            ].map((action) => {
-              const colors: Record<string, { bg: string; text: string; hoverBg: string }> = {
-                primary: { bg: "bg-primary/10", text: "text-primary", hoverBg: "hover:bg-primary/[0.06]" },
-                success: { bg: "bg-success/10", text: "text-success", hoverBg: "hover:bg-success/[0.06]" },
-                info: { bg: "bg-info/10", text: "text-info", hoverBg: "hover:bg-info/[0.06]" },
-                warning: { bg: "bg-warning/10", text: "text-warning", hoverBg: "hover:bg-warning/[0.06]" },
-              };
-              const c = colors[action.tone] || colors.primary;
-              return (
-                <Link key={action.href} to={action.href}
-                  className={cn("group flex items-center gap-2.5 rounded-xl border border-border/30 p-3 transition-colors duration-200 hover:border-border/60", c.hoverBg)}>
-                  <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
-                    <action.icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] text-muted-foreground/50 hidden md:block">{action.desc}</p>
-                  </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 hidden md:block group-hover:text-muted-foreground/40 transition-colors" />
-                </Link>
-              );
-            })}
+            
+            <div className="grid grid-cols-2 gap-2.5">
+              {[
+                { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
+                { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
+                { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
+                { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" as const },
+                { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
+                { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
+                { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
+                { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" as const },
+                { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
+                { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
+              ].map((action) => {
+                const colors: Record<string, { bg: string; text: string; hoverBorder: string }> = {
+                  primary: { bg: "bg-primary/10", text: "text-primary", hoverBorder: "hover:border-primary/20" },
+                  success: { bg: "bg-success/10", text: "text-success", hoverBorder: "hover:border-success/20" },
+                  info: { bg: "bg-info/10", text: "text-info", hoverBorder: "hover:border-info/20" },
+                  warning: { bg: "bg-warning/10", text: "text-warning", hoverBorder: "hover:border-warning/20" },
+                };
+                const c = colors[action.tone] || colors.primary;
+                return (
+                  <Link key={action.href} to={action.href}
+                    className={cn("group flex items-center gap-3 rounded-xl border border-border/30 bg-background/30 p-3.5 transition-all duration-200 hover:bg-accent/30", c.hoverBorder)}>
+                    <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/20", c.bg, c.text)}>
+                      <action.icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
+                      <p className="text-[10px] text-muted-foreground/40 hidden md:block">{action.desc}</p>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/15 hidden md:block group-hover:text-muted-foreground/40 transition-colors" />
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Activity feed */}
-        <div className="rounded-xl border border-border/50 bg-card flex flex-col">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/40">
-            <div className="flex items-center gap-2">
+        <div className="xl:col-span-5 rounded-2xl border border-border/40 bg-card flex flex-col relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/[0.01] pointer-events-none" />
+          <div className="relative flex items-center justify-between px-5 pt-5 pb-3 border-b border-border/30">
+            <div className="flex items-center gap-2.5">
               <span className="relative flex h-2 w-2">
                 <span className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-30" />
                 <span className="relative h-2 w-2 rounded-full bg-primary" />
               </span>
-              <p className="text-[12px] font-semibold text-foreground/70">Tempo real</p>
+              <p className="text-[12px] font-bold text-foreground/70">Tempo real</p>
             </div>
-            <Link to="/financeiro/extrato" className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
+            <Link to="/financeiro/extrato" className="text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-border/20">
+          <div className="relative flex-1 min-h-0 overflow-y-auto divide-y divide-border/15">
             {activity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-center">
-                <Activity className="h-8 w-8 text-muted-foreground/20 mb-3" />
-                <p className="text-sm text-muted-foreground/40 font-display font-bold">Sem movimentações ainda</p>
+                <div className="h-14 w-14 rounded-2xl bg-muted/20 flex items-center justify-center mb-4">
+                  <Activity className="h-6 w-6 text-muted-foreground/25" />
+                </div>
+                <p className="text-sm text-muted-foreground/40 font-display font-bold">Sem movimentações</p>
+                <p className="text-[11px] text-muted-foreground/25 mt-1">As transações aparecerão aqui</p>
               </div>
             ) : (
               activity.map((item) => {
@@ -779,8 +830,8 @@ export default function Dashboard() {
                 const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
 
                 return (
-                  <div key={item.id} className="group flex items-center gap-3 px-5 py-3 hover:bg-accent/30 transition-colors">
-                    <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", s.iconBg, s.iconText)}>
+                  <div key={item.id} className="group flex items-center gap-3 px-5 py-3.5 hover:bg-accent/20 transition-colors">
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ring-border/10", s.iconBg, s.iconText)}>
                       {item.kind === "transaction" ? <DollarSign className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -790,15 +841,15 @@ export default function Dashboard() {
                           {s.label}
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {fullTx && (
-                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent transition-all" title="Ver detalhes">
+                        <button onClick={() => setDetailTx(fullTx)} className="opacity-0 group-hover:opacity-100 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/50 transition-all" title="Ver detalhes">
                           <Eye className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <span className="text-[10px] text-muted-foreground/35 font-mono tabular-nums">{timeAgo(item.createdAt)}</span>
+                      <span className="text-[10px] text-muted-foreground/30 font-mono tabular-nums">{timeAgo(item.createdAt)}</span>
                     </div>
                   </div>
                 );
