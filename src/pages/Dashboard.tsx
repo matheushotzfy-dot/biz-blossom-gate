@@ -547,58 +547,72 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Revenue + summary chips */}
-        <div className="mb-6">
-          <p className="text-[11px] font-medium text-muted-foreground mb-1">
-            {isCustom && customRange?.from
-              ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-              : `Receita — ${selectedPeriod.label}`}
-          </p>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <span className="text-4xl sm:text-5xl font-heading font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">
-              {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
-              ].map((chip, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-card px-2.5 py-1.5 text-[11px] font-medium text-foreground/80">
-                  <chip.icon className={cn("h-3 w-3", chip.color)} />
-                  {chip.label}
+        {/* ─── HERO REVENUE CARD ─── */}
+        <div className="relative rounded-2xl border border-border/40 bg-card overflow-hidden mb-5">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-primary/[0.02] pointer-events-none" />
+          <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/[0.06] blur-[80px] pointer-events-none" />
+          <div className="relative px-6 py-5 sm:px-8 sm:py-6">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-2">
+                  {isCustom && customRange?.from
+                    ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                    : `Receita — ${selectedPeriod.label}`}
+                </p>
+                <span className="text-4xl sm:text-5xl font-heading font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">
+                  {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
-              ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { icon: Check, label: `${approved.length} aprovadas`, color: "text-primary" },
+                  { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
+                  { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
+                  { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
+                ].map((chip, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 bg-background/50 px-2.5 py-1.5 text-[11px] font-medium text-foreground/70 backdrop-blur-sm">
+                    <chip.icon className={cn("h-3 w-3", chip.color)} />
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Stat cards */}
+        {/* ─── STAT CARDS ─── */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {([
-            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, tone: "primary" as Tone },
-            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, tone: "success" as Tone },
-            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, tone: "info" as Tone },
-            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, tone: "primary" as Tone },
-          ] as const).map((item, idx) => {
+            { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, tone: "primary" as Tone, trend: "+0%" },
+            { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, tone: "success" as Tone, trend: `${approved.length}` },
+            { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, tone: "info" as Tone, trend: "" },
+            { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, tone: "primary" as Tone, trend: "" },
+          ] as const).map((item) => {
+            const toneGradients: Record<Tone, string> = {
+              primary: "from-primary/15 to-primary/5",
+              success: "from-success/15 to-success/5",
+              info: "from-info/15 to-info/5",
+              warning: "from-warning/15 to-warning/5",
+              destructive: "from-destructive/15 to-destructive/5",
+            };
             const accentColors: Record<Tone, string> = { primary: "bg-primary", success: "bg-success", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive" };
             return (
               <div key={item.label}
-                className="group relative rounded-xl border border-border/50 bg-card p-4 sm:p-5 transition-colors hover:border-border overflow-hidden">
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColors[item.tone])} />
-                <div className="pl-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">{item.label}</p>
-                      <p className="text-2xl font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
-                        {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
-                      </p>
-                    </div>
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg shrink-0", toneMap[item.tone].bg)}>
-                      <item.icon className={cn("h-4 w-4", toneMap[item.tone].text)} />
+                className="group relative rounded-2xl border border-border/40 bg-card p-5 sm:p-6 transition-all duration-300 hover:border-border/70 hover:shadow-lg hover:shadow-black/5 overflow-hidden">
+                {/* Top gradient accent */}
+                <div className={cn("absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r", toneGradients[item.tone])} />
+                {/* Glow on hover */}
+                <div className={cn("absolute -top-8 -right-8 h-20 w-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl", accentColors[item.tone], "bg-opacity-10")} />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">{item.label}</p>
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ring-1 ring-border/20", toneMap[item.tone].bg)}>
+                      <item.icon className={cn("h-[18px] w-[18px]", toneMap[item.tone].text)} />
                     </div>
                   </div>
+                  <p className="text-[28px] sm:text-3xl font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+                  </p>
                 </div>
               </div>
             );
