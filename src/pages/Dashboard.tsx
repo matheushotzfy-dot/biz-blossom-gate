@@ -596,23 +596,24 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, valueColor: "text-success", borderColor: "border-success/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--success)/0.4)]", iconBg: "bg-success/12", iconText: "text-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, valueColor: "text-info", borderColor: "border-info/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--info)/0.4)]", iconBg: "bg-info/12", iconText: "text-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, valueColor: "text-primary", borderColor: "border-primary/60", glowShadow: "shadow-[0_0_15px_-3px_hsl(var(--primary)/0.4)]", iconBg: "bg-primary/12", iconText: "text-primary" },
+              { label: "Faturamento bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
+              { label: "Vendas aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentColor: "bg-success", iconBg: "bg-success/8", iconText: "text-success" },
+              { label: "Taxa conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentColor: "bg-info", iconBg: "bg-info/8", iconText: "text-info" },
+              { label: "Clientes únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
             ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-2xl border-2 p-5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02]", item.borderColor, item.glowShadow)}
-                style={{ background: "linear-gradient(145deg, hsl(var(--card) / 0.95) 0%, hsl(var(--card) / 0.80) 100%)" }}>
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-
-                <div className="relative z-10 flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">{item.label}</p>
-                    <p className={cn("text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums", item.valueColor)}>{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
+              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 + idx * 0.06 }}
+                className="group relative rounded-xl border border-border/40 bg-card/90 backdrop-blur-sm p-4 sm:p-5 transition-all duration-300 hover:border-border/70 overflow-hidden">
+                {/* Thin top accent line */}
+                <div className={cn("absolute inset-x-0 top-0 h-[2px]", item.accentColor)} />
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/55">{item.label}</p>
+                    <p className="text-2xl sm:text-[26px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                      {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+                    </p>
                   </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border border-border/20 backdrop-blur-sm", item.iconBg, item.iconText)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg shrink-0", item.iconBg)}>
+                    <item.icon className={cn("h-4.5 w-4.5", item.iconText)} />
                   </div>
                 </div>
               </motion.div>
@@ -625,11 +626,9 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-2xl border border-emerald-500/30 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden shadow-xl shadow-emerald-500/8">
-          <div className="absolute -top-28 -left-28 h-64 w-64 rounded-full bg-emerald-400/30 blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-teal-400/25 blur-[100px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-[60%] rounded-full bg-emerald-400/20 blur-[130px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/40 bg-card p-4 md:p-6 min-h-[280px] relative overflow-hidden">
+          <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full bg-primary/[0.06] blur-[100px] pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -662,10 +661,8 @@ export default function Dashboard() {
 
         <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 relative overflow-hidden shadow-xl shadow-emerald-500/8">
-            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-emerald-400/25 blur-[90px] pointer-events-none" />
-            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-teal-400/18 blur-[70px] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border/40 bg-card p-4 md:p-5 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
             <p className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/70 font-bold mb-3">Métricas de Conversão</p>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -683,9 +680,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-amber-500 to-orange-400", valueColor: "text-amber-400", dotColor: "bg-amber-400", accentBorder: "border-t-amber-500" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("rounded-2xl border border-emerald-500/20 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-emerald-400/40 relative overflow-hidden shadow-lg shadow-emerald-500/6", item.accentBorder)}>
-                <div className="absolute -top-14 -right-14 h-32 w-32 rounded-full bg-emerald-400/18 blur-[70px] pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-teal-400/12 blur-[50px] pointer-events-none" />
+                className={cn("rounded-xl border border-border/40 border-t-2 bg-card p-4 md:p-5 transition-all duration-200 hover:border-border/60 relative overflow-hidden", item.accentBorder)}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", item.iconGradient)}>
                     {item.isPix ? (
@@ -717,11 +712,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-6">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-emerald-500/25 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden shadow-xl shadow-emerald-500/8">
-          <div className="absolute -top-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/22 blur-[110px] pointer-events-none" />
-          <div className="absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-teal-400/18 blur-[90px] pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-[50%] rounded-full bg-emerald-400/12 blur-[100px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border/40 bg-card p-4 md:p-5 flex flex-col relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
           <div className="flex items-center gap-2 mb-4">
             <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
@@ -767,10 +759,8 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-emerald-500/25 bg-card flex flex-col relative overflow-hidden shadow-xl shadow-emerald-500/8">
-          <div className="absolute -top-20 -right-20 h-52 w-52 rounded-full bg-emerald-400/22 blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-teal-400/15 blur-[80px] pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/45 to-transparent" />
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-xl border border-border/40 bg-card flex flex-col relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/30">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
