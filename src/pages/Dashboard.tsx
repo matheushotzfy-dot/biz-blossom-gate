@@ -686,7 +686,7 @@ export default function Dashboard() {
               { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning to-warning/70", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("dashboard-tile dashboard-metric-tile rounded-xl border-t-[3px] p-4 md:p-5 transition-all duration-300 hover:-translate-y-[2px]", item.accentBorder)}>
+                className={cn("dashboard-tile dashboard-metric-tile rounded-xl border-t-[3px] p-5 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-lg", item.accentBorder)}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner ring-1 ring-border/10", item.iconGradient)}>
                     {item.isPix ? (
