@@ -66,9 +66,9 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 225 28% 7%;
+    --background: 224 24% 10%;
     --foreground: 210 20% 96%;
-    --card: 222 22% 11%;
+    --card: 222 20% 13%;
     --card-foreground: 210 20% 96%;
     --popover: 224 24% 10%;
     --popover-foreground: 210 20% 96%;
