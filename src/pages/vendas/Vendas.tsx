@@ -739,14 +739,12 @@ export default function Vendas() {
 
  /* ═══════════ RENDER ═══════════ */
  return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative overflow-hidden">
- {/* Background — matching Dashboard */}
- <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
- <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
- <div className="absolute inset-0 ambient-grid opacity-[0.12] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.5),transparent_88%)]" />
- <div className="absolute inset-x-[10%] top-8 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
- <div className="absolute inset-x-[16%] bottom-8 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
- </div>
+  <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+   {/* Background — matching Dashboard */}
+   <div className="pointer-events-none fixed inset-0 -z-10">
+   <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
+   <div className="absolute inset-0 ambient-grid opacity-[0.12] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.5),transparent_88%)]" />
+   </div>
 
  {/* ════════ HERO ════════ */}
  <motion.section
