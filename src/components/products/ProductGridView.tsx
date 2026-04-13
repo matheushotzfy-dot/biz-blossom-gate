@@ -31,11 +31,10 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
             onClick={() => handlers.onEditProduct(product)}
             className={cn(
               "group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl",
-              "border border-border/10 bg-card/95",
-              "ring-1 ring-inset ring-foreground/[0.02]",
-              "shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.18)]",
+              "border border-border/25 bg-sidebar",
+              "shadow-[0_2px_10px_-3px_hsl(var(--foreground)/0.14)]",
               "transition-all duration-300 ease-out",
-              "hover:-translate-y-1 hover:border-primary/15 hover:shadow-[0_16px_40px_-12px_hsl(var(--primary)/0.12),0_6px_16px_-6px_hsl(var(--foreground)/0.12)]"
+              "hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_16px_40px_-12px_hsl(var(--primary)/0.14),0_6px_16px_-6px_hsl(var(--foreground)/0.1)]"
             )}
           >
             {/* Hover accent */}
