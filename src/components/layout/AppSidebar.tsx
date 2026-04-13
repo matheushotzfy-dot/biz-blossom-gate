@@ -235,8 +235,8 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
   className={cn(
     "group/nav relative flex min-h-14 w-full items-center gap-3 rounded-[20px] px-3.5 py-3 text-[14px] font-semibold transition-all duration-[240ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2.5",
     isActive
-      ? "border border-primary/30 bg-primary/10 text-foreground"
-      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+      ? "border border-primary/25 bg-primary/8 text-foreground"
+      : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
   )}
  >
  {isActive && (
@@ -308,7 +308,7 @@ export function AppSidebar() {
 
  return (
  <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
- <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sidebar-primary/[0.08] to-transparent" />
+ <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sidebar-primary/[0.04] to-transparent" />
 
  <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-5">
  <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
