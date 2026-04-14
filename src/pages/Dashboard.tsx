@@ -554,7 +554,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative mb-8 rounded-[20px] border border-border/40 bg-card overflow-hidden"
+          className="relative mb-8 rounded-[20px] border border-border bg-[hsl(var(--card-elevated,var(--card)))] overflow-hidden"
         >
           {/* Subtle top accent line */}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary/20 to-transparent" />
@@ -609,22 +609,26 @@ export default function Dashboard() {
         </motion.div>
 
         {/* ── KPI Strip ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px rounded-xl overflow-hidden border border-border/40 bg-border/40">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {([
-            { label: "Faturamento Bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary" },
-            { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-success" },
-            { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info" },
-            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary" },
+            { label: "Faturamento Bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", accent: "bg-primary" },
+            { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-success", accent: "bg-success" },
+            { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", accent: "bg-info" },
+            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", accent: "bg-primary" },
           ] as const).map((item, idx) => (
             <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 + idx * 0.05 }}
-              className="bg-card p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-heading text-muted-foreground">{item.label}</p>
-                <item.icon className={cn("h-4 w-4", item.color)} />
+              className="relative rounded-[16px] border border-border bg-card p-5 overflow-hidden">
+              {/* Left accent bar */}
+              <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", item.accent)} />
+              <div className="pl-2">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[10px] font-heading text-muted-foreground uppercase tracking-[0.08em] font-bold">{item.label}</p>
+                  <item.icon className={cn("h-4 w-4", item.color)} />
+                </div>
+                <p className="text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
+                  {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+                </p>
               </div>
-              <p className="text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
-                {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
-              </p>
             </motion.div>
           ))}
         </div>
@@ -635,7 +639,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-8">
         {/* Chart */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-xl border border-border/40 bg-card min-h-[320px] flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[16px] border border-border bg-card min-h-[320px] flex flex-col">
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <p className="text-[11px] font-heading text-muted-foreground">Faturamento</p>
             <p className="text-[11px] font-heading text-primary tabular-nums font-bold">{privacy.hidden ? CENSORED : fmt(revenue)}</p>
@@ -675,7 +679,7 @@ export default function Dashboard() {
         {/* Right column */}
         <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Conversion */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-border/40 bg-card p-4">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[16px] border border-border bg-card p-4">
             <p className="text-[11px] font-heading text-muted-foreground mb-3">Conversão</p>
             <div className="space-y-3">
               {[
@@ -695,7 +699,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Payment KPIs */}
-          <div className="grid grid-cols-2 gap-px rounded-xl overflow-hidden border border-border/40 bg-border/40">
+          <div className="grid grid-cols-2 gap-3 flex-1">
             {([
               { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
               { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
@@ -703,7 +707,9 @@ export default function Dashboard() {
               { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, color: "text-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 + idx * 0.04 }}
-                className="bg-card p-4">
+                className="relative rounded-[12px] border border-border bg-card p-4 overflow-hidden">
+                {/* Top accent bar */}
+                <div className={cn("absolute top-0 left-0 right-0 h-[2px]", item.color.replace("text-", "bg-"))} />
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className={cn("text-[9px] font-heading font-bold uppercase tracking-[0.1em]", item.color)}>{item.label}</span>
                 </div>
