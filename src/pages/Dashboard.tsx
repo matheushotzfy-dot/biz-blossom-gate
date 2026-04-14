@@ -595,14 +595,14 @@ export default function Dashboard() {
 
             {/* Divider */}
             <div className="h-px bg-border/50 mb-5" />
-            <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/8" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", bg: "bg-warning/8" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", bg: "bg-info/8" },
-                { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", bg: "bg-primary/8" },
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/10", border: "border-success/15" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", bg: "bg-warning/10", border: "border-warning/15" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", bg: "bg-info/10", border: "border-info/15" },
+                { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", bg: "bg-primary/10", border: "border-primary/15" },
               ].map((chip, i) => (
-                <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold", chip.bg, chip.color)}>
+                <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold", chip.bg, chip.color, chip.border)}>
                   <chip.icon className="h-3.5 w-3.5" />
                   {chip.label}
                 </span>
