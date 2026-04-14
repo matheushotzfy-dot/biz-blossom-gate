@@ -383,7 +383,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
  initial={{ opacity: 0, y: 8 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.25, delay: Math.min(i * 0.015, 0.12), ease: [0.16, 1, 0.3, 1] }}
- className="cursor-pointer rounded-2xl border border-border/50 bg-card overflow-hidden transition-all duration-150 hover:border-border/70 active:scale-[0.995]"
+ className="cursor-pointer rounded-[14px] border border-border bg-card overflow-hidden transition-all duration-150 hover:border-foreground/15 active:scale-[0.995]"
  onClick={onClick}
  >
  {/* Accent rail top */}
