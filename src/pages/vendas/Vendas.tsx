@@ -802,9 +802,13 @@ export default function Vendas() {
 
         {/* ═══════ HERO KPIs — 2 grandes ═══════ */}
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
+          <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
+            <div className="absolute left-0 top-0 h-full w-[3px] bg-primary" />
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Vendas encontradas</p>
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><ShoppingCart className="h-4 w-4 text-primary" /></span>
+                <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Vendas encontradas</p>
+              </div>
               <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
             </div>
             <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</p>
@@ -813,12 +817,16 @@ export default function Vendas() {
               <span className="text-[10px] text-muted-foreground/40">vs período anterior</span>
             </div>
           </div>
-          <div className="rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
+          <div className="relative overflow-hidden rounded-xl border border-success/20 bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
+            <div className="absolute left-0 top-0 h-full w-[3px] bg-success" />
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Valor líquido</p>
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/15"><DollarSign className="h-4 w-4 text-success" /></span>
+                <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Valor líquido</p>
+              </div>
               <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
             </div>
-            <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
+            <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-success tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
             <div className="mt-4 flex items-center gap-3">
               <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
               <span className="text-[10px] text-muted-foreground/40">resultado do período</span>
@@ -829,24 +837,29 @@ export default function Vendas() {
         {/* ═══════ SECONDARY KPIs — 4 compactos ═══════ */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}` },
-            { label: "Vendas no pix", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}` },
-            { label: "Porcentagem de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined },
-            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}` },
-          ].map((kpi) => (
-            <div key={kpi.label} className="rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-5">
-              <p className="text-[10px] font-heading font-semibold text-muted-foreground/60 mb-3">{kpi.label}</p>
-              <div className="flex items-center justify-between">
+            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, icon: RefreshCw, accent: "info" as AccentTone },
+            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: Smartphone, accent: "success" as AccentTone },
+            { label: "Taxa de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : "text-warning", icon: Percent, accent: "warning" as AccentTone },
+            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, icon: Shield, accent: "destructive" as AccentTone },
+          ].map((kpi) => {
+            const a = ACCENT_STYLES[kpi.accent];
+            const Icon = kpi.icon;
+            return (
+              <div key={kpi.label} className="relative overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-5">
+                <div className={cn("absolute top-0 left-0 right-0 h-[3px]", a.rail)} />
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={cn("flex h-6 w-6 items-center justify-center rounded-md border", a.iconWrap)}><Icon className="h-3 w-3" /></span>
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/60">{kpi.label}</p>
+                </div>
                 <p className={cn("text-[24px] lg:text-[28px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
-                <button onClick={toggleHidden} className="text-muted-foreground/25 hover:text-muted-foreground/50 transition-colors"><Eye className="h-3.5 w-3.5" /></button>
+                <p className="mt-2 text-[10px] text-muted-foreground/35">{kpi.sub}</p>
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground/35">{kpi.sub}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))]">
           {/* Status tabs */}
           <div className="border-b border-border px-5 pt-1">
             <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
@@ -972,9 +985,12 @@ export default function Vendas() {
         {/* ═══════ CHART + ANALYTICS ═══════ */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-3">
           {/* Chart */}
-          <div className="xl:col-span-8 rounded-xl border border-border bg-card overflow-hidden">
+          <div className="xl:col-span-8 rounded-xl border border-primary/15 bg-[hsl(var(--card-elevated))] overflow-hidden">
             <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-              <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><BarChart3 className="h-3.5 w-3.5 text-primary" /></span>
+                <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
+              </div>
               <span className="text-[14px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
             </div>
             <div className="px-2 pb-3 pt-1">
@@ -987,8 +1003,8 @@ export default function Vendas() {
             {/* Top Products */}
             {metrics.topProducts.length > 0 && (
               <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                  <Crown className="h-3.5 w-3.5 text-primary" />
+            <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-warning/10 border border-warning/15"><Crown className="h-3 w-3 text-warning" /></span>
                   <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
                 </div>
                 <div className="divide-y divide-border">
