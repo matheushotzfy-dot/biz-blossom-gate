@@ -788,26 +788,28 @@ export default function Vendas() {
 
           {/* ═══════ KPI CARDS ═══════ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <div className="rounded-2xl border border-border/60 bg-card px-5 py-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-heading font-semibold text-muted-foreground/50 uppercase tracking-wider">Vendas encontradas</span>
+            <div className="relative overflow-hidden rounded-[20px] border border-border/60 bg-card px-6 py-5">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-[20px]" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">Vendas encontradas</span>
                 <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
               </div>
               <div className="flex items-end justify-between">
-                <span className="text-3xl font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</span>
-                <button onClick={toggleHidden} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/20 hover:text-foreground transition-colors">
+                <span className="text-[34px] font-heading font-black text-foreground tabular-nums tracking-[-0.04em] leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</span>
+                <button onClick={toggleHidden} className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-secondary/50 transition-all">
                   {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
-            <div className="rounded-2xl border border-border/60 bg-card px-5 py-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-heading font-semibold text-muted-foreground/50 uppercase tracking-wider">Valor líquido</span>
+            <div className="relative overflow-hidden rounded-[20px] border border-border/60 bg-card px-6 py-5">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-success rounded-l-[20px]" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">Valor líquido</span>
                 <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
               </div>
               <div className="flex items-end justify-between">
-                <span className="text-3xl font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
-                <button onClick={toggleHidden} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/20 hover:text-foreground transition-colors">
+                <span className="text-[34px] font-heading font-black text-foreground tabular-nums tracking-[-0.04em] leading-none">{hidden ? HIDE : fmt(m.totalNet)}</span>
+                <button onClick={toggleHidden} className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-secondary/50 transition-all">
                   {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -820,11 +822,12 @@ export default function Vendas() {
               { label: "% de reembolso", value: `${m.refundRate.toFixed(1)}%`, accent: (m.refundRate > 5 ? "destructive" : "primary") as AccentTone },
               { label: "Chargeback", value: hidden ? HIDE : fmt(m.chargebacks.reduce((a: number, t: Tables<"transactions">) => a + Number(t.amount), 0)), accent: (m.chargebackRate > 1 ? "destructive" : "success") as AccentTone },
             ]).map((card) => (
-              <div key={card.label} className="rounded-2xl border border-border/60 bg-card px-4 py-3.5">
-                <span className="text-[9px] font-heading font-semibold text-muted-foreground/50 uppercase tracking-wider">{card.label}</span>
-                <div className="flex items-end justify-between mt-1.5">
-                  <span className={cn("text-xl font-heading font-black tabular-nums tracking-[-0.03em]", ACCENT_STYLES[card.accent].text)}>{card.value}</span>
-                  <button onClick={toggleHidden} className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground/15 hover:text-foreground transition-colors">
+              <div key={card.label} className="relative overflow-hidden rounded-[20px] border border-border/60 bg-card px-5 py-4">
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[20px]", ACCENT_STYLES[card.accent].rail)} />
+                <span className="text-[9px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">{card.label}</span>
+                <div className="flex items-end justify-between mt-2">
+                  <span className={cn("text-[22px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", ACCENT_STYLES[card.accent].text)}>{card.value}</span>
+                  <button onClick={toggleHidden} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/25 hover:text-foreground hover:bg-secondary/50 transition-all">
                     {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
