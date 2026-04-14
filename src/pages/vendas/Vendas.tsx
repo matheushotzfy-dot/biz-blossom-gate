@@ -251,12 +251,12 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
- const methods: Record<string, { label: string; icon: React.ReactNode; color: string; bgClass: string }> = {
-  pix: { label: "PIX", icon: <Smartphone className="h-3 w-3" />, color: "text-success", bgClass: "bg-success/8 border-success/15" },
-  credit_card: { label: "Cartão", icon: <CreditCard className="h-3 w-3" />, color: "text-info", bgClass: "bg-info/8 border-info/15" },
-  boleto: { label: "Boleto", icon: <FileText className="h-3 w-3" />, color: "text-warning", bgClass: "bg-warning/8 border-warning/15" },
+ const methods: Record<string, { label: string; color: string }> = {
+  pix: { label: "Pix", color: "text-success" },
+  credit_card: { label: "Cartão", color: "text-info" },
+  boleto: { label: "Boleto", color: "text-warning" },
  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null, color: "text-muted-foreground", bgClass: "bg-secondary border-border" };
+  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground" };
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
   const prodName = tx.product_id ? (prods[tx.product_id] || "Produto sem nome") : "Sem produto";
@@ -264,78 +264,49 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
   const net = Number(tx.net_amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/70 hover:bg-secondary/30">
-  <td className="px-5 py-3.5 align-middle">
-  <div className="space-y-0.5">
-  <p className="text-[11px] font-heading font-bold text-foreground tabular-nums">{fmtDate(tx.created_at)}</p>
-  <p className="text-[10px] font-medium text-muted-foreground/45 tabular-nums">{fmtTime(tx.created_at)}</p>
-  </div>
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border hover:bg-secondary/20 transition-colors">
+  <td className="px-5 py-3 align-middle">
+   <p className="text-[11px] font-heading font-semibold text-foreground tabular-nums">{fmtDate(tx.created_at)} {fmtTime(tx.created_at)}</p>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="flex min-w-0 items-center gap-3">
-   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border bg-secondary text-muted-foreground/55">
-    <Package className="h-4 w-4" />
-   </div>
+  <td className="px-3 py-3 align-middle">
+   <p className="truncate text-[11px] font-heading font-semibold text-muted-foreground/60 max-w-[140px]">{prodName}</p>
+  </td>
+  <td className="px-3 py-3 align-middle">
    <div className="min-w-0">
-    <p className="truncate text-[11px] font-heading font-bold text-foreground">{prodName}</p>
-    <span className={cn("mt-1 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-heading font-bold", method.color, method.bgClass)}>
-     {method.icon}{method.label}
-    </span>
-   </div>
-  </div>
-  </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="flex min-w-0 items-center gap-3">
-   <Avatar className="h-10 w-10 shrink-0 rounded-[11px] ring-1 ring-border/70 ring-inset">
-    <AvatarFallback className={cn("text-[10px] font-black tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
-   </Avatar>
-   <div className="min-w-0 space-y-0.5">
     <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-    {tx.customer_email ? (
-     <p className="truncate text-[10px] text-muted-foreground/45">{tx.customer_email}</p>
-    ) : (
-     <p className="text-[10px] text-muted-foreground/30">Sem email informado</p>
-    )}
+    <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
    </div>
-  </div>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-heading font-black uppercase tracking-[0.12em]", st.fg, st.bg, st.border)}>
-  <span className="relative flex h-1.5 w-1.5">
-   {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-   <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
-  </span>
-  {st.label}
-  </span>
+  <td className="px-3 py-3 align-middle">
+   <div className="flex items-center gap-2">
+    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-heading font-bold", st.fg, st.bg, st.border, "border")}>
+     {st.label}
+    </span>
+    <span className={cn("text-[10px] font-heading", method.color)}>{method.label}</span>
+   </div>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="space-y-0.5">
-   <p className="text-[11px] font-heading font-bold text-foreground/75 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
-   <p className="text-[9px] text-muted-foreground/35">{tx.payment_method === "credit_card" ? "taxa processada" : "sem juros adicionais"}</p>
-  </div>
+  <td className="px-3 py-3 align-middle">
+   <p className="text-[11px] font-heading font-semibold text-muted-foreground/60 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="space-y-0.5">
-   <p className="text-[13px] font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{fmt(net)}</p>
-   <p className="text-[9px] text-muted-foreground/35 tabular-nums">bruto {fmt(Number(tx.amount))}</p>
-  </div>
+  <td className="px-3 py-3 align-middle">
+   <p className="text-[12px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em]">{fmt(net)}</p>
   </td>
-  <td className="px-3 py-3.5 align-middle">
-  <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+  <td className="px-2 py-3 align-middle">
+  <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
   {tx.customer_phone && (
    <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-success/75 hover:bg-success/8 hover:text-success">
+    className="flex h-7 w-7 items-center justify-center rounded-md text-success/60 hover:bg-success/8 hover:text-success">
     <MessageCircle className="h-3.5 w-3.5" />
    </a>
   )}
   <DropdownMenu>
   <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-  <button className="flex h-8 w-8 items-center justify-center rounded-[10px] hover:bg-secondary">
-  <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/55" />
+  <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-secondary">
+  <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
   </button>
   </DropdownMenuTrigger>
-  <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/60">
-  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+  <DropdownMenuContent align="end" className="w-44 rounded-lg border-border">
+  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-md"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
   {tx.customer_phone && (
   <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
   )}
@@ -776,194 +747,138 @@ export default function Vendas() {
 
       /* ═══════════ RENDER ═══════════ */
     return (
-      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
+      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
 
         {/* ═══════ HEADER ═══════ */}
-        <div className="space-y-4">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.06] px-3 py-1.5 text-[11px] font-heading font-bold text-primary">
-                <span className="relative flex h-2 w-2"><span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40" /><span className="h-2 w-2 rounded-full bg-primary" /></span>
-                {periodLabel}
-              </span>
-              <h1 className="mt-4 text-[36px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
-              <p className="mt-2 text-[13px] text-muted-foreground/50 max-w-md">{lastSaleText ? `Última venda ${lastSaleText}` : "Visão consolidada de receita, clientes e aprovações."}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <button onClick={() => window.location.reload()} className="inline-flex h-10 items-center gap-2 rounded-[12px] border border-border bg-card px-5 text-[12px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
-                <RefreshCw className="h-4 w-4 text-muted-foreground/50" /> Atualizar
-              </button>
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-10 items-center gap-2 rounded-[12px] bg-primary px-5 text-[12px] font-heading font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-                <Download className="h-4 w-4" /> Exportar
-              </button>
-            </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
+            <p className="mt-1.5 text-[12px] text-muted-foreground/60">{lastSaleText ? `Última atualização: ${lastSaleText}` : "Visão consolidada de receita e transações."}</p>
           </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-4 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
+              <RefreshCw className="h-3.5 w-3.5 text-muted-foreground/60" /> Atualizar
+            </button>
+            <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+              Exportar <ChevronDown className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
 
-          {/* ═══════ PERIOD BAR ═══════ */}
-          <div className="flex flex-col gap-3 rounded-[16px] border border-border bg-card px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <div className="inline-flex items-center rounded-[11px] border border-border bg-background p-1">
-                {PERIODS.map((opt) => (
-                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-[9px] px-4 py-[7px] text-[11px] font-heading font-bold transition-all",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground/45 hover:text-foreground"
-                    )}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn("inline-flex h-9 items-center gap-2 rounded-[11px] border px-4 text-[11px] font-heading font-bold transition-all",
-                    isCustom ? "border-primary bg-primary/8 text-primary" : "border-border bg-background text-muted-foreground/45 hover:text-foreground"
+        {/* ═══════ PERIOD BAR ═══════ */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center rounded-lg border border-border bg-card p-0.5">
+              {PERIODS.map((opt) => (
+                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                  className={cn("rounded-md px-3.5 py-[6px] text-[11px] font-heading font-bold transition-colors",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground/50 hover:text-foreground"
                   )}>
-                    <CalendarDays className="h-4 w-4" />
-                    {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Período custom"}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-auto overflow-hidden rounded-2xl border border-border bg-popover p-0">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                </PopoverContent>
-              </Popover>
+                  {opt.label}
+                </button>
+              ))}
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <div className="inline-flex h-9 items-center gap-2 rounded-[11px] border border-primary/15 bg-primary/[0.05] px-4 text-[11px] font-heading font-bold text-primary">
-                <Users className="h-4 w-4" /> {m.uniqueCustomers} clientes
-              </div>
-              <div className="inline-flex h-9 items-center gap-2 rounded-[11px] border border-success/15 bg-success/[0.05] px-4 text-[11px] font-heading font-bold text-success">
-                <Target className="h-4 w-4" /> {approvalRate.toFixed(1)}% aprovação
-              </div>
-              <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-[11px] border transition-all", hidden ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground/45 hover:text-foreground")}>
-                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-heading font-bold transition-colors",
+                  isCustom ? "border-primary/30 bg-primary/8 text-primary" : "border-border bg-card text-muted-foreground/50 hover:text-foreground"
+                )}>
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Custom"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-heading font-bold text-muted-foreground/40">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
+            <button onClick={toggleHidden} className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-colors", hidden ? "border-primary/25 bg-primary/8 text-primary" : "border-border bg-card text-muted-foreground/50 hover:text-foreground")}>
+              {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* ═══════ HERO KPIs — 2 grandes ═══════ */}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Vendas encontradas</p>
+              <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
+            </div>
+            <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</p>
+            <div className="mt-4 flex items-center gap-3">
+              <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
+              <span className="text-[10px] text-muted-foreground/40">vs período anterior</span>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Valor líquido</p>
+              <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
+            </div>
+            <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
+            <div className="mt-4 flex items-center gap-3">
+              <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
+              <span className="text-[10px] text-muted-foreground/40">resultado do período</span>
             </div>
           </div>
         </div>
 
-        {/* ═══════ HERO KPIs ═══════ */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="group relative overflow-hidden rounded-[20px] border border-primary/25 bg-card transition-all duration-300 hover:border-primary/40 hover:translate-y-[-2px]"
-            style={{ boxShadow: "0 0 40px hsla(160, 84%, 39%, 0.08), inset 0 1px 0 hsla(0, 0%, 100%, 0.03)" }}>
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary to-primary/60" />
-            <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, hsla(160, 84%, 39%, 0.15), transparent 70%)" }} />
-            <div className="relative z-10 p-6 lg:p-7">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[9px] lg:text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/50">Total de vendas</p>
-                  <p className="mt-4 text-[48px] lg:text-[56px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{dateFiltered.length.toLocaleString("pt-BR")}</p>
-                </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
-                  <ShoppingCart className="h-6 w-6" />
-                </div>
-              </div>
-              <div className="mt-5 flex items-center gap-3">
-                <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
-                <span className="text-[11px] font-heading text-muted-foreground/40">vs período anterior</span>
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-success/12 bg-success/[0.04] px-4 py-3.5">
-                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-success/50">Aprovadas</p>
-                  <p className="mt-2 text-[22px] font-heading font-black text-success tabular-nums leading-none">{m.approved.length}</p>
-                </div>
-                <div className="rounded-2xl border border-warning/12 bg-warning/[0.04] px-4 py-3.5">
-                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-warning/50">Pendentes</p>
-                  <p className="mt-2 text-[22px] font-heading font-black text-warning tabular-nums leading-none">{m.pending.length}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-[20px] border border-success/25 bg-card transition-all duration-300 hover:border-success/40 hover:translate-y-[-2px]"
-            style={{ boxShadow: "0 0 40px hsla(142, 71%, 45%, 0.08), inset 0 1px 0 hsla(0, 0%, 100%, 0.03)" }}>
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-success to-success/60" />
-            <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, hsla(142, 71%, 45%, 0.15), transparent 70%)" }} />
-            <div className="relative z-10 p-6 lg:p-7">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[9px] lg:text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/50">Receita líquida</p>
-                  <p className="mt-4 text-[48px] lg:text-[56px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
-                </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-success/10 text-success transition-transform duration-300 group-hover:scale-110">
-                  <Coins className="h-6 w-6" />
-                </div>
-              </div>
-              <div className="mt-5 flex items-center gap-3">
-                <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                <span className="text-[11px] font-heading text-muted-foreground/40">resultado líquido do período</span>
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-border/20 bg-card px-4 py-3.5">
-                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">Método líder</p>
-                  <p className="mt-2 text-[20px] font-heading font-black text-foreground leading-none">{dominantMethod.value > 0 ? dominantMethod.label : "—"}</p>
-                </div>
-                <div className="rounded-2xl border border-border/20 bg-card px-4 py-3.5">
-                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">Taxas totais</p>
-                  <p className="mt-2 text-[20px] font-heading font-black text-destructive/80 tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalFees)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ═══════ SECONDARY KPIs ═══════ */}
+        {/* ═══════ SECONDARY KPIs — 4 compactos ═══════ */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), icon: <RefreshCw className="h-5 w-5" />, iconBg: "bg-info/10", iconText: "text-info", sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, accentColor: "from-info to-info/60", glowColor: "hsla(217, 91%, 60%, 0.06)" },
-            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), icon: <Smartphone className="h-5 w-5" />, iconBg: "bg-success/10", iconText: "text-success", sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, accentColor: "from-success to-success/60", glowColor: "hsla(142, 71%, 45%, 0.06)" },
-            { label: "Reembolso %", value: `${m.refundRate.toFixed(1)}%`, icon: <Percent className="h-5 w-5" />, iconBg: "bg-warning/10", iconText: "text-warning", sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined, accentColor: "from-warning to-warning/60", glowColor: "hsla(38, 92%, 50%, 0.06)" },
-            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), icon: <Shield className="h-5 w-5" />, iconBg: "bg-destructive/10", iconText: "text-destructive", sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, accentColor: "from-destructive to-destructive/60", glowColor: "hsla(0, 84%, 60%, 0.06)" },
+            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}` },
+            { label: "Vendas no pix", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}` },
+            { label: "Porcentagem de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined },
+            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}` },
           ].map((kpi) => (
-            <div key={kpi.label} className="group relative overflow-hidden rounded-[16px] border border-border/25 bg-card p-5 transition-all duration-300 hover:border-border/40 hover:translate-y-[-2px]"
-              style={{ boxShadow: `0 0 30px ${kpi.glowColor}, inset 0 1px 0 hsla(0, 0%, 100%, 0.03)` }}>
-              <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", kpi.accentColor)} />
-              <div className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle, ${kpi.glowColor.replace('0.06', '0.15')}, transparent 70%)` }} />
-              <div className="relative z-10 flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/50">{kpi.label}</p>
-                  <p className={cn("text-[26px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
-                  <p className="mt-2.5 text-[10px] text-muted-foreground/40">{kpi.sub}</p>
-                </div>
-                <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 shrink-0", kpi.iconBg, kpi.iconText)}>
-                  {kpi.icon}
-                </div>
+            <div key={kpi.label} className="rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-5">
+              <p className="text-[10px] font-heading font-semibold text-muted-foreground/60 mb-3">{kpi.label}</p>
+              <div className="flex items-center justify-between">
+                <p className={cn("text-[24px] lg:text-[28px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
+                <button onClick={toggleHidden} className="text-muted-foreground/25 hover:text-muted-foreground/50 transition-colors"><Eye className="h-3.5 w-3.5" /></button>
               </div>
+              <p className="mt-2 text-[10px] text-muted-foreground/35">{kpi.sub}</p>
             </div>
           ))}
         </div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
-        <div className="overflow-hidden rounded-[18px] border border-border bg-card">
-          <div className="border-b border-border px-6 py-5">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                {statusTabs.map((tab) => {
-                  const active = statusFilter === tab.value;
-                  return (
-                    <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                      className={cn("rounded-[10px] px-4 py-[7px] text-[11px] font-heading font-bold whitespace-nowrap transition-all",
-                        active ? "bg-primary text-primary-foreground" : "text-muted-foreground/45 hover:bg-secondary hover:text-foreground"
-                      )}>
-                      {tab.label}
-                      {tab.count > 0 && <span className={cn("ml-1.5 tabular-nums", active ? "text-primary-foreground/50" : "text-muted-foreground/25")}>{tab.count}</span>}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="relative w-full sm:w-[300px]">
-                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/25" />
-                  <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar cliente, email ou ID"
-                    className="h-[40px] w-full rounded-[12px] border border-border bg-background pl-10 pr-10 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 transition-all" />
-                  {search ? (
-                    <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2"><X className="h-4 w-4 text-muted-foreground/25 hover:text-foreground" /></button>
-                  ) : (
-                    <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-[6px] border border-border bg-secondary px-2 py-0.5 text-[9px] font-heading font-bold text-muted-foreground/30 md:inline">⌘K</kbd>
-                  )}
-                </div>
-                <div className="inline-flex h-[40px] items-center rounded-[12px] border border-primary/15 bg-primary/[0.05] px-4 text-[11px] font-heading font-bold text-primary tabular-nums">
-                  {sortedFiltered.length} registro{sortedFiltered.length !== 1 ? "s" : ""}
-                </div>
-              </div>
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          {/* Status tabs */}
+          <div className="border-b border-border px-5 pt-1">
+            <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
+              {statusTabs.map((tab) => {
+                const active = statusFilter === tab.value;
+                return (
+                  <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
+                    className={cn("relative px-4 py-3 text-[12px] font-heading font-semibold whitespace-nowrap transition-colors",
+                      active ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/70"
+                    )}>
+                    {tab.label}
+                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px]", active ? "text-foreground/50" : "text-muted-foreground/25")}>{tab.count}</span>}
+                    {active && <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-primary rounded-full" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Search + filters */}
+          <div className="flex flex-col gap-2 border-b border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:w-[280px]">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/30" />
+              <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
+                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 transition-colors" />
+              {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground" /></button>}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-heading text-muted-foreground/40 tabular-nums">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""}</span>
+              <button className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground/50" /> Filtros
+              </button>
             </div>
           </div>
 
@@ -971,33 +886,31 @@ export default function Vendas() {
           <div className="hidden md:block">
             {loading ? (
               <div className="p-20 text-center">
-                <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
-                <p className="text-[11px] font-heading text-muted-foreground/30">Carregando vendas…</p>
+                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+                <p className="text-[11px] font-heading text-muted-foreground/30">Carregando…</p>
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[980px]">
+                  <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border bg-secondary/30">
-                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-6" />
-                        <th className="px-4 py-3.5 text-left text-[10px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Produto</th>
+                      <tr className="border-b border-border">
+                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-5" />
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Produto</th>
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} />
-                        <th className="px-4 py-3.5 text-left text-[10px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Status</th>
-                        <th className="px-4 py-3.5 text-left text-[10px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Taxa</th>
-                        <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} />
-                        <th className="w-14" />
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Status</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Juros Recebidos</th>
+                        <SortHead label="Valor Líquido" field="net" sort={sort} onSort={handleSort} />
+                        <th className="w-12" />
                       </tr>
                     </thead>
                     <tbody>
                       {visibleItems.length === 0 ? (
-                        <tr><td colSpan={7} className="py-24">
+                        <tr><td colSpan={7} className="py-20">
                           <div className="flex flex-col items-center justify-center">
-                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border border-primary/15 bg-primary/[0.06]">
-                              <ShoppingCart className="h-5 w-5 text-primary/40" />
-                            </div>
-                            <p className="text-[13px] font-heading font-bold text-foreground/70">Nenhuma venda encontrada</p>
-                            <p className="mt-1.5 text-[11px] text-muted-foreground/40">Ajuste o período ou refine a pesquisa.</p>
+                            <ShoppingCart className="mb-3 h-5 w-5 text-muted-foreground/20" />
+                            <p className="text-[12px] font-heading font-semibold text-foreground/60">Nenhuma venda encontrada</p>
+                            <p className="mt-1 text-[11px] text-muted-foreground/35">Ajuste o período ou refine a pesquisa.</p>
                           </div>
                         </td></tr>
                       ) : visibleItems.map((tx, i) => (
@@ -1007,19 +920,19 @@ export default function Vendas() {
                   </table>
                 </div>
                 {visibleItems.length > 0 && (
-                  <div className="flex items-center justify-between border-t border-border px-6 py-4">
-                    <span className="text-[11px] font-heading font-bold text-muted-foreground/40 tabular-nums">
-                      {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Página {currentPage} de {totalPages}
+                  <div className="flex items-center justify-between border-t border-border px-5 py-3">
+                    <span className="text-[11px] font-heading text-muted-foreground/40 tabular-nums">
+                      {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Pág. {currentPage}/{totalPages}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border px-4 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground hover:border-primary/30 disabled:opacity-30 disabled:pointer-events-none transition-all">
-                        <ChevronDown className="h-3.5 w-3.5 rotate-90" /> Anterior
+                    <div className="flex items-center gap-1.5">
+                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none transition-colors">
+                        <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
                       </button>
-                      <span className="min-w-[100px] text-center text-[12px] font-heading font-black text-primary tabular-nums">
+                      <span className="min-w-[80px] text-center text-[11px] font-heading font-black text-primary tabular-nums">
                         {hidden ? HIDE : fmt(filteredNetTotal)}
                       </span>
-                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border px-4 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground hover:border-primary/30 disabled:opacity-30 disabled:pointer-events-none transition-all">
-                        Próxima <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none transition-colors">
+                        Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
                       </button>
                     </div>
                   </div>
@@ -1029,15 +942,15 @@ export default function Vendas() {
           </div>
 
           {/* Mobile cards */}
-          <div className="space-y-3 p-4 md:hidden">
+          <div className="space-y-2.5 p-3 md:hidden">
             {loading ? (
-              <div className="p-16 text-center">
-                <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+              <div className="p-12 text-center">
+                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
               </div>
             ) : visibleItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16">
-                <ShoppingCart className="mb-3 h-5 w-5 text-primary/20" />
-                <p className="text-[12px] font-heading font-bold text-foreground/65">Nenhuma venda encontrada</p>
+              <div className="flex flex-col items-center justify-center py-12">
+                <ShoppingCart className="mb-2 h-5 w-5 text-muted-foreground/20" />
+                <p className="text-[11px] font-heading font-semibold text-foreground/60">Nenhuma venda encontrada</p>
               </div>
             ) : (
               <>
@@ -1045,10 +958,10 @@ export default function Vendas() {
                   <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
                 ))}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between rounded-[14px] border border-primary/15 bg-card px-5 py-4">
-                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 transition-all">← Anterior</button>
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 transition-colors">← Anterior</button>
                     <span className="text-[11px] font-heading font-bold text-primary tabular-nums">{currentPage} / {totalPages}</span>
-                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 transition-all">Próxima →</button>
+                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 transition-colors">Próxima →</button>
                   </div>
                 )}
               </>
@@ -1056,99 +969,87 @@ export default function Vendas() {
           </div>
         </div>
 
-        {/* ═══════ CHART + TOP PRODUCTS ═══════ */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-          <div className="xl:col-span-8 rounded-[18px] border border-border bg-card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <div>
-                <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
-                <p className="mt-1 text-[10px] text-muted-foreground/35">Curva de receita líquida no período selecionado</p>
-              </div>
-              <span className="text-[16px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
+        {/* ═══════ CHART + ANALYTICS ═══════ */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-3">
+          {/* Chart */}
+          <div className="xl:col-span-8 rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+              <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
+              <span className="text-[14px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
             </div>
-            <div className="px-3 pb-4 pt-2">
+            <div className="px-2 pb-3 pt-1">
               <RevenueChart data={metrics.chartData} hidden={hidden} />
             </div>
           </div>
 
-          <div className="xl:col-span-4 space-y-4">
+          {/* Right panel */}
+          <div className="xl:col-span-4 space-y-3">
+            {/* Top Products */}
             {metrics.topProducts.length > 0 && (
-              <div className="rounded-[18px] border border-border bg-card overflow-hidden">
-                <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-[9px] border border-primary/20 bg-primary/10 text-primary">
-                    <Crown className="h-4 w-4" />
-                  </div>
-                  <p className="text-[12px] font-heading font-bold text-foreground">Top Produtos</p>
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+                  <Crown className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
                 </div>
-                <div className="divide-y divide-border/60">
-                  {metrics.topProducts.slice(0, 5).map((prod, i) => (
-                    <div key={prod.id} className="flex items-center justify-between gap-3 px-5 py-3.5">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span className={cn("flex h-7 w-7 items-center justify-center rounded-[9px] text-[10px] font-heading font-black shrink-0", i === 0 ? "bg-primary/12 text-primary border border-primary/15" : "bg-secondary text-muted-foreground/45")}>{i + 1}</span>
-                        <div className="min-w-0">
-                          <p className="truncate text-[12px] font-heading font-bold text-foreground">{prod.name}</p>
-                          <p className="mt-0.5 text-[10px] text-muted-foreground/35">{prod.sales} venda{prod.sales !== 1 ? "s" : ""}</p>
-                        </div>
+                <div className="divide-y divide-border">
+                  {metrics.topProducts.slice(0, 4).map((prod, i) => (
+                    <div key={prod.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <span className={cn("flex h-6 w-6 items-center justify-center rounded-md text-[9px] font-heading font-black shrink-0", i === 0 ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground/40")}>{i + 1}</span>
+                        <p className="truncate text-[11px] font-heading font-semibold text-foreground">{prod.name}</p>
                       </div>
-                      <span className={cn("text-[12px] font-heading font-black tabular-nums tracking-[-0.02em]", i === 0 ? "text-primary" : "text-foreground")}>{hidden ? HIDE : fmtCompact(prod.revenue)}</span>
+                      <span className={cn("text-[11px] font-heading font-black tabular-nums shrink-0", i === 0 ? "text-primary" : "text-foreground/80")}>{hidden ? HIDE : fmtCompact(prod.revenue)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="rounded-[18px] border border-border bg-card overflow-hidden">
-              <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-[9px] border border-success/20 bg-success/10 text-success">
-                    <Activity className="h-4 w-4" />
-                  </div>
-                  <p className="text-[12px] font-heading font-bold text-foreground">Saúde operacional</p>
+            {/* Payment Mix */}
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-3.5 w-3.5 text-success" />
+                  <p className="text-[11px] font-heading font-bold text-foreground">Mix de pagamento</p>
                 </div>
-                {peakHour !== null ? <span className="text-[10px] font-heading font-bold text-primary/60">pico {peakHour}h</span> : <span className="text-[10px] text-muted-foreground/35">—</span>}
+                {peakHour !== null && <span className="text-[9px] font-heading font-bold text-muted-foreground/40">pico {peakHour}h</span>}
               </div>
-              <div className="divide-y divide-border/60">
+              <div className="divide-y divide-border">
                 {paymentMix.map((pm) => {
                   const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                   const accent = ACCENT_STYLES[pm.color as AccentTone];
                   return (
-                    <div key={pm.label} className="flex items-center justify-between gap-3 px-5 py-3.5">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span className={cn("flex h-9 w-9 items-center justify-center rounded-[10px] border [&_svg]:h-4 [&_svg]:w-4", accent.iconWrap)}>{pm.icon}</span>
-                        <div className="min-w-0">
+                    <div key={pm.label} className="flex items-center justify-between gap-2 px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg border [&_svg]:h-3.5 [&_svg]:w-3.5", accent.iconWrap)}>{pm.icon}</span>
+                        <div>
                           <p className="text-[11px] font-heading font-bold text-foreground">{pm.label}</p>
-                          <p className="mt-0.5 text-[10px] text-muted-foreground/35">{pm.count} venda{pm.count !== 1 ? "s" : ""}</p>
+                          <p className="text-[9px] text-muted-foreground/35">{pm.count} venda{pm.count !== 1 ? "s" : ""} · {pct.toFixed(0)}%</p>
                         </div>
                       </div>
-                      <div className="min-w-[120px]">
-                        <div className="h-[5px] overflow-hidden rounded-full bg-secondary">
-                          <div className={cn("h-full rounded-full transition-all", accent.rail)} style={{ width: `${Math.max(pct, 4)}%` }} />
-                        </div>
-                        <p className="mt-1.5 text-right text-[11px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
-                      </div>
+                      <p className="text-[11px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="grid grid-cols-3 gap-2.5 border-t border-border px-5 py-4">
+              {/* Health indicators */}
+              <div className="grid grid-cols-3 gap-2 border-t border-border px-4 py-3">
                 {healthItems.map((hi) => {
                   const ok = hi.value <= hi.threshold;
                   return (
-                    <div key={hi.label} className={cn("rounded-[11px] border px-3 py-2.5", ok ? "border-success/15 bg-success/[0.04]" : "border-destructive/15 bg-destructive/[0.04]")}>
-                      <p className="text-[9px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/40">{hi.label}</p>
-                      <p className={cn("mt-1.5 text-[14px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                    <div key={hi.label} className={cn("rounded-lg border px-2.5 py-2", ok ? "border-success/15 bg-success/[0.04]" : "border-destructive/15 bg-destructive/[0.04]")}>
+                      <p className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/40">{hi.label}</p>
+                      <p className={cn("mt-1 text-[13px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="border-t border-border px-5 py-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[10px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Volume por hora</p>
-                  <p className="text-[10px] text-muted-foreground/30">baseado nas aprovadas</p>
-                </div>
-                <div className="flex h-[28px] items-end gap-[2px]">
+              {/* Hourly bars */}
+              <div className="border-t border-border px-4 py-3">
+                <p className="text-[9px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/35 mb-2">Volume por hora</p>
+                <div className="flex h-[24px] items-end gap-[1.5px]">
                   {metrics.hours.map((v, i) => (
-                    <div key={i} className={cn("min-w-0 flex-1 rounded-[3px] transition-all", peakHour === i ? "bg-primary" : v > 0 ? "bg-primary/20" : "bg-foreground/[0.05]")} style={{ height: `${Math.max((v / maxHour) * 100, 6)}%` }} />
+                    <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors", peakHour === i ? "bg-primary" : v > 0 ? "bg-primary/25" : "bg-foreground/[0.04]")} style={{ height: `${Math.max((v / maxHour) * 100, 5)}%` }} />
                   ))}
                 </div>
               </div>
