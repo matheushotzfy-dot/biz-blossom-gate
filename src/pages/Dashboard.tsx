@@ -563,37 +563,38 @@ export default function Dashboard() {
 
           <div className="p-6 sm:p-8 lg:p-10">
             {/* Top row: period label + saldo */}
-            <div className="flex items-start justify-between mb-6">
+            <div className="flex items-start justify-between mb-8">
               <div>
-                <p className="text-[10px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-1">
+                <p className="text-[11px] font-heading text-muted-foreground uppercase tracking-[0.12em] font-bold mb-1.5">
                   {isCustom && customRange?.from
                     ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                     : `Receita — ${selectedPeriod.label}`}
                 </p>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-[6px] w-[6px]">
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
-                    <span className="relative h-[6px] w-[6px] rounded-full bg-success" />
+                <div className="inline-flex items-center gap-2 rounded-full bg-success/8 border border-success/15 px-2.5 py-1">
+                  <span className="relative flex h-[5px] w-[5px]">
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
+                    <span className="relative h-[5px] w-[5px] rounded-full bg-success" />
                   </span>
-                  <span className="text-[10px] font-heading text-success font-bold">Atualizado em tempo real</span>
+                  <span className="text-[9px] font-heading text-success font-bold uppercase tracking-[0.08em]">Tempo real</span>
                 </div>
               </div>
               <div className="text-right hidden sm:block">
-                <p className="text-[9px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-0.5">Saldo Disponível</p>
-                <p className="text-[18px] font-heading font-black tabular-nums text-primary tracking-[-0.03em]">
+                <p className="text-[9px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-1">Saldo Disponível</p>
+                <p className="text-[22px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
                   {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
                 </p>
               </div>
             </div>
 
             {/* Big number */}
-            <div className="mb-6">
+            <div className="mb-8">
               <span className="text-5xl sm:text-7xl lg:text-[104px] font-heading font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.05em]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
 
-            {/* Bottom metrics row */}
+            {/* Divider */}
+            <div className="h-px bg-border/50 mb-5" />
             <div className="flex flex-wrap items-center gap-3 sm:gap-5">
               {[
                 { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/8" },
