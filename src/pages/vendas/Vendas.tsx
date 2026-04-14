@@ -1150,7 +1150,6 @@ export default function Vendas() {
       </div>
     );
 }
-                <Download className="h-3.5 w-3.5" /> Exportar
               </button>
             </div>
           </div>
