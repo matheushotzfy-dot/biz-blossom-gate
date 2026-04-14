@@ -476,19 +476,15 @@ export default function Dashboard() {
         {/* Ambient grid texture */}
         <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
 
-        {/* ══ EMERALD ATMOSPHERE — high-intensity glows ══ */}
-        {/* Big emerald nebula — top-left */}
-        <div className="pointer-events-none absolute -top-10 -left-10 h-[500px] w-[500px] rounded-full opacity-100" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, hsl(var(--primary) / 0.06) 40%, transparent 70%)', animationDuration: '5s' }} />
-        {/* Bottom-right bloom */}
-        <div className="pointer-events-none absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full opacity-100 animate-pulse" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.14) 0%, hsl(var(--primary) / 0.04) 45%, transparent 70%)', animationDuration: '7s' }} />
-        {/* Center-top floating accent */}
-        <div className="pointer-events-none absolute -top-6 left-[30%] h-[250px] w-[250px] rounded-full opacity-100 animate-pulse" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.10) 0%, transparent 60%)', animationDuration: '9s', animationDelay: '2s' }} />
-        {/* Right-center accent */}
-        <div className="pointer-events-none absolute top-[40%] -right-5 h-[300px] w-[300px] rounded-full opacity-100" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 55%)' }} />
+        {/* ══ EMERALD ATMOSPHERE ══ */}
+        <div className="pointer-events-none absolute -top-24 -left-24 h-[420px] w-[420px] rounded-full bg-primary/20 blur-[180px]" />
+        <div className="pointer-events-none absolute -bottom-20 -right-20 h-[350px] w-[350px] rounded-full bg-primary/15 blur-[150px] animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="pointer-events-none absolute -top-10 left-[35%] h-[220px] w-[220px] rounded-full bg-primary/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }} />
+        <div className="pointer-events-none absolute top-[30%] -right-10 h-[280px] w-[280px] rounded-full bg-primary/8 blur-[130px]" />
 
         {/* ══ EDGE GLOW LINES ══ */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/30 via-primary/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/35 via-primary/10 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
 
