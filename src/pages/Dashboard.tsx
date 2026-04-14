@@ -762,7 +762,7 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-2 flex-1">
+          <div className="grid grid-cols-2 gap-1.5 flex-1">
             {[
               { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
               { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
@@ -775,24 +775,24 @@ export default function Dashboard() {
               { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
               { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
             ].map((action) => {
-              const colors: Record<string, { bg: string; text: string; hoverBg: string }> = {
-                primary: { bg: "bg-primary/10", text: "text-primary", hoverBg: "hover:bg-primary/[0.06]" },
-                success: { bg: "bg-success/10", text: "text-success", hoverBg: "hover:bg-success/[0.06]" },
-                info: { bg: "bg-info/10", text: "text-info", hoverBg: "hover:bg-info/[0.06]" },
-                warning: { bg: "bg-warning/10", text: "text-warning", hoverBg: "hover:bg-warning/[0.06]" },
+              const colors: Record<string, { bg: string; text: string }> = {
+                primary: { bg: "bg-primary/8", text: "text-primary" },
+                success: { bg: "bg-success/8", text: "text-success" },
+                info: { bg: "bg-info/8", text: "text-info" },
+                warning: { bg: "bg-warning/8", text: "text-warning" },
               };
               const c = colors[action.tone] || colors.primary;
               return (
                 <Link key={action.href} to={action.href}
-                  className={cn("dashboard-action-link group flex items-center gap-2.5 rounded-2xl p-3 transition-all duration-300 hover:-translate-y-[1px] border border-transparent hover:border-border/30", c.hoverBg)}>
-                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0", c.bg, c.text)}>
-                    <action.icon className="h-4 w-4" />
+                  className="dashboard-action-link group flex items-center gap-2.5 rounded-xl p-2.5 lg:p-3 transition-all duration-200 border border-transparent hover:border-border/20 hover:bg-accent/30">
+                  <div className={cn("h-8 w-8 lg:h-9 lg:w-9 rounded-lg flex items-center justify-center shrink-0", c.bg, c.text)}>
+                    <action.icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[12px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] text-muted-foreground/50 hidden md:block">{action.desc}</p>
+                    <p className="text-[12px] font-display font-bold text-foreground leading-tight">{action.label}</p>
+                    <p className="text-[10px] text-muted-foreground/40 hidden lg:block">{action.desc}</p>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground/20 hidden md:block group-hover:text-muted-foreground/50 transition-colors" />
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/15 hidden lg:block group-hover:text-muted-foreground/40 transition-colors" />
                 </Link>
               );
             })}
