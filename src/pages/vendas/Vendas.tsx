@@ -543,7 +543,7 @@ export default function Vendas() {
  const [search, setSearch] = useState("");
  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
  const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
- const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+ const [currentPage, setCurrentPage] = useState(1);
  const [selectedPeriod, setSelectedPeriod] = useState<Period>(PERIODS[0]);
  const [customRange, setCustomRange] = useState<DateRange | undefined>();
  const [isCustom, setIsCustom] = useState(false);
@@ -559,7 +559,7 @@ export default function Vendas() {
  setSort(p => p.field === f ? { field: f, dir: p.dir === "desc" ? "asc" : "desc" } : { field: f, dir: "desc" });
  }, []);
 
- useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, statusFilter, selectedPeriod, isCustom, customRange]);
+ useEffect(() => { setCurrentPage(1); }, [search, statusFilter, selectedPeriod, isCustom, customRange]);
 
  const brasiliaToday = useCallback(() => {
  const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" });
@@ -702,7 +702,8 @@ export default function Vendas() {
  return s;
  }, [filtered, sort]);
 
- const visibleItems = useMemo(() => sortedFiltered.slice(0, visibleCount), [sortedFiltered, visibleCount]);
+  const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / PAGE_SIZE));
+  const visibleItems = useMemo(() => sortedFiltered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE), [sortedFiltered, currentPage]);
 
  const statusTabs = useMemo(() => {
  const c: Record<string, number> = { all: dateFiltered.length, completed: 0, pending: 0, failed: 0, refunded: 0, chargeback: 0 };
@@ -988,19 +989,19 @@ export default function Vendas() {
                 {visibleItems.length > 0 && (
                   <div className="flex items-center justify-between border-t border-border px-5 py-3">
                     <span className="text-[10px] font-heading font-bold text-muted-foreground/40 tabular-nums">
-                      {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"}
-                      {visibleCount < sortedFiltered.length && <span className="text-muted-foreground/25"> · {visibleItems.length} visíveis agora</span>}
+                      {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Página {currentPage} de {totalPages}
                     </span>
-                    <span className="text-[11px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em]">
-                      Total filtrado <span className="text-primary">{hidden ? HIDE : fmt(filteredNetTotal)}</span>
-                    </span>
-                  </div>
-                )}
-                {visibleCount < sortedFiltered.length && (
-                  <div className="border-t border-border/60 p-2 text-center">
-                    <button onClick={() => setVisibleCount((c) => c + PAGE_SIZE)} className="inline-flex items-center gap-1 text-[10px] font-heading font-bold text-primary/70 hover:text-primary">
-                      <ChevronDown className="h-3 w-3" /> Mais {Math.min(PAGE_SIZE, sortedFiltered.length - visibleCount)}
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none">
+                        <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
+                      </button>
+                      <span className="px-2 text-[11px] font-heading font-black text-foreground tabular-nums">
+                        {hidden ? HIDE : fmt(filteredNetTotal)}
+                      </span>
+                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none">
+                        Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </>
@@ -1022,10 +1023,12 @@ export default function Vendas() {
                 {visibleItems.map((tx, i) => (
                   <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
                 ))}
-                {visibleCount < sortedFiltered.length && (
-                  <button onClick={() => setVisibleCount((c) => c + PAGE_SIZE)} className="inline-flex w-full items-center justify-center gap-1 rounded-[12px] border border-border bg-card py-3 text-[10px] font-heading font-bold text-muted-foreground/45 hover:text-foreground">
-                    <ChevronDown className="h-3 w-3" /> Mais {sortedFiltered.length - visibleCount}
-                  </button>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between rounded-[12px] border border-border bg-card px-4 py-3">
+                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30">← Anterior</button>
+                    <span className="text-[10px] font-heading font-bold text-muted-foreground/50 tabular-nums">{currentPage} / {totalPages}</span>
+                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30">Próxima →</button>
+                  </div>
                 )}
               </>
             )}
