@@ -498,33 +498,33 @@ export default function Dashboard() {
                 <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/60">Live</span>
               </div>
               {nickname && (
-                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-background/40 px-2.5 py-1.5">
                   <Crown className="h-3 w-3 text-warning" />
-                  <span className="text-[10px] font-heading text-muted-foreground">{nickname}</span>
+                  <span className="text-[9px] font-heading text-muted-foreground/60">{nickname}</span>
                 </div>
               )}
               {scaleModeUnlocked && (
-                <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-heading transition-all active:scale-[0.97]",
-                  scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border/60 bg-background/75 text-muted-foreground hover:text-foreground hover:border-border"
+                <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-heading transition-all active:scale-[0.97]",
+                  scaleMode ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 bg-background/40 text-muted-foreground/60 hover:text-foreground hover:border-border/40"
                 )}>
                   <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
                   <span>Escala</span>
                 </button>
               )}
               {!scaleModeUnlocked && (
-                <div className="group relative inline-flex items-center gap-2 rounded-full border border-border/40 bg-background/50 px-3 py-2 text-[10px] font-heading text-muted-foreground/40 cursor-not-allowed">
+                <div className="group relative inline-flex items-center gap-1.5 rounded-full border border-border/15 bg-background/30 px-2.5 py-1.5 text-[9px] font-heading text-muted-foreground/25 cursor-not-allowed">
                   <Lock className="h-3 w-3" />
                   <span>Escala</span>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 rounded-xl bg-card border border-border p-3 text-center shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 rounded-xl bg-card border border-border/30 p-3 text-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     <p className="text-[10px] font-semibold text-foreground mb-0.5">Modo Escala</p>
-                    <p className="text-[9px] text-muted-foreground">R$ 2.000 em 24h para desbloquear</p>
+                    <p className="text-[9px] text-muted-foreground/60">R$ 2.000 em 24h para desbloquear</p>
                   </div>
                 </div>
               )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-full border border-border/60 bg-background/75 p-1 shadow-sm">
+              <div className="inline-flex items-center rounded-full border border-border/20 bg-background/40 p-0.5">
                 {PERIOD_PRESETS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn("rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-colors active:scale-[0.97]",
