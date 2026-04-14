@@ -774,36 +774,39 @@ export default function Vendas() {
   const refundedAmount = m.refunded.reduce((acc, tx) => acc + Number(tx.amount), 0);
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
-     /* ═══════════ RENDER ═══════════ */
+      /* ═══════════ RENDER ═══════════ */
     return (
-      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
-        <div className="space-y-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
+
+        {/* ═══════ HEADER ═══════ */}
+        <div className="space-y-4">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-heading font-semibold text-muted-foreground/50">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.06] px-3 py-1.5 text-[11px] font-heading font-bold text-primary">
+                <span className="relative flex h-2 w-2"><span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40" /><span className="h-2 w-2 rounded-full bg-primary" /></span>
                 {periodLabel}
               </span>
-              <h1 className="mt-3 text-[28px] font-heading font-black tracking-[-0.05em] text-foreground">Minhas Vendas</h1>
-              <p className="mt-1 text-[11px] text-muted-foreground/45">{lastSaleText ? `Última venda ${lastSaleText}` : "Visão consolidada de receita, clientes e aprovações."}</p>
+              <h1 className="mt-4 text-[36px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
+              <p className="mt-2 text-[13px] text-muted-foreground/50 max-w-md">{lastSaleText ? `Última venda ${lastSaleText}` : "Visão consolidada de receita, clientes e aprovações."}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-1.5 rounded-[12px] border border-border bg-card px-4 text-[11px] font-heading font-bold text-foreground hover:bg-secondary">
-                <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button onClick={() => window.location.reload()} className="inline-flex h-10 items-center gap-2 rounded-[12px] border border-border bg-card px-5 text-[12px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
+                <RefreshCw className="h-4 w-4 text-muted-foreground/50" /> Atualizar
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-[12px] bg-primary px-4 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90">
-                <Download className="h-3.5 w-3.5" /> Exportar
+              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-10 items-center gap-2 rounded-[12px] bg-primary px-5 text-[12px] font-heading font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+                <Download className="h-4 w-4" /> Exportar
               </button>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-[14px] border border-border bg-card px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-[10px] border border-border bg-background p-[3px]">
+          {/* ═══════ PERIOD BAR ═══════ */}
+          <div className="flex flex-col gap-3 rounded-[16px] border border-border bg-card px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="inline-flex items-center rounded-[11px] border border-border bg-background p-1">
                 {PERIODS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-[8px] px-3 py-[5px] text-[10px] font-heading font-bold transition-colors",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground/45 hover:text-foreground"
+                    className={cn("rounded-[9px] px-4 py-[7px] text-[11px] font-heading font-bold transition-all",
+                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground/45 hover:text-foreground"
                     )}>
                     {opt.label}
                   </button>
@@ -811,10 +814,10 @@ export default function Vendas() {
               </div>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-[10px] border px-3 text-[10px] font-heading font-bold",
-                    isCustom ? "border-primary bg-primary/8 text-foreground" : "border-border bg-background text-muted-foreground/45 hover:text-foreground"
+                  <button className={cn("inline-flex h-9 items-center gap-2 rounded-[11px] border px-4 text-[11px] font-heading font-bold transition-all",
+                    isCustom ? "border-primary bg-primary/8 text-primary" : "border-border bg-background text-muted-foreground/45 hover:text-foreground"
                   )}>
-                    <CalendarDays className="h-3.5 w-3.5" />
+                    <CalendarDays className="h-4 w-4" />
                     {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Período custom"}
                   </button>
                 </PopoverTrigger>
@@ -823,161 +826,167 @@ export default function Vendas() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex h-8 items-center gap-1.5 rounded-[10px] border border-border bg-background px-3 text-[10px] font-heading font-bold text-muted-foreground/45">
-                <Users className="h-3.5 w-3.5 text-primary/70" /> {m.uniqueCustomers} clientes
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="inline-flex h-9 items-center gap-2 rounded-[11px] border border-primary/15 bg-primary/[0.05] px-4 text-[11px] font-heading font-bold text-primary">
+                <Users className="h-4 w-4" /> {m.uniqueCustomers} clientes
               </div>
-              <div className="inline-flex h-8 items-center gap-1.5 rounded-[10px] border border-border bg-background px-3 text-[10px] font-heading font-bold text-muted-foreground/45">
-                <Target className="h-3.5 w-3.5 text-success/80" /> {approvalRate.toFixed(1)}% aprovação
+              <div className="inline-flex h-9 items-center gap-2 rounded-[11px] border border-success/15 bg-success/[0.05] px-4 text-[11px] font-heading font-bold text-success">
+                <Target className="h-4 w-4" /> {approvalRate.toFixed(1)}% aprovação
               </div>
-              <button onClick={toggleHidden} className={cn("flex h-8 w-8 items-center justify-center rounded-[10px] border", hidden ? "border-primary bg-primary/8 text-primary" : "border-border bg-background text-muted-foreground/45 hover:text-foreground")}>
-                {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-[11px] border transition-all", hidden ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground/45 hover:text-foreground")}>
+                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="rounded-[14px] border border-border bg-[hsl(var(--card-elevated))]">
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-3">
+        {/* ═══════ HERO KPIs ═══════ */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="relative overflow-hidden rounded-[18px] border border-primary/20 bg-[hsl(var(--card-elevated))]">
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+            <div className="p-6">
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/40">Vendas encontradas</p>
-                  <p className="mt-3 text-[42px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{dateFiltered.length.toLocaleString("pt-BR")}</p>
+                  <p className="text-[10px] font-heading font-black uppercase tracking-[0.2em] text-primary/60">Total de vendas</p>
+                  <p className="mt-4 text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{dateFiltered.length.toLocaleString("pt-BR")}</p>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-primary/15 bg-primary/10 text-primary">
-                  <ShoppingCart className="h-5 w-5" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-primary/20 bg-primary/10 text-primary">
+                  <ShoppingCart className="h-6 w-6" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-5 flex items-center gap-3">
                 <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
-                <span className="text-[10px] font-heading text-muted-foreground/40">comparado ao período anterior</span>
+                <span className="text-[11px] font-heading text-muted-foreground/40">vs período anterior</span>
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <div className="rounded-[10px] border border-border bg-card px-3 py-2.5">
-                  <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Aprovadas</p>
-                  <p className="mt-1 text-[16px] font-heading font-black text-foreground tabular-nums">{m.approved.length}</p>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-[12px] border border-success/15 bg-success/[0.05] px-4 py-3">
+                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-success/60">Aprovadas</p>
+                  <p className="mt-1.5 text-[20px] font-heading font-black text-success tabular-nums">{m.approved.length}</p>
                 </div>
-                <div className="rounded-[10px] border border-border bg-card px-3 py-2.5">
-                  <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Pendentes</p>
-                  <p className="mt-1 text-[16px] font-heading font-black text-foreground tabular-nums">{m.pending.length}</p>
+                <div className="rounded-[12px] border border-warning/15 bg-warning/[0.05] px-4 py-3">
+                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-warning/60">Pendentes</p>
+                  <p className="mt-1.5 text-[20px] font-heading font-black text-warning tabular-nums">{m.pending.length}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[14px] border border-border bg-[hsl(var(--card-elevated))]">
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-3">
+          <div className="relative overflow-hidden rounded-[18px] border border-success/20 bg-[hsl(var(--card-elevated))]">
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-success via-success/60 to-transparent" />
+            <div className="p-6">
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/40">Valor líquido</p>
-                  <p className="mt-3 text-[42px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
+                  <p className="text-[10px] font-heading font-black uppercase tracking-[0.2em] text-success/60">Receita líquida</p>
+                  <p className="mt-4 text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-success/15 bg-success/10 text-success">
-                  <Coins className="h-5 w-5" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-success/20 bg-success/10 text-success">
+                  <Coins className="h-6 w-6" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-5 flex items-center gap-3">
                 <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                <span className="text-[10px] font-heading text-muted-foreground/40">resultado líquido do período</span>
+                <span className="text-[11px] font-heading text-muted-foreground/40">resultado líquido do período</span>
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <div className="rounded-[10px] border border-border bg-card px-3 py-2.5">
-                  <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Método líder</p>
-                  <p className="mt-1 text-[16px] font-heading font-black text-foreground">{dominantMethod.value > 0 ? dominantMethod.label : "Sem receita"}</p>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-[12px] border border-border bg-card px-4 py-3">
+                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Método líder</p>
+                  <p className="mt-1.5 text-[18px] font-heading font-black text-foreground">{dominantMethod.value > 0 ? dominantMethod.label : "—"}</p>
                 </div>
-                <div className="rounded-[10px] border border-border bg-card px-3 py-2.5">
-                  <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Taxas</p>
-                  <p className="mt-1 text-[16px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmt(m.totalFees)}</p>
+                <div className="rounded-[12px] border border-border bg-card px-4 py-3">
+                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Taxas totais</p>
+                  <p className="mt-1.5 text-[18px] font-heading font-black text-destructive/80 tabular-nums">{hidden ? HIDE : fmt(m.totalFees)}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        {/* ═══════ SECONDARY KPIs ═══════ */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), icon: <RefreshCw className="h-3.5 w-3.5" />, iconClass: "border-info/15 bg-info/10 text-info", sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}` },
-            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), icon: <Smartphone className="h-3.5 w-3.5" />, iconClass: "border-success/15 bg-success/10 text-success", sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}` },
-            { label: "Reembolso %", value: `${m.refundRate.toFixed(1)}%`, icon: <Percent className="h-3.5 w-3.5" />, iconClass: "border-warning/15 bg-warning/10 text-warning", sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined },
-            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), icon: <Shield className="h-3.5 w-3.5" />, iconClass: "border-destructive/15 bg-destructive/10 text-destructive", sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}` },
+            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), icon: <RefreshCw className="h-4 w-4" />, iconClass: "border-info/20 bg-info/10 text-info", sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, accent: "border-info/10" },
+            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), icon: <Smartphone className="h-4 w-4" />, iconClass: "border-success/20 bg-success/10 text-success", sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, accent: "border-success/10" },
+            { label: "Reembolso %", value: `${m.refundRate.toFixed(1)}%`, icon: <Percent className="h-4 w-4" />, iconClass: "border-warning/20 bg-warning/10 text-warning", sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined, accent: "border-warning/10" },
+            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), icon: <Shield className="h-4 w-4" />, iconClass: "border-destructive/20 bg-destructive/10 text-destructive", sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, accent: "border-destructive/10" },
           ].map((kpi) => (
-            <div key={kpi.label} className="rounded-[14px] border border-border bg-card p-3.5">
-              <div className="flex items-center gap-2">
-                <div className={cn("flex h-8 w-8 items-center justify-center rounded-[9px] border shrink-0", kpi.iconClass)}>{kpi.icon}</div>
-                <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/40 leading-tight">{kpi.label}</p>
+            <div key={kpi.label} className={cn("rounded-[16px] border bg-card p-4", kpi.accent)}>
+              <div className="flex items-center gap-3">
+                <div className={cn("flex h-10 w-10 items-center justify-center rounded-[11px] border shrink-0", kpi.iconClass)}>{kpi.icon}</div>
+                <p className="text-[10px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/45 leading-tight">{kpi.label}</p>
               </div>
-              <p className={cn("mt-2.5 text-[20px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
-              <p className="mt-1.5 text-[9px] text-muted-foreground/40">{kpi.sub}</p>
+              <p className={cn("mt-3 text-[24px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
+              <p className="mt-2 text-[10px] text-muted-foreground/40">{kpi.sub}</p>
             </div>
           ))}
         </div>
 
-        <div className="overflow-hidden rounded-[14px] border border-border bg-card">
-          <div className="border-b border-border px-5 py-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+        {/* ═══════ TRANSACTIONS TABLE ═══════ */}
+        <div className="overflow-hidden rounded-[18px] border border-border bg-card">
+          <div className="border-b border-border px-6 py-5">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {statusTabs.map((tab) => {
                   const active = statusFilter === tab.value;
                   return (
                     <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                      className={cn("rounded-[10px] px-3 py-[6px] text-[10px] font-heading font-bold whitespace-nowrap",
-                        active ? "bg-foreground text-background" : "text-muted-foreground/45 hover:bg-secondary hover:text-foreground"
+                      className={cn("rounded-[10px] px-4 py-[7px] text-[11px] font-heading font-bold whitespace-nowrap transition-all",
+                        active ? "bg-primary text-primary-foreground" : "text-muted-foreground/45 hover:bg-secondary hover:text-foreground"
                       )}>
                       {tab.label}
-                      {tab.count > 0 && <span className={cn("ml-1 tabular-nums", active ? "text-background/40" : "text-muted-foreground/25")}>{tab.count}</span>}
+                      {tab.count > 0 && <span className={cn("ml-1.5 tabular-nums", active ? "text-primary-foreground/50" : "text-muted-foreground/25")}>{tab.count}</span>}
                     </button>
                   );
                 })}
               </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="relative w-full sm:w-[280px]">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/25" />
+                <div className="relative w-full sm:w-[300px]">
+                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/25" />
                   <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar cliente, email ou ID"
-                    className="h-[36px] w-full rounded-[11px] border border-border bg-background pl-9 pr-9 text-[11px] font-heading text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20" />
+                    className="h-[40px] w-full rounded-[12px] border border-border bg-background pl-10 pr-10 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 transition-all" />
                   {search ? (
-                    <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/25 hover:text-foreground" /></button>
+                    <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2"><X className="h-4 w-4 text-muted-foreground/25 hover:text-foreground" /></button>
                   ) : (
-                    <kbd className="absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded-[5px] border border-border bg-secondary px-1.5 py-0.5 text-[8px] font-heading font-bold text-muted-foreground/30 md:inline">⌘K</kbd>
+                    <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-[6px] border border-border bg-secondary px-2 py-0.5 text-[9px] font-heading font-bold text-muted-foreground/30 md:inline">⌘K</kbd>
                   )}
                 </div>
-                <div className="inline-flex h-[36px] items-center rounded-[11px] border border-border bg-background px-3 text-[10px] font-heading font-bold text-muted-foreground/45">
+                <div className="inline-flex h-[40px] items-center rounded-[12px] border border-primary/15 bg-primary/[0.05] px-4 text-[11px] font-heading font-bold text-primary tabular-nums">
                   {sortedFiltered.length} registro{sortedFiltered.length !== 1 ? "s" : ""}
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Desktop table */}
           <div className="hidden md:block">
             {loading ? (
-              <div className="p-16 text-center">
-                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
-                <p className="text-[10px] font-heading text-muted-foreground/30">Carregando vendas…</p>
+              <div className="p-20 text-center">
+                <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+                <p className="text-[11px] font-heading text-muted-foreground/30">Carregando vendas…</p>
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[980px]">
                     <thead>
-                      <tr className="border-b border-border bg-secondary/35">
-                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-5" />
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Produto</th>
+                      <tr className="border-b border-border bg-secondary/30">
+                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-6" />
+                        <th className="px-4 py-3.5 text-left text-[10px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Produto</th>
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} />
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Status</th>
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Taxa</th>
+                        <th className="px-4 py-3.5 text-left text-[10px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Status</th>
+                        <th className="px-4 py-3.5 text-left text-[10px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35">Taxa</th>
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} />
                         <th className="w-14" />
                       </tr>
                     </thead>
                     <tbody>
                       {visibleItems.length === 0 ? (
-                        <tr><td colSpan={7} className="py-20">
+                        <tr><td colSpan={7} className="py-24">
                           <div className="flex flex-col items-center justify-center">
-                            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-[12px] border border-border bg-secondary">
-                              <ShoppingCart className="h-4 w-4 text-muted-foreground/20" />
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border border-primary/15 bg-primary/[0.06]">
+                              <ShoppingCart className="h-5 w-5 text-primary/40" />
                             </div>
-                            <p className="text-[11px] font-heading font-bold text-foreground/70">Nenhuma venda encontrada</p>
-                            <p className="mt-1 text-[10px] text-muted-foreground/40">Ajuste o período ou refine a pesquisa.</p>
+                            <p className="text-[13px] font-heading font-bold text-foreground/70">Nenhuma venda encontrada</p>
+                            <p className="mt-1.5 text-[11px] text-muted-foreground/40">Ajuste o período ou refine a pesquisa.</p>
                           </div>
                         </td></tr>
                       ) : visibleItems.map((tx, i) => (
@@ -987,19 +996,19 @@ export default function Vendas() {
                   </table>
                 </div>
                 {visibleItems.length > 0 && (
-                  <div className="flex items-center justify-between border-t border-border px-5 py-3">
-                    <span className="text-[10px] font-heading font-bold text-muted-foreground/40 tabular-nums">
+                  <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                    <span className="text-[11px] font-heading font-bold text-muted-foreground/40 tabular-nums">
                       {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Página {currentPage} de {totalPages}
                     </span>
-                    <div className="flex items-center gap-1">
-                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none">
-                        <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
+                    <div className="flex items-center gap-2">
+                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border px-4 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground hover:border-primary/30 disabled:opacity-30 disabled:pointer-events-none transition-all">
+                        <ChevronDown className="h-3.5 w-3.5 rotate-90" /> Anterior
                       </button>
-                      <span className="px-2 text-[11px] font-heading font-black text-foreground tabular-nums">
+                      <span className="min-w-[100px] text-center text-[12px] font-heading font-black text-primary tabular-nums">
                         {hidden ? HIDE : fmt(filteredNetTotal)}
                       </span>
-                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none">
-                        Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
+                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border px-4 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground hover:border-primary/30 disabled:opacity-30 disabled:pointer-events-none transition-all">
+                        Próxima <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
                       </button>
                     </div>
                   </div>
@@ -1008,15 +1017,16 @@ export default function Vendas() {
             )}
           </div>
 
-          <div className="space-y-3 p-3 md:hidden">
+          {/* Mobile cards */}
+          <div className="space-y-3 p-4 md:hidden">
             {loading ? (
-              <div className="p-12 text-center">
-                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+              <div className="p-16 text-center">
+                <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
               </div>
             ) : visibleItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <ShoppingCart className="mb-2 h-4 w-4 text-muted-foreground/15" />
-                <p className="text-[11px] font-heading font-bold text-foreground/65">Nenhuma venda encontrada</p>
+              <div className="flex flex-col items-center justify-center py-16">
+                <ShoppingCart className="mb-3 h-5 w-5 text-primary/20" />
+                <p className="text-[12px] font-heading font-bold text-foreground/65">Nenhuma venda encontrada</p>
               </div>
             ) : (
               <>
@@ -1024,10 +1034,10 @@ export default function Vendas() {
                   <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
                 ))}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between rounded-[12px] border border-border bg-card px-4 py-3">
-                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30">← Anterior</button>
-                    <span className="text-[10px] font-heading font-bold text-muted-foreground/50 tabular-nums">{currentPage} / {totalPages}</span>
-                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[10px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30">Próxima →</button>
+                  <div className="flex items-center justify-between rounded-[14px] border border-primary/15 bg-card px-5 py-4">
+                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 transition-all">← Anterior</button>
+                    <span className="text-[11px] font-heading font-bold text-primary tabular-nums">{currentPage} / {totalPages}</span>
+                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-30 transition-all">Próxima →</button>
                   </div>
                 )}
               </>
@@ -1036,91 +1046,98 @@ export default function Vendas() {
         </div>
 
         {/* ═══════ CHART + TOP PRODUCTS ═══════ */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-3">
-          <div className="xl:col-span-8 rounded-[14px] border border-border bg-card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border px-5 py-3">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          <div className="xl:col-span-8 rounded-[18px] border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <div>
-                <p className="text-[10px] font-heading font-bold text-foreground">Evolução da receita</p>
-                <p className="mt-0.5 text-[9px] text-muted-foreground/35">Curva de receita líquida no período selecionado</p>
+                <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
+                <p className="mt-1 text-[10px] text-muted-foreground/35">Curva de receita líquida no período selecionado</p>
               </div>
-              <span className="text-[13px] font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
+              <span className="text-[16px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
             </div>
-            <div className="px-2 pb-3 pt-1">
+            <div className="px-3 pb-4 pt-2">
               <RevenueChart data={metrics.chartData} hidden={hidden} />
             </div>
           </div>
 
-          <div className="xl:col-span-4 space-y-3">
+          <div className="xl:col-span-4 space-y-4">
             {metrics.topProducts.length > 0 && (
-              <div className="rounded-[14px] border border-border bg-card overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                  <Crown className="h-3.5 w-3.5 text-primary/70" />
-                  <p className="text-[10px] font-heading font-bold text-foreground">Top Produtos</p>
+              <div className="rounded-[18px] border border-border bg-card overflow-hidden">
+                <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[9px] border border-primary/20 bg-primary/10 text-primary">
+                    <Crown className="h-4 w-4" />
+                  </div>
+                  <p className="text-[12px] font-heading font-bold text-foreground">Top Produtos</p>
                 </div>
                 <div className="divide-y divide-border/60">
                   {metrics.topProducts.slice(0, 5).map((prod, i) => (
-                    <div key={prod.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div key={prod.id} className="flex items-center justify-between gap-3 px-5 py-3.5">
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className={cn("flex h-6 w-6 items-center justify-center rounded-[8px] text-[9px] font-heading font-black shrink-0", i === 0 ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground/45")}>{i + 1}</span>
+                        <span className={cn("flex h-7 w-7 items-center justify-center rounded-[9px] text-[10px] font-heading font-black shrink-0", i === 0 ? "bg-primary/12 text-primary border border-primary/15" : "bg-secondary text-muted-foreground/45")}>{i + 1}</span>
                         <div className="min-w-0">
-                          <p className="truncate text-[11px] font-heading font-bold text-foreground">{prod.name}</p>
-                          <p className="mt-0.5 text-[9px] text-muted-foreground/35">{prod.sales} venda{prod.sales !== 1 ? "s" : ""}</p>
+                          <p className="truncate text-[12px] font-heading font-bold text-foreground">{prod.name}</p>
+                          <p className="mt-0.5 text-[10px] text-muted-foreground/35">{prod.sales} venda{prod.sales !== 1 ? "s" : ""}</p>
                         </div>
                       </div>
-                      <span className={cn("text-[11px] font-heading font-black tabular-nums tracking-[-0.02em]", i === 0 ? "text-primary" : "text-foreground")}>{hidden ? HIDE : fmtCompact(prod.revenue)}</span>
+                      <span className={cn("text-[12px] font-heading font-black tabular-nums tracking-[-0.02em]", i === 0 ? "text-primary" : "text-foreground")}>{hidden ? HIDE : fmtCompact(prod.revenue)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="rounded-[14px] border border-border bg-card overflow-hidden">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <p className="text-[10px] font-heading font-bold text-foreground">Mix e saúde operacional</p>
-                {peakHour !== null ? <span className="text-[9px] text-muted-foreground/35">pico {peakHour}h</span> : <span className="text-[9px] text-muted-foreground/35">sem pico registrado</span>}
+            <div className="rounded-[18px] border border-border bg-card overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border px-5 py-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[9px] border border-success/20 bg-success/10 text-success">
+                    <Activity className="h-4 w-4" />
+                  </div>
+                  <p className="text-[12px] font-heading font-bold text-foreground">Saúde operacional</p>
+                </div>
+                {peakHour !== null ? <span className="text-[10px] font-heading font-bold text-primary/60">pico {peakHour}h</span> : <span className="text-[10px] text-muted-foreground/35">—</span>}
               </div>
               <div className="divide-y divide-border/60">
                 {paymentMix.map((pm) => {
                   const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                   const accent = ACCENT_STYLES[pm.color as AccentTone];
                   return (
-                    <div key={pm.label} className="flex items-center justify-between gap-3 px-4 py-3">
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <span className={cn("flex h-8 w-8 items-center justify-center rounded-[10px] border [&_svg]:h-4 [&_svg]:w-4", accent.iconWrap)}>{pm.icon}</span>
+                    <div key={pm.label} className="flex items-center justify-between gap-3 px-5 py-3.5">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className={cn("flex h-9 w-9 items-center justify-center rounded-[10px] border [&_svg]:h-4 [&_svg]:w-4", accent.iconWrap)}>{pm.icon}</span>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-heading font-bold text-foreground">{pm.label}</p>
-                          <p className="mt-0.5 text-[9px] text-muted-foreground/35">{pm.count} venda{pm.count !== 1 ? "s" : ""}</p>
+                          <p className="text-[11px] font-heading font-bold text-foreground">{pm.label}</p>
+                          <p className="mt-0.5 text-[10px] text-muted-foreground/35">{pm.count} venda{pm.count !== 1 ? "s" : ""}</p>
                         </div>
                       </div>
-                      <div className="min-w-[112px]">
-                        <div className="h-[4px] overflow-hidden rounded-full bg-secondary">
-                          <div className={cn("h-full rounded-full", accent.rail)} style={{ width: `${Math.max(pct, 4)}%` }} />
+                      <div className="min-w-[120px]">
+                        <div className="h-[5px] overflow-hidden rounded-full bg-secondary">
+                          <div className={cn("h-full rounded-full transition-all", accent.rail)} style={{ width: `${Math.max(pct, 4)}%` }} />
                         </div>
-                        <p className="mt-1 text-right text-[10px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                        <p className="mt-1.5 text-right text-[11px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <div className="grid grid-cols-3 gap-2 border-t border-border px-4 py-3">
+              <div className="grid grid-cols-3 gap-2.5 border-t border-border px-5 py-4">
                 {healthItems.map((hi) => {
                   const ok = hi.value <= hi.threshold;
                   return (
-                    <div key={hi.label} className="rounded-[10px] border border-border bg-secondary/35 px-2.5 py-2">
-                      <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">{hi.label}</p>
-                      <p className={cn("mt-1 text-[12px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                    <div key={hi.label} className={cn("rounded-[11px] border px-3 py-2.5", ok ? "border-success/15 bg-success/[0.04]" : "border-destructive/15 bg-destructive/[0.04]")}>
+                      <p className="text-[9px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/40">{hi.label}</p>
+                      <p className={cn("mt-1.5 text-[14px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
                     </div>
                   );
                 })}
               </div>
-              <div className="border-t border-border px-4 py-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/35">Volume por hora</p>
-                  <p className="text-[9px] text-muted-foreground/30">baseado nas aprovadas</p>
+              <div className="border-t border-border px-5 py-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[10px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Volume por hora</p>
+                  <p className="text-[10px] text-muted-foreground/30">baseado nas aprovadas</p>
                 </div>
-                <div className="flex h-[24px] items-end gap-[2px]">
+                <div className="flex h-[28px] items-end gap-[2px]">
                   {metrics.hours.map((v, i) => (
-                    <div key={i} className={cn("min-w-0 flex-1 rounded-[2px]", peakHour === i ? "bg-primary" : v > 0 ? "bg-foreground/12" : "bg-foreground/[0.05]")} style={{ height: `${Math.max((v / maxHour) * 100, 6)}%` }} />
+                    <div key={i} className={cn("min-w-0 flex-1 rounded-[3px] transition-all", peakHour === i ? "bg-primary" : v > 0 ? "bg-primary/20" : "bg-foreground/[0.05]")} style={{ height: `${Math.max((v / maxHour) * 100, 6)}%` }} />
                   ))}
                 </div>
               </div>
