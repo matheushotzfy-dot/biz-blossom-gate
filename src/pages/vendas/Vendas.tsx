@@ -702,7 +702,8 @@ export default function Vendas() {
  return s;
  }, [filtered, sort]);
 
- const visibleItems = useMemo(() => sortedFiltered.slice(0, visibleCount), [sortedFiltered, visibleCount]);
+  const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / PAGE_SIZE));
+  const visibleItems = useMemo(() => sortedFiltered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE), [sortedFiltered, currentPage]);
 
  const statusTabs = useMemo(() => {
  const c: Record<string, number> = { all: dateFiltered.length, completed: 0, pending: 0, failed: 0, refunded: 0, chargeback: 0 };
