@@ -470,25 +470,32 @@ export default function AdminConteudo() {
 
       {/* ── Course List ── */}
       {isLoading ? (
-        <div className="py-20 flex items-center justify-center">
-          <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
+          <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 flex flex-col items-center gap-2">
-          <p className="text-sm text-muted-foreground">
-            {search || filter !== "all" ? "Nenhum resultado" : "Nenhum curso criado"}
+        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
+            <GraduationCap className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
+          </div>
+          <p className="mt-5 text-sm font-semibold text-foreground">
+            {search || filter !== "all" ? "Nenhum resultado" : "Comece por aqui"}
+          </p>
+          <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
+            {search || filter !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie seu primeiro curso e comece a entregar conteúdo."}
           </p>
           {!search && filter === "all" && (
             <button
               onClick={openNew}
-              className="mt-1 text-[13px] font-medium text-primary hover:underline"
+              className="mt-6 inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
             >
-              Criar primeiro curso →
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Criar curso
             </button>
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
+        <div className="px-5 pt-5 pb-8 sm:px-7">
           {/* Table header */}
           <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border/40 bg-muted/20">
             <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Curso</span>
