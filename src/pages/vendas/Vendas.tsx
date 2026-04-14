@@ -752,15 +752,20 @@ export default function Vendas() {
         {/* ═══════ HEADER ═══════ */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
-            <p className="mt-1.5 text-[12px] text-muted-foreground/60">{lastSaleText ? `Última atualização: ${lastSaleText}` : "Visão consolidada de receita e transações."}</p>
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/15"><Banknote className="h-5 w-5 text-primary" /></span>
+              <div>
+                <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
+                <p className="mt-1 text-[12px] text-muted-foreground/60">{lastSaleText ? `Última venda: ${lastSaleText}` : "Visão consolidada de receita e transações."}</p>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-4 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
+            <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-[hsl(var(--card-elevated))] px-4 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
               <RefreshCw className="h-3.5 w-3.5 text-muted-foreground/60" /> Atualizar
             </button>
             <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-              Exportar <ChevronDown className="h-3 w-3" />
+              <Download className="h-3.5 w-3.5" /> Exportar
             </button>
           </div>
         </div>
