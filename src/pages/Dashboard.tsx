@@ -723,22 +723,23 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Payment KPIs */}
-          <div className="grid grid-cols-2 gap-3 flex-1">
+          <div className="grid grid-cols-2 gap-2.5 flex-1">
             {([
-              { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, accentBorder: "border-t-success" },
-              { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, accentBorder: "border-t-info" },
-              { label: "TICKET MÉDIO", isPix: false, icon: Wallet, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "por venda", accentBorder: "border-t-primary" },
-              { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, accentBorder: "border-t-warning" },
+              { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, accentColor: "bg-success" },
+              { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, accentColor: "bg-info" },
+              { label: "TICKET MÉDIO", isPix: false, icon: Wallet, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "por venda", accentColor: "bg-primary" },
+              { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, accentColor: "bg-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 + idx * 0.04 }}
-                className={cn("relative rounded-2xl border border-border/60 border-t-2 bg-background/80 p-4 overflow-hidden shadow-sm", item.accentBorder)}>
+                className="relative rounded-[16px] border border-border/30 bg-background/60 p-4 overflow-hidden transition-all duration-200 hover:border-border/50">
+                <div className={cn("absolute top-0 left-3 right-3 h-[2px] rounded-b-full", item.accentColor)} />
                 <div className="flex items-center gap-1.5 mb-2.5">
-                  <span className="text-[9px] font-heading font-bold uppercase tracking-[0.1em] text-muted-foreground">{item.label}</span>
+                  <span className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/50">{item.label}</span>
                 </div>
                 <p className="text-[18px] font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-1.5">
                   {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
                 </p>
-                <span className="text-[10px] text-muted-foreground/50">{privacy.hidden ? "••••" : item.helper}</span>
+                <span className="text-[10px] text-muted-foreground/40">{privacy.hidden ? "••••" : item.helper}</span>
               </motion.div>
             ))}
           </div>
@@ -748,9 +749,9 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* ACTIONS + ACTIVITY                                               */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-10">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-8">
         {/* Quick actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card p-6 flex flex-col shadow-sm overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border/30 bg-card p-5 lg:p-6 flex flex-col overflow-hidden">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
               <Zap className="h-4 w-4" />
