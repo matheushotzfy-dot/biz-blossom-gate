@@ -1150,8 +1150,6 @@ export default function Vendas() {
       </div>
     );
 }
-              </button>
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-[12px] bg-primary px-4 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90">
                 <Download className="h-3.5 w-3.5" /> Exportar
               </button>
             </div>
