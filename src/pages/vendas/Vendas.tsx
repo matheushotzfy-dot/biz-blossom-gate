@@ -206,7 +206,7 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
-  <th onClick={() => onSort(field)} className={cn("text-left py-3.5 px-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
+  <th onClick={() => onSort(field)} className={cn("text-left py-3 px-4 text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
  <span className="inline-flex items-center gap-1">
  {label}
  {active
