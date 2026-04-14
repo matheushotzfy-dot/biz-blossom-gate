@@ -549,30 +549,62 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Revenue Block ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
-          <p className="text-[11px] font-heading text-muted-foreground mb-2">
-            {isCustom && customRange?.from
-              ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-              : `Receita — ${selectedPeriod.label}`}
-          </p>
-          <div className="flex items-baseline gap-6 mb-5">
-            <span className="text-5xl sm:text-7xl lg:text-[96px] font-heading font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.05em]">
-              {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 text-[12px]">
-            {[
-              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success" },
-              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning" },
-              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info" },
-              { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary" },
-            ].map((chip, i) => (
-              <span key={i} className="inline-flex items-center gap-1.5 text-muted-foreground font-medium">
-                <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
-                {chip.label}
+        {/* ── CARD GRANDE — Revenue Hero ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="relative mb-8 rounded-[20px] border border-border/40 bg-card overflow-hidden"
+        >
+          {/* Subtle top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary/20 to-transparent" />
+
+          <div className="p-6 sm:p-8 lg:p-10">
+            {/* Top row: period label + saldo */}
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-1">
+                  {isCustom && customRange?.from
+                    ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                    : `Receita — ${selectedPeriod.label}`}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-[6px] w-[6px]">
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
+                    <span className="relative h-[6px] w-[6px] rounded-full bg-success" />
+                  </span>
+                  <span className="text-[10px] font-heading text-success font-bold">Atualizado em tempo real</span>
+                </div>
+              </div>
+              <div className="text-right hidden sm:block">
+                <p className="text-[9px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-0.5">Saldo Disponível</p>
+                <p className="text-[18px] font-heading font-black tabular-nums text-primary tracking-[-0.03em]">
+                  {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
+                </p>
+              </div>
+            </div>
+
+            {/* Big number */}
+            <div className="mb-6">
+              <span className="text-5xl sm:text-7xl lg:text-[104px] font-heading font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.05em]">
+                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
-            ))}
+            </div>
+
+            {/* Bottom metrics row */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+              {[
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/8" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", bg: "bg-warning/8" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", bg: "bg-info/8" },
+                { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", bg: "bg-primary/8" },
+              ].map((chip, i) => (
+                <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold", chip.bg, chip.color)}>
+                  <chip.icon className="h-3.5 w-3.5" />
+                  {chip.label}
+                </span>
+              ))}
+            </div>
           </div>
         </motion.div>
 
