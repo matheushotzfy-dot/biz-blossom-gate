@@ -479,10 +479,9 @@ export default function Dashboard() {
         transition={{ duration: 0.4 }}
         className="dashboard-hero-surface dashboard-command-panel relative mb-10 rounded-[20px] overflow-hidden"
       >
-        {/* Top accent bar — gradient stripe */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] z-20 bg-gradient-to-r from-primary/20 via-primary to-info/40" />
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] z-20 bg-primary" />
         
-        {/* Inner padding wrapper */}
         <div className="relative z-10 p-8 sm:p-10 lg:p-14">
           {/* ── Top bar ── */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
@@ -491,12 +490,12 @@ export default function Dashboard() {
                 <div className="dashboard-icon-shell flex h-9 w-9 items-center justify-center rounded-xl">
                   <BarChart3 className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <span className="text-[11px] font-heading uppercase tracking-[0.18em] text-foreground/55">Dashboard</span>
+                <span className="text-[11px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Dashboard</span>
               </motion.div>
               {nickname && (
                 <div className="dashboard-meta-pill inline-flex items-center gap-1.5 rounded-full px-3 py-1.5">
                   <Crown className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-heading text-foreground/55">{nickname}</span>
+                  <span className="text-[10px] font-heading text-muted-foreground">{nickname}</span>
                 </div>
               )}
               <div className="dashboard-meta-pill inline-flex items-center gap-1.5 rounded-full px-3 py-1.5">
@@ -504,19 +503,19 @@ export default function Dashboard() {
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-20" />
                   <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
-                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-foreground/45">Tempo Real</span>
+                <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-muted-foreground">Tempo Real</span>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
               {scaleModeUnlocked ? (
-                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "border border-border/55 bg-card text-foreground shadow-[0_10px_24px_hsl(var(--background)/0.18)]" : "border border-border/45 bg-muted/15 text-foreground/70 hover:border-border/55 hover:bg-muted/24 hover:text-foreground"}`}>
+                <button onClick={activateScaleMode} className={`flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading transition-all active:scale-[0.97] ${scaleMode ? "border border-border bg-card text-foreground" : "border border-border/50 bg-accent text-muted-foreground hover:border-border hover:text-foreground"}`}>
                   {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
                   <Flame className={`h-3.5 w-3.5 text-primary ${scaleMode ? "animate-pulse" : "group-hover:animate-pulse"}`} />
                   <span className="leading-tight">Escala</span>
                 </button>
               ) : (
-                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading border border-border/45 bg-muted/15 text-foreground/65 cursor-not-allowed shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)]">
+                <div className="flame-btn group relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[10px] font-heading border border-border/50 bg-accent text-muted-foreground cursor-not-allowed">
                   {[0, 1, 2, 3, 4].map((i) => (<span key={i} className="flame-tip" style={{ left: `${20 + i * 15}%`, width: `${3 + Math.random() * 3}px`, height: `${3 + Math.random() * 3}px`, ['--dur' as string]: `${0.6 + i * 0.15}s`, ['--delay' as string]: `${i * 0.12}s` }} />))}
                   <Lock className="h-3.5 w-3.5 text-primary" />
                   <span className="leading-tight">Escala</span>
@@ -550,7 +549,7 @@ export default function Dashboard() {
                     </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/20 bg-card p-0 shadow-[0_18px_44px_hsl(var(--background)/0.26)]">
+                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-lg">
                   <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
@@ -562,24 +561,24 @@ export default function Dashboard() {
 
           {/* ── Revenue Hero ── */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-14">
-            <p className="text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-4">
+            <p className="text-[10px] font-heading uppercase tracking-[0.22em] text-muted-foreground mb-4">
               {isCustom && customRange?.from
                 ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                 : `Receita — ${selectedPeriod.label}`}
             </p>
             <div className="flex items-end gap-5 mb-4">
-              <span className="text-5xl sm:text-7xl lg:text-[104px] font-heading font-black tabular-nums text-foreground leading-[0.82] tracking-[-0.04em]" style={{ textShadow: '0 2px 24px hsl(var(--primary) / 0.12)' }}>
+              <span className="text-5xl sm:text-7xl lg:text-[104px] font-heading font-black tabular-nums text-foreground leading-[0.82] tracking-[-0.04em]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
-            <div className="mt-6 flex flex-wrap items-center gap-2.5">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/20", bg: "bg-success/8" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/20", bg: "bg-warning/8" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/20", bg: "bg-info/8" },
-                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", border: "border-primary/20", bg: "bg-primary/8" },
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/10" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", bg: "bg-warning/10" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", bg: "bg-info/10" },
+                { icon: Wallet, label: `saldo ${privacy.hidden ? CENSORED : fmt(Math.abs(balance))}`, color: "text-primary", bg: "bg-primary/10" },
               ].map((chip, i) => (
-                <span key={i} className={`inline-flex items-center gap-2 rounded-lg border ${chip.border} ${chip.bg} px-3.5 py-2 text-[11px] font-semibold text-foreground/72`}>
+                <span key={i} className={`inline-flex items-center gap-2 rounded-lg border border-border/30 ${chip.bg} px-3 py-1.5 text-[11px] font-semibold text-foreground/80`}>
                   <chip.icon className={`h-3.5 w-3.5 ${chip.color}`} />
                   {chip.label}
                 </span>
@@ -588,7 +587,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* ── Separator ── */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border/30 to-transparent mb-8" />
+          <div className="h-px bg-border/30 mb-8" />
 
           {/* ── KPI Row ── */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -599,13 +598,13 @@ export default function Dashboard() {
               { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, iconBg: "bg-primary/10", iconText: "text-primary", accent: "border-l-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group rounded-xl border border-border/20 border-l-[3px] bg-card/50 p-5 transition-all duration-300 hover:bg-card/80 hover:-translate-y-[1px]", item.accent)}>
+                className={cn("group rounded-xl border border-border/40 border-l-[3px] bg-card p-5 transition-all duration-200 hover:border-border/60", item.accent)}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/35">{item.label}</p>
+                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">{item.label}</p>
                     <p className="text-[24px] font-heading font-black leading-none tracking-[-0.03em] tabular-nums text-foreground">{privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}</p>
                   </div>
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-border/10", item.iconBg, item.iconText)}>
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
