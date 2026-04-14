@@ -644,11 +644,17 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-8">
         {/* Chart */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[16px] border border-border bg-card min-h-[320px] flex flex-col">
-          <div className="flex items-center justify-between px-5 pt-4 pb-2">
-            <p className="text-[11px] font-heading text-muted-foreground">Faturamento</p>
-            <p className="text-[11px] font-heading text-primary tabular-nums font-bold">{privacy.hidden ? CENSORED : fmt(revenue)}</p>
+         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[16px] border border-border bg-card min-h-[320px] flex flex-col">
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-3 w-3 text-primary" />
+              </div>
+              <p className="text-[11px] font-heading text-muted-foreground font-bold uppercase tracking-[0.06em]">Faturamento</p>
+            </div>
+            <p className="text-[12px] font-heading text-primary tabular-nums font-black">{privacy.hidden ? CENSORED : fmt(revenue)}</p>
           </div>
+          <div className="h-px bg-border/30 mx-5" />
           <div className="flex-1 px-2 pb-3 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
@@ -684,8 +690,13 @@ export default function Dashboard() {
         {/* Right column */}
         <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Conversion */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[16px] border border-border bg-card p-4">
-            <p className="text-[11px] font-heading text-muted-foreground mb-3">Conversão</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[16px] border border-border bg-card p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-6 w-6 rounded-md bg-info/10 flex items-center justify-center">
+                <Percent className="h-3 w-3 text-info" />
+              </div>
+              <p className="text-[11px] font-heading text-muted-foreground font-bold uppercase tracking-[0.06em]">Conversão</p>
+            </div>
             <div className="space-y-3">
               {[
                 { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success" },
