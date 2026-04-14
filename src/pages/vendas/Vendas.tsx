@@ -219,38 +219,38 @@ function SortHead({ label, field, sort, onSort, className }: { label: string; fi
 
 /* ─── Revenue Chart ─── */
 function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
- if (data.length < 2 || hidden) {
- return (
- <div className="h-[280px] flex flex-col items-center justify-center gap-3">
- {hidden ? <EyeOff className="h-8 w-8 text-muted-foreground/15" /> : <BarChart3 className="h-8 w-8 text-muted-foreground/15" />}
- <span className="text-[11px] text-muted-foreground/40">{hidden ? "Valores ocultos" : "Dados insuficientes para visualização"}</span>
- </div>
- );
- }
- return (
- <ResponsiveContainer width="100%" height={280}>
- <ComposedChart data={data} margin={{ top: 12, right: 8, left: -16, bottom: 0 }}>
- <defs>
- <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
- <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
- <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.06} />
- <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
- </linearGradient>
- </defs>
- <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.06} vertical={false} />
- <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
- <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
- <ReTooltip
- contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border)/0.3)", borderRadius: 12, fontSize: 11, padding: "12px 16px", boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
- formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
- labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}
- cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "4 4" }}
- />
- <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="5 3" fill="none" opacity={0.15} dot={false} />
- <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#rv-gradient-premium)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
- </ComposedChart>
- </ResponsiveContainer>
- );
+  if (data.length < 2 || hidden) {
+    return (
+      <div className="h-[260px] flex flex-col items-center justify-center gap-2">
+        {hidden ? <EyeOff className="h-6 w-6 text-muted-foreground/20" /> : <BarChart3 className="h-6 w-6 text-muted-foreground/20" />}
+        <span className="text-[11px] text-muted-foreground/40 font-medium">{hidden ? "Valores ocultos" : "Dados insuficientes para visualização"}</span>
+      </div>
+    );
+  }
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <ComposedChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
+        <defs>
+          <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+            <stop offset="40%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.12} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={{ stroke: "hsl(var(--border))", strokeOpacity: 0.15 }} tickLine={false} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
+        <ReTooltip
+          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border)/0.4)", borderRadius: 10, fontSize: 11, padding: "10px 14px" }}
+          formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
+          labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontWeight: 600 }}
+          cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "4 4" }}
+        />
+        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} strokeDasharray="4 3" fill="none" opacity={0.2} dot={false} />
+        <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#rv-gradient-premium)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
 }
 
 /* ─── Desktop Row ─── */
