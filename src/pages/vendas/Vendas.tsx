@@ -915,8 +915,8 @@ export default function Vendas() {
                   <kbd className="absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-border/30 px-1.5 py-0.5 text-[8px] font-heading font-bold text-muted-foreground/25 md:inline">⌘K</kbd>
                 )}
               </div>
-              {sortedFiltered.length > 0 && !hidden && (
-                <span className="shrink-0 hidden text-[11px] font-heading font-black text-primary tabular-nums lg:inline">{fmt(filteredNetTotal)}</span>
+              {sortedFiltered.length > 0 && (
+                <span className="shrink-0 hidden text-[10px] font-heading font-bold text-muted-foreground/40 tabular-nums lg:inline">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""}</span>
               )}
             </div>
           </div>
