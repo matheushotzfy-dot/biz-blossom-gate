@@ -251,12 +251,12 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
- const methods: Record<string, { label: string; icon: React.ReactNode; color: string; bgClass: string }> = {
-  pix: { label: "PIX", icon: <Smartphone className="h-3 w-3" />, color: "text-success", bgClass: "bg-success/8 border-success/15" },
-  credit_card: { label: "Cartão", icon: <CreditCard className="h-3 w-3" />, color: "text-info", bgClass: "bg-info/8 border-info/15" },
-  boleto: { label: "Boleto", icon: <FileText className="h-3 w-3" />, color: "text-warning", bgClass: "bg-warning/8 border-warning/15" },
+ const methods: Record<string, { label: string; color: string }> = {
+  pix: { label: "Pix", color: "text-success" },
+  credit_card: { label: "Cartão", color: "text-info" },
+  boleto: { label: "Boleto", color: "text-warning" },
  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null, color: "text-muted-foreground", bgClass: "bg-secondary border-border" };
+  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground" };
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
   const prodName = tx.product_id ? (prods[tx.product_id] || "Produto sem nome") : "Sem produto";
@@ -264,78 +264,49 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
   const net = Number(tx.net_amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/70 hover:bg-secondary/30">
-  <td className="px-5 py-3.5 align-middle">
-  <div className="space-y-0.5">
-  <p className="text-[11px] font-heading font-bold text-foreground tabular-nums">{fmtDate(tx.created_at)}</p>
-  <p className="text-[10px] font-medium text-muted-foreground/45 tabular-nums">{fmtTime(tx.created_at)}</p>
-  </div>
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border hover:bg-secondary/20 transition-colors">
+  <td className="px-5 py-3 align-middle">
+   <p className="text-[11px] font-heading font-semibold text-foreground tabular-nums">{fmtDate(tx.created_at)} {fmtTime(tx.created_at)}</p>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="flex min-w-0 items-center gap-3">
-   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border bg-secondary text-muted-foreground/55">
-    <Package className="h-4 w-4" />
-   </div>
+  <td className="px-3 py-3 align-middle">
+   <p className="truncate text-[11px] font-heading font-semibold text-muted-foreground/60 max-w-[140px]">{prodName}</p>
+  </td>
+  <td className="px-3 py-3 align-middle">
    <div className="min-w-0">
-    <p className="truncate text-[11px] font-heading font-bold text-foreground">{prodName}</p>
-    <span className={cn("mt-1 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-heading font-bold", method.color, method.bgClass)}>
-     {method.icon}{method.label}
-    </span>
-   </div>
-  </div>
-  </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="flex min-w-0 items-center gap-3">
-   <Avatar className="h-10 w-10 shrink-0 rounded-[11px] ring-1 ring-border/70 ring-inset">
-    <AvatarFallback className={cn("text-[10px] font-black tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
-   </Avatar>
-   <div className="min-w-0 space-y-0.5">
     <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-    {tx.customer_email ? (
-     <p className="truncate text-[10px] text-muted-foreground/45">{tx.customer_email}</p>
-    ) : (
-     <p className="text-[10px] text-muted-foreground/30">Sem email informado</p>
-    )}
+    <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
    </div>
-  </div>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-heading font-black uppercase tracking-[0.12em]", st.fg, st.bg, st.border)}>
-  <span className="relative flex h-1.5 w-1.5">
-   {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-   <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
-  </span>
-  {st.label}
-  </span>
+  <td className="px-3 py-3 align-middle">
+   <div className="flex items-center gap-2">
+    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-heading font-bold", st.fg, st.bg, st.border, "border")}>
+     {st.label}
+    </span>
+    <span className={cn("text-[10px] font-heading", method.color)}>{method.label}</span>
+   </div>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="space-y-0.5">
-   <p className="text-[11px] font-heading font-bold text-foreground/75 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
-   <p className="text-[9px] text-muted-foreground/35">{tx.payment_method === "credit_card" ? "taxa processada" : "sem juros adicionais"}</p>
-  </div>
+  <td className="px-3 py-3 align-middle">
+   <p className="text-[11px] font-heading font-semibold text-muted-foreground/60 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
   </td>
-  <td className="px-4 py-3.5 align-middle">
-  <div className="space-y-0.5">
-   <p className="text-[13px] font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{fmt(net)}</p>
-   <p className="text-[9px] text-muted-foreground/35 tabular-nums">bruto {fmt(Number(tx.amount))}</p>
-  </div>
+  <td className="px-3 py-3 align-middle">
+   <p className="text-[12px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em]">{fmt(net)}</p>
   </td>
-  <td className="px-3 py-3.5 align-middle">
-  <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+  <td className="px-2 py-3 align-middle">
+  <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
   {tx.customer_phone && (
    <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-    className="flex h-8 w-8 items-center justify-center rounded-[10px] text-success/75 hover:bg-success/8 hover:text-success">
+    className="flex h-7 w-7 items-center justify-center rounded-md text-success/60 hover:bg-success/8 hover:text-success">
     <MessageCircle className="h-3.5 w-3.5" />
    </a>
   )}
   <DropdownMenu>
   <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-  <button className="flex h-8 w-8 items-center justify-center rounded-[10px] hover:bg-secondary">
-  <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/55" />
+  <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-secondary">
+  <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
   </button>
   </DropdownMenuTrigger>
-  <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/60">
-  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+  <DropdownMenuContent align="end" className="w-44 rounded-lg border-border">
+  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-md"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
   {tx.customer_phone && (
   <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
   )}
