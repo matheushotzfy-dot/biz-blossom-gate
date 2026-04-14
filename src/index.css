@@ -20,6 +20,8 @@ input[type="number"]::-webkit-inner-spin-button {
     --background: 160 12% 90%;
     --foreground: 220 30% 8%;
     --card: 155 8% 96%;
+    --card-elevated: 155 8% 98%;
+    --card-inset: 155 8% 93%;
     --card-foreground: 220 30% 8%;
     --popover: 155 8% 96%;
     --popover-foreground: 220 30% 8%;
