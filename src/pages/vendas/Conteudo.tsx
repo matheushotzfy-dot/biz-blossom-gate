@@ -542,26 +542,26 @@ export default function AdminConteudo() {
 
                   {/* Conteúdo */}
                   <div className="hidden sm:block">
-                    <p className="text-[12px] text-muted-foreground tabular-nums">{stats.modules}m · {stats.lessons}a</p>
+                    <p className="text-[12px] font-display text-muted-foreground tabular-nums">{stats.modules}m · {stats.lessons}a</p>
                   </div>
 
                   {/* Alunos */}
                   <div className="hidden sm:block">
-                    <p className="text-[12px] text-muted-foreground tabular-nums">{students > 0 ? students : "—"}</p>
+                    <p className="text-[12px] font-display text-muted-foreground tabular-nums">{students > 0 ? students : "—"}</p>
                   </div>
 
                   {/* Status */}
                   <div className="hidden sm:flex items-center gap-1.5">
                     <span className={cn(
                       "h-1.5 w-1.5 rounded-full",
-                      isLive ? "bg-primary" : "bg-muted-foreground/25"
+                      isLive ? "bg-success animate-pulse" : "bg-muted-foreground/25"
                     )} />
-                    <span className="text-[12px] text-muted-foreground">{isLive ? "Live" : "Draft"}</span>
+                    <span className="text-[12px] font-display text-muted-foreground">{isLive ? "Live" : "Draft"}</span>
                   </div>
 
                   {/* Receita */}
                   <div className="hidden sm:block">
-                    <p className={cn("text-[12px] tabular-nums", revenue > 0 ? "text-foreground font-medium" : "text-muted-foreground/30")}>
+                    <p className={cn("text-[12px] font-display tabular-nums", revenue > 0 ? "text-foreground font-semibold" : "text-muted-foreground/30")}>
                       {revenue > 0 ? fmt(revenue) : "—"}
                     </p>
                   </div>
