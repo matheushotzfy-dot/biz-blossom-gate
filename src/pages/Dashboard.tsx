@@ -471,25 +471,35 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-8 overflow-hidden rounded-[20px] border border-border/20 bg-card p-6 sm:p-8 lg:p-10"
+        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/15 bg-card p-6 sm:p-8 lg:p-10"
       >
-        {/* Ambient overlays — premium depth layers */}
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.04]" />
+        {/* Ambient grid texture */}
+        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
 
-        {/* Primary emerald glow — top-left */}
-        <div className="pointer-events-none absolute -top-32 -left-32 h-80 w-80 rounded-full bg-primary/[0.07] blur-[120px] animate-pulse" style={{ animationDuration: '6s' }} />
-        {/* Secondary emerald glow — bottom-right */}
-        <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-primary/[0.05] blur-[100px] animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }} />
-        {/* Subtle blue-teal accent — center-right */}
-        <div className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-0 h-48 w-48 rounded-full bg-info/[0.03] blur-[80px]" />
-        {/* Radial emerald wash across the card */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_15%_50%,hsl(var(--primary)/0.06),transparent_70%)]" />
-        {/* Top edge glow line */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
-        {/* Left edge glow line */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-primary/15 via-primary/5 to-transparent" />
-        {/* Bottom edge subtle glow */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+        {/* ══ EMERALD ATMOSPHERE ══ */}
+        {/* Large emerald nebula — top-left corner */}
+        <div className="pointer-events-none absolute -top-20 -left-20 h-[400px] w-[400px] rounded-full bg-primary/[0.12] blur-[150px] animate-pulse" style={{ animationDuration: '5s' }} />
+        {/* Secondary emerald bloom — bottom-right */}
+        <div className="pointer-events-none absolute -bottom-16 -right-16 h-[300px] w-[300px] rounded-full bg-primary/[0.09] blur-[120px] animate-pulse" style={{ animationDuration: '7s', animationDelay: '1.5s' }} />
+        {/* Floating accent — center top */}
+        <div className="pointer-events-none absolute -top-10 left-1/3 h-[200px] w-[200px] rounded-full bg-primary/[0.06] blur-[100px] animate-pulse" style={{ animationDuration: '9s', animationDelay: '3s' }} />
+        {/* Teal accent — far right */}
+        <div className="pointer-events-none absolute top-1/2 -translate-y-1/2 -right-10 h-[250px] w-[250px] rounded-full bg-emerald-400/[0.05] blur-[100px]" />
+
+        {/* Radial emerald wash — sweeping from left */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_10%_40%,hsl(var(--primary)/0.10),transparent_65%)]" />
+        {/* Secondary radial from bottom-right */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_85%_70%,hsl(var(--primary)/0.06),transparent_60%)]" />
+
+        {/* ══ EDGE GLOW LINES ══ */}
+        {/* Top border glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        {/* Left border glow */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/25 via-primary/8 to-transparent" />
+        {/* Bottom subtle glow */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
+        {/* Right subtle glow */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/10 to-transparent" />
 
         <div className="relative z-10">
           {/* Header row */}
