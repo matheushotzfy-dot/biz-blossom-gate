@@ -642,9 +642,9 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + ANALYTICS                                                */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-8">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
         {/* Chart */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-3xl border border-border/60 bg-card min-h-[340px] flex flex-col overflow-hidden shadow-sm">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[20px] border border-border/30 bg-card min-h-[340px] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <div className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
