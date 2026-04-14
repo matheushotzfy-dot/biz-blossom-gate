@@ -717,12 +717,12 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-10">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel dashboard-ops-panel rounded-[20px] p-5 flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface rounded-[20px] p-5 flex flex-col">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="dashboard-icon-shell h-7 w-7 rounded-lg flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
             </div>
-            <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40 font-bold">Ações Rápidas</span>
+            <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Ações Rápidas</span>
           </div>
           
           <div className="grid grid-cols-2 gap-2 flex-1">
@@ -753,9 +753,9 @@ export default function Dashboard() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[12px] md:text-[13px] font-display font-bold text-foreground leading-tight">{action.label}</p>
-                    <p className="text-[10px] text-muted-foreground/35 hidden md:block">{action.desc}</p>
+                    <p className="text-[10px] text-muted-foreground hidden md:block">{action.desc}</p>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground/15 hidden md:block group-hover:text-muted-foreground/30 transition-colors" />
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/30 hidden md:block group-hover:text-muted-foreground transition-colors" />
                 </Link>
               );
             })}
@@ -763,7 +763,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="dashboard-surface dashboard-side-panel dashboard-feed-panel rounded-[20px] flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="dashboard-surface rounded-[20px] flex flex-col">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/10">
             <div className="flex items-center gap-2">
               <span className="relative flex h-1.5 w-1.5">
@@ -812,7 +812,7 @@ export default function Dashboard() {
                           {s.label}
                         </span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground/35 truncate mt-0.5">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {fullTx && (
