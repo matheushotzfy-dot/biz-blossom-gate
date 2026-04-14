@@ -618,13 +618,13 @@ export default function Dashboard() {
       {/* CHART + KPIs                                                     */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-12 mb-10">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="dashboard-surface dashboard-chart-panel xl:col-span-8 rounded-[20px] min-h-[320px] flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="dashboard-surface xl:col-span-8 rounded-[20px] min-h-[320px] flex flex-col">
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <div className="flex items-center gap-2.5">
               <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Activity className="h-3.5 w-3.5 text-primary" />
               </div>
-              <p className="text-[11px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40 font-bold">Faturamento</p>
+              <p className="text-[11px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Faturamento</p>
             </div>
             <p className="text-[11px] font-heading text-primary tabular-nums font-bold">{privacy.hidden ? CENSORED : fmt(revenue)}</p>
           </div>
@@ -633,8 +633,8 @@ export default function Dashboard() {
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                 <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                 <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.18)" fontSize={11} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
@@ -644,7 +644,7 @@ export default function Dashboard() {
                   if (!active || !payload?.length) return null;
                   const value = payload[0].value as number;
                   return (
-                    <div className="rounded-2xl border border-border/35 bg-card px-4 py-3 shadow-[0_18px_42px_hsl(var(--background)/0.28)]">
+                    <div className="rounded-xl border border-border bg-card px-4 py-3 shadow-lg">
                       <p className="text-[10px] font-heading uppercase tracking-[0.15em] text-muted-foreground mb-1">{label}</p>
                       <p className="text-lg font-heading font-black text-primary tabular-nums tracking-tight">
                         R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -654,20 +654,20 @@ export default function Dashboard() {
                 }}
                 cursor={{ stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 1.5, strokeDasharray: "6 4" }}
               />
-              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={3.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 7, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 3 }} style={{ filter: "drop-shadow(0 0 4px hsl(var(--primary) / 0.3))" }} />
+              <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
           </div>
         </motion.div>
 
         <div className="xl:col-span-4 flex flex-col gap-4">
-          {/* Conversion metrics - clean */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface dashboard-side-panel dashboard-conversion-panel rounded-[20px] p-5">
+          {/* Conversion metrics */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface rounded-[20px] p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="h-7 w-7 rounded-lg bg-info/10 flex items-center justify-center">
                 <Percent className="h-3.5 w-3.5 text-info" />
               </div>
-              <p className="text-[11px] font-heading uppercase tracking-[0.16em] text-muted-foreground/40 font-bold">Conversão</p>
+              <p className="text-[11px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Conversão</p>
             </div>
             <div className="space-y-2">
               <SmallMetric icon={<PixLogoMark className="h-3.5 w-3.5" />} label="Conv. PIX" value={`${pixConversion.toFixed(1)}%`} tone="success" />
@@ -676,25 +676,25 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* KPI tiles - clean */}
+          {/* KPI tiles */}
           <div className="grid grid-cols-2 gap-3">
             {([
-              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, iconGradient: "from-success to-success/70", valueColor: "text-success", dotColor: "bg-success", accentBorder: "border-t-success" },
-              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, iconGradient: "from-info to-info/70", valueColor: "text-info", dotColor: "bg-info", accentBorder: "border-t-info" },
-              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", iconGradient: "from-primary to-primary/70", valueColor: "text-primary", dotColor: "bg-primary", accentBorder: "border-t-primary" },
-              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", iconGradient: "from-warning to-warning/70", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning" },
+              { icon: null, label: "PIX", isPix: true, numValue: pixRevenue, helper: privacy.hidden ? "••••" : `${pixConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${pixApprovedCount}/${pixTotalCount}`, valueColor: "text-success", dotColor: "bg-success", accentBorder: "border-t-success", iconBg: "bg-success/10", iconText: "text-success" },
+              { icon: CreditCard, label: "CARTÃO", isPix: false, numValue: cardRevenue, helper: privacy.hidden ? "••••" : `${cardConversion.toFixed(1)}%`, sub: privacy.hidden ? "" : `${cardApprovedCount}/${cardTotalCount}`, valueColor: "text-info", dotColor: "bg-info", accentBorder: "border-t-info", iconBg: "bg-info/10", iconText: "text-info" },
+              { icon: Wallet, label: "TICKET MÉDIO", isPix: false, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "média", sub: "por transação", valueColor: "text-primary", dotColor: "bg-primary", accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
+              { icon: DollarSign, label: "PENDENTE", isPix: false, numValue: withdrawalPending, helper: privacy.hidden ? "••••" : `${withdrawals.filter(w => w.status === "pending").length}`, sub: privacy.hidden ? "" : "solicitações", valueColor: "text-warning", dotColor: "bg-warning", accentBorder: "border-t-warning", iconBg: "bg-warning/10", iconText: "text-warning" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 + idx * 0.05, type: "spring", stiffness: 300, damping: 24 }}
-                className={cn("dashboard-tile dashboard-metric-tile rounded-xl border-t-[3px] p-5 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-lg", item.accentBorder)}>
+                className={cn("dashboard-tile rounded-xl border-t-[3px] p-5 transition-all duration-200", item.accentBorder)}>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner ring-1 ring-border/10", item.iconGradient)}>
+                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", item.iconBg)}>
                     {item.isPix ? (
-                      <PixLogoMark className="h-4 w-4" variant="white" />
+                      <PixLogoMark className="h-4 w-4" />
                     ) : (
-                      item.icon && <item.icon className="h-3.5 w-3.5 text-primary-foreground" />
+                      item.icon && <item.icon className={cn("h-3.5 w-3.5", item.iconText)} />
                     )}
                   </div>
-                  <span className="text-[9px] font-display font-extrabold uppercase tracking-[0.14em] text-muted-foreground/50">{item.label}</span>
+                  <span className="text-[9px] font-display font-extrabold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</span>
                 </div>
                 <p className="text-[20px] md:text-[24px] font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-2">
                   {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
@@ -704,7 +704,7 @@ export default function Dashboard() {
                     <div className={cn("h-1.5 w-1.5 rounded-full", item.dotColor)} />
                     <span className={cn("text-[11px] font-bold tabular-nums", item.valueColor)}>{item.helper}</span>
                   </div>
-                  {item.sub && <span className="text-[9px] text-muted-foreground/35">{item.sub}</span>}
+                  {item.sub && <span className="text-[9px] text-muted-foreground">{item.sub}</span>}
                 </div>
               </motion.div>
             ))}
