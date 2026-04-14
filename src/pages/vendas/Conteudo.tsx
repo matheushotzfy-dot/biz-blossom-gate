@@ -507,7 +507,7 @@ export default function AdminConteudo() {
             <span />
           </div>
 
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border/50">
             {filtered.map((c) => {
               const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
               const product = products.find(p => p.id === c.product_id);
