@@ -969,12 +969,12 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border">
+                      <tr className="border-b border-border bg-secondary/30">
                         <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-5" />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Produto</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Produto</th>
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Status</th>
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Juros Recebidos</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Status</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Juros Recebidos</th>
                         <SortHead label="Valor Líquido" field="net" sort={sort} onSort={handleSort} />
                         <th className="w-12" />
                       </tr>
