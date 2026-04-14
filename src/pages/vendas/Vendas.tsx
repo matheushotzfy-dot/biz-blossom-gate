@@ -867,41 +867,8 @@ export default function Vendas() {
   </div>
   </motion.section>
 
- {/* ════════ REVENUE TIMELINE ════════ */}
- <motion.section
- initial={{ opacity: 0, y: 12 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.4, delay: 0.1 }}
- className="mb-6"
- >
- <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-  <div className="flex items-center gap-3">
-  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-  <Activity className="h-4.5 w-4.5" />
-  </div>
-  <div>
-  <h2 className="text-[11px] font-heading uppercase tracking-[0.18em] text-foreground/80">Evolução de Receita</h2>
-  <p className="mt-0.5 text-[10px] text-muted-foreground/50">Comparativo com o período anterior</p>
-  </div>
-  </div>
-   <div className="flex flex-wrap gap-4 text-[11px] tabular-nums">
-   <span className="inline-flex items-center gap-2">
-   <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-   Líquido <span className="font-bold text-primary">{hidden ? HIDE : fmtCompact(m.totalNet)}</span>
-   </span>
-   <span className="inline-flex items-center gap-2 text-muted-foreground/60">
-   <span className="h-2.5 w-2.5 rounded-full border border-dashed border-muted-foreground/30" />
-   Anterior
-   </span>
-  </div>
- </div>
-
- <div className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-6 relative overflow-hidden min-h-[280px]">
-  <div className="absolute inset-0 ambient-grid opacity-[0.05] pointer-events-none" />
-  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
-  <RevenueChart data={metrics.chartData} hidden={hidden} />
- </div>
- </motion.section>
+  {/* ════════ REVENUE TIMELINE (moved below transactions) ════════ */}
+  {/* Rendered after transactions table below */}
 
   {/* ════════ INTELLIGENCE PANELS ════════ */}
   <section className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
