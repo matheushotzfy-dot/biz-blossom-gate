@@ -826,9 +826,8 @@ export default function Vendas() {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
 
-          <div className="relative z-10 grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-background/60 backdrop-blur-sm p-6 lg:p-7">
-              <div className="absolute left-0 top-0 h-full w-[3px] bg-primary" />
+          <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><ShoppingCart className="h-4 w-4 text-primary" /></span>
@@ -842,8 +841,7 @@ export default function Vendas() {
                 <span className="text-[10px] text-muted-foreground/40">vs período anterior</span>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-xl border border-success/20 bg-background/60 backdrop-blur-sm p-6 lg:p-7">
-              <div className="absolute left-0 top-0 h-full w-[3px] bg-success" />
+            <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/15"><DollarSign className="h-4 w-4 text-success" /></span>
