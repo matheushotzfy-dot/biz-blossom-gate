@@ -901,14 +901,40 @@ export default function Vendas() {
             <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
+                const tabColors: Record<string, string> = {
+                  all: "text-primary",
+                  completed: "text-success",
+                  pending: "text-warning",
+                  failed: "text-destructive",
+                  refunded: "text-info",
+                  chargeback: "text-destructive",
+                };
+                const dotColors: Record<string, string> = {
+                  completed: "bg-success",
+                  pending: "bg-warning",
+                  failed: "bg-destructive",
+                  refunded: "bg-info",
+                  chargeback: "bg-destructive",
+                };
+                const activeBarColors: Record<string, string> = {
+                  all: "bg-primary",
+                  completed: "bg-success",
+                  pending: "bg-warning",
+                  failed: "bg-destructive",
+                  refunded: "bg-info",
+                  chargeback: "bg-destructive",
+                };
                 return (
                   <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
                     className={cn("relative px-4 py-3 text-[12px] font-heading font-semibold whitespace-nowrap transition-colors",
-                      active ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/70"
+                      active ? (tabColors[tab.value] || "text-foreground") : "text-muted-foreground/40 hover:text-muted-foreground/70"
                     )}>
-                    {tab.label}
-                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px]", active ? "text-foreground/50" : "text-muted-foreground/25")}>{tab.count}</span>}
-                    {active && <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-primary rounded-full" />}
+                    <span className="flex items-center gap-1.5">
+                      {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", active ? dotColors[tab.value] : "bg-muted-foreground/20")} />}
+                      {tab.label}
+                    </span>
+                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px] font-bold", active ? "opacity-60" : "text-muted-foreground/25")}>{tab.count}</span>}
+                    {active && <span className={cn("absolute bottom-0 left-4 right-4 h-[2px] rounded-full", activeBarColors[tab.value] || "bg-primary")} />}
                   </button>
                 );
               })}
@@ -916,17 +942,17 @@ export default function Vendas() {
           </div>
 
           {/* Search + filters */}
-          <div className="flex flex-col gap-2 border-b border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 border-b border-border/50 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:w-[280px]">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/30" />
               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
-                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 transition-colors" />
+                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all" />
               {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground" /></button>}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-heading text-muted-foreground/40 tabular-nums">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""}</span>
-              <button className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
-                <Filter className="h-3.5 w-3.5 text-muted-foreground/50" /> Filtros
+              <span className="text-[10px] font-heading font-bold text-primary/60 tabular-nums">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""}</span>
+              <button className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[11px] font-heading font-bold text-foreground hover:bg-secondary hover:border-primary/20 transition-all">
+                <Filter className="h-3.5 w-3.5 text-primary/50" /> Filtros
               </button>
             </div>
           </div>
