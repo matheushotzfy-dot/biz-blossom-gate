@@ -471,35 +471,26 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/15 bg-card p-6 sm:p-8 lg:p-10"
+        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/20 bg-[hsl(var(--card))] p-6 sm:p-8 lg:p-10"
       >
         {/* Ambient grid texture */}
         <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
 
-        {/* ══ EMERALD ATMOSPHERE ══ */}
-        {/* Large emerald nebula — top-left corner */}
-        <div className="pointer-events-none absolute -top-20 -left-20 h-[400px] w-[400px] rounded-full bg-primary/[0.12] blur-[150px] animate-pulse" style={{ animationDuration: '5s' }} />
-        {/* Secondary emerald bloom — bottom-right */}
-        <div className="pointer-events-none absolute -bottom-16 -right-16 h-[300px] w-[300px] rounded-full bg-primary/[0.09] blur-[120px] animate-pulse" style={{ animationDuration: '7s', animationDelay: '1.5s' }} />
-        {/* Floating accent — center top */}
-        <div className="pointer-events-none absolute -top-10 left-1/3 h-[200px] w-[200px] rounded-full bg-primary/[0.06] blur-[100px] animate-pulse" style={{ animationDuration: '9s', animationDelay: '3s' }} />
-        {/* Teal accent — far right */}
-        <div className="pointer-events-none absolute top-1/2 -translate-y-1/2 -right-10 h-[250px] w-[250px] rounded-full bg-emerald-400/[0.05] blur-[100px]" />
-
-        {/* Radial emerald wash — sweeping from left */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_10%_40%,hsl(var(--primary)/0.10),transparent_65%)]" />
-        {/* Secondary radial from bottom-right */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_85%_70%,hsl(var(--primary)/0.06),transparent_60%)]" />
+        {/* ══ EMERALD ATMOSPHERE — high-intensity glows ══ */}
+        {/* Big emerald nebula — top-left */}
+        <div className="pointer-events-none absolute -top-10 -left-10 h-[500px] w-[500px] rounded-full opacity-100" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, hsl(var(--primary) / 0.06) 40%, transparent 70%)', animationDuration: '5s' }} />
+        {/* Bottom-right bloom */}
+        <div className="pointer-events-none absolute -bottom-10 -right-10 h-[400px] w-[400px] rounded-full opacity-100 animate-pulse" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.14) 0%, hsl(var(--primary) / 0.04) 45%, transparent 70%)', animationDuration: '7s' }} />
+        {/* Center-top floating accent */}
+        <div className="pointer-events-none absolute -top-6 left-[30%] h-[250px] w-[250px] rounded-full opacity-100 animate-pulse" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.10) 0%, transparent 60%)', animationDuration: '9s', animationDelay: '2s' }} />
+        {/* Right-center accent */}
+        <div className="pointer-events-none absolute top-[40%] -right-5 h-[300px] w-[300px] rounded-full opacity-100" style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 55%)' }} />
 
         {/* ══ EDGE GLOW LINES ══ */}
-        {/* Top border glow */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        {/* Left border glow */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/25 via-primary/8 to-transparent" />
-        {/* Bottom subtle glow */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
-        {/* Right subtle glow */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/30 via-primary/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
 
         <div className="relative z-10">
           {/* Header row */}
