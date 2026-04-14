@@ -471,30 +471,31 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-8 overflow-hidden rounded-[20px] border border-border/40 bg-card p-6 sm:p-8 lg:p-10"
+        className="relative mb-8 overflow-hidden rounded-[20px] border border-border/20 bg-card p-6 sm:p-8 lg:p-10"
       >
-        {/* Ambient overlays */}
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/[0.03] to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
+        {/* Ambient overlays — premium depth layers */}
+        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.04]" />
+        <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/[0.04] blur-[100px]" />
+        <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-info/[0.03] blur-[80px]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
 
         <div className="relative z-10">
           {/* Header row */}
-          <div className="mb-8 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2 shadow-sm">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <BarChart3 className="h-4.5 w-4.5" />
+          <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2 rounded-full border border-border/30 bg-background/60 px-3 py-1.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <BarChart3 className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-[11px] font-heading uppercase tracking-[0.18em] text-foreground/80">Dashboard</span>
+                <span className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-foreground/70">Dashboard</span>
               </motion.div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
-                <span className="relative flex h-2 w-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-background/40 px-2.5 py-1.5">
+                <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                  <span className="relative h-2 w-2 rounded-full bg-success" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
-                <span className="text-[10px] font-heading uppercase tracking-[0.18em] text-muted-foreground">Em tempo real</span>
+                <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/60">Live</span>
               </div>
               {nickname && (
                 <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-2">
