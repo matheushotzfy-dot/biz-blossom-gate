@@ -66,33 +66,35 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 240 6% 6%;
-    --foreground: 0 0% 93%;
-    --card: 240 5% 10%;
-    --card-foreground: 0 0% 93%;
-    --popover: 240 6% 6%;
-    --popover-foreground: 0 0% 93%;
+    --background: 220 10% 5%;
+    --foreground: 0 0% 95%;
+    --card: 220 8% 9%;
+    --card-foreground: 0 0% 95%;
+    --card-elevated: 220 8% 11%;
+    --card-inset: 220 10% 7%;
+    --popover: 220 10% 5%;
+    --popover-foreground: 0 0% 95%;
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 2%;
-    --secondary: 240 4% 13%;
+    --secondary: 220 6% 13%;
     --secondary-foreground: 0 0% 93%;
-    --muted: 240 4% 13%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 240 4% 16%;
+    --muted: 220 6% 13%;
+    --muted-foreground: 220 6% 46%;
+    --accent: 220 6% 14%;
     --accent-foreground: 0 0% 93%;
     --destructive: 0 74% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 4% 18%;
-    --input: 240 4% 13%;
+    --border: 220 6% 16%;
+    --input: 220 6% 13%;
     --ring: 160 84% 39%;
 
-    --sidebar-background: 240 6% 5%;
-    --sidebar-foreground: 240 4% 50%;
+    --sidebar-background: 220 10% 4%;
+    --sidebar-foreground: 220 6% 50%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 2%;
-    --sidebar-accent: 240 5% 10%;
+    --sidebar-accent: 220 8% 9%;
     --sidebar-accent-foreground: 0 0% 93%;
-    --sidebar-border: 240 4% 14%;
+    --sidebar-border: 220 6% 12%;
     --sidebar-ring: 160 84% 39%;
 
     --success: 158 64% 42%;
@@ -102,7 +104,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --info: 206 82% 62%;
     --info-foreground: 0 0% 100%;
 
-    --tooltip-bg: rgba(10, 10, 14, 0.98);
+    --tooltip-bg: rgba(10, 12, 18, 0.98);
     --tooltip-border: rgba(0, 200, 120, 0.08);
     --tooltip-text: #a1a1aa;
     --card-shadow: none;
