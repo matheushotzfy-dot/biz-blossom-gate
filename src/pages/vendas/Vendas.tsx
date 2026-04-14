@@ -256,80 +256,115 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
- const methods: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
- pix: { label: "PIX", icon: <Smartphone className="h-3 w-3" />, color: "text-success" },
- credit_card: { label: "Cartão", icon: <CreditCard className="h-3 w-3" />, color: "text-info" },
- boleto: { label: "Boleto", icon: <FileText className="h-3 w-3" />, color: "text-warning" },
+ const methods: Record<string, { label: string; icon: React.ReactNode; color: string; bgClass: string }> = {
+ pix: { label: "PIX", icon: <Smartphone className="h-3 w-3" />, color: "text-success", bgClass: "bg-success/8 border-success/12" },
+ credit_card: { label: "Cartão", icon: <CreditCard className="h-3 w-3" />, color: "text-info", bgClass: "bg-info/8 border-info/12" },
+ boleto: { label: "Boleto", icon: <FileText className="h-3 w-3" />, color: "text-warning", bgClass: "bg-warning/8 border-warning/12" },
  };
- const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null, color: "text-muted-foreground" };
+ const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: null, color: "text-muted-foreground", bgClass: "bg-muted/8 border-border/12" };
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
+ const prodName = tx.product_id ? (prods[tx.product_id] || "—") : "—";
 
  return (
  <motion.tr
- initial={{ opacity: 0, x: -8 }}
+ initial={{ opacity: 0, x: -6 }}
  animate={{ opacity: 1, x: 0 }}
- transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.3), ease: [0.16, 1, 0.3, 1] }}
+ transition={{ duration: 0.25, delay: Math.min(i * 0.015, 0.25), ease: [0.16, 1, 0.3, 1] }}
  onClick={onClick}
-  className="group cursor-pointer border-b border-border/60 transition-colors duration-150 hover:bg-secondary/70"
+  className="group cursor-pointer border-b border-border/40 transition-all duration-150 hover:bg-primary/[0.03]"
  >
- <td className="py-3.5 px-5">
+ {/* Cliente */}
+ <td className="py-3 px-5">
  <div className="flex items-center gap-3">
- <Avatar className="h-8 w-8 shrink-0">
-  <AvatarFallback className={cn("text-[10px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
- </Avatar>
- <div className="min-w-0">
- <p className="text-[12px] font-semibold text-foreground truncate leading-tight">{name}</p>
- {tx.customer_email && <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5">{tx.customer_email}</p>}
+ <div className="relative">
+  <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/20">
+   <AvatarFallback className={cn("text-[10px] font-black tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
+  </Avatar>
+  {tx.status === "completed" && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-card flex items-center justify-center"><div className="h-2 w-2 rounded-full bg-success" /></div>}
+ </div>
+ <div className="min-w-0 space-y-0.5">
+ <p className="text-[12px] font-heading font-bold text-foreground truncate leading-none">{name}</p>
+ <div className="flex items-center gap-1.5">
+  {tx.customer_email && <p className="text-[10px] text-muted-foreground/50 truncate max-w-[160px]">{tx.customer_email}</p>}
+  {tx.customer_phone && (
+   <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground/30"><Phone className="h-2.5 w-2.5" /></span>
+  )}
+ </div>
  </div>
  </div>
  </td>
- <td className="py-3.5 px-4">
- <span className="text-[11px] text-muted-foreground truncate block max-w-[140px]">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
- </td>
- <td className="py-3.5 px-4">
- <div>
- <span className="text-[13px] font-bold text-foreground tabular-nums tracking-tight">{fmt(Number(tx.amount))}</span>
- <p className="text-[9px] text-muted-foreground/50 tabular-nums mt-0.5">líq. {fmt(Number(tx.net_amount))}</p>
+ {/* Produto */}
+ <td className="py-3 px-4">
+ <div className="flex items-center gap-2 min-w-0">
+  <div className="h-6 w-6 rounded-md bg-secondary/80 flex items-center justify-center shrink-0">
+   <Package className="h-3 w-3 text-muted-foreground/40" />
+  </div>
+  <span className="text-[11px] font-heading font-medium text-foreground/80 truncate max-w-[130px]">{prodName}</span>
  </div>
  </td>
- <td className="py-3.5 px-4">
- <span className={cn("inline-flex items-center gap-1 text-[10px] font-semibold", method.color)}>
+ {/* Valor */}
+ <td className="py-3 px-4">
+ <div className="space-y-0.5">
+ <span className="text-[13px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em] leading-none">{fmt(Number(tx.amount))}</span>
+ <div className="flex items-center gap-1">
+  <span className="text-[9px] text-success/60 font-semibold tabular-nums">líq. {fmt(Number(tx.net_amount))}</span>
+  {Number(tx.fee_amount) > 0 && <span className="text-[8px] text-muted-foreground/25 tabular-nums">(-{fmt(Number(tx.fee_amount))})</span>}
+ </div>
+ </div>
+ </td>
+ {/* Método */}
+ <td className="py-3 px-4">
+ <span className={cn("inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-heading font-bold border", method.color, method.bgClass)}>
  {method.icon}{method.label}
  </span>
  </td>
- <td className="py-3.5 px-4">
- <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold tracking-wide border", st.fg, st.bg, st.border)}>
- <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+ {/* Status */}
+ <td className="py-3 px-4">
+ <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-heading font-black tracking-wide uppercase border", st.fg, st.bg, st.border)}>
+ <span className="relative flex h-1.5 w-1.5">
+  {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+  <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+ </span>
  {st.label}
  </span>
  </td>
- <td className="py-3.5 px-4">
- <div className="flex flex-col">
- <span className="text-[11px] text-muted-foreground tabular-nums">{fmtDate(tx.created_at)}</span>
- <span className="text-[9px] text-muted-foreground/40 tabular-nums">{fmtTime(tx.created_at)}</span>
+ {/* Data */}
+ <td className="py-3 px-4">
+ <div className="flex flex-col items-start">
+ <span className="text-[11px] font-heading font-semibold text-foreground/70 tabular-nums">{fmtDate(tx.created_at)}</span>
+ <span className="text-[9px] text-muted-foreground/35 tabular-nums font-medium">{fmtTime(tx.created_at)}</span>
  </div>
  </td>
- <td className="py-3.5 px-2">
+ {/* Actions */}
+ <td className="py-3 px-2">
+ <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+ {tx.customer_phone && (
+  <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+   className="h-7 w-7 rounded-lg flex items-center justify-center text-success/60 hover:bg-success/8 hover:text-success transition-colors active:scale-95">
+   <MessageCircle className="h-3.5 w-3.5" />
+  </a>
+ )}
  <DropdownMenu>
  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
- <button className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-muted/15 active:scale-95">
- <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+ <button className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-secondary/80 transition-all active:scale-95">
+ <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/50" />
  </button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/30">
- <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+ <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/50">
+ <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
  {tx.customer_phone && (
- <>
- <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Copiado!"); }} className="gap-2 text-[11px] rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
- <DropdownMenuItem asChild><a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="gap-2 text-[11px] rounded-lg"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a></DropdownMenuItem>
- </>
+ <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
+ )}
+ {tx.customer_email && (
+ <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>
  )}
  {tx.status === "completed" && (
- <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
+ <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] font-heading text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
  )}
  </DropdownMenuContent>
  </DropdownMenu>
+ </div>
  </td>
  </motion.tr>
  );
@@ -340,44 +375,60 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
  const methodLabels: Record<string, string> = { pix: "PIX", credit_card: "Cartão", boleto: "Boleto" };
+ const methodColors: Record<string, string> = { pix: "text-success", credit_card: "text-info", boleto: "text-warning" };
+ const prodName = tx.product_id ? prods[tx.product_id] || "" : "—";
 
  return (
  <motion.div
- initial={{ opacity: 0, y: 12 }}
+ initial={{ opacity: 0, y: 8 }}
  animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.15), ease: [0.16, 1, 0.3, 1] }}
- className="cursor-pointer rounded-xl border border-border/30 bg-card p-4 transition-colors duration-150 hover:border-border/50 active:scale-[0.99]"
+ transition={{ duration: 0.25, delay: Math.min(i * 0.015, 0.12), ease: [0.16, 1, 0.3, 1] }}
+ className="cursor-pointer rounded-2xl border border-border/50 bg-card overflow-hidden transition-all duration-150 hover:border-border/70 active:scale-[0.995]"
  onClick={onClick}
  >
- <div className="flex items-start justify-between mb-3">
+ {/* Accent rail top */}
+ <div className={cn("h-[2px] w-full", st.dot)} />
+ <div className="p-4">
+ {/* Top row: Avatar + Name + Status */}
+ <div className="flex items-start justify-between mb-3.5">
  <div className="flex items-center gap-2.5 min-w-0">
- <Avatar className="h-8 w-8 shrink-0">
- <AvatarFallback className={cn("text-[9px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
- </Avatar>
- <div className="min-w-0">
- <p className="text-[12px] font-bold text-foreground truncate leading-tight">{name}</p>
- <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5">{tx.customer_email || methodLabels[tx.payment_method || ""] || ""}</p>
+  <div className="relative">
+   <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/20">
+    <AvatarFallback className={cn("text-[9px] font-black", avatarColor(name))}>{initials(name)}</AvatarFallback>
+   </Avatar>
+   {tx.status === "completed" && <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-card flex items-center justify-center"><div className="h-1.5 w-1.5 rounded-full bg-success" /></div>}
+  </div>
+  <div className="min-w-0 space-y-0.5">
+   <p className="text-[12px] font-heading font-bold text-foreground truncate leading-none">{name}</p>
+   <p className="text-[10px] text-muted-foreground/50 truncate">{tx.customer_email || ""}</p>
+  </div>
  </div>
- </div>
- <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-bold shrink-0 border", st.fg, st.bg, st.border)}>
- <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />{st.label}
+ <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-heading font-black uppercase shrink-0 border tracking-wider", st.fg, st.bg, st.border)}>
+ <span className="relative flex h-1.5 w-1.5">
+  {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+  <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+ </span>
+ {st.label}
  </span>
  </div>
- <div className="flex items-end justify-between">
- <div>
- <p className="text-lg font-black text-foreground tabular-nums tracking-tight leading-none">{fmt(Number(tx.amount))}</p>
- <div className="flex items-center gap-2 mt-1.5">
- <span className="text-[10px] text-muted-foreground font-medium">{methodLabels[tx.payment_method || ""] || "—"}</span>
- <span className="text-[10px] text-muted-foreground/25">·</span>
- <span className="text-[10px] text-muted-foreground/60 truncate max-w-[100px]">{tx.product_id ? prods[tx.product_id] || "" : "—"}</span>
+ {/* Middle: Amount prominent */}
+ <div className="mb-3">
+ <p className="text-xl font-heading font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">{fmt(Number(tx.amount))}</p>
+ <p className="text-[10px] text-success/60 font-semibold tabular-nums mt-1">líq. {fmt(Number(tx.net_amount))}</p>
  </div>
+ {/* Bottom row: meta */}
+ <div className="flex items-center justify-between pt-3 border-t border-border/30">
+ <div className="flex items-center gap-2">
+  <span className={cn("text-[10px] font-heading font-bold", methodColors[tx.payment_method || ""] || "text-muted-foreground")}>{methodLabels[tx.payment_method || ""] || "—"}</span>
+  <span className="text-muted-foreground/15">·</span>
+  <span className="text-[10px] text-muted-foreground/40 truncate max-w-[90px]">{prodName}</span>
+  <span className="text-muted-foreground/15">·</span>
+  <span className="text-[10px] text-muted-foreground/40 tabular-nums">{fmtDate(tx.created_at)}</span>
  </div>
- <div className="text-right flex flex-col items-end gap-1.5">
- <span className="text-[10px] text-muted-foreground/60 tabular-nums">{fmtDate(tx.created_at)}</span>
  {tx.customer_phone && (
- <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-7 w-7 rounded-lg bg-success/8 flex items-center justify-center text-success hover:bg-success/12 transition-colors active:scale-95 border border-success/10">
- <MessageCircle className="h-3 w-3" />
- </a>
+  <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="h-7 w-7 rounded-lg bg-success/8 flex items-center justify-center text-success hover:bg-success/12 transition-colors active:scale-95 border border-success/10">
+  <MessageCircle className="h-3 w-3" />
+  </a>
  )}
  </div>
  </div>
