@@ -471,25 +471,25 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-8 overflow-hidden rounded-[20px] border border-border/20 bg-card p-6 sm:p-8 lg:p-10"
+        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/20 p-6 sm:p-8 lg:p-10"
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 70% at 0% 10%, hsla(160, 84%, 39%, 0.22), transparent 55%),
+            radial-gradient(ellipse 50% 60% at 95% 90%, hsla(160, 84%, 39%, 0.15), transparent 50%),
+            radial-gradient(ellipse 40% 40% at 50% 0%, hsla(160, 84%, 39%, 0.10), transparent 45%),
+            radial-gradient(ellipse 30% 50% at 100% 20%, hsla(160, 84%, 39%, 0.08), transparent 45%),
+            hsl(var(--card))
+          `
+        }}
       >
-        {/* Ambient overlays — premium depth layers */}
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.04]" />
+        {/* Ambient grid texture */}
+        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
 
-        {/* Primary emerald glow — top-left */}
-        <div className="pointer-events-none absolute -top-32 -left-32 h-80 w-80 rounded-full bg-primary/[0.07] blur-[120px] animate-pulse" style={{ animationDuration: '6s' }} />
-        {/* Secondary emerald glow — bottom-right */}
-        <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-primary/[0.05] blur-[100px] animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }} />
-        {/* Subtle blue-teal accent — center-right */}
-        <div className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-0 h-48 w-48 rounded-full bg-info/[0.03] blur-[80px]" />
-        {/* Radial emerald wash across the card */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_15%_50%,hsl(var(--primary)/0.06),transparent_70%)]" />
-        {/* Top edge glow line */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
-        {/* Left edge glow line */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-primary/15 via-primary/5 to-transparent" />
-        {/* Bottom edge subtle glow */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+        {/* ══ EDGE GLOW LINES ══ */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/35 via-primary/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
 
         <div className="relative z-10">
           {/* Header row */}
