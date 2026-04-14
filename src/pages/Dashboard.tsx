@@ -596,23 +596,23 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Chips row */}
-          <div className="flex flex-wrap items-center gap-2 mb-8">
+          <div className="flex flex-wrap items-center gap-2.5 mb-10">
             {[
-              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/10", bg: "bg-success/4" },
-              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/10", bg: "bg-warning/4" },
-              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/10", bg: "bg-info/4" },
-              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-primary/10", bg: "bg-primary/4" },
-              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-warning/10", bg: "bg-warning/4" },
+              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
+              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
+              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
+              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
+              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
             ].map((chip, i) => (
-              <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-semibold text-foreground/70", chip.bg, chip.border)}>
-                <chip.icon className={cn("h-3 w-3", chip.color)} />
+              <span key={i} className={cn("inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[12px] font-semibold text-foreground/80", chip.bg, chip.border)}>
+                <chip.icon className={cn("h-3.5 w-3.5", chip.color)} />
                 {chip.label}
               </span>
             ))}
           </div>
 
           {/* ── KPI Strip ── */}
-          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
               { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
               { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentColor: "bg-success", iconBg: "bg-success/8", iconText: "text-success" },
@@ -620,18 +620,18 @@ export default function Dashboard() {
               { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.12 + idx * 0.06 }}
-                className="group relative overflow-hidden rounded-[16px] border border-border/30 bg-background/60 p-4 lg:p-5 transition-all duration-200 hover:border-border/50">
+                className="group relative overflow-hidden rounded-[16px] border border-border/30 bg-background/60 p-5 lg:p-6 transition-all duration-200 hover:border-border/50">
                 {/* Top accent line */}
                 <div className={cn("absolute top-0 left-4 right-4 h-[2px] rounded-b-full", item.accentColor)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-2.5 text-[8px] lg:text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/50">{item.label}</p>
-                    <p className="text-[22px] lg:text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
+                    <p className="mb-3 text-[9px] lg:text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/50">{item.label}</p>
+                    <p className="text-[26px] lg:text-[32px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
                       {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
                     </p>
                   </div>
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
-                    <item.icon className="h-[18px] w-[18px]" />
+                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
+                    <item.icon className="h-5 w-5" />
                   </div>
                 </div>
               </motion.div>
