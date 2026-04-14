@@ -774,17 +774,19 @@ export default function Vendas() {
   const refundedAmount = m.refunded.reduce((acc, tx) => acc + Number(tx.amount), 0);
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
-     /* ═══════════ RENDER ═══════════ */
+      /* ═══════════ RENDER ═══════════ */
     return (
-      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
-        <div className="space-y-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
+
+        {/* ═══════ HEADER ═══════ */}
+        <div className="space-y-4">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-heading font-semibold text-muted-foreground/50">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.06] px-3 py-1.5 text-[11px] font-heading font-bold text-primary">
+                <span className="relative flex h-2 w-2"><span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40" /><span className="h-2 w-2 rounded-full bg-primary" /></span>
                 {periodLabel}
               </span>
-              <h1 className="mt-3 text-[28px] font-heading font-black tracking-[-0.05em] text-foreground">Minhas Vendas</h1>
+              <h1 className="mt-4 text-[36px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
               <p className="mt-1 text-[11px] text-muted-foreground/45">{lastSaleText ? `Última venda ${lastSaleText}` : "Visão consolidada de receita, clientes e aprovações."}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
