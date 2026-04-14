@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useTransactions, useInvalidateAll } from "@/hooks/useQueryData";
 import {
- Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
- Link as LinkIcon, Search, Copy, MoreVertical,
- Globe, Lock, Image as ImageIcon, X,
- Video, DollarSign, PlayCircle, Sparkles,
- Users, Grid3X3, List, CheckCircle2,
- ChevronRight, GraduationCap, Loader2,
+  Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
+  Link as LinkIcon, Search, Copy, MoreVertical,
+  Globe, Lock, Image as ImageIcon, X,
+  Video, DollarSign, PlayCircle, Sparkles,
+  Users, Grid3X3, List, CheckCircle2,
+  ChevronRight, GraduationCap, Loader2, ExternalLink, Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
