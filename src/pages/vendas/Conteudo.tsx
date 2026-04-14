@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts as useProductsQuery, useCourses as useCoursesQuery, useTransactions, useInvalidateAll } from "@/hooks/useQueryData";
 import {
- Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
- Link as LinkIcon, Search, Copy, MoreVertical,
- Globe, Lock, Image as ImageIcon, X,
- Video, DollarSign, PlayCircle, Sparkles,
- Users, Grid3X3, List, CheckCircle2,
- ChevronRight, GraduationCap, Loader2,
+  Plus, BookOpen, Layers, Trash2, Edit, Eye, EyeOff,
+  Link as LinkIcon, Search, Copy, MoreVertical,
+  Globe, Lock, Image as ImageIcon, X,
+  Video, DollarSign, PlayCircle, Sparkles,
+  Users, Grid3X3, List, CheckCircle2,
+  ChevronRight, GraduationCap, Loader2, ExternalLink, Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -496,148 +496,171 @@ export default function AdminConteudo() {
         </div>
       ) : (
         <div className="px-5 pt-5 pb-8 sm:px-7">
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-          {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border bg-secondary/50">
-            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Curso</span>
-            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Conteúdo</span>
-            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Alunos</span>
-            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Status</span>
-            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Receita</span>
-            <span />
-          </div>
-
-          <div className="divide-y divide-border/50">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filtered.map((c) => {
               const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
               const product = products.find(p => p.id === c.product_id);
               const revenue = getCourseRevenue(c);
               const students = studentCounts[c.id] || 0;
               const isLive = !!c.is_published;
+              const initial = c.title.charAt(0).toUpperCase();
 
               return (
-                <div
+                <article
                   key={c.id}
                   onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                  className="group grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 py-3 sm:py-0 sm:h-[56px] hover:bg-secondary/40 transition-colors cursor-pointer"
+                  className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/50 hover:-translate-y-0.5"
                 >
-                  {/* Course */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 bg-secondary border border-border/50">
-                      {c.thumbnail_url ? (
-                        <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <GraduationCap className="h-4 w-4 text-primary/30" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-display font-semibold text-foreground truncate">{c.title}</p>
-                      <p className="text-[11px] text-muted-foreground/50 truncate font-display">
-                        {product ? product.name : c.description || "—"}
-                      </p>
-                    </div>
-                  </div>
+                  {/* Thumbnail */}
+                  <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                    {c.thumbnail_url ? (
+                      <img src={c.thumbnail_url} alt={c.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
+                        <span className="font-display text-3xl font-black text-muted-foreground/60">{initial}</span>
+                      </div>
+                    )}
 
-                  {/* Conteúdo */}
-                  <div className="hidden sm:block">
-                    <p className="text-[12px] font-display text-muted-foreground tabular-nums">{stats.modules}m · {stats.lessons}a</p>
-                  </div>
-
-                  {/* Alunos */}
-                  <div className="hidden sm:block">
-                    <p className="text-[12px] font-display text-muted-foreground tabular-nums">{students > 0 ? students : "—"}</p>
-                  </div>
-
-                  {/* Status */}
-                  <div className="hidden sm:flex items-center gap-1.5">
-                    <span className={cn(
-                      "h-1.5 w-1.5 rounded-full",
-                      isLive ? "bg-success animate-pulse" : "bg-muted-foreground/25"
-                    )} />
-                    <span className="text-[12px] font-display text-muted-foreground">{isLive ? "Live" : "Draft"}</span>
-                  </div>
-
-                  {/* Receita */}
-                  <div className="hidden sm:block">
-                    <p className={cn("text-[12px] font-display tabular-nums", revenue > 0 ? "text-foreground font-semibold" : "text-muted-foreground/30")}>
-                      {revenue > 0 ? fmt(revenue) : "—"}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="hidden sm:flex justify-end" onClick={e => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground/25 hover:text-foreground transition-colors">
-                          <MoreVertical className="h-3.5 w-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" sideOffset={8} className="w-[220px] rounded-2xl border border-border bg-secondary p-1.5 shadow-none">
-                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><ChevronRight className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Gerenciar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Configurações
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">{isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}</div> {isLive ? "Despublicar" : "Publicar"}
-                        </DropdownMenuItem>
+                    {/* Status */}
+                    <div className="absolute left-3 top-3">
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border",
+                        isLive
+                          ? "bg-success/15 text-success border-success/25"
+                          : "bg-card/95 text-muted-foreground border-border"
+                      )}>
                         {isLive && (
-                          <>
-                            <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
-                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Copy className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Copiar link
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
-                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><PlayCircle className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Ver área
-                            </DropdownMenuItem>
-                          </>
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-50" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                          </span>
                         )}
-                        <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
-                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive cursor-pointer focus:bg-destructive/10">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10"><Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} /></div> Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  {/* Mobile meta */}
-                  <div className="flex items-center justify-between mt-1.5 sm:hidden">
-                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-success animate-pulse" : "bg-muted-foreground/25")} />
-                        {isLive ? "Live" : "Draft"}
+                        {isLive ? "Live" : "Rascunho"}
                       </span>
-                      <span>{stats.modules}m · {stats.lessons}a</span>
-                      {revenue > 0 && <span className="font-medium text-foreground">{fmt(revenue)}</span>}
                     </div>
-                    <div onClick={e => e.stopPropagation()}>
+
+                    {/* Menu on hover */}
+                    <div className="absolute right-3 top-3 opacity-0 transition-opacity duration-150 group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground/30">
+                          <button className="flex h-7 w-7 items-center justify-center rounded-md bg-card border border-border text-foreground hover:bg-accent transition-colors">
                             <MoreVertical className="h-3.5 w-3.5" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44 rounded-lg">
-                          <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
-                            <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                        <DropdownMenuContent align="end" sideOffset={8} className="w-[220px] rounded-2xl border border-border bg-secondary p-1.5 shadow-none">
+                          <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><ChevronRight className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Gerenciar
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
-                            <Edit className="h-3.5 w-3.5" /> Configurações
+                          <DropdownMenuItem onClick={() => openEdit(c)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Configurações
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
-                            <Trash2 className="h-3.5 w-3.5" /> Excluir
+                          <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">{isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}</div> {isLive ? "Despublicar" : "Publicar"}
+                          </DropdownMenuItem>
+                          {isLive && (
+                            <>
+                              <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Copy className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Copiar link
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><PlayCircle className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Ver área
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
+                          <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive cursor-pointer focus:bg-destructive/10">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10"><Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} /></div> Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
+
+                    {/* Tags */}
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-card/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground border border-border">
+                        <Layers className="h-3 w-3" strokeWidth={2} />
+                        {stats.modules}m · {stats.lessons}a
+                      </span>
+                      {students > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-card/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground border border-border">
+                          <Users className="h-3 w-3" strokeWidth={2} />
+                          {students}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+
+                  {/* Body */}
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="truncate text-[15px] font-bold leading-6 text-foreground">{c.title}</h3>
+                    <p className="mt-1 truncate text-[13px] leading-5 text-muted-foreground">{c.description || "Sem descrição"}</p>
+
+                    <div className="mt-5 flex items-end justify-between">
+                      {revenue > 0 ? (
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-numbers text-2xl font-black tabular-nums tracking-tight text-success">{fmt(revenue)}</span>
+                          <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">receita</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-sm font-semibold text-muted-foreground/40">Sem receita</span>
+                        </div>
+                      )}
+                      {product && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary truncate max-w-[120px]">
+                          <LinkIcon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                          <span className="truncate">{product.name}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="my-4 h-px bg-border" />
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                        className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-secondary text-[11px] font-medium text-foreground transition-colors hover:bg-accent"
+                      >
+                        <Edit className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        Gerenciar
+                      </button>
+                      {isLive && (
+                        <>
+                          <button
+                            onClick={() => copyMemberLink(c.id)}
+                            className={cn(
+                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                              copiedId === c.id
+                                ? "border-success/40 bg-success/15 text-success"
+                                : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent"
+                            )}
+                            title="Copiar link"
+                          >
+                            <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          </button>
+                          <button
+                            onClick={() => window.open(getMemberLink(c.id), "_blank")}
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                            title="Ver área de membros"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3" strokeWidth={1.8} />
+                        {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                      </span>
+                      <span className="font-mono uppercase tracking-widest">#{c.id.slice(0, 6)}</span>
+                    </div>
+                  </div>
+                </article>
               );
             })}
-          </div>
           </div>
         </div>
       )}
