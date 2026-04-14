@@ -983,46 +983,7 @@ export default function Vendas() {
               </>
             )}
           </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/50 bg-secondary/30">
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/50">Produto</th>
-                        <SortHead label="Valor" field="amount" sort={sort} onSort={handleSort} />
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/50">Método</th>
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/50">Status</th>
-                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="w-10" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleItems.length === 0 ? (
-                        <tr><td colSpan={7} className="py-16">
-                          <div className="flex flex-col items-center justify-center">
-                            <ShoppingCart className="h-6 w-6 text-muted-foreground/10 mb-2" />
-                            <p className="text-[11px] font-heading font-bold text-muted-foreground/30">Nenhuma venda encontrada</p>
-                            <p className="text-[9px] font-heading text-muted-foreground/20 mt-0.5">Ajuste os filtros, o período ou a busca</p>
-                          </div>
-                        </td></tr>
-                      ) : visibleItems.map((tx, i) => (
-                        <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                {visibleCount < sortedFiltered.length && (
-                  <div className="border-t border-border/10 p-3 text-center">
-                    <button onClick={() => setVisibleCount((c) => c + PAGE_SIZE)} className="text-[10px] font-heading font-bold text-muted-foreground/30 hover:text-foreground transition-colors inline-flex items-center gap-1 active:scale-[0.97]">
-                      <ChevronDown className="h-3.5 w-3.5" /> Carregar mais {Math.min(PAGE_SIZE, sortedFiltered.length - visibleCount)}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+
 
           <div className="space-y-2 md:hidden p-4 pt-2">
             {loading ? (
