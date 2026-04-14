@@ -788,26 +788,28 @@ export default function Vendas() {
 
           {/* ═══════ KPI CARDS ═══════ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <div className="rounded-2xl border border-border/60 bg-card px-5 py-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-heading font-semibold text-muted-foreground/50 uppercase tracking-wider">Vendas encontradas</span>
+            <div className="relative overflow-hidden rounded-[20px] border border-border/60 bg-card px-6 py-5">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-[20px]" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">Vendas encontradas</span>
                 <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
               </div>
               <div className="flex items-end justify-between">
-                <span className="text-3xl font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</span>
-                <button onClick={toggleHidden} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/20 hover:text-foreground transition-colors">
+                <span className="text-[34px] font-heading font-black text-foreground tabular-nums tracking-[-0.04em] leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</span>
+                <button onClick={toggleHidden} className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-secondary/50 transition-all">
                   {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
-            <div className="rounded-2xl border border-border/60 bg-card px-5 py-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-heading font-semibold text-muted-foreground/50 uppercase tracking-wider">Valor líquido</span>
+            <div className="relative overflow-hidden rounded-[20px] border border-border/60 bg-card px-6 py-5">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-success rounded-l-[20px]" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">Valor líquido</span>
                 <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
               </div>
               <div className="flex items-end justify-between">
-                <span className="text-3xl font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
-                <button onClick={toggleHidden} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/20 hover:text-foreground transition-colors">
+                <span className="text-[34px] font-heading font-black text-foreground tabular-nums tracking-[-0.04em] leading-none">{hidden ? HIDE : fmt(m.totalNet)}</span>
+                <button onClick={toggleHidden} className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground/30 hover:text-foreground hover:bg-secondary/50 transition-all">
                   {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -820,11 +822,12 @@ export default function Vendas() {
               { label: "% de reembolso", value: `${m.refundRate.toFixed(1)}%`, accent: (m.refundRate > 5 ? "destructive" : "primary") as AccentTone },
               { label: "Chargeback", value: hidden ? HIDE : fmt(m.chargebacks.reduce((a: number, t: Tables<"transactions">) => a + Number(t.amount), 0)), accent: (m.chargebackRate > 1 ? "destructive" : "success") as AccentTone },
             ]).map((card) => (
-              <div key={card.label} className="rounded-2xl border border-border/60 bg-card px-4 py-3.5">
-                <span className="text-[9px] font-heading font-semibold text-muted-foreground/50 uppercase tracking-wider">{card.label}</span>
-                <div className="flex items-end justify-between mt-1.5">
-                  <span className={cn("text-xl font-heading font-black tabular-nums tracking-[-0.03em]", ACCENT_STYLES[card.accent].text)}>{card.value}</span>
-                  <button onClick={toggleHidden} className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground/15 hover:text-foreground transition-colors">
+              <div key={card.label} className="relative overflow-hidden rounded-[20px] border border-border/60 bg-card px-5 py-4">
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[20px]", ACCENT_STYLES[card.accent].rail)} />
+                <span className="text-[9px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.14em]">{card.label}</span>
+                <div className="flex items-end justify-between mt-2">
+                  <span className={cn("text-[22px] font-heading font-black tabular-nums tracking-[-0.03em] leading-none", ACCENT_STYLES[card.accent].text)}>{card.value}</span>
+                  <button onClick={toggleHidden} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/25 hover:text-foreground hover:bg-secondary/50 transition-all">
                     {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
@@ -834,18 +837,18 @@ export default function Vendas() {
         </motion.div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="flex flex-col gap-3 px-5 py-3 border-b border-border/50 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-1 overflow-x-auto">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="overflow-hidden rounded-[20px] border border-border/60 bg-card">
+          <div className="flex flex-col gap-3 px-5 py-3.5 border-b border-border/50 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-1.5 overflow-x-auto">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
                   <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                    className={cn("rounded-lg px-3 py-1.5 text-[11px] font-heading font-semibold transition-all whitespace-nowrap active:scale-[0.97]",
-                      active ? "bg-foreground text-background" : "text-muted-foreground/50 hover:text-foreground hover:bg-secondary/50"
+                    className={cn("rounded-lg px-3.5 py-1.5 text-[11px] font-heading font-bold transition-all whitespace-nowrap active:scale-[0.97]",
+                      active ? "bg-foreground text-background" : "text-muted-foreground/40 hover:text-foreground hover:bg-secondary/60"
                     )}>
                     {tab.label}
-                    {tab.count > 0 && <span className={cn("ml-1.5 tabular-nums", active ? "text-background/60" : "text-muted-foreground/25")}>{tab.count}</span>}
+                    {tab.count > 0 && <span className={cn("ml-1.5 tabular-nums", active ? "text-background/50" : "text-muted-foreground/20")}>{tab.count}</span>}
                   </button>
                 );
               })}
@@ -942,13 +945,15 @@ export default function Vendas() {
 
         {/* ═══════ CHART + SIDE PANELS ═══════ */}
         <section className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-12">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 flex min-h-[340px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border/50">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-muted-foreground/50" />
-                <p className="text-[11px] font-heading text-foreground font-bold">Faturamento</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 flex min-h-[340px] flex-col overflow-hidden rounded-[20px] border border-border/60 bg-card">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-[12px] font-heading text-foreground font-bold">Faturamento</p>
               </div>
-              <p className="text-[13px] font-heading text-foreground tabular-nums font-black tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</p>
+              <p className="text-[14px] font-heading text-primary tabular-nums font-black tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</p>
             </div>
             <div className="flex-1 min-h-0 px-2 pb-3 pt-1">
               <RevenueChart data={metrics.chartData} hidden={hidden} />
@@ -956,7 +961,7 @@ export default function Vendas() {
           </motion.div>
 
           <div className="xl:col-span-4 flex flex-col gap-3">
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-[20px] border border-border/60 bg-card overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-3.5 w-3.5 text-muted-foreground/50" />
@@ -988,7 +993,7 @@ export default function Vendas() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-[20px] border border-border/60 bg-card overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                 <div className="flex items-center gap-2">
                   <Activity className="h-3.5 w-3.5 text-muted-foreground/50" />
@@ -1020,7 +1025,7 @@ export default function Vendas() {
             </div>
 
             {metrics.topProducts.length > 0 && (
-              <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+              <div className="rounded-[20px] border border-border/60 bg-card overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                   <div className="flex items-center gap-2">
                     <Package className="h-3.5 w-3.5 text-muted-foreground/50" />
