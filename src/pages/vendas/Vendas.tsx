@@ -961,7 +961,7 @@ export default function Vendas() {
           </motion.div>
 
           <div className="xl:col-span-4 flex flex-col gap-3">
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-[20px] border border-border/60 bg-card overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-3.5 w-3.5 text-muted-foreground/50" />
@@ -993,7 +993,7 @@ export default function Vendas() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="rounded-[20px] border border-border/60 bg-card overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                 <div className="flex items-center gap-2">
                   <Activity className="h-3.5 w-3.5 text-muted-foreground/50" />
@@ -1025,7 +1025,7 @@ export default function Vendas() {
             </div>
 
             {metrics.topProducts.length > 0 && (
-              <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+              <div className="rounded-[20px] border border-border/60 bg-card overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                   <div className="flex items-center gap-2">
                     <Package className="h-3.5 w-3.5 text-muted-foreground/50" />
