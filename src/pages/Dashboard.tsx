@@ -556,8 +556,10 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="relative mb-8 rounded-[20px] border border-border bg-[hsl(var(--card-elevated,var(--card)))] overflow-hidden"
         >
-          {/* Subtle top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary/20 to-transparent" />
+          {/* Top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-primary/40 to-transparent" />
+          {/* Subtle corner glow */}
+          <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/[0.04] blur-[60px] pointer-events-none" />
 
           <div className="p-6 sm:p-8 lg:p-10">
             {/* Top row: period label + saldo */}
