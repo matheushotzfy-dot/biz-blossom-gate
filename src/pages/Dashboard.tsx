@@ -693,9 +693,9 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Right panel — Conversion + Payment KPIs */}
-        <div className="xl:col-span-4 flex flex-col gap-4">
+        <div className="xl:col-span-4 flex flex-col gap-3">
           {/* Conversion rates */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm flex flex-col">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border/30 bg-card p-5 flex flex-col">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-info">
                 <Percent className="h-4 w-4" />
