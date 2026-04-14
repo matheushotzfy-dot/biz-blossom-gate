@@ -558,30 +558,35 @@ export default function Dashboard() {
 
           {/* ── Main revenue display ── */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
-            <p className="mb-4 text-[11px] font-heading uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
               {isCustom && customRange?.from
                 ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                 : `Receita — ${selectedPeriod.label}`}
             </p>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[104px]">
+                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[96px]">
                   {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-success/8 border border-success/15 px-3 py-1.5">
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-success/8 border border-success/12 px-3 py-1.5">
                     <span className="relative flex h-[5px] w-[5px]">
                       <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
                       <span className="relative h-[5px] w-[5px] rounded-full bg-success" />
                     </span>
-                    <span className="text-[9px] font-heading text-success font-bold uppercase tracking-[0.08em]">Tempo real</span>
+                    <span className="text-[9px] font-heading text-success font-bold uppercase tracking-[0.1em]">Tempo real</span>
                   </div>
+                  {approved.length > 0 && (
+                    <span className="text-[10px] font-heading text-muted-foreground/40">
+                      {approved.length} venda{approved.length !== 1 ? "s" : ""} aprovada{approved.length !== 1 ? "s" : ""}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="text-right hidden sm:flex flex-col items-end gap-3">
-                <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] px-5 py-3.5">
-                  <p className="text-[9px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-1.5">Saldo Disponível</p>
-                  <p className="text-[28px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
+                <div className="rounded-[16px] border border-primary/12 bg-primary/[0.03] px-6 py-4">
+                  <p className="text-[9px] font-heading text-muted-foreground/50 uppercase tracking-[0.14em] mb-2">Saldo Disponível</p>
+                  <p className="text-[30px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
                     {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
                   </p>
                 </div>
