@@ -857,7 +857,6 @@ export default function Vendas() {
             </div>
           </div>
         </div>
-        </div>
 
         {/* ═══════ SECONDARY KPIs — 4 compactos ═══════ */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
