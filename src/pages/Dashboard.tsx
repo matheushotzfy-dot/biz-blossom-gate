@@ -471,16 +471,19 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/20 bg-[hsl(var(--card))] p-6 sm:p-8 lg:p-10"
+        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/20 p-6 sm:p-8 lg:p-10"
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 70% at 5% 20%, hsl(var(--primary) / 0.16), transparent 60%),
+            radial-gradient(ellipse 50% 60% at 90% 80%, hsl(var(--primary) / 0.10), transparent 55%),
+            radial-gradient(ellipse 40% 40% at 40% 10%, hsl(var(--primary) / 0.07), transparent 50%),
+            radial-gradient(ellipse 35% 50% at 95% 30%, hsl(var(--primary) / 0.05), transparent 50%),
+            hsl(var(--card))
+          `
+        }}
       >
         {/* Ambient grid texture */}
         <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
-
-        {/* ══ EMERALD ATMOSPHERE ══ */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-[420px] w-[420px] rounded-full bg-primary/20 blur-[180px]" />
-        <div className="pointer-events-none absolute -bottom-20 -right-20 h-[350px] w-[350px] rounded-full bg-primary/15 blur-[150px] animate-pulse" style={{ animationDuration: '6s' }} />
-        <div className="pointer-events-none absolute -top-10 left-[35%] h-[220px] w-[220px] rounded-full bg-primary/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }} />
-        <div className="pointer-events-none absolute top-[30%] -right-10 h-[280px] w-[280px] rounded-full bg-primary/8 blur-[130px]" />
 
         {/* ══ EDGE GLOW LINES ══ */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
