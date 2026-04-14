@@ -379,98 +379,135 @@ export default function AdminConteudo() {
   const totalLessonsCount = Object.values(courseStats).reduce((a, s) => a + s.lessons, 0);
   const totalRevenue = courses.reduce((a, c) => a + getCourseRevenue(c), 0);
 
-  return (
-    <div className="mx-auto w-full max-w-[1440px] pb-28 md:pb-16">
+   return (
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
       {/* ── Header ── */}
-      <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
-        <div>
-          <h1 className="text-[22px] font-bold text-foreground">Área de Membros</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
-            {courses.length} curso{courses.length !== 1 ? "s" : ""}
-            {totalStudents > 0 && <> · {totalStudents} aluno{totalStudents !== 1 ? "s" : ""}</>}
-          </p>
+      <div className="px-5 pt-1 sm:px-7 md:pt-1">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-border">
+                <GraduationCap className="h-5 w-5 text-primary" strokeWidth={1.8} />
+              </div>
+              <div>
+                <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                  Área de Membros
+                </h1>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-muted-foreground">
+                    {courses.length} {courses.length === 1 ? "curso cadastrado" : "cursos cadastrados"}
+                  </p>
+                  {publishedCourses > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-success/70">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                      {publishedCourses} publicado{publishedCourses !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={openNew}
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:-translate-y-px"
+          >
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+            Novo curso
+          </button>
         </div>
-        <button
-          onClick={openNew}
-          className="h-9 px-4 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" /> Novo curso
-        </button>
+
+        {/* ── Toolbar ── */}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Tabs */}
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
+            {tabs.map((item) => {
+              const active = filter === item.value;
+              return (
+                <button
+                  key={item.value}
+                  onClick={() => setFilter(item.value)}
+                  className={cn(
+                    "relative rounded-md px-3 py-1.5 text-[11px] font-semibold transition-all duration-150",
+                    active
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                  {item.count > 0 && (
+                    <span className={cn(
+                      "ml-1 text-[10px] tabular-nums",
+                      active ? "text-primary" : "text-muted-foreground/50"
+                    )}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar..."
+              className="h-8 w-full rounded-lg border border-border bg-secondary pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-52"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* ── Toolbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-        <div className="flex items-center gap-0.5">
-          {tabs.map(t => (
-            <button
-              key={t.value}
-              onClick={() => setFilter(t.value)}
-              className={cn(
-                "px-3 py-2 text-[13px] font-medium transition-colors relative",
-                filter === t.value ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {t.label}
-              {t.count > 0 && (
-                <span className={cn(
-                  "ml-1.5 text-[11px] tabular-nums",
-                  filter === t.value ? "text-primary font-semibold" : "text-muted-foreground/50"
-                )}>{t.count}</span>
-              )}
-              {filter === t.value && (
-                <motion.div layoutId="content-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
-              )}
-            </button>
-          ))}
-        </div>
-        <div className="sm:ml-auto relative w-full sm:w-56">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar…"
-            className="h-8 w-full rounded-md border border-border/60 bg-card pl-8 pr-7 text-[12px] placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-shadow"
-          />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2">
-              <X className="h-3 w-3 text-muted-foreground/40" />
-            </button>
-          )}
-        </div>
-      </div>
+      {/* ── Divider ── */}
+      <div className="mx-5 mt-5 h-px bg-border sm:mx-7" />
 
       {/* ── Course List ── */}
       {isLoading ? (
-        <div className="py-20 flex items-center justify-center">
-          <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
+          <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 flex flex-col items-center gap-2">
-          <p className="text-sm text-muted-foreground">
-            {search || filter !== "all" ? "Nenhum resultado" : "Nenhum curso criado"}
+        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
+            <GraduationCap className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
+          </div>
+          <p className="mt-5 text-sm font-semibold text-foreground">
+            {search || filter !== "all" ? "Nenhum resultado" : "Comece por aqui"}
+          </p>
+          <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
+            {search || filter !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie seu primeiro curso e comece a entregar conteúdo."}
           </p>
           {!search && filter === "all" && (
             <button
               onClick={openNew}
-              className="mt-1 text-[13px] font-medium text-primary hover:underline"
+              className="mt-6 inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
             >
-              Criar primeiro curso →
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Criar curso
             </button>
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
+        <div className="px-5 pt-5 pb-8 sm:px-7">
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
           {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border/40 bg-muted/20">
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Curso</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Conteúdo</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Alunos</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Status</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Receita</span>
+          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border bg-secondary/50">
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Curso</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Conteúdo</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Alunos</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Status</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Receita</span>
             <span />
           </div>
 
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border/50">
             {filtered.map((c) => {
               const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
               const product = products.find(p => p.id === c.product_id);
@@ -482,22 +519,22 @@ export default function AdminConteudo() {
                 <div
                   key={c.id}
                   onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                  className="group grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 py-3 sm:py-0 sm:h-[56px] hover:bg-muted/10 transition-colors cursor-pointer"
+                  className="group grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 py-3 sm:py-0 sm:h-[56px] hover:bg-secondary/40 transition-colors cursor-pointer"
                 >
                   {/* Course */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-md overflow-hidden shrink-0 bg-muted/30">
+                    <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 bg-secondary border border-border/50">
                       {c.thumbnail_url ? (
                         <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center">
-                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground/25" />
+                          <GraduationCap className="h-4 w-4 text-primary/30" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-foreground truncate">{c.title}</p>
-                      <p className="text-[11px] text-muted-foreground/50 truncate">
+                      <p className="text-[13px] font-display font-semibold text-foreground truncate">{c.title}</p>
+                      <p className="text-[11px] text-muted-foreground/50 truncate font-display">
                         {product ? product.name : c.description || "—"}
                       </p>
                     </div>
@@ -505,26 +542,26 @@ export default function AdminConteudo() {
 
                   {/* Conteúdo */}
                   <div className="hidden sm:block">
-                    <p className="text-[12px] text-muted-foreground tabular-nums">{stats.modules}m · {stats.lessons}a</p>
+                    <p className="text-[12px] font-display text-muted-foreground tabular-nums">{stats.modules}m · {stats.lessons}a</p>
                   </div>
 
                   {/* Alunos */}
                   <div className="hidden sm:block">
-                    <p className="text-[12px] text-muted-foreground tabular-nums">{students > 0 ? students : "—"}</p>
+                    <p className="text-[12px] font-display text-muted-foreground tabular-nums">{students > 0 ? students : "—"}</p>
                   </div>
 
                   {/* Status */}
                   <div className="hidden sm:flex items-center gap-1.5">
                     <span className={cn(
                       "h-1.5 w-1.5 rounded-full",
-                      isLive ? "bg-primary" : "bg-muted-foreground/25"
+                      isLive ? "bg-success animate-pulse" : "bg-muted-foreground/25"
                     )} />
-                    <span className="text-[12px] text-muted-foreground">{isLive ? "Live" : "Draft"}</span>
+                    <span className="text-[12px] font-display text-muted-foreground">{isLive ? "Live" : "Draft"}</span>
                   </div>
 
                   {/* Receita */}
                   <div className="hidden sm:block">
-                    <p className={cn("text-[12px] tabular-nums", revenue > 0 ? "text-foreground font-medium" : "text-muted-foreground/30")}>
+                    <p className={cn("text-[12px] font-display tabular-nums", revenue > 0 ? "text-foreground font-semibold" : "text-muted-foreground/30")}>
                       {revenue > 0 ? fmt(revenue) : "—"}
                     </p>
                   </div>
@@ -537,29 +574,29 @@ export default function AdminConteudo() {
                           <MoreVertical className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
-                          <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                      <DropdownMenuContent align="end" sideOffset={8} className="w-[220px] rounded-2xl border border-border bg-secondary p-1.5 shadow-none">
+                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><ChevronRight className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Gerenciar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
-                          <Edit className="h-3.5 w-3.5" /> Configurações
+                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Configurações
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
-                          {isLive ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">{isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}</div> {isLive ? "Despublicar" : "Publicar"}
                         </DropdownMenuItem>
                         {isLive && (
                           <>
-                            <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-2 text-[12px] cursor-pointer">
-                              <Copy className="h-3.5 w-3.5" /> Copiar link
+                            <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Copy className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Copiar link
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
-                              <PlayCircle className="h-3.5 w-3.5" /> Ver área
+                            <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><PlayCircle className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Ver área
                             </DropdownMenuItem>
                           </>
                         )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
-                          <Trash2 className="h-3.5 w-3.5" /> Excluir
+                        <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
+                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive cursor-pointer focus:bg-destructive/10">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10"><Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} /></div> Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -569,7 +606,7 @@ export default function AdminConteudo() {
                   <div className="flex items-center justify-between mt-1.5 sm:hidden">
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-primary" : "bg-muted-foreground/25")} />
+                        <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-success animate-pulse" : "bg-muted-foreground/25")} />
                         {isLive ? "Live" : "Draft"}
                       </span>
                       <span>{stats.modules}m · {stats.lessons}a</span>
@@ -601,6 +638,7 @@ export default function AdminConteudo() {
               );
             })}
           </div>
+          </div>
         </div>
       )}
 
@@ -613,18 +651,16 @@ export default function AdminConteudo() {
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="rounded-xl max-w-md">
+        <AlertDialogContent className="max-w-sm rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold text-lg">Excluir curso</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
-              Tem certeza? Módulos, aulas e acessos vinculados serão removidos.
-            </AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-semibold">Excluir curso</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-muted-foreground">Tem certeza? Módulos, aulas e acessos vinculados serão removidos.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingCourse} className="rounded-lg">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2">
-              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
-              {deletingCourse ? "Excluindo..." : "Excluir"}
+            <AlertDialogCancel disabled={deletingCourse} className="h-9 rounded-lg text-[13px]">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="h-9 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
+              {deletingCourse && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {deletingCourse ? "Excluindo…" : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
