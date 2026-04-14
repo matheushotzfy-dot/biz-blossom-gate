@@ -499,11 +499,11 @@ export default function AdminConteudo() {
           <div className="rounded-xl border border-border bg-card overflow-hidden">
           {/* Table header */}
           <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border bg-secondary/50">
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Curso</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Conteúdo</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Alunos</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Status</span>
-            <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Receita</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Curso</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Conteúdo</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Alunos</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Status</span>
+            <span className="text-[11px] font-display font-semibold text-muted-foreground/60 uppercase tracking-wider">Receita</span>
             <span />
           </div>
 
