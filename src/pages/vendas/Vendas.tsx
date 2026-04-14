@@ -806,35 +806,56 @@ export default function Vendas() {
         </div>
 
         {/* ═══════ HERO KPIs — 2 grandes ═══════ */}
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
-            <div className="absolute left-0 top-0 h-full w-[3px] bg-primary" />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><ShoppingCart className="h-4 w-4 text-primary" /></span>
-                <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Vendas encontradas</p>
+        <div
+          className="relative overflow-hidden rounded-[20px] border border-primary/20 p-5 sm:p-6 lg:p-8"
+          style={{
+            background: `
+              radial-gradient(ellipse 60% 70% at 0% 10%, hsla(160, 84%, 39%, 0.22), transparent 55%),
+              radial-gradient(ellipse 50% 60% at 95% 90%, hsla(160, 84%, 39%, 0.15), transparent 50%),
+              radial-gradient(ellipse 40% 40% at 50% 0%, hsla(160, 84%, 39%, 0.10), transparent 45%),
+              radial-gradient(ellipse 30% 50% at 100% 20%, hsla(160, 84%, 39%, 0.08), transparent 45%),
+              hsl(var(--card))
+            `
+          }}
+        >
+          {/* Ambient grid texture */}
+          <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
+          {/* Edge glow lines */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/35 via-primary/10 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
+
+          <div className="relative z-10 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-background/60 backdrop-blur-sm p-6 lg:p-7">
+              <div className="absolute left-0 top-0 h-full w-[3px] bg-primary" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><ShoppingCart className="h-4 w-4 text-primary" /></span>
+                  <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Vendas encontradas</p>
+                </div>
+                <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
               </div>
-              <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
-            </div>
-            <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</p>
-            <div className="mt-4 flex items-center gap-3">
-              <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
-              <span className="text-[10px] text-muted-foreground/40">vs período anterior</span>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-xl border border-success/20 bg-[hsl(var(--card-elevated))] p-6 lg:p-7">
-            <div className="absolute left-0 top-0 h-full w-[3px] bg-success" />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/15"><DollarSign className="h-4 w-4 text-success" /></span>
-                <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Valor líquido</p>
+              <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</p>
+              <div className="mt-4 flex items-center gap-3">
+                <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
+                <span className="text-[10px] text-muted-foreground/40">vs período anterior</span>
               </div>
-              <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
             </div>
-            <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-success tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
-            <div className="mt-4 flex items-center gap-3">
-              <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-              <span className="text-[10px] text-muted-foreground/40">resultado do período</span>
+            <div className="relative overflow-hidden rounded-xl border border-success/20 bg-background/60 backdrop-blur-sm p-6 lg:p-7">
+              <div className="absolute left-0 top-0 h-full w-[3px] bg-success" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/15"><DollarSign className="h-4 w-4 text-success" /></span>
+                  <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Valor líquido</p>
+                </div>
+                <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
+              </div>
+              <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-success tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
+              <div className="mt-4 flex items-center gap-3">
+                <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
+                <span className="text-[10px] text-muted-foreground/40">resultado do período</span>
+              </div>
             </div>
           </div>
         </div>
