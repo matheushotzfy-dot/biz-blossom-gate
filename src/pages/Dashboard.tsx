@@ -697,18 +697,18 @@ export default function Dashboard() {
               </div>
               <p className="text-[11px] font-heading text-muted-foreground font-bold uppercase tracking-[0.06em]">Conversão</p>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-1">
               {[
-                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success" },
-                { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", value: `${cardConversion.toFixed(1)}%`, color: "text-info" },
-                { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-success" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success", bg: "bg-success/8" },
+                { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", value: `${cardConversion.toFixed(1)}%`, color: "text-info", bg: "bg-info/8" },
+                { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-success", bg: chargebackRate > 1 ? "bg-destructive/8" : "bg-success/8" },
               ].map((m) => (
-                <div key={m.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div key={m.label} className={cn("flex items-center justify-between rounded-xl px-3 py-2.5", m.bg)}>
+                  <div className="flex items-center gap-2.5">
                     <span className={m.color}>{m.icon}</span>
-                    <span className="text-[12px] text-muted-foreground">{m.label}</span>
+                    <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
                   </div>
-                  <span className={cn("text-[14px] font-heading font-black tabular-nums", m.color)}>{m.value}</span>
+                  <span className={cn("text-[15px] font-heading font-black tabular-nums", m.color)}>{m.value}</span>
                 </div>
               ))}
             </div>
