@@ -496,8 +496,9 @@ export default function AdminConteudo() {
         </div>
       ) : (
         <div className="px-5 pt-5 pb-8 sm:px-7">
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
           {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border/40 bg-muted/20">
+          <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 h-9 border-b border-border bg-secondary/50">
             <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Curso</span>
             <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Conteúdo</span>
             <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">Alunos</span>
