@@ -251,12 +251,12 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
- const methods: Record<string, { label: string; color: string }> = {
-  pix: { label: "Pix", color: "text-success" },
-  credit_card: { label: "Cartão", color: "text-info" },
-  boleto: { label: "Boleto", color: "text-warning" },
+ const methods: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  pix: { label: "Pix", color: "text-success", bg: "bg-success/8", border: "border-success/15" },
+  credit_card: { label: "Cartão", color: "text-info", bg: "bg-info/8", border: "border-info/15" },
+  boleto: { label: "Boleto", color: "text-warning", bg: "bg-warning/8", border: "border-warning/15" },
  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground" };
+  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", bg: "bg-secondary", border: "border-border" };
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
   const prodName = tx.product_id ? (prods[tx.product_id] || "Produto sem nome") : "Sem produto";
@@ -264,34 +264,46 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
   const net = Number(tx.net_amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border hover:bg-secondary/20 transition-colors">
-  <td className="px-5 py-3 align-middle">
-   <p className="text-[11px] font-heading font-semibold text-foreground tabular-nums">{fmtDate(tx.created_at)} {fmtTime(tx.created_at)}</p>
-  </td>
-  <td className="px-3 py-3 align-middle">
-   <p className="truncate text-[11px] font-heading font-semibold text-muted-foreground/60 max-w-[140px]">{prodName}</p>
-  </td>
-  <td className="px-3 py-3 align-middle">
-   <div className="min-w-0">
-    <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-    <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 hover:bg-primary/[0.03] transition-all duration-200">
+  <td className="px-5 py-3.5 align-middle">
+   <div className="flex flex-col">
+    <p className="text-[12px] font-heading font-bold text-foreground tabular-nums">{fmtDate(tx.created_at)}</p>
+    <p className="text-[10px] font-heading text-muted-foreground/50 tabular-nums">{fmtTime(tx.created_at)}</p>
    </div>
   </td>
-  <td className="px-3 py-3 align-middle">
+  <td className="px-3 py-3.5 align-middle">
+   <p className="truncate text-[11px] font-heading font-semibold text-foreground/70 max-w-[140px]">{prodName}</p>
+  </td>
+  <td className="px-3 py-3.5 align-middle">
+   <div className="flex items-center gap-2.5 min-w-0">
+    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-1 ring-border/50">
+     <AvatarFallback className={cn("text-[9px] font-black tracking-tight rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
+    </Avatar>
+    <div className="min-w-0">
+     <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
+     <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
+    </div>
+   </div>
+  </td>
+  <td className="px-3 py-3.5 align-middle">
    <div className="flex items-center gap-2">
-    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-heading font-bold", st.fg, st.bg, st.border, "border")}>
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
+     <span className="relative flex h-1.5 w-1.5">
+      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+     </span>
      {st.label}
     </span>
-    <span className={cn("text-[10px] font-heading", method.color)}>{method.label}</span>
+    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-heading font-bold", method.color, method.bg, method.border)}>{method.label}</span>
    </div>
   </td>
-  <td className="px-3 py-3 align-middle">
-   <p className="text-[11px] font-heading font-semibold text-muted-foreground/60 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
+  <td className="px-3 py-3.5 align-middle">
+   <p className="text-[11px] font-heading font-semibold text-muted-foreground/50 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
   </td>
-  <td className="px-3 py-3 align-middle">
-   <p className="text-[12px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em]">{fmt(net)}</p>
+  <td className="px-3 py-3.5 align-middle">
+   <p className={cn("text-[13px] font-heading font-black tabular-nums tracking-[-0.02em]", tx.status === "completed" ? "text-success" : "text-foreground")}>{fmt(net)}</p>
   </td>
-  <td className="px-2 py-3 align-middle">
+  <td className="px-2 py-3.5 align-middle">
   <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
   {tx.customer_phone && (
    <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
@@ -889,14 +901,40 @@ export default function Vendas() {
             <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
+                const tabColors: Record<string, string> = {
+                  all: "text-primary",
+                  completed: "text-success",
+                  pending: "text-warning",
+                  failed: "text-destructive",
+                  refunded: "text-info",
+                  chargeback: "text-destructive",
+                };
+                const dotColors: Record<string, string> = {
+                  completed: "bg-success",
+                  pending: "bg-warning",
+                  failed: "bg-destructive",
+                  refunded: "bg-info",
+                  chargeback: "bg-destructive",
+                };
+                const activeBarColors: Record<string, string> = {
+                  all: "bg-primary",
+                  completed: "bg-success",
+                  pending: "bg-warning",
+                  failed: "bg-destructive",
+                  refunded: "bg-info",
+                  chargeback: "bg-destructive",
+                };
                 return (
                   <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
                     className={cn("relative px-4 py-3 text-[12px] font-heading font-semibold whitespace-nowrap transition-colors",
-                      active ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/70"
+                      active ? (tabColors[tab.value] || "text-foreground") : "text-muted-foreground/40 hover:text-muted-foreground/70"
                     )}>
-                    {tab.label}
-                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px]", active ? "text-foreground/50" : "text-muted-foreground/25")}>{tab.count}</span>}
-                    {active && <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-primary rounded-full" />}
+                    <span className="flex items-center gap-1.5">
+                      {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", active ? dotColors[tab.value] : "bg-muted-foreground/20")} />}
+                      {tab.label}
+                    </span>
+                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px] font-bold", active ? "opacity-60" : "text-muted-foreground/25")}>{tab.count}</span>}
+                    {active && <span className={cn("absolute bottom-0 left-4 right-4 h-[2px] rounded-full", activeBarColors[tab.value] || "bg-primary")} />}
                   </button>
                 );
               })}
@@ -904,17 +942,17 @@ export default function Vendas() {
           </div>
 
           {/* Search + filters */}
-          <div className="flex flex-col gap-2 border-b border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 border-b border-border/50 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:w-[280px]">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/30" />
               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
-                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 transition-colors" />
+                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all" />
               {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground" /></button>}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-heading text-muted-foreground/40 tabular-nums">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""}</span>
-              <button className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
-                <Filter className="h-3.5 w-3.5 text-muted-foreground/50" /> Filtros
+              <span className="text-[10px] font-heading font-bold text-primary/60 tabular-nums">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""}</span>
+              <button className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[11px] font-heading font-bold text-foreground hover:bg-secondary hover:border-primary/20 transition-all">
+                <Filter className="h-3.5 w-3.5 text-primary/50" /> Filtros
               </button>
             </div>
           </div>
@@ -931,12 +969,12 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border">
+                      <tr className="border-b border-border bg-secondary/30">
                         <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-5" />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Produto</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Produto</th>
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Status</th>
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Juros Recebidos</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Status</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Juros Recebidos</th>
                         <SortHead label="Valor Líquido" field="net" sort={sort} onSort={handleSort} />
                         <th className="w-12" />
                       </tr>
