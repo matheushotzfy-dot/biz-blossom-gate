@@ -611,24 +611,26 @@ export default function Dashboard() {
           </div>
 
           {/* ── KPI Strip ── */}
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentBorder: "border-t-success", iconBg: "bg-success/10", iconText: "text-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentBorder: "border-t-info", iconBg: "bg-info/10", iconText: "text-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentBorder: "border-t-primary", iconBg: "bg-primary/10", iconText: "text-primary" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentColor: "bg-success", iconBg: "bg-success/8", iconText: "text-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentColor: "bg-info", iconBg: "bg-info/8", iconText: "text-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentColor: "bg-primary", iconBg: "bg-primary/8", iconText: "text-primary" },
             ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + idx * 0.07 }}
-                className={cn("group relative overflow-hidden rounded-3xl border border-border/60 border-t-2 bg-background/80 p-5 shadow-sm transition-colors", item.accentBorder)}>
+              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.12 + idx * 0.06 }}
+                className="group relative overflow-hidden rounded-[16px] border border-border/30 bg-background/60 p-4 lg:p-5 transition-all duration-200 hover:border-border/50">
+                {/* Top accent line */}
+                <div className={cn("absolute top-0 left-4 right-4 h-[2px] rounded-b-full", item.accentColor)} />
                 <div className="relative z-10 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
-                    <p className="text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
+                    <p className="mb-2.5 text-[8px] lg:text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/50">{item.label}</p>
+                    <p className="text-[22px] lg:text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
                       {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
                     </p>
                   </div>
-                  <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.iconBg, item.iconText)}>
+                    <item.icon className="h-[18px] w-[18px]" />
                   </div>
                 </div>
               </motion.div>
