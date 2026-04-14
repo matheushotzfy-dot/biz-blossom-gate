@@ -842,15 +842,17 @@ export default function Vendas() {
 
         {/* ═══════ HERO KPIs ═══════ */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="relative overflow-hidden rounded-[18px] border border-primary/20 bg-[hsl(var(--card-elevated))]">
-            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary via-primary/60 to-transparent" />
-            <div className="p-6">
+          <div className="group relative overflow-hidden rounded-[20px] border border-primary/25 bg-card transition-all duration-300 hover:border-primary/40 hover:translate-y-[-2px]"
+            style={{ boxShadow: "0 0 40px hsla(160, 84%, 39%, 0.08), inset 0 1px 0 hsla(0, 0%, 100%, 0.03)" }}>
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary to-primary/60" />
+            <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, hsla(160, 84%, 39%, 0.15), transparent 70%)" }} />
+            <div className="relative z-10 p-6 lg:p-7">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-heading font-black uppercase tracking-[0.2em] text-primary/60">Total de vendas</p>
-                  <p className="mt-4 text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{dateFiltered.length.toLocaleString("pt-BR")}</p>
+                  <p className="text-[9px] lg:text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/50">Total de vendas</p>
+                  <p className="mt-4 text-[48px] lg:text-[56px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{dateFiltered.length.toLocaleString("pt-BR")}</p>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-primary/20 bg-primary/10 text-primary">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
                   <ShoppingCart className="h-6 w-6" />
                 </div>
               </div>
@@ -859,27 +861,29 @@ export default function Vendas() {
                 <span className="text-[11px] font-heading text-muted-foreground/40">vs período anterior</span>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-[12px] border border-success/15 bg-success/[0.05] px-4 py-3">
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-success/60">Aprovadas</p>
-                  <p className="mt-1.5 text-[20px] font-heading font-black text-success tabular-nums">{m.approved.length}</p>
+                <div className="rounded-2xl border border-success/12 bg-success/[0.04] px-4 py-3.5">
+                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-success/50">Aprovadas</p>
+                  <p className="mt-2 text-[22px] font-heading font-black text-success tabular-nums leading-none">{m.approved.length}</p>
                 </div>
-                <div className="rounded-[12px] border border-warning/15 bg-warning/[0.05] px-4 py-3">
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-warning/60">Pendentes</p>
-                  <p className="mt-1.5 text-[20px] font-heading font-black text-warning tabular-nums">{m.pending.length}</p>
+                <div className="rounded-2xl border border-warning/12 bg-warning/[0.04] px-4 py-3.5">
+                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-warning/50">Pendentes</p>
+                  <p className="mt-2 text-[22px] font-heading font-black text-warning tabular-nums leading-none">{m.pending.length}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[18px] border border-success/20 bg-[hsl(var(--card-elevated))]">
-            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-success via-success/60 to-transparent" />
-            <div className="p-6">
+          <div className="group relative overflow-hidden rounded-[20px] border border-success/25 bg-card transition-all duration-300 hover:border-success/40 hover:translate-y-[-2px]"
+            style={{ boxShadow: "0 0 40px hsla(142, 71%, 45%, 0.08), inset 0 1px 0 hsla(0, 0%, 100%, 0.03)" }}>
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-success to-success/60" />
+            <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle, hsla(142, 71%, 45%, 0.15), transparent 70%)" }} />
+            <div className="relative z-10 p-6 lg:p-7">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-heading font-black uppercase tracking-[0.2em] text-success/60">Receita líquida</p>
-                  <p className="mt-4 text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
+                  <p className="text-[9px] lg:text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/50">Receita líquida</p>
+                  <p className="mt-4 text-[48px] lg:text-[56px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-success/20 bg-success/10 text-success">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-success/10 text-success transition-transform duration-300 group-hover:scale-110">
                   <Coins className="h-6 w-6" />
                 </div>
               </div>
@@ -888,13 +892,13 @@ export default function Vendas() {
                 <span className="text-[11px] font-heading text-muted-foreground/40">resultado líquido do período</span>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-[12px] border border-border bg-card px-4 py-3">
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Método líder</p>
-                  <p className="mt-1.5 text-[18px] font-heading font-black text-foreground">{dominantMethod.value > 0 ? dominantMethod.label : "—"}</p>
+                <div className="rounded-2xl border border-border/20 bg-card px-4 py-3.5">
+                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">Método líder</p>
+                  <p className="mt-2 text-[20px] font-heading font-black text-foreground leading-none">{dominantMethod.value > 0 ? dominantMethod.label : "—"}</p>
                 </div>
-                <div className="rounded-[12px] border border-border bg-card px-4 py-3">
-                  <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Taxas totais</p>
-                  <p className="mt-1.5 text-[18px] font-heading font-black text-destructive/80 tabular-nums">{hidden ? HIDE : fmt(m.totalFees)}</p>
+                <div className="rounded-2xl border border-border/20 bg-card px-4 py-3.5">
+                  <p className="text-[8px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/40">Taxas totais</p>
+                  <p className="mt-2 text-[20px] font-heading font-black text-destructive/80 tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalFees)}</p>
                 </div>
               </div>
             </div>
@@ -904,18 +908,25 @@ export default function Vendas() {
         {/* ═══════ SECONDARY KPIs ═══════ */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), icon: <RefreshCw className="h-4 w-4" />, iconClass: "border-info/20 bg-info/10 text-info", sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, accent: "border-info/10" },
-            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), icon: <Smartphone className="h-4 w-4" />, iconClass: "border-success/20 bg-success/10 text-success", sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, accent: "border-success/10" },
-            { label: "Reembolso %", value: `${m.refundRate.toFixed(1)}%`, icon: <Percent className="h-4 w-4" />, iconClass: "border-warning/20 bg-warning/10 text-warning", sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined, accent: "border-warning/10" },
-            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), icon: <Shield className="h-4 w-4" />, iconClass: "border-destructive/20 bg-destructive/10 text-destructive", sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, accent: "border-destructive/10" },
+            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), icon: <RefreshCw className="h-5 w-5" />, iconBg: "bg-info/10", iconText: "text-info", sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, accentColor: "from-info to-info/60", glowColor: "hsla(217, 91%, 60%, 0.06)" },
+            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), icon: <Smartphone className="h-5 w-5" />, iconBg: "bg-success/10", iconText: "text-success", sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, accentColor: "from-success to-success/60", glowColor: "hsla(142, 71%, 45%, 0.06)" },
+            { label: "Reembolso %", value: `${m.refundRate.toFixed(1)}%`, icon: <Percent className="h-5 w-5" />, iconBg: "bg-warning/10", iconText: "text-warning", sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined, accentColor: "from-warning to-warning/60", glowColor: "hsla(38, 92%, 50%, 0.06)" },
+            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), icon: <Shield className="h-5 w-5" />, iconBg: "bg-destructive/10", iconText: "text-destructive", sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, accentColor: "from-destructive to-destructive/60", glowColor: "hsla(0, 84%, 60%, 0.06)" },
           ].map((kpi) => (
-            <div key={kpi.label} className={cn("rounded-[16px] border bg-card p-4", kpi.accent)}>
-              <div className="flex items-center gap-3">
-                <div className={cn("flex h-10 w-10 items-center justify-center rounded-[11px] border shrink-0", kpi.iconClass)}>{kpi.icon}</div>
-                <p className="text-[10px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/45 leading-tight">{kpi.label}</p>
+            <div key={kpi.label} className="group relative overflow-hidden rounded-[16px] border border-border/25 bg-card p-5 transition-all duration-300 hover:border-border/40 hover:translate-y-[-2px]"
+              style={{ boxShadow: `0 0 30px ${kpi.glowColor}, inset 0 1px 0 hsla(0, 0%, 100%, 0.03)` }}>
+              <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", kpi.accentColor)} />
+              <div className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle, ${kpi.glowColor.replace('0.06', '0.15')}, transparent 70%)` }} />
+              <div className="relative z-10 flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="mb-3 text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/50">{kpi.label}</p>
+                  <p className={cn("text-[26px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
+                  <p className="mt-2.5 text-[10px] text-muted-foreground/40">{kpi.sub}</p>
+                </div>
+                <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 shrink-0", kpi.iconBg, kpi.iconText)}>
+                  {kpi.icon}
+                </div>
               </div>
-              <p className={cn("mt-3 text-[24px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
-              <p className="mt-2 text-[10px] text-muted-foreground/40">{kpi.sub}</p>
             </div>
           ))}
         </div>
