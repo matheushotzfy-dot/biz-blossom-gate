@@ -574,29 +574,29 @@ export default function AdminConteudo() {
                           <MoreVertical className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-lg">
-                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-2 text-[12px] cursor-pointer">
-                          <ChevronRight className="h-3.5 w-3.5" /> Gerenciar
+                      <DropdownMenuContent align="end" sideOffset={8} className="w-[220px] rounded-2xl border border-border bg-secondary p-1.5 shadow-none">
+                        <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><ChevronRight className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Gerenciar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2 text-[12px] cursor-pointer">
-                          <Edit className="h-3.5 w-3.5" /> Configurações
+                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Configurações
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2 text-[12px] cursor-pointer">
-                          {isLive ? <><EyeOff className="h-3.5 w-3.5" /> Despublicar</> : <><Eye className="h-3.5 w-3.5" /> Publicar</>}
+                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">{isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}</div> {isLive ? "Despublicar" : "Publicar"}
                         </DropdownMenuItem>
                         {isLive && (
                           <>
-                            <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-2 text-[12px] cursor-pointer">
-                              <Copy className="h-3.5 w-3.5" /> Copiar link
+                            <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Copy className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Copiar link
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2 text-[12px] cursor-pointer">
-                              <PlayCircle className="h-3.5 w-3.5" /> Ver área
+                            <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><PlayCircle className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Ver área
                             </DropdownMenuItem>
                           </>
                         )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2 text-[12px] text-destructive cursor-pointer">
-                          <Trash2 className="h-3.5 w-3.5" /> Excluir
+                        <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
+                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive cursor-pointer focus:bg-destructive/10">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10"><Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} /></div> Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
