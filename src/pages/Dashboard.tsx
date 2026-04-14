@@ -741,18 +741,21 @@ export default function Dashboard() {
           {/* Payment KPIs */}
           <div className="grid grid-cols-2 gap-2.5 flex-1">
             {([
-              { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, accentColor: "bg-success" },
-              { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, accentColor: "bg-info" },
-              { label: "TICKET MÉDIO", isPix: false, icon: Wallet, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "por venda", accentColor: "bg-primary" },
-              { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, accentColor: "bg-warning" },
+              { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, accentColor: "from-success to-success/60", glowColor: "hsla(142, 71%, 45%, 0.06)" },
+              { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, accentColor: "from-info to-info/60", glowColor: "hsla(217, 91%, 60%, 0.06)" },
+              { label: "TICKET MÉDIO", isPix: false, icon: Wallet, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "por venda", accentColor: "from-primary to-primary/60", glowColor: "hsla(160, 84%, 39%, 0.06)" },
+              { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, accentColor: "from-warning to-warning/60", glowColor: "hsla(38, 92%, 50%, 0.06)" },
             ] as const).map((item, idx) => (
               <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 + idx * 0.04 }}
-                className="relative rounded-[16px] border border-border/30 bg-background/60 p-4 overflow-hidden transition-all duration-200 hover:border-border/50">
-                <div className={cn("absolute top-0 left-3 right-3 h-[2px] rounded-b-full", item.accentColor)} />
+                className="group relative rounded-[16px] border border-border/25 bg-card p-4 overflow-hidden transition-all duration-300 hover:border-border/40 hover:translate-y-[-1px]"
+                style={{ boxShadow: `0 0 30px ${item.glowColor}, inset 0 1px 0 hsla(0, 0%, 100%, 0.03)` }}
+              >
+                {/* Top accent gradient */}
+                <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", item.accentColor)} />
                 <div className="flex items-center gap-1.5 mb-2.5">
                   <span className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/50">{item.label}</span>
                 </div>
-                <p className="text-[18px] font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-1.5">
+                <p className="text-[20px] font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-1.5">
                   {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
                 </p>
                 <span className="text-[10px] text-muted-foreground/40">{privacy.hidden ? "••••" : item.helper}</span>
