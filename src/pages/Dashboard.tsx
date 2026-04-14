@@ -554,7 +554,6 @@ export default function Dashboard() {
               <button onClick={privacy.toggle} className={cn("flex h-8 w-8 items-center justify-center rounded-full border transition-colors active:scale-[0.97]", privacy.hidden ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 bg-background/40 text-muted-foreground/50 hover:border-border/40 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
                 {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
-              </button>
             </div>
           </div>
 
