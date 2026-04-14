@@ -61,7 +61,7 @@ const PERIODS = [
  { label: "90D", days: 90 },
 ] as const;
 type Period = (typeof PERIODS)[number];
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 15;
 
 const AVATAR_PALETTE = [
  "bg-primary/12 text-primary",
@@ -894,58 +894,22 @@ export default function Vendas() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[14px] border border-border bg-card p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Total reembolsado</p>
-                <p className="mt-3 text-[28px] font-heading font-black tracking-[-0.04em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(refundedAmount)}</p>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          {[
+            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), icon: <RefreshCw className="h-3.5 w-3.5" />, iconClass: "border-info/15 bg-info/10 text-info", sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}` },
+            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), icon: <Smartphone className="h-3.5 w-3.5" />, iconClass: "border-success/15 bg-success/10 text-success", sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}` },
+            { label: "Reembolso %", value: `${m.refundRate.toFixed(1)}%`, icon: <Percent className="h-3.5 w-3.5" />, iconClass: "border-warning/15 bg-warning/10 text-warning", sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : undefined },
+            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), icon: <Shield className="h-3.5 w-3.5" />, iconClass: "border-destructive/15 bg-destructive/10 text-destructive", sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}` },
+          ].map((kpi) => (
+            <div key={kpi.label} className="rounded-[14px] border border-border bg-card p-3.5">
+              <div className="flex items-center gap-2">
+                <div className={cn("flex h-8 w-8 items-center justify-center rounded-[9px] border shrink-0", kpi.iconClass)}>{kpi.icon}</div>
+                <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/40 leading-tight">{kpi.label}</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-info/15 bg-info/10 text-info">
-                <RefreshCw className="h-4 w-4" />
-              </div>
+              <p className={cn("mt-2.5 text-[20px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
+              <p className="mt-1.5 text-[9px] text-muted-foreground/40">{kpi.sub}</p>
             </div>
-            <p className="mt-4 text-[10px] text-muted-foreground/40">{m.refunded.length} venda{m.refunded.length !== 1 ? "s" : ""} reembolsada{m.refunded.length !== 1 ? "s" : ""}</p>
-          </div>
-
-          <div className="rounded-[14px] border border-border bg-card p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Vendas no PIX</p>
-                <p className="mt-3 text-[28px] font-heading font-black tracking-[-0.04em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(m.pixRev)}</p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-success/15 bg-success/10 text-success">
-                <Smartphone className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-4 text-[10px] text-muted-foreground/40">{m.pixCount} venda{m.pixCount !== 1 ? "s" : ""} aprovadas no PIX</p>
-          </div>
-
-          <div className="rounded-[14px] border border-border bg-card p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Porcentagem de reembolso</p>
-                <p className={cn("mt-3 text-[28px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", m.refundRate > 5 ? "text-destructive" : "text-foreground")}>{m.refundRate.toFixed(1)}%</p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-warning/15 bg-warning/10 text-warning">
-                <Percent className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-4 text-[10px] text-muted-foreground/40">meta saudável abaixo de 5%</p>
-          </div>
-
-          <div className="rounded-[14px] border border-border bg-card p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/40">Chargeback</p>
-                <p className="mt-3 text-[28px] font-heading font-black tracking-[-0.04em] text-foreground tabular-nums leading-none">{hidden ? HIDE : fmt(chargebackAmount)}</p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-destructive/15 bg-destructive/10 text-destructive">
-                <Shield className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-4 text-[10px] text-muted-foreground/40">{m.chargebacks.length} ocorrência{m.chargebacks.length !== 1 ? "s" : ""} no período</p>
-          </div>
+          ))}
         </div>
 
         <div className="overflow-hidden rounded-[14px] border border-border bg-card">
