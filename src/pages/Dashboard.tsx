@@ -614,19 +614,21 @@ export default function Dashboard() {
         {/* ── KPI Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {([
-            { label: "Faturamento Bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", accent: "bg-primary" },
-            { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-success", accent: "bg-success" },
-            { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", accent: "bg-info" },
-            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", accent: "bg-primary" },
+            { label: "Faturamento Bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", accent: "bg-primary", iconBg: "bg-primary/10" },
+            { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-success", accent: "bg-success", iconBg: "bg-success/10" },
+            { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", accent: "bg-info", iconBg: "bg-info/10" },
+            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", accent: "bg-primary", iconBg: "bg-primary/10" },
           ] as const).map((item, idx) => (
             <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 + idx * 0.05 }}
-              className="relative rounded-[16px] border border-border bg-card p-5 overflow-hidden">
+              className="relative rounded-[16px] border border-border bg-card p-5 overflow-hidden hover:border-border/80 transition-colors">
               {/* Left accent bar */}
-              <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", item.accent)} />
-              <div className="pl-2">
+              <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full", item.accent)} />
+              <div className="pl-2.5">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-[10px] font-heading text-muted-foreground uppercase tracking-[0.08em] font-bold">{item.label}</p>
-                  <item.icon className={cn("h-4 w-4", item.color)} />
+                  <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", item.iconBg)}>
+                    <item.icon className={cn("h-3.5 w-3.5", item.color)} />
+                  </div>
                 </div>
                 <p className="text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
                   {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
