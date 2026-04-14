@@ -837,18 +837,18 @@ export default function Vendas() {
         </motion.div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="flex flex-col gap-3 px-5 py-3 border-b border-border/50 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-1 overflow-x-auto">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="overflow-hidden rounded-[20px] border border-border/60 bg-card">
+          <div className="flex flex-col gap-3 px-5 py-3.5 border-b border-border/50 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-1.5 overflow-x-auto">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
                   <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                    className={cn("rounded-lg px-3 py-1.5 text-[11px] font-heading font-semibold transition-all whitespace-nowrap active:scale-[0.97]",
-                      active ? "bg-foreground text-background" : "text-muted-foreground/50 hover:text-foreground hover:bg-secondary/50"
+                    className={cn("rounded-lg px-3.5 py-1.5 text-[11px] font-heading font-bold transition-all whitespace-nowrap active:scale-[0.97]",
+                      active ? "bg-foreground text-background" : "text-muted-foreground/40 hover:text-foreground hover:bg-secondary/60"
                     )}>
                     {tab.label}
-                    {tab.count > 0 && <span className={cn("ml-1.5 tabular-nums", active ? "text-background/60" : "text-muted-foreground/25")}>{tab.count}</span>}
+                    {tab.count > 0 && <span className={cn("ml-1.5 tabular-nums", active ? "text-background/50" : "text-muted-foreground/20")}>{tab.count}</span>}
                   </button>
                 );
               })}
