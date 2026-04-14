@@ -606,7 +606,7 @@ export default function AdminConteudo() {
                   <div className="flex items-center justify-between mt-1.5 sm:hidden">
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-primary" : "bg-muted-foreground/25")} />
+                        <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-success animate-pulse" : "bg-muted-foreground/25")} />
                         {isLive ? "Live" : "Draft"}
                       </span>
                       <span>{stats.modules}m · {stats.lessons}a</span>
@@ -651,18 +651,16 @@ export default function AdminConteudo() {
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="rounded-xl max-w-md">
+        <AlertDialogContent className="max-w-sm rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold text-lg">Excluir curso</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
-              Tem certeza? Módulos, aulas e acessos vinculados serão removidos.
-            </AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-semibold">Excluir curso</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-muted-foreground">Tem certeza? Módulos, aulas e acessos vinculados serão removidos.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingCourse} className="rounded-lg">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2">
-              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
-              {deletingCourse ? "Excluindo..." : "Excluir"}
+            <AlertDialogCancel disabled={deletingCourse} className="h-9 rounded-lg text-[13px]">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="h-9 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
+              {deletingCourse && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {deletingCourse ? "Excluindo…" : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
