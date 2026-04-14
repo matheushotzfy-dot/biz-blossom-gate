@@ -474,10 +474,10 @@ export default function Dashboard() {
         className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/20 p-6 sm:p-8 lg:p-10"
         style={{
           background: `
-            radial-gradient(ellipse 60% 70% at 5% 20%, hsl(var(--primary) / 0.16), transparent 60%),
-            radial-gradient(ellipse 50% 60% at 90% 80%, hsl(var(--primary) / 0.10), transparent 55%),
-            radial-gradient(ellipse 40% 40% at 40% 10%, hsl(var(--primary) / 0.07), transparent 50%),
-            radial-gradient(ellipse 35% 50% at 95% 30%, hsl(var(--primary) / 0.05), transparent 50%),
+            radial-gradient(ellipse 55% 65% at 3% 15%, hsla(160, 84%, 39%, 0.18), transparent 55%),
+            radial-gradient(ellipse 45% 55% at 92% 85%, hsla(160, 84%, 39%, 0.12), transparent 50%),
+            radial-gradient(ellipse 35% 35% at 45% 5%, hsla(160, 84%, 39%, 0.08), transparent 45%),
+            radial-gradient(ellipse 30% 45% at 98% 25%, hsla(160, 84%, 39%, 0.06), transparent 45%),
             hsl(var(--card))
           `
         }}
