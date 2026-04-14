@@ -251,12 +251,12 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
- const methods: Record<string, { label: string; color: string }> = {
-  pix: { label: "Pix", color: "text-success" },
-  credit_card: { label: "Cartão", color: "text-info" },
-  boleto: { label: "Boleto", color: "text-warning" },
+ const methods: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  pix: { label: "Pix", color: "text-success", bg: "bg-success/8", border: "border-success/15" },
+  credit_card: { label: "Cartão", color: "text-info", bg: "bg-info/8", border: "border-info/15" },
+  boleto: { label: "Boleto", color: "text-warning", bg: "bg-warning/8", border: "border-warning/15" },
  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground" };
+  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", bg: "bg-secondary", border: "border-border" };
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
   const prodName = tx.product_id ? (prods[tx.product_id] || "Produto sem nome") : "Sem produto";
@@ -264,34 +264,46 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
   const net = Number(tx.net_amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border hover:bg-secondary/20 transition-colors">
-  <td className="px-5 py-3 align-middle">
-   <p className="text-[11px] font-heading font-semibold text-foreground tabular-nums">{fmtDate(tx.created_at)} {fmtTime(tx.created_at)}</p>
-  </td>
-  <td className="px-3 py-3 align-middle">
-   <p className="truncate text-[11px] font-heading font-semibold text-muted-foreground/60 max-w-[140px]">{prodName}</p>
-  </td>
-  <td className="px-3 py-3 align-middle">
-   <div className="min-w-0">
-    <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-    <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 hover:bg-primary/[0.03] transition-all duration-200">
+  <td className="px-5 py-3.5 align-middle">
+   <div className="flex flex-col">
+    <p className="text-[12px] font-heading font-bold text-foreground tabular-nums">{fmtDate(tx.created_at)}</p>
+    <p className="text-[10px] font-heading text-muted-foreground/50 tabular-nums">{fmtTime(tx.created_at)}</p>
    </div>
   </td>
-  <td className="px-3 py-3 align-middle">
+  <td className="px-3 py-3.5 align-middle">
+   <p className="truncate text-[11px] font-heading font-semibold text-foreground/70 max-w-[140px]">{prodName}</p>
+  </td>
+  <td className="px-3 py-3.5 align-middle">
+   <div className="flex items-center gap-2.5 min-w-0">
+    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-1 ring-border/50">
+     <AvatarFallback className={cn("text-[9px] font-black tracking-tight rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
+    </Avatar>
+    <div className="min-w-0">
+     <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
+     <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
+    </div>
+   </div>
+  </td>
+  <td className="px-3 py-3.5 align-middle">
    <div className="flex items-center gap-2">
-    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-heading font-bold", st.fg, st.bg, st.border, "border")}>
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
+     <span className="relative flex h-1.5 w-1.5">
+      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+     </span>
      {st.label}
     </span>
-    <span className={cn("text-[10px] font-heading", method.color)}>{method.label}</span>
+    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-heading font-bold", method.color, method.bg, method.border)}>{method.label}</span>
    </div>
   </td>
-  <td className="px-3 py-3 align-middle">
-   <p className="text-[11px] font-heading font-semibold text-muted-foreground/60 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
+  <td className="px-3 py-3.5 align-middle">
+   <p className="text-[11px] font-heading font-semibold text-muted-foreground/50 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
   </td>
-  <td className="px-3 py-3 align-middle">
-   <p className="text-[12px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em]">{fmt(net)}</p>
+  <td className="px-3 py-3.5 align-middle">
+   <p className={cn("text-[13px] font-heading font-black tabular-nums tracking-[-0.02em]", tx.status === "completed" ? "text-success" : "text-foreground")}>{fmt(net)}</p>
   </td>
-  <td className="px-2 py-3 align-middle">
+  <td className="px-2 py-3.5 align-middle">
   <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
   {tx.customer_phone && (
    <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
