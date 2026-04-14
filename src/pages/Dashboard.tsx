@@ -556,50 +556,53 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="relative mb-8 rounded-[20px] border border-border bg-[hsl(var(--card-elevated,var(--card)))] overflow-hidden"
         >
-          {/* Subtle top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary/20 to-transparent" />
+          {/* Top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-primary/40 to-transparent" />
+          {/* Subtle corner glow */}
+          <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/[0.04] blur-[60px] pointer-events-none" />
 
           <div className="p-6 sm:p-8 lg:p-10">
             {/* Top row: period label + saldo */}
-            <div className="flex items-start justify-between mb-6">
+            <div className="flex items-start justify-between mb-8">
               <div>
-                <p className="text-[10px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-1">
+                <p className="text-[11px] font-heading text-muted-foreground uppercase tracking-[0.12em] font-bold mb-1.5">
                   {isCustom && customRange?.from
                     ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                     : `Receita — ${selectedPeriod.label}`}
                 </p>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-[6px] w-[6px]">
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
-                    <span className="relative h-[6px] w-[6px] rounded-full bg-success" />
+                <div className="inline-flex items-center gap-2 rounded-full bg-success/8 border border-success/15 px-2.5 py-1">
+                  <span className="relative flex h-[5px] w-[5px]">
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
+                    <span className="relative h-[5px] w-[5px] rounded-full bg-success" />
                   </span>
-                  <span className="text-[10px] font-heading text-success font-bold">Atualizado em tempo real</span>
+                  <span className="text-[9px] font-heading text-success font-bold uppercase tracking-[0.08em]">Tempo real</span>
                 </div>
               </div>
               <div className="text-right hidden sm:block">
-                <p className="text-[9px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-0.5">Saldo Disponível</p>
-                <p className="text-[18px] font-heading font-black tabular-nums text-primary tracking-[-0.03em]">
+                <p className="text-[9px] font-heading text-muted-foreground uppercase tracking-[0.12em] mb-1">Saldo Disponível</p>
+                <p className="text-[22px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
                   {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
                 </p>
               </div>
             </div>
 
             {/* Big number */}
-            <div className="mb-6">
+            <div className="mb-8">
               <span className="text-5xl sm:text-7xl lg:text-[104px] font-heading font-black tabular-nums text-foreground leading-[0.85] tracking-[-0.05em]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
             </div>
 
-            {/* Bottom metrics row */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+            {/* Divider */}
+            <div className="h-px bg-border/50 mb-5" />
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               {[
-                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/8" },
-                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", bg: "bg-warning/8" },
-                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", bg: "bg-info/8" },
-                { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", bg: "bg-primary/8" },
+                { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", bg: "bg-success/10", border: "border-success/15" },
+                { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", bg: "bg-warning/10", border: "border-warning/15" },
+                { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", bg: "bg-info/10", border: "border-info/15" },
+                { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", bg: "bg-primary/10", border: "border-primary/15" },
               ].map((chip, i) => (
-                <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold", chip.bg, chip.color)}>
+                <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold", chip.bg, chip.color, chip.border)}>
                   <chip.icon className="h-3.5 w-3.5" />
                   {chip.label}
                 </span>
@@ -611,19 +614,21 @@ export default function Dashboard() {
         {/* ── KPI Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {([
-            { label: "Faturamento Bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", accent: "bg-primary" },
-            { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-success", accent: "bg-success" },
-            { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", accent: "bg-info" },
-            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", accent: "bg-primary" },
+            { label: "Faturamento Bruto", numValue: revenue, formatter: fmt, icon: ShoppingCart, color: "text-primary", accent: "bg-primary", iconBg: "bg-primary/10" },
+            { label: "Vendas Aprovadas", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, color: "text-success", accent: "bg-success", iconBg: "bg-success/10" },
+            { label: "Taxa Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, color: "text-info", accent: "bg-info", iconBg: "bg-info/10" },
+            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, color: "text-primary", accent: "bg-primary", iconBg: "bg-primary/10" },
           ] as const).map((item, idx) => (
             <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 + idx * 0.05 }}
-              className="relative rounded-[16px] border border-border bg-card p-5 overflow-hidden">
+              className="relative rounded-[16px] border border-border bg-card p-5 overflow-hidden hover:border-border/80 transition-colors">
               {/* Left accent bar */}
-              <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full", item.accent)} />
-              <div className="pl-2">
+              <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full", item.accent)} />
+              <div className="pl-2.5">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-[10px] font-heading text-muted-foreground uppercase tracking-[0.08em] font-bold">{item.label}</p>
-                  <item.icon className={cn("h-4 w-4", item.color)} />
+                  <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", item.iconBg)}>
+                    <item.icon className={cn("h-3.5 w-3.5", item.color)} />
+                  </div>
                 </div>
                 <p className="text-[26px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
                   {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
@@ -639,11 +644,17 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12 mb-8">
         {/* Chart */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[16px] border border-border bg-card min-h-[320px] flex flex-col">
-          <div className="flex items-center justify-between px-5 pt-4 pb-2">
-            <p className="text-[11px] font-heading text-muted-foreground">Faturamento</p>
-            <p className="text-[11px] font-heading text-primary tabular-nums font-bold">{privacy.hidden ? CENSORED : fmt(revenue)}</p>
+         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[16px] border border-border bg-card min-h-[320px] flex flex-col">
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-3 w-3 text-primary" />
+              </div>
+              <p className="text-[11px] font-heading text-muted-foreground font-bold uppercase tracking-[0.06em]">Faturamento</p>
+            </div>
+            <p className="text-[12px] font-heading text-primary tabular-nums font-black">{privacy.hidden ? CENSORED : fmt(revenue)}</p>
           </div>
+          <div className="h-px bg-border/30 mx-5" />
           <div className="flex-1 px-2 pb-3 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
@@ -679,20 +690,25 @@ export default function Dashboard() {
         {/* Right column */}
         <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Conversion */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[16px] border border-border bg-card p-4">
-            <p className="text-[11px] font-heading text-muted-foreground mb-3">Conversão</p>
-            <div className="space-y-3">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[16px] border border-border bg-card p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-6 w-6 rounded-md bg-info/10 flex items-center justify-center">
+                <Percent className="h-3 w-3 text-info" />
+              </div>
+              <p className="text-[11px] font-heading text-muted-foreground font-bold uppercase tracking-[0.06em]">Conversão</p>
+            </div>
+            <div className="space-y-1">
               {[
-                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success" },
-                { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", value: `${cardConversion.toFixed(1)}%`, color: "text-info" },
-                { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-success" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success", bg: "bg-success/8" },
+                { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", value: `${cardConversion.toFixed(1)}%`, color: "text-info", bg: "bg-info/8" },
+                { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-success", bg: chargebackRate > 1 ? "bg-destructive/8" : "bg-success/8" },
               ].map((m) => (
-                <div key={m.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div key={m.label} className={cn("flex items-center justify-between rounded-xl px-3 py-2.5", m.bg)}>
+                  <div className="flex items-center gap-2.5">
                     <span className={m.color}>{m.icon}</span>
-                    <span className="text-[12px] text-muted-foreground">{m.label}</span>
+                    <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
                   </div>
-                  <span className={cn("text-[14px] font-heading font-black tabular-nums", m.color)}>{m.value}</span>
+                  <span className={cn("text-[15px] font-heading font-black tabular-nums", m.color)}>{m.value}</span>
                 </div>
               ))}
             </div>
@@ -728,9 +744,9 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2 mb-10">
         {/* Quick actions - clean, no glow */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-surface rounded-[20px] p-5 flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border bg-card p-5 flex flex-col">
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="dashboard-icon-shell h-7 w-7 rounded-lg flex items-center justify-center">
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Zap className="h-3.5 w-3.5 text-primary" />
             </div>
             <span className="text-[10px] font-heading uppercase tracking-[0.16em] text-muted-foreground font-bold">Ações Rápidas</span>
@@ -774,7 +790,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Activity feed - clean */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="dashboard-surface rounded-[20px] flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-[20px] border border-border bg-card flex flex-col">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border/10">
             <div className="flex items-center gap-2">
               <span className="relative flex h-1.5 w-1.5">
