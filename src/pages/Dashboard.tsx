@@ -595,16 +595,16 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Chips row */}
-          <div className="flex flex-wrap items-center gap-2.5 mb-8">
+          <div className="flex flex-wrap items-center gap-2 mb-8">
             {[
-              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
-              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
-              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
-              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
-              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
+              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/10", bg: "bg-success/4" },
+              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/10", bg: "bg-warning/4" },
+              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/10", bg: "bg-info/4" },
+              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-primary/10", bg: "bg-primary/4" },
+              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-warning/10", bg: "bg-warning/4" },
             ].map((chip, i) => (
-              <span key={i} className={cn("inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-semibold text-foreground/80", chip.bg, chip.border)}>
-                <chip.icon className={cn("h-3.5 w-3.5", chip.color)} />
+              <span key={i} className={cn("inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-semibold text-foreground/70", chip.bg, chip.border)}>
+                <chip.icon className={cn("h-3 w-3", chip.color)} />
                 {chip.label}
               </span>
             ))}
