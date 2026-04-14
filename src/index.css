@@ -886,6 +886,8 @@ tr {
 button svg, a svg, [role="button"] svg {
   transition: color 220ms cubic-bezier(0.16, 1, 0.3, 1), transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* Safe area for mobile bottom nav */
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
 /* Fire particle animation for Modo Escala */
 @keyframes fireParticle {
