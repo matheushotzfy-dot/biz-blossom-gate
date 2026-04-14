@@ -471,12 +471,13 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative mb-10 overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8 lg:p-10"
+        className="relative mb-8 overflow-hidden rounded-[20px] border border-border/40 bg-card p-6 sm:p-8 lg:p-10"
       >
-        {/* Ambient overlays — matching Vendas */}
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.08]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-secondary/35 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/70 to-transparent" />
+        {/* Ambient overlays */}
+        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/[0.03] to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
 
         <div className="relative z-10">
           {/* Header row */}
