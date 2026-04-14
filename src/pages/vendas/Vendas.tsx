@@ -945,13 +945,15 @@ export default function Vendas() {
 
         {/* ═══════ CHART + SIDE PANELS ═══════ */}
         <section className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-12">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 flex min-h-[340px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border/50">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-muted-foreground/50" />
-                <p className="text-[11px] font-heading text-foreground font-bold">Faturamento</p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 flex min-h-[340px] flex-col overflow-hidden rounded-[20px] border border-border/60 bg-card">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-[12px] font-heading text-foreground font-bold">Faturamento</p>
               </div>
-              <p className="text-[13px] font-heading text-foreground tabular-nums font-black tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</p>
+              <p className="text-[14px] font-heading text-primary tabular-nums font-black tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</p>
             </div>
             <div className="flex-1 min-h-0 px-2 pb-3 pt-1">
               <RevenueChart data={metrics.chartData} hidden={hidden} />
