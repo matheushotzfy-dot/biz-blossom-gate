@@ -519,22 +519,22 @@ export default function AdminConteudo() {
                 <div
                   key={c.id}
                   onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                  className="group grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 py-3 sm:py-0 sm:h-[56px] hover:bg-muted/10 transition-colors cursor-pointer"
+                  className="group grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px_100px_80px_100px_36px] items-center px-4 py-3 sm:py-0 sm:h-[56px] hover:bg-secondary/40 transition-colors cursor-pointer"
                 >
                   {/* Course */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-md overflow-hidden shrink-0 bg-muted/30">
+                    <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 bg-secondary border border-border/50">
                       {c.thumbnail_url ? (
                         <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center">
-                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground/25" />
+                          <GraduationCap className="h-4 w-4 text-primary/30" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-foreground truncate">{c.title}</p>
-                      <p className="text-[11px] text-muted-foreground/50 truncate">
+                      <p className="text-[13px] font-display font-semibold text-foreground truncate">{c.title}</p>
+                      <p className="text-[11px] text-muted-foreground/50 truncate font-display">
                         {product ? product.name : c.description || "—"}
                       </p>
                     </div>
