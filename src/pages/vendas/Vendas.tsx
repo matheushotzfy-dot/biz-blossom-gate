@@ -983,14 +983,15 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border bg-secondary/20">
+                      <tr className="border-b border-border/50 bg-secondary/15">
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-4 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Status</th>
-                        <th className="px-4 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Método</th>
-                        <th className="px-4 py-3 text-right text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Taxa</th>
+                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/35">Status</th>
+                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/35">Método</th>
+                        <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
-                        <th className="w-14" />
+                        <th className="w-12" />
+                      </tr>
                       </tr>
                     </thead>
                     <tbody>
