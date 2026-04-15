@@ -992,7 +992,6 @@ export default function Vendas() {
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
                         <th className="w-12" />
                       </tr>
-                      </tr>
                     </thead>
                     <tbody>
                       {visibleItems.length === 0 ? (
