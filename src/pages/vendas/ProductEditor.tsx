@@ -808,7 +808,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div className="relative group/img">
  <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
- <div className="absolute inset-0 bg-background/40 opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
+ <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-colors duration-200">
  <ImagePlus className="h-5 w-5 text-foreground" />
  </motion.button>
