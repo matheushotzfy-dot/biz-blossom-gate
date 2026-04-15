@@ -966,14 +966,14 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border bg-secondary/30">
-                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-5" />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Produto</th>
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Status</th>
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Juros Recebidos</th>
-                        <SortHead label="Valor Líquido" field="net" sort={sort} onSort={handleSort} />
-                        <th className="w-12" />
+                      <tr className="border-b border-border bg-secondary/20">
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
+                        <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                        <th className="px-4 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Status</th>
+                        <th className="px-4 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Método</th>
+                        <th className="px-4 py-3 text-right text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Taxa</th>
+                        <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
+                        <th className="w-14" />
                       </tr>
                     </thead>
                     <tbody>
