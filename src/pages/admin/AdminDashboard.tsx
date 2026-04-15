@@ -665,6 +665,9 @@ export default function AdminDashboard() {
                 {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
                 {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
                 {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
+                {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+                {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+                {activeTab === "support" && isAdmin && <AdminSupportTab profiles={profiles} />}
                 {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
                 {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
                 {activeTab === "inactive-sellers" && isAdmin && (
