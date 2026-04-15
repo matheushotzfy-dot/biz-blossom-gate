@@ -131,7 +131,7 @@ export function MobileBottomNav() {
 
  {/* ═══ Bottom Tab Bar ═══ */}
  <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
- <div className="bg-background/90 backdrop-blur-2xl border-t border-border/40">
+ <div className="bg-background border-t border-border">
  <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
  {tabs.map((tab) => {
  const isMore = tab.path === "__more__";
