@@ -79,12 +79,13 @@ const initials = (n: string) => {
  return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : (p[0]?.[0] || "?").toUpperCase();
 };
 
-const STATUS: Record<string, { label: string; fg: string; dot: string; bg: string; border: string }> = {
- completed: { label: "Aprovada", fg: "text-success", dot: "bg-success", bg: "bg-success/8", border: "border-success/15" },
- pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/8", border: "border-warning/15" },
- failed: { label: "Falha", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/15" },
- refunded: { label: "Reembolso", fg: "text-info", dot: "bg-info", bg: "bg-info/8", border: "border-info/15" },
- chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/15" },
+const STATUS: Record<string, { label: string; fg: string; dot: string; bg: string; border: string; glow?: string }> = {
+ completed: { label: "Aprovada", fg: "text-success", dot: "bg-success", bg: "bg-success/[0.07]", border: "border-success/20", glow: "shadow-[0_0_8px_hsl(var(--success)/0.15)]" },
+ pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/[0.07]", border: "border-warning/20", glow: "shadow-[0_0_8px_hsl(var(--warning)/0.15)]" },
+ failed: { label: "Falha", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/[0.07]", border: "border-destructive/20" },
+ expired: { label: "Expirada", fg: "text-muted-foreground/60", dot: "bg-muted-foreground/40", bg: "bg-muted/[0.06]", border: "border-border/30" },
+ refunded: { label: "Reembolso", fg: "text-info", dot: "bg-info", bg: "bg-info/[0.07]", border: "border-info/20" },
+ chargeback: { label: "Chargeback", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/[0.07]", border: "border-destructive/20" },
 };
 
 type AccentTone = "primary" | "success" | "warning" | "info" | "destructive";
