@@ -334,9 +334,16 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
        {tx.customer_email && (
         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>
        )}
-       {tx.status === "completed" && (
-
-/* ─── Mobile Card ─── */
+        {tx.status === "completed" && (
+         <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] font-heading text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
+        )}
+       </DropdownMenuContent>
+      </DropdownMenu>
+     </div>
+    </td>
+   </tr>
+  );
+}
 function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
