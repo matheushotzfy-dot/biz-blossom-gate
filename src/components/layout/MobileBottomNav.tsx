@@ -68,8 +68,8 @@ export function MobileBottomNav() {
  {/* ═══ "More" bottom sheet ═══ */}
  {moreOpen && (
  <div className="fixed inset-0 z-[60] md:hidden">
- <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setMoreOpen(false)} />
- <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border/50 rounded-t-[28px] max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up">
+ <div className="absolute inset-0 bg-background/80" onClick={() => setMoreOpen(false)} />
+ <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-[28px] max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up">
  {/* Handle */}
  <div className="flex justify-center pt-3 pb-1">
  <div className="h-1 w-10 rounded-full bg-border/60" />
@@ -131,7 +131,7 @@ export function MobileBottomNav() {
 
  {/* ═══ Bottom Tab Bar ═══ */}
  <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
- <div className="bg-background/90 backdrop-blur-2xl border-t border-border/40">
+ <div className="bg-background border-t border-border">
  <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
  {tabs.map((tab) => {
  const isMore = tab.path === "__more__";
