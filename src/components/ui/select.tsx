@@ -74,8 +74,7 @@ const SelectContent = React.forwardRef<
  position={position}
  {...props}
  >
- {/* Top glow line */}
- <div className="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+  <SelectScrollUpButton />
  <SelectScrollUpButton />
  <SelectPrimitive.Viewport
  className={cn(
@@ -86,9 +85,7 @@ const SelectContent = React.forwardRef<
  >
  {children}
  </SelectPrimitive.Viewport>
- <SelectScrollDownButton />
- {/* Bottom glow line */}
- <div className="absolute bottom-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
+  <SelectScrollDownButton />
  </SelectPrimitive.Content>
  </SelectPrimitive.Portal>
 ));
