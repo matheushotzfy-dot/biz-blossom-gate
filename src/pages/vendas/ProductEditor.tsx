@@ -2077,51 +2077,51 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
  const accentBg = color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info";
  const bgColor = color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10";
 
- return (
- <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
- checked ? "bg-card/60 border-border/40" : "bg-card/20 border-border/20 opacity-50"
- )}>
- {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
- <div className="flex items-center gap-3">
- <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-transparent", bgColor)}>
- <Icon className={cn("h-4 w-4", color)} />
- </div>
- <div>
- <p className="text-sm font-semibold">{label}</p>
- {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
- </div>
- </div>
- <Switch checked={checked} onCheckedChange={onChange} />
- </div>
- );
+  return (
+  <div className={cn(
+  "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
+  checked ? "bg-card border-border" : "bg-card border-border opacity-50"
+  )}>
+  {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
+  <div className="flex items-center gap-3">
+  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-border", bgColor)}>
+  <Icon className={cn("h-4 w-4", color)} />
+  </div>
+  <div>
+  <p className="text-sm font-semibold">{label}</p>
+  {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
+  </div>
+  </div>
+  <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+  );
 }
 
 function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
- label: string; sublabel?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
+  label: string; sublabel?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
 }) {
- return (
- <div className="space-y-2">
- <EditorLabel>{label}</EditorLabel>
- {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
- <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
- {preview ? (
- <div className="relative rounded-lg overflow-hidden border border-border/30 group/banner">
- <img src={preview} alt={label} className="w-full h-24 object-cover" />
- <div className="absolute inset-0 bg-background/50 backdrop-blur-sm opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center gap-2">
- <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center hover:bg-muted/40 transition-all active:scale-95">
- <ImagePlus className="h-3.5 w-3.5 text-foreground" />
- </button>
- <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-all active:scale-95">
- <X className="h-3.5 w-3.5" />
- </button>
- </div>
- </div>
- ) : (
- <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border/25 hover:border-primary/30 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-all active:scale-[0.99]">
- <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
- </button>
- )}
- </div>
- );
+  return (
+  <div className="space-y-2">
+  <EditorLabel>{label}</EditorLabel>
+  {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
+  <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
+  {preview ? (
+  <div className="relative rounded-lg overflow-hidden border border-border group/banner">
+  <img src={preview} alt={label} className="w-full h-24 object-cover" />
+  <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+  <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors duration-200 active:scale-95">
+  <ImagePlus className="h-3.5 w-3.5 text-foreground" />
+  </button>
+  <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors duration-200 active:scale-95">
+  <X className="h-3.5 w-3.5" />
+  </button>
+  </div>
+  </div>
+  ) : (
+  <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors duration-200 active:scale-[0.99]">
+  <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
+  </button>
+  )}
+  </div>
+  );
 }
