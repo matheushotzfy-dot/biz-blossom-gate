@@ -962,11 +962,12 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border/50 bg-secondary/15">
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
+                      <tr className="border-b border-border/[0.06]">
+                        <th className="w-[3px]" />
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-4" />
                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/35">Status</th>
-                        <th className="px-4 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/35">Método</th>
+                        <th className="px-3 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Status</th>
+                        <th className="px-3 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Método</th>
                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
                         <th className="w-12" />
@@ -974,7 +975,7 @@ export default function Vendas() {
                     </thead>
                     <tbody>
                       {visibleItems.length === 0 ? (
-                        <tr><td colSpan={7} className="py-20">
+                        <tr><td colSpan={8} className="py-20">
                           <div className="flex flex-col items-center justify-center">
                             <ShoppingCart className="mb-3 h-5 w-5 text-muted-foreground/20" />
                             <p className="text-[12px] font-heading font-semibold text-foreground/60">Nenhuma venda encontrada</p>
