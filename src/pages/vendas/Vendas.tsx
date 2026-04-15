@@ -256,82 +256,79 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
   credit_card: { label: "Cartão", color: "text-info", bg: "bg-info/8", border: "border-info/15" },
   boleto: { label: "Boleto", color: "text-warning", bg: "bg-warning/8", border: "border-warning/15" },
  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", bg: "bg-secondary", border: "border-border" };
+ const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", bg: "bg-secondary", border: "border-border" };
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
-  const prodName = tx.product_id ? (prods[tx.product_id] || "Produto sem nome") : "Sem produto";
-  const fee = Number(tx.fee_amount);
-  const net = Number(tx.net_amount);
+ const prodName = tx.product_id ? (prods[tx.product_id] || "Produto sem nome") : "Sem produto";
+ const fee = Number(tx.fee_amount);
+ const net = Number(tx.net_amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 hover:bg-primary/[0.03] transition-all duration-200">
-  <td className="px-5 py-3.5 align-middle">
-   <div className="flex flex-col">
-    <p className="text-[12px] font-heading font-bold text-foreground tabular-nums">{fmtDate(tx.created_at)}</p>
-    <p className="text-[10px] font-heading text-muted-foreground/50 tabular-nums">{fmtTime(tx.created_at)}</p>
-   </div>
-  </td>
-  <td className="px-3 py-3.5 align-middle">
-   <p className="truncate text-[11px] font-heading font-semibold text-foreground/70 max-w-[140px]">{prodName}</p>
-  </td>
-  <td className="px-3 py-3.5 align-middle">
-   <div className="flex items-center gap-2.5 min-w-0">
-    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-1 ring-border/50">
-     <AvatarFallback className={cn("text-[9px] font-black tracking-tight rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
-    </Avatar>
-    <div className="min-w-0">
-     <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-     <p className="truncate text-[10px] text-muted-foreground/40">{tx.customer_email || "—"}</p>
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/40 hover:bg-accent/40 transition-all duration-200">
+   <td className="px-5 py-4 align-middle">
+    <div className="flex items-center gap-3.5">
+     <Avatar className="h-9 w-9 shrink-0 rounded-xl ring-1 ring-border/40 shadow-sm">
+      <AvatarFallback className={cn("text-[10px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
+     </Avatar>
+     <div className="min-w-0">
+      <p className="truncate text-[13px] font-heading font-bold text-foreground leading-tight">{name}</p>
+      <p className="truncate text-[11px] text-muted-foreground/50 mt-0.5">{tx.customer_email || "Sem email"}</p>
+     </div>
     </div>
-   </div>
-  </td>
-  <td className="px-3 py-3.5 align-middle">
-   <div className="flex items-center gap-2">
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
-     <span className="relative flex h-1.5 w-1.5">
-      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+   </td>
+   <td className="px-4 py-4 align-middle">
+    <p className="truncate text-[12px] font-heading font-semibold text-foreground/80 max-w-[160px]">{prodName}</p>
+    <p className="text-[10px] text-muted-foreground/40 mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+   </td>
+   <td className="px-4 py-4 align-middle">
+    <div className="flex items-center gap-2">
+     <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
+      <span className="relative flex h-1.5 w-1.5">
+       {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+       <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+      </span>
+      {st.label}
      </span>
-     {st.label}
-    </span>
-    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-heading font-bold", method.color, method.bg, method.border)}>{method.label}</span>
-   </div>
-  </td>
-  <td className="px-3 py-3.5 align-middle">
-   <p className="text-[11px] font-heading font-semibold text-muted-foreground/50 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
-  </td>
-  <td className="px-3 py-3.5 align-middle">
-   <p className={cn("text-[13px] font-heading font-black tabular-nums tracking-[-0.02em]", tx.status === "completed" ? "text-success" : "text-foreground")}>{fmt(net)}</p>
-  </td>
-  <td className="px-2 py-3.5 align-middle">
-  <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-  {tx.customer_phone && (
-   <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-    className="flex h-7 w-7 items-center justify-center rounded-md text-success/60 hover:bg-success/8 hover:text-success">
-    <MessageCircle className="h-3.5 w-3.5" />
-   </a>
-  )}
-  <DropdownMenu>
-  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-  <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-secondary">
-  <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
-  </button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent align="end" className="w-44 rounded-lg border-border">
-  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-md"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
-  {tx.customer_phone && (
-  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
-  )}
-  {tx.customer_email && (
-  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>
-  )}
-  {tx.status === "completed" && (
-  <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] font-heading text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
-  )}
-  </DropdownMenuContent>
-  </DropdownMenu>
-  </div>
-  </td>
+    </div>
+   </td>
+   <td className="px-4 py-4 align-middle">
+    <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold", method.color, method.bg, method.border)}>{method.label}</span>
+   </td>
+   <td className="px-4 py-4 align-middle text-right">
+    <p className="text-[11px] font-heading font-semibold text-muted-foreground/50 tabular-nums">{fee > 0 ? fmt(fee) : "—"}</p>
+   </td>
+   <td className="px-4 py-4 align-middle text-right">
+    <p className={cn("text-[14px] font-heading font-black tabular-nums tracking-[-0.02em]", tx.status === "completed" ? "text-success" : "text-foreground")}>{fmt(net)}</p>
+   </td>
+   <td className="px-3 py-4 align-middle">
+    <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+     {tx.customer_phone && (
+      <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+       className="flex h-8 w-8 items-center justify-center rounded-lg text-success/60 hover:bg-success/8 hover:text-success transition-colors">
+       <MessageCircle className="h-3.5 w-3.5" />
+      </a>
+     )}
+     <DropdownMenu>
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+       <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-secondary transition-colors">
+        <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/40" />
+       </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44 rounded-xl border-border">
+       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+       {tx.customer_phone && (
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>
+       )}
+       {tx.customer_email && (
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>
+       )}
+       {tx.status === "completed" && (
+        <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] font-heading text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>
+       )}
+      </DropdownMenuContent>
+     </DropdownMenu>
+    </div>
+   </td>
   </tr>
  );
 }
@@ -340,60 +337,54 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
 function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
-  const methods: Record<string, { label: string; color: string; border: string }> = {
+ const methods: Record<string, { label: string; color: string; border: string }> = {
   pix: { label: "PIX", color: "text-success", border: "border-success/15 bg-success/8" },
   credit_card: { label: "Cartão", color: "text-info", border: "border-info/15 bg-info/8" },
   boleto: { label: "Boleto", color: "text-warning", border: "border-warning/15 bg-warning/8" },
-  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", border: "border-border bg-secondary" };
-  const prodName = tx.product_id ? prods[tx.product_id] || "Produto sem nome" : "Sem produto";
-  const fee = Number(tx.fee_amount);
+ };
+ const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", border: "border-border bg-secondary" };
+ const prodName = tx.product_id ? prods[tx.product_id] || "Produto sem nome" : "Sem produto";
+ const net = Number(tx.net_amount);
 
  return (
-  <div className="cursor-pointer overflow-hidden rounded-[14px] border border-border bg-[hsl(var(--card-elevated))]" onClick={onClick}>
-  <div className={cn("h-[3px] w-full", st.dot)} />
-  <div className="p-4">
-  <div className="flex items-start justify-between gap-3">
-   <div className="min-w-0">
-    <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/35">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-    <p className="mt-2 truncate text-[12px] font-heading font-bold text-foreground">{prodName}</p>
+  <div className="cursor-pointer overflow-hidden rounded-2xl border border-border/60 bg-card active:scale-[0.99] transition-all duration-200" onClick={onClick}>
+   <div className="p-4">
+    {/* Top: Avatar + Name + Status */}
+    <div className="flex items-center justify-between gap-3">
+     <div className="flex items-center gap-3 min-w-0 flex-1">
+      <Avatar className="h-10 w-10 shrink-0 rounded-xl ring-1 ring-border/40 shadow-sm">
+       <AvatarFallback className={cn("text-[10px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      </Avatar>
+      <div className="min-w-0">
+       <p className="truncate text-[13px] font-heading font-bold text-foreground">{name}</p>
+       <p className="truncate text-[11px] text-muted-foreground/45 mt-0.5">{tx.customer_email || "Sem email"}</p>
+      </div>
+     </div>
+     <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[9px] font-heading font-black uppercase tracking-[0.08em] shrink-0", st.fg, st.bg, st.border)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+      {st.label}
+     </span>
+    </div>
+
+    {/* Product + Date */}
+    <div className="mt-3 flex items-center justify-between">
+     <p className="text-[11px] font-heading font-semibold text-foreground/70 truncate max-w-[60%]">{prodName}</p>
+     <p className="text-[10px] font-heading text-muted-foreground/40 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+    </div>
+
+    {/* Value + Method */}
+    <div className="mt-3 flex items-center justify-between pt-3 border-t border-border/40">
+     <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold", method.color, method.border)}>{method.label}</span>
+     <div className="flex items-center gap-3">
+      {tx.customer_phone && (
+       <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex h-8 w-8 items-center justify-center rounded-lg text-success/60 hover:bg-success/8">
+        <MessageCircle className="h-3.5 w-3.5" />
+       </a>
+      )}
+      <p className={cn("text-[16px] font-heading font-black tabular-nums tracking-[-0.03em]", tx.status === "completed" ? "text-success" : "text-foreground")}>{fmt(net)}</p>
+     </div>
+    </div>
    </div>
-   <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[8px] font-heading font-black uppercase tracking-[0.12em]", st.fg, st.bg, st.border)}>
-   <span className="relative flex h-1.5 w-1.5">
-    {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-    <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
-   </span>
-   {st.label}
-   </span>
-  </div>
-  <div className="mt-4 flex items-center gap-3">
-   <Avatar className="h-10 w-10 shrink-0 rounded-[11px] ring-1 ring-border/70 ring-inset">
-    <AvatarFallback className={cn("text-[10px] font-black tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
-   </Avatar>
-   <div className="min-w-0">
-    <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-    <p className="truncate text-[10px] text-muted-foreground/45">{tx.customer_email || "Sem email informado"}</p>
-   </div>
-  </div>
-  <div className="mt-4 grid grid-cols-2 gap-2">
-   <div className="rounded-[10px] border border-border bg-card px-3 py-2">
-    <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Taxa</p>
-    <p className="mt-1 text-[11px] font-heading font-bold text-foreground/75 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
-   </div>
-   <div className="rounded-[10px] border border-border bg-card px-3 py-2">
-    <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Líquido</p>
-    <p className="mt-1 text-[13px] font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{fmt(Number(tx.net_amount))}</p>
-   </div>
-  </div>
-  <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-   <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-heading font-bold", method.color, method.border)}>{method.label}</span>
-   {tx.customer_phone && (
-    <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex h-8 w-8 items-center justify-center rounded-[10px] text-success hover:bg-success/8">
-    <MessageCircle className="h-3.5 w-3.5" />
-    </a>
-   )}
-  </div>
-  </div>
   </div>
  );
 }
@@ -969,14 +960,14 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border bg-secondary/30">
-                        <SortHead label="Data" field="date" sort={sort} onSort={handleSort} className="pl-5" />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Produto</th>
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Status</th>
-                        <th className="px-3 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Juros Recebidos</th>
-                        <SortHead label="Valor Líquido" field="net" sort={sort} onSort={handleSort} />
-                        <th className="w-12" />
+                      <tr className="border-b border-border bg-secondary/20">
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
+                        <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                        <th className="px-4 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Status</th>
+                        <th className="px-4 py-3 text-left text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Método</th>
+                        <th className="px-4 py-3 text-right text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/40">Taxa</th>
+                        <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
+                        <th className="w-14" />
                       </tr>
                     </thead>
                     <tbody>
