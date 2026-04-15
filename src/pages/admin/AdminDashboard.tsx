@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
-  Activity, Settings, Bell,
+  Activity, Settings, Bell, MessageSquare,
   UserCog, RefreshCw, Rocket,
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
@@ -42,6 +42,9 @@ import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
 import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
 import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
+import AdminSupportTab from "./tabs/AdminSupportTab";
+import AdminSubscriptionsTab from "./tabs/AdminSubscriptionsTab";
+import AdminReferralsTab from "./tabs/AdminReferralsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -82,6 +85,8 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
       { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
       { id: "affiliates", label: "Afiliados", icon: Users, employeeAccess: false },
+      { id: "subscriptions", label: "Assinaturas", icon: CreditCard, employeeAccess: false },
+      { id: "referrals", label: "Indicações", icon: Zap, employeeAccess: false },
     ],
   },
   {
@@ -91,6 +96,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "settings", label: "Configurações", icon: Settings, employeeAccess: false },
       { id: "error-logs", label: "Error Logs", icon: Bug, employeeAccess: false },
       { id: "notifications", label: "Notificações", icon: Bell, employeeAccess: false },
+      { id: "support", label: "Suporte", icon: MessageSquare, employeeAccess: false },
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
@@ -659,6 +665,9 @@ export default function AdminDashboard() {
                 {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
                 {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}
                 {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
+                {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+                {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+                {activeTab === "support" && isAdmin && <AdminSupportTab profiles={profiles} />}
                 {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
                 {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
                 {activeTab === "inactive-sellers" && isAdmin && (
