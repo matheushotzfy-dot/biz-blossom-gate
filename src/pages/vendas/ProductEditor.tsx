@@ -2041,34 +2041,34 @@ function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ classN
 }
 
 function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }: {
- icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
+  icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
- return (
- <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
- checked ? "border-primary/20 bg-primary/[0.03]" : "border-border/30 bg-card/40 hover:border-border/50"
- )}>
- {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
- <div className="flex items-center gap-3 flex-1">
- {Icon && (
- <div className={cn(
- "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
- checked ? "bg-primary/10 border-primary/15" : "bg-muted/15 border-transparent"
- )}>
- <Icon className={cn("h-3.5 w-3.5", checked ? "text-primary" : "text-muted-foreground/40")} />
- </div>
- )}
- <div>
- <p className="text-sm font-semibold text-foreground">{label}</p>
- {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
- </div>
- </div>
- <div className="flex items-center gap-2">
- {children}
- <Switch checked={checked} onCheckedChange={onChange} />
- </div>
- </div>
- );
+  return (
+  <div className={cn(
+  "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
+  checked ? "border-primary/20 bg-primary/5" : "border-border bg-card hover:border-muted-foreground/20"
+  )}>
+  {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
+  <div className="flex items-center gap-3 flex-1">
+  {Icon && (
+  <div className={cn(
+  "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors duration-200",
+  checked ? "bg-primary/10 border-primary/20" : "bg-secondary border-border"
+  )}>
+  <Icon className={cn("h-3.5 w-3.5 transition-colors duration-200", checked ? "text-primary" : "text-muted-foreground/50")} />
+  </div>
+  )}
+  <div>
+  <p className="text-sm font-semibold text-foreground">{label}</p>
+  {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
+  </div>
+  </div>
+  <div className="flex items-center gap-2">
+  {children}
+  <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+  </div>
+  );
 }
 
 function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChange }: {
