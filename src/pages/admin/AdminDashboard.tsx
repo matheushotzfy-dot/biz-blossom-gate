@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
-  Activity, Settings, Bell,
+  Activity, Settings, Bell, MessageSquare,
   UserCog, RefreshCw, Rocket,
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
