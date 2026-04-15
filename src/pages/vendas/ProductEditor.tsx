@@ -489,31 +489,30 @@ export default function ProductEditor() {
  toast.success("Link copiado!");
  };
 
- if (loading) {
- return (
- <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
- <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03] pointer-events-none" />
- <div className="flex flex-col items-center gap-5 relative z-10">
- <div className="relative">
- <motion.div
- animate={{ rotate: 360 }}
- transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
- className="h-16 w-16 border-2 border-border/15 border-t-primary rounded-full"
- />
- <div className="absolute inset-0 flex items-center justify-center">
- <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
- <Package className="h-5 w-5 text-primary/60" />
- </div>
- </div>
- </div>
- <div className="text-center space-y-1.5">
- <p className="text-sm font-display font-black text-foreground tracking-[-0.02em]">Carregando produto</p>
- <p className="text-xs text-muted-foreground/40 font-display">Preparando o editor...</p>
- </div>
- </div>
- </div>
- );
- }
+  if (loading) {
+  return (
+  <div className="h-[100dvh] bg-background flex items-center justify-center">
+  <div className="flex flex-col items-center gap-5">
+  <div className="relative">
+  <motion.div
+  animate={{ rotate: 360 }}
+  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+  className="h-14 w-14 border-2 border-border border-t-primary rounded-full"
+  />
+  <div className="absolute inset-0 flex items-center justify-center">
+  <div className="h-9 w-9 rounded-xl bg-primary/10 border border-border flex items-center justify-center">
+  <Package className="h-4.5 w-4.5 text-primary" />
+  </div>
+  </div>
+  </div>
+  <div className="text-center space-y-1">
+  <p className="text-sm font-display font-bold text-foreground">Carregando produto</p>
+  <p className="text-xs text-muted-foreground">Preparando o editor...</p>
+  </div>
+  </div>
+  </div>
+  );
+  }
 
  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
  const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
