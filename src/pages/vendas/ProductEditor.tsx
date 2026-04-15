@@ -701,31 +701,31 @@ export default function ProductEditor() {
   </nav>
 
  {/* ── Mobile Tab Bar ── */}
- <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
- <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
- {TABS.map(tab => {
- const locked = tab.key !== "geral" && tabsLocked;
- return (
- <button
- key={tab.key}
- onClick={() => {
- if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
- setActiveTab(tab.key);
- }}
- disabled={locked}
- className={cn(
- "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-all min-w-[50px]",
- locked ? "opacity-30 text-muted-foreground" :
- activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
- )}
- >
- {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
- <span className="truncate max-w-[48px]">{tab.label}</span>
- </button>
- );
- })}
- </div>
- </div>
+  <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card border-t border-border safe-area-bottom">
+  <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
+  {TABS.map(tab => {
+  const locked = tab.key !== "geral" && tabsLocked;
+  return (
+  <button
+  key={tab.key}
+  onClick={() => {
+  if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
+  setActiveTab(tab.key);
+  }}
+  disabled={locked}
+  className={cn(
+  "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-colors duration-200 min-w-[50px]",
+  locked ? "opacity-30 text-muted-foreground" :
+  activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+  )}
+  >
+  {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+  <span className="truncate max-w-[48px]">{tab.label}</span>
+  </button>
+  );
+  })}
+  </div>
+  </div>
 
  {/* ───── Content Area ───── */}
  <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
