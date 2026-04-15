@@ -42,6 +42,9 @@ import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
 import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
 import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
+import AdminSupportTab from "./tabs/AdminSupportTab";
+import AdminSubscriptionsTab from "./tabs/AdminSubscriptionsTab";
+import AdminReferralsTab from "./tabs/AdminReferralsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -82,6 +85,8 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
       { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
       { id: "affiliates", label: "Afiliados", icon: Users, employeeAccess: false },
+      { id: "subscriptions", label: "Assinaturas", icon: CreditCard, employeeAccess: false },
+      { id: "referrals", label: "Indicações", icon: Zap, employeeAccess: false },
     ],
   },
   {
@@ -91,6 +96,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "settings", label: "Configurações", icon: Settings, employeeAccess: false },
       { id: "error-logs", label: "Error Logs", icon: Bug, employeeAccess: false },
       { id: "notifications", label: "Notificações", icon: Bell, employeeAccess: false },
+      { id: "support", label: "Suporte", icon: MessageSquare, employeeAccess: false },
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
