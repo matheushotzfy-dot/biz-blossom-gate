@@ -489,31 +489,30 @@ export default function ProductEditor() {
  toast.success("Link copiado!");
  };
 
- if (loading) {
- return (
- <div className="h-[100dvh] bg-background flex items-center justify-center relative overflow-hidden">
- <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03] pointer-events-none" />
- <div className="flex flex-col items-center gap-5 relative z-10">
- <div className="relative">
- <motion.div
- animate={{ rotate: 360 }}
- transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
- className="h-16 w-16 border-2 border-border/15 border-t-primary rounded-full"
- />
- <div className="absolute inset-0 flex items-center justify-center">
- <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
- <Package className="h-5 w-5 text-primary/60" />
- </div>
- </div>
- </div>
- <div className="text-center space-y-1.5">
- <p className="text-sm font-display font-black text-foreground tracking-[-0.02em]">Carregando produto</p>
- <p className="text-xs text-muted-foreground/40 font-display">Preparando o editor...</p>
- </div>
- </div>
- </div>
- );
- }
+  if (loading) {
+  return (
+  <div className="h-[100dvh] bg-background flex items-center justify-center">
+  <div className="flex flex-col items-center gap-5">
+  <div className="relative">
+  <motion.div
+  animate={{ rotate: 360 }}
+  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+  className="h-14 w-14 border-2 border-border border-t-primary rounded-full"
+  />
+  <div className="absolute inset-0 flex items-center justify-center">
+  <div className="h-9 w-9 rounded-xl bg-primary/10 border border-border flex items-center justify-center">
+  <Package className="h-4.5 w-4.5 text-primary" />
+  </div>
+  </div>
+  </div>
+  <div className="text-center space-y-1">
+  <p className="text-sm font-display font-bold text-foreground">Carregando produto</p>
+  <p className="text-xs text-muted-foreground">Preparando o editor...</p>
+  </div>
+  </div>
+  </div>
+  );
+  }
 
  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
  const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
@@ -533,203 +532,200 @@ export default function ProductEditor() {
  </div>
 
  {/* ───── Top Bar ───── */}
- <div className="shrink-0 z-50 bg-card/80 backdrop-blur-2xl border-b border-border/20 relative overflow-hidden shadow-sm">
- <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-transparent to-info/[0.02] pointer-events-none" />
- <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
- <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px] relative">
- <div className="flex items-center gap-3">
- <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/20 bg-card/60 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-all active:scale-[0.985] group shadow-sm">
- <ArrowLeft className="h-4 w-4 group-hover:text-foreground transition-colors" />
- </button>
+  <div className="shrink-0 z-50 bg-card border-b border-border">
+  <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
+  <div className="flex items-center gap-3">
+  <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 active:scale-[0.97]">
+  <ArrowLeft className="h-4 w-4" />
+  </button>
 
- {/* Product chip */}
- {name && (
- <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/50 border border-border/20 ring-1 ring-border/10 shadow-sm">
- {imagePreview ? (
- <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover border border-border/15 ring-1 ring-border/10" />
- ) : (
- <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center ring-1 ring-primary/15">
- <Package className="h-3.5 w-3.5 text-primary/60" />
- </div>
- )}
- <div>
- <p className="text-xs font-display font-black text-foreground truncate max-w-[200px] leading-tight tracking-[-0.01em]">{name}</p>
- {price && (
- <p className="text-[10px] font-numbers font-black text-primary leading-tight flex items-center gap-1.5">
- R$ {Number(price).toFixed(2)}
- <span className={cn("h-1.5 w-1.5 rounded-full shadow-sm", status === "active" ? "bg-success animate-pulse shadow-success/30" : "bg-muted-foreground/30")} />
- </p>
- )}
- </div>
- </div>
- )}
- </div>
+  {/* Product chip */}
+  {name && (
+  <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary border border-border">
+  {imagePreview ? (
+  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover border border-border" />
+  ) : (
+  <div className="h-7 w-7 rounded-lg bg-primary/10 border border-border flex items-center justify-center">
+  <Package className="h-3.5 w-3.5 text-primary" />
+  </div>
+  )}
+  <div>
+  <p className="text-xs font-display font-bold text-foreground truncate max-w-[200px] leading-tight">{name}</p>
+  {price && (
+  <p className="text-[10px] font-numbers font-bold text-primary leading-tight flex items-center gap-1.5">
+  R$ {Number(price).toFixed(2)}
+  <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-success" : "bg-muted-foreground/40")} />
+  </p>
+  )}
+  </div>
+  </div>
+  )}
+  </div>
 
- <div className="flex items-center gap-2.5">
- {/* Step indicator */}
- <div className="hidden lg:flex items-center gap-1 px-3 py-2.5 rounded-xl bg-card/40 border border-border/15 ring-1 ring-border/5">
- {TABS.map((tab) => {
- const isActive = activeTab === tab.key;
- const locked = tab.key !== "geral" && tabsLocked;
- return (
- <motion.div
- key={tab.key}
- animate={{ width: isActive ? 20 : 6, opacity: locked ? 0.15 : 1 }}
- transition={{ duration: 0.3 }}
- className={cn(
- "h-1.5 rounded-full transition-colors",
- isActive ? "bg-primary shadow-sm shadow-primary/20" : "bg-muted-foreground/20"
- )}
- title={tab.label}
- />
- );
- })}
- </div>
+  <div className="flex items-center gap-2.5">
+  {/* Step indicator */}
+  <div className="hidden lg:flex items-center gap-1 px-3 py-2.5 rounded-xl bg-secondary border border-border">
+  {TABS.map((tab) => {
+  const isActive = activeTab === tab.key;
+  const locked = tab.key !== "geral" && tabsLocked;
+  return (
+  <motion.div
+  key={tab.key}
+  animate={{ width: isActive ? 20 : 6, opacity: locked ? 0.2 : 1 }}
+  transition={{ duration: 0.25 }}
+  className={cn(
+  "h-1.5 rounded-full transition-colors duration-200",
+  isActive ? "bg-primary" : "bg-muted-foreground/25"
+  )}
+  title={tab.label}
+  />
+  );
+  })}
+  </div>
 
- {/* Completion */}
- <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/40 border border-border/15 ring-1 ring-border/5">
- <CompletionRing percent={completionPercent} />
- <div>
- <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Completo</p>
- <p className="text-[11px] font-numbers font-black text-foreground tabular-nums leading-tight">{completionPercent}%</p>
- </div>
- </div>
+  {/* Completion */}
+  <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary border border-border">
+  <CompletionRing percent={completionPercent} />
+  <div>
+  <p className="text-[8px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Completo</p>
+  <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums leading-tight">{completionPercent}%</p>
+  </div>
+  </div>
 
- <div className="h-5 w-px bg-border/15 hidden sm:block" />
+  <div className="h-5 w-px bg-border hidden sm:block" />
 
- {/* Actions */}
- <div className="flex items-center gap-1.5">
- {!tabsLocked && (
- <>
- <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground/50 gap-1.5 text-xs rounded-xl h-9 hidden sm:flex hover:text-foreground font-display font-bold">
- <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
- </Button>
- <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/40 hover:text-destructive hover:bg-destructive/5 h-9 w-9 p-0 rounded-xl hidden sm:flex">
- <Trash2 className="h-3.5 w-3.5" />
- </Button>
- </>
- )}
- <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
- "gap-1.5 rounded-xl text-xs font-display font-black h-9 px-5 transition-all duration-300 shadow-md relative overflow-hidden",
- saved ? "bg-success hover:bg-success shadow-success/20" : "shadow-primary/15"
- )}>
- {!saved && !saving && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />}
- {saved ? (
- <><Check className="h-3.5 w-3.5 relative z-10" /> <span className="hidden sm:inline relative z-10">Salvo!</span></>
- ) : saving ? (
- <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
- ) : isNew && !createdProductId ? (
- <><ChevronRight className="h-3 w-3 relative z-10" /> <span className="relative z-10">Próximo</span></>
- ) : (
- <><Save className="h-3 w-3 relative z-10" /> <span className="relative z-10">Salvar</span></>
- )}
- </Button>
- </div>
- </div>
- </div>
- </div>
+  {/* Actions */}
+  <div className="flex items-center gap-1.5">
+  {!tabsLocked && (
+  <>
+  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground gap-1.5 text-xs rounded-xl h-9 hidden sm:flex hover:text-foreground hover:bg-muted font-display font-bold transition-colors duration-200">
+  <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
+  </Button>
+  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-9 w-9 p-0 rounded-xl hidden sm:flex transition-colors duration-200">
+  <Trash2 className="h-3.5 w-3.5" />
+  </Button>
+  </>
+  )}
+  <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
+  "gap-1.5 rounded-xl text-xs font-display font-bold h-9 px-5 transition-all duration-250",
+  saved ? "bg-success hover:bg-success" : ""
+  )}>
+  {saved ? (
+  <><Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span></>
+  ) : saving ? (
+  <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
+  ) : isNew && !createdProductId ? (
+  <><ChevronRight className="h-3 w-3" /> <span>Próximo</span></>
+  ) : (
+  <><Save className="h-3 w-3" /> <span>Salvar</span></>
+  )}
+  </Button>
+  </div>
+  </div>
+  </div>
+  </div>
 
  {/* ───── Main Area ───── */}
  <div className="flex-1 min-h-0 flex overflow-hidden">
  <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-6 py-5 min-h-0">
 
  {/* ───── Sidebar ───── */}
- <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
- <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl p-2.5 space-y-0.5 ring-1 ring-border/5 shadow-sm">
- <div className="px-3 py-2.5 mb-1">
- <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Navegação</p>
- </div>
- {TABS.map((tab) => {
- const isActive = activeTab === tab.key;
- const completed = tabCompleted(tab.key);
- const locked = tab.key !== "geral" && tabsLocked;
- return (
- <button
- key={tab.key}
- onClick={() => {
- if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; }
- setActiveTab(tab.key);
- }}
- disabled={locked}
- className={cn(
- "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-300 text-left relative group/tab",
- locked
- ? "opacity-25 cursor-not-allowed text-muted-foreground"
- : isActive
- ? "bg-primary/8 text-primary ring-1 ring-primary/12"
- : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/10"
- )}
- >
- {isActive && (
- <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.2)]" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
- )}
- {locked ? (
- <Lock className="h-3.5 w-3.5 shrink-0" />
- ) : (
- <div className={cn(
- "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ring-1 transition-all duration-300",
- isActive ? "bg-primary/10 ring-primary/15 shadow-sm shadow-primary/5" : "bg-muted/5 ring-border/10 group-hover/tab:ring-border/20"
- )}>
- <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground/30 group-hover/tab:text-muted-foreground/50")} />
- </div>
- )}
- <span className="truncate">{tab.label}</span>
- {completed && !isActive && !locked && (
- <div className="ml-auto h-2 w-2 rounded-full bg-success/60 shrink-0 shadow-sm shadow-success/20" />
- )}
- </button>
- );
- })}
- </div>
+  <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
+  <div className="rounded-2xl border border-border bg-card p-2.5 space-y-0.5">
+  <div className="px-3 py-2.5 mb-1">
+  <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Navegação</p>
+  </div>
+  {TABS.map((tab) => {
+  const isActive = activeTab === tab.key;
+  const completed = tabCompleted(tab.key);
+  const locked = tab.key !== "geral" && tabsLocked;
+  return (
+  <button
+  key={tab.key}
+  onClick={() => {
+  if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; }
+  setActiveTab(tab.key);
+  }}
+  disabled={locked}
+  className={cn(
+  "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-200 text-left relative group/tab",
+  locked
+  ? "opacity-25 cursor-not-allowed text-muted-foreground"
+  : isActive
+  ? "bg-primary/10 text-primary border border-primary/15"
+  : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+  )}
+  >
+  {isActive && (
+  <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+  )}
+  {locked ? (
+  <Lock className="h-3.5 w-3.5 shrink-0" />
+  ) : (
+  <div className={cn(
+  "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200",
+  isActive ? "bg-primary/10 border-primary/20" : "bg-secondary border-border group-hover/tab:border-muted-foreground/20"
+  )}>
+  <tab.icon className={cn("h-3.5 w-3.5 transition-colors duration-200", isActive ? "text-primary" : "text-muted-foreground/50 group-hover/tab:text-muted-foreground")} />
+  </div>
+  )}
+  <span className="truncate">{tab.label}</span>
+  {completed && !isActive && !locked && (
+  <div className="ml-auto h-2 w-2 rounded-full bg-success shrink-0" />
+  )}
+  </button>
+  );
+  })}
+  </div>
 
- {/* Quick info */}
- {!tabsLocked && product?.checkout_url && (
- <div className="rounded-2xl border border-border/20 bg-card/40 backdrop-blur-xl p-3.5 space-y-2.5 ring-1 ring-border/5 shadow-sm">
- <p className="text-[8px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Ações Rápidas</p>
- <Button
- variant="outline" size="sm"
- onClick={() => copyLink(getCheckoutLink())}
- className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold border-border/20 hover:border-border/30"
- >
- <Copy className="h-3 w-3" /> Copiar Link
- </Button>
- <Button
- variant="outline" size="sm"
- onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
- className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold border-border/20 hover:border-border/30"
- >
- <Palette className="h-3 w-3" /> Checkout Builder
- </Button>
- </div>
- )}
- </nav>
+  {/* Quick info */}
+  {!tabsLocked && product?.checkout_url && (
+  <div className="rounded-2xl border border-border bg-card p-3.5 space-y-2.5">
+  <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Ações Rápidas</p>
+  <Button
+  variant="outline" size="sm"
+  onClick={() => copyLink(getCheckoutLink())}
+  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold transition-colors duration-200"
+  >
+  <Copy className="h-3 w-3" /> Copiar Link
+  </Button>
+  <Button
+  variant="outline" size="sm"
+  onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
+  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold transition-colors duration-200"
+  >
+  <Palette className="h-3 w-3" /> Checkout Builder
+  </Button>
+  </div>
+  )}
+  </nav>
 
  {/* ── Mobile Tab Bar ── */}
- <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom">
- <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
- {TABS.map(tab => {
- const locked = tab.key !== "geral" && tabsLocked;
- return (
- <button
- key={tab.key}
- onClick={() => {
- if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
- setActiveTab(tab.key);
- }}
- disabled={locked}
- className={cn(
- "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-all min-w-[50px]",
- locked ? "opacity-30 text-muted-foreground" :
- activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
- )}
- >
- {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
- <span className="truncate max-w-[48px]">{tab.label}</span>
- </button>
- );
- })}
- </div>
- </div>
+  <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card border-t border-border safe-area-bottom">
+  <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
+  {TABS.map(tab => {
+  const locked = tab.key !== "geral" && tabsLocked;
+  return (
+  <button
+  key={tab.key}
+  onClick={() => {
+  if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
+  setActiveTab(tab.key);
+  }}
+  disabled={locked}
+  className={cn(
+  "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-colors duration-200 min-w-[50px]",
+  locked ? "opacity-30 text-muted-foreground" :
+  activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+  )}
+  >
+  {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+  <span className="truncate max-w-[48px]">{tab.label}</span>
+  </button>
+  );
+  })}
+  </div>
+  </div>
 
  {/* ───── Content Area ───── */}
  <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
@@ -800,7 +796,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div
  className={cn(
  "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-500 relative group/upload",
- isDragging ? "border-primary/50 bg-primary/5 scale-[1.005] shadow-lg shadow-primary/5" : "border-border/20 bg-card/30 hover:border-border/30"
+ isDragging ? "border-primary/50 bg-primary/5 scale-[1.005]" : "border-border bg-card hover:border-border"
  )}
  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
  onDragLeave={() => setIsDragging(false)}
@@ -812,15 +808,15 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div className="relative group/img">
  <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
- <div className="absolute inset-0 bg-background/40 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
- <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all shadow-xl ring-1 ring-border/10">
+ <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
+ <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-colors duration-200">
  <ImagePlus className="h-5 w-5 text-foreground" />
  </motion.button>
- <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-12 w-12 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all shadow-xl ring-1 ring-border/10">
+ <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-colors duration-200">
  <X className="h-5 w-5" />
  </motion.button>
  </div>
- <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card/80 backdrop-blur-xl border border-border/15 shadow-lg ring-1 ring-border/10">
+ <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary border border-border">
  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
  <span className="text-[10px] font-display font-black text-foreground">Imagem adicionada</span>
  </div>
@@ -832,7 +828,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <motion.div
  animate={isDragging ? { scale: 1.1, y: -8 } : { scale: 1, y: 0 }}
  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
- className="relative h-18 w-18 rounded-2xl bg-muted/8 group-hover/upload:bg-primary/8 flex items-center justify-center transition-all duration-500 border border-dashed border-border/20 group-hover/upload:border-primary/20 ring-1 ring-transparent group-hover/upload:ring-primary/10"
+ className="relative h-18 w-18 rounded-2xl bg-muted/8 group-hover/upload:bg-primary/8 flex items-center justify-center transition-all duration-500 border border-dashed border-border group-hover/upload:border-primary/20 ring-1 ring-transparent group-hover/upload:ring-primary/10"
  >
  <Upload className="h-8 w-8" />
  </motion.div>
@@ -848,7 +844,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <EditorCard accentColor="bg-primary">
  <div className="space-y-2">
  <EditorLabel icon={Package}>Nome do produto</EditorLabel>
- <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 bg-card/80 border-border/40 focus-visible:border-primary/40 text-base font-display font-bold" required maxLength={200} />
+ <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 bg-secondary border-border focus-visible:border-primary/40 text-base font-display font-bold" required maxLength={200} />
  <div className="flex items-center justify-between">
  <p className="text-[10px] text-muted-foreground/30">{name.length > 0 ? "✓ Nome preenchido" : "Obrigatório"}</p>
  <p className="text-[10px] text-muted-foreground/30 font-numbers tabular-nums">{name.length}/200</p>
@@ -857,7 +853,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
 
  <div className="space-y-2">
  <EditorLabel>Descrição <span className="text-destructive">*</span></EditorLabel>
- <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes (mínimo 50 caracteres)..." className={cn("resize-none bg-card/80 border-border/40", description.length > 0 && description.length < 50 && "border-destructive/40")} maxLength={2000} />
+ <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border", description.length > 0 && description.length < 50 && "border-destructive/40")} maxLength={2000} />
  <div className="flex items-center justify-between">
  <p className={cn("text-[10px]", description.length >= 50 ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/30")}>
  {description.length >= 50 ? "✓ Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres (mín. 50)` : "Obrigatório • Mínimo 50 caracteres"}
@@ -870,7 +866,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div className="space-y-2">
  <EditorLabel>Categoria</EditorLabel>
  <Select value={category} onValueChange={setCategory}>
- <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="infoproduto">Infoproduto</SelectItem>
  <SelectItem value="curso">Curso Online</SelectItem>
@@ -886,7 +882,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div className="space-y-2">
  <EditorLabel>Tipo de pagamento</EditorLabel>
  <Select value={paymentType} onValueChange={setPaymentType}>
- <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="unico">Único</SelectItem>
  <SelectItem value="assinatura">Assinatura</SelectItem>
@@ -903,7 +899,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div className="flex items-center gap-2">
  <EditorLabel icon={Shield}>Garantia</EditorLabel>
  <Select value={warrantyDays} onValueChange={setWarrantyDays}>
- <SelectTrigger className="h-8 w-24 text-xs bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-8 w-24 text-xs bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="7">7 dias</SelectItem>
  <SelectItem value="14">14 dias</SelectItem>
@@ -918,7 +914,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <span className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Preço principal</span>
  <div className="relative">
  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-display font-bold text-muted-foreground">R$</span>
- <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-10 text-2xl font-numbers font-black tracking-[-0.03em] bg-card/80 border-border/40" placeholder="0.00" />
+ <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-10 text-2xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border" placeholder="0.00" />
  </div>
  </div>
 
@@ -931,18 +927,18 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel icon={ExternalLink}>Página de vendas <span className="text-destructive">*</span></EditorLabel>
- <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className="h-11 bg-card/80 border-border/40" required />
+ <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className="h-11 bg-secondary border-border" required />
  <p className={cn("text-[10px]", /^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "✓ Página preenchida" : "Obrigatório — insira o domínio completo"}</p>
  </div>
  <div className="space-y-2">
  <EditorLabel icon={Mail}>E-mail de suporte <span className="text-destructive">*</span></EditorLabel>
- <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-card/80 border-border/40" required />
+ <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-secondary border-border" required />
  <p className={cn("text-[10px]", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "✓ E-mail preenchido" : "Obrigatório — insira um e-mail válido"}</p>
  </div>
  </div>
  <div className="space-y-2">
  <EditorLabel icon={Users}>Nome de exibição do produtor <span className="text-destructive">*</span></EditorLabel>
- <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador no checkout" className="h-11 bg-card/80 border-border/40" required />
+ <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador no checkout" className="h-11 bg-secondary border-border" required />
  <p className={cn("text-[10px]", displayName.trim() ? "text-success" : "text-muted-foreground/30")}>{displayName.trim() ? "✓ Nome preenchido" : "Obrigatório • Aparecerá no rodapé do checkout"}</p>
  </div>
  </EditorCard>
@@ -953,7 +949,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
  <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
  <Eye className="h-4 w-4 text-warning" /> Pré-visualização (Google)
  </h3>
- <div className="rounded-xl border border-border/30 bg-card/30 p-4 space-y-1">
+ <div className="rounded-xl border border-border bg-card p-4 space-y-1">
  <p className="text-[13px] text-info font-medium truncate">{pageUrl || "https://seusite.com/produto"}</p>
  <p className="text-base text-primary font-display font-bold truncate">{name || "Nome do Produto"}{price ? ` — R$ ${Number(price).toFixed(2)}` : ""}</p>
  <p className="text-xs text-muted-foreground line-clamp-2">{description.slice(0, 160) || "Descrição do produto aparecerá aqui..."}</p>
@@ -981,7 +977,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
 
  {/* Payment summary */}
  {price && parseFloat(price) > 0 && (
- <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border/20 p-3 space-y-2">
+ <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
  <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
  <div className="grid grid-cols-3 gap-3">
  {pixEnabled && (
@@ -1038,7 +1034,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  "flex items-start gap-3 p-4 rounded-xl border text-left transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
  deliveryType === opt.value
  ? "bg-primary/5 border-primary/20 shadow-sm"
- : "bg-card/30 border-border/20 hover:border-border/40"
+ : "bg-card border-border hover:border-border"
  )}
  >
  {deliveryType === opt.value && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
@@ -1051,7 +1047,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  </div>
  {deliveryType === opt.value && (
  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2">
- <div className="h-5 w-5 rounded-full bg-primary/15 ring-1 ring-primary/25 flex items-center justify-center">
+ <div className="h-5 w-5 rounded-full bg-primary/15 flex items-center justify-center">
  <div className="h-2 w-2 rounded-full bg-primary" />
  </div>
  </motion.div>
@@ -1072,7 +1068,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  {/* How it works */}
  <EditorCard accentColor="bg-info">
  <div className="flex items-start gap-3">
- <div className="h-10 w-10 rounded-xl bg-info/10 ring-1 ring-info/20 flex items-center justify-center shrink-0">
+ <div className="h-10 w-10 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
  <Sparkles className="h-4 w-4 text-info" />
  </div>
  <div>
@@ -1098,14 +1094,14 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  initial={{ opacity: 0, x: -10 }}
  animate={{ opacity: 1, x: 0 }}
  transition={{ delay: i * 0.05 }}
- className="flex items-center justify-between rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] p-4 relative overflow-hidden group/bump hover:border-primary/20 transition-all"
+ className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden group/bump hover:border-primary/20 transition-all"
  >
  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-warning" />
  <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
  {prod?.image_url ? (
- <img src={prod.image_url} alt={prod.name} className="h-11 w-11 rounded-xl object-cover ring-1 ring-border/20 shrink-0" />
+ <img src={prod.image_url} alt={prod.name} className="h-11 w-11 rounded-xl object-cover shrink-0" />
  ) : (
- <div className="h-11 w-11 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center shrink-0">
+ <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
  <Package className="h-4 w-4 text-primary" />
  </div>
  )}
@@ -1128,7 +1124,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  {availableForBump.length > 0 && orderBumps.length < 5 && (
  <div className="flex gap-2">
  <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
- <SelectTrigger className="flex-1 h-10 bg-card/80 border-border/40"><SelectValue placeholder="Selecione um produto..." /></SelectTrigger>
+ <SelectTrigger className="flex-1 h-10 bg-secondary border-border"><SelectValue placeholder="Selecione um produto..." /></SelectTrigger>
  <SelectContent>
  {availableForBump.map((p: any) => (
  <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
@@ -1158,7 +1154,7 @@ function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setTh
  {/* Strategy info */}
  <EditorCard accentColor="bg-success">
  <div className="flex items-start gap-3">
- <div className="h-10 w-10 rounded-xl bg-success/10 ring-1 ring-success/20 flex items-center justify-center shrink-0">
+ <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
  <Rocket className="h-4 w-4 text-success" />
  </div>
  <div>
@@ -1191,7 +1187,7 @@ function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setTh
  "flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
  upsellType === opt.value
  ? "bg-primary/5 border-primary/20 shadow-sm"
- : "bg-card/30 border-border/20 hover:border-border/40"
+ : "bg-card border-border hover:border-border"
  )}
  >
  {upsellType === opt.value && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
@@ -1215,7 +1211,7 @@ function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setTh
  </h4>
  <div className="space-y-2">
  <EditorLabel>URL da página</EditorLabel>
- <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/obrigado" type="url" className="h-11 bg-card/80 border-border/40" />
+ <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/obrigado" type="url" className="h-11 bg-secondary border-border" />
  <p className="text-[10px] text-muted-foreground/40">O comprador será redirecionado para esta URL após a compra</p>
  </div>
  </EditorCard>
@@ -1231,11 +1227,11 @@ function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setTh
  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden space-y-4 pt-2">
  <div className="space-y-2 pl-4 border-l-2 border-info/20">
  <EditorLabel>URL da oferta downsell</EditorLabel>
- <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-card/80 border-border/40" />
+ <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-secondary border-border" />
  </div>
  <div className="space-y-2 pl-4 border-l-2 border-info/20">
  <EditorLabel icon={Timer}>Delay antes de exibir (segundos)</EditorLabel>
- <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="w-24 h-10 text-center font-numbers bg-card/80 border-border/40" />
+ <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="w-24 h-10 text-center font-numbers bg-secondary border-border" />
  </div>
  </motion.div>
  )}
@@ -1290,11 +1286,11 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  ) : (
  <>
  {/* Checkout Quick Actions Card */}
- <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-[0_2px_12px_hsl(var(--foreground)/0.04)] overflow-hidden relative">
+ <div className="rounded-2xl border border-border bg-card overflow-hidden relative">
  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
  <div className="p-5 flex items-center justify-between">
  <div className="flex items-center gap-4">
- <div className="h-12 w-12 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+ <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
  <ShoppingCart className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -1322,7 +1318,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
  <Eye className="h-4 w-4 text-primary" /> Pré-visualização
  </h3>
- <div className="flex items-center gap-1 rounded-lg border border-border/30 bg-card/30 p-0.5">
+ <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-0.5">
  <button
  onClick={() => setPreviewDevice("desktop")}
  className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "desktop" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
@@ -1340,7 +1336,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
 
  {/* Mini checkout preview */}
  <div className={cn(
- "mx-auto rounded-xl border border-border/30 bg-background overflow-hidden transition-all duration-300",
+ "mx-auto rounded-xl border border-border bg-background overflow-hidden transition-all duration-300",
  previewDevice === "mobile" ? "max-w-[320px]" : "max-w-full"
  )}>
  {/* Banner area */}
@@ -1359,7 +1355,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
 
  {/* Product */}
  <div className="flex items-center gap-3">
- <div className="h-10 w-10 rounded-lg bg-muted/10 flex items-center justify-center shrink-0 border border-border/20">
+ <div className="h-10 w-10 rounded-lg bg-muted/10 flex items-center justify-center shrink-0 border border-border">
  <Package className="h-4 w-4 text-muted-foreground/30" />
  </div>
  <div className="flex-1 min-w-0">
@@ -1410,8 +1406,8 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <div className="relative">
  <input type="color" value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="w-12 h-12 rounded-xl border border-border cursor-pointer" />
  </div>
- <Input value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-card/80 border-border/40 h-11" />
- <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-primary-foreground shadow-lg cursor-default" style={{ backgroundColor: buttonColor }}>
+ <Input value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-secondary border-border h-11" />
+ <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-primary-foreground cursor-default" style={{ backgroundColor: buttonColor }}>
  Comprar Agora
  </motion.div>
  </div>
@@ -1422,7 +1418,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <button
  key={c}
  onClick={() => setButtonColor(c)}
- className={cn("h-6 w-6 rounded-lg border-2 transition-all hover:scale-110", buttonColor === c ? "border-foreground ring-1 ring-foreground/20 scale-110" : "border-border/30")}
+ className={cn("h-6 w-6 rounded-lg border-2 transition-all hover:scale-110", buttonColor === c ? "border-foreground ring-1 ring-foreground/20 scale-110" : "border-border")}
  style={{ backgroundColor: c }}
  />
  ))}
@@ -1438,7 +1434,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <ToggleRow icon={Timer} label="Timer de urgência" sublabel="Contador regressivo no checkout" checked={timerEnabled} onChange={setTimerEnabled}>
  {timerEnabled && (
  <div className="flex items-center gap-1.5">
- <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e: any) => setTimerMinutes(e.target.value)} className="w-16 h-8 text-center text-xs bg-card/80 border-border/40" />
+ <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e: any) => setTimerMinutes(e.target.value)} className="w-16 h-8 text-center text-xs bg-secondary border-border" />
  <span className="text-[10px] text-muted-foreground">min</span>
  </div>
  )}
@@ -1472,7 +1468,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  {/* Info card */}
  <EditorCard accentColor="bg-info">
  <div className="flex items-start gap-3">
- <div className="h-10 w-10 rounded-xl bg-info/10 ring-1 ring-info/20 flex items-center justify-center shrink-0">
+ <div className="h-10 w-10 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
  <Award className="h-4 w-4 text-info" />
  </div>
  <div>
@@ -1492,12 +1488,12 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel icon={Mail}>E-mail do co-produtor</EditorLabel>
- <Input value={coProducerEmail} onChange={(e: any) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" className="h-11 bg-card/80 border-border/40" />
+ <Input value={coProducerEmail} onChange={(e: any) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" className="h-11 bg-secondary border-border" />
  </div>
  <div className="space-y-2">
  <EditorLabel icon={Clock}>Tempo de duração</EditorLabel>
  <Select value={coProductionDuration} onValueChange={setCoProductionDuration}>
- <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="30">30 dias</SelectItem>
  <SelectItem value="60">60 dias</SelectItem>
@@ -1514,7 +1510,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  <EditorCard accentColor="bg-primary">
  <EditorLabel icon={Percent}>Comissão do co-produtor</EditorLabel>
  <div className="flex items-center gap-3">
- <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e: any) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-card/80 border-border/40" />
+ <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e: any) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
  <span className="text-lg font-display font-black text-muted-foreground">%</span>
  <div className="flex-1">
  <div className="h-3 rounded-full bg-muted/20 overflow-hidden flex">
@@ -1531,7 +1527,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  <div className="space-y-2">
  <EditorLabel>Comissões de quais vendas?</EditorLabel>
  <Select value={coProductionSalesType} onValueChange={setCoProductionSalesType}>
- <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="all">Todas as vendas</SelectItem>
  <SelectItem value="producer_only">Vendas do produtor</SelectItem>
@@ -1565,12 +1561,12 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel>Código do cupom</EditorLabel>
- <Input value={newCouponCode} onChange={(e: any) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-card/80 border-border/40 font-mono uppercase" maxLength={30} />
+ <Input value={newCouponCode} onChange={(e: any) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono uppercase" maxLength={30} />
  </div>
  <div className="space-y-2">
  <EditorLabel>Tipo de desconto</EditorLabel>
  <Select value={newCouponType} onValueChange={setNewCouponType}>
- <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="percentage">Percentual (%)</SelectItem>
  <SelectItem value="fixed">Valor fixo (R$)</SelectItem>
@@ -1581,11 +1577,11 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel>{newCouponType === "percentage" ? "Percentual (%)" : "Valor (R$)"}</EditorLabel>
- <Input type="number" min="0.01" max={newCouponType === "percentage" ? "100" : "99999"} step="0.01" value={newCouponValue} onChange={(e: any) => setNewCouponValue(e.target.value)} className="h-11 bg-card/80 border-border/40 font-numbers font-black" placeholder="0" />
+ <Input type="number" min="0.01" max={newCouponType === "percentage" ? "100" : "99999"} step="0.01" value={newCouponValue} onChange={(e: any) => setNewCouponValue(e.target.value)} className="h-11 bg-secondary border-border font-numbers font-black" placeholder="0" />
  </div>
  <div className="space-y-2">
  <EditorLabel>Usos máximos</EditorLabel>
- <Input type="number" min="1" value={newCouponMaxUses} onChange={(e: any) => setNewCouponMaxUses(e.target.value)} className="h-11 bg-card/80 border-border/40 font-numbers" placeholder="Ilimitado" />
+ <Input type="number" min="1" value={newCouponMaxUses} onChange={(e: any) => setNewCouponMaxUses(e.target.value)} className="h-11 bg-secondary border-border font-numbers" placeholder="Ilimitado" />
  </div>
  </div>
  <Button onClick={createCoupon} disabled={creatingCoupon || !newCouponCode.trim()} className="gap-2 rounded-xl font-display font-bold w-full sm:w-auto">
@@ -1602,8 +1598,8 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: i * 0.03 }}
  className={cn(
- "rounded-2xl border bg-card/50 backdrop-blur-xl p-4 flex items-center justify-between relative overflow-hidden transition-all",
- coupon.is_active ? "border-border/50" : "border-border/20 opacity-60"
+ "rounded-2xl border bg-card p-4 flex items-center justify-between relative overflow-hidden transition-all",
+ coupon.is_active ? "border-border" : "border-border opacity-60"
  )}
  >
  <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", coupon.is_active ? "bg-warning" : "bg-muted-foreground/20")} />
@@ -1650,14 +1646,14 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <div className="space-y-2">
  <EditorLabel icon={Percent}>Comissão (%)</EditorLabel>
  <div className="flex items-center gap-2">
- <Input type="number" min="1" max="80" value={affiliateCommission} onChange={(e: any) => setAffiliateCommission(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-card/80 border-border/40" />
+ <Input type="number" min="1" max="80" value={affiliateCommission} onChange={(e: any) => setAffiliateCommission(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
  <span className="text-lg font-display font-black text-muted-foreground">%</span>
  </div>
  </div>
  <div className="space-y-2">
  <EditorLabel>Atribuição</EditorLabel>
  <Select value={affiliateAttribution} onValueChange={setAffiliateAttribution}>
- <SelectTrigger className="h-11 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="last_click">Último clique</SelectItem>
  <SelectItem value="first_click">Primeiro clique</SelectItem>
@@ -1669,7 +1665,7 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <div className="space-y-2">
  <EditorLabel icon={Clock}>Duração dos cookies</EditorLabel>
  <Select value={affiliateCookieDays} onValueChange={setAffiliateCookieDays}>
- <SelectTrigger className="h-11 w-40 bg-card/80 border-border/40"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="h-11 w-40 bg-secondary border-border"><SelectValue /></SelectTrigger>
  <SelectContent>
  <SelectItem value="7">7 dias</SelectItem>
  <SelectItem value="15">15 dias</SelectItem>
@@ -1695,11 +1691,11 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel icon={Mail}>E-mail de suporte para afiliados</EditorLabel>
- <Input value={affiliateSupportEmail} onChange={(e: any) => setAffiliateSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-card/80 border-border/40" />
+ <Input value={affiliateSupportEmail} onChange={(e: any) => setAffiliateSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-secondary border-border" />
  </div>
  <div className="space-y-2">
  <EditorLabel>Descrição para afiliados</EditorLabel>
- <Textarea value={affiliateDescription} onChange={(e: any) => setAffiliateDescription(e.target.value)} rows={2} placeholder="Descreva os benefícios..." className="resize-none bg-card/80 border-border/40" />
+ <Textarea value={affiliateDescription} onChange={(e: any) => setAffiliateDescription(e.target.value)} rows={2} placeholder="Descreva os benefícios..." className="resize-none bg-secondary border-border" />
  </div>
  </div>
  </EditorCard>
@@ -1709,7 +1705,7 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <h4 className="text-[15px] font-display font-black flex items-center gap-2"><UserPlus className="h-4 w-4 text-success" /> Convidar afiliados</h4>
  <p className="text-xs text-muted-foreground/60">Compartilhe esse link para convidar os seus afiliados:</p>
  <div className="flex items-center gap-2">
- <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10 border-border/30" />
+ <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10 border-border" />
  <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-9 shrink-0 rounded-xl">
  <Copy className="h-3.5 w-3.5" /> Copiar
  </Button>
@@ -1753,7 +1749,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  </button>
  </div>
  <div className="flex items-center gap-2">
- <Input readOnly value={checkoutLink} className="h-10 font-mono text-xs bg-muted/10 border-border/30" />
+ <Input readOnly value={checkoutLink} className="h-10 font-mono text-xs bg-muted/10 border-border" />
  <Button variant="outline" size="sm" onClick={() => copyLink(checkoutLink)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
  <Copy className="h-3.5 w-3.5" /> Copiar
  </Button>
@@ -1771,8 +1767,8 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  exit={{ opacity: 0, height: 0 }}
  className="overflow-hidden"
  >
- <div className="flex flex-col items-center gap-3 py-4 border-t border-border/20 mt-2">
- <div className="bg-background p-4 rounded-xl border border-border/20 shadow-sm">
+ <div className="flex flex-col items-center gap-3 py-4 border-t border-border mt-2">
+ <div className="bg-background p-4 rounded-xl border border-border shadow-sm">
  <QRCodeSVG
  value={checkoutLink}
  size={180}
@@ -1804,7 +1800,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  rel="noopener noreferrer"
  whileHover={{ scale: 1.02 }}
  whileTap={{ scale: 0.98 }}
- className="flex items-center gap-3 p-3 rounded-xl border border-border/20 hover:border-border/40 bg-card/30 transition-all"
+ className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-border bg-card transition-all"
  >
  <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1 shrink-0", sl.color)}>
  <sl.icon className="h-4 w-4" />
@@ -1820,7 +1816,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  <EditorCard accentColor="bg-info">
  <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
  <div className="flex items-center gap-2">
- <Input readOnly value={pageUrl} className="h-10 font-mono text-xs bg-muted/10 border-border/30" />
+ <Input readOnly value={pageUrl} className="h-10 font-mono text-xs bg-muted/10 border-border" />
  <Button variant="outline" size="sm" onClick={() => copyLink(pageUrl)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
  <Copy className="h-3.5 w-3.5" /> Copiar
  </Button>
@@ -1832,7 +1828,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  <EditorCard accentColor="bg-warning">
  <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Users className="h-4 w-4 text-warning" /> Link de Afiliado</h4>
  <div className="flex items-center gap-2">
- <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-10 font-mono text-xs bg-muted/10 border-border/30" />
+ <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-10 font-mono text-xs bg-muted/10 border-border" />
  <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
  <Copy className="h-3.5 w-3.5" /> Copiar
  </Button>
@@ -1903,7 +1899,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
  ) : courses.length === 0 ? (
  <EditorCard accentColor="bg-primary">
  <div className="flex flex-col items-center py-10 gap-5">
- <div className="h-16 w-16 rounded-2xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+ <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
  <GraduationCap className="h-7 w-7 text-primary/40" />
  </div>
  <div className="text-center">
@@ -1918,7 +1914,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
  } as any).select().single();
  if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
  }}
- className="gap-2 rounded-xl font-display font-bold text-sm h-10 shadow-lg shadow-primary/15"
+ className="gap-2 rounded-xl font-display font-bold text-sm h-10"
  >
  <Plus className="h-4 w-4" /> Criar Curso
  </Button>
@@ -1937,7 +1933,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
  >
  <EditorCard accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
  <div className="flex items-center gap-4">
- <div className="h-18 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border/15 ring-1 ring-border/5 relative group/thumb">
+ <div className="h-18 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border relative group/thumb">
  {c.thumbnail_url ? (
  <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500" />
  ) : (
@@ -1953,8 +1949,8 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
  <span className={cn(
  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-black uppercase tracking-[0.08em] border ring-1",
  c.is_published
- ? "bg-success/10 text-success border-success/15 ring-success/10 shadow-sm shadow-success/5"
- : "bg-muted/10 text-muted-foreground/50 border-border/15 ring-border/5"
+ ? "bg-success/10 text-success border-success/15 ring-success/10"
+ : "bg-muted/10 text-muted-foreground/50 border-border ring-border/5"
  )}>
  <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse shadow-[0_0_4px_hsl(var(--success)/0.3)]" : "bg-muted-foreground/30")} />
  {c.is_published ? "Live" : "Rascunho"}
@@ -1987,7 +1983,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
  } as any).select().single();
  if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
  }}
- className="w-full gap-2 rounded-2xl font-display font-bold text-sm h-12 border-2 border-dashed border-border/15 hover:border-primary/20 hover:bg-primary/[0.03] text-muted-foreground/30 hover:text-primary transition-all duration-500 active:scale-[0.99]"
+ className="w-full gap-2 rounded-2xl font-display font-bold text-sm h-12 border-2 border-dashed border-border hover:border-primary/20 hover:bg-primary/[0.03] text-muted-foreground/30 hover:text-primary transition-all duration-500 active:scale-[0.99]"
  >
  <Plus className="h-4 w-4" /> Adicionar Curso
  </Button>
@@ -2002,85 +1998,77 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
  ═══════════════════════════════════════════════ */
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
- return (
- <div className="flex items-center gap-3.5 mb-6">
- <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-primary/12 to-primary/5 border border-primary/12 flex items-center justify-center shadow-sm shadow-primary/5 ring-1 ring-primary/10">
- <Icon className="h-5 w-5 text-primary/70" />
- </div>
- <div>
- <h2 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">{title}</h2>
- <p className="text-xs text-muted-foreground/50 mt-0.5 font-display">{subtitle}</p>
- </div>
- </div>
- );
+  return (
+  <div className="flex items-center gap-3.5 mb-6">
+  <div className="h-11 w-11 shrink-0 rounded-xl bg-primary/10 border border-border flex items-center justify-center">
+  <Icon className="h-5 w-5 text-primary" />
+  </div>
+  <div>
+  <h2 className="text-[15px] font-display font-bold text-foreground tracking-[-0.02em]">{title}</h2>
+  <p className="text-xs text-muted-foreground mt-0.5 font-display">{subtitle}</p>
+  </div>
+  </div>
+  );
 }
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
- return (
- <motion.div
- initial={{ opacity: 0, y: 8 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
- className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-sm relative overflow-hidden hover:border-border/30 transition-all duration-500 ring-1 ring-border/5 group/card"
- >
- <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full transition-all duration-500 group-hover/card:shadow-sm", accentColor)} />
- <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover/card:from-primary/[0.01] group-hover/card:to-transparent transition-all duration-700 pointer-events-none" />
- {children}
- </motion.div>
- );
+  return (
+  <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4 relative overflow-hidden hover:border-muted-foreground/20 transition-colors duration-250">
+  <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
+  {children}
+  </div>
+  );
 }
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
- return (
- <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/50 flex items-center gap-1.5">
- {Icon && <Icon className="h-3 w-3 text-muted-foreground/30" />}
- {children}
- </Label>
- );
+  return (
+  <Label className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+  {Icon && <Icon className="h-3 w-3 text-muted-foreground/60" />}
+  {children}
+  </Label>
+  );
 }
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
- return (
- <div className="rounded-2xl border border-border/20 bg-card/30 flex flex-col items-center justify-center py-16 gap-4 relative overflow-hidden">
- <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
- <div className="absolute inset-0 opacity-[0.01]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
- <div className="h-16 w-16 rounded-2xl bg-muted/10 flex items-center justify-center border border-border/15 ring-1 ring-border/5 relative shadow-sm">
- <Icon className="h-7 w-7 text-muted-foreground/15" />
- </div>
- <p className="text-sm font-display font-bold text-muted-foreground/40 relative">{message}</p>
- </div>
- );
+  return (
+  <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-16 gap-4">
+  <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center border border-border">
+  <Icon className="h-7 w-7 text-muted-foreground/30" />
+  </div>
+  <p className="text-sm font-display font-medium text-muted-foreground">{message}</p>
+  </div>
+  );
 }
 
 function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }: {
- icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
+  icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
- return (
- <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
- checked ? "border-primary/20 bg-primary/[0.03]" : "border-border/30 bg-card/40 hover:border-border/50"
- )}>
- {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
- <div className="flex items-center gap-3 flex-1">
- {Icon && (
- <div className={cn(
- "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
- checked ? "bg-primary/10 border-primary/15" : "bg-muted/15 border-transparent"
- )}>
- <Icon className={cn("h-3.5 w-3.5", checked ? "text-primary" : "text-muted-foreground/40")} />
- </div>
- )}
- <div>
- <p className="text-sm font-semibold text-foreground">{label}</p>
- {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
- </div>
- </div>
- <div className="flex items-center gap-2">
- {children}
- <Switch checked={checked} onCheckedChange={onChange} />
- </div>
- </div>
- );
+  return (
+  <div className={cn(
+  "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
+  checked ? "border-primary/20 bg-primary/5" : "border-border bg-card hover:border-muted-foreground/20"
+  )}>
+  {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
+  <div className="flex items-center gap-3 flex-1">
+  {Icon && (
+  <div className={cn(
+  "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors duration-200",
+  checked ? "bg-primary/10 border-primary/20" : "bg-secondary border-border"
+  )}>
+  <Icon className={cn("h-3.5 w-3.5 transition-colors duration-200", checked ? "text-primary" : "text-muted-foreground/50")} />
+  </div>
+  )}
+  <div>
+  <p className="text-sm font-semibold text-foreground">{label}</p>
+  {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
+  </div>
+  </div>
+  <div className="flex items-center gap-2">
+  {children}
+  <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+  </div>
+  );
 }
 
 function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChange }: {
@@ -2089,51 +2077,51 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
  const accentBg = color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info";
  const bgColor = color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10";
 
- return (
- <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 relative",
- checked ? "bg-card/60 border-border/40" : "bg-card/20 border-border/20 opacity-50"
- )}>
- {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
- <div className="flex items-center gap-3">
- <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-transparent", bgColor)}>
- <Icon className={cn("h-4 w-4", color)} />
- </div>
- <div>
- <p className="text-sm font-semibold">{label}</p>
- {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
- </div>
- </div>
- <Switch checked={checked} onCheckedChange={onChange} />
- </div>
- );
+  return (
+  <div className={cn(
+  "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
+  checked ? "bg-card border-border" : "bg-card border-border opacity-50"
+  )}>
+  {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
+  <div className="flex items-center gap-3">
+  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-border", bgColor)}>
+  <Icon className={cn("h-4 w-4", color)} />
+  </div>
+  <div>
+  <p className="text-sm font-semibold">{label}</p>
+  {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
+  </div>
+  </div>
+  <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+  );
 }
 
 function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
- label: string; sublabel?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
+  label: string; sublabel?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
 }) {
- return (
- <div className="space-y-2">
- <EditorLabel>{label}</EditorLabel>
- {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
- <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
- {preview ? (
- <div className="relative rounded-lg overflow-hidden border border-border/30 group/banner">
- <img src={preview} alt={label} className="w-full h-24 object-cover" />
- <div className="absolute inset-0 bg-background/50 backdrop-blur-sm opacity-0 group-hover/banner:opacity-100 transition-all flex items-center justify-center gap-2">
- <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center hover:bg-muted/40 transition-all active:scale-95">
- <ImagePlus className="h-3.5 w-3.5 text-foreground" />
- </button>
- <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border/40 flex items-center justify-center text-destructive hover:bg-destructive/10 transition-all active:scale-95">
- <X className="h-3.5 w-3.5" />
- </button>
- </div>
- </div>
- ) : (
- <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border/25 hover:border-primary/30 hover:bg-primary/[0.02] flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-all active:scale-[0.99]">
- <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
- </button>
- )}
- </div>
- );
+  return (
+  <div className="space-y-2">
+  <EditorLabel>{label}</EditorLabel>
+  {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
+  <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
+  {preview ? (
+  <div className="relative rounded-lg overflow-hidden border border-border group/banner">
+  <img src={preview} alt={label} className="w-full h-24 object-cover" />
+  <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+  <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors duration-200 active:scale-95">
+  <ImagePlus className="h-3.5 w-3.5 text-foreground" />
+  </button>
+  <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors duration-200 active:scale-95">
+  <X className="h-3.5 w-3.5" />
+  </button>
+  </div>
+  </div>
+  ) : (
+  <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors duration-200 active:scale-[0.99]">
+  <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
+  </button>
+  )}
+  </div>
+  );
 }
