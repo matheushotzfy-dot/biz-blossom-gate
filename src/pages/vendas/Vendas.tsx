@@ -337,60 +337,54 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
 function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground", bg: "bg-muted/8", border: "border-border/10" };
-  const methods: Record<string, { label: string; color: string; border: string }> = {
+ const methods: Record<string, { label: string; color: string; border: string }> = {
   pix: { label: "PIX", color: "text-success", border: "border-success/15 bg-success/8" },
   credit_card: { label: "Cartão", color: "text-info", border: "border-info/15 bg-info/8" },
   boleto: { label: "Boleto", color: "text-warning", border: "border-warning/15 bg-warning/8" },
-  };
-  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", border: "border-border bg-secondary" };
-  const prodName = tx.product_id ? prods[tx.product_id] || "Produto sem nome" : "Sem produto";
-  const fee = Number(tx.fee_amount);
+ };
+ const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", color: "text-muted-foreground", border: "border-border bg-secondary" };
+ const prodName = tx.product_id ? prods[tx.product_id] || "Produto sem nome" : "Sem produto";
+ const net = Number(tx.net_amount);
 
  return (
-  <div className="cursor-pointer overflow-hidden rounded-[14px] border border-border bg-[hsl(var(--card-elevated))]" onClick={onClick}>
-  <div className={cn("h-[3px] w-full", st.dot)} />
-  <div className="p-4">
-  <div className="flex items-start justify-between gap-3">
-   <div className="min-w-0">
-    <p className="text-[9px] font-heading font-black uppercase tracking-[0.16em] text-muted-foreground/35">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-    <p className="mt-2 truncate text-[12px] font-heading font-bold text-foreground">{prodName}</p>
+  <div className="cursor-pointer overflow-hidden rounded-2xl border border-border/60 bg-card active:scale-[0.99] transition-all duration-200" onClick={onClick}>
+   <div className="p-4">
+    {/* Top: Avatar + Name + Status */}
+    <div className="flex items-center justify-between gap-3">
+     <div className="flex items-center gap-3 min-w-0 flex-1">
+      <Avatar className="h-10 w-10 shrink-0 rounded-xl ring-1 ring-border/40 shadow-sm">
+       <AvatarFallback className={cn("text-[10px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      </Avatar>
+      <div className="min-w-0">
+       <p className="truncate text-[13px] font-heading font-bold text-foreground">{name}</p>
+       <p className="truncate text-[11px] text-muted-foreground/45 mt-0.5">{tx.customer_email || "Sem email"}</p>
+      </div>
+     </div>
+     <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[9px] font-heading font-black uppercase tracking-[0.08em] shrink-0", st.fg, st.bg, st.border)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+      {st.label}
+     </span>
+    </div>
+
+    {/* Product + Date */}
+    <div className="mt-3 flex items-center justify-between">
+     <p className="text-[11px] font-heading font-semibold text-foreground/70 truncate max-w-[60%]">{prodName}</p>
+     <p className="text-[10px] font-heading text-muted-foreground/40 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+    </div>
+
+    {/* Value + Method */}
+    <div className="mt-3 flex items-center justify-between pt-3 border-t border-border/40">
+     <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold", method.color, method.border)}>{method.label}</span>
+     <div className="flex items-center gap-3">
+      {tx.customer_phone && (
+       <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex h-8 w-8 items-center justify-center rounded-lg text-success/60 hover:bg-success/8">
+        <MessageCircle className="h-3.5 w-3.5" />
+       </a>
+      )}
+      <p className={cn("text-[16px] font-heading font-black tabular-nums tracking-[-0.03em]", tx.status === "completed" ? "text-success" : "text-foreground")}>{fmt(net)}</p>
+     </div>
+    </div>
    </div>
-   <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[8px] font-heading font-black uppercase tracking-[0.12em]", st.fg, st.bg, st.border)}>
-   <span className="relative flex h-1.5 w-1.5">
-    {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-    <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
-   </span>
-   {st.label}
-   </span>
-  </div>
-  <div className="mt-4 flex items-center gap-3">
-   <Avatar className="h-10 w-10 shrink-0 rounded-[11px] ring-1 ring-border/70 ring-inset">
-    <AvatarFallback className={cn("text-[10px] font-black tracking-tight", avatarColor(name))}>{initials(name)}</AvatarFallback>
-   </Avatar>
-   <div className="min-w-0">
-    <p className="truncate text-[12px] font-heading font-bold text-foreground">{name}</p>
-    <p className="truncate text-[10px] text-muted-foreground/45">{tx.customer_email || "Sem email informado"}</p>
-   </div>
-  </div>
-  <div className="mt-4 grid grid-cols-2 gap-2">
-   <div className="rounded-[10px] border border-border bg-card px-3 py-2">
-    <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Taxa</p>
-    <p className="mt-1 text-[11px] font-heading font-bold text-foreground/75 tabular-nums">{fee > 0 ? fmt(fee) : "R$ 0,00"}</p>
-   </div>
-   <div className="rounded-[10px] border border-border bg-card px-3 py-2">
-    <p className="text-[8px] font-heading font-black uppercase tracking-[0.14em] text-muted-foreground/35">Líquido</p>
-    <p className="mt-1 text-[13px] font-heading font-black text-foreground tabular-nums tracking-[-0.03em]">{fmt(Number(tx.net_amount))}</p>
-   </div>
-  </div>
-  <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-   <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-heading font-bold", method.color, method.border)}>{method.label}</span>
-   {tx.customer_phone && (
-    <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex h-8 w-8 items-center justify-center rounded-[10px] text-success hover:bg-success/8">
-    <MessageCircle className="h-3.5 w-3.5" />
-    </a>
-   )}
-  </div>
-  </div>
   </div>
  );
 }
