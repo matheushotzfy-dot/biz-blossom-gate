@@ -136,6 +136,7 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
                 </span>
                 <span className="font-mono uppercase tracking-widest">#{product.id.slice(0, 6)}</span>
               </div>
+              </div>
             </div>
           </article>
         );
