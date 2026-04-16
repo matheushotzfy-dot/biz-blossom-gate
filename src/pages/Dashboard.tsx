@@ -483,19 +483,6 @@ export default function Dashboard() {
                 </div>
                 <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Dashboard</span>
               </div>
-              <div className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                <span className="text-[10px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground">Live</span>
-              </div>
-              {nickname && (
-                <div className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1.5">
-                  <Crown className="h-3 w-3 text-warning" />
-                  <span className="text-[10px] font-heading font-semibold text-muted-foreground">{nickname}</span>
-                </div>
-              )}
               {scaleModeUnlocked && (
                 <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-heading font-semibold transition-all active:scale-[0.97]",
                   scaleMode ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
