@@ -916,28 +916,28 @@ export default function Vendas() {
          </div>
 
         {/* ═══════ SECONDARY KPIs — 4 compactos ═══════ */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {[
-            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, icon: RefreshCw, accent: "info" as AccentTone },
-            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: PixLogoMark, accent: "success" as AccentTone },
-            { label: "Taxa de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : "text-warning", icon: Percent, accent: "warning" as AccentTone },
-            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, icon: Shield, accent: "destructive" as AccentTone },
-          ].map((kpi) => {
-            const a = ACCENT_STYLES[kpi.accent];
-            const Icon = kpi.icon;
-            return (
-              <div key={kpi.label} className="relative overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-5">
-                <div className={cn("absolute top-0 left-0 right-0 h-[3px]", a.rail)} />
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={cn("flex h-6 w-6 items-center justify-center rounded-md border", a.iconWrap)}><Icon className="h-3 w-3" /></span>
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/60">{kpi.label}</p>
-                </div>
-                <p className={cn("text-[24px] lg:text-[28px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
-                <p className="mt-2 text-[10px] text-muted-foreground/35">{kpi.sub}</p>
-              </div>
-            );
-          })}
-        </div>
+         <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
+           {[
+             { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, icon: RefreshCw, accent: "info" as AccentTone },
+             { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: PixLogoMark, accent: "success" as AccentTone },
+             { label: "Taxa de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : "text-warning", icon: Percent, accent: "warning" as AccentTone },
+             { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, icon: Shield, accent: "destructive" as AccentTone },
+           ].map((kpi) => {
+             const a = ACCENT_STYLES[kpi.accent];
+             const Icon = kpi.icon;
+             return (
+               <div key={kpi.label} className="group relative overflow-hidden rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm p-5 hover:border-border/50 transition-all duration-300">
+                 <div className={cn("absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity", a.rail)} />
+                 <div className="flex items-center gap-2 mb-3.5">
+                   <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg border", a.iconWrap)}><Icon className="h-3 w-3" /></span>
+                   <p className="text-[10px] font-heading font-semibold text-muted-foreground/50">{kpi.label}</p>
+                 </div>
+                 <p className={cn("text-[22px] lg:text-[26px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
+                 <p className="mt-2.5 text-[10px] text-muted-foreground/30 font-medium">{kpi.sub}</p>
+               </div>
+             );
+           })}
+         </div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
         <div className="overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))]">
