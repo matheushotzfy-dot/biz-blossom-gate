@@ -261,15 +261,15 @@ export default function Apps() {
  )} />
  </div>
 
- <div className="relative z-[1] flex h-full w-full items-center justify-center">
- <div className="flex h-12 w-12 items-center justify-center md:h-14 md:w-14">
- <img
- src={app.logo}
- alt={app.name}
- className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.06]"
- />
- </div>
- </div>
+              <div className="relative z-[1] flex h-full w-full items-center justify-center">
+                <div className="flex h-20 w-32 items-center justify-center md:h-24 md:w-40">
+                  <img
+                    src={app.logo}
+                    alt={app.name}
+                    className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.06]"
+                  />
+                </div>
+              </div>
  </button>
  );
  })}
