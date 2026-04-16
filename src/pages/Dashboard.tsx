@@ -559,12 +559,12 @@ export default function Dashboard() {
             </p>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[80px]">
+                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-primary sm:text-6xl lg:text-[80px]">
                   {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
                 <div className="mt-4 flex items-center gap-3">
                   {approved.length > 0 && (
-                    <span className="text-[10px] font-heading text-muted-foreground/40">
+                    <span className="text-[10px] font-heading text-primary/50 font-semibold">
                       {approved.length} venda{approved.length !== 1 ? "s" : ""} aprovada{approved.length !== 1 ? "s" : ""}
                     </span>
                   )}
