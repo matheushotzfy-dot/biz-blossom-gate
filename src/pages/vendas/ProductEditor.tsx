@@ -751,8 +751,8 @@ export default function ProductEditor() {
  {...{ isNew: tabsLocked, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
  />}
 
- {activeTab === "upsell" && <TabUpsell
- {...{ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }}
+    {activeTab === "upsell" && <TabUpsell
+ {...{ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }}
  />}
 
  {activeTab === "checkout" && <TabCheckout
