@@ -1135,136 +1135,285 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
 }
 
-function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
+function TabUpsell({ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
  const [upsellType, setUpsellType] = useState("none");
+ const [upsellName, setUpsellName] = useState("");
+ const [upsellPrice, setUpsellPrice] = useState("");
+ const [upsellDiscount, setUpsellDiscount] = useState("30");
  const [downsellEnabled, setDownsellEnabled] = useState(false);
  const [downsellUrl, setDownsellUrl] = useState("");
+ const [downsellPrice, setDownsellPrice] = useState("");
  const [downsellDelay, setDownsellDelay] = useState("5");
+
+ const mainPrice = Number(price || 0);
+ const upPrice = Number(upsellPrice || 0);
+ const downPrice = Number(downsellPrice || 0);
+ const isConfigured = upsellType !== "none";
+
+ // Projected AOV: assume 18% accept upsell, 12% of refusers accept downsell
+ const projectedAov = mainPrice + (upPrice * 0.18) + (downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
+ const upliftPct = mainPrice > 0 ? Math.round(((projectedAov - mainPrice) / mainPrice) * 100) : 0;
 
  return (
  <div className="space-y-6">
- <SectionHeader icon={ArrowUpRight} title="Upsell / Downsell" subtitle="Maximize o valor de cada venda com ofertas pós-compra inteligentes." />
+ <SectionHeader icon={ArrowUpRight} title="Funil pós-pagamento" subtitle="Defina a sequência de ofertas exibidas após a compra inicial." />
 
- {/* Strategy info */}
- <EditorCard accentColor="bg-success">
- <div className="flex items-start gap-3">
- <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
- <Rocket className="h-4 w-4 text-success" />
- </div>
+ {/* ═══ FUNNEL FLOW VISUAL ═══ */}
+ <div className="rounded-2xl border border-border bg-card overflow-hidden">
+ <div className="px-5 py-4 border-b border-border flex items-center justify-between">
  <div>
- <p className="text-sm font-display font-bold text-foreground">Aumente seu LTV</p>
- <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
- Vendedores que usam upsell aumentam o valor médio por cliente em até 40%. Configure sua estratégia de pós-venda para maximizar a receita.
+ <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70 font-display font-bold">Sequência do funil</p>
+ <p className="text-[15px] font-display font-black text-foreground mt-0.5 tracking-[-0.02em]">Jornada do comprador</p>
+ </div>
+ <div className="text-right">
+ <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Ticket projetado</p>
+ <p className="text-base font-numbers font-black text-success tabular-nums">
+ R$ {projectedAov.toFixed(2)}
+ {upliftPct > 0 && <span className="text-[10px] font-display font-bold text-success/80 ml-1.5">+{upliftPct}%</span>}
  </p>
  </div>
  </div>
- </EditorCard>
 
- {/* Upsell Type Selection */}
- <EditorCard accentColor="bg-primary">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
- <Target className="h-4 w-4 text-primary" /> Tipo de Upsell
- </h3>
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+ <div className="p-5 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-3 md:gap-2 items-stretch">
+ <FunnelStep
+ step="01"
+ status="active"
+ label="Produto principal"
+ title={name || "Seu produto"}
+ price={mainPrice}
+ thumb={imagePreview}
+ anchor
+ />
+ <FunnelArrow />
+ <FunnelStep
+ step="02"
+ status={isConfigured ? "active" : "empty"}
+ label={isConfigured ? "Upsell" : "Sem upsell"}
+ title={isConfigured ? (upsellName || "Oferta complementar") : "Configure abaixo"}
+ price={isConfigured ? upPrice : undefined}
+ badge={isConfigured && upsellDiscount ? `-${upsellDiscount}%` : undefined}
+ />
+ <FunnelArrow />
+ <FunnelStep
+ step="03"
+ status={downsellEnabled ? "active" : "empty"}
+ label={downsellEnabled ? "Downsell" : "Sem downsell"}
+ title={downsellEnabled ? "Oferta de recuperação" : "Opcional"}
+ price={downsellEnabled ? downPrice : undefined}
+ muted
+ />
+ <FunnelArrow />
+ <FunnelStep
+ step="04"
+ status="active"
+ label="Confirmação"
+ title="Página de obrigado"
+ icon={Check}
+ />
+ </div>
+ </div>
+
+ {/* ═══ STEP 02 EDITOR — UPSELL TYPE ═══ */}
+ <div className="rounded-2xl border border-border bg-card">
+ <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
+ <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center text-[10px] font-numbers font-black text-primary tabular-nums">02</div>
+ <div className="flex-1 min-w-0">
+ <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Configurar oferta de upsell</p>
+ <p className="text-xs text-muted-foreground/70 mt-0.5">Exibida imediatamente após o pagamento aprovado.</p>
+ </div>
+ </div>
+
+ <div className="p-5 space-y-5">
+ <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
  {[
- { value: "none", label: "Sem Upsell", desc: "Redirecionar para obrigado padrão", icon: Check },
- { value: "page", label: "Página Custom", desc: "Redirecionar para URL personalizada", icon: ExternalLink },
- { value: "popup", label: "Popup Upsell", desc: "Exibir oferta em popup na página", icon: Sparkles },
- ].map((opt) => (
- <motion.button
+ { value: "none", label: "Nenhum", desc: "Ir direto para confirmação", icon: Check },
+ { value: "page", label: "Página externa", desc: "Redirecionar para URL própria", icon: ExternalLink },
+ { value: "popup", label: "Popup nativo", desc: "Oferta sobre página de obrigado", icon: Sparkles },
+ ].map((opt) => {
+ const selected = upsellType === opt.value;
+ return (
+ <button
  key={opt.value}
  type="button"
  onClick={() => { setUpsellType(opt.value); if (opt.value !== "none") setHasCustomThankYou(opt.value === "page"); }}
- whileHover={{ scale: 1.01 }}
- whileTap={{ scale: 0.98 }}
  className={cn(
- "flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
- upsellType === opt.value
- ? "bg-primary/5 border-primary/20 shadow-sm"
- : "bg-card border-border hover:border-border"
+ "group relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors",
+ selected ? "bg-primary/5 border-primary/40" : "bg-card border-border hover:border-border/80"
  )}
  >
- {upsellType === opt.value && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
- <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center ring-1 transition-all", upsellType === opt.value ? "bg-primary/10 ring-primary/20" : "bg-muted/10 ring-border/20")}>
- <opt.icon className={cn("h-4 w-4", upsellType === opt.value ? "text-primary" : "text-muted-foreground/40")} />
+ {selected && <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full bg-primary" />}
+ <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors", selected ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
+ <opt.icon className="h-4 w-4" />
  </div>
- <p className="text-xs font-display font-bold text-foreground">{opt.label}</p>
- <p className="text-[9px] text-muted-foreground/50">{opt.desc}</p>
- </motion.button>
- ))}
+ <div className="min-w-0">
+ <p className={cn("text-[13px] font-display font-bold leading-tight", selected ? "text-foreground" : "text-foreground/80")}>{opt.label}</p>
+ <p className="text-[11px] text-muted-foreground/60 mt-1 leading-snug">{opt.desc}</p>
  </div>
- </EditorCard>
+ </button>
+ );
+ })}
+ </div>
 
- {/* Custom Thank You URL */}
- <AnimatePresence>
- {(upsellType === "page" || hasCustomThankYou) && (
+ <AnimatePresence initial={false}>
+ {upsellType === "popup" && (
  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <EditorCard accentColor="bg-warning">
- <h4 className="text-[15px] font-display font-black flex items-center gap-2">
- <ExternalLink className="h-4 w-4 text-warning" /> Página de obrigado / upsell
- </h4>
- <div className="space-y-2">
- <EditorLabel>URL da página</EditorLabel>
- <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/obrigado" type="url" className="h-11 bg-secondary border-border" />
- <p className="text-[10px] text-muted-foreground/40">O comprador será redirecionado para esta URL após a compra</p>
+ <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-3 pt-1">
+ <div className="space-y-1.5">
+ <EditorLabel>Nome da oferta</EditorLabel>
+ <Input value={upsellName} onChange={(e: any) => setUpsellName(e.target.value)} placeholder="Ex: Mentoria 1:1 com 30% OFF" className="h-10 bg-secondary border-border" />
  </div>
- </EditorCard>
+ <div className="space-y-1.5">
+ <EditorLabel>Preço (R$)</EditorLabel>
+ <Input type="number" value={upsellPrice} onChange={(e: any) => setUpsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
+ </div>
+ <div className="space-y-1.5">
+ <EditorLabel>Desconto (%)</EditorLabel>
+ <Input type="number" min="0" max="90" value={upsellDiscount} onChange={(e: any) => setUpsellDiscount(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums" />
+ </div>
+ </div>
+ </motion.div>
+ )}
+ {upsellType === "page" && (
+ <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+ <div className="space-y-1.5 pt-1">
+ <EditorLabel>URL da página de upsell</EditorLabel>
+ <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/oferta-especial" type="url" className="h-10 bg-secondary border-border" />
+ <p className="text-[11px] text-muted-foreground/60">O comprador será redirecionado após pagamento aprovado.</p>
+ </div>
  </motion.div>
  )}
  </AnimatePresence>
+ </div>
+ </div>
 
- {/* Downsell */}
- <EditorCard accentColor="bg-info">
- <ToggleRow icon={ArrowUpRight} label="Downsell (oferta de recuperação)" sublabel="Se o comprador recusar o upsell, exiba uma oferta com desconto" checked={downsellEnabled} onChange={setDownsellEnabled} />
- <AnimatePresence>
+ {/* ═══ STEP 03 EDITOR — DOWNSELL ═══ */}
+ <div className={cn("rounded-2xl border bg-card transition-colors", downsellEnabled ? "border-border" : "border-border/60")}>
+ <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
+ <div className={cn("h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-numbers font-black tabular-nums", downsellEnabled ? "bg-info/10 text-info" : "bg-muted/40 text-muted-foreground/50")}>03</div>
+ <div className="flex-1 min-w-0">
+ <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Oferta de recuperação (Downsell)</p>
+ <p className="text-xs text-muted-foreground/70 mt-0.5">Acionada apenas se o cliente recusar o upsell.</p>
+ </div>
+ <Switch checked={downsellEnabled} onCheckedChange={setDownsellEnabled} />
+ </div>
+
+ <AnimatePresence initial={false}>
  {downsellEnabled && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden space-y-4 pt-2">
- <div className="space-y-2 pl-4 border-l-2 border-info/20">
- <EditorLabel>URL da oferta downsell</EditorLabel>
- <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-secondary border-border" />
+ <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+ <div className="p-5 grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr] gap-3">
+ <div className="space-y-1.5">
+ <EditorLabel>URL ou identificador da oferta</EditorLabel>
+ <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-10 bg-secondary border-border" />
  </div>
- <div className="space-y-2 pl-4 border-l-2 border-info/20">
- <EditorLabel icon={Timer}>Delay antes de exibir (segundos)</EditorLabel>
- <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="w-24 h-10 text-center font-numbers bg-secondary border-border" />
+ <div className="space-y-1.5">
+ <EditorLabel>Preço reduzido (R$)</EditorLabel>
+ <Input type="number" value={downsellPrice} onChange={(e: any) => setDownsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
+ </div>
+ <div className="space-y-1.5">
+ <EditorLabel>Delay (s)</EditorLabel>
+ <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums text-center" />
+ </div>
  </div>
  </motion.div>
  )}
  </AnimatePresence>
- </EditorCard>
+ </div>
 
- {/* Email confirmation */}
- <EditorCard accentColor="bg-success">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
- <Mail className="h-4 w-4 text-success" /> E-mail pós-compra
- </h3>
- <ToggleRow icon={Mail} label="Enviar e-mail de confirmação" checked={sendConfirmationEmail} onChange={setSendConfirmationEmail} />
- <AnimatePresence>
+ {/* ═══ STEP 04 EDITOR — CONFIRMATION EMAIL ═══ */}
+ <div className="rounded-2xl border border-border bg-card">
+ <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
+ <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center text-[10px] font-numbers font-black text-success tabular-nums">04</div>
+ <div className="flex-1 min-w-0">
+ <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">E-mail de confirmação</p>
+ <p className="text-xs text-muted-foreground/70 mt-0.5">Define quando o acesso é entregue ao comprador.</p>
+ </div>
+ <Switch checked={sendConfirmationEmail} onCheckedChange={setSendConfirmationEmail} />
+ </div>
+
+ <AnimatePresence initial={false}>
  {sendConfirmationEmail && (
  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="space-y-3 pl-4 border-l-2 border-success/20">
+ <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
  {[
- { val: "immediate", label: "Enviar imediatamente após o pagamento", icon: Zap },
- { val: "after_upsell", label: "Enviar após concluir as ofertas de upsell", icon: Clock },
- ].map(opt => (
- <label key={opt.val} className={cn(
- "flex items-center gap-3 cursor-pointer rounded-xl p-3 border transition-all",
- emailTiming === opt.val ? "border-primary/20 bg-primary/5" : "border-transparent hover:bg-muted/10"
- )}>
- <div className={cn(
- "h-4 w-4 rounded-full border-2 flex items-center justify-center transition-all",
- emailTiming === opt.val ? "border-primary" : "border-muted-foreground/30"
- )}>
- {emailTiming === opt.val && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-2 w-2 rounded-full bg-primary" />}
+ { val: "immediate", label: "Enviar imediatamente", desc: "Logo após pagamento aprovado", icon: Zap },
+ { val: "after_upsell", label: "Após o funil completo", desc: "Aguarda fim de upsell/downsell", icon: Clock },
+ ].map(opt => {
+ const selected = emailTiming === opt.val;
+ return (
+ <button
+ key={opt.val}
+ type="button"
+ onClick={() => setEmailTiming(opt.val)}
+ className={cn(
+ "relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors",
+ selected ? "bg-success/5 border-success/40" : "bg-card border-border hover:border-border/80"
+ )}
+ >
+ {selected && <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full bg-success" />}
+ <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", selected ? "bg-success/10 text-success" : "bg-muted/30 text-muted-foreground/50")}>
+ <opt.icon className="h-4 w-4" />
  </div>
- <opt.icon className={cn("h-3.5 w-3.5", emailTiming === opt.val ? "text-primary" : "text-muted-foreground/40")} />
- <span className="text-sm font-display font-medium">{opt.label}</span>
- </label>
- ))}
+ <div className="min-w-0">
+ <p className="text-[13px] font-display font-bold leading-tight text-foreground">{opt.label}</p>
+ <p className="text-[11px] text-muted-foreground/60 mt-1 leading-snug">{opt.desc}</p>
+ </div>
+ </button>
+ );
+ })}
  </div>
  </motion.div>
  )}
  </AnimatePresence>
- </EditorCard>
+ </div>
+ </div>
+ );
+}
+
+/* ───── Funnel sub-primitives ───── */
+function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: any) {
+ const isEmpty = status === "empty";
+ return (
+ <div className={cn(
+ "relative rounded-xl border p-3.5 flex flex-col gap-2 min-h-[112px]",
+ anchor ? "bg-primary/[0.04] border-primary/30" : isEmpty ? "bg-muted/10 border-dashed border-border/70" : "bg-card border-border"
+ )}>
+ <div className="flex items-center justify-between">
+ <span className={cn(
+ "text-[10px] font-numbers font-black tabular-nums tracking-wider",
+ anchor ? "text-primary" : isEmpty ? "text-muted-foreground/40" : "text-muted-foreground/70"
+ )}>{step}</span>
+ {badge && (
+ <span className="text-[9px] font-display font-black px-1.5 py-0.5 rounded-md bg-success/10 text-success tabular-nums">{badge}</span>
+ )}
+ </div>
+ <div className="flex items-center gap-2.5 min-w-0">
+ {thumb ? (
+ <img src={thumb} alt="" className="h-9 w-9 rounded-lg object-cover border border-border shrink-0" />
+ ) : Icon ? (
+ <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", isEmpty ? "bg-muted/20 text-muted-foreground/40" : "bg-success/10 text-success")}>
+ <Icon className="h-4 w-4" />
+ </div>
+ ) : (
+ <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", isEmpty ? "bg-muted/20 text-muted-foreground/40" : "bg-muted/30 text-muted-foreground/60")}>
+ <Package className="h-4 w-4" />
+ </div>
+ )}
+ <div className="min-w-0 flex-1">
+ <p className={cn("text-[10px] uppercase tracking-wider font-display font-bold leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
+ <p className={cn("text-[13px] font-display font-bold truncate leading-tight mt-0.5", isEmpty ? "text-muted-foreground/60" : "text-foreground")}>{title}</p>
+ </div>
+ </div>
+ {typeof price === "number" && price > 0 && (
+ <p className={cn("text-xs font-numbers font-black tabular-nums mt-auto", anchor ? "text-primary" : "text-foreground/80")}>R$ {price.toFixed(2)}</p>
+ )}
+ </div>
+ );
+}
+
+function FunnelArrow() {
+ return (
+ <div className="flex md:flex-col items-center justify-center text-muted-foreground/30 py-1 md:py-0">
+ <ArrowUpRight className="h-3.5 w-3.5 rotate-45 md:rotate-0" />
  </div>
  );
 }
