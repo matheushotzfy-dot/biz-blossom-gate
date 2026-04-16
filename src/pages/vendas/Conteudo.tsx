@@ -658,6 +658,7 @@ export default function AdminConteudo() {
                       </span>
                       <span className="font-mono uppercase tracking-widest">#{c.id.slice(0, 6)}</span>
                     </div>
+                    </div>
                   </div>
                 </article>
               );
