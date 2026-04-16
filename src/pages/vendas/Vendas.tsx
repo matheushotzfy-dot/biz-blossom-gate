@@ -1157,26 +1157,26 @@ export default function Vendas() {
                 })}
               </div>
               {/* Health indicators */}
-              <div className="grid grid-cols-3 gap-2 border-t border-border px-4 py-3">
-                {healthItems.map((hi) => {
-                  const ok = hi.value <= hi.threshold;
-                  return (
-                    <div key={hi.label} className={cn("rounded-lg border px-2.5 py-2", ok ? "border-success/15 bg-success/[0.04]" : "border-destructive/15 bg-destructive/[0.04]")}>
-                      <p className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/40">{hi.label}</p>
-                      <p className={cn("mt-1 text-[13px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Hourly bars */}
-              <div className="border-t border-border px-4 py-3">
-                <p className="text-[9px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/35 mb-2">Volume por hora</p>
-                <div className="flex h-[24px] items-end gap-[1.5px]">
-                  {metrics.hours.map((v, i) => (
-                    <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors", peakHour === i ? "bg-primary" : v > 0 ? "bg-primary/25" : "bg-foreground/[0.04]")} style={{ height: `${Math.max((v / maxHour) * 100, 5)}%` }} />
-                  ))}
-                </div>
-              </div>
+               <div className="grid grid-cols-3 gap-2.5 border-t border-border/15 px-5 py-4">
+                 {healthItems.map((hi) => {
+                   const ok = hi.value <= hi.threshold;
+                   return (
+                     <div key={hi.label} className={cn("rounded-xl border px-3 py-2.5", ok ? "border-success/10 bg-success/[0.03]" : "border-destructive/10 bg-destructive/[0.03]")}>
+                       <p className="text-[8px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/35">{hi.label}</p>
+                       <p className={cn("mt-1.5 text-[13px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                     </div>
+                   );
+                 })}
+               </div>
+               {/* Hourly bars */}
+               <div className="border-t border-border/15 px-5 py-4">
+                 <p className="text-[9px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/30 mb-2.5">Volume por hora</p>
+                 <div className="flex h-[28px] items-end gap-[2px]">
+                   {metrics.hours.map((v, i) => (
+                     <div key={i} className={cn("min-w-0 flex-1 rounded-[3px] transition-all duration-300", peakHour === i ? "bg-primary shadow-sm shadow-primary/20" : v > 0 ? "bg-primary/20" : "bg-foreground/[0.03]")} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} />
+                   ))}
+                 </div>
+               </div>
             </div>
           </div>
         </div>
