@@ -274,59 +274,47 @@ export function AppSidebar() {
  navigate("/auth");
  };
 
- return (
- <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
- <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sidebar-primary/[0.04] to-transparent" />
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
+      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
+        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-card">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
+          </div>
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
+              HOTZFY
+            </h1>
+          </div>
+        </div>
+        <RevenueCard collapsed={collapsed} revenue={revenue} milestone={milestone} onOpenRewards={() => navigate("/premiacoes")} />
+      </SidebarHeader>
 
- <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-5">
- <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
- <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[22px] border border-sidebar-primary/15 bg-card ring-1 ring-sidebar-primary/20 shadow-lg">
- <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
- </div>
- <div className="min-w-0 group-data-[collapsible=icon]:hidden">
- <h1 className="text-[30px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
- HOTZFY
- </h1>
- </div>
- </div>
- <RevenueCard collapsed={collapsed} revenue={revenue} milestone={milestone} onOpenRewards={() => navigate("/premiacoes")} />
- </SidebarHeader>
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
+        {sections.map((section) => (
+          <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} />
+        ))}
+      </SidebarContent>
 
- <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3">
- {sections.map((section, index) => (
- <div key={section.label}>
- {index > 0 && (
- <div className="mx-3 my-4 border-t border-sidebar-border/30 group-data-[collapsible=icon]:mx-1.5" />
- )}
- <SidebarSectionNav section={section} pathname={location.pathname} />
- </div>
- ))}
- </SidebarContent>
+      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2">
+        <button
+          type="button"
+          onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
+          className="mb-1 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] font-semibold text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+        >
+          <Headphones className="h-[17px] w-[17px] shrink-0 text-sidebar-foreground/55" />
+          <span className="group-data-[collapsible=icon]:hidden">Suporte 24/7</span>
+        </button>
 
- <SidebarFooter className="relative border-t border-sidebar-border/70 p-3">
- <button
- type="button"
- onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
- className="mb-3 flex w-full items-center gap-3 rounded-[22px] border border-sidebar-primary/20 bg-sidebar-primary/[0.1] p-4 text-left transition-all duration-[240ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-sidebar-primary/30 hover:bg-sidebar-primary/[0.14] group-data-[collapsible=icon]:hidden"
- >
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sidebar-primary/14">
- <Headphones className="h-4.5 w-4.5 text-sidebar-primary" />
- </div>
- <div>
- <span className="block text-[13px] font-black text-sidebar-accent-foreground">Solicitar Suporte</span>
- <span className="text-[11px] text-sidebar-foreground/70">24/07 ao seu dispor!</span>
- </div>
- </button>
-
- <button
- type="button"
- onClick={handleLogout}
- className="flex w-full items-center gap-3 rounded-[18px] px-3 py-3.5 text-[14px] font-semibold text-sidebar-foreground/80 transition-all duration-[240ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
- >
- <LogOut className="h-4.5 w-4.5" />
- <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
- </button>
- </SidebarFooter>
- </Sidebar>
- );
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/65 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+        >
+          <LogOut className="h-[17px] w-[17px] shrink-0" />
+          <span className="group-data-[collapsible=icon]:hidden">Sair</span>
+        </button>
+      </SidebarFooter>
+    </Sidebar>
+  );
 }
