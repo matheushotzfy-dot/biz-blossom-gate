@@ -267,69 +267,95 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/[0.06] last:border-b-0 transition-all duration-200 hover:bg-[hsl(var(--primary)/0.02)]">
-   <td className="w-[3px] p-0">
-    <div className={cn("h-full w-[3px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-r-full", tx.status === "completed" ? "bg-success" : tx.status === "pending" ? "bg-warning" : "bg-primary/40")} />
+  <tr onClick={onClick} className="group cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--primary)/0.015)]">
+   {/* Left accent rail */}
+   <td className="w-[3px] p-0 relative">
+    <div className={cn(
+      "absolute inset-y-1 left-0 w-[3px] rounded-r-full transition-all duration-300",
+      tx.status === "completed" ? "bg-success/30 group-hover:bg-success" : tx.status === "pending" ? "bg-warning/30 group-hover:bg-warning" : tx.status === "failed" ? "bg-destructive/30 group-hover:bg-destructive" : "bg-transparent group-hover:bg-primary/40"
+    )} />
    </td>
-   <td className="pl-4 pr-3 py-4 align-middle">
-    <div className="flex items-center gap-3">
+   {/* Customer */}
+   <td className="pl-5 pr-3 py-[18px] align-middle">
+    <div className="flex items-center gap-3.5">
      <div className="relative">
-      <Avatar className="h-9 w-9 shrink-0 rounded-[10px] ring-1 ring-border/20 shadow-[0_2px_8px_hsl(var(--foreground)/0.04)]">
-       <AvatarFallback className={cn("text-[10px] font-black tracking-tight rounded-[10px]", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      <Avatar className="h-10 w-10 shrink-0 rounded-xl ring-1 ring-border/10 shadow-sm">
+       <AvatarFallback className={cn("text-[11px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
       </Avatar>
-      {tx.status === "completed" && <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-card" />}
+      {tx.status === "completed" && (
+       <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-success ring-[2.5px] ring-card">
+        <Check className="h-1.5 w-1.5 text-success-foreground" strokeWidth={3} />
+       </span>
+      )}
+      {tx.status === "pending" && (
+       <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-warning ring-[2.5px] ring-card">
+        <Clock className="h-1.5 w-1.5 text-warning-foreground" strokeWidth={3} />
+       </span>
+      )}
      </div>
      <div className="min-w-0">
       <p className="truncate text-[13px] font-heading font-bold text-foreground leading-tight tracking-[-0.01em]">{name}</p>
-      <p className="truncate text-[10.5px] text-muted-foreground/40 mt-0.5 flex items-center gap-1"><Mail className="h-2.5 w-2.5 shrink-0 opacity-60" />{tx.customer_email || "—"}</p>
+      <div className="flex items-center gap-1.5 mt-1">
+       {tx.customer_email && <p className="truncate text-[10px] text-muted-foreground/40 max-w-[150px]">{tx.customer_email}</p>}
+       {tx.customer_phone && (
+        <>
+         <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/15 shrink-0" />
+         <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-0.5 text-[10px] text-success/50 hover:text-success transition-colors">
+          <MessageCircle className="h-2.5 w-2.5" />
+         </a>
+        </>
+       )}
+      </div>
      </div>
     </div>
    </td>
-   <td className="px-3 py-4 align-middle">
-    <div className="flex items-center gap-2.5">
-     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[hsl(var(--foreground)/0.03)] border border-border/15 shrink-0"><Package className="h-3 w-3 text-muted-foreground/35" /></span>
-     <div className="min-w-0">
-      <p className="truncate text-[11.5px] font-heading font-semibold text-foreground/80 max-w-[160px]">{prodName}</p>
-      <p className="text-[9.5px] text-muted-foreground/30 mt-0.5 tabular-nums flex items-center gap-1"><Clock className="h-2.5 w-2.5 opacity-60" />{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-     </div>
+   {/* Product + Date */}
+   <td className="px-3 py-[18px] align-middle">
+    <div className="min-w-0">
+     <p className="truncate text-[11.5px] font-heading font-semibold text-foreground/75 max-w-[180px]">{prodName}</p>
+     <p className="text-[10px] text-muted-foreground/30 mt-1 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
     </div>
    </td>
-   <td className="px-3 py-4 align-middle">
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[10px] font-heading font-bold border backdrop-blur-sm", st.fg, st.bg, st.border, st.glow)}>
+   {/* Status */}
+   <td className="px-3 py-[18px] align-middle">
+    <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-[5px] text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
      <span className="relative flex h-[5px] w-[5px]">
-      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-50", st.dot)} />}
+      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
       <span className={cn("h-[5px] w-[5px] rounded-full", st.dot)} />
      </span>
      {st.label}
     </span>
    </td>
-   <td className="px-3 py-4 align-middle">
+   {/* Method */}
+   <td className="px-3 py-[18px] align-middle">
     <div className="flex items-center gap-2">
-     <span className={cn("flex h-6 w-6 items-center justify-center rounded-md border", method.iconBg, method.border)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
+     <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg border", method.iconBg, method.border)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
      <span className={cn("text-[10.5px] font-heading font-semibold", method.color)}>{method.label}</span>
     </div>
    </td>
-   <td className="px-3 py-4 align-middle text-right">
-    <p className="text-[12.5px] font-heading font-bold text-foreground/85 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
-    {fee > 0 && <p className="text-[9px] font-heading text-destructive/40 tabular-nums mt-0.5">−R$ {fee.toFixed(2).replace(".", ",")} taxa</p>}
+   {/* Gross */}
+   <td className="px-3 py-[18px] align-middle text-right">
+    <p className="text-[12.5px] font-heading font-bold text-foreground/80 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
+    {fee > 0 && <p className="text-[9px] text-destructive/35 tabular-nums mt-0.5">−{fmt(fee)}</p>}
    </td>
-   <td className="px-4 py-4 align-middle text-right">
-    <p className={cn("text-[15px] font-heading font-black tabular-nums tracking-[-0.025em]", tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/70")}>{fmt(net)}</p>
+   {/* Net */}
+   <td className="px-4 py-[18px] align-middle text-right">
+    <p className={cn("text-[15px] font-heading font-black tabular-nums tracking-[-0.03em]",
+     tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning/80" : "text-foreground/50"
+    )}>{fmt(net)}</p>
    </td>
-   <td className="pr-3 py-4 align-middle">
-    <div className="flex items-center justify-end gap-0.5 opacity-0 transition-all duration-200 group-hover:opacity-100">
-     {tx.customer_phone && (
-      <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex h-7 w-7 items-center justify-center rounded-lg text-success/50 hover:bg-success/10 hover:text-success transition-colors"><MessageCircle className="h-3.5 w-3.5" /></a>
-     )}
+   {/* Actions */}
+   <td className="pr-4 py-[18px] align-middle">
+    <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
      <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-       <button className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-secondary transition-colors"><MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/30" /></button>
+       <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-secondary/80 transition-colors"><MoreHorizontal className="h-4 w-4 text-muted-foreground/40" /></button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 rounded-xl border-border/40 bg-popover/95 backdrop-blur-xl">
-       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[11px] font-heading rounded-lg"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
-       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Copy className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
-       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2 text-[11px] font-heading rounded-lg"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
-       {tx.status === "completed" && <><DropdownMenuSeparator /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[11px] font-heading text-destructive focus:text-destructive rounded-lg"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
+      <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/40 bg-popover/95 backdrop-blur-xl p-1">
+       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2.5 text-[11px] font-heading font-semibold rounded-lg py-2"><Eye className="h-3.5 w-3.5 text-primary" /> Ver detalhes</DropdownMenuItem>
+       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2.5 text-[11px] font-heading font-semibold rounded-lg py-2"><Phone className="h-3.5 w-3.5 text-success" /> Copiar telefone</DropdownMenuItem>}
+       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2.5 text-[11px] font-heading font-semibold rounded-lg py-2"><Mail className="h-3.5 w-3.5 text-info" /> Copiar email</DropdownMenuItem>}
+       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2.5 text-[11px] font-heading font-semibold text-destructive focus:text-destructive rounded-lg py-2"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
       </DropdownMenuContent>
      </DropdownMenu>
     </div>
@@ -352,40 +378,63 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
  const prodName = tx.product_id ? prods[tx.product_id] || "Produto sem nome" : "Sem produto";
  const net = Number(tx.net_amount);
  const fee = Number(tx.fee_amount);
+ const gross = Number(tx.amount);
+
+ const statusAccentBar = tx.status === "completed" ? "from-success via-success/40" : tx.status === "pending" ? "from-warning via-warning/40" : tx.status === "failed" ? "from-destructive via-destructive/40" : "from-muted-foreground/20 via-transparent";
 
  return (
-  <div className="group cursor-pointer overflow-hidden rounded-xl border border-border/[0.08] bg-card/80 backdrop-blur-sm active:scale-[0.985] transition-all duration-200" onClick={onClick}>
-   <div className={cn("h-[2px]", tx.status === "completed" ? "bg-gradient-to-r from-success/50 via-success/20 to-transparent" : tx.status === "pending" ? "bg-gradient-to-r from-warning/50 via-warning/20 to-transparent" : "bg-border/20")} />
-   <div className="p-4">
-    <div className="flex items-center justify-between gap-3">
-     <div className="flex items-center gap-2.5 min-w-0 flex-1">
-      <div className="relative">
-       <Avatar className="h-10 w-10 shrink-0 rounded-[10px] ring-1 ring-border/20 shadow-[0_2px_8px_hsl(var(--foreground)/0.04)]">
-        <AvatarFallback className={cn("text-[10px] font-black tracking-tight rounded-[10px]", avatarColor(name))}>{initials(name)}</AvatarFallback>
+  <div className="group cursor-pointer overflow-hidden rounded-2xl border border-border/15 bg-card active:scale-[0.98] transition-all duration-200" onClick={onClick}>
+   {/* Top accent line */}
+   <div className={cn("h-[2px] bg-gradient-to-r to-transparent", statusAccentBar)} />
+   
+   <div className="p-4 space-y-3">
+    {/* Row 1: Avatar + Name + Net amount */}
+    <div className="flex items-start justify-between gap-3">
+     <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="relative shrink-0">
+       <Avatar className="h-11 w-11 rounded-xl ring-1 ring-border/10 shadow-sm">
+        <AvatarFallback className={cn("text-[11px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
        </Avatar>
-       {tx.status === "completed" && <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-card" />}
+       {tx.status === "completed" && (
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-success ring-[2.5px] ring-card">
+         <Check className="h-1.5 w-1.5 text-success-foreground" strokeWidth={3} />
+        </span>
+       )}
       </div>
       <div className="min-w-0">
-       <p className="truncate text-[13px] font-heading font-bold text-foreground tracking-[-0.01em]">{name}</p>
-       <p className="truncate text-[10px] text-muted-foreground/35 mt-0.5">{tx.customer_email || "—"}</p>
+       <p className="truncate text-[14px] font-heading font-bold text-foreground tracking-[-0.01em]">{name}</p>
+       <p className="truncate text-[10.5px] text-muted-foreground/35 mt-0.5">{tx.customer_email || "—"}</p>
       </div>
      </div>
      <div className="text-right shrink-0">
-      <p className={cn("text-[16px] font-heading font-black tabular-nums tracking-[-0.03em]", tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/70")}>{fmt(net)}</p>
-      {fee > 0 && <p className="text-[9px] text-muted-foreground/25 tabular-nums mt-0.5">−R$ {fee.toFixed(2).replace(".", ",")} taxa</p>}
+      <p className={cn("text-[18px] font-heading font-black tabular-nums tracking-[-0.03em] leading-tight",
+       tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
+      )}>{fmt(net)}</p>
+      {fee > 0 && (
+       <div className="flex items-center justify-end gap-1 mt-0.5">
+        <span className="text-[9px] text-muted-foreground/25 tabular-nums line-through">{fmt(gross)}</span>
+       </div>
+      )}
      </div>
     </div>
-    <div className="mt-3 flex items-center justify-between gap-2 pt-3 border-t border-border/[0.06]">
-     <div className="flex items-center gap-2 min-w-0 flex-1">
-      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[hsl(var(--foreground)/0.03)] border border-border/10 shrink-0"><Package className="h-3 w-3 text-muted-foreground/30" /></span>
-      <div className="min-w-0">
-       <p className="text-[10.5px] font-heading font-semibold text-foreground/65 truncate">{prodName}</p>
-       <p className="text-[9px] text-muted-foreground/25 tabular-nums mt-0.5">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-      </div>
+    
+    {/* Row 2: Product + Date + Badges */}
+    <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-border/[0.08]">
+     <div className="min-w-0 flex-1">
+      <p className="text-[11px] font-heading font-semibold text-foreground/60 truncate">{prodName}</p>
+      <p className="text-[9.5px] text-muted-foreground/25 tabular-nums mt-0.5">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
      </div>
      <div className="flex items-center gap-1.5 shrink-0">
-      <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-[3px] text-[8.5px] font-heading font-bold", st.fg, st.bg, st.border)}><span className={cn("h-1 w-1 rounded-full", st.dot)} />{st.label}</span>
-      <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-[3px] text-[8.5px] font-heading font-bold", method.color, method.bg, method.border)}><MethodIcon className="h-2.5 w-2.5" />{method.label}</span>
+      <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2 py-[4px] text-[9px] font-heading font-bold", st.fg, st.bg, st.border)}>
+       <span className="relative flex h-[4px] w-[4px]">
+        {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+        <span className={cn("h-[4px] w-[4px] rounded-full", st.dot)} />
+       </span>
+       {st.label}
+      </span>
+      <span className={cn("inline-flex items-center gap-1 rounded-lg border px-2 py-[4px] text-[9px] font-heading font-bold", method.color, method.bg, method.border)}>
+       <MethodIcon className="h-2.5 w-2.5" />{method.label}
+      </span>
      </div>
     </div>
    </div>
@@ -962,15 +1011,15 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border/[0.06]">
+                      <tr className="border-b border-border/30">
                         <th className="w-[3px]" />
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-4" />
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Status</th>
-                        <th className="px-3 py-3 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Método</th>
+                        <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Status</th>
+                        <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Método</th>
                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
-                        <th className="w-12" />
+                        <th className="w-14" />
                       </tr>
                     </thead>
                     <tbody>
