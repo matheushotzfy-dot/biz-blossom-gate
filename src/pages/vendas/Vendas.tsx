@@ -1014,12 +1014,12 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border/30">
-                        <th className="w-[3px]" />
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
-                        <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Status</th>
-                        <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Método</th>
+                       <tr className="border-b border-border/15">
+                         <th className="w-[3px]" />
+                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
+                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                         <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/25">Status</th>
+                         <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/25">Método</th>
                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
                         <th className="w-14" />
