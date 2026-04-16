@@ -1041,22 +1041,22 @@ export default function Vendas() {
                   </table>
                 </div>
                 {visibleItems.length > 0 && (
-                  <div className="flex items-center justify-between border-t border-border px-5 py-3">
-                    <span className="text-[11px] font-heading text-muted-foreground/40 tabular-nums">
-                      {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Pág. {currentPage}/{totalPages}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none transition-colors">
-                        <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
-                      </button>
-                      <span className="min-w-[80px] text-center text-[11px] font-heading font-black text-primary tabular-nums">
-                        {hidden ? HIDE : fmt(filteredNetTotal)}
-                      </span>
-                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none transition-colors">
-                        Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
-                      </button>
-                    </div>
-                  </div>
+                   <div className="flex items-center justify-between border-t border-border/20 px-5 py-3.5">
+                     <span className="text-[11px] font-heading text-muted-foreground/35 tabular-nums">
+                       {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Pág. {currentPage}/{totalPages}
+                     </span>
+                     <div className="flex items-center gap-2">
+                       <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-xl border border-border/30 bg-card/50 px-3.5 text-[11px] font-heading font-bold text-muted-foreground/60 hover:text-foreground hover:border-border/50 disabled:opacity-20 disabled:pointer-events-none transition-all duration-200">
+                         <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
+                       </button>
+                       <span className="min-w-[80px] text-center text-[11px] font-heading font-black text-primary tabular-nums">
+                         {hidden ? HIDE : fmt(filteredNetTotal)}
+                       </span>
+                       <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-xl border border-border/30 bg-card/50 px-3.5 text-[11px] font-heading font-bold text-muted-foreground/60 hover:text-foreground hover:border-border/50 disabled:opacity-20 disabled:pointer-events-none transition-all duration-200">
+                         Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
+                       </button>
+                     </div>
+                   </div>
                 )}
               </>
             )}
