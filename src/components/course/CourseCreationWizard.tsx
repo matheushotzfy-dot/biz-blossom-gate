@@ -110,13 +110,13 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
 
   return (
     <div>
-      <Label className="text-[11px] font-semibold text-muted-foreground mb-2 block">Banner / Capa</Label>
+      <Label className="text-[11px] font-semibold text-muted-foreground/80 mb-2 block">Banner / Capa</Label>
       <div
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         className={cn(
-          "relative rounded-xl border border-dashed border-border cursor-pointer overflow-hidden transition-colors hover:border-primary/30",
+          "relative rounded-xl border-2 border-dashed border-border/50 cursor-pointer overflow-hidden transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5",
           value ? "aspect-video" : "flex flex-col items-center justify-center py-8"
         )}
       >
@@ -130,10 +130,10 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
           </>
         ) : (
           <>
-            <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center mb-2">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : <Upload className="h-4 w-4 text-muted-foreground" />}
+            <div className="h-11 w-11 rounded-xl bg-primary/5 ring-1 ring-primary/15 flex items-center justify-center mb-2">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin text-primary/60" /> : <Upload className="h-4 w-4 text-primary/50" />}
             </div>
-            <p className="text-xs text-muted-foreground">Clique ou arraste • 16:9 • até 5MB</p>
+            <p className="text-xs text-muted-foreground/70 font-medium">Clique ou arraste • 16:9 • até 5MB</p>
           </>
         )}
       </div>
@@ -337,7 +337,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                 <div className="space-y-2">
                   {(editCourse.modules ?? []).length > 0 ? (
                     (editCourse.modules ?? []).map((m, i) => (
-                      <div key={`${m.title}-${i}`} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+                      <div key={`${m.title}-${i}`} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card px-3 py-2.5 shadow-sm hover:shadow-md hover:border-border transition-all duration-200">
                         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">{i + 1}</span>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-foreground">{m.title}</p>
@@ -386,7 +386,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                   {wizardModules.length > 0 && (
                     <div className="mt-3 space-y-1.5">
                       {wizardModules.map((m, i) => (
-                        <div key={m} className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2">
+                        <div key={m} className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-card px-3 py-2.5 shadow-sm hover:shadow-md hover:border-border transition-all duration-200">
                           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-[11px] font-bold text-primary">{i + 1}</span>
                           <span className="truncate text-sm font-medium text-foreground flex-1">{m}</span>
                           <button
