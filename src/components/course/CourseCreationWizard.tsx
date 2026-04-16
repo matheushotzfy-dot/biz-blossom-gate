@@ -117,25 +117,33 @@ function SectionCard({
   icon: Icon,
   title,
   subtitle,
+  step,
   children,
 }: {
   icon: typeof GraduationCap;
   title: string;
   subtitle: string;
+  step?: number;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[1.5rem] border border-border bg-card p-5">
-      <div className="mb-4 flex items-start gap-3.5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <h3 className="text-sm font-bold tracking-tight text-foreground">{title}</h3>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{subtitle}</p>
+    <section className="space-y-3.5">
+      <div className="flex items-start gap-3">
+        {step !== undefined ? (
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-[11px] font-bold text-primary">
+            {step}
+          </div>
+        ) : (
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground">
+            <Icon className="h-3.5 w-3.5" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h3 className="text-[13px] font-bold tracking-tight text-foreground">{title}</h3>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">{subtitle}</p>
         </div>
       </div>
-      {children}
+      <div className="pl-10">{children}</div>
     </section>
   );
 }
