@@ -617,9 +617,9 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
         {/* Chart */}
         <div className="xl:col-span-8 rounded-2xl border border-border bg-card min-h-[340px] flex flex-col overflow-hidden">
-          <div className="px-4 pt-4">
-              <div className="rounded-[18px] border border-border/30 bg-background/40 px-4 py-3">
-                <div className="h-[250px] sm:h-[270px]">
+          <div className="flex-1 px-4 pt-4 pb-4 min-h-[320px]">
+            <div className="h-full rounded-[18px] border border-border/30 bg-background/40 px-4 py-3">
+              <div className="h-full min-h-[280px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 10, right: 8, left: -20, bottom: 0 }}>
                       <defs>
