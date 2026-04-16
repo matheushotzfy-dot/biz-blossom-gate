@@ -117,25 +117,33 @@ function SectionCard({
   icon: Icon,
   title,
   subtitle,
+  step,
   children,
 }: {
   icon: typeof GraduationCap;
   title: string;
   subtitle: string;
+  step?: number;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[1.5rem] border border-border bg-card p-5">
-      <div className="mb-4 flex items-start gap-3.5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <h3 className="text-sm font-bold tracking-tight text-foreground">{title}</h3>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{subtitle}</p>
+    <section className="space-y-3.5">
+      <div className="flex items-start gap-3">
+        {step !== undefined ? (
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-[11px] font-bold text-primary">
+            {step}
+          </div>
+        ) : (
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground">
+            <Icon className="h-3.5 w-3.5" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h3 className="text-[13px] font-bold tracking-tight text-foreground">{title}</h3>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">{subtitle}</p>
         </div>
       </div>
-      {children}
+      <div className="pl-10">{children}</div>
     </section>
   );
 }
@@ -359,7 +367,19 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
   };
 
   const previewTitle = form.title.trim() || "Sua área premium";
-  
+
+  // Completion progress (drives left column hierarchy + footer/header confidence)
+  const completion = useMemo(() => {
+    const checks = [
+      Boolean(form.title.trim()),
+      Boolean(form.description.trim()),
+      Boolean(form.thumbnail_url),
+      Boolean(form.product_id),
+      (editCourse?.modules?.length ?? wizardModules.length) > 0,
+    ];
+    const done = checks.filter(Boolean).length;
+    return { done, total: checks.length, pct: Math.round((done / checks.length) * 100) };
+  }, [form, wizardModules, editCourse?.modules]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -382,24 +402,41 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             </div>
           </div>
 
-          <Button
-            onClick={saveCourse}
-            disabled={saving || !form.title.trim()}
-            size="sm"
-            className="rounded-2xl px-6 font-bold"
-          >
-            {saving ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-2 h-3.5 w-3.5" />}
-            {editCourse ? "Salvar" : "Criar curso"}
-          </Button>
+          <div className="flex items-center gap-4">
+            {/* Completion progress */}
+            <div className="hidden md:flex items-center gap-2.5">
+              <div className="text-right leading-tight">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Progresso</p>
+                <p className="text-xs font-bold text-foreground tabular-nums">{completion.done}/{completion.total} <span className="text-muted-foreground font-medium">· {completion.pct}%</span></p>
+              </div>
+              <div className="h-1.5 w-28 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${completion.pct}%` }}
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={saveCourse}
+              disabled={saving || !form.title.trim()}
+              className="rounded-2xl px-7 h-11 text-sm font-bold shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.45)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.55)]"
+            >
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+              {editCourse ? "Salvar alterações" : "Criar área de membros"}
+            </Button>
+          </div>
         </div>
 
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[460px_minmax(0,1fr)]">
+
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[420px_minmax(0,1fr)]">
           <div className="flex min-h-0 flex-col border-r border-border bg-background">
 
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-              <div className="space-y-5 pb-6">
+              <div className="space-y-7 pb-6">
                 <SectionCard
                   icon={GraduationCap}
+                  step={1}
                   title="Base do curso"
                   subtitle="Nome, categoria e vínculo com produto para dar contexto imediato ao aluno."
                 >
@@ -468,6 +505,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
                 <SectionCard
                   icon={ImageIcon}
+                  step={2}
                   title="Identidade visual"
                   subtitle="A capa transforma o preview de genérico para produto real e aumenta a percepção premium."
                 >
@@ -479,6 +517,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
                 <SectionCard
                   icon={Layers}
+                  step={3}
                   title="Estrutura de módulos"
                   subtitle="Adicione rapidamente a espinha dorsal da jornada para o aluno já entender a trilha."
                 >
@@ -594,66 +633,73 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             </div>
           </div>
 
-          <div className="min-h-0 overflow-y-auto border-l border-border bg-card-inset p-6">
-            <div className="mb-5 rounded-[1.5rem] border border-border bg-card p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">Preview ao vivo</p>
-                  <p className="mt-1 text-xl font-bold tracking-tight text-foreground">Visão do aluno</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Uma prévia com mais presença, leitura e cara de produto final.</p>
-                </div>
-                <div className="flex items-center gap-1 rounded-2xl border border-border bg-card-inset p-1">
-                  {([
-                    { id: "desktop" as const, icon: Monitor },
-                    { id: "mobile" as const, icon: Smartphone },
-                  ] as const).map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setViewMode(item.id)}
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-200",
-                        viewMode === item.id
-                          ? "border-primary/20 bg-card text-primary"
-                          : "border-transparent text-muted-foreground hover:border-border hover:bg-card hover:text-foreground"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                    </button>
-                  ))}
+          <div className="min-h-0 overflow-y-auto bg-card-inset">
+            {/* Sleek toolbar — inline, less framed, lets preview dominate */}
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-card-inset/90 px-7 py-3.5 backdrop-blur-md">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-success">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                  Preview ao vivo
+                </span>
+                <div className="hidden md:flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <span className="truncate font-semibold text-foreground max-w-[180px]">{previewTitle}</span>
+                  <span className="text-border">·</span>
+                  <span className="tabular-nums">{previewModules.length} módulos</span>
+                  {linkedProduct && (
+                    <>
+                      <span className="text-border">·</span>
+                      <span className="truncate max-w-[140px]">{linkedProduct.name}</span>
+                    </>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-2.5">
-                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Curso</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{previewTitle}</p>
-                </div>
-                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Produto</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{linkedProduct?.name || "Sem vínculo"}</p>
-                </div>
-                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Módulos</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{previewModules.length}</p>
-                </div>
+              <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-0.5">
+                {([
+                  { id: "desktop" as const, icon: Monitor, label: "Desktop" },
+                  { id: "mobile" as const, icon: Smartphone, label: "Mobile" },
+                ] as const).map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setViewMode(item.id)}
+                    className={cn(
+                      "flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-semibold transition-all duration-200",
+                      viewMode === item.id
+                        ? "bg-primary/12 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{item.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-border bg-background p-4">
-              <MemberExperiencePreview
-                className="mx-auto"
-                course={{
-                  title: previewTitle,
-                  description: form.description,
-                  category: form.category,
-                  thumbnail_url: form.thumbnail_url,
-                  productName: linkedProduct?.name,
-                  is_published: false,
+            {/* Preview canvas — dominant, breathing area, soft stage */}
+            <div className="px-8 py-8">
+              <div
+                className="relative overflow-hidden rounded-[2rem] border border-border bg-background p-5 sm:p-7"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 30% 0%, hsl(var(--primary) / 0.06), transparent 55%), radial-gradient(circle at 80% 100%, hsl(var(--primary) / 0.04), transparent 60%)",
                 }}
-                modules={previewModules}
-                viewMode={viewMode}
-              />
+              >
+                <MemberExperiencePreview
+                  className="mx-auto"
+                  course={{
+                    title: previewTitle,
+                    description: form.description,
+                    category: form.category,
+                    thumbnail_url: form.thumbnail_url,
+                    productName: linkedProduct?.name,
+                    is_published: false,
+                  }}
+                  modules={previewModules}
+                  viewMode={viewMode}
+                />
+              </div>
             </div>
           </div>
         </div>
