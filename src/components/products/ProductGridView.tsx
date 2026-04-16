@@ -92,7 +92,8 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
                 )}
               </div>
 
-              <div className="mt-auto pt-4 border-t border-border mt-4" />
+              <div className="mt-auto pt-4">
+                <div className="h-px bg-border mb-4" />
 
               {/* Actions */}
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
