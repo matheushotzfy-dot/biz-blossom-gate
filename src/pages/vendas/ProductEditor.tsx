@@ -1863,125 +1863,173 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
 }
 
 function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
- const [showQR, setShowQR] = useState(false);
- const checkoutLink = getCheckoutLink();
+  const [showQR, setShowQR] = useState(false);
+  const checkoutLink = getCheckoutLink();
+  const affiliateInviteLink = `${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`;
 
- const shareLinks = [
- { label: "WhatsApp", icon: MessageSquare, color: "bg-success/10 text-success ring-success/20", url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
- { label: "Telegram", icon: Share2, color: "bg-info/10 text-info ring-info/20", url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}` },
- { label: "Twitter/X", icon: Megaphone, color: "bg-foreground/5 text-foreground ring-border/20", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}&url=${encodeURIComponent(checkoutLink)}` },
- ];
+  const shareLinks = [
+    { label: "WhatsApp", icon: MessageSquare, url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
+    { label: "Telegram", icon: Share2, url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}` },
+    { label: "Twitter / X", icon: Megaphone, url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}&url=${encodeURIComponent(checkoutLink)}` },
+  ];
 
- return (
- <div className="space-y-6">
- <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie, compartilhe e monitore seus links de checkout." />
- {isNew ? (
- <EmptyCard icon={Link2} message="Salve o produto primeiro para gerar links." />
- ) : (
- <div className="space-y-4">
- {/* Main checkout link with QR */}
- {product?.checkout_url && (
- <EditorCard accentColor="bg-primary">
- <div className="flex items-center justify-between">
- <h4 className="text-[15px] font-display font-black flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
- <button
- onClick={() => setShowQR(!showQR)}
- className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-all ring-1", showQR ? "bg-primary/10 ring-primary/20 text-primary" : "bg-muted/10 ring-border/20 text-muted-foreground/50 hover:text-foreground")}
- >
- <QrCode className="h-4 w-4" />
- </button>
- </div>
- <div className="flex items-center gap-2">
- <Input readOnly value={checkoutLink} className="h-10 font-mono text-xs bg-muted/10 border-border" />
- <Button variant="outline" size="sm" onClick={() => copyLink(checkoutLink)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
- <Copy className="h-3.5 w-3.5" /> Copiar
- </Button>
- <Button variant="outline" size="sm" onClick={() => window.open(checkoutLink, "_blank")} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
- <Eye className="h-3.5 w-3.5" /> Abrir
- </Button>
- </div>
+  type LinkRow = {
+    type: string;
+    typeColor: string;
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    description: string;
+    url: string;
+    showQrToggle?: boolean;
+  };
 
- {/* QR Code */}
- <AnimatePresence>
- {showQR && (
- <motion.div
- initial={{ opacity: 0, height: 0 }}
- animate={{ opacity: 1, height: "auto" }}
- exit={{ opacity: 0, height: 0 }}
- className="overflow-hidden"
- >
- <div className="flex flex-col items-center gap-3 py-4 border-t border-border mt-2">
- <div className="bg-background p-4 rounded-xl border border-border shadow-sm">
- <QRCodeSVG
- value={checkoutLink}
- size={180}
- level="M"
- bgColor="transparent"
- fgColor="hsl(var(--foreground))"
- />
- </div>
- <p className="text-[10px] text-muted-foreground/40 font-display">Escaneie para acessar o checkout</p>
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </EditorCard>
- )}
+  const rows: LinkRow[] = [];
+  if (product?.checkout_url && checkoutLink) {
+    rows.push({
+      type: "Checkout",
+      typeColor: "bg-primary/10 text-primary border-primary/20",
+      icon: ShoppingCart,
+      label: "Link do Checkout",
+      description: "Pagamento direto para este produto",
+      url: checkoutLink,
+      showQrToggle: true,
+    });
+  }
+  if (pageUrl) {
+    rows.push({
+      type: "Página",
+      typeColor: "bg-info/10 text-info border-info/20",
+      icon: Globe,
+      label: "Página de Vendas",
+      description: "Landing page pública do produto",
+      url: pageUrl,
+    });
+  }
+  if (affiliateEnabled) {
+    rows.push({
+      type: "Afiliado",
+      typeColor: "bg-warning/10 text-warning border-warning/20",
+      icon: Users,
+      label: "Convite de Afiliado",
+      description: "Compartilhe para recrutar parceiros",
+      url: affiliateInviteLink,
+    });
+  }
 
- {/* Social sharing */}
- {checkoutLink && (
- <EditorCard accentColor="bg-success">
- <h4 className="text-[15px] font-display font-black flex items-center gap-2">
- <Share2 className="h-4 w-4 text-success" /> Compartilhar
- </h4>
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
- {shareLinks.map(sl => (
- <motion.a
- key={sl.label}
- href={sl.url}
- target="_blank"
- rel="noopener noreferrer"
- whileHover={{ scale: 1.02 }}
- whileTap={{ scale: 0.98 }}
- className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-border bg-card transition-all"
- >
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1 shrink-0", sl.color)}>
- <sl.icon className="h-4 w-4" />
- </div>
- <span className="text-sm font-display font-bold text-foreground">{sl.label}</span>
- </motion.a>
- ))}
- </div>
- </EditorCard>
- )}
+  return (
+    <div className="space-y-6">
+      <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie, compartilhe e monitore seus links de checkout." />
 
- {pageUrl && (
- <EditorCard accentColor="bg-info">
- <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
- <div className="flex items-center gap-2">
- <Input readOnly value={pageUrl} className="h-10 font-mono text-xs bg-muted/10 border-border" />
- <Button variant="outline" size="sm" onClick={() => copyLink(pageUrl)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
- <Copy className="h-3.5 w-3.5" /> Copiar
- </Button>
- </div>
- </EditorCard>
- )}
+      {isNew ? (
+        <EmptyCard icon={Link2} message="Salve o produto primeiro para gerar links." />
+      ) : rows.length === 0 ? (
+        <EmptyCard icon={Link2} message="Nenhum link disponível ainda." />
+      ) : (
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          {/* Header row */}
+          <div className="hidden md:grid grid-cols-[140px_1fr_auto] gap-4 px-4 py-2.5 border-b border-border bg-muted/20">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Link</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Ações</span>
+          </div>
 
- {affiliateEnabled && (
- <EditorCard accentColor="bg-warning">
- <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Users className="h-4 w-4 text-warning" /> Link de Afiliado</h4>
- <div className="flex items-center gap-2">
- <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-10 font-mono text-xs bg-muted/10 border-border" />
- <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
- <Copy className="h-3.5 w-3.5" /> Copiar
- </Button>
- </div>
- </EditorCard>
- )}
- </div>
- )}
- </div>
- );
+          {rows.map((row, idx) => (
+            <div key={row.label} className={cn("border-b border-border last:border-0", idx % 2 === 1 && "bg-muted/[0.04]")}>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-3 md:gap-4 px-4 py-3.5 items-center">
+                {/* Type pill + icon */}
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center shrink-0">
+                    <row.icon className="h-3.5 w-3.5 text-foreground/70" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider border", row.typeColor)}>
+                      {row.type}
+                    </span>
+                    <p className="text-[11px] text-muted-foreground/70 mt-1 truncate md:hidden">{row.description}</p>
+                  </div>
+                </div>
+
+                {/* Link content */}
+                <div className="min-w-0">
+                  <p className="text-[12px] font-semibold text-foreground mb-0.5">{row.label}</p>
+                  <p className="text-[11px] text-muted-foreground/70 mb-1.5 hidden md:block">{row.description}</p>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted/30 border border-border">
+                    <Link2 className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                    <span className="font-mono text-[11px] text-foreground/80 truncate">{row.url}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1.5 md:justify-end">
+                  {row.showQrToggle && (
+                    <Button
+                      type="button"
+                      variant={showQR ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setShowQR(!showQR)}
+                      className="h-8 w-8 p-0 rounded-md"
+                      title="Mostrar QR Code"
+                    >
+                      <QrCode className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => window.open(row.url, "_blank")} className="h-8 w-8 p-0 rounded-md" title="Abrir link">
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="sm" onClick={() => copyLink(row.url)} className="h-8 gap-1.5 rounded-md font-semibold text-[11px] px-3">
+                    <Copy className="h-3.5 w-3.5" /> Copiar
+                  </Button>
+                </div>
+              </div>
+
+              {/* QR Code expansion (only for checkout row) */}
+              <AnimatePresence>
+                {row.showQrToggle && showQR && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-col items-center gap-2 py-4 border-t border-border bg-muted/[0.03]">
+                      <div className="bg-background p-3 rounded-lg border border-border">
+                        <QRCodeSVG value={row.url} size={160} level="M" bgColor="transparent" fgColor="hsl(var(--foreground))" />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/60">Escaneie para acessar o checkout</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Quick share — compact strip */}
+      {!isNew && checkoutLink && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5">
+            <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Compartilhamento Rápido</h4>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {shareLinks.map(sl => (
+              <a
+                key={sl.label}
+                href={sl.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 h-10 rounded-lg border border-border bg-card hover:bg-muted/30 hover:border-primary/30 transition-colors text-[12px] font-semibold text-foreground"
+              >
+                <sl.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                {sl.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ═══════════════════════════════════════════════
