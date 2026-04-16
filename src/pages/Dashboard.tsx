@@ -675,7 +675,7 @@ export default function Dashboard() {
             </AreaChart>
           </ResponsiveContainer>
           </div>
-        </motion.div>
+        </div>
 
         {/* Right panel — Conversion + Payment KPIs */}
         <div className="xl:col-span-4 flex flex-col gap-3">
