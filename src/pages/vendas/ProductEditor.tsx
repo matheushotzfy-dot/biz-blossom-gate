@@ -1840,151 +1840,189 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  ═══════════════════════════════════════════════ */
 
 function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean }) {
- const navigate = useNavigate();
- const { user } = useAuth();
- const [courses, setCourses] = useState<any[]>([]);
- const [loading, setLoading] = useState(true);
- const [moduleStats, setModuleStats] = useState<Record<string, { modules: number; lessons: number }>>({});
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [moduleStats, setModuleStats] = useState<Record<string, { modules: number; lessons: number }>>({});
+  const [creating, setCreating] = useState(false);
 
- useEffect(() => {
- if (isNew || !productId) { setLoading(false); return; }
- (async () => {
- const { data: coursesData } = await supabase.from("courses").select("*").eq("product_id", productId).order("created_at", { ascending: false });
- const courses = coursesData || [];
- setCourses(courses);
- if (courses.length > 0) {
- const courseIds = courses.map(c => c.id);
- const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
- const modsData = mods || [];
- const modIds = modsData.map(m => m.id);
- let lessonsCount: Record<string, number> = {};
- if (modIds.length > 0) {
- const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
- (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });
- }
- const stats: Record<string, { modules: number; lessons: number }> = {};
- courses.forEach(c => {
- const courseMods = modsData.filter(m => m.course_id === c.id);
- stats[c.id] = { modules: courseMods.length, lessons: courseMods.reduce((a, m) => a + (lessonsCount[m.id] || 0), 0) };
- });
- setModuleStats(stats);
- }
- setLoading(false);
- })();
- }, [productId, isNew]);
+  useEffect(() => {
+    if (isNew || !productId) { setLoading(false); return; }
+    (async () => {
+      const { data: coursesData } = await supabase.from("courses").select("*").eq("product_id", productId).order("created_at", { ascending: false });
+      const courses = coursesData || [];
+      setCourses(courses);
+      if (courses.length > 0) {
+        const courseIds = courses.map(c => c.id);
+        const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
+        const modsData = mods || [];
+        const modIds = modsData.map(m => m.id);
+        let lessonsCount: Record<string, number> = {};
+        if (modIds.length > 0) {
+          const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
+          (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });
+        }
+        const stats: Record<string, { modules: number; lessons: number }> = {};
+        courses.forEach(c => {
+          const courseMods = modsData.filter(m => m.course_id === c.id);
+          stats[c.id] = { modules: courseMods.length, lessons: courseMods.reduce((a, m) => a + (lessonsCount[m.id] || 0), 0) };
+        });
+        setModuleStats(stats);
+      }
+      setLoading(false);
+    })();
+  }, [productId, isNew]);
 
- if (isNew) {
- return (
- <div className="space-y-6">
- <SectionHeader icon={GraduationCap} title="Conteúdo do Produto" subtitle="Salve o produto primeiro para gerenciar o conteúdo." />
- <EmptyCard icon={Lock} message="Salve o produto para acessar esta seção" />
- </div>
- );
- }
+  const createCourse = async () => {
+    if (!user || creating) return;
+    setCreating(true);
+    const { data } = await supabase.from("courses").insert({
+      user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
+    } as any).select().single();
+    setCreating(false);
+    if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+  };
 
- return (
- <div className="space-y-6">
- <SectionHeader icon={GraduationCap} title="Conteúdo do Produto" subtitle="Cursos e aulas vinculados a este produto." />
+  if (isNew) {
+    return (
+      <div className="space-y-6">
+        <header>
+          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Conteúdo do produto</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Salve o produto primeiro para gerenciar cursos, módulos e aulas.</p>
+        </header>
+        <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-16 gap-3">
+          <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center border border-border">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">Salve o produto para acessar o conteúdo</p>
+          <p className="text-xs text-muted-foreground">Você poderá criar cursos vinculados após o primeiro salvamento.</p>
+        </div>
+      </div>
+    );
+  }
 
- {loading ? (
- <div className="flex items-center justify-center py-16">
- <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
- </div>
- ) : courses.length === 0 ? (
- <EditorCard accentColor="bg-primary">
- <div className="flex flex-col items-center py-10 gap-5">
- <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
- <GraduationCap className="h-7 w-7 text-primary/40" />
- </div>
- <div className="text-center">
- <p className="text-sm font-display font-bold text-foreground/50 mb-1">Nenhum curso vinculado</p>
- <p className="text-xs text-muted-foreground/40">Crie um curso para entregar conteúdo aos compradores</p>
- </div>
- <Button
- onClick={async () => {
- if (!user) return;
- const { data } = await supabase.from("courses").insert({
- user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
- } as any).select().single();
- if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
- }}
- className="gap-2 rounded-xl font-display font-bold text-sm h-10"
- >
- <Plus className="h-4 w-4" /> Criar Curso
- </Button>
- </div>
- </EditorCard>
- ) : (
- <div className="space-y-3">
- {courses.map((c: any, i: number) => {
- const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
- return (
- <motion.div
- key={c.id}
- initial={{ opacity: 0, y: 8 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
- >
- <EditorCard accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
- <div className="flex items-center gap-4">
- <div className="h-18 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border relative group/thumb">
- {c.thumbnail_url ? (
- <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500" />
- ) : (
- <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent relative">
- <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
- <GraduationCap className="h-7 w-7 text-primary/12 relative z-10" />
- </div>
- )}
- </div>
- <div className="flex-1 min-w-0">
- <div className="flex items-center gap-2.5 mb-1.5">
- <h3 className="text-sm font-display font-black text-foreground truncate tracking-[-0.01em]">{c.title}</h3>
- <span className={cn(
- "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-black uppercase tracking-[0.08em] border ring-1",
- c.is_published
- ? "bg-success/10 text-success border-success/15 ring-success/10"
- : "bg-muted/10 text-muted-foreground/50 border-border ring-border/5"
- )}>
- <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse shadow-[0_0_4px_hsl(var(--success)/0.3)]" : "bg-muted-foreground/30")} />
- {c.is_published ? "Live" : "Rascunho"}
- </span>
- </div>
- <div className="flex items-center gap-3 text-xs text-muted-foreground/50 font-display">
- <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-primary/40" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
- <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-info/40" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
- </div>
- </div>
- <Button
- variant="ghost" size="sm"
- onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
- className="gap-2 rounded-xl text-xs font-display font-black text-primary hover:text-primary hover:bg-primary/8 h-10 px-4 active:scale-[0.98]"
- >
- Gerenciar <ChevronRight className="h-3.5 w-3.5" />
- </Button>
- </div>
- </EditorCard>
- </motion.div>
- );
- })}
+  // Aggregate totals
+  const totalModules = Object.values(moduleStats).reduce((a, s) => a + s.modules, 0);
+  const totalLessons = Object.values(moduleStats).reduce((a, s) => a + s.lessons, 0);
+  const publishedCount = courses.filter(c => c.is_published).length;
 
- <Button
- variant="ghost"
- onClick={async () => {
- if (!user) return;
- const { data } = await supabase.from("courses").insert({
- user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
- } as any).select().single();
- if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
- }}
- className="w-full gap-2 rounded-2xl font-display font-bold text-sm h-12 border-2 border-dashed border-border hover:border-primary/20 hover:bg-primary/[0.03] text-muted-foreground/30 hover:text-primary transition-all duration-500 active:scale-[0.99]"
- >
- <Plus className="h-4 w-4" /> Adicionar Curso
- </Button>
- </div>
- )}
- </div>
- );
+  return (
+    <div className="space-y-6">
+      {/* Header with primary action */}
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Conteúdo do produto</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Cursos, módulos e aulas entregues após a compra.</p>
+        </div>
+        {!loading && courses.length > 0 && (
+          <Button onClick={createCourse} disabled={creating} className="h-10 gap-2 rounded-xl text-xs font-semibold">
+            {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />}
+            Novo curso
+          </Button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16 rounded-2xl border border-border bg-card">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-20 gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center border border-border">
+            <GraduationCap className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-foreground">Nenhum curso criado</p>
+            <p className="mt-1 text-xs text-muted-foreground max-w-[280px]">Crie seu primeiro curso para entregar conteúdo aos compradores deste produto.</p>
+          </div>
+          <Button onClick={createCourse} disabled={creating} className="h-10 gap-2 rounded-xl text-xs font-semibold">
+            {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />}
+            Criar primeiro curso
+          </Button>
+        </div>
+      ) : (
+        <>
+          {/* Stats strip */}
+          <div className="grid grid-cols-3 rounded-2xl border border-border bg-card divide-x divide-border overflow-hidden">
+            <div className="p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos</p>
+              <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{courses.length}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{publishedCount} publicado{publishedCount !== 1 ? "s" : ""}</p>
+            </div>
+            <div className="p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Módulos</p>
+              <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalModules}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">no total</p>
+            </div>
+            <div className="p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Aulas</p>
+              <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalLessons}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">disponíveis</p>
+            </div>
+          </div>
+
+          {/* Course list — dense rows */}
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-secondary/30">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos vinculados</p>
+              <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
+            </div>
+            <div className="divide-y divide-border">
+              {courses.map((c: any) => {
+                const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                    className="group w-full flex items-center gap-4 p-4 text-left transition-colors hover:bg-secondary/40 active:bg-secondary/60"
+                  >
+                    {/* Thumb */}
+                    <div className="h-14 w-20 rounded-lg overflow-hidden shrink-0 bg-secondary border border-border relative">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <GraduationCap className="h-5 w-5 text-muted-foreground/40" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Title + meta */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-foreground truncate">{c.title}</h3>
+                        <span className={cn(
+                          "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider border",
+                          c.is_published
+                            ? "bg-success/10 text-success border-success/20"
+                            : "bg-secondary text-muted-foreground border-border"
+                        )}>
+                          <span className={cn("h-1 w-1 rounded-full", c.is_published ? "bg-success" : "bg-muted-foreground/50")} />
+                          {c.is_published ? "Publicado" : "Rascunho"}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground tabular-nums">
+                        <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {stats.modules} {stats.modules === 1 ? "módulo" : "módulos"}</span>
+                        <span className="text-border">·</span>
+                        <span className="flex items-center gap-1"><Video className="h-3 w-3" /> {stats.lessons} {stats.lessons === 1 ? "aula" : "aulas"}</span>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground group-hover:text-primary transition-colors">
+                      Gerenciar
+                      <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 /* ═══════════════════════════════════════════════
