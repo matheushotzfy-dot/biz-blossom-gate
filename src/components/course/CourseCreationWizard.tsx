@@ -58,6 +58,28 @@ interface WizardProps {
   onSaved: () => void;
 }
 
+const COURSE_CATEGORIES = [
+  { value: "marketing", label: "Marketing Digital" },
+  { value: "vendas", label: "Vendas" },
+  { value: "negocios", label: "Negócios" },
+  { value: "financas", label: "Finanças" },
+  { value: "tecnologia", label: "Tecnologia" },
+  { value: "design", label: "Design" },
+  { value: "saude", label: "Saúde & Bem-estar" },
+  { value: "educacao", label: "Educação" },
+  { value: "desenvolvimento-pessoal", label: "Desenvolvimento Pessoal" },
+  { value: "produtividade", label: "Produtividade" },
+  { value: "idiomas", label: "Idiomas" },
+  { value: "direito", label: "Direito" },
+  { value: "culinaria", label: "Culinária" },
+  { value: "fitness", label: "Fitness" },
+  { value: "musica", label: "Música" },
+  { value: "fotografia", label: "Fotografia & Vídeo" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "programacao", label: "Programação" },
+  { value: "geral", label: "Outros" },
+] as const;
+
 const STARTER_MODULES = [
   { title: "Boas-vindas", subtitle: "Primeira impressão e acesso imediato" },
   { title: "Fundamentos", subtitle: "Base para preparar o aluno" },
@@ -422,12 +444,19 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</Label>
-                        <Input
+                        <Select
                           value={form.category}
-                          onChange={(e) => setForm((c) => ({ ...c, category: e.target.value }))}
-                          placeholder="Marketing, saúde..."
-                          className="h-11 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25"
-                        />
+                          onValueChange={(v) => setForm((c) => ({ ...c, category: v }))}
+                        >
+                          <SelectTrigger className="h-11 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COURSE_CATEGORIES.map((cat) => (
+                              <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2">
