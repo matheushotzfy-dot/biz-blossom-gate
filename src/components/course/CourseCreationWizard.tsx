@@ -366,6 +366,8 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
     }
   };
 
+  const previewTitle = form.title.trim() || "Sua área premium";
+
   // Completion progress (drives left column hierarchy + footer/header confidence)
   const completion = useMemo(() => {
     const checks = [
