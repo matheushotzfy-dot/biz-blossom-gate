@@ -371,13 +371,12 @@ export default function AdminConteudo() {
     { label: "Rascunhos", value: "draft" as const, count: draftCourses },
   ];
 
-  const statusLabel = (isPublished: boolean) => isPublished ? "Publicado" : "Rascunho";
-  const statusDot = (isPublished: boolean) => isPublished ? "bg-success" : "bg-muted-foreground/30";
-
   const totalStudents = Object.values(studentCounts).reduce((a, c) => a + c, 0);
   const totalModules = Object.values(courseStats).reduce((a, s) => a + s.modules, 0);
   const totalLessonsCount = Object.values(courseStats).reduce((a, s) => a + s.lessons, 0);
   const totalRevenue = courses.reduce((a, c) => a + getCourseRevenue(c), 0);
+
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
    return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
