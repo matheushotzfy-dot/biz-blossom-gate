@@ -282,64 +282,103 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  </TabsContent>
 
  {/* ORDER BUMPS TAB */}
- <TabsContent value="bumps" className="space-y-4 mt-4">
- <p className="text-xs text-muted-foreground">
- Adicione outros produtos como ofertas especiais no checkout. O cliente pode adicionar ao pedido com um clique.
+ <TabsContent value="bumps" className="space-y-5 mt-4">
+ {/* Header / Stats strip */}
+ <div className="grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-border bg-border">
+ <div className="bg-card px-3 py-2.5">
+ <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Ofertas</p>
+ <p className="text-lg font-semibold tabular-nums">{orderBumps.length}</p>
+ </div>
+ <div className="bg-card px-3 py-2.5">
+ <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Receita extra</p>
+ <p className="text-lg font-semibold tabular-nums">
+ R$ {orderBumps.reduce((sum, b) => {
+ const p = allProducts.find(ap => ap.id === b.bump_product_id);
+ return sum + Number(p?.price || 0);
+ }, 0).toFixed(0)}
  </p>
+ </div>
+ <div className="bg-card px-3 py-2.5">
+ <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Disponíveis</p>
+ <p className="text-lg font-semibold tabular-nums">{availableForBump.length}</p>
+ </div>
+ </div>
 
- {/* Existing bumps */}
- {orderBumps.length > 0 && (
- <div className="space-y-2">
- {orderBumps.map(bump => {
+ {/* Linked products list */}
+ {orderBumps.length > 0 ? (
+ <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+ {orderBumps.map((bump, idx) => {
  const prod = allProducts.find(p => p.id === bump.bump_product_id);
  return (
- <div key={bump.id} className="flex items-center justify-between p-3 rounded-xl border border-border">
- <div className="flex items-center gap-3 min-w-0 flex-1">
+ <div key={bump.id} className="flex items-center gap-3 p-3 bg-card hover:bg-muted/30 transition-colors">
+ <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-[11px] font-semibold text-muted-foreground tabular-nums flex-shrink-0">
+ {idx + 1}
+ </div>
  {prod?.image_url ? (
- <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-lg object-cover flex-shrink-0" />
+ <img src={prod.image_url} alt={prod.name} className="h-12 w-12 rounded-lg object-cover flex-shrink-0 border border-border" />
  ) : (
- <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Package className="h-4 w-4 text-primary" />
+ <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 border border-border">
+ <Package className="h-5 w-5 text-muted-foreground" />
  </div>
  )}
- <div className="min-w-0">
- <p className="text-sm font-medium truncate">{prod?.name || "Produto"}</p>
- <p className="text-xs text-muted-foreground">R$ {Number(prod?.price || 0).toFixed(2)}</p>
+ <div className="min-w-0 flex-1">
+ <p className="text-sm font-semibold truncate leading-tight">{prod?.name || "Produto"}</p>
+ <div className="flex items-center gap-2 mt-0.5">
+ <span className="text-xs font-medium text-foreground tabular-nums">R$ {Number(prod?.price || 0).toFixed(2)}</span>
+ <span className="text-[10px] text-muted-foreground">·</span>
+ <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Posição {idx + 1}</span>
  </div>
  </div>
- <Button variant="ghost" size="sm" onClick={() => removeBump(bump.id)} className="text-destructive hover:text-destructive h-8 w-8 p-0">
- <Trash2 className="h-4 w-4" />
+ <Button variant="ghost" size="icon" onClick={() => removeBump(bump.id)} className="text-muted-foreground hover:text-destructive h-8 w-8 flex-shrink-0">
+ <Trash2 className="h-3.5 w-3.5" />
  </Button>
  </div>
  );
  })}
  </div>
- )}
+ ) : availableForBump.length > 0 ? (
+ <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center">
+ <Package className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+ <p className="text-sm font-medium text-foreground">Nenhuma oferta vinculada</p>
+ <p className="text-xs text-muted-foreground mt-1">Selecione um produto abaixo para começar</p>
+ </div>
+ ) : null}
 
- {/* Add new bump */}
+ {/* Add new bump control */}
  {availableForBump.length > 0 && (
+ <div className="space-y-2">
+ <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Vincular produto</Label>
  <div className="flex gap-2">
  <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
- <SelectTrigger className="flex-1 h-10 rounded-xl">
- <SelectValue placeholder="Selecione um produto..." />
+ <SelectTrigger className="flex-1 h-10 rounded-lg">
+ <SelectValue placeholder="Selecione da sua biblioteca..." />
  </SelectTrigger>
  <SelectContent>
  {availableForBump.map(p => (
- <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
+ <SelectItem key={p.id} value={p.id}>
+ <span className="font-medium">{p.name}</span>
+ <span className="text-muted-foreground ml-2 tabular-nums">R$ {Number(p.price).toFixed(2)}</span>
+ </SelectItem>
  ))}
  </SelectContent>
  </Select>
- <Button onClick={addBump} disabled={!selectedBumpProduct} size="sm" className="gap-1 rounded-xl">
- <Plus className="h-4 w-4" /> Adicionar
+ <Button onClick={addBump} disabled={!selectedBumpProduct} size="default" className="gap-1.5 rounded-lg h-10 px-4">
+ <Plus className="h-4 w-4" /> Vincular
  </Button>
+ </div>
+ <p className="text-[11px] text-muted-foreground">
+ Ofertas aparecem antes da finalização do pagamento. Adicione com 1 clique.
+ </p>
  </div>
  )}
 
- {allProducts.length <= 1 && orderBumps.length === 0 && (
- <div className="text-center py-6 space-y-3">
- <p className="text-muted-foreground text-sm">Cadastre outros produtos para usar como order bumps</p>
- <a href="/vendas/produtos" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
- <Plus className="h-4 w-4" /> Cadastrar Produto
+ {allProducts.length === 0 && orderBumps.length === 0 && (
+ <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
+ <Package className="h-6 w-6 text-muted-foreground mx-auto mb-3" />
+ <p className="text-sm font-semibold text-foreground">Sem produtos disponíveis</p>
+ <p className="text-xs text-muted-foreground mt-1 mb-4">Cadastre outros produtos para vincular como ofertas</p>
+ <a href="/vendas/produtos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+ <Plus className="h-3.5 w-3.5" /> Cadastrar produto
  </a>
  </div>
  )}
