@@ -280,7 +280,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--primary)/0.015)]">
+  <tr onClick={onClick} className="group cursor-pointer transition-all duration-200 hover:bg-primary/[0.02] border-b border-border/[0.06] last:border-b-0">
    {/* Left accent rail */}
    <td className="w-[3px] p-0 relative">
     <div className={cn(
@@ -1014,12 +1014,12 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border/30">
-                        <th className="w-[3px]" />
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
-                        <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Status</th>
-                        <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/30">Método</th>
+                       <tr className="border-b border-border/15">
+                         <th className="w-[3px]" />
+                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
+                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                         <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/25">Status</th>
+                         <th className="px-3 py-3.5 text-left text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/25">Método</th>
                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
                         <th className="w-14" />
@@ -1041,22 +1041,22 @@ export default function Vendas() {
                   </table>
                 </div>
                 {visibleItems.length > 0 && (
-                  <div className="flex items-center justify-between border-t border-border px-5 py-3">
-                    <span className="text-[11px] font-heading text-muted-foreground/40 tabular-nums">
-                      {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Pág. {currentPage}/{totalPages}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none transition-colors">
-                        <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
-                      </button>
-                      <span className="min-w-[80px] text-center text-[11px] font-heading font-black text-primary tabular-nums">
-                        {hidden ? HIDE : fmt(filteredNetTotal)}
-                      </span>
-                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-[11px] font-heading font-bold text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none transition-colors">
-                        Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
-                      </button>
-                    </div>
-                  </div>
+                   <div className="flex items-center justify-between border-t border-border/20 px-5 py-3.5">
+                     <span className="text-[11px] font-heading text-muted-foreground/35 tabular-nums">
+                       {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · Pág. {currentPage}/{totalPages}
+                     </span>
+                     <div className="flex items-center gap-2">
+                       <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-xl border border-border/30 bg-card/50 px-3.5 text-[11px] font-heading font-bold text-muted-foreground/60 hover:text-foreground hover:border-border/50 disabled:opacity-20 disabled:pointer-events-none transition-all duration-200">
+                         <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
+                       </button>
+                       <span className="min-w-[80px] text-center text-[11px] font-heading font-black text-primary tabular-nums">
+                         {hidden ? HIDE : fmt(filteredNetTotal)}
+                       </span>
+                       <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-xl border border-border/30 bg-card/50 px-3.5 text-[11px] font-heading font-bold text-muted-foreground/60 hover:text-foreground hover:border-border/50 disabled:opacity-20 disabled:pointer-events-none transition-all duration-200">
+                         Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
+                       </button>
+                     </div>
+                   </div>
                 )}
               </>
             )}
@@ -1157,26 +1157,26 @@ export default function Vendas() {
                 })}
               </div>
               {/* Health indicators */}
-              <div className="grid grid-cols-3 gap-2 border-t border-border px-4 py-3">
-                {healthItems.map((hi) => {
-                  const ok = hi.value <= hi.threshold;
-                  return (
-                    <div key={hi.label} className={cn("rounded-lg border px-2.5 py-2", ok ? "border-success/15 bg-success/[0.04]" : "border-destructive/15 bg-destructive/[0.04]")}>
-                      <p className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/40">{hi.label}</p>
-                      <p className={cn("mt-1 text-[13px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Hourly bars */}
-              <div className="border-t border-border px-4 py-3">
-                <p className="text-[9px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/35 mb-2">Volume por hora</p>
-                <div className="flex h-[24px] items-end gap-[1.5px]">
-                  {metrics.hours.map((v, i) => (
-                    <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors", peakHour === i ? "bg-primary" : v > 0 ? "bg-primary/25" : "bg-foreground/[0.04]")} style={{ height: `${Math.max((v / maxHour) * 100, 5)}%` }} />
-                  ))}
-                </div>
-              </div>
+               <div className="grid grid-cols-3 gap-2.5 border-t border-border/15 px-5 py-4">
+                 {healthItems.map((hi) => {
+                   const ok = hi.value <= hi.threshold;
+                   return (
+                     <div key={hi.label} className={cn("rounded-xl border px-3 py-2.5", ok ? "border-success/10 bg-success/[0.03]" : "border-destructive/10 bg-destructive/[0.03]")}>
+                       <p className="text-[8px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/35">{hi.label}</p>
+                       <p className={cn("mt-1.5 text-[13px] font-heading font-black tabular-nums", ok ? "text-success" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                     </div>
+                   );
+                 })}
+               </div>
+               {/* Hourly bars */}
+               <div className="border-t border-border/15 px-5 py-4">
+                 <p className="text-[9px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/30 mb-2.5">Volume por hora</p>
+                 <div className="flex h-[28px] items-end gap-[2px]">
+                   {metrics.hours.map((v, i) => (
+                     <div key={i} className={cn("min-w-0 flex-1 rounded-[3px] transition-all duration-300", peakHour === i ? "bg-primary shadow-sm shadow-primary/20" : v > 0 ? "bg-primary/20" : "bg-foreground/[0.03]")} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} />
+                   ))}
+                 </div>
+               </div>
             </div>
           </div>
         </div>
