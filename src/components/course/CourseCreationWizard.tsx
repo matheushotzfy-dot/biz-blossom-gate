@@ -422,12 +422,19 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</Label>
-                        <Input
+                        <Select
                           value={form.category}
-                          onChange={(e) => setForm((c) => ({ ...c, category: e.target.value }))}
-                          placeholder="Marketing, saúde..."
-                          className="h-11 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25"
-                        />
+                          onValueChange={(v) => setForm((c) => ({ ...c, category: v }))}
+                        >
+                          <SelectTrigger className="h-11 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COURSE_CATEGORIES.map((cat) => (
+                              <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2">
