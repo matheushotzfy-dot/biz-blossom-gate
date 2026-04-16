@@ -229,8 +229,8 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
             </Section>
           </TabsContent>
 
- {/* ORDER BUMPS TAB */}
- <TabsContent value="bumps" className="space-y-5 mt-4">
+          {/* ORDER BUMPS TAB */}
+          <TabsContent value="bumps" className="mt-5 space-y-5 pb-2">
  {/* Header / Stats strip */}
  <div className="grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-border bg-border">
  <div className="bg-card px-3 py-2.5">
