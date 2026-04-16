@@ -331,12 +331,75 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  </div>
  )}
  </TabsContent>
- </Tabs>
+        </Tabs>
 
- <Button onClick={handleSave} disabled={saving} className="w-full mt-4 gradient-primary text-primary-foreground font-bold rounded-xl">
- {saving ? "Salvando..." : "Salvar configurações"}
- </Button>
- </DialogContent>
- </Dialog>
- );
+        <div className="sticky bottom-0 mt-6 px-6 py-4 border-t border-border/60 bg-card/95 backdrop-blur-md">
+          <Button onClick={handleSave} disabled={saving} className="w-full h-11 gradient-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20">
+            {saving ? "Salvando..." : "Salvar configurações"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
+
+/* ─── Internal layout helpers ─── */
+
+function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-2.5">
+      <div>
+        <h4 className="text-[12px] font-display font-bold text-foreground tracking-tight">{title}</h4>
+        {subtitle && <p className="text-[11px] text-muted-foreground/70 mt-0.5">{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Row({ icon, title, description, children }: { icon: ReactNode; title: string; description?: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-3.5 py-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="h-7 w-7 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center shrink-0">{icon}</div>
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold text-foreground leading-tight">{title}</p>
+          {description && <p className="text-[11px] text-muted-foreground/70 mt-0.5 truncate">{description}</p>}
+        </div>
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  );
+}
+
+function BannerSlot({
+  label, preview, inputRef, onSelect, onClear, onChange,
+}: {
+  label: string;
+  preview: string;
+  inputRef: React.RefObject<HTMLInputElement>;
+  onSelect: () => void;
+  onClear: () => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-bold">{label}</Label>
+      <input ref={inputRef} type="file" accept="image/*" onChange={onChange} className="hidden" />
+      {preview ? (
+        <div className="relative rounded-xl overflow-hidden border border-border/60 bg-muted/20 aspect-[16/9]">
+          <img src={preview} alt={label} className="w-full h-full object-cover" />
+          <button type="button" onClick={onClear} className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-background/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors">
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      ) : (
+        <button type="button" onClick={onSelect} className="w-full aspect-[16/9] rounded-xl border-2 border-dashed border-border/60 hover:border-primary/40 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-primary text-[11px] font-medium transition-colors">
+          <Upload className="h-4 w-4" />
+          Enviar imagem
+        </button>
+      )}
+    </div>
+  );
+}
+
