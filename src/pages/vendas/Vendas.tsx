@@ -839,39 +839,39 @@ export default function Vendas() {
          </div>
 
         {/* ═══════ PERIOD BAR ═══════ */}
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center rounded-lg border border-border bg-card p-0.5">
-              {PERIODS.map((opt) => (
-                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn("rounded-md px-3.5 py-[6px] text-[11px] font-heading font-bold transition-colors",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground/50 hover:text-foreground"
-                  )}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-heading font-bold transition-colors",
-                  isCustom ? "border-primary/30 bg-primary/8 text-primary" : "border-border bg-card text-muted-foreground/50 hover:text-foreground"
-                )}>
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Custom"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-heading font-bold text-muted-foreground/40">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
-            <button onClick={toggleHidden} className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-colors", hidden ? "border-primary/25 bg-primary/8 text-primary" : "border-border bg-card text-muted-foreground/50 hover:text-foreground")}>
-              {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
+         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+           <div className="flex flex-wrap items-center gap-2.5">
+             <div className="inline-flex items-center rounded-xl border border-border/40 bg-card/70 backdrop-blur-sm p-1 shadow-sm">
+               {PERIODS.map((opt) => (
+                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                   className={cn("rounded-lg px-3.5 py-[7px] text-[11px] font-heading font-bold transition-all duration-200",
+                     !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15" : "text-muted-foreground/45 hover:text-foreground/80"
+                   )}>
+                   {opt.label}
+                 </button>
+               ))}
+             </div>
+             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+               <PopoverTrigger asChild>
+                 <button className={cn("inline-flex h-9 items-center gap-1.5 rounded-xl border px-3.5 text-[11px] font-heading font-bold transition-all duration-200",
+                   isCustom ? "border-primary/25 bg-primary/8 text-primary shadow-sm" : "border-border/40 bg-card/70 text-muted-foreground/45 hover:text-foreground/80 hover:border-border/60"
+                 )}>
+                   <CalendarDays className="h-3.5 w-3.5" />
+                   {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Custom"}
+                 </button>
+               </PopoverTrigger>
+               <PopoverContent align="start" className="w-auto overflow-hidden rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-xl p-0 shadow-xl">
+                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+               </PopoverContent>
+             </Popover>
+           </div>
+           <div className="flex items-center gap-2.5">
+             <span className="text-[11px] font-heading font-semibold text-muted-foreground/35">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
+             <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-200", hidden ? "border-primary/20 bg-primary/8 text-primary" : "border-border/40 bg-card/70 text-muted-foreground/40 hover:text-foreground/70 hover:border-border/60")}>
+               {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+             </button>
+           </div>
+         </div>
 
         {/* ═══════ HERO KPIs — 2 grandes ═══════ */}
         <div
