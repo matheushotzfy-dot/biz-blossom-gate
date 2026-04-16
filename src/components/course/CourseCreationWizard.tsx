@@ -505,6 +505,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
                 <SectionCard
                   icon={ImageIcon}
+                  step={2}
                   title="Identidade visual"
                   subtitle="A capa transforma o preview de genérico para produto real e aumenta a percepção premium."
                 >
@@ -516,6 +517,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
                 <SectionCard
                   icon={Layers}
+                  step={3}
                   title="Estrutura de módulos"
                   subtitle="Adicione rapidamente a espinha dorsal da jornada para o aluno já entender a trilha."
                 >
