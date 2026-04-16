@@ -359,7 +359,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
   };
 
   const previewTitle = form.title.trim() || "Sua área premium";
-  const completionCount = [form.title.trim(), form.description.trim(), form.thumbnail_url, wizardModules.length > 0].filter(Boolean).length;
+  
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
