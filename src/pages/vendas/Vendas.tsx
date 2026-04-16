@@ -1115,8 +1115,8 @@ export default function Vendas() {
                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/8 border border-warning/10"><Crown className="h-3 w-3 text-warning" /></span>
                    <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
                 </div>
-                <div className="divide-y divide-border">
-                  {metrics.topProducts.slice(0, 4).map((prod, i) => (
+                 <div className="divide-y divide-border/20">
+                   {metrics.topProducts.slice(0, 4).map((prod, i) => (
                     <div key={prod.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
                         <span className={cn("flex h-6 w-6 items-center justify-center rounded-md text-[9px] font-heading font-black shrink-0", i === 0 ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground/40")}>{i + 1}</span>
@@ -1130,13 +1130,13 @@ export default function Vendas() {
             )}
 
             {/* Payment Mix */}
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-3.5 w-3.5 text-success" />
-                  <p className="text-[11px] font-heading font-bold text-foreground">Mix de pagamento</p>
-                </div>
-                {peakHour !== null && <span className="text-[9px] font-heading font-bold text-muted-foreground/40">pico {peakHour}h</span>}
+             <div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+               <div className="flex items-center justify-between border-b border-border/25 px-5 py-3.5">
+                 <div className="flex items-center gap-2.5">
+                   <Activity className="h-3.5 w-3.5 text-success" />
+                   <p className="text-[11px] font-heading font-bold text-foreground">Mix de pagamento</p>
+                 </div>
+                 {peakHour !== null && <span className="text-[9px] font-heading font-bold text-muted-foreground/35">pico {peakHour}h</span>}
               </div>
               <div className="divide-y divide-border">
                 {paymentMix.map((pm) => {
