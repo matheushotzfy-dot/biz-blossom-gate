@@ -5,6 +5,7 @@ import { useBankAccounts, usePixKeys, useInvalidateAll } from "@/hooks/useQueryD
 import {
  Building2, Plus, Trash2, Key, Shield, Fingerprint,
  CreditCard, Landmark, CheckCircle2, AlertCircle, Search,
+ Lock, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
