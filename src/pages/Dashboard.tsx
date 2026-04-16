@@ -559,7 +559,7 @@ export default function Dashboard() {
             </p>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-primary sm:text-6xl lg:text-[80px]">
+                <span className="inline-flex items-baseline text-5xl font-heading font-black leading-none tracking-[-0.05em] text-primary sm:text-6xl lg:text-[72px] whitespace-nowrap">
                   {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
                 <div className="mt-4 flex items-center gap-3">
