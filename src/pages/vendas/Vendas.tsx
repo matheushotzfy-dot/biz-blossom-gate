@@ -814,146 +814,135 @@ export default function Vendas() {
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
       /* ═══════════ RENDER ═══════════ */
-    return (
-      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
+     return (
+       <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
 
-        {/* ═══════ HEADER ═══════ */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/15"><Banknote className="h-5 w-5 text-primary" /></span>
-              <div>
-                <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
-                <p className="mt-1 text-[12px] text-muted-foreground/60">{lastSaleText ? `Última venda: ${lastSaleText}` : "Visão consolidada de receita e transações."}</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-[hsl(var(--card-elevated))] px-4 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
-              <RefreshCw className="h-3.5 w-3.5 text-muted-foreground/60" /> Atualizar
-            </button>
-            <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-              <Download className="h-3.5 w-3.5" /> Exportar
-            </button>
-          </div>
-        </div>
+         {/* ═══════ HEADER ═══════ */}
+         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+           <div className="flex items-center gap-3.5">
+             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 border border-primary/10 shadow-sm">
+               <Banknote className="h-5 w-5 text-primary" />
+             </div>
+             <div>
+               <h1 className="text-[26px] sm:text-[30px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
+               <p className="mt-1.5 text-[12px] text-muted-foreground/50 font-medium">{lastSaleText ? `Última venda: ${lastSaleText}` : "Visão consolidada de receita e transações"}</p>
+             </div>
+           </div>
+           <div className="flex items-center gap-2.5">
+             <button onClick={() => window.location.reload()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm px-4.5 text-[11px] font-heading font-bold text-foreground/80 hover:bg-secondary hover:border-border/70 transition-all duration-200">
+               <RefreshCw className="h-3.5 w-3.5 text-muted-foreground/50" /> Atualizar
+             </button>
+             <button onClick={() => setShowExportDialog(true)} className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90 shadow-sm shadow-primary/20 transition-all duration-200">
+               <Download className="h-3.5 w-3.5" /> Exportar
+             </button>
+           </div>
+         </div>
 
         {/* ═══════ PERIOD BAR ═══════ */}
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center rounded-lg border border-border bg-card p-0.5">
-              {PERIODS.map((opt) => (
-                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn("rounded-md px-3.5 py-[6px] text-[11px] font-heading font-bold transition-colors",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground/50 hover:text-foreground"
-                  )}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-heading font-bold transition-colors",
-                  isCustom ? "border-primary/30 bg-primary/8 text-primary" : "border-border bg-card text-muted-foreground/50 hover:text-foreground"
-                )}>
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Custom"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-heading font-bold text-muted-foreground/40">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
-            <button onClick={toggleHidden} className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-colors", hidden ? "border-primary/25 bg-primary/8 text-primary" : "border-border bg-card text-muted-foreground/50 hover:text-foreground")}>
-              {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
+         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+           <div className="flex flex-wrap items-center gap-2.5">
+             <div className="inline-flex items-center rounded-xl border border-border/40 bg-card/70 backdrop-blur-sm p-1 shadow-sm">
+               {PERIODS.map((opt) => (
+                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                   className={cn("rounded-lg px-3.5 py-[7px] text-[11px] font-heading font-bold transition-all duration-200",
+                     !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm shadow-primary/15" : "text-muted-foreground/45 hover:text-foreground/80"
+                   )}>
+                   {opt.label}
+                 </button>
+               ))}
+             </div>
+             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+               <PopoverTrigger asChild>
+                 <button className={cn("inline-flex h-9 items-center gap-1.5 rounded-xl border px-3.5 text-[11px] font-heading font-bold transition-all duration-200",
+                   isCustom ? "border-primary/25 bg-primary/8 text-primary shadow-sm" : "border-border/40 bg-card/70 text-muted-foreground/45 hover:text-foreground/80 hover:border-border/60"
+                 )}>
+                   <CalendarDays className="h-3.5 w-3.5" />
+                   {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Custom"}
+                 </button>
+               </PopoverTrigger>
+               <PopoverContent align="start" className="w-auto overflow-hidden rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-xl p-0 shadow-xl">
+                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+               </PopoverContent>
+             </Popover>
+           </div>
+           <div className="flex items-center gap-2.5">
+             <span className="text-[11px] font-heading font-semibold text-muted-foreground/35">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
+             <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-200", hidden ? "border-primary/20 bg-primary/8 text-primary" : "border-border/40 bg-card/70 text-muted-foreground/40 hover:text-foreground/70 hover:border-border/60")}>
+               {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+             </button>
+           </div>
+         </div>
 
         {/* ═══════ HERO KPIs — 2 grandes ═══════ */}
-        <div
-          className="relative overflow-hidden rounded-[20px] border border-primary/20 p-5 sm:p-6 lg:p-8"
-          style={{
-            background: `
-              radial-gradient(ellipse 60% 70% at 0% 10%, hsla(160, 84%, 39%, 0.22), transparent 55%),
-              radial-gradient(ellipse 50% 60% at 95% 90%, hsla(160, 84%, 39%, 0.15), transparent 50%),
-              radial-gradient(ellipse 40% 40% at 50% 0%, hsla(160, 84%, 39%, 0.10), transparent 45%),
-              radial-gradient(ellipse 30% 50% at 100% 20%, hsla(160, 84%, 39%, 0.08), transparent 45%),
-              hsl(var(--card))
-            `
-          }}
-        >
-          {/* Ambient grid texture */}
-          <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
-          {/* Edge glow lines */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/35 via-primary/10 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
+         <div
+           className="relative overflow-hidden rounded-2xl border border-primary/12 p-6 sm:p-7 lg:p-9"
+           style={{
+             background: `
+               radial-gradient(ellipse 55% 65% at 0% 10%, hsla(160, 84%, 39%, 0.18), transparent 55%),
+               radial-gradient(ellipse 45% 55% at 95% 90%, hsla(160, 84%, 39%, 0.12), transparent 50%),
+               radial-gradient(ellipse 35% 35% at 50% 0%, hsla(160, 84%, 39%, 0.07), transparent 45%),
+               hsl(var(--card))
+             `
+           }}
+         >
+           <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.04]" />
+           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+           <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-primary/25 via-primary/8 to-transparent" />
 
-          <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><ShoppingCart className="h-4 w-4 text-primary" /></span>
-                  <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Vendas encontradas</p>
-                </div>
-                <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
-              </div>
-              <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</p>
-              <div className="mt-4 flex items-center gap-3">
-                <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
-                <span className="text-[10px] text-muted-foreground/40">vs período anterior</span>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/15"><DollarSign className="h-4 w-4 text-success" /></span>
-                  <p className="text-[11px] font-heading font-semibold text-muted-foreground/60">Valor líquido</p>
-                </div>
-                <button onClick={toggleHidden} className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"><Eye className="h-4 w-4" /></button>
-              </div>
-              <p className="mt-4 text-[42px] lg:text-[52px] font-heading font-black tracking-[-0.05em] text-success tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
-              <div className="mt-4 flex items-center gap-3">
-                <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                <span className="text-[10px] text-muted-foreground/40">resultado do período</span>
-              </div>
-            </div>
-          </div>
-        </div>
+           <div className="relative z-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
+             <div>
+               <div className="flex items-center gap-2.5">
+                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 border border-primary/10"><ShoppingCart className="h-3.5 w-3.5 text-primary" /></span>
+                 <p className="text-[11px] font-heading font-semibold text-muted-foreground/50">Vendas encontradas</p>
+               </div>
+               <p className="mt-5 text-[44px] lg:text-[54px] font-heading font-black tracking-[-0.05em] text-foreground tabular-nums leading-none">{hidden ? HIDE : dateFiltered.length.toLocaleString("pt-BR")}</p>
+               <div className="mt-4 flex items-center gap-3">
+                 <DeltaBadge cur={dateFiltered.length} prev={previousPeriodFiltered.length} />
+                 <span className="text-[10px] text-muted-foreground/35 font-medium">vs período anterior</span>
+               </div>
+             </div>
+             <div>
+               <div className="flex items-center gap-2.5">
+                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/8 border border-success/10"><DollarSign className="h-3.5 w-3.5 text-success" /></span>
+                 <p className="text-[11px] font-heading font-semibold text-muted-foreground/50">Valor líquido</p>
+               </div>
+               <p className="mt-5 text-[44px] lg:text-[54px] font-heading font-black tracking-[-0.05em] text-success tabular-nums leading-none">{hidden ? HIDE : fmt(m.totalNet)}</p>
+               <div className="mt-4 flex items-center gap-3">
+                 <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
+                 <span className="text-[10px] text-muted-foreground/35 font-medium">resultado do período</span>
+               </div>
+             </div>
+           </div>
+         </div>
 
         {/* ═══════ SECONDARY KPIs — 4 compactos ═══════ */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {[
-            { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, icon: RefreshCw, accent: "info" as AccentTone },
-            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: PixLogoMark, accent: "success" as AccentTone },
-            { label: "Taxa de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : "text-warning", icon: Percent, accent: "warning" as AccentTone },
-            { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, icon: Shield, accent: "destructive" as AccentTone },
-          ].map((kpi) => {
-            const a = ACCENT_STYLES[kpi.accent];
-            const Icon = kpi.icon;
-            return (
-              <div key={kpi.label} className="relative overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))] p-5">
-                <div className={cn("absolute top-0 left-0 right-0 h-[3px]", a.rail)} />
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={cn("flex h-6 w-6 items-center justify-center rounded-md border", a.iconWrap)}><Icon className="h-3 w-3" /></span>
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/60">{kpi.label}</p>
-                </div>
-                <p className={cn("text-[24px] lg:text-[28px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
-                <p className="mt-2 text-[10px] text-muted-foreground/35">{kpi.sub}</p>
-              </div>
-            );
-          })}
-        </div>
+         <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
+           {[
+             { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, icon: RefreshCw, accent: "info" as AccentTone },
+             { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: PixLogoMark, accent: "success" as AccentTone },
+             { label: "Taxa de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : "text-warning", icon: Percent, accent: "warning" as AccentTone },
+             { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, icon: Shield, accent: "destructive" as AccentTone },
+           ].map((kpi) => {
+             const a = ACCENT_STYLES[kpi.accent];
+             const Icon = kpi.icon;
+             return (
+               <div key={kpi.label} className="group relative overflow-hidden rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm p-5 hover:border-border/50 transition-all duration-300">
+                 <div className={cn("absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity", a.rail)} />
+                 <div className="flex items-center gap-2 mb-3.5">
+                   <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg border", a.iconWrap)}><Icon className="h-3 w-3" /></span>
+                   <p className="text-[10px] font-heading font-semibold text-muted-foreground/50">{kpi.label}</p>
+                 </div>
+                 <p className={cn("text-[22px] lg:text-[26px] font-heading font-black tracking-[-0.04em] tabular-nums leading-none", kpi.valueClass || "text-foreground")}>{kpi.value}</p>
+                 <p className="mt-2.5 text-[10px] text-muted-foreground/30 font-medium">{kpi.sub}</p>
+               </div>
+             );
+           })}
+         </div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
-        <div className="overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))]">
+        <div className="overflow-hidden rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm shadow-sm">
           {/* Status tabs */}
-          <div className="border-b border-border px-5 pt-1">
+          <div className="border-b border-border/30 px-5 pt-1.5">
             <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
@@ -998,11 +987,11 @@ export default function Vendas() {
           </div>
 
           {/* Search + filters */}
-          <div className="flex flex-col gap-2 border-b border-border/50 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2.5 border-b border-border/25 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:w-[280px]">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/30" />
-              <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
-                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all" />
+               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
+                 className="h-9 w-full rounded-xl border border-border/30 bg-background/60 pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/15 transition-all duration-200" />
               {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground" /></button>}
             </div>
             <div className="flex items-center gap-2">
@@ -1102,32 +1091,32 @@ export default function Vendas() {
         </div>
 
         {/* ═══════ CHART + ANALYTICS ═══════ */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-3">
-          {/* Chart */}
-          <div className="xl:col-span-8 rounded-xl border border-primary/15 bg-[hsl(var(--card-elevated))] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><BarChart3 className="h-3.5 w-3.5 text-primary" /></span>
-                <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
-              </div>
-              <span className="text-[14px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
-            </div>
-            <div className="px-2 pb-3 pt-1">
-              <RevenueChart data={metrics.chartData} hidden={hidden} />
-            </div>
-          </div>
+         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+           {/* Chart */}
+           <div className="xl:col-span-8 rounded-2xl border border-primary/10 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+             <div className="flex items-center justify-between border-b border-border/25 px-6 py-4">
+               <div className="flex items-center gap-2.5">
+                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 border border-primary/10"><BarChart3 className="h-3.5 w-3.5 text-primary" /></span>
+                 <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
+               </div>
+               <span className="text-[14px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
+             </div>
+             <div className="px-2 pb-3 pt-1">
+               <RevenueChart data={metrics.chartData} hidden={hidden} />
+             </div>
+           </div>
 
           {/* Right panel */}
-          <div className="xl:col-span-4 space-y-3">
-            {/* Top Products */}
-            {metrics.topProducts.length > 0 && (
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-warning/10 border border-warning/15"><Crown className="h-3 w-3 text-warning" /></span>
-                  <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
+           <div className="xl:col-span-4 space-y-4">
+             {/* Top Products */}
+             {metrics.topProducts.length > 0 && (
+               <div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+             <div className="flex items-center gap-2.5 border-b border-border/25 px-5 py-3.5">
+                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/8 border border-warning/10"><Crown className="h-3 w-3 text-warning" /></span>
+                   <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
                 </div>
-                <div className="divide-y divide-border">
-                  {metrics.topProducts.slice(0, 4).map((prod, i) => (
+                 <div className="divide-y divide-border/20">
+                   {metrics.topProducts.slice(0, 4).map((prod, i) => (
                     <div key={prod.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
                         <span className={cn("flex h-6 w-6 items-center justify-center rounded-md text-[9px] font-heading font-black shrink-0", i === 0 ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground/40")}>{i + 1}</span>
@@ -1141,15 +1130,15 @@ export default function Vendas() {
             )}
 
             {/* Payment Mix */}
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-3.5 w-3.5 text-success" />
-                  <p className="text-[11px] font-heading font-bold text-foreground">Mix de pagamento</p>
-                </div>
-                {peakHour !== null && <span className="text-[9px] font-heading font-bold text-muted-foreground/40">pico {peakHour}h</span>}
+             <div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+               <div className="flex items-center justify-between border-b border-border/25 px-5 py-3.5">
+                 <div className="flex items-center gap-2.5">
+                   <Activity className="h-3.5 w-3.5 text-success" />
+                   <p className="text-[11px] font-heading font-bold text-foreground">Mix de pagamento</p>
+                 </div>
+                 {peakHour !== null && <span className="text-[9px] font-heading font-bold text-muted-foreground/35">pico {peakHour}h</span>}
               </div>
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border/20">
                 {paymentMix.map((pm) => {
                   const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                   const accent = ACCENT_STYLES[pm.color as AccentTone];
