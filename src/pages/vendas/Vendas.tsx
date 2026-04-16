@@ -940,9 +940,9 @@ export default function Vendas() {
          </div>
 
         {/* ═══════ TRANSACTIONS TABLE ═══════ */}
-        <div className="overflow-hidden rounded-xl border border-border bg-[hsl(var(--card-elevated))]">
+        <div className="overflow-hidden rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm shadow-sm">
           {/* Status tabs */}
-          <div className="border-b border-border px-5 pt-1">
+          <div className="border-b border-border/30 px-5 pt-1.5">
             <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
@@ -987,11 +987,11 @@ export default function Vendas() {
           </div>
 
           {/* Search + filters */}
-          <div className="flex flex-col gap-2 border-b border-border/50 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2.5 border-b border-border/25 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:w-[280px]">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/30" />
-              <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
-                className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all" />
+               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar"
+                 className="h-9 w-full rounded-xl border border-border/30 bg-background/60 pl-9 pr-9 text-[12px] font-heading text-foreground placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/15 transition-all duration-200" />
               {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/30 hover:text-foreground" /></button>}
             </div>
             <div className="flex items-center gap-2">
