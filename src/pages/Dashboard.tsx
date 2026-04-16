@@ -113,7 +113,7 @@ function usePrivacyMode() {
 }
 
 const fmt = (v: number) =>
-  v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 // Cache date string conversion to avoid repeated Intl calls
 const _brasiliaDateCache = new Map<string, string>();
