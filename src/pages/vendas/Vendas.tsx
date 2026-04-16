@@ -1091,20 +1091,20 @@ export default function Vendas() {
         </div>
 
         {/* ═══════ CHART + ANALYTICS ═══════ */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-3">
-          {/* Chart */}
-          <div className="xl:col-span-8 rounded-xl border border-primary/15 bg-[hsl(var(--card-elevated))] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/15"><BarChart3 className="h-3.5 w-3.5 text-primary" /></span>
-                <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
-              </div>
-              <span className="text-[14px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
-            </div>
-            <div className="px-2 pb-3 pt-1">
-              <RevenueChart data={metrics.chartData} hidden={hidden} />
-            </div>
-          </div>
+         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+           {/* Chart */}
+           <div className="xl:col-span-8 rounded-2xl border border-primary/10 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+             <div className="flex items-center justify-between border-b border-border/25 px-6 py-4">
+               <div className="flex items-center gap-2.5">
+                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 border border-primary/10"><BarChart3 className="h-3.5 w-3.5 text-primary" /></span>
+                 <p className="text-[12px] font-heading font-bold text-foreground">Evolução da receita</p>
+               </div>
+               <span className="text-[14px] font-heading font-black text-primary tabular-nums tracking-[-0.03em]">{hidden ? HIDE : fmt(m.totalNet)}</span>
+             </div>
+             <div className="px-2 pb-3 pt-1">
+               <RevenueChart data={metrics.chartData} hidden={hidden} />
+             </div>
+           </div>
 
           {/* Right panel */}
           <div className="xl:col-span-4 space-y-3">
