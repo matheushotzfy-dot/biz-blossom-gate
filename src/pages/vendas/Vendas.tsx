@@ -280,7 +280,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--primary)/0.015)]">
+  <tr onClick={onClick} className="group cursor-pointer transition-all duration-200 hover:bg-primary/[0.02] border-b border-border/[0.06] last:border-b-0">
    {/* Left accent rail */}
    <td className="w-[3px] p-0 relative">
     <div className={cn(
