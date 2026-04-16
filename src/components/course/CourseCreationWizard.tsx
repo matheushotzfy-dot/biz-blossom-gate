@@ -429,13 +429,14 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         </div>
 
 
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[460px_minmax(0,1fr)]">
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[420px_minmax(0,1fr)]">
           <div className="flex min-h-0 flex-col border-r border-border bg-background">
 
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-              <div className="space-y-5 pb-6">
+              <div className="space-y-7 pb-6">
                 <SectionCard
                   icon={GraduationCap}
+                  step={1}
                   title="Base do curso"
                   subtitle="Nome, categoria e vínculo com produto para dar contexto imediato ao aluno."
                 >
