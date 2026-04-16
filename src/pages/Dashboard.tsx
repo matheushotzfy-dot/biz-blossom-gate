@@ -467,63 +467,42 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — COMMAND CENTER                                            */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="relative mb-8 overflow-hidden rounded-[20px] border border-primary/20 p-6 sm:p-8 lg:p-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 60% 70% at 0% 10%, hsla(160, 84%, 39%, 0.22), transparent 55%),
-            radial-gradient(ellipse 50% 60% at 95% 90%, hsla(160, 84%, 39%, 0.15), transparent 50%),
-            radial-gradient(ellipse 40% 40% at 50% 0%, hsla(160, 84%, 39%, 0.10), transparent 45%),
-            radial-gradient(ellipse 30% 50% at 100% 20%, hsla(160, 84%, 39%, 0.08), transparent 45%),
-            hsl(var(--card))
-          `
-        }}
+      <section
+        className="relative mb-8 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:p-10"
       >
-        {/* Ambient grid texture */}
-        <div className="pointer-events-none absolute inset-0 ambient-grid opacity-[0.05]" />
-
-        {/* ══ EDGE GLOW LINES ══ */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-primary/35 via-primary/10 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/12 to-transparent" />
-
-        <div className="relative z-10">
+        <div className="relative">
           {/* Header row */}
           <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="inline-flex items-center gap-2 rounded-full border border-border/30 bg-background/60 px-3 py-1.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-1.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
                   <BarChart3 className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-foreground/70">Dashboard</span>
-              </motion.div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-background/40 px-2.5 py-1.5">
+                <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Dashboard</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1.5">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
                   <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
-                <span className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/60">Live</span>
+                <span className="text-[10px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground">Live</span>
               </div>
               {nickname && (
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-background/40 px-2.5 py-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1.5">
                   <Crown className="h-3 w-3 text-warning" />
-                  <span className="text-[9px] font-heading text-muted-foreground/60">{nickname}</span>
+                  <span className="text-[10px] font-heading font-semibold text-muted-foreground">{nickname}</span>
                 </div>
               )}
               {scaleModeUnlocked && (
-                <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-heading transition-all active:scale-[0.97]",
-                  scaleMode ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 bg-background/40 text-muted-foreground/60 hover:text-foreground hover:border-border/40"
+                <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-heading font-semibold transition-all active:scale-[0.97]",
+                  scaleMode ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
                 )}>
                   <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
                   <span>Escala</span>
                 </button>
               )}
               {!scaleModeUnlocked && (
-                <div className="group relative inline-flex items-center gap-1.5 rounded-full border border-border/15 bg-background/30 px-2.5 py-1.5 text-[9px] font-heading text-muted-foreground/25 cursor-not-allowed">
+                <div className="group relative inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1.5 text-[10px] font-heading text-muted-foreground/40 cursor-not-allowed">
                   <Lock className="h-3 w-3" />
                   <span>Escala</span>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 rounded-xl bg-card border border-border/30 p-3 text-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
@@ -535,11 +514,11 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-full border border-border/20 bg-background/40 p-0.5">
+              <div className="inline-flex items-center rounded-xl border border-border bg-background p-0.5">
                 {PERIOD_PRESETS.map((opt) => (
                   <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-full px-3 py-1.5 text-[10px] font-heading font-semibold transition-all active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-sm" : "text-muted-foreground/50 hover:text-foreground"
+                    className={cn("rounded-lg px-3 py-1.5 text-[11px] font-heading font-semibold transition-all active:scale-[0.97]",
+                      !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground border border-border" : "text-muted-foreground hover:text-foreground"
                     )}>
                     {opt.label}
                   </button>
@@ -547,8 +526,8 @@ export default function Dashboard() {
               </div>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-full border px-3 text-[9px] font-heading font-semibold transition-colors active:scale-[0.97]",
-                    isCustom ? "border-primary/25 bg-primary/8 text-foreground" : "border-border/20 bg-background/40 text-muted-foreground/50 hover:border-border/40 hover:text-foreground"
+                  <button className={cn("h-8 rounded-xl border px-3 text-[10px] font-heading font-semibold transition-colors active:scale-[0.97]",
+                    isCustom ? "border-primary/20 bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"
                   )}>
                     <span className="inline-flex items-center gap-1.5">
                       <CalendarDays className="h-3 w-3" />
@@ -562,32 +541,25 @@ export default function Dashboard() {
                   <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
                 </PopoverContent>
               </Popover>
-              <button onClick={privacy.toggle} className={cn("flex h-8 w-8 items-center justify-center rounded-full border transition-colors active:scale-[0.97]", privacy.hidden ? "border-primary/25 bg-primary/8 text-primary" : "border-border/20 bg-background/40 text-muted-foreground/50 hover:border-border/40 hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              <button onClick={privacy.toggle} className={cn("flex h-8 w-8 items-center justify-center rounded-xl border transition-colors active:scale-[0.97]", privacy.hidden ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
                 {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
 
           {/* ── Main revenue display ── */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
-            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+          <div className="mb-8">
+            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground">
               {isCustom && customRange?.from
                 ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                 : `Receita — ${selectedPeriod.label}`}
             </p>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[96px]">
+                <span className="block text-5xl font-heading font-black leading-[0.9] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-[80px]">
                   {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
                 </span>
-                <div className="mt-5 flex items-center gap-3">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-success/8 border border-success/12 px-3 py-1.5">
-                    <span className="relative flex h-[5px] w-[5px]">
-                      <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-40" />
-                      <span className="relative h-[5px] w-[5px] rounded-full bg-success" />
-                    </span>
-                    <span className="text-[9px] font-heading text-success font-bold uppercase tracking-[0.1em]">Tempo real</span>
-                  </div>
+                <div className="mt-4 flex items-center gap-3">
                   {approved.length > 0 && (
                     <span className="text-[10px] font-heading text-muted-foreground/40">
                       {approved.length} venda{approved.length !== 1 ? "s" : ""} aprovada{approved.length !== 1 ? "s" : ""}
@@ -596,26 +568,26 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-right hidden sm:flex flex-col items-end gap-3">
-                <div className="rounded-[16px] border border-primary/12 bg-primary/[0.03] px-6 py-4">
-                  <p className="text-[9px] font-heading text-muted-foreground/50 uppercase tracking-[0.14em] mb-2">Saldo Disponível</p>
-                  <p className="text-[30px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
+                <div className="rounded-2xl border border-border bg-background px-6 py-4">
+                  <p className="text-[10px] font-heading font-bold text-muted-foreground uppercase tracking-[0.14em] mb-2">Saldo Disponível</p>
+                  <p className="text-[28px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
                     {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
                   </p>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Chips row */}
-          <div className="flex flex-wrap items-center gap-2.5 mb-10">
+          <div className="flex flex-wrap items-center gap-2 mb-8">
             {[
-              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-success/15", bg: "bg-success/5" },
-              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
-              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-info/15", bg: "bg-info/5" },
-              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-primary/15", bg: "bg-primary/5" },
-              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-warning/15", bg: "bg-warning/5" },
+              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-border", bg: "bg-background" },
+              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-border", bg: "bg-background" },
+              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-border", bg: "bg-background" },
+              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-border", bg: "bg-background" },
+              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-border", bg: "bg-background" },
             ].map((chip, i) => (
-              <span key={i} className={cn("inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[12px] font-semibold text-foreground/80", chip.bg, chip.border)}>
+              <span key={i} className={cn("inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-[12px] font-semibold text-foreground", chip.bg, chip.border)}>
                 <chip.icon className={cn("h-3.5 w-3.5", chip.color)} />
                 {chip.label}
               </span>
@@ -625,45 +597,42 @@ export default function Dashboard() {
           {/* ── KPI Strip ── */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, accentColor: "from-primary to-primary/60", iconBg: "bg-primary/10", iconText: "text-primary", glowColor: "hsla(160, 84%, 39%, 0.08)" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, accentColor: "from-success to-success/60", iconBg: "bg-success/10", iconText: "text-success", glowColor: "hsla(142, 71%, 45%, 0.08)" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, accentColor: "from-info to-info/60", iconBg: "bg-info/10", iconText: "text-info", glowColor: "hsla(217, 91%, 60%, 0.08)" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, accentColor: "from-primary to-primary/60", iconBg: "bg-primary/10", iconText: "text-primary", glowColor: "hsla(160, 84%, 39%, 0.08)" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, iconBg: "bg-primary/10", iconText: "text-primary", accent: "bg-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, iconBg: "bg-success/10", iconText: "text-success", accent: "bg-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, iconBg: "bg-info/10", iconText: "text-info", accent: "bg-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, iconBg: "bg-primary/10", iconText: "text-primary", accent: "bg-primary" },
             ] as const).map((item, idx) => (
-              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.12 + idx * 0.06 }}
-                className="group relative overflow-hidden rounded-[16px] border border-border/25 bg-card p-5 lg:p-6 transition-all duration-300 hover:border-border/40 hover:translate-y-[-2px]"
-                style={{ boxShadow: `0 0 40px ${item.glowColor}, inset 0 1px 0 hsla(0, 0%, 100%, 0.03)` }}
+              <div key={item.label}
+                className="group relative overflow-hidden rounded-2xl border border-border bg-background p-5 lg:p-6 transition-colors hover:border-primary/20"
               >
-                {/* Top accent gradient line */}
-                <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", item.accentColor)} />
-                {/* Subtle corner glow */}
-                <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle, ${item.glowColor.replace('0.08', '0.15')}, transparent 70%)` }} />
-                <div className="relative z-10 flex items-start justify-between">
+                {/* Left accent bar */}
+                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px]", item.accent)} />
+                <div className="relative flex items-start justify-between pl-1">
                   <div className="flex-1">
-                    <p className="mb-3 text-[9px] lg:text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/50">{item.label}</p>
+                    <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
                     <p className="text-[28px] lg:text-[34px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
                       {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
                     </p>
                   </div>
-                  <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110", item.iconBg, item.iconText)}>
+                  <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl border border-border", item.iconBg, item.iconText)}>
                     <item.icon className="h-5 w-5" />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + ANALYTICS                                                */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
         {/* Chart */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-8 rounded-[20px] border border-border/30 bg-card min-h-[340px] flex flex-col overflow-hidden">
+        <div className="xl:col-span-8 rounded-2xl border border-border bg-card min-h-[340px] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-background text-primary">
                 <BarChart3 className="h-4 w-4" />
               </div>
               <div>
