@@ -814,29 +814,29 @@ export default function Vendas() {
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
       /* ═══════════ RENDER ═══════════ */
-    return (
-      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
+     return (
+       <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
 
-        {/* ═══════ HEADER ═══════ */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/15"><Banknote className="h-5 w-5 text-primary" /></span>
-              <div>
-                <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
-                <p className="mt-1 text-[12px] text-muted-foreground/60">{lastSaleText ? `Última venda: ${lastSaleText}` : "Visão consolidada de receita e transações."}</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-[hsl(var(--card-elevated))] px-4 text-[11px] font-heading font-bold text-foreground hover:bg-secondary transition-colors">
-              <RefreshCw className="h-3.5 w-3.5 text-muted-foreground/60" /> Atualizar
-            </button>
-            <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-              <Download className="h-3.5 w-3.5" /> Exportar
-            </button>
-          </div>
-        </div>
+         {/* ═══════ HEADER ═══════ */}
+         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+           <div className="flex items-center gap-3.5">
+             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 border border-primary/10 shadow-sm">
+               <Banknote className="h-5 w-5 text-primary" />
+             </div>
+             <div>
+               <h1 className="text-[26px] sm:text-[30px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
+               <p className="mt-1.5 text-[12px] text-muted-foreground/50 font-medium">{lastSaleText ? `Última venda: ${lastSaleText}` : "Visão consolidada de receita e transações"}</p>
+             </div>
+           </div>
+           <div className="flex items-center gap-2.5">
+             <button onClick={() => window.location.reload()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm px-4.5 text-[11px] font-heading font-bold text-foreground/80 hover:bg-secondary hover:border-border/70 transition-all duration-200">
+               <RefreshCw className="h-3.5 w-3.5 text-muted-foreground/50" /> Atualizar
+             </button>
+             <button onClick={() => setShowExportDialog(true)} className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[11px] font-heading font-bold text-primary-foreground hover:bg-primary/90 shadow-sm shadow-primary/20 transition-all duration-200">
+               <Download className="h-3.5 w-3.5" /> Exportar
+             </button>
+           </div>
+         </div>
 
         {/* ═══════ PERIOD BAR ═══════ */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
