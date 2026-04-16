@@ -103,14 +103,14 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[1.35rem] border border-border/60 bg-card/30 p-4 shadow-[0_12px_30px_-24px_hsl(var(--foreground)/0.45)]">
-      <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+    <section className="rounded-[1.5rem] border border-border bg-card p-5">
+      <div className="mb-4 flex items-start gap-3.5">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
           <Icon className="h-4 w-4" />
         </div>
-        <div>
+        <div className="min-w-0">
           <h3 className="text-sm font-bold tracking-tight text-foreground">{title}</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{subtitle}</p>
         </div>
       </div>
       {children}
@@ -149,10 +149,10 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <Label className="block text-[11px] font-semibold text-muted-foreground/85">Banner / Capa</Label>
-        <span className="rounded-full border border-border/60 bg-background px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
+        <Label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Banner / Capa</Label>
+        <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold text-muted-foreground">
           16:9 recomendado
         </span>
       </div>
@@ -166,18 +166,18 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
           if (f) handleFile(f);
         }}
         className={cn(
-          "relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-background/80 transition-all duration-200 hover:border-primary/35 hover:bg-card/70 hover:shadow-md hover:shadow-primary/5",
-          value ? "aspect-video" : "flex min-h-[180px] flex-col items-center justify-center px-4 py-8"
+          "relative cursor-pointer overflow-hidden rounded-[1.4rem] border border-border bg-card-inset transition-all duration-200 hover:border-primary/35 hover:bg-card",
+          value ? "aspect-video" : "flex min-h-[220px] flex-col items-center justify-center px-5 py-10"
         )}
       >
         {value ? (
           <>
             <img src={value} alt="Capa do curso" className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Capa aplicada</p>
-                <p className="text-xs text-muted-foreground">Clique para trocar ou remover</p>
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/35 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">Capa aplicada</p>
+                <p className="mt-1 text-xs text-muted-foreground">Troque ou remova para testar novas identidades.</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -186,7 +186,7 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
                     e.stopPropagation();
                     inputRef.current?.click();
                   }}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card text-foreground shadow-sm"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground hover:border-primary/25"
                 >
                   <ImageIcon className="h-4 w-4" />
                 </button>
@@ -196,7 +196,7 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
                     e.stopPropagation();
                     onChange("");
                   }}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card text-destructive shadow-sm"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-destructive hover:border-destructive/25"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -205,13 +205,16 @@ function ThumbnailUpload({ value, onChange }: { value: string; onChange: (v: str
           </>
         ) : (
           <>
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 text-primary ring-1 ring-primary/15">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
+              {uploading ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Upload className="h-4.5 w-4.5" />}
             </div>
-            <p className="text-sm font-semibold text-foreground">Envie a identidade visual do curso</p>
-            <p className="mt-1 max-w-[18rem] text-center text-xs leading-relaxed text-muted-foreground">
-              Uma boa capa aumenta percepção de valor e deixa o preview muito mais real.
+            <p className="text-base font-bold text-foreground">Envie a identidade visual do curso</p>
+            <p className="mt-2 max-w-[19rem] text-center text-xs leading-relaxed text-muted-foreground">
+              A capa define a primeira impressão do aluno e deixa o preview com cara de produto real.
             </p>
+            <div className="mt-4 rounded-full border border-border bg-background px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+              Clique ou arraste a imagem
+            </div>
           </>
         )}
       </div>
@@ -338,14 +341,14 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[90vh] max-h-[90vh] max-w-[1320px] flex-col gap-0 overflow-hidden rounded-[1.9rem] border border-border/60 bg-background p-0 shadow-2xl shadow-black/25">
-        <div className="flex items-center justify-between border-b border-border/50 bg-card/25 px-6 py-4">
-          <div className="flex items-center gap-3 pr-8">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
+      <DialogContent className="flex h-[92vh] max-h-[92vh] max-w-[1380px] flex-col gap-0 overflow-hidden rounded-[2rem] border border-border bg-card p-0">
+        <div className="flex items-center justify-between gap-4 border-b border-border bg-card px-6 py-4">
+          <div className="flex min-w-0 items-center gap-3 pr-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
               <GraduationCap className="h-4.5 w-4.5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-lg font-bold tracking-tight text-foreground">
                   {editCourse ? "Editar área de membros" : "Nova área de membros"}
                 </h2>
@@ -353,7 +356,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                   Setup guiado
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground/75">Defina base, capa e estrutura — o preview responde em tempo real.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Preencha o essencial à esquerda e acompanhe uma prévia real da experiência do aluno.</p>
             </div>
           </div>
 
@@ -361,42 +364,44 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             onClick={saveCourse}
             disabled={saving || !form.title.trim()}
             size="sm"
-            className="rounded-2xl px-6 font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+            className="rounded-2xl px-6 font-bold"
           >
             {saving ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-2 h-3.5 w-3.5" />}
             {editCourse ? "Salvar" : "Criar curso"}
           </Button>
         </div>
 
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[450px_minmax(0,1fr)]">
-          <div className="flex min-h-0 flex-col border-r border-border/50 bg-background">
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-              <div className="space-y-5 pb-6">
-                <div className="rounded-[1.35rem] border border-border/60 bg-card/25 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">Monte sua área com clareza</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Primeiro o posicionamento, depois a identidade visual e por fim os módulos.</p>
-                    </div>
-                    <div className="rounded-2xl border border-border/60 bg-background px-3 py-2 text-right">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Preenchido</p>
-                      <p className="text-sm font-bold text-primary">{completionCount}/4</p>
-                    </div>
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[460px_minmax(0,1fr)]">
+          <div className="flex min-h-0 flex-col border-r border-border bg-background">
+            <div className="border-b border-border bg-card px-6 py-5">
+              <div className="rounded-[1.5rem] border border-border bg-card-inset p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-base font-bold text-foreground">Monte sua área com clareza</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Base, visual e módulos: só o que importa para tirar a área do papel com velocidade.</p>
                   </div>
-                  <div className="mt-4 grid grid-cols-3 gap-2">
-                    {[
-                      { step: "01", label: "Base" },
-                      { step: "02", label: "Visual" },
-                      { step: "03", label: "Módulos" },
-                    ].map((item) => (
-                      <div key={item.step} className="rounded-xl border border-border/60 bg-background/90 px-3 py-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary/75">{item.step}</p>
-                        <p className="mt-1 text-xs font-medium text-foreground/85">{item.label}</p>
-                      </div>
-                    ))}
+                  <div className="rounded-2xl border border-border bg-card px-3 py-2 text-right">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Preenchido</p>
+                    <p className="text-sm font-bold text-primary">{completionCount}/4</p>
                   </div>
                 </div>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {[
+                    { step: "01", label: "Base" },
+                    { step: "02", label: "Visual" },
+                    { step: "03", label: "Módulos" },
+                  ].map((item) => (
+                    <div key={item.step} className="rounded-xl border border-border bg-card px-3 py-2.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">{item.step}</p>
+                      <p className="mt-1 text-xs font-semibold text-foreground">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+              <div className="space-y-5 pb-6">
                 <SectionCard
                   icon={GraduationCap}
                   title="Base do curso"
@@ -404,34 +409,34 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                 >
                   <div className="space-y-4">
                     <div className="space-y-2.5">
-                      <Label className="block text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">Nome do curso</Label>
+                      <Label className="block text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Nome do curso</Label>
                       <Input
                         value={form.title}
                         onChange={(e) => setForm((c) => ({ ...c, title: e.target.value }))}
                         placeholder="Ex: Escala de Vendas com Conteúdo"
-                        className="h-12 rounded-2xl border-primary/30 bg-background text-sm font-medium shadow-[0_0_0_1px_hsl(var(--primary)/0.05)] hover:border-primary/40 focus-visible:border-primary/50 focus-visible:ring-primary/20"
+                        className="h-13 rounded-2xl border-primary/25 bg-background text-sm font-semibold hover:border-primary/45 focus-visible:border-primary/45"
                         autoFocus
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label className="block text-[11px] font-semibold text-muted-foreground/85">Categoria</Label>
+                        <Label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</Label>
                         <Input
                           value={form.category}
                           onChange={(e) => setForm((c) => ({ ...c, category: e.target.value }))}
                           placeholder="Marketing, saúde..."
-                          className="h-10 rounded-xl border-border/60 bg-background text-sm shadow-sm hover:border-primary/25"
+                          className="h-11 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="block text-[11px] font-semibold text-muted-foreground/85">Produto</Label>
+                        <Label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Produto</Label>
                         <Select
                           value={form.product_id || "none"}
                           onValueChange={(v) => setForm((c) => ({ ...c, product_id: v === "none" ? "" : v }))}
                         >
-                          <SelectTrigger className="h-10 rounded-xl border-border/60 bg-background text-sm shadow-sm hover:border-primary/25">
+                          <SelectTrigger className="h-11 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25">
                             <SelectValue placeholder="Nenhum" />
                           </SelectTrigger>
                           <SelectContent>
@@ -447,12 +452,12 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                     </div>
 
                     <div className="space-y-2.5">
-                      <Label className="block text-[11px] font-semibold text-muted-foreground/85">Descrição / Promessa</Label>
+                      <Label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Descrição / Promessa</Label>
                       <Textarea
                         value={form.description}
                         onChange={(e) => setForm((c) => ({ ...c, description: e.target.value }))}
                         placeholder="O que o aluno vai aprender ou transformar?"
-                        className="min-h-[120px] rounded-2xl border-border/60 bg-background text-sm resize-none shadow-sm hover:border-primary/25 focus-visible:border-primary/40"
+                        className="min-h-[132px] rounded-2xl border-border bg-background text-sm resize-none font-medium hover:border-primary/25 focus-visible:border-primary/35"
                       />
                     </div>
                   </div>
@@ -476,57 +481,59 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                 >
                   <div className="space-y-4">
                     {editCourse ? (
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         {(editCourse.modules ?? []).length > 0 ? (
                           (editCourse.modules ?? []).map((m, i) => (
-                            <div key={`${m.title}-${i}`} className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background px-3 py-3 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary">{i + 1}</span>
+                            <div key={`${m.title}-${i}`} className="flex items-center gap-3 rounded-2xl border border-border bg-card-inset px-3.5 py-3.5 hover:border-primary/20">
+                              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-xs font-bold text-primary">{i + 1}</span>
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold text-foreground">{m.title}</p>
-                                <p className="text-[11px] text-muted-foreground">{m.lessonsCount ?? 0} aulas</p>
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">{m.lessonsCount ?? 0} aulas</p>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="py-4 text-center text-xs text-muted-foreground">Nenhum módulo ainda. Crie no studio após salvar.</p>
+                          <p className="rounded-2xl border border-dashed border-border bg-card-inset px-4 py-5 text-center text-xs text-muted-foreground">Nenhum módulo ainda. Crie no studio após salvar.</p>
                         )}
                       </div>
                     ) : (
                       <>
-                        <div className="flex gap-2">
-                          <Input
-                            value={newModuleName}
-                            onChange={(e) => setNewModuleName(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") addModule(newModuleName);
-                            }}
-                            placeholder="Nome do módulo..."
-                            className="h-10 flex-1 rounded-xl border-border/60 bg-background text-sm shadow-sm hover:border-primary/25"
-                          />
-                          <Button
-                            onClick={() => addModule(newModuleName)}
-                            disabled={!newModuleName.trim()}
-                            size="sm"
-                            className="h-10 rounded-xl px-3 shadow-md shadow-primary/20"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </Button>
+                        <div className="rounded-[1.35rem] border border-border bg-card-inset p-3">
+                          <div className="flex gap-2">
+                            <Input
+                              value={newModuleName}
+                              onChange={(e) => setNewModuleName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") addModule(newModuleName);
+                              }}
+                              placeholder="Nome do módulo..."
+                              className="h-11 flex-1 rounded-xl border-border bg-background text-sm font-medium hover:border-primary/25"
+                            />
+                            <Button
+                              onClick={() => addModule(newModuleName)}
+                              disabled={!newModuleName.trim()}
+                              size="sm"
+                              className="h-11 rounded-xl px-4"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-2.5">
                           {STARTER_MODULES.map((item) => (
                             <button
                               key={item.title}
                               type="button"
                               onClick={() => addModule(item.title)}
-                              className="rounded-2xl border border-border/60 bg-background px-3 py-3 text-left transition-all hover:border-primary/35 hover:bg-primary/5 hover:shadow-sm"
+                              className="rounded-[1.25rem] border border-border bg-card-inset px-3.5 py-3.5 text-left hover:border-primary/35 hover:bg-card"
                             >
                               <div className="flex items-center justify-between gap-3">
-                                <div>
+                                <div className="min-w-0">
                                   <p className="text-sm font-semibold text-foreground">{item.title}</p>
                                   <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{item.subtitle}</p>
                                 </div>
-                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
                                   <Plus className="h-3.5 w-3.5" />
                                 </div>
                               </div>
@@ -535,22 +542,22 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                         </div>
 
                         {wizardModules.length > 0 && (
-                          <div className="space-y-2">
+                          <div className="space-y-2.5">
                             <div className="flex items-center justify-between">
                               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Sequência montada</p>
-                              <span className="rounded-full border border-border/60 bg-background px-2.5 py-1 text-[10px] font-medium text-primary">
+                              <span className="rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-semibold text-primary">
                                 {wizardModules.length} módulos
                               </span>
                             </div>
 
                             {wizardModules.map((m, i) => (
-                              <div key={m} className="flex items-center gap-2.5 rounded-2xl border border-border/50 bg-background px-3 py-3 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-[11px] font-bold text-primary">{i + 1}</span>
-                                <span className="flex-1 truncate text-sm font-medium text-foreground">{m}</span>
+                              <div key={m} className="flex items-center gap-3 rounded-2xl border border-border bg-card px-3.5 py-3.5 hover:border-primary/20">
+                                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-[11px] font-bold text-primary">{i + 1}</span>
+                                <span className="flex-1 truncate text-sm font-semibold text-foreground">{m}</span>
                                 <button
                                   type="button"
                                   onClick={() => setWizardModules((cur) => cur.filter((x) => x !== m))}
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-transparent text-muted-foreground hover:border-destructive/15 hover:bg-destructive/10 hover:text-destructive"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -565,17 +572,17 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
               </div>
             </div>
 
-            <div className="border-t border-border/50 bg-card/35 px-6 py-4">
+            <div className="border-t border-border bg-card px-6 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Tudo pronto para criar</p>
-                  <p className="text-xs text-muted-foreground">Você ajusta à esquerda e já enxerga impacto real à direita.</p>
+                  <p className="text-sm font-bold text-foreground">Tudo pronto para criar</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Você ajusta à esquerda e acompanha o impacto visual na hora.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl px-4">
                     Fechar
                   </Button>
-                  <Button onClick={saveCourse} disabled={saving || !form.title.trim()} className="rounded-xl px-5 shadow-lg shadow-primary/25">
+                  <Button onClick={saveCourse} disabled={saving || !form.title.trim()} className="rounded-xl px-5 font-bold">
                     {saving ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-2 h-3.5 w-3.5" />}
                     {editCourse ? "Salvar" : "Criar curso"}
                   </Button>
@@ -584,15 +591,15 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             </div>
           </div>
 
-          <div className="min-h-0 overflow-y-auto bg-gradient-to-b from-card/70 via-card/35 to-muted/15 p-6">
-            <div className="mb-5 rounded-[1.35rem] border border-border/60 bg-card/25 p-4">
+          <div className="min-h-0 overflow-y-auto border-l border-border bg-card-inset p-6">
+            <div className="mb-5 rounded-[1.5rem] border border-border bg-card p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary/70">Preview ao vivo</p>
-                  <p className="mt-1 text-lg font-bold tracking-tight text-foreground">Visão do aluno</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Aqui a área já ganha peso visual, contexto e leitura de produto premium.</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">Preview ao vivo</p>
+                  <p className="mt-1 text-xl font-bold tracking-tight text-foreground">Visão do aluno</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Uma prévia com mais presença, leitura e cara de produto final.</p>
                 </div>
-                <div className="flex items-center gap-0.5 rounded-2xl border border-border/50 bg-background/90 p-1 shadow-sm">
+                <div className="flex items-center gap-1 rounded-2xl border border-border bg-card-inset p-1">
                   {([
                     { id: "desktop" as const, icon: Monitor },
                     { id: "mobile" as const, icon: Smartphone },
@@ -602,10 +609,10 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                       type="button"
                       onClick={() => setViewMode(item.id)}
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-xl transition-all",
+                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-200",
                         viewMode === item.id
-                          ? "bg-card text-primary shadow-sm ring-1 ring-primary/20"
-                          : "text-muted-foreground hover:bg-card hover:text-foreground"
+                          ? "border-primary/20 bg-card text-primary"
+                          : "border-transparent text-muted-foreground hover:border-border hover:bg-card hover:text-foreground"
                       )}
                     >
                       <item.icon className="h-4 w-4" />
@@ -614,23 +621,23 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="rounded-xl border border-border/60 bg-background/80 px-3 py-2.5">
+              <div className="mt-4 grid grid-cols-3 gap-2.5">
+                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Curso</p>
                   <p className="mt-1 truncate text-sm font-semibold text-foreground">{previewTitle}</p>
                 </div>
-                <div className="rounded-xl border border-border/60 bg-background/80 px-3 py-2.5">
+                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Produto</p>
                   <p className="mt-1 truncate text-sm font-semibold text-foreground">{linkedProduct?.name || "Sem vínculo"}</p>
                 </div>
-                <div className="rounded-xl border border-border/60 bg-background/80 px-3 py-2.5">
+                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Módulos</p>
                   <p className="mt-1 truncate text-sm font-semibold text-foreground">{previewModules.length}</p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-[1.8rem] border border-border/60 bg-background p-3 shadow-[0_30px_80px_-36px_hsl(var(--foreground)/0.5)] ring-1 ring-white/[0.03]">
+            <div className="rounded-[2rem] border border-border bg-background p-4">
               <MemberExperiencePreview
                 className="mx-auto"
                 course={{
