@@ -633,66 +633,73 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             </div>
           </div>
 
-          <div className="min-h-0 overflow-y-auto border-l border-border bg-card-inset p-6">
-            <div className="mb-5 rounded-[1.5rem] border border-border bg-card p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">Preview ao vivo</p>
-                  <p className="mt-1 text-xl font-bold tracking-tight text-foreground">Visão do aluno</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Uma prévia com mais presença, leitura e cara de produto final.</p>
-                </div>
-                <div className="flex items-center gap-1 rounded-2xl border border-border bg-card-inset p-1">
-                  {([
-                    { id: "desktop" as const, icon: Monitor },
-                    { id: "mobile" as const, icon: Smartphone },
-                  ] as const).map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setViewMode(item.id)}
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-200",
-                        viewMode === item.id
-                          ? "border-primary/20 bg-card text-primary"
-                          : "border-transparent text-muted-foreground hover:border-border hover:bg-card hover:text-foreground"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                    </button>
-                  ))}
+          <div className="min-h-0 overflow-y-auto bg-card-inset">
+            {/* Sleek toolbar — inline, less framed, lets preview dominate */}
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-card-inset/90 px-7 py-3.5 backdrop-blur-md">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-success">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                  Preview ao vivo
+                </span>
+                <div className="hidden md:flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <span className="truncate font-semibold text-foreground max-w-[180px]">{previewTitle}</span>
+                  <span className="text-border">·</span>
+                  <span className="tabular-nums">{previewModules.length} módulos</span>
+                  {linkedProduct && (
+                    <>
+                      <span className="text-border">·</span>
+                      <span className="truncate max-w-[140px]">{linkedProduct.name}</span>
+                    </>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-2.5">
-                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Curso</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{previewTitle}</p>
-                </div>
-                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Produto</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{linkedProduct?.name || "Sem vínculo"}</p>
-                </div>
-                <div className="rounded-xl border border-border bg-card-inset px-3 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Módulos</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-foreground">{previewModules.length}</p>
-                </div>
+              <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-0.5">
+                {([
+                  { id: "desktop" as const, icon: Monitor, label: "Desktop" },
+                  { id: "mobile" as const, icon: Smartphone, label: "Mobile" },
+                ] as const).map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setViewMode(item.id)}
+                    className={cn(
+                      "flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-semibold transition-all duration-200",
+                      viewMode === item.id
+                        ? "bg-primary/12 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{item.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-border bg-background p-4">
-              <MemberExperiencePreview
-                className="mx-auto"
-                course={{
-                  title: previewTitle,
-                  description: form.description,
-                  category: form.category,
-                  thumbnail_url: form.thumbnail_url,
-                  productName: linkedProduct?.name,
-                  is_published: false,
+            {/* Preview canvas — dominant, breathing area, soft stage */}
+            <div className="px-8 py-8">
+              <div
+                className="relative overflow-hidden rounded-[2rem] border border-border bg-background p-5 sm:p-7"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 30% 0%, hsl(var(--primary) / 0.06), transparent 55%), radial-gradient(circle at 80% 100%, hsl(var(--primary) / 0.04), transparent 60%)",
                 }}
-                modules={previewModules}
-                viewMode={viewMode}
-              />
+              >
+                <MemberExperiencePreview
+                  className="mx-auto"
+                  course={{
+                    title: previewTitle,
+                    description: form.description,
+                    category: form.category,
+                    thumbnail_url: form.thumbnail_url,
+                    productName: linkedProduct?.name,
+                    is_published: false,
+                  }}
+                  modules={previewModules}
+                  viewMode={viewMode}
+                />
+              </div>
             </div>
           </div>
         </div>
