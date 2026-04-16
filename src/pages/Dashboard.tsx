@@ -600,26 +600,22 @@ export default function Dashboard() {
           {/* ── KPI Strip ── */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, icon: ShoppingCart, iconBg: "bg-primary/10", iconText: "text-primary", accent: "bg-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), icon: TrendingUp, iconBg: "bg-success/10", iconText: "text-success", accent: "bg-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, icon: Target, iconBg: "bg-info/10", iconText: "text-info", accent: "bg-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), icon: Users, iconBg: "bg-primary/10", iconText: "text-primary", accent: "bg-primary" },
+              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, accent: "bg-primary" },
+              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), accent: "bg-success" },
+              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "bg-info" },
+              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "bg-primary" },
             ] as const).map((item, idx) => (
-              <div key={item.label}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-background p-5 lg:p-6 transition-colors hover:border-primary/20"
+              <div
+                key={item.label}
+                className="group relative overflow-hidden rounded-[26px] border border-border/80 bg-card px-5 py-5 lg:px-6 lg:py-6 transition-all duration-200 hover:border-primary/20 hover:bg-card/95"
               >
-                {/* Left accent bar */}
-                <div className={cn("absolute left-0 top-0 bottom-0 w-[3px]", item.accent)} />
-                <div className="relative flex items-start justify-between pl-1">
-                  <div className="flex-1">
-                    <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
-                    <p className="text-[28px] lg:text-[34px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
-                      {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
-                    </p>
-                  </div>
-                  <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl border border-border", item.iconBg, item.iconText)}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
+                <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", item.accent)} />
+                <div className="absolute inset-0 bg-gradient-to-br from-background/10 via-transparent to-transparent pointer-events-none" />
+                <div className="relative pl-2">
+                  <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/90">{item.label}</p>
+                  <p className="whitespace-nowrap text-[28px] lg:text-[34px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
+                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+                  </p>
                 </div>
               </div>
             ))}
