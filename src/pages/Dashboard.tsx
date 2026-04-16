@@ -349,6 +349,7 @@ export default function Dashboard() {
       amount: Number(t.amount),
       status: t.status,
       label: t.payment_method || "Pagamento",
+      paymentMethod: t.payment_method,
     }));
 
     const wd = withdrawals.slice(0, 5).map((w) => ({
