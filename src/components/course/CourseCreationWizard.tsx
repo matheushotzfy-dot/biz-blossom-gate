@@ -366,8 +366,18 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
     }
   };
 
-  const previewTitle = form.title.trim() || "Sua área premium";
-  
+  // Completion progress (drives left column hierarchy + footer/header confidence)
+  const completion = useMemo(() => {
+    const checks = [
+      Boolean(form.title.trim()),
+      Boolean(form.description.trim()),
+      Boolean(form.thumbnail_url),
+      Boolean(form.product_id),
+      (editCourse?.modules?.length ?? wizardModules.length) > 0,
+    ];
+    const done = checks.filter(Boolean).length;
+    return { done, total: checks.length, pct: Math.round((done / checks.length) * 100) };
+  }, [form, wizardModules, editCourse?.modules]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -390,16 +400,32 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             </div>
           </div>
 
-          <Button
-            onClick={saveCourse}
-            disabled={saving || !form.title.trim()}
-            size="sm"
-            className="rounded-2xl px-6 font-bold"
-          >
-            {saving ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-2 h-3.5 w-3.5" />}
-            {editCourse ? "Salvar" : "Criar curso"}
-          </Button>
+          <div className="flex items-center gap-4">
+            {/* Completion progress */}
+            <div className="hidden md:flex items-center gap-2.5">
+              <div className="text-right leading-tight">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Progresso</p>
+                <p className="text-xs font-bold text-foreground tabular-nums">{completion.done}/{completion.total} <span className="text-muted-foreground font-medium">· {completion.pct}%</span></p>
+              </div>
+              <div className="h-1.5 w-28 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${completion.pct}%` }}
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={saveCourse}
+              disabled={saving || !form.title.trim()}
+              className="rounded-2xl px-7 h-11 text-sm font-bold shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.45)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.55)]"
+            >
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+              {editCourse ? "Salvar alterações" : "Criar área de membros"}
+            </Button>
+          </div>
         </div>
+
 
         <div className="grid min-h-0 flex-1 lg:grid-cols-[460px_minmax(0,1fr)]">
           <div className="flex min-h-0 flex-col border-r border-border bg-background">
