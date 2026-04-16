@@ -58,6 +58,28 @@ interface WizardProps {
   onSaved: () => void;
 }
 
+const COURSE_CATEGORIES = [
+  { value: "marketing", label: "Marketing Digital" },
+  { value: "vendas", label: "Vendas" },
+  { value: "negocios", label: "Negócios" },
+  { value: "financas", label: "Finanças" },
+  { value: "tecnologia", label: "Tecnologia" },
+  { value: "design", label: "Design" },
+  { value: "saude", label: "Saúde & Bem-estar" },
+  { value: "educacao", label: "Educação" },
+  { value: "desenvolvimento-pessoal", label: "Desenvolvimento Pessoal" },
+  { value: "produtividade", label: "Produtividade" },
+  { value: "idiomas", label: "Idiomas" },
+  { value: "direito", label: "Direito" },
+  { value: "culinaria", label: "Culinária" },
+  { value: "fitness", label: "Fitness" },
+  { value: "musica", label: "Música" },
+  { value: "fotografia", label: "Fotografia & Vídeo" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "programacao", label: "Programação" },
+  { value: "geral", label: "Outros" },
+] as const;
+
 const STARTER_MODULES = [
   { title: "Boas-vindas", subtitle: "Primeira impressão e acesso imediato" },
   { title: "Fundamentos", subtitle: "Base para preparar o aluno" },
