@@ -1138,7 +1138,7 @@ export default function Vendas() {
                  </div>
                  {peakHour !== null && <span className="text-[9px] font-heading font-bold text-muted-foreground/35">pico {peakHour}h</span>}
               </div>
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border/20">
                 {paymentMix.map((pm) => {
                   const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                   const accent = ACCENT_STYLES[pm.color as AccentTone];
