@@ -95,11 +95,11 @@ function AnalyticsLogo({ className, style }: { className?: string; style?: React
 }
 
 const PLATFORMS: { id: Platform; label: string; color: string; bg: string; ring: string; brandColor: string; LogoComp: React.FC<{className?: string; style?: React.CSSProperties}>; fields: string[] }[] = [
- { id: "facebook", label: "Facebook Pixel", color: "text-[#1877F2]", bg: "bg-[#1877F2]/10", ring: "ring-[#1877F2]/15", brandColor: "#1877F2", LogoComp: FacebookLogo, fields: ["pixel_id", "api_token", "domain"] },
- { id: "google_ads", label: "Google Ads", color: "text-[#4285F4]", bg: "bg-[#4285F4]/10", ring: "ring-[#4285F4]/15", brandColor: "#4285F4", LogoComp: GoogleLogo, fields: ["pixel_id", "api_token"] },
- { id: "google_analytics", label: "Google Analytics", color: "text-[#E37400]", bg: "bg-[#E37400]/10", ring: "ring-[#E37400]/15", brandColor: "#E37400", LogoComp: AnalyticsLogo, fields: ["pixel_id"] },
- { id: "tiktok", label: "TikTok Pixel", color: "text-[#FF004F]", bg: "bg-[#FF004F]/10", ring: "ring-[#FF004F]/15", brandColor: "#FF004F", LogoComp: TikTokLogo, fields: ["pixel_id", "api_token"] },
- { id: "kwai", label: "Kwai Pixel", color: "text-[#FF6B2C]", bg: "bg-[#FF6B2C]/10", ring: "ring-[#FF6B2C]/15", brandColor: "#FF6B2C", LogoComp: KwaiLogo, fields: ["pixel_id", "api_token"] },
+ { id: "facebook", label: "Facebook Pixel", color: "text-[hsl(var(--info))]", bg: "bg-info/10", ring: "ring-info/15", brandColor: "#1877F2", LogoComp: FacebookLogo, fields: ["pixel_id", "api_token", "domain"] },
+ { id: "google_ads", label: "Google Ads", color: "text-[hsl(var(--info))]", bg: "bg-info/10", ring: "ring-info/15", brandColor: "#4285F4", LogoComp: GoogleLogo, fields: ["pixel_id", "api_token"] },
+ { id: "google_analytics", label: "Google Analytics", color: "text-[hsl(var(--warning))]", bg: "bg-warning/10", ring: "ring-warning/15", brandColor: "#E37400", LogoComp: AnalyticsLogo, fields: ["pixel_id"] },
+ { id: "tiktok", label: "TikTok Pixel", color: "text-[hsl(var(--destructive))]", bg: "bg-destructive/10", ring: "ring-destructive/15", brandColor: "#FF004F", LogoComp: TikTokLogo, fields: ["pixel_id", "api_token"] },
+ { id: "kwai", label: "Kwai Pixel", color: "text-[hsl(var(--warning))]", bg: "bg-warning/10", ring: "ring-warning/15", brandColor: "#FF6B2C", LogoComp: KwaiLogo, fields: ["pixel_id", "api_token"] },
 ];
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -184,11 +184,11 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="max-w-[720px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-3xl border-border/15 bg-card backdrop-blur-3xl gap-0 shadow-[0_32px_100px_hsl(var(--foreground)/0.15)]">
+ <DialogContent className="max-w-[860px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-[32px] border border-border/30 bg-card gap-0 shadow-[0_32px_100px_hsl(var(--foreground)/0.18)]">
  {/* ═══ HEADER ═══ */}
- <div className="relative px-7 pt-7 pb-5 overflow-hidden">
+ <div className="relative overflow-hidden px-7 pt-7 pb-6">
  {/* Ambient glow */}
- <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent" />
+ <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
  <div className="pointer-events-none absolute -top-32 -right-32 w-64 h-64 rounded-full bg-primary/[0.08] blur-[100px]" />
  <div className="pointer-events-none absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-info/[0.04] blur-[80px]" />
 
@@ -199,36 +199,45 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
  </button>
 
  {/* Title */}
- <div className="relative flex items-center gap-4">
+ <div className="relative flex items-start justify-between gap-4">
  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/15 flex items-center justify-center shadow-lg shadow-primary/10">
  <Crosshair className="h-5.5 w-5.5 text-primary" />
  </div>
- <div>
- <h2 className="text-[18px] font-display font-black tracking-[-0.03em] text-foreground">Pixels de Conversão</h2>
- <p className="text-[11px] text-muted-foreground/40 font-display font-medium mt-0.5">{product.name}</p>
+ <div className="flex-1">
+ <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-display font-black uppercase tracking-[0.18em] text-primary">
+ <Sparkles className="h-3 w-3" /> Tracking premium
+ </div>
+ <h2 className="mt-3 text-[22px] font-display font-black tracking-[-0.04em] text-foreground">Pixels & Tracking</h2>
+ <p className="mt-1 text-[11px] font-display font-medium text-muted-foreground/55">Gestão avançada de conversão para {product.name}</p>
  </div>
  </div>
 
  {/* Stats pills */}
- <div className="relative flex items-center gap-3 mt-5">
- <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-muted/6 ring-1 ring-border/8">
+ <div className="relative mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+ <div className="flex items-center gap-2 rounded-2xl border border-border/20 bg-background/60 px-4 py-3">
  <Layers className="h-3 w-3 text-primary/40" />
  <span className="text-[10px] font-display font-bold text-muted-foreground/40">
  <span className="text-primary font-numbers">{pixels.length}</span> pixel{pixels.length !== 1 ? "s" : ""} configurado{pixels.length !== 1 ? "s" : ""}
  </span>
  </div>
- <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-success/5 ring-1 ring-success/10">
+ <div className="flex items-center gap-2 rounded-2xl border border-success/15 bg-success/5 px-4 py-3">
  <Power className="h-3 w-3 text-success/50" />
  <span className="text-[10px] font-display font-bold text-muted-foreground/40">
  <span className="text-success font-numbers">{pixels.filter(p => p.is_active).length}</span> ativo{pixels.filter(p => p.is_active).length !== 1 ? "s" : ""}
  </span>
  </div>
  </div>
+ <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
+ <Signal className="h-3.5 w-3.5 text-primary/60" />
+ <span className="text-[10px] font-display font-bold text-muted-foreground/55">
+ <span className="font-numbers text-primary">{platformPixels.length}</span> conectado{platformPixels.length !== 1 ? "s" : ""} em {platform.label}
+ </span>
+ </div>
  </div>
 
  {/* ═══ PLATFORM TABS ═══ */}
- <div className="px-7 pb-3">
- <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+ <div className="px-7 pb-4">
+ <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
  {PLATFORMS.map(p => {
  const isActive = activePlatform === p.id;
  const count = pixels.filter(px => px.platform === p.id).length;
@@ -271,7 +280,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
  </div>
 
  {/* ═══ CONTENT ═══ */}
- <div className="flex-1 overflow-y-auto px-7 pb-7 space-y-5">
+ <div className="flex-1 overflow-y-auto px-7 pb-7 space-y-6">
 
  {/* Existing pixels */}
  {platformPixels.length === 0 ? (
@@ -406,10 +415,10 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
  )}
 
  {/* ═══ ADD NEW PIXEL ═══ */}
- <div className="rounded-2xl ring-1 ring-border/12 bg-muted/4 overflow-hidden relative">
+ <div className="relative overflow-hidden rounded-[28px] border border-border/25 bg-background/40">
  <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(135deg, ${platform.brandColor}04 0%, transparent 60%)` }} />
  {/* Section header */}
- <div className="relative flex items-center gap-3.5 px-5 pt-5 pb-4">
+ <div className="relative flex items-center gap-3.5 border-b border-border/15 px-5 pt-5 pb-4">
  <div className="h-10 w-10 rounded-xl flex items-center justify-center ring-1"
  style={{ background: `${platform.brandColor}10`, borderColor: `${platform.brandColor}15` }}>
  <platform.LogoComp className="h-4.5 w-4.5" style={{ color: platform.brandColor }} />
@@ -422,17 +431,17 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
  <div className="px-5 pb-5 space-y-4">
  {/* Fields */}
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
  <div>
  <Label className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/30 mb-1.5 block">Pixel ID</Label>
  <Input value={newPixelId} onChange={e => setNewPixelId(e.target.value)}
- placeholder="Ex: 123456789" className="h-11 text-[12px] rounded-xl bg-background/50 border-border/12 focus:border-primary/30 focus:ring-2 focus:ring-primary/8 font-mono" />
+ placeholder="Ex: 123456789" className="h-12 rounded-2xl border-border/20 bg-background/80 text-[12px] font-mono focus:border-primary/30 focus:ring-2 focus:ring-primary/10" />
  </div>
  {platform.fields.includes("api_token") && (
  <div>
  <Label className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/30 mb-1.5 block">API Token</Label>
  <Input value={newApiToken} onChange={e => setNewApiToken(e.target.value)}
- placeholder="Token de conversão" className="h-11 text-[12px] rounded-xl bg-background/50 border-border/12 focus:border-primary/30 focus:ring-2 focus:ring-primary/8 font-mono" />
+ placeholder="Token de conversão" className="h-12 rounded-2xl border-border/20 bg-background/80 text-[12px] font-mono focus:border-primary/30 focus:ring-2 focus:ring-primary/10" />
  </div>
  )}
  </div>
@@ -440,7 +449,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
  <div>
  <Label className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/30 mb-1.5 block">Domínio</Label>
  <Input value={newDomain} onChange={e => setNewDomain(e.target.value)}
- placeholder="seusite.com" className="h-11 text-[12px] rounded-xl bg-background/50 border-border/12 focus:border-primary/30 focus:ring-2 focus:ring-primary/8 font-mono" />
+ placeholder="seusite.com" className="h-12 rounded-2xl border-border/20 bg-background/80 text-[12px] font-mono focus:border-primary/30 focus:ring-2 focus:ring-primary/10" />
  </div>
  )}
 
@@ -493,7 +502,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
  <p className="text-[10px] text-muted-foreground/20 font-display font-medium">
  <span className="font-numbers">{platformPixels.length}</span> / 50 pixels
  </p>
- <Button onClick={addPixel} className="gap-2 rounded-xl font-display font-bold shadow-lg shadow-primary/15 h-11 px-7 text-[11px]">
+ <Button onClick={addPixel} className="h-12 gap-2 rounded-2xl px-7 text-[11px] font-display font-bold shadow-lg shadow-primary/15">
  <Plus className="h-3.5 w-3.5" /> Adicionar Pixel
  </Button>
  </div>

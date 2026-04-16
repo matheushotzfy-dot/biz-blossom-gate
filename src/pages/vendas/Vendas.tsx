@@ -381,9 +381,10 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
 function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
  const name = tx.customer_name || "Cliente";
  const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground/60", dot: "bg-muted-foreground/40", bg: "bg-muted/[0.06]", border: "border-border/30" };
- const methods: Record<string, { label: string; icon: typeof Smartphone; color: string; bg: string; border: string }> = {
-  pix: { label: "PIX", icon: Smartphone, color: "text-success", bg: "bg-success/[0.06]", border: "border-success/20" },
+ const methods: Record<string, { label: string; icon: any; color: string; bg: string; border: string }> = {
+  pix: { label: "PIX", icon: PixLogoMark, color: "text-success", bg: "bg-success/[0.06]", border: "border-success/20" },
   credit_card: { label: "Cartão", icon: CreditCard, color: "text-info", bg: "bg-info/[0.06]", border: "border-info/20" },
+  card: { label: "Cartão", icon: CreditCard, color: "text-info", bg: "bg-info/[0.06]", border: "border-info/20" },
   boleto: { label: "Boleto", icon: FileText, color: "text-warning", bg: "bg-warning/[0.06]", border: "border-warning/20" },
  };
  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: DollarSign, color: "text-muted-foreground", bg: "bg-secondary", border: "border-border" };
@@ -463,7 +464,7 @@ const ALL_STATUSES = [
  { value: "chargeback", label: "Chargebacks", dot: "bg-destructive" },
 ];
 const ALL_METHODS = [
- { value: "pix", label: "PIX", icon: Smartphone },
+ { value: "pix", label: "PIX", icon: PixLogoMark },
  { value: "credit_card", label: "Cartão", icon: CreditCard },
  { value: "boleto", label: "Boleto", icon: FileText },
 ];
@@ -484,7 +485,7 @@ function ExportDialog({ open, onOpenChange, transactions, products, productsRaw,
  };
  const exportFiltered = useMemo(() => transactions.filter(t => {
  if (!selectedStatuses.has(t.status)) return false;
- if (t.payment_method && !selectedMethods.has(t.payment_method)) return false;
+ if (t.payment_method && !(selectedMethods.has(t.payment_method) || (t.payment_method === "card" && selectedMethods.has("credit_card")))) return false;
  if (!selectedProducts.has("all") && t.product_id && !selectedProducts.has(t.product_id)) return false;
  return true;
  }), [transactions, selectedStatuses, selectedMethods, selectedProducts]);
@@ -653,10 +654,10 @@ export default function Vendas() {
  const avgTicket = approved.length > 0 ? totalGross / approved.length : 0;
  const conversion = txs.length > 0 ? (approved.length / txs.length) * 100 : 0;
  const pixRev = approved.filter(t => t.payment_method === "pix").reduce((a, t) => a + Number(t.net_amount), 0);
- const cardRev = approved.filter(t => t.payment_method === "credit_card").reduce((a, t) => a + Number(t.net_amount), 0);
+ const cardRev = approved.filter(t => t.payment_method === "credit_card" || t.payment_method === "card").reduce((a, t) => a + Number(t.net_amount), 0);
  const boletoRev = approved.filter(t => t.payment_method === "boleto").reduce((a, t) => a + Number(t.net_amount), 0);
  const pixCount = approved.filter(t => t.payment_method === "pix").length;
- const cardCount = approved.filter(t => t.payment_method === "credit_card").length;
+ const cardCount = approved.filter(t => t.payment_method === "credit_card" || t.payment_method === "card").length;
  const boletoCount = approved.filter(t => t.payment_method === "boleto").length;
  const uniqueCustomers = new Set(approved.map(t => t.customer_email).filter(Boolean)).size;
  const refundRate = approved.length > 0 ? (refunded.length / (approved.length + refunded.length)) * 100 : 0;
@@ -787,7 +788,7 @@ export default function Vendas() {
  const peakHour = rawPeakSales > 0 ? metrics.hours.findIndex((value) => value === rawPeakSales) : null;
 
  const paymentMix = [
- { label: "PIX", value: m.pixRev, count: m.pixCount, icon: <Smartphone className="h-4 w-4" />, total: m.totalNet, color: "success" },
+ { label: "PIX", value: m.pixRev, count: m.pixCount, icon: <PixLogoMark className="h-4 w-4" />, total: m.totalNet, color: "success" },
  { label: "Cartão", value: m.cardRev, count: m.cardCount, icon: <CreditCard className="h-4 w-4" />, total: m.totalNet, color: "info" },
  { label: "Boleto", value: m.boletoRev, count: m.boletoCount, icon: <FileText className="h-4 w-4" />, total: m.totalNet, color: "warning" },
  ];
@@ -929,7 +930,7 @@ export default function Vendas() {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
             { label: "Total reembolsado", value: hidden ? HIDE : fmt(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""}`, icon: RefreshCw, accent: "info" as AccentTone },
-            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: Smartphone, accent: "success" as AccentTone },
+            { label: "Vendas no PIX", value: hidden ? HIDE : fmt(m.pixRev), sub: `${m.pixCount} aprovada${m.pixCount !== 1 ? "s" : ""}`, icon: PixLogoMark, accent: "success" as AccentTone },
             { label: "Taxa de reembolso", value: `${m.refundRate.toFixed(1)}%`, sub: "meta < 5%", valueClass: m.refundRate > 5 ? "text-destructive" : "text-warning", icon: Percent, accent: "warning" as AccentTone },
             { label: "Chargeback", value: hidden ? HIDE : fmt(chargebackAmount), sub: `${m.chargebacks.length} ocorrência${m.chargebacks.length !== 1 ? "s" : ""}`, icon: Shield, accent: "destructive" as AccentTone },
           ].map((kpi) => {
