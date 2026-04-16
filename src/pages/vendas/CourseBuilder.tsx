@@ -176,6 +176,16 @@ export default function CourseBuilder() {
 
  useEffect(() => { loadAll(); }, [loadAll]);
 
+ // Auto-select fallback: if no lesson is selected but lessons exist, pick the first
+ useEffect(() => {
+   if (selectedLesson) return;
+   const firstLesson = modules.flatMap(m => m.lessons)[0];
+   if (firstLesson) {
+     selectLesson(firstLesson);
+   }
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [modules, selectedLesson]);
+
  const loadAttachments = useCallback(async (lessonId: string) => {
  const { data } = await supabase
  .from("lesson_attachments" as any).select("*")
