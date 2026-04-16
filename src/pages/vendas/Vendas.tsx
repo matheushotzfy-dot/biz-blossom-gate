@@ -264,9 +264,10 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 
 /* ─── Desktop Row ─── */
 function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; i: number }) {
- const methods: Record<string, { label: string; icon: typeof Smartphone; color: string; bg: string; border: string; iconBg: string }> = {
-  pix: { label: "Pix", icon: Smartphone, color: "text-success", bg: "bg-success/[0.06]", border: "border-success/20", iconBg: "bg-success/10" },
+ const methods: Record<string, { label: string; icon: any; color: string; bg: string; border: string; iconBg: string }> = {
+  pix: { label: "Pix", icon: PixLogoMark, color: "text-success", bg: "bg-success/[0.06]", border: "border-success/20", iconBg: "bg-success/10" },
   credit_card: { label: "Cartão", icon: CreditCard, color: "text-info", bg: "bg-info/[0.06]", border: "border-info/20", iconBg: "bg-info/10" },
+  card: { label: "Cartão", icon: CreditCard, color: "text-info", bg: "bg-info/[0.06]", border: "border-info/20", iconBg: "bg-info/10" },
   boleto: { label: "Boleto", icon: FileText, color: "text-warning", bg: "bg-warning/[0.06]", border: "border-warning/20", iconBg: "bg-warning/10" },
  };
  const method = methods[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: DollarSign, color: "text-muted-foreground", bg: "bg-secondary", border: "border-border", iconBg: "bg-muted/10" };
