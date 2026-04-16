@@ -1107,13 +1107,13 @@ export default function Vendas() {
            </div>
 
           {/* Right panel */}
-          <div className="xl:col-span-4 space-y-3">
-            {/* Top Products */}
-            {metrics.topProducts.length > 0 && (
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-warning/10 border border-warning/15"><Crown className="h-3 w-3 text-warning" /></span>
-                  <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
+           <div className="xl:col-span-4 space-y-4">
+             {/* Top Products */}
+             {metrics.topProducts.length > 0 && (
+               <div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+             <div className="flex items-center gap-2.5 border-b border-border/25 px-5 py-3.5">
+                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/8 border border-warning/10"><Crown className="h-3 w-3 text-warning" /></span>
+                   <p className="text-[11px] font-heading font-bold text-foreground">Top Produtos</p>
                 </div>
                 <div className="divide-y divide-border">
                   {metrics.topProducts.slice(0, 4).map((prod, i) => (
