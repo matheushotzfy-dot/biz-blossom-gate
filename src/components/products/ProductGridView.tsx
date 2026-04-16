@@ -92,7 +92,8 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
                 )}
               </div>
 
-              <div className="my-4 h-px bg-border" />
+              <div className="mt-auto pt-4">
+                <div className="h-px bg-border mb-4" />
 
               {/* Actions */}
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
@@ -134,6 +135,7 @@ export function ProductGridView({ products, copiedId, ...handlers }: ProductGrid
                   {formatCompactDate(product.created_at)}
                 </span>
                 <span className="font-mono uppercase tracking-widest">#{product.id.slice(0, 6)}</span>
+              </div>
               </div>
             </div>
           </article>
