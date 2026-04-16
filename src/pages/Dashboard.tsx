@@ -819,7 +819,13 @@ export default function Dashboard() {
                     <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-3 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1.5")}>
                       <div className="flex items-center gap-3">
                         <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border/20", s.iconBg, s.iconText)}>
-                          {item.kind === "transaction" ? <PixLogoMark className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
+                          {item.kind === "transaction"
+                            ? item.paymentMethod === "pix"
+                              ? <PixLogoMark className="h-4 w-4" />
+                              : item.paymentMethod === "credit_card" || item.paymentMethod === "card"
+                                ? <CreditCard className="h-4 w-4" />
+                                : <DollarSign className="h-4 w-4" />
+                            : <Wallet className="h-4 w-4" />}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -828,7 +834,7 @@ export default function Dashboard() {
                               {s.label}
                             </span>
                           </div>
-                          <p className="mt-1 truncate text-[10px] text-muted-foreground/45">{item.kind === "transaction" ? `Venda • ${item.label}` : item.label}</p>
+                          <p className="mt-1 truncate text-[10px] text-muted-foreground/45">{item.kind === "transaction" ? `Venda • ${item.label === "credit_card" || item.label === "card" ? "Cartão" : item.label === "pix" ? "PIX" : item.label}` : item.label}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           {fullTx && (
