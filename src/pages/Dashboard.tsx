@@ -616,8 +616,7 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
         {/* Chart */}
         <div className="xl:col-span-8 rounded-2xl border border-border bg-card min-h-[340px] flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-6 pt-5 pb-3">
-            <div className="px-4 pt-4">
+          <div className="px-4 pt-4">
               <div className="rounded-[18px] border border-border/30 bg-background/40 px-4 py-3">
                 <div className="h-[250px] sm:h-[270px]">
                   <ResponsiveContainer width="100%" height="100%">
