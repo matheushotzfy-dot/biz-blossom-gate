@@ -149,24 +149,28 @@ export default function CourseBuilder() {
   setModules(mapped);
   setExpandedModules(new Set(mods.map(m => m.id)));
   // Auto-select first lesson if none selected
-  if (!selectedLesson && lessons.length > 0) {
-    const firstLesson = mapped.flatMap(m => m.lessons)[0];
-    if (firstLesson) {
-      setSelectedLesson(firstLesson);
-      setLessonTitle(firstLesson.title);
-      setLessonDescription(firstLesson.description || "");
-      setLessonVideoUrl(firstLesson.video_url || "");
-      setLessonDripDays(firstLesson.drip_days || 0);
-      setLessonIsFree(firstLesson.is_free);
-      setLessonDripEnabled((firstLesson.drip_days || 0) > 0);
-      setLessonDuration(firstLesson.duration_minutes || 0);
-      setActiveEditorTab("video");
-      const { data: attData } = await supabase
-        .from("lesson_attachments" as any).select("*")
-        .eq("lesson_id", firstLesson.id).order("created_at", { ascending: false });
-      setAttachments((attData || []) as unknown as Attachment[]);
+  setSelectedLesson(prev => {
+    if (!prev && lessons.length > 0) {
+      const firstLesson = mapped.flatMap(m => m.lessons)[0];
+      if (firstLesson) {
+        setLessonTitle(firstLesson.title);
+        setLessonDescription(firstLesson.description || "");
+        setLessonVideoUrl(firstLesson.video_url || "");
+        setLessonDripDays(firstLesson.drip_days || 0);
+        setLessonIsFree(firstLesson.is_free);
+        setLessonDripEnabled((firstLesson.drip_days || 0) > 0);
+        setLessonDuration(firstLesson.duration_minutes || 0);
+        setActiveEditorTab("video");
+        // Load attachments for auto-selected lesson
+        supabase
+          .from("lesson_attachments" as any).select("*")
+          .eq("lesson_id", firstLesson.id).order("created_at", { ascending: false })
+          .then(({ data }) => setAttachments((data || []) as unknown as Attachment[]));
+        return firstLesson;
+      }
     }
-  }
+    return prev;
+  });
   setLoading(false);
   }, [courseId]);
 
