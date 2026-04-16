@@ -468,8 +468,11 @@ export default function Dashboard() {
       {/* HERO — COMMAND CENTER                                            */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section
-        className="relative mb-8 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:p-10"
+        className="relative mb-8 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:p-10 overflow-hidden"
       >
+        {/* Green accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/6 to-transparent pointer-events-none" />
         <div className="relative">
           {/* Header row */}
           <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
