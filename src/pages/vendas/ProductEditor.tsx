@@ -788,176 +788,170 @@ export default function ProductEditor() {
  ═══════════════════════════════════════════════ */
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
- return (
- <div className="space-y-6">
- <SectionHeader icon={Package} title="Informações do Produto" subtitle="Dados principais exibidos na área de membros e programa de afiliados." />
+  const descValid = description.length >= 50;
+  const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
 
- {/* ─── Interactive Image Upload with Drag & Drop ─── */}
- <div
- className={cn(
- "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-500 relative group/upload",
- isDragging ? "border-primary/50 bg-primary/5 scale-[1.005]" : "border-border bg-card hover:border-border"
- )}
- onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
- onDragLeave={() => setIsDragging(false)}
- onDrop={handleDrop}
- >
- <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
+  return (
+    <div className="space-y-8">
+      {/* Section 1: Identity */}
+      <section>
+        <header className="mb-4">
+          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Identidade do produto</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
+        </header>
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
+            <div
+              className={cn("relative border-b md:border-b-0 md:border-r border-border transition-colors", isDragging ? "bg-primary/5" : "bg-secondary/40")}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+            >
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
+              {imagePreview ? (
+                <div className="relative h-full min-h-[220px] group/img">
+                  <img src={imagePreview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-background/85 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 px-3 rounded-lg bg-card border border-border text-xs font-semibold text-foreground hover:border-primary/40 transition-colors flex items-center gap-1.5">
+                      <ImagePlus className="h-3.5 w-3.5" /> Trocar
+                    </button>
+                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border text-destructive hover:border-destructive/40 transition-colors flex items-center justify-center">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="h-full min-h-[220px] w-full flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-foreground transition-colors p-6">
+                  <div className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-semibold text-foreground">{isDragging ? "Solte aqui" : "Adicionar imagem"}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground/70">JPG, PNG, WebP — até 10MB</p>
+                    <p className="text-[10px] text-muted-foreground/50">Recomendado 300×250px</p>
+                  </div>
+                </button>
+              )}
+            </div>
+            <div className="p-5 space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nome do produto</label>
+                <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
+                  <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
+                  <span className="tabular-nums">{name.length}/200</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Descrição</label>
+                <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
+                    {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
+                  </span>
+                  <span className="tabular-nums text-muted-foreground/60">{description.length}/2000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
- {imagePreview ? (
- <div className="relative group/img">
- <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
- <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
- <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
- <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-colors duration-200">
- <ImagePlus className="h-5 w-5 text-foreground" />
- </motion.button>
- <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-colors duration-200">
- <X className="h-5 w-5" />
- </motion.button>
- </div>
- <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary border border-border">
- <CheckCircle2 className="h-3.5 w-3.5 text-success" />
- <span className="text-[10px] font-display font-black text-foreground">Imagem adicionada</span>
- </div>
- </div>
- ) : (
- <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-52 flex flex-col items-center justify-center gap-4 text-muted-foreground/30 hover:text-primary/50 transition-all duration-500 relative overflow-hidden">
- <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
- <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-primary/[0.02] pointer-events-none" />
- <motion.div
- animate={isDragging ? { scale: 1.1, y: -8 } : { scale: 1, y: 0 }}
- transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
- className="relative h-18 w-18 rounded-2xl bg-muted/8 group-hover/upload:bg-primary/8 flex items-center justify-center transition-all duration-500 border border-dashed border-border group-hover/upload:border-primary/20 ring-1 ring-transparent group-hover/upload:ring-primary/10"
- >
- <Upload className="h-8 w-8" />
- </motion.div>
- <div className="relative text-center space-y-1.5">
- <span className="text-sm font-display font-bold block">{isDragging ? "Solte a imagem aqui" : "Arraste ou clique para enviar"}</span>
- <span className="text-[10px] text-muted-foreground/25 block font-display">JPG, PNG, WebP, GIF • Máx: 10MB • Recomendado: 300×250px</span>
- </div>
- </button>
- )}
- </div>
+      {/* Section 2: Classification & Pricing */}
+      <section>
+        <header className="mb-4">
+          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Categoria e preço</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto é classificado e cobrado.</p>
+        </header>
+        <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
+            <div className="p-5 space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="infoproduto">Infoproduto</SelectItem>
+                  <SelectItem value="curso">Curso Online</SelectItem>
+                  <SelectItem value="ebook">E-book</SelectItem>
+                  <SelectItem value="mentoria">Mentoria</SelectItem>
+                  <SelectItem value="software">Software / SaaS</SelectItem>
+                  <SelectItem value="servico">Serviço</SelectItem>
+                  <SelectItem value="comunidade">Comunidade</SelectItem>
+                  <SelectItem value="outro">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-5 space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
+              <Select value={paymentType} onValueChange={setPaymentType}>
+                <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unico">Pagamento único</SelectItem>
+                  <SelectItem value="assinatura">Assinatura recorrente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="p-5">
+            <div className="flex items-end justify-between gap-6">
+              <div className="flex-1 space-y-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Preço de venda</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
+                  <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success" placeholder="0,00" />
+                </div>
+              </div>
+              <div className="w-32 space-y-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
+                <Select value={warrantyDays} onValueChange={setWarrantyDays}>
+                  <SelectTrigger className="h-14 bg-secondary border-border text-sm font-semibold"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 dias</SelectItem>
+                    <SelectItem value="14">14 dias</SelectItem>
+                    <SelectItem value="30">30 dias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
- {/* ─── Product Details ─── */}
- <EditorCard accentColor="bg-primary">
- <div className="space-y-2">
- <EditorLabel icon={Package}>Nome do produto</EditorLabel>
- <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 bg-secondary border-border focus-visible:border-primary/40 text-base font-display font-bold" required maxLength={200} />
- <div className="flex items-center justify-between">
- <p className="text-[10px] text-muted-foreground/30">{name.length > 0 ? "✓ Nome preenchido" : "Obrigatório"}</p>
- <p className="text-[10px] text-muted-foreground/30 font-numbers tabular-nums">{name.length}/200</p>
- </div>
- </div>
-
- <div className="space-y-2">
- <EditorLabel>Descrição <span className="text-destructive">*</span></EditorLabel>
- <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border", description.length > 0 && description.length < 50 && "border-destructive/40")} maxLength={2000} />
- <div className="flex items-center justify-between">
- <p className={cn("text-[10px]", description.length >= 50 ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/30")}>
- {description.length >= 50 ? "✓ Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres (mín. 50)` : "Obrigatório • Mínimo 50 caracteres"}
- </p>
- <p className="text-[10px] text-muted-foreground/40 text-right font-numbers tabular-nums">{description.length}/2000</p>
- </div>
- </div>
-
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div className="space-y-2">
- <EditorLabel>Categoria</EditorLabel>
- <Select value={category} onValueChange={setCategory}>
- <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
- <SelectContent>
- <SelectItem value="infoproduto">Infoproduto</SelectItem>
- <SelectItem value="curso">Curso Online</SelectItem>
- <SelectItem value="ebook">E-book</SelectItem>
- <SelectItem value="mentoria">Mentoria</SelectItem>
- <SelectItem value="software">Software / SaaS</SelectItem>
- <SelectItem value="servico">Serviço</SelectItem>
- <SelectItem value="comunidade">Comunidade</SelectItem>
- <SelectItem value="outro">Outro</SelectItem>
- </SelectContent>
- </Select>
- </div>
- <div className="space-y-2">
- <EditorLabel>Tipo de pagamento</EditorLabel>
- <Select value={paymentType} onValueChange={setPaymentType}>
- <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
- <SelectContent>
- <SelectItem value="unico">Único</SelectItem>
- <SelectItem value="assinatura">Assinatura</SelectItem>
- </SelectContent>
- </Select>
- </div>
- </div>
- </EditorCard>
-
- {/* ─── Interactive Pricing Card ─── */}
- <EditorCard accentColor="bg-success">
- <div className="flex items-center justify-between">
- <EditorLabel icon={DollarSign}>Preço</EditorLabel>
- <div className="flex items-center gap-2">
- <EditorLabel icon={Shield}>Garantia</EditorLabel>
- <Select value={warrantyDays} onValueChange={setWarrantyDays}>
- <SelectTrigger className="h-8 w-24 text-xs bg-secondary border-border"><SelectValue /></SelectTrigger>
- <SelectContent>
- <SelectItem value="7">7 dias</SelectItem>
- <SelectItem value="14">14 dias</SelectItem>
- <SelectItem value="30">30 dias</SelectItem>
- </SelectContent>
- </Select>
- </div>
- </div>
-
- <div className="space-y-5">
- <div className="space-y-1.5">
- <span className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Preço principal</span>
- <div className="relative">
- <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-display font-bold text-muted-foreground">R$</span>
- <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-10 text-2xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border" placeholder="0.00" />
- </div>
- </div>
-
- </div>
- </EditorCard>
-
- {/* ─── Links & Support (Required) ─── */}
- <EditorCard accentColor="bg-info">
- <SectionHeader icon={Globe} title="Informações do Produtor" subtitle="Esses dados são obrigatórios e serão exibidos no checkout." />
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div className="space-y-2">
- <EditorLabel icon={ExternalLink}>Página de vendas <span className="text-destructive">*</span></EditorLabel>
- <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className="h-11 bg-secondary border-border" required />
- <p className={cn("text-[10px]", /^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "✓ Página preenchida" : "Obrigatório — insira o domínio completo"}</p>
- </div>
- <div className="space-y-2">
- <EditorLabel icon={Mail}>E-mail de suporte <span className="text-destructive">*</span></EditorLabel>
- <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-secondary border-border" required />
- <p className={cn("text-[10px]", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "✓ E-mail preenchido" : "Obrigatório — insira um e-mail válido"}</p>
- </div>
- </div>
- <div className="space-y-2">
- <EditorLabel icon={Users}>Nome de exibição do produtor <span className="text-destructive">*</span></EditorLabel>
- <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador no checkout" className="h-11 bg-secondary border-border" required />
- <p className={cn("text-[10px]", displayName.trim() ? "text-success" : "text-muted-foreground/30")}>{displayName.trim() ? "✓ Nome preenchido" : "Obrigatório • Aparecerá no rodapé do checkout"}</p>
- </div>
- </EditorCard>
-
- {/* ─── SEO Preview Card ─── */}
- {name && (
- <EditorCard accentColor="bg-warning">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
- <Eye className="h-4 w-4 text-warning" /> Pré-visualização (Google)
- </h3>
- <div className="rounded-xl border border-border bg-card p-4 space-y-1">
- <p className="text-[13px] text-info font-medium truncate">{pageUrl || "https://seusite.com/produto"}</p>
- <p className="text-base text-primary font-display font-bold truncate">{name || "Nome do Produto"}{price ? ` — R$ ${Number(price).toFixed(2)}` : ""}</p>
- <p className="text-xs text-muted-foreground line-clamp-2">{description.slice(0, 160) || "Descrição do produto aparecerá aqui..."}</p>
- </div>
- </EditorCard>
- )}
- </div>
- );
+      {/* Section 3: Producer info */}
+      <section>
+        <header className="mb-4">
+          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Informações do produtor</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
+        </header>
+        <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <ExternalLink className="h-3 w-3" /> Página de vendas
+              </label>
+              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
+              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "Insira o domínio completo"}</p>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <Mail className="h-3 w-3" /> E-mail de suporte
+              </label>
+              <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
+              <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <Users className="h-3 w-3" /> Nome de exibição do produtor
+            </label>
+            <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
+            <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }: any) {
