@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box,
   Loader2,
   Package,
   Plus,
@@ -101,58 +100,43 @@ export default function Produtos() {
 
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero workspace ── */}
-      <div className="px-5 pt-1 sm:px-7 md:pt-1">
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            {/* Identity */}
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-border">
-                <Box className="h-5 w-5 text-primary" strokeWidth={1.8} />
-              </div>
-              <div>
-                <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-[22px]">
-                  Catálogo de produtos
-                </h1>
-                <p className="mt-0.5 text-[12px] text-muted-foreground">
-                  Gerencie, publique e otimize sua oferta em um só lugar.
-                </p>
-              </div>
-            </div>
-
-            {/* KPI strip */}
-            <div className="flex items-stretch gap-0 divide-x divide-border rounded-xl border border-border bg-secondary/30">
-              <div className="flex flex-col items-center justify-center px-5 py-2.5">
-                <span className="font-numbers text-lg font-black tabular-nums text-foreground">{products.length}</span>
-                <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Total</span>
-              </div>
-              <div className="flex flex-col items-center justify-center px-5 py-2.5">
-                <span className="font-numbers text-lg font-black tabular-nums text-success">{activeCount}</span>
-                <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Ativos</span>
-              </div>
-              <div className="flex flex-col items-center justify-center px-5 py-2.5">
-                <span className="font-numbers text-lg font-black tabular-nums text-warning">{pendingCount}</span>
-                <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Revisão</span>
-              </div>
-              <div className="flex flex-col items-center justify-center px-5 py-2.5">
-                <span className="font-numbers text-lg font-black tabular-nums text-muted-foreground">{inactiveCount}</span>
-                <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Inativos</span>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <button
-              onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:-translate-y-px"
-            >
-              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Novo produto
-            </button>
+      {/* ── Page header ── */}
+      <div className="flex flex-col gap-5 px-5 pt-1 sm:px-7 md:pt-1">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight text-foreground sm:text-[30px]">
+              Produtos
+            </h1>
+            <p className="mt-2 text-[13px] text-muted-foreground">
+              <span className="font-semibold text-foreground">{products.length}</span> no catálogo
+              {activeCount > 0 && (
+                <>
+                  <span className="mx-2 text-muted-foreground/40">·</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                    <span className="font-semibold text-foreground">{activeCount}</span> ativos
+                  </span>
+                </>
+              )}
+              {pendingCount > 0 && (
+                <>
+                  <span className="mx-2 text-muted-foreground/40">·</span>
+                  <span className="font-semibold text-warning">{pendingCount}</span> em revisão
+                </>
+              )}
+            </p>
           </div>
+          <button
+            onClick={() => navigate("/vendas/produtos/novo/editar")}
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:-translate-y-px"
+          >
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+            Novo produto
+          </button>
         </div>
 
         {/* ── Toolbar ── */}
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs */}
           <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
             {tabs.map((item) => {
