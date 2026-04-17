@@ -555,7 +555,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="px-5 py-7 lg:px-8 lg:py-10 bg-background/40">
+          <div className="relative px-5 py-7 lg:px-8 lg:py-10 border-l-2 border-success/70 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-success/40 before:to-transparent after:absolute after:inset-y-4 after:left-[-1px] after:w-[3px] after:rounded-full after:bg-success after:shadow-[0_0_18px_hsl(var(--success)/0.55)]">
             <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
             <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-primary tracking-[-0.04em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
@@ -702,6 +702,9 @@ export default function Dashboard() {
                 { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
                 { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
                 { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
+                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
+                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
+                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
                 { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
               ].map((action) => (
                 <Link
