@@ -2,6 +2,7 @@ import {
   Copy,
   ExternalLink,
   Pencil,
+  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -18,29 +19,38 @@ type ProductGridViewProps = ProductMenuHandlers & {
 
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+    <div className="space-y-4">
       {toolbar && (
-        <div className="border-b border-border px-6 py-3.5">{toolbar}</div>
+        <div className="rounded-xl border border-border bg-card px-5 py-3">{toolbar}</div>
       )}
 
-      <ul className="divide-y divide-border/60">
+      <ul className="space-y-3">
         {products.map((product) => {
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const checkoutLink = product.checkout_url ? getCheckoutLink(product.checkout_url) : null;
           const initial = product.name.charAt(0).toUpperCase();
           const price = Number(product.price);
           const isCopied = copiedId === product.id;
+          const isActive = product.status === "active";
 
           return (
             <li
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
-              className="group relative flex cursor-pointer items-center gap-6 px-6 py-5 transition-colors duration-200 hover:bg-secondary/40"
+              className="group relative flex cursor-pointer items-stretch overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/30 hover:bg-card/80"
             >
-              {/* ── PRODUTO (dominant) ── */}
-              <div className="flex min-w-0 flex-1 items-center gap-5">
-                {/* Premium thumbnail */}
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-muted ring-1 ring-border/40">
+              {/* Active accent rail */}
+              <div
+                className={cn(
+                  "w-[3px] shrink-0 transition-colors duration-300",
+                  isActive ? "bg-success" : "bg-transparent group-hover:bg-primary/40"
+                )}
+              />
+
+              {/* ── PRODUTO (dominant, with large thumb) ── */}
+              <div className="flex min-w-0 flex-1 items-center gap-5 py-4 pl-5 pr-4">
+                {/* Hero thumbnail */}
+                <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -49,65 +59,66 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
-                      <span className="font-display text-3xl font-black text-primary/70">{initial}</span>
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-transparent">
+                      <span className="font-display text-4xl font-black text-primary/80">{initial}</span>
                     </div>
-                  )}
-                  {checkoutLink && (
-                    <span className="absolute right-1.5 top-1.5 flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-70" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-success ring-2 ring-card" />
-                    </span>
                   )}
                 </div>
 
-                {/* Title + metadata stack */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="truncate font-display text-[16px] font-bold leading-tight tracking-tight text-foreground">
+                {/* Title + description + metadata */}
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  {/* Top row: title + affiliate */}
+                  <div className="flex items-center gap-2">
+                    <h3 className="truncate font-display text-[17px] font-bold leading-tight tracking-tight text-foreground transition-colors group-hover:text-primary">
                       {product.name}
                     </h3>
                     {product.affiliate_enabled && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
-                        <Users className="h-2.5 w-2.5" strokeWidth={2.4} />
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-primary">
+                        <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
                         {product.affiliate_commission}%
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 truncate text-[12.5px] leading-snug text-muted-foreground">
+
+                  {/* Description */}
+                  <p className="line-clamp-1 text-[13px] leading-snug text-muted-foreground">
                     {product.description || "Sem descrição"}
                   </p>
-                  <div className="mt-2 flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground/60">
+
+                  {/* Metadata row */}
+                  <div className="mt-1 flex items-center gap-3 text-[10.5px] font-medium text-muted-foreground/60">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-success" : "bg-muted-foreground/30")} />
+                      <span className="uppercase tracking-wider">{deliveryLabel}</span>
+                    </span>
+                    <span className="h-3 w-px bg-border" />
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
+                    <span className="h-3 w-px bg-border" />
                     <span className="font-mono uppercase tracking-wider">#{product.id.slice(0, 6)}</span>
+                    {checkoutLink && (
+                      <>
+                        <span className="h-3 w-px bg-border" />
+                        <span className="inline-flex items-center gap-1 text-success/80">
+                          <Sparkles className="h-2.5 w-2.5" strokeWidth={2.2} />
+                          <span className="uppercase tracking-wider">Online</span>
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* ── ENTREGA (subtle badge) ── */}
-              <div className="hidden w-[110px] shrink-0 md:block">
-                <span className="text-[11px] font-medium text-muted-foreground/80">
-                  {deliveryLabel}
-                </span>
-              </div>
-
-              {/* ── PREÇO (prominent) ── */}
-              <div className="hidden w-[120px] shrink-0 flex-col items-end md:flex">
-                <span className="font-numbers text-[20px] font-black leading-none tabular-nums tracking-tight text-foreground">
+              {/* ── PRICE + STATUS sidebar ── */}
+              <div className="hidden shrink-0 flex-col items-end justify-center gap-2 border-l border-border/60 px-6 py-4 md:flex">
+                <span className="font-numbers text-[22px] font-black leading-none tabular-nums tracking-tight text-foreground">
                   {formatCurrency(price)}
                 </span>
-                <span className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">BRL</span>
-              </div>
-
-              {/* ── STATUS (premium badge) ── */}
-              <div className="hidden w-[100px] shrink-0 justify-center md:flex">
                 <ProductStatusIndicator status={product.status} tone="soft" />
               </div>
 
-              {/* ── AÇÕES (clean) ── */}
+              {/* ── ACTIONS ── */}
               <div
-                className="flex shrink-0 items-center gap-0.5 opacity-60 transition-opacity duration-200 group-hover:opacity-100"
+                className="flex shrink-0 items-center gap-0.5 border-l border-border/60 px-3 py-4 opacity-50 transition-opacity duration-200 group-hover:opacity-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 {checkoutLink && (
