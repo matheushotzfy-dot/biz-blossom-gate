@@ -26,29 +26,42 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           const price = Number(product.price);
           const isCopied = copiedId === product.id;
           const isActive = product.status === "active";
+          const formattedPrice = formatCurrency(price);
+          // Split currency symbol from value for typographic hierarchy
+          const priceMatch = formattedPrice.match(/^(\D+)\s?(.+)$/);
+          const currencySymbol = priceMatch?.[1]?.trim() ?? "";
+          const priceValue = priceMatch?.[2] ?? formattedPrice;
 
           return (
             <li
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
               className={cn(
-                "group relative flex cursor-pointer items-center gap-6 px-6 py-4 transition-colors duration-150 hover:bg-secondary/40",
-                idx !== 0 && "border-t border-border/50"
+                "group relative flex cursor-pointer items-center gap-7 px-7 py-5 transition-colors duration-200",
+                "hover:bg-foreground/[0.025]",
+                idx !== 0 && "border-t border-border/40",
+                idx % 2 === 1 && "bg-foreground/[0.008]"
               )}
             >
-              {/* ── ZONE 1: PRODUCT IDENTITY (dominant) ── */}
-              <div className="flex min-w-0 flex-[1.6] items-center gap-4">
-                <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-muted">
+              {/* Active accent rail on hover */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-3 left-0 w-[2px] rounded-r-full bg-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              />
+
+              {/* ── ZONE 1: PRODUCT IDENTITY (dominant, breathable) ── */}
+              <div className="flex min-w-0 flex-[2] items-center gap-5">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border/60">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
                       alt={product.name}
                       loading="lazy"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                      <span className="font-display text-3xl font-black text-primary/70">{initial}</span>
+                      <span className="font-display text-[34px] font-black leading-none text-primary/70">{initial}</span>
                     </div>
                   )}
                   {isActive && (
@@ -58,7 +71,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate font-display text-[16px] font-bold leading-tight tracking-tight text-foreground">
+                    <h3 className="truncate font-display text-[17.5px] font-extrabold leading-tight tracking-[-0.015em] text-foreground">
                       {product.name}
                     </h3>
                     {product.affiliate_enabled && (
@@ -68,24 +81,24 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 truncate text-[12.5px] leading-snug text-muted-foreground">
+                  <p className="mt-1 truncate text-[12.5px] leading-snug text-muted-foreground/70">
                     {product.description || "Sem descrição"}
                   </p>
-                  <div className="mt-1.5 flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground/55">
+                  <div className="mt-2 flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground/40">
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="text-muted-foreground/30">·</span>
+                    <span className="text-muted-foreground/25">·</span>
                     <span className="font-mono uppercase tracking-wider">#{product.id.slice(0, 6)}</span>
                   </div>
                 </div>
               </div>
 
               {/* ── ZONE 2: TYPE + META (subtle) ── */}
-              <div className="hidden w-[140px] shrink-0 flex-col gap-1 md:flex">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/70">
+              <div className="hidden w-[120px] shrink-0 flex-col gap-1 md:flex">
+                <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
                   {deliveryLabel}
                 </span>
                 {checkoutLink && (
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-success/80">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-success/70">
                     <span className="h-1 w-1 rounded-full bg-success" />
                     Online
                   </span>
@@ -93,10 +106,15 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               </div>
 
               {/* ── ZONE 3: COMMERCIAL (high impact) ── */}
-              <div className="hidden w-[140px] shrink-0 flex-col items-end gap-1.5 md:flex">
+              <div className="hidden w-[150px] shrink-0 flex-col items-end gap-2 md:flex">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-numbers text-[22px] font-black leading-none tabular-nums tracking-tight text-foreground">
-                    {formatCurrency(price)}
+                  {currencySymbol && (
+                    <span className="font-numbers text-[12px] font-semibold leading-none text-muted-foreground/55">
+                      {currencySymbol}
+                    </span>
+                  )}
+                  <span className="font-numbers text-[26px] font-black leading-none tabular-nums tracking-[-0.02em] text-foreground">
+                    {priceValue}
                   </span>
                 </div>
                 <ProductStatusIndicator status={product.status} tone="soft" />
