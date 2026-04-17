@@ -1,9 +1,6 @@
 import {
-  ArrowUpRight,
-  Calendar,
   Copy,
   ExternalLink,
-  Package,
   Pencil,
   Users,
 } from "lucide-react";
@@ -23,18 +20,10 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       {toolbar && (
-        <div className="border-b border-border px-5 py-3">{toolbar}</div>
+        <div className="border-b border-border px-6 py-3.5">{toolbar}</div>
       )}
-      {/* Column ribbon */}
-      <div className="grid grid-cols-[1fr_120px_140px_120px_80px] items-center gap-4 border-b border-border bg-secondary/30 px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
-        <span>Produto</span>
-        <span className="text-center">Entrega</span>
-        <span className="text-right">Preço</span>
-        <span className="text-center">Status</span>
-        <span className="text-right">Ações</span>
-      </div>
 
-      <ul className="divide-y divide-border">
+      <ul className="divide-y divide-border/60">
         {products.map((product) => {
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const checkoutLink = product.checkout_url ? getCheckoutLink(product.checkout_url) : null;
@@ -46,125 +35,118 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
             <li
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
-              className="group relative grid cursor-pointer grid-cols-[1fr_120px_140px_120px_80px] items-center gap-4 px-5 py-4 transition-colors hover:bg-secondary/30"
+              className="group relative flex cursor-pointer items-center gap-6 px-6 py-5 transition-colors duration-200 hover:bg-secondary/40"
             >
-              {/* Product identity */}
-              <div className="flex min-w-0 items-center gap-4">
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+              {/* ── PRODUTO (dominant) ── */}
+              <div className="flex min-w-0 flex-1 items-center gap-5">
+                {/* Premium thumbnail */}
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-muted ring-1 ring-border/40">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
                       alt={product.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-primary/5">
-                      <span className="font-display text-xl font-black text-primary/70">{initial}</span>
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
+                      <span className="font-display text-3xl font-black text-primary/70">{initial}</span>
                     </div>
                   )}
                   {checkoutLink && (
-                    <span className="absolute -right-1 -top-1 flex h-3 w-3">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                      <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-card bg-success" />
+                    <span className="absolute right-1.5 top-1.5 flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-70" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-success ring-2 ring-card" />
                     </span>
                   )}
                 </div>
 
+                {/* Title + metadata stack */}
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="truncate text-[14px] font-bold leading-tight text-foreground">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="truncate font-display text-[16px] font-bold leading-tight tracking-tight text-foreground">
                       {product.name}
                     </h3>
                     {product.affiliate_enabled && (
                       <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
-                        <Users className="h-2.5 w-2.5" strokeWidth={2.2} />
+                        <Users className="h-2.5 w-2.5" strokeWidth={2.4} />
                         {product.affiliate_commission}%
                       </span>
                     )}
                   </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className="truncate">{product.description || "Sem descrição"}</span>
-                  </div>
-                  <div className="mt-1.5 flex items-center gap-3 text-[10px] text-muted-foreground/70">
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar className="h-2.5 w-2.5" strokeWidth={1.8} />
-                      {formatCompactDate(product.created_at)}
-                    </span>
-                    <span className="font-mono uppercase tracking-widest">#{product.id.slice(0, 6)}</span>
+                  <p className="mt-1 truncate text-[12.5px] leading-snug text-muted-foreground">
+                    {product.description || "Sem descrição"}
+                  </p>
+                  <div className="mt-2 flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground/60">
+                    <span>{formatCompactDate(product.created_at)}</span>
+                    <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
+                    <span className="font-mono uppercase tracking-wider">#{product.id.slice(0, 6)}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Delivery */}
-              <div className="flex justify-center">
-                <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/80">
-                  <Package className="h-3 w-3" strokeWidth={2} />
+              {/* ── ENTREGA (subtle badge) ── */}
+              <div className="hidden w-[110px] shrink-0 md:block">
+                <span className="text-[11px] font-medium text-muted-foreground/80">
                   {deliveryLabel}
                 </span>
               </div>
 
-              {/* Price */}
-              <div className="flex flex-col items-end">
-                <span className="font-numbers text-[17px] font-black tabular-nums tracking-tight text-foreground">
+              {/* ── PREÇO (prominent) ── */}
+              <div className="hidden w-[120px] shrink-0 flex-col items-end md:flex">
+                <span className="font-numbers text-[20px] font-black leading-none tabular-nums tracking-tight text-foreground">
                   {formatCurrency(price)}
                 </span>
-                <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/60">BRL</span>
+                <span className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">BRL</span>
               </div>
 
-              {/* Status */}
-              <div className="flex justify-center">
+              {/* ── STATUS (premium badge) ── */}
+              <div className="hidden w-[100px] shrink-0 justify-center md:flex">
                 <ProductStatusIndicator status={product.status} tone="soft" />
               </div>
 
-              {/* Actions */}
+              {/* ── AÇÕES (clean) ── */}
               <div
-                className="flex items-center justify-end gap-1"
+                className="flex shrink-0 items-center gap-0.5 opacity-60 transition-opacity duration-200 group-hover:opacity-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 {checkoutLink && (
-                  <>
-                    <button
-                      onClick={() => handlers.onCopyLink(product)}
-                      className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                        isCopied
-                          ? "border-success/40 bg-success/15 text-success"
-                          : "border-transparent text-muted-foreground hover:border-border hover:bg-secondary hover:text-foreground"
-                      )}
-                      title="Copiar link"
-                    >
-                      <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />
-                    </button>
-                    <button
-                      onClick={() => handlers.onOpenCheckout(product)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-foreground transition-colors hover:border-border hover:bg-secondary hover:text-foreground"
-                      title="Abrir checkout"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
-                    </button>
-                  </>
+                  <button
+                    onClick={() => handlers.onCopyLink(product)}
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                      isCopied
+                        ? "bg-success/15 text-success"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    )}
+                    title="Copiar link"
+                  >
+                    <Copy className="h-4 w-4" strokeWidth={1.8} />
+                  </button>
+                )}
+                {checkoutLink && (
+                  <button
+                    onClick={() => handlers.onOpenCheckout(product)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                    title="Abrir checkout"
+                  >
+                    <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
+                  </button>
                 )}
                 <button
                   onClick={() => handlers.onEditProduct(product)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-foreground transition-colors hover:border-border hover:bg-secondary hover:text-foreground"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                   title="Editar"
                 >
-                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  <Pencil className="h-4 w-4" strokeWidth={1.8} />
                 </button>
                 <ProductActionsMenu
                   copied={isCopied}
                   product={product}
-                  triggerClassName="h-8 w-8 rounded-lg border border-transparent text-muted-foreground hover:border-border hover:bg-secondary hover:text-foreground"
+                  triggerClassName="h-9 w-9 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
                   {...handlers}
                 />
               </div>
-
-              {/* Hover indicator */}
-              <ArrowUpRight
-                className="pointer-events-none absolute right-2 top-2 h-3 w-3 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/30"
-                strokeWidth={2}
-              />
             </li>
           );
         })}
