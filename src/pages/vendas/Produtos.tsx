@@ -135,8 +135,6 @@ export default function Produtos() {
           </button>
         </div>
 
-        {/* ── Toolbar ── */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       </div>
 
       {/* ── Product workspace ── */}
