@@ -71,7 +71,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate font-display text-[17.5px] font-extrabold leading-tight tracking-[-0.015em] text-foreground">
+                    <h3 className="truncate font-display text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
                       {product.name}
                     </h3>
                     {product.affiliate_enabled && (
@@ -81,12 +81,12 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 truncate text-[12.5px] leading-snug text-muted-foreground/70">
+                  <p className="mt-1 truncate text-[12.5px] leading-snug text-muted-foreground/55">
                     {product.description || "Sem descrição"}
                   </p>
-                  <div className="mt-2 flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground/40">
+                  <div className="mt-2 flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground/35">
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="text-muted-foreground/25">·</span>
+                    <span className="text-muted-foreground/20">·</span>
                     <span className="font-mono uppercase tracking-wider">#{product.id.slice(0, 6)}</span>
                   </div>
                 </div>
@@ -94,7 +94,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
               {/* ── ZONE 2: TYPE + META (subtle) ── */}
               <div className="hidden w-[120px] shrink-0 flex-col gap-1 md:flex">
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
+                <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/55">
                   {deliveryLabel}
                 </span>
                 {checkoutLink && (
@@ -106,14 +106,14 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               </div>
 
               {/* ── ZONE 3: COMMERCIAL (high impact) ── */}
-              <div className="hidden w-[150px] shrink-0 flex-col items-end gap-2 md:flex">
-                <div className="flex items-baseline gap-1">
+              <div className="hidden w-[170px] shrink-0 flex-col items-end gap-2 md:flex">
+                <div className="flex items-baseline gap-1.5">
                   {currencySymbol && (
-                    <span className="font-numbers text-[12px] font-semibold leading-none text-muted-foreground/55">
+                    <span className="font-numbers text-[11px] font-semibold uppercase leading-none tracking-wider text-muted-foreground/45">
                       {currencySymbol}
                     </span>
                   )}
-                  <span className="font-numbers text-[26px] font-black leading-none tabular-nums tracking-[-0.02em] text-foreground">
+                  <span className="font-numbers text-[32px] font-black leading-none tabular-nums tracking-[-0.035em] text-foreground">
                     {priceValue}
                   </span>
                 </div>
