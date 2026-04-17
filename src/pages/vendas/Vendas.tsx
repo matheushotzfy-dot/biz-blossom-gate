@@ -940,16 +940,81 @@ export default function Vendas() {
             </div>
           </div>
 
-          {/* ═══════ OPERATION PANEL — single intentional surface ═══════ */}
+          {/* ═══════ INTELLIGENCE STRIP — dense horizontal data ribbon, single surface ═══════ */}
           <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-            {/* Top: 3 columns sharing the same surface, divided by lines (no nested cards) */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border/50">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border/50">
 
-              {/* Col 1 — Payment methods */}
+              {/* LEFT — Top products list (dominant, replaces 3 weak cards) */}
               <div className="p-5 lg:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Métodos de pagamento</p>
+                <div className="flex items-end justify-between mb-4">
+                  <div>
+                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Produtos que estão vendendo</p>
+                    <p className="text-[10.5px] text-muted-foreground/60 mt-0.5">Ranqueado por receita líquida no período</p>
+                  </div>
+                  {metrics.topProducts.length > 0 && (
+                    <span className="text-[10px] font-bold tabular-nums text-muted-foreground/70">
+                      {metrics.topProducts.length} de {productsRaw.length} ativos
+                    </span>
+                  )}
+                </div>
+                {metrics.topProducts.length === 0 ? (
+                  <div className="py-12 text-center border border-dashed border-border/40 rounded-xl bg-card-inset/20">
+                    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-muted/40 border border-border/40">
+                      <Package className="h-5 w-5 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-[12.5px] font-bold text-foreground mb-1">Nenhuma venda registrada</p>
+                    <p className="text-[10.5px] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
+                      {productsRaw.length === 0
+                        ? "Cadastre seu primeiro produto para começar."
+                        : `Você tem ${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, mas nenhum vendeu neste período.`}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border/30">
+                    {metrics.topProducts.slice(0, 5).map((prod, i) => {
+                      const maxRev = metrics.topProducts[0]?.revenue || 1;
+                      const pct = (prod.revenue / maxRev) * 100;
+                      const share = m.totalNet > 0 ? (prod.revenue / m.totalNet) * 100 : 0;
+                      return (
+                        <div key={prod.id} className="py-3 first:pt-0 last:pb-0 group">
+                          <div className="flex items-center gap-3.5">
+                            <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-heading font-black tabular-nums shrink-0",
+                              i === 0 ? "bg-success/15 text-success border border-success/25" :
+                              i === 1 ? "bg-info/12 text-info border border-info/20" :
+                              "bg-muted/50 text-muted-foreground border border-border/40"
+                            )}>
+                              #{i + 1}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-baseline justify-between gap-3">
+                                <p className="truncate text-[12.5px] font-bold text-foreground">{prod.name}</p>
+                                <p className="text-[13px] font-heading font-black text-foreground tabular-nums leading-none shrink-0">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                              </div>
+                              <div className="mt-1.5 flex items-center gap-2.5">
+                                <div className="h-[2px] flex-1 rounded-full bg-muted/40 overflow-hidden">
+                                  <div className={cn("h-full rounded-full transition-all duration-500",
+                                    i === 0 ? "bg-success" : i === 1 ? "bg-info/80" : "bg-foreground/30"
+                                  )} style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className="text-[10px] text-muted-foreground tabular-nums font-semibold shrink-0">
+                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} · {share.toFixed(0)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* RIGHT — Stacked: Payment mix (compact list) + Health (compact list) */}
+              <div className="flex flex-col">
+                {/* Payment methods — clean data list */}
+                <div className="p-5 lg:p-6 border-b border-border/50">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Mix de pagamentos</p>
                     {dominantMethod.value > 0 && (
                       <span className={cn("text-[9px] font-bold uppercase tracking-wider rounded px-1.5 py-[1px] border",
                         dominantMethod.color === "success" ? "text-success bg-success/10 border-success/20" :
@@ -958,122 +1023,61 @@ export default function Vendas() {
                       )}>{dominantMethod.label} líder</span>
                     )}
                   </div>
-                </div>
-                {m.totalNet === 0 ? (
-                  <div className="py-8 text-center">
-                    <CreditCard className="mx-auto h-5 w-5 text-muted-foreground/30 mb-2" />
-                    <p className="text-[11.5px] text-muted-foreground">Sem pagamentos no período</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {paymentMix.map((pm) => {
-                      const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                      const accent = pm.color === "success" ? "bg-success" : pm.color === "info" ? "bg-info" : "bg-warning";
-                      const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
-                      return (
-                        <div key={pm.label}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2.5">
-                              <span className={cn("[&_svg]:h-3.5 [&_svg]:w-3.5", accentText)}>{pm.icon}</span>
-                              <div>
-                                <p className="text-[12.5px] font-bold text-foreground leading-tight">{pm.label}</p>
-                                <p className="text-[10.5px] text-muted-foreground tabular-nums">{pm.count} venda{pm.count !== 1 ? "s" : ""} · {hidden ? HIDE : fmtCompact(pm.count > 0 ? pm.value / pm.count : 0)}</p>
+                  {m.totalNet === 0 ? (
+                    <p className="text-[11px] text-muted-foreground/60 py-2">Sem pagamentos no período.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {paymentMix.map((pm) => {
+                        const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
+                        const accent = pm.color === "success" ? "bg-success" : pm.color === "info" ? "bg-info" : "bg-warning";
+                        const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
+                        return (
+                          <div key={pm.label} className="flex items-center gap-3">
+                            <span className={cn("[&_svg]:h-3.5 [&_svg]:w-3.5 shrink-0", accentText)}>{pm.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <span className="text-[11.5px] font-bold text-foreground">{pm.label}</span>
+                                <span className="text-[11px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</span>
+                              </div>
+                              <div className="mt-1 flex items-center gap-2">
+                                <div className="h-[2px] flex-1 rounded-full bg-muted/40 overflow-hidden">
+                                  <div className={cn("h-full rounded-full", accent)} style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className="text-[9.5px] font-bold tabular-nums text-muted-foreground/70 shrink-0 w-10 text-right">{pct.toFixed(0)}% · {pm.count}</span>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className={cn("text-[13.5px] font-heading font-black tabular-nums leading-tight", pm.value > 0 ? accentText : "text-foreground/40")}>{hidden ? HIDE : fmtCompact(pm.value)}</p>
-                              <p className="text-[10.5px] font-bold text-muted-foreground tabular-nums">{pct.toFixed(1)}%</p>
-                            </div>
                           </div>
-                          <div className="h-[3px] rounded-full bg-muted/40 overflow-hidden">
-                            <div className={cn("h-full rounded-full transition-all duration-700", accent)} style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Col 2 — Top products */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Top produtos</p>
-                  <span className="text-[10px] font-bold tabular-nums text-muted-foreground/60">{metrics.topProducts.length} {metrics.topProducts.length === 1 ? "ativo" : "ativos"}</span>
-                </div>
-                {metrics.topProducts.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted/40 border border-border/40">
-                      <Package className="h-4 w-4 text-muted-foreground/50" />
+                        );
+                      })}
                     </div>
-                    <p className="text-[12px] font-bold text-foreground mb-1">Nenhum produto vendeu</p>
-                    <p className="text-[10.5px] text-muted-foreground max-w-[220px] mx-auto leading-relaxed">
-                      {productsRaw.length === 0
-                        ? "Cadastre seu primeiro produto para começar a vender."
-                        : `${productsRaw.length} cadastrado${productsRaw.length !== 1 ? "s" : ""}, nenhum vendeu no período.`}
-                    </p>
+                  )}
+                </div>
+
+                {/* Health — compact inline */}
+                <div className="p-5 lg:p-6 flex-1">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Saúde da operação</p>
+                    <span className="text-[10px] font-bold tabular-nums text-success">{approvalRate.toFixed(1)}% aprov.</span>
                   </div>
-                ) : (
-                  <div className="space-y-3.5">
-                    {metrics.topProducts.slice(0, 5).map((prod, i) => {
-                      const maxRev = metrics.topProducts[0]?.revenue || 1;
-                      const pct = (prod.revenue / maxRev) * 100;
+                  <div className="grid grid-cols-3 gap-3">
+                    {healthItems.map((hi) => {
+                      const ok = hi.value <= hi.threshold;
                       return (
-                        <div key={prod.id}>
-                          <div className="flex items-center justify-between gap-3 mb-1.5">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span className={cn("text-[10px] font-heading font-black tabular-nums w-4", i === 0 ? "text-success" : "text-muted-foreground/50")}>#{i + 1}</span>
-                              <p className="truncate text-[12.5px] font-bold text-foreground">{prod.name}</p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="text-[12.5px] font-heading font-black text-foreground tabular-nums leading-tight">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
-                              <p className="text-[10px] text-muted-foreground tabular-nums">{prod.sales} venda{prod.sales !== 1 ? "s" : ""}</p>
-                            </div>
-                          </div>
-                          <div className="h-[2px] rounded-full bg-muted/40 overflow-hidden ml-6">
-                            <div className={cn("h-full rounded-full", i === 0 ? "bg-success/70" : "bg-foreground/35")} style={{ width: `${pct}%` }} />
-                          </div>
+                        <div key={hi.label} className={cn("rounded-lg border px-2.5 py-2", ok ? "border-border/40 bg-card-inset/30" : "border-destructive/25 bg-destructive/[0.04]")}>
+                          <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground/70">{hi.label}</p>
+                          <p className={cn("mt-1 text-[15px] font-heading font-black tabular-nums leading-none", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                          <p className="text-[9px] text-muted-foreground/60 mt-1">máx {hi.threshold}%</p>
                         </div>
                       );
                     })}
                   </div>
-                )}
-              </div>
-
-              {/* Col 3 — Health */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Saúde da operação</p>
-                  <span className="text-[10px] font-bold tabular-nums text-muted-foreground/60">{approvalRate.toFixed(1)}% aprov.</span>
-                </div>
-                <div className="space-y-3.5">
-                  {healthItems.map((hi) => {
-                    const ok = hi.value <= hi.threshold;
-                    const Icon = hi.icon;
-                    return (
-                      <div key={hi.label} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <Icon className={cn("h-3.5 w-3.5", ok ? "text-muted-foreground/60" : "text-destructive")} />
-                          <div>
-                            <p className="text-[12px] font-bold text-foreground leading-tight">{hi.label}</p>
-                            <p className="text-[10px] text-muted-foreground">limite &lt; {hi.threshold}%</p>
-                          </div>
-                        </div>
-                        <span className={cn("text-[14px] font-heading font-black tabular-nums", ok ? "text-foreground" : "text-destructive")}>
-                          {hi.value.toFixed(1)}%
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground/60">Reembolsado</p>
-                    <p className="mt-0.5 text-[13px] font-heading font-black text-info tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground/60">Chargeback</p>
-                    <p className={cn("mt-0.5 text-[13px] font-heading font-black tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground/40")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</p>
+                  <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between text-[10.5px]">
+                    <span className="text-muted-foreground">
+                      Reembolsado <span className="text-info font-bold tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      Chargeback <span className={cn("font-bold tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground/40")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1083,12 +1087,13 @@ export default function Vendas() {
             <div className="border-t border-border/50 px-5 lg:px-6 py-4 bg-card-inset/30">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground/50" />
                   <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Volume por hora</p>
                   {peakHour !== null && (
                     <span className="text-[9.5px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-[1px]">Pico {peakHour}h</span>
                   )}
                 </div>
-                <span className="text-[10.5px] text-muted-foreground tabular-nums font-semibold">{m.approved.length} aprovadas no período</span>
+                <span className="text-[10.5px] text-muted-foreground tabular-nums font-semibold">{m.approved.length} aprovadas · ticket médio {hidden ? HIDE : fmtCompact(m.avgTicket)}</span>
               </div>
               <div className="flex h-[44px] items-end gap-[3px]">
                 {metrics.hours.map((v, i) => (
@@ -1103,19 +1108,27 @@ export default function Vendas() {
             </div>
           </div>
 
-         {/* ═══════ TRANSACTIONS — DOMINANT ═══════ */}
-         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-           {/* Section header */}
-           <div className="flex items-center justify-between border-b border-border/50 px-5 py-4">
-             <div>
-               <p className="text-[14px] font-heading font-bold text-foreground">Transações</p>
-               <p className="text-[11px] text-muted-foreground mt-0.5">Histórico detalhado · ordene clicando nas colunas</p>
+         {/* ═══════ TRANSACTIONS — DOMINANT WORKSPACE ═══════ */}
+         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]">
+           {/* Top contextual ribbon — turns the table into a workspace, not a list */}
+           <div className="flex items-center justify-between gap-4 border-b border-border/50 px-5 py-3 bg-gradient-to-r from-card to-card-inset/30">
+             <div className="flex items-center gap-3">
+               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.04] border border-border/60">
+                 <Receipt className="h-4 w-4 text-foreground" />
+               </div>
+               <div>
+                 <p className="text-[13.5px] font-heading font-bold text-foreground leading-tight">Transações</p>
+                 <p className="text-[10.5px] text-muted-foreground mt-0.5">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""} · ordene clicando nas colunas</p>
+               </div>
              </div>
-             <div className="flex items-center gap-2">
-               <span className="text-[11px] font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span>
-               <span className="text-[10px] text-muted-foreground">total filtrado</span>
+             <div className="flex items-center gap-5">
+               <div className="text-right hidden sm:block">
+                 <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground/60">Total filtrado</p>
+                 <p className="text-[14px] font-heading font-black text-success tabular-nums leading-none mt-0.5">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
+               </div>
              </div>
            </div>
+
 
            {/* Status tabs */}
            <div className="border-b border-border/50 px-5">
