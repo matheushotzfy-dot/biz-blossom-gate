@@ -688,64 +688,36 @@ export default function Dashboard() {
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* ACTIONS + ACTIVITY                                               */}
         {/* ════════════════════════════════════════════════════════════════ */}
-        <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-8">
-          {/* Quick actions */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border/30 bg-card p-5 lg:p-6 flex flex-col overflow-hidden">
-            <div className="mb-5 flex items-center justify-between border-b border-border/20 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <Zap className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-heading font-bold text-foreground">Ações Rápidas</p>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.1em] text-muted-foreground/50">Operação diária</p>
-                </div>
-              </div>
-              <span className="rounded-full border border-border/30 bg-background px-2.5 py-1 text-[9px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/60">10 atalhos</span>
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.4fr] mb-8">
+          {/* Quick actions — operational support */}
+          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
+              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
             </div>
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="divide-y divide-border/60">
               {[
-                { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
-                { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
-                { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
-                { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" as const },
-                { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
-                { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
-                { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
-                { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" as const },
-                { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
-                { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
-              ].map((action) => {
-                const colors: Record<string, { bg: string; text: string; ring: string }> = {
-                  primary: { bg: "bg-primary/10", text: "text-primary", ring: "group-hover:border-primary/20" },
-                  success: { bg: "bg-success/10", text: "text-success", ring: "group-hover:border-success/20" },
-                  info: { bg: "bg-info/10", text: "text-info", ring: "group-hover:border-info/20" },
-                  warning: { bg: "bg-warning/10", text: "text-warning", ring: "group-hover:border-warning/20" },
-                };
-                const c = colors[action.tone] || colors.primary;
-                return (
-                  <Link
-                    key={action.href}
-                    to={action.href}
-                    className={cn("group relative overflow-hidden rounded-[18px] border border-border/20 bg-background/50 p-3.5 transition-all duration-200 hover:-translate-y-[1px] hover:bg-background", c.ring)}
-                  >
-                    <div className="absolute inset-y-3 left-0 w-[3px] rounded-full bg-border/30 group-hover:bg-primary/50" />
-                    <div className="relative flex items-start gap-3 pl-2">
-                      <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border/30", c.bg, c.text)}>
-                        <action.icon className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-display font-black leading-tight text-foreground">{action.label}</p>
-                        <p className="mt-1 text-[10px] text-muted-foreground/55">{action.desc}</p>
-                      </div>
-                      <ChevronRight className="mt-1 h-3.5 w-3.5 shrink-0 text-muted-foreground/20 transition-colors group-hover:text-foreground/60" />
-                    </div>
-                  </Link>
-                );
-              })}
+                { label: "Criar produto", href: "/vendas/produtos", icon: Package },
+                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
+                { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
+                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
+                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
+                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  to={action.href}
+                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                    <action.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="flex-1 text-[12.5px] font-semibold text-foreground">{action.label}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+                </Link>
+              ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Activity feed */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-[20px] border border-border/30 bg-card flex flex-col overflow-hidden">
