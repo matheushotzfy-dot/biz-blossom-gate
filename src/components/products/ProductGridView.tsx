@@ -71,11 +71,11 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 <div className="flex flex-col items-end gap-1.5">
                   <div className="flex items-baseline gap-1">
                     {currencySymbol && (
-                      <span className="font-numbers text-[12px] font-medium leading-none text-muted-foreground/55">
+                      <span className="font-numbers text-[11px] font-medium leading-none text-muted-foreground/45">
                         {currencySymbol}
                       </span>
                     )}
-                    <span className="font-numbers text-[22px] font-bold leading-none tabular-nums tracking-[-0.02em] text-foreground">
+                    <span className="font-numbers text-[26px] font-extrabold leading-none tabular-nums tracking-[-0.03em] text-foreground">
                       {priceValue}
                     </span>
                   </div>
