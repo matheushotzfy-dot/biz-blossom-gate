@@ -32,14 +32,14 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
               className={cn(
-                "group relative flex h-[88px] cursor-pointer items-center justify-between px-5 py-[18px] transition-colors duration-200 ease-out",
+                "group relative flex min-h-[96px] cursor-pointer items-center gap-8 px-6 py-5 transition-colors duration-200 ease-out",
                 "hover:bg-foreground/[0.04]",
-                idx > 0 && "before:absolute before:inset-x-5 before:top-0 before:h-px before:bg-border/40"
+                idx > 0 && "before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-border/40"
               )}
             >
-              {/* LEFT — product identity */}
-              <div className="flex min-w-0 flex-1 items-center gap-4">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] bg-[hsl(var(--card-elevated))] ring-1 ring-border">
+              {/* LEFT — product identity (dominant, ~70%) */}
+              <div className="flex min-w-0 flex-[1_1_auto] items-center gap-5">
+                <div className="relative h-[68px] w-[68px] shrink-0 overflow-hidden rounded-[14px] bg-[hsl(var(--card-elevated))] ring-1 ring-border shadow-[0_2px_6px_-2px_hsl(0_0%_0%/0.18)]">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
@@ -66,28 +66,29 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 </div>
               </div>
 
-              {/* RIGHT — money + control */}
-              <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <div className="flex items-baseline gap-1">
-                  {currencySymbol && (
-                    <span className="font-numbers text-[12px] font-medium leading-none text-muted-foreground/55">
-                      {currencySymbol}
+              {/* RIGHT — commercial block (compact, anchored) */}
+              <div className="flex shrink-0 items-center gap-5 border-l border-border/40 pl-6">
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="flex items-baseline gap-1">
+                    {currencySymbol && (
+                      <span className="font-numbers text-[12px] font-medium leading-none text-muted-foreground/55">
+                        {currencySymbol}
+                      </span>
+                    )}
+                    <span className="font-numbers text-[22px] font-bold leading-none tabular-nums tracking-[-0.02em] text-foreground">
+                      {priceValue}
                     </span>
-                  )}
-                  <span className="font-numbers text-[20px] font-bold leading-none tabular-nums tracking-[-0.02em] text-foreground">
-                    {priceValue}
-                  </span>
+                  </div>
+                  <ProductStatusIndicator status={product.status} tone="soft" />
                 </div>
 
-                <ProductStatusIndicator status={product.status} tone="soft" />
-
                 <div
-                  className="mt-0.5 flex items-center gap-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  className="flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     onClick={() => handlers.onEditProduct(product)}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
                     title="Editar produto"
                     aria-label="Editar produto"
                   >
@@ -96,7 +97,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <ProductActionsMenu
                     copied={isCopied}
                     product={product}
-                    triggerClassName="h-7 w-7 rounded-md text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
+                    triggerClassName="h-8 w-8 rounded-md text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
                     {...handlers}
                   />
                 </div>
