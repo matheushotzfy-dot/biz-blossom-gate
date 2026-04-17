@@ -360,9 +360,8 @@ export default function Suporte() {
                   const isExpanded = expandedId === ticket.id;
                   const priorityCfg = PRIORITY_MAP[ticket.priority] || PRIORITY_MAP.normal;
                   return (
-                    <>
+                    <React.Fragment key={ticket.id}>
                       <TableRow
-                        key={ticket.id}
                         className="border-border cursor-pointer"
                         onClick={() => setExpandedId(isExpanded ? null : ticket.id)}
                       >
