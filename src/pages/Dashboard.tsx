@@ -720,18 +720,10 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-[20px] border border-border/30 bg-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/20 px-6 pt-5 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <PixLogoMark className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-heading font-bold text-foreground">Atividades</p>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.1em] text-muted-foreground/50">Vendas e saques</p>
-                </div>
-              </div>
-              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-heading text-primary transition-colors hover:text-primary/80">
+          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Atividade recente</p>
+              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition-colors hover:text-primary/80">
                 Ver tudo <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
