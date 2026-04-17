@@ -877,54 +877,68 @@ export default function Vendas() {
            </div>
          </div>
 
-         {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-           <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr]">
-             {/* Left: KPIs stacked */}
-             <div className="border-b lg:border-b-0 lg:border-r border-border/60 p-6 flex flex-col justify-between bg-card-inset/30">
-               <div>
-                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Receita líquida</p>
-                 <p className="mt-3 text-[42px] lg:text-[48px] font-heading font-black tracking-[-0.04em] text-foreground tabular-nums leading-none">
-                   <span className="text-success">{hidden ? HIDE : fmt(m.totalNet)}</span>
-                 </p>
-                 <div className="mt-3 flex items-center gap-2">
-                   <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                   <span className="text-[11px] text-muted-foreground/60">vs período anterior</span>
-                 </div>
-               </div>
+          {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
+          <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
+              {/* Left: KPIs stacked — connected via shared accent rail */}
+              <div className="relative border-b lg:border-b-0 lg:border-r border-border/60 p-6 flex flex-col justify-between">
+                <div className="absolute left-0 top-6 bottom-6 w-[2px] rounded-r-full bg-gradient-to-b from-success via-success/50 to-transparent" />
+                <div className="pl-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Receita líquida</p>
+                    <span className="text-[9.5px] font-bold uppercase tracking-wider text-success/90 bg-success/10 border border-success/20 rounded px-1.5 py-[1px]">{periodLabel}</span>
+                  </div>
+                  <p className="mt-3 text-[44px] lg:text-[50px] font-heading font-black tracking-[-0.045em] text-success tabular-nums leading-[0.95]">
+                    {hidden ? HIDE : fmt(m.totalNet)}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 flex-wrap">
+                    <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
+                    <span className="text-[11px] text-muted-foreground/60">vs anterior {hidden ? "" : `· ${fmtCompact(p.totalNet)}`}</span>
+                  </div>
+                </div>
 
-               <div className="mt-8 grid grid-cols-3 gap-4 pt-5 border-t border-border/50">
-                 <div>
-                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Vendas</p>
-                   <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : dateFiltered.length}</p>
-                 </div>
-                 <div>
-                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Ticket</p>
-                   <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                 </div>
-                 <div>
-                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Bruto</p>
-                   <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(m.totalGross)}</p>
-                 </div>
-               </div>
-             </div>
+                <div className="mt-8 grid grid-cols-3 gap-4 pt-5 border-t border-border/50 pl-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Vendas</p>
+                    <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : m.approved.length}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">{approvalRate.toFixed(1)}% aprov.</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Ticket</p>
+                    <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">por venda</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Bruto</p>
+                    <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(m.totalGross)}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">−{hidden ? HIDE : fmtCompact(m.totalFees)} taxas</p>
+                  </div>
+                </div>
+              </div>
 
-             {/* Right: Chart dominant */}
-             <div className="p-5 lg:p-6">
-               <div className="flex items-center justify-between mb-4">
-                 <div className="flex items-center gap-3">
-                   <p className="text-[13px] font-heading font-bold text-foreground">Evolução da receita</p>
-                   <div className="flex items-center gap-3 text-[10.5px] text-muted-foreground font-semibold">
-                     <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-primary" />Atual</span>
-                     <span className="flex items-center gap-1.5"><span className="h-0.5 w-3 bg-muted-foreground/50" style={{ borderTop: "1px dashed currentColor" }} />Anterior</span>
-                   </div>
-                 </div>
-                 <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">{metrics.chartData.length} pontos</span>
-               </div>
-               <RevenueChart data={metrics.chartData} hidden={hidden} />
-             </div>
-           </div>
-         </div>
+              {/* Right: Chart dominant */}
+              <div className="p-5 lg:p-6">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="flex items-center gap-4">
+                    <p className="text-[13px] font-heading font-bold text-foreground">Evolução da receita</p>
+                    <div className="flex items-center gap-3 text-[10.5px] text-muted-foreground font-semibold">
+                      <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Atual</span>
+                      <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground/60" />Anterior</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10.5px]">
+                    <span className="text-muted-foreground/60 font-semibold">{metrics.chartData.length} {metrics.chartData.length === 1 ? "dia" : "dias"}</span>
+                    {metrics.chartData.length > 0 && (
+                      <span className="text-foreground/70 font-bold tabular-nums">
+                        · pico {hidden ? HIDE : fmtCompact(Math.max(...metrics.chartData.map(d => d.value)))}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <RevenueChart data={metrics.chartData} hidden={hidden} />
+              </div>
+            </div>
+          </div>
 
          {/* ═══════ BREAKDOWN ROW: Payment methods + Top products + Health ═══════ */}
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
