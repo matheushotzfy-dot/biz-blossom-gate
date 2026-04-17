@@ -1241,31 +1241,15 @@ export default function Vendas() {
            </div>
          </div>
 
-          {/* ═══════ FINANCIAL HEALTH STRIP — compact, integrated ═══════ */}
-          <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 rounded-xl border border-border/50 bg-card-inset/30 px-5 py-3.5">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Reembolsado</span>
-                <span className="text-[13px] font-heading font-black text-info tabular-nums">{hidden ? HIDE : fmt(refundedAmount)}</span>
-                <span className="text-[10px] text-muted-foreground/60 tabular-nums">· {m.refunded.length}</span>
-              </div>
-              <span className="h-3 w-px bg-border/50" />
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Chargeback</span>
-                <span className={cn("text-[13px] font-heading font-black tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground/40")}>{hidden ? HIDE : fmt(chargebackAmount)}</span>
-                <span className="text-[10px] text-muted-foreground/60 tabular-nums">· {m.chargebacks.length}</span>
-              </div>
-              <span className="h-3 w-px bg-border/50" />
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Taxas</span>
-                <span className="text-[13px] font-heading font-black text-foreground/70 tabular-nums">{hidden ? HIDE : fmt(m.totalFees)}</span>
-              </div>
+          {/* ═══════ NET RESULT — single line footer, no card duplication ═══════ */}
+          <div className="flex items-center justify-between gap-4 px-2 pt-1">
+            <div className="flex items-center gap-2">
+              <Activity className="h-3.5 w-3.5 text-success" />
+              <span className="uppercase tracking-[0.14em] text-[10px] font-bold text-muted-foreground/60">Saldo líquido após reembolsos & chargebacks</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[10.5px] font-semibold text-muted-foreground">
-              <Activity className="h-3 w-3" />
-              <span>Saldo líquido do período: </span>
-              <span className="text-success font-heading font-black tabular-nums">{hidden ? HIDE : fmt(m.totalNet - refundedAmount - chargebackAmount)}</span>
-            </div>
+            <span className="text-[15px] font-heading font-black text-success tabular-nums tracking-[-0.02em]">
+              {hidden ? HIDE : fmt(m.totalNet - refundedAmount - chargebackAmount)}
+            </span>
           </div>
 
          {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
