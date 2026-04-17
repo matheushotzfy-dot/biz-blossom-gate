@@ -1128,17 +1128,7 @@ export default function Vendas() {
                </div>
              </div>
            </div>
-           {/* Section header */}
-           <div className="flex items-center justify-between border-b border-border/50 px-5 py-4">
-             <div>
-               <p className="text-[14px] font-heading font-bold text-foreground">Transações</p>
-               <p className="text-[11px] text-muted-foreground mt-0.5">Histórico detalhado · ordene clicando nas colunas</p>
-             </div>
-             <div className="flex items-center gap-2">
-               <span className="text-[11px] font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span>
-               <span className="text-[10px] text-muted-foreground">total filtrado</span>
-             </div>
-           </div>
+
 
            {/* Status tabs */}
            <div className="border-b border-border/50 px-5">
