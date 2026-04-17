@@ -15,8 +15,8 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-5xl">
       {toolbar && <div className="mb-5 px-1">{toolbar}</div>}
 
-      <div className="rounded-2xl border border-border bg-muted/40 p-5 shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04)] ring-1 ring-foreground/[0.04] dark:bg-background/60">
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card">
+      <div className="rounded-2xl border border-border bg-[hsl(var(--card-elevated))] p-2 shadow-[0_1px_2px_0_hsl(0_0%_0%/0.04),0_8px_24px_-16px_hsl(0_0%_0%/0.3)] ring-1 ring-foreground/[0.03]">
+        <ul className="flex flex-col overflow-hidden rounded-xl border border-border/60 bg-[hsl(var(--card-inset))]">
         {products.map((product, idx) => {
           const deliveryLabel = (DELIVERY_LABELS[product.delivery_type] || product.delivery_type).toUpperCase();
           const initial = product.name.charAt(0).toUpperCase();
