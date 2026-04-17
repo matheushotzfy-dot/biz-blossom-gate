@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
 import { DELIVERY_LABELS, formatCurrency, formatCompactDate, type Product } from "./productPresentation";
@@ -70,30 +71,40 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               </div>
 
               {/* ═══════════ RIGHT — Commercial block (compact) ═══════════ */}
-              <div className="flex shrink-0 flex-col items-end justify-center gap-2">
-                <div className="flex items-baseline gap-1">
-                  {currencySymbol && (
-                    <span className="font-numbers text-[11px] font-semibold uppercase leading-none text-muted-foreground/55">
-                      {currencySymbol}
+              {/* ═══════════ RIGHT — Commercial block + minimal actions ═══════════ */}
+              <div className="flex shrink-0 items-center gap-5">
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="flex items-baseline gap-1">
+                    {currencySymbol && (
+                      <span className="font-numbers text-[11px] font-semibold uppercase leading-none text-muted-foreground/55">
+                        {currencySymbol}
+                      </span>
+                    )}
+                    <span className="font-numbers text-[24px] font-black leading-none tabular-nums tracking-[-0.035em] text-foreground">
+                      {priceValue}
                     </span>
-                  )}
-                  <span className="font-numbers text-[24px] font-black leading-none tabular-nums tracking-[-0.035em] text-foreground">
-                    {priceValue}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ProductStatusIndicator status={product.status} tone="soft" />
-                  <div
-                    className="flex items-center"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <ProductActionsMenu
-                      copied={isCopied}
-                      product={product}
-                      triggerClassName="h-8 w-8 rounded-lg text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
-                      {...handlers}
-                    />
                   </div>
+                  <ProductStatusIndicator status={product.status} tone="soft" />
+                </div>
+
+                <div
+                  className="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => handlers.onEditProduct(product)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
+                    title="Editar produto"
+                    aria-label="Editar produto"
+                  >
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+                  </button>
+                  <ProductActionsMenu
+                    copied={isCopied}
+                    product={product}
+                    triggerClassName="h-8 w-8 rounded-lg text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
+                    {...handlers}
+                  />
                 </div>
               </div>
             </li>
