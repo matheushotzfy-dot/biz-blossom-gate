@@ -39,7 +39,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
             >
               {/* LEFT — product identity (dominant, ~70%) */}
               <div className="flex min-w-0 flex-[1_1_auto] items-center gap-5">
-                <div className="relative h-[68px] w-[68px] shrink-0 overflow-hidden rounded-[14px] bg-[hsl(var(--card-elevated))] ring-1 ring-border shadow-[0_2px_6px_-2px_hsl(0_0%_0%/0.18)]">
+                <div className="relative h-16 w-16 shrink-0 self-center overflow-hidden rounded-2xl bg-[hsl(var(--card-elevated))] ring-1 ring-border/80 shadow-[0_2px_8px_-2px_hsl(0_0%_0%/0.22),inset_0_0_0_1px_hsl(0_0%_100%/0.03)]">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
