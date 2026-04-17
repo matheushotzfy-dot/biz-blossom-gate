@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil } from "lucide-react";
+import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
