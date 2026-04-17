@@ -940,79 +940,104 @@ export default function Vendas() {
             </div>
           </div>
 
-         {/* ═══════ BREAKDOWN ROW: Payment methods + Top products + Health ═══════ */}
-         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* ═══════ BREAKDOWN ROW: Payment methods + Top products + Health ═══════ */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-           {/* Payment Methods — clean data list */}
-           <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
-               <p className="text-[12px] font-heading font-bold text-foreground">Métodos de pagamento</p>
-               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Receita</span>
-             </div>
-             <div>
-               {paymentMix.map((pm, idx) => {
-                 const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                 return (
-                   <div key={pm.label} className={cn("px-5 py-3.5", idx > 0 && "border-t border-border/30")}>
-                     <div className="flex items-center justify-between mb-2">
-                       <div className="flex items-center gap-2.5">
-                         <span className="flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 text-foreground [&_svg]:h-3.5 [&_svg]:w-3.5">{pm.icon}</span>
-                         <div>
-                           <p className="text-[12.5px] font-bold text-foreground leading-tight">{pm.label}</p>
-                           <p className="text-[10.5px] text-muted-foreground tabular-nums">{pm.count} venda{pm.count !== 1 ? "s" : ""}</p>
-                         </div>
-                       </div>
-                       <div className="text-right">
-                         <p className="text-[13px] font-heading font-black text-foreground tabular-nums leading-tight">{hidden ? HIDE : fmtCompact(pm.value)}</p>
-                         <p className="text-[10.5px] font-bold text-muted-foreground tabular-nums">{pct.toFixed(1)}%</p>
-                       </div>
-                     </div>
-                     <div className="h-1 rounded-full bg-muted/50 overflow-hidden">
-                       <div className="h-full bg-foreground/70 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-                     </div>
-                   </div>
-                 );
-               })}
-             </div>
-           </div>
+            {/* Payment Methods — clean data list with semantic accents */}
+            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <p className="text-[12px] font-heading font-bold text-foreground">Métodos de pagamento</p>
+                  {dominantMethod.value > 0 && (
+                    <span className={cn("text-[9px] font-bold uppercase tracking-wider rounded px-1.5 py-[1px] border",
+                      dominantMethod.color === "success" ? "text-success bg-success/10 border-success/20" :
+                      dominantMethod.color === "info" ? "text-info bg-info/10 border-info/20" :
+                      "text-warning bg-warning/10 border-warning/20"
+                    )}>{dominantMethod.label} líder</span>
+                  )}
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Receita</span>
+              </div>
+              {m.totalNet === 0 ? (
+                <div className="px-5 py-10 text-center">
+                  <CreditCard className="mx-auto h-5 w-5 text-muted-foreground/30 mb-2" />
+                  <p className="text-[11.5px] text-muted-foreground">Sem pagamentos no período</p>
+                </div>
+              ) : (
+                <div>
+                  {paymentMix.map((pm, idx) => {
+                    const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
+                    const accent = pm.color === "success" ? "bg-success" : pm.color === "info" ? "bg-info" : "bg-warning";
+                    const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
+                    return (
+                      <div key={pm.label} className={cn("px-5 py-3.5", idx > 0 && "border-t border-border/30")}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2.5">
+                            <span className={cn("flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 [&_svg]:h-3.5 [&_svg]:w-3.5", accentText)}>{pm.icon}</span>
+                            <div>
+                              <p className="text-[12.5px] font-bold text-foreground leading-tight">{pm.label}</p>
+                              <p className="text-[10.5px] text-muted-foreground tabular-nums">{pm.count} venda{pm.count !== 1 ? "s" : ""} · {hidden ? HIDE : fmtCompact(pm.count > 0 ? pm.value / pm.count : 0)} ticket</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn("text-[13px] font-heading font-black tabular-nums leading-tight", pm.value > 0 ? accentText : "text-foreground/40")}>{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                            <p className="text-[10.5px] font-bold text-muted-foreground tabular-nums">{pct.toFixed(1)}%</p>
+                          </div>
+                        </div>
+                        <div className="h-1 rounded-full bg-muted/40 overflow-hidden">
+                          <div className={cn("h-full rounded-full transition-all duration-700", accent)} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-           {/* Top Products */}
-           <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
-               <p className="text-[12px] font-heading font-bold text-foreground">Top produtos</p>
-               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">{metrics.topProducts.length} ativos</span>
-             </div>
-             {metrics.topProducts.length === 0 ? (
-               <div className="px-5 py-10 text-center">
-                 <Package className="mx-auto h-5 w-5 text-muted-foreground/30 mb-2" />
-                 <p className="text-[11.5px] text-muted-foreground">Sem vendas no período</p>
-               </div>
-             ) : (
-               <div>
-                 {metrics.topProducts.slice(0, 5).map((prod, i) => {
-                   const maxRev = metrics.topProducts[0]?.revenue || 1;
-                   const pct = (prod.revenue / maxRev) * 100;
-                   return (
-                     <div key={prod.id} className={cn("px-5 py-3", i > 0 && "border-t border-border/30")}>
-                       <div className="flex items-center justify-between gap-3 mb-1.5">
-                         <div className="flex items-center gap-2.5 min-w-0">
-                           <span className="text-[10px] font-heading font-black text-muted-foreground/60 tabular-nums w-4">{i + 1}</span>
-                           <p className="truncate text-[12.5px] font-bold text-foreground">{prod.name}</p>
-                         </div>
-                         <div className="text-right shrink-0">
-                           <p className="text-[12.5px] font-heading font-black text-foreground tabular-nums leading-tight">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
-                           <p className="text-[10px] text-muted-foreground tabular-nums">{prod.sales} venda{prod.sales !== 1 ? "s" : ""}</p>
-                         </div>
-                       </div>
-                       <div className="h-0.5 rounded-full bg-muted/50 overflow-hidden ml-6">
-                         <div className="h-full bg-foreground/40 rounded-full" style={{ width: `${pct}%` }} />
-                       </div>
-                     </div>
-                   );
-                 })}
-               </div>
-             )}
-           </div>
+            {/* Top Products */}
+            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
+                <p className="text-[12px] font-heading font-bold text-foreground">Top produtos</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">{metrics.topProducts.length} {metrics.topProducts.length === 1 ? "ativo" : "ativos"}</span>
+              </div>
+              {metrics.topProducts.length === 0 ? (
+                <div className="px-5 py-8 text-center">
+                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted/40 border border-border/40">
+                    <Package className="h-4 w-4 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-[12px] font-bold text-foreground mb-1">Nenhum produto vendeu</p>
+                  <p className="text-[10.5px] text-muted-foreground max-w-[220px] mx-auto leading-relaxed">
+                    {productsRaw.length === 0
+                      ? "Cadastre seu primeiro produto para começar a vender."
+                      : `Você tem ${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, mas nenhum gerou vendas no período.`}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  {metrics.topProducts.slice(0, 5).map((prod, i) => {
+                    const maxRev = metrics.topProducts[0]?.revenue || 1;
+                    const pct = (prod.revenue / maxRev) * 100;
+                    return (
+                      <div key={prod.id} className={cn("px-5 py-3", i > 0 && "border-t border-border/30")}>
+                        <div className="flex items-center justify-between gap-3 mb-1.5">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className={cn("text-[10px] font-heading font-black tabular-nums w-4", i === 0 ? "text-success" : "text-muted-foreground/60")}>#{i + 1}</span>
+                            <p className="truncate text-[12.5px] font-bold text-foreground">{prod.name}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-[12.5px] font-heading font-black text-foreground tabular-nums leading-tight">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                            <p className="text-[10px] text-muted-foreground tabular-nums">{prod.sales} venda{prod.sales !== 1 ? "s" : ""}</p>
+                          </div>
+                        </div>
+                        <div className="h-0.5 rounded-full bg-muted/50 overflow-hidden ml-6">
+                          <div className={cn("h-full rounded-full", i === 0 ? "bg-success/70" : "bg-foreground/40")} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
            {/* Health + Hourly */}
            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
