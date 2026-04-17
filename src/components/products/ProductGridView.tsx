@@ -32,21 +32,16 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
               className={cn(
-                "group relative flex cursor-pointer items-stretch gap-8 px-7 py-6 transition-colors duration-200 ease-out",
+                "group relative flex h-[88px] cursor-pointer items-center justify-between px-5 py-[18px] transition-colors duration-200 ease-out",
                 "hover:bg-foreground/[0.04]",
-                idx > 0 && "before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-border/40"
+                idx > 0 && "before:absolute before:inset-x-5 before:top-0 before:h-px before:bg-border/40"
               )}
             >
-              {/* ═══════════ LEFT — Product identity (dominant) ═══════════ */}
-              <div className="flex min-w-0 flex-[1_1_0%] items-center gap-7">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[hsl(var(--card-elevated))] ring-1 ring-border shadow-[0_1px_2px_0_hsl(0_0%_0%/0.06),0_4px_12px_-4px_hsl(0_0%_0%/0.12)]">
+              {/* LEFT — product identity */}
+              <div className="flex min-w-0 flex-1 items-center gap-4">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] bg-[hsl(var(--card-elevated))] ring-1 ring-border">
                   {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/25 to-primary/[0.06]">
                       <span className="font-display text-2xl font-black tracking-tight text-primary">{initial}</span>
@@ -54,47 +49,45 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   )}
                 </div>
 
-                <div className="flex min-w-0 flex-1 flex-col justify-center">
-                  <h3 className="truncate font-display text-[22px] font-black leading-[1.1] tracking-[-0.03em] text-foreground">
+                <div className="flex min-w-0 flex-col">
+                  <div className="truncate font-display text-[17px] font-semibold leading-tight tracking-[-0.01em] text-foreground">
                     {product.name}
-                  </h3>
-                  <p className="mt-2 truncate text-[12.5px] font-normal leading-snug text-muted-foreground/55">
+                  </div>
+                  <div className="mt-1 truncate text-[13px] leading-snug text-muted-foreground/70">
                     {product.description || "Sem descrição"}
-                  </p>
-                  <div className="mt-3.5 flex items-center gap-2 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/30">
+                  </div>
+                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/40">
                     <span>{deliveryLabel}</span>
-                    <span className="h-[2px] w-[2px] rounded-full bg-muted-foreground/20" />
+                    <span>•</span>
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="h-[2px] w-[2px] rounded-full bg-muted-foreground/20" />
-                    <span className="font-mono normal-case tracking-normal">{shortId}</span>
+                    <span>•</span>
+                    <span className="font-mono normal-case tracking-normal">#{shortId}</span>
                   </div>
                 </div>
               </div>
 
-              {/* ═══════════ RIGHT — Commercial block (compact) ═══════════ */}
-              {/* ═══════════ RIGHT — Commercial block + minimal actions ═══════════ */}
-              <div className="flex shrink-0 items-center gap-5">
-                <div className="flex flex-col items-end gap-1.5">
-                  <div className="flex items-baseline gap-1">
-                    {currencySymbol && (
-                      <span className="font-numbers text-[11px] font-semibold uppercase leading-none text-muted-foreground/45">
-                        {currencySymbol}
-                      </span>
-                    )}
-                    <span className="font-numbers text-[26px] font-black leading-none tabular-nums tracking-[-0.04em] text-foreground">
-                      {priceValue}
+              {/* RIGHT — money + control */}
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
+                <div className="flex items-baseline gap-1">
+                  {currencySymbol && (
+                    <span className="font-numbers text-[12px] font-medium leading-none text-muted-foreground/55">
+                      {currencySymbol}
                     </span>
-                  </div>
-                  <ProductStatusIndicator status={product.status} tone="soft" />
+                  )}
+                  <span className="font-numbers text-[20px] font-bold leading-none tabular-nums tracking-[-0.02em] text-foreground">
+                    {priceValue}
+                  </span>
                 </div>
 
+                <ProductStatusIndicator status={product.status} tone="soft" />
+
                 <div
-                  className="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  className="mt-0.5 flex items-center gap-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     onClick={() => handlers.onEditProduct(product)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
                     title="Editar produto"
                     aria-label="Editar produto"
                   >
@@ -103,7 +96,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <ProductActionsMenu
                     copied={isCopied}
                     product={product}
-                    triggerClassName="h-8 w-8 rounded-lg text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
+                    triggerClassName="h-7 w-7 rounded-md text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
                     {...handlers}
                   />
                 </div>
