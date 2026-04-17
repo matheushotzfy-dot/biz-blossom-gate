@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { ProductStatusIndicator } from "./ProductStatusIndicator";
 import { DELIVERY_LABELS, formatCurrency, formatCompactDate, type Product } from "./productPresentation";
