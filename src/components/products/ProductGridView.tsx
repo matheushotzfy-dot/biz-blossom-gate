@@ -16,7 +16,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-5xl">
       {toolbar && <div className="mb-4 px-1">{toolbar}</div>}
 
-      <ul className="flex flex-col">
+      <ul className="flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/40 shadow-[0_1px_0_0_hsl(var(--border)/0.4),0_24px_60px_-30px_hsl(var(--background)/0.8)] backdrop-blur-sm">
         {products.map((product, idx) => {
           const deliveryLabel = (DELIVERY_LABELS[product.delivery_type] || product.delivery_type).toUpperCase();
           const initial = product.name.charAt(0).toUpperCase();
@@ -34,7 +34,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               className={cn(
                 "group relative flex cursor-pointer items-center gap-5 px-5 py-5 transition-colors duration-150",
                 "hover:bg-foreground/[0.04]",
-                idx > 0 && "border-t border-border/30"
+                idx > 0 && "border-t border-border/40"
               )}
             >
               {/* ─────────── LEFT — Product identity ─────────── */}
