@@ -791,7 +791,7 @@ export default function Dashboard() {
                 })
               )}
             </div>
-          </motion.div>
+          </div>
         </section>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
