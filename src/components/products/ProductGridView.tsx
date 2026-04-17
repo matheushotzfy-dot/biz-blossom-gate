@@ -36,8 +36,8 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               )}
             >
               {/* ═══════════ LEFT — Product identity (dominant) ═══════════ */}
-              <div className="flex min-w-0 flex-[1_1_0%] items-center gap-5">
-                <div className="relative h-[68px] w-[68px] shrink-0 overflow-hidden rounded-2xl bg-muted ring-1 ring-border/50">
+              <div className="flex min-w-0 flex-[1_1_0%] items-center gap-6">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-muted ring-1 ring-border/60 shadow-sm">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -52,19 +52,19 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   )}
                 </div>
 
-                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
-                  <h3 className="truncate font-display text-[17px] font-bold leading-tight tracking-[-0.015em] text-foreground">
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+                  <h3 className="truncate font-display text-[17px] font-bold leading-tight tracking-[-0.018em] text-foreground">
                     {product.name}
                   </h3>
-                  <p className="truncate text-[13px] leading-snug text-muted-foreground/70">
+                  <p className="truncate text-[13px] leading-snug text-muted-foreground/65">
                     {product.description || "Sem descrição"}
                   </p>
-                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.09em] text-muted-foreground/45">
+                  <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/40">
                     <span>{deliveryLabel}</span>
-                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/30" />
+                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/25" />
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/30" />
-                    <span className="font-mono normal-case tracking-normal text-muted-foreground/45">{shortId}</span>
+                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/25" />
+                    <span className="font-mono normal-case tracking-normal text-muted-foreground/40">{shortId}</span>
                   </div>
                 </div>
               </div>
