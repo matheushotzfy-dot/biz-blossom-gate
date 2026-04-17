@@ -16,13 +16,17 @@ import { cn } from "@/lib/utils";
 type ProductGridViewProps = ProductMenuHandlers & {
   copiedId: string | null;
   products: Product[];
+  toolbar?: React.ReactNode;
 };
 
-export function ProductGridView({ products, copiedId, ...handlers }: ProductGridViewProps) {
+export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      {/* Header ribbon */}
-      <div className="grid grid-cols-[1fr_120px_140px_120px_80px] items-center gap-4 border-b border-border bg-secondary/40 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+      {toolbar && (
+        <div className="border-b border-border px-5 py-3">{toolbar}</div>
+      )}
+      {/* Column ribbon */}
+      <div className="grid grid-cols-[1fr_120px_140px_120px_80px] items-center gap-4 border-b border-border bg-secondary/30 px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
         <span>Produto</span>
         <span className="text-center">Entrega</span>
         <span className="text-right">Preço</span>
