@@ -112,6 +112,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }
