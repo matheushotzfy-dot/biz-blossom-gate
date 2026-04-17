@@ -50,7 +50,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 </div>
 
                 <div className="flex min-w-0 flex-col">
-                  <div className="truncate font-display text-[17px] font-semibold leading-tight tracking-[-0.01em] text-foreground">
+                  <div className="truncate font-display text-[18px] font-bold leading-tight tracking-[-0.02em] text-foreground">
                     {product.name}
                   </div>
                   <div className="mt-1 truncate text-[13px] leading-snug text-muted-foreground/70">
