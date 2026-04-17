@@ -83,21 +83,21 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 </div>
 
                 <div
-                  className="flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  className="flex items-center gap-0.5 self-center opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     onClick={() => handlers.onEditProduct(product)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
                     title="Editar produto"
                     aria-label="Editar produto"
                   >
-                    <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
                   </button>
                   <ProductActionsMenu
                     copied={isCopied}
                     product={product}
-                    triggerClassName="h-8 w-8 rounded-md text-muted-foreground/60 hover:bg-secondary hover:text-foreground"
+                    triggerClassName="h-8 w-8 rounded-lg text-muted-foreground/40 hover:bg-foreground/[0.06] hover:text-foreground"
                     {...handlers}
                   />
                 </div>
