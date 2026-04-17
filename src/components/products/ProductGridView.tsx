@@ -34,7 +34,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               className={cn(
                 "group relative flex cursor-pointer items-center gap-5 px-5 py-5 transition-colors duration-150",
                 "hover:bg-foreground/[0.04]",
-                idx > 0 && "border-t border-border/30"
+                idx > 0 && "border-t border-border/40"
               )}
             >
               {/* ─────────── LEFT — Product identity ─────────── */}
