@@ -590,101 +590,100 @@ export default function Dashboard() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* CHART + ANALYTICS                                                */}
+      {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        {/* Chart */}
-        <div className="xl:col-span-8 rounded-2xl border border-border bg-card min-h-[340px] flex flex-col overflow-hidden">
-          <div className="flex-1 px-4 pt-4 pb-4 min-h-[320px]">
-            <div className="h-full rounded-[18px] border border-border/30 bg-background/40 px-4 py-3">
-              <div className="h-full min-h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 8, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                      <YAxis tickLine={false} axisLine={false} width={72} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
-                      <Tooltip
-                        content={({ active, payload, label }) => {
-                          if (!active || !payload?.length) return null;
-                          const value = payload[0].value as number;
-                          return (
-                            <div className="rounded-xl border border-primary/20 bg-card px-4 py-3 shadow-xl shadow-primary/10">
-                              <p className="mb-1 text-[9px] font-heading text-muted-foreground/60">{label}</p>
-                              <p className="text-sm font-heading font-black text-primary tabular-nums">
-                                R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </p>
-                            </div>
-                          );
-                        }}
-                      />
-                      <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+      <section className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
+          {/* Chart */}
+          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/60">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
+              <div>
+                <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Receita ao longo do tempo</p>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                  {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {selectedPeriod.label}
+                </p>
               </div>
+              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                Vendas aprovadas
+              </div>
+            </div>
+            <div className="flex-1 px-3 py-4 min-h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                  <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                  <Tooltip
+                    cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const value = payload[0].value as number;
+                      return (
+                        <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+                          <p className="text-[9px] font-heading text-muted-foreground/70 uppercase tracking-wider">{label}</p>
+                          <p className="text-[13px] font-heading font-black text-primary tabular-nums mt-0.5">
+                            R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Right panel — Conversion + Payment KPIs */}
-          <div className="xl:col-span-4 flex flex-col gap-3">
-            {/* Conversion rates */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border/30 bg-card p-5 flex flex-col">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-info">
-                  <Percent className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-heading text-foreground font-bold">Conversão</p>
-                  <p className="text-[9px] font-heading text-muted-foreground/50 uppercase tracking-[0.1em]">Por método</p>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                {[
-                  { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success", bg: "bg-success/6", border: "border-success/10" },
-                  { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", value: `${cardConversion.toFixed(1)}%`, color: "text-info", bg: "bg-info/6", border: "border-info/10" },
-                  { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-success", bg: chargebackRate > 1 ? "bg-destructive/6" : "bg-success/6", border: chargebackRate > 1 ? "border-destructive/10" : "border-success/10" },
-                ].map((m) => (
-                  <div key={m.label} className={cn("flex items-center justify-between rounded-2xl border px-4 py-3", m.bg, m.border)}>
-                    <div className="flex items-center gap-2.5">
+          {/* Payment breakdown rail */}
+          <div className="flex flex-col">
+            <div className="px-5 py-4 border-b border-border/60">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Por método</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conversão e receita</p>
+            </div>
+            <div className="flex-1 divide-y divide-border/60">
+              {[
+                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
+                { icon: <CreditCard className="h-4 w-4" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
+              ].map((m) => (
+                <div key={m.label} className="px-5 py-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
                       <span className={m.color}>{m.icon}</span>
                       <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
                     </div>
-                    <span className={cn("text-[15px] font-heading font-black tabular-nums", m.color)}>{m.value}</span>
+                    <span className={cn("text-[13px] font-heading font-black tabular-nums", m.color)}>{m.conv.toFixed(1)}%</span>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Payment KPIs */}
-            <div className="grid grid-cols-2 gap-2.5 flex-1">
-              {([
-                { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, accentColor: "from-success to-success/60", glowColor: "hsla(142, 71%, 45%, 0.06)" },
-                { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, accentColor: "from-info to-info/60", glowColor: "hsla(217, 91%, 60%, 0.06)" },
-                { label: "TICKET MÉDIO", isPix: false, icon: Wallet, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "por venda", accentColor: "from-primary to-primary/60", glowColor: "hsla(160, 84%, 39%, 0.06)" },
-                { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, accentColor: "from-warning to-warning/60", glowColor: "hsla(38, 92%, 50%, 0.06)" },
-              ] as const).map((item, idx) => (
-                <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 + idx * 0.04 }}
-                  className="group relative rounded-[16px] border border-border/25 bg-card p-4 overflow-hidden transition-all duration-300 hover:border-border/40 hover:translate-y-[-1px]"
-                  style={{ boxShadow: `0 0 30px ${item.glowColor}, inset 0 1px 0 hsla(0, 0%, 100%, 0.03)` }}
-                >
-                  <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", item.accentColor)} />
-                  <div className="flex items-center gap-1.5 mb-2.5">
-                    <span className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/50">{item.label}</span>
-                  </div>
-                  <p className="text-[20px] font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-1.5">
-                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
+                  <p className="text-[18px] font-heading font-black tabular-nums text-foreground leading-none">
+                    {privacy.hidden ? CENSORED : fmt(m.revenue)}
                   </p>
-                  <span className="text-[10px] text-muted-foreground/40">{privacy.hidden ? "••••" : item.helper}</span>
-                </motion.div>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1.5">{m.count} aprovadas</p>
+                </div>
               ))}
+              <div className="px-5 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-warning" />
+                    <span className="text-[12px] text-foreground font-semibold">Saques pendentes</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/70 tabular-nums">{withdrawals.filter(w => w.status === "pending").length}</span>
+                </div>
+                <p className="text-[18px] font-heading font-black tabular-nums text-warning leading-none">
+                  {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                </p>
+                <Link to="/financeiro/saques" className="text-[10px] text-primary font-semibold mt-1.5 inline-flex items-center gap-0.5 hover:underline">
+                  Gerenciar <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* ACTIONS + ACTIVITY                                               */}
