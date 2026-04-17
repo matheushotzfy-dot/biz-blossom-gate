@@ -13,9 +13,10 @@ type ProductGridViewProps = ProductMenuHandlers & {
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
   return (
     <div className="mx-auto w-full max-w-5xl">
-      {toolbar && <div className="mb-4 px-1">{toolbar}</div>}
+      {toolbar && <div className="mb-5 px-1">{toolbar}</div>}
 
-      <ul className="flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/40 shadow-[0_1px_0_0_hsl(var(--border)/0.4),0_24px_60px_-30px_hsl(var(--background)/0.8)] backdrop-blur-sm">
+      <div className="rounded-2xl border border-border/80 bg-card/80 p-3 shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.03),0_1px_0_0_hsl(var(--border)/0.5)] ring-1 ring-foreground/[0.02]">
+        <ul className="flex flex-col overflow-hidden rounded-xl">
         {products.map((product, idx) => {
           const deliveryLabel = (DELIVERY_LABELS[product.delivery_type] || product.delivery_type).toUpperCase();
           const initial = product.name.charAt(0).toUpperCase();
@@ -111,6 +112,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }
