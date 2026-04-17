@@ -555,12 +555,16 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="relative px-5 py-7 lg:px-8 lg:py-10 border-l-2 border-success/70 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-success/40 before:to-transparent after:absolute after:inset-y-4 after:left-[-1px] after:w-[3px] after:rounded-full after:bg-success after:shadow-[0_0_18px_hsl(var(--success)/0.55)]">
-            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
-            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-primary tracking-[-0.04em] leading-none">
+          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
+            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
+            </div>
+            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
-            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline">
+            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
               Sacar agora <ChevronRight className="h-3 w-3" />
             </Link>
             {withdrawalPending > 0 && (
