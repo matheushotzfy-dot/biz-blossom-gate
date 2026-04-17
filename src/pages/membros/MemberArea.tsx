@@ -95,7 +95,7 @@ export default function MemberArea() {
         grantedAt: accessRow?.granted_at || c.created_at,
         amountPaid: tx?.amount ?? null,
         paymentMethod: tx?.payment_method ?? null,
-        accessStatus: (accessRow?.status === "revoked" ? "revoked" : "active"),
+        accessStatus: (accessRow?.status === "revoked" ? "revoked" : "active") as "active" | "revoked",
         transactionId: accessRow?.transaction_id ?? null,
       };
     }).sort((a, b) => new Date(b.grantedAt).getTime() - new Date(a.grantedAt).getTime());
