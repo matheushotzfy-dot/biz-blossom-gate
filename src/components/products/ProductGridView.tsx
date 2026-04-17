@@ -54,18 +54,18 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-                  <h3 className="truncate font-display text-[17px] font-bold leading-tight tracking-[-0.018em] text-foreground">
+                  <h3 className="truncate font-display text-[17px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
                     {product.name}
                   </h3>
-                  <p className="truncate text-[13px] leading-snug text-muted-foreground/65">
+                  <p className="truncate text-[13px] leading-snug text-muted-foreground/55">
                     {product.description || "Sem descrição"}
                   </p>
-                  <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/40">
+                  <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.11em] text-muted-foreground/35">
                     <span>{deliveryLabel}</span>
-                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/25" />
+                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/20" />
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/25" />
-                    <span className="font-mono normal-case tracking-normal text-muted-foreground/40">{shortId}</span>
+                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/20" />
+                    <span className="font-mono normal-case tracking-normal text-muted-foreground/35">{shortId}</span>
                   </div>
                 </div>
               </div>
