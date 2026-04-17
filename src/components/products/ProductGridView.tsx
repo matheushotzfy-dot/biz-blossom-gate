@@ -55,17 +55,17 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col justify-center">
-                  <h3 className="truncate font-display text-[19px] font-extrabold leading-[1.15] tracking-[-0.025em] text-foreground">
+                  <h3 className="truncate font-display text-[22px] font-black leading-[1.1] tracking-[-0.03em] text-foreground">
                     {product.name}
                   </h3>
-                  <p className="mt-1.5 truncate text-[13px] font-normal leading-snug text-muted-foreground/70">
+                  <p className="mt-2 truncate text-[12.5px] font-normal leading-snug text-muted-foreground/55">
                     {product.description || "Sem descrição"}
                   </p>
-                  <div className="mt-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/40">
+                  <div className="mt-3.5 flex items-center gap-2 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/30">
                     <span>{deliveryLabel}</span>
-                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/25" />
+                    <span className="h-[2px] w-[2px] rounded-full bg-muted-foreground/20" />
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span className="h-[3px] w-[3px] rounded-full bg-muted-foreground/25" />
+                    <span className="h-[2px] w-[2px] rounded-full bg-muted-foreground/20" />
                     <span className="font-mono normal-case tracking-normal">{shortId}</span>
                   </div>
                 </div>
