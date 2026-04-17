@@ -200,12 +200,9 @@ export default function Produtos() {
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="mx-5 mt-5 h-px bg-border sm:mx-7" />
-
-      {/* ── Product grid ── */}
+      {/* ── Product list ── */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
+        <div className="mx-5 mt-5 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-24 text-center sm:mx-7">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
             <Package className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
           </div>
