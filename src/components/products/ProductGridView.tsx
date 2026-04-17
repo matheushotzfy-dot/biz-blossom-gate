@@ -53,7 +53,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <div className="truncate font-display text-[18px] font-bold leading-tight tracking-[-0.02em] text-foreground">
                     {product.name}
                   </div>
-                  <div className="mt-1 truncate text-[13px] leading-snug text-muted-foreground/70">
+                  <div className="mt-0.5 truncate text-[12.5px] font-normal leading-snug text-muted-foreground/50">
                     {product.description || "Sem descrição"}
                   </div>
                   <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/40">
