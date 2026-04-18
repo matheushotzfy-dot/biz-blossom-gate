@@ -12,12 +12,9 @@ import {
   Puzzle,
   User,
   LogOut,
-  Headphones,
   MessageSquare,
   Repeat,
   Ticket,
-  Zap,
-  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -66,7 +63,7 @@ type SidebarSection = {
 function getMilestone(revenue: number) {
   const lastMilestone = MILESTONES[MILESTONES.length - 1];
   if (revenue >= lastMilestone.value) {
-    return { current: lastMilestone, next: lastMilestone, pct: 100, tier: MILESTONES.length - 1 };
+    return { current: lastMilestone, next: lastMilestone, pct: 100 };
   }
   let current = MILESTONES[0];
   let next = MILESTONES[1];
@@ -79,7 +76,7 @@ function getMilestone(revenue: number) {
   }
   const range = next.value - current.value;
   const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
-  return { current, next, pct, tier: MILESTONES.indexOf(current) };
+  return { current, next, pct };
 }
 
 function formatRevenue(revenue: number) {
@@ -101,51 +98,39 @@ type RevenueCardProps = {
 
 function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
-
   const pct = Math.round(milestone.pct);
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-3.5 block w-full overflow-hidden rounded-2xl border border-sidebar-primary/25 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-accent/40 to-sidebar-accent/20 p-4 text-left transition-all hover:border-sidebar-primary/50 hover:shadow-[0_8px_30px_-10px_hsl(var(--sidebar-primary)/0.5)]"
+      className="mt-3 block w-full rounded-lg border border-sidebar-border bg-sidebar-accent/30 p-3 text-left transition-colors hover:bg-sidebar-accent/50"
     >
-      {/* Ambient glow */}
-      <div aria-hidden className="pointer-events-none absolute -top-12 -right-8 h-32 w-32 rounded-full bg-sidebar-primary/25 blur-2xl opacity-60 transition-opacity group-hover/rev:opacity-100" />
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/55">
+          Faturamento total
+        </p>
+        <Trophy className="h-3.5 w-3.5 text-sidebar-foreground/40" strokeWidth={2} />
+      </div>
+      <p className="mt-1.5 font-display text-[22px] font-bold leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
+        {formatRevenue(revenue)}
+      </p>
 
-      <div className="relative flex items-center gap-2.5">
-        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 shadow-[0_0_20px_-4px_hsl(var(--sidebar-primary)/0.6)]">
-          <Zap className="h-[16px] w-[16px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/55">
-            Faturamento total
-          </p>
-          <p className="mt-0.5 font-display text-[21px] font-black leading-none tracking-[-0.02em] text-sidebar-accent-foreground tabular-nums">
-            {formatRevenue(revenue)}
-          </p>
-        </div>
+      <div className="mt-3 flex items-center justify-between text-[10.5px] font-medium tabular-nums text-sidebar-foreground/60">
+        <span>{milestone.current.label}</span>
+        <span>{milestone.next.label}</span>
       </div>
 
-      <div className="relative mt-3.5 flex items-center justify-between text-[10.5px] font-bold tabular-nums">
-        <span className="text-sidebar-primary">{milestone.current.label}</span>
-        <span className="text-sidebar-foreground/50">Meta: {milestone.next.label}</span>
-      </div>
-
-      <div className="relative mt-1.5 h-[6px] overflow-hidden rounded-full bg-sidebar-border/50">
+      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-sidebar-border">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-sidebar-primary/80 to-sidebar-primary shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.6)] transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-sidebar-foreground/70 transition-[width] duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <div className="relative mt-3 flex items-center justify-between">
-        <span className="text-[13px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
-        <span className="inline-flex items-center gap-0.5 text-[10.5px] font-bold text-sidebar-primary/90 transition-all group-hover/rev:text-sidebar-primary group-hover/rev:translate-x-0.5">
-          Premiações
-          <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
-        </span>
-      </div>
+      <p className="mt-1.5 text-[10.5px] font-semibold tabular-nums text-sidebar-foreground/70">
+        {pct}% até a próxima meta
+      </p>
     </button>
   );
 }
@@ -158,8 +143,8 @@ type SidebarSectionNavProps = {
 function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
   return (
     <SidebarGroup className="px-0 py-0">
-      <div className="px-3 pb-1.5 pt-3.5 group-data-[collapsible=icon]:hidden">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/35">
+      <div className="px-3 pb-1 pt-3 group-data-[collapsible=icon]:hidden">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/40">
           {section.label}
         </span>
       </div>
@@ -169,49 +154,37 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-2xl p-0 hover:bg-transparent active:bg-transparent">
+                <SidebarMenuButton asChild className="h-auto rounded-md p-0 hover:bg-transparent active:bg-transparent">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-sidebar-primary/40 bg-gradient-to-r from-sidebar-primary/15 via-sidebar-primary/8 to-transparent text-sidebar-accent-foreground font-bold shadow-[inset_0_1px_0_0_hsl(var(--sidebar-primary)/0.15),0_4px_20px_-8px_hsl(var(--sidebar-primary)/0.4)] before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary before:shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.8)] before:content-['']"
-                        : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground hover:translate-x-0.5",
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                     )}
                   >
-                    <span className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all",
-                      isActive
-                        ? "bg-gradient-to-br from-sidebar-primary/25 to-sidebar-primary/10 text-sidebar-primary shadow-[0_0_16px_-4px_hsl(var(--sidebar-primary)/0.6)]"
-                        : "bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:bg-sidebar-accent/60",
-                    )}>
-                      <item.icon
-                        className="h-[16px] w-[16px]"
-                        strokeWidth={isActive ? 2.5 : 1.9}
-                      />
-                    </span>
+                    <item.icon
+                      className={cn(
+                        "h-[15px] w-[15px] shrink-0",
+                        isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/55",
+                      )}
+                      strokeWidth={2}
+                    />
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                      <span className="ml-auto rounded bg-sidebar-border px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
                         {item.badge}
                       </span>
                     )}
                     {item.count !== undefined && item.count > 0 && !item.badge && (
-                      <span className={cn(
-                        "ml-auto rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
-                        isActive
-                          ? "bg-sidebar-primary/20 text-sidebar-primary"
-                          : "bg-sidebar-border/50 text-sidebar-foreground/55",
-                      )}>
+                      <span className="ml-auto rounded bg-sidebar-border/70 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
                         {item.count}
                       </span>
-                    )}
-                    {isActive && !item.badge && item.count === undefined && (
-                      <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-sidebar-primary group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
                     )}
                   </NavLink>
                 </SidebarMenuButton>
@@ -231,26 +204,18 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
-  const [todayRevenue, setTodayRevenue] = useState(0);
-  const [salesToday, setSalesToday] = useState(0);
   const [counts, setCounts] = useState({ products: 0, courses: 0, subscriptions: 0, coupons: 0 });
 
   useEffect(() => {
     let ignore = false;
     if (!user?.id) {
       setRevenue(0);
-      setTodayRevenue(0);
-      setSalesToday(0);
       setCounts({ products: 0, courses: 0, subscriptions: 0, coupons: 0 });
       return;
     }
     const load = async () => {
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const startISO = startOfDay.toISOString();
-
       const [{ data: tx }, { count: products }, { count: courses }, { count: subscriptions }, { count: coupons }] = await Promise.all([
-        supabase.from("transactions").select("net_amount, created_at").eq("user_id", user.id).eq("status", "completed"),
+        supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed"),
         supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("courses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("seller_user_id", user.id).eq("status", "active"),
@@ -261,11 +226,7 @@ export function AppSidebar() {
 
       if (tx) {
         const total = tx.reduce((sum, t) => sum + Number(t.net_amount ?? 0), 0);
-        const todayTx = tx.filter((t) => t.created_at >= startISO);
-        const today = todayTx.reduce((sum, t) => sum + Number(t.net_amount ?? 0), 0);
         setRevenue(total);
-        setTodayRevenue(today);
-        setSalesToday(todayTx.length);
       }
       setCounts({
         products: products ?? 0,
@@ -284,7 +245,7 @@ export function AppSidebar() {
     {
       label: "COMANDO",
       items: [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, badge: "Live", exact: true },
+        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exact: true },
         { title: "Minhas Vendas", url: "/vendas", icon: BarChart3, exact: true },
       ],
     },
@@ -333,21 +294,18 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/60 px-3 pb-3 pt-3.5">
+      <SidebarHeader className="border-b border-sidebar-border px-3 pb-3 pt-3">
         <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-card">
+          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-md border border-sidebar-border bg-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[19px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
+            <h1 className="text-[17px] leading-none font-display font-bold tracking-tight text-sidebar-accent-foreground">
               HOTZFY
             </h1>
-            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-sidebar-foreground/50">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-              </span>
-              Sistema operacional
+            <p className="mt-1 inline-flex items-center gap-1.5 text-[10.5px] font-medium text-sidebar-foreground/50">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              Operacional
             </p>
           </div>
         </div>
@@ -359,47 +317,26 @@ export function AppSidebar() {
         />
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
+      <SidebarContent className="gap-0 overflow-y-auto px-2 py-2">
         {sections.map((section) => (
           <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} />
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-2.5">
-        {/* Solicitar Suporte — featured card */}
-        <button
-          type="button"
-          onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/30 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-primary/8 to-transparent px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:shadow-[0_8px_24px_-8px_hsl(var(--sidebar-primary)/0.5)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-        >
-          <div aria-hidden className="pointer-events-none absolute -top-8 -right-4 h-20 w-20 rounded-full bg-sidebar-primary/20 blur-2xl opacity-0 transition-opacity group-hover/sup:opacity-100" />
-          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/25 to-sidebar-primary/10 text-sidebar-primary shadow-[0_0_16px_-4px_hsl(var(--sidebar-primary)/0.6)]">
-            <Headphones className="h-[16px] w-[16px]" strokeWidth={2.25} />
-          </div>
-          <div className="relative min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
-              Solicitar Suporte
-            </p>
-            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/60">
-              24/7 ao seu dispor!
-            </p>
-          </div>
-        </button>
-
-        {/* User chip */}
+      <SidebarFooter className="gap-1.5 border-t border-sidebar-border p-2">
         <button
           type="button"
           onClick={() => navigate("/perfil")}
-          className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-sidebar-accent/50 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 text-[12px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/20">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-sidebar-border bg-sidebar-accent/40 text-[12px] font-semibold text-sidebar-accent-foreground">
             {userInitial}
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-[12px] font-semibold leading-tight text-sidebar-accent-foreground">
+            <p className="truncate text-[12.5px] font-semibold leading-tight text-sidebar-accent-foreground">
               {userName}
             </p>
-            <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/45">
+            <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/50">
               {user?.email}
             </p>
           </div>
@@ -408,10 +345,10 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] font-medium text-sidebar-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[12px] font-medium text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.9} />
-          <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
+          <LogOut className="h-[14px] w-[14px] shrink-0" strokeWidth={2} />
+          <span className="group-data-[collapsible=icon]:hidden">Sair</span>
         </button>
       </SidebarFooter>
     </Sidebar>
