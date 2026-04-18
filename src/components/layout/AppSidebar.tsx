@@ -108,38 +108,41 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-3.5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/40 p-3.5 text-left transition-all hover:border-sidebar-primary/50 hover:bg-sidebar-accent/55"
+      className="group/rev relative mt-3.5 block w-full overflow-hidden rounded-2xl border border-sidebar-primary/25 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-accent/40 to-sidebar-accent/20 p-4 text-left transition-all hover:border-sidebar-primary/50 hover:shadow-[0_8px_30px_-10px_hsl(var(--sidebar-primary)/0.5)]"
     >
-      <div className="flex items-center gap-2.5">
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/10">
-          <Zap className="h-[15px] w-[15px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+      {/* Ambient glow */}
+      <div aria-hidden className="pointer-events-none absolute -top-12 -right-8 h-32 w-32 rounded-full bg-sidebar-primary/25 blur-2xl opacity-60 transition-opacity group-hover/rev:opacity-100" />
+
+      <div className="relative flex items-center gap-2.5">
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 shadow-[0_0_20px_-4px_hsl(var(--sidebar-primary)/0.6)]">
+          <Zap className="h-[16px] w-[16px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/45">
+          <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/55">
             Faturamento total
           </p>
-          <p className="mt-0.5 font-display text-[20px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
+          <p className="mt-0.5 font-display text-[21px] font-black leading-none tracking-[-0.02em] text-sidebar-accent-foreground tabular-nums">
             {formatRevenue(revenue)}
           </p>
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-[10.5px] font-semibold tabular-nums">
+      <div className="relative mt-3.5 flex items-center justify-between text-[10.5px] font-bold tabular-nums">
         <span className="text-sidebar-primary">{milestone.current.label}</span>
-        <span className="text-sidebar-foreground/45">Meta: {milestone.next.label}</span>
+        <span className="text-sidebar-foreground/50">Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-sidebar-border/60">
+      <div className="relative mt-1.5 h-[6px] overflow-hidden rounded-full bg-sidebar-border/50">
         <div
-          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-sidebar-primary/80 to-sidebar-primary shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.6)] transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between">
-        <span className="text-[12px] font-bold tabular-nums text-sidebar-primary">{pct}%</span>
-        <span className="inline-flex items-center gap-0.5 text-[10.5px] font-semibold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
-          Ver Premiações
+      <div className="relative mt-3 flex items-center justify-between">
+        <span className="text-[13px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
+        <span className="inline-flex items-center gap-0.5 text-[10.5px] font-bold text-sidebar-primary/90 transition-all group-hover/rev:text-sidebar-primary group-hover/rev:translate-x-0.5">
+          Premiações
           <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
         </span>
       </div>
@@ -172,21 +175,21 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-sidebar-primary/45 bg-sidebar-primary/10 text-sidebar-accent-foreground font-semibold shadow-[0_0_0_1px_hsl(var(--sidebar-primary)/0.08)_inset] before:absolute before:left-0 before:top-1/2 before:h-6 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary before:content-['']"
-                        : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                        ? "border border-sidebar-primary/40 bg-gradient-to-r from-sidebar-primary/15 via-sidebar-primary/8 to-transparent text-sidebar-accent-foreground font-bold shadow-[inset_0_1px_0_0_hsl(var(--sidebar-primary)/0.15),0_4px_20px_-8px_hsl(var(--sidebar-primary)/0.4)] before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary before:shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.8)] before:content-['']"
+                        : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground hover:translate-x-0.5",
                     )}
                   >
                     <span className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all",
                       isActive
-                        ? "bg-sidebar-primary/15 text-sidebar-primary"
-                        : "bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/nav:text-sidebar-accent-foreground",
+                        ? "bg-gradient-to-br from-sidebar-primary/25 to-sidebar-primary/10 text-sidebar-primary shadow-[0_0_16px_-4px_hsl(var(--sidebar-primary)/0.6)]"
+                        : "bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:bg-sidebar-accent/60",
                     )}>
                       <item.icon
                         className="h-[16px] w-[16px]"
-                        strokeWidth={isActive ? 2.25 : 1.9}
+                        strokeWidth={isActive ? 2.5 : 1.9}
                       />
                     </span>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
@@ -367,16 +370,17 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup flex w-full items-center gap-3 rounded-2xl border border-sidebar-primary/35 bg-sidebar-primary/10 px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:bg-sidebar-primary/15 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/30 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-primary/8 to-transparent px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:shadow-[0_8px_24px_-8px_hsl(var(--sidebar-primary)/0.5)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/15 text-sidebar-primary">
+          <div aria-hidden className="pointer-events-none absolute -top-8 -right-4 h-20 w-20 rounded-full bg-sidebar-primary/20 blur-2xl opacity-0 transition-opacity group-hover/sup:opacity-100" />
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/25 to-sidebar-primary/10 text-sidebar-primary shadow-[0_0_16px_-4px_hsl(var(--sidebar-primary)/0.6)]">
             <Headphones className="h-[16px] w-[16px]" strokeWidth={2.25} />
           </div>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+          <div className="relative min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <p className="text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
               Solicitar Suporte
             </p>
-            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/55">
+            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/60">
               24/7 ao seu dispor!
             </p>
           </div>
