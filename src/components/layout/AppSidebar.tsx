@@ -278,42 +278,51 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
-        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-card">
+      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-5">
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/60 bg-gradient-to-br from-sidebar-accent to-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-sidebar-primary ring-2 ring-sidebar" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
+            <h1 className="text-[21px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
               HOTZFY
             </h1>
+            <p className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/45">
+              Seller Console
+            </p>
           </div>
         </div>
         <RevenueCard collapsed={collapsed} revenue={revenue} milestone={milestone} onOpenRewards={() => navigate("/premiacoes")} />
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
         {sections.map((section, idx) => (
           <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} isFirst={idx === 0} />
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2">
+      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5">
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-0.5 flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[13px] font-medium text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup mb-1 flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[13.5px] font-medium text-sidebar-foreground/60 transition-all duration-200 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <Headphones className="h-4 w-4 shrink-0 text-sidebar-foreground/45" strokeWidth={1.85} />
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/40 text-sidebar-foreground/55">
+            <Headphones className="h-4 w-4" strokeWidth={1.95} />
+          </span>
           <span className="group-data-[collapsible=icon]:hidden">Suporte 24/7</span>
+          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-500 group-data-[collapsible=icon]:hidden" />
         </button>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium text-sidebar-foreground/55 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/out flex h-10 w-full items-center gap-3 rounded-xl px-3 text-[13.5px] font-medium text-sidebar-foreground/55 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.85} />
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/out:bg-destructive/15 group-hover/out:text-destructive">
+            <LogOut className="h-4 w-4" strokeWidth={1.95} />
+          </span>
           <span className="group-data-[collapsible=icon]:hidden">Sair</span>
         </button>
       </SidebarFooter>
