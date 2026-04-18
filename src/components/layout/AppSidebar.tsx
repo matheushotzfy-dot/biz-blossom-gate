@@ -99,13 +99,11 @@ function isItemActive(pathname: string, item: SidebarItem) {
 type RevenueCardProps = {
   collapsed: boolean;
   revenue: number;
-  todayRevenue: number;
-  salesToday: number;
   milestone: ReturnType<typeof getMilestone>;
   onOpenRewards: () => void;
 };
 
-function RevenueCard({ collapsed, revenue, todayRevenue, salesToday, milestone, onOpenRewards }: RevenueCardProps) {
+function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
 
   const pct = Math.round(milestone.pct);
@@ -114,65 +112,40 @@ function RevenueCard({ collapsed, revenue, todayRevenue, salesToday, milestone, 
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-4 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-gradient-to-br from-sidebar-accent/60 via-sidebar-accent/40 to-sidebar-accent/30 p-4 text-left shadow-[0_4px_20px_-8px_hsl(var(--sidebar-primary)/0.25)] transition-all hover:border-sidebar-primary/55 hover:shadow-[0_6px_28px_-6px_hsl(var(--sidebar-primary)/0.35)]"
+      className="group/rev relative mt-4 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/40 p-3.5 text-left transition-all hover:border-sidebar-primary/55 hover:bg-sidebar-accent/55"
     >
-      {/* Decorative glow */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sidebar-primary/10 blur-2xl" />
-
-      {/* Header row */}
-      <div className="relative flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-sidebar-primary/15 ring-1 ring-sidebar-primary/25">
-            <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} />
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/55">
-            Faturamento
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/10">
+          <Zap className="h-4 w-4 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/50">
+            Faturamento total
+          </p>
+          <p className="mt-0.5 font-display text-[22px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
+            {formatRevenue(revenue)}
           </p>
         </div>
-        <span className="rounded-md border border-sidebar-primary/30 bg-sidebar-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sidebar-primary">
-          {milestone.current.tier}
-        </span>
       </div>
 
-      {/* Big number */}
-      <p className="relative mt-2.5 font-display text-[26px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
-        {formatRevenue(revenue)}
-      </p>
-
-      {/* Today stats */}
-      <div className="relative mt-2.5 flex items-center gap-3 text-[11px]">
-        <span className="inline-flex items-center gap-1 text-success">
-          <TrendingUp className="h-3 w-3" strokeWidth={2.5} />
-          <span className="font-bold tabular-nums">{formatRevenue(todayRevenue)}</span>
-          <span className="font-medium text-sidebar-foreground/45">hoje</span>
-        </span>
-        <span className="h-3 w-px bg-sidebar-border/60" />
-        <span className="inline-flex items-center gap-1 text-sidebar-foreground/65">
-          <Activity className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} />
-          <span className="font-bold tabular-nums text-sidebar-accent-foreground">{salesToday}</span>
-          <span className="font-medium text-sidebar-foreground/45">vendas</span>
-        </span>
+      <div className="mt-3 flex items-center justify-between text-[11px] font-semibold tabular-nums">
+        <span className="text-sidebar-primary">{milestone.current.label}</span>
+        <span className="text-sidebar-foreground/50">Meta: {milestone.next.label}</span>
       </div>
 
-      {/* Progress */}
-      <div className="relative mt-3.5">
-        <div className="mb-1.5 flex items-center justify-between text-[10.5px] font-semibold tabular-nums">
-          <span className="text-sidebar-primary">{milestone.current.label}</span>
-          <span className="text-sidebar-foreground/45">→ {milestone.next.label}</span>
-        </div>
-        <div className="h-[6px] overflow-hidden rounded-full bg-sidebar-border/60 ring-1 ring-inset ring-sidebar-border/40">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/70 shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.6)] transition-[width] duration-700 ease-out"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between">
-          <span className="text-[12px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
-          <span className="inline-flex items-center gap-0.5 text-[10.5px] font-semibold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
-            Premiações
-            <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={2.5} />
-          </span>
-        </div>
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-sidebar-border/60">
+        <div
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      <div className="mt-2.5 flex items-center justify-between">
+        <span className="text-[13px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
+        <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
+          Ver Premiações
+          <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={2.5} />
+        </span>
       </div>
     </button>
   );
