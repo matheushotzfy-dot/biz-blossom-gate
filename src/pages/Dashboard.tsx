@@ -521,7 +521,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main metric block */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.8fr_1fr] gap-0">
           <div className="px-5 py-7 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/60">
             <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Receita {isCustom && customRange?.from
@@ -529,7 +529,7 @@ export default function Dashboard() {
                 : `· ${selectedPeriod.label}`}
             </p>
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="inline-flex items-baseline text-[clamp(2.2rem,7vw,68px)] font-heading font-black leading-none tracking-[-0.05em] text-foreground whitespace-nowrap">
+              <span className="inline-flex items-baseline text-[clamp(2.4rem,7.5vw,72px)] font-heading font-black leading-none tracking-[-0.05em] text-success whitespace-nowrap">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
@@ -555,20 +555,20 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
-            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
-            <div className="flex items-center gap-2 mb-3">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+          <div className="relative px-5 py-5 lg:px-7 lg:py-7">
+            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-foreground/15" />
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-foreground/50" />
               <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
             </div>
-            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
+            <p className="text-[clamp(1.1rem,2.4vw,24px)] font-heading font-black tabular-nums text-foreground tracking-[-0.03em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
-            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
+            <Link to="/financeiro/saques" className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-semibold text-foreground/80 hover:text-foreground hover:underline">
               Sacar agora <ChevronRight className="h-3 w-3" />
             </Link>
             {withdrawalPending > 0 && (
-              <p className="mt-3 text-[10px] text-muted-foreground">
+              <p className="mt-2.5 text-[10px] text-muted-foreground">
                 <span className="font-semibold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
               </p>
             )}
