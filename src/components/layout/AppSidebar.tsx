@@ -18,6 +18,10 @@ import {
   Ticket,
   Zap,
   ChevronRight,
+  Sparkles,
+  TrendingUp,
+  Activity,
+  Crown,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -41,12 +45,12 @@ import {
 } from "@/components/ui/sidebar";
 
 const MILESTONES = [
-  { label: "R$ 0", value: 0 },
-  { label: "R$ 10K", value: 10000 },
-  { label: "R$ 100K", value: 100000 },
-  { label: "R$ 500K", value: 500000 },
-  { label: "R$ 1M", value: 1000000 },
-  { label: "R$ 5M", value: 5000000 },
+  { label: "R$ 0", value: 0, tier: "Iniciante" },
+  { label: "R$ 10K", value: 10000, tier: "Bronze" },
+  { label: "R$ 100K", value: 100000, tier: "Prata" },
+  { label: "R$ 500K", value: 500000, tier: "Ouro" },
+  { label: "R$ 1M", value: 1000000, tier: "Platina" },
+  { label: "R$ 5M", value: 5000000, tier: "Diamante" },
 ];
 
 type SidebarItem = {
@@ -95,11 +99,13 @@ function isItemActive(pathname: string, item: SidebarItem) {
 type RevenueCardProps = {
   collapsed: boolean;
   revenue: number;
+  todayRevenue: number;
+  salesToday: number;
   milestone: ReturnType<typeof getMilestone>;
   onOpenRewards: () => void;
 };
 
-function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
+function RevenueCard({ collapsed, revenue, todayRevenue, salesToday, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
 
   const pct = Math.round(milestone.pct);
@@ -108,40 +114,65 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-3.5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/40 p-3.5 text-left transition-all hover:border-sidebar-primary/50 hover:bg-sidebar-accent/55"
+      className="group/rev relative mt-4 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-gradient-to-br from-sidebar-accent/60 via-sidebar-accent/40 to-sidebar-accent/30 p-4 text-left shadow-[0_4px_20px_-8px_hsl(var(--sidebar-primary)/0.25)] transition-all hover:border-sidebar-primary/55 hover:shadow-[0_6px_28px_-6px_hsl(var(--sidebar-primary)/0.35)]"
     >
-      <div className="flex items-center gap-2.5">
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/10">
-          <Zap className="h-[15px] w-[15px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/45">
-            Faturamento total
+      {/* Decorative glow */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sidebar-primary/10 blur-2xl" />
+
+      {/* Header row */}
+      <div className="relative flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-sidebar-primary/15 ring-1 ring-sidebar-primary/25">
+            <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} />
+          </div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/55">
+            Faturamento
           </p>
-          <p className="mt-0.5 font-display text-[20px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
-            {formatRevenue(revenue)}
-          </p>
         </div>
-      </div>
-
-      <div className="mt-3 flex items-center justify-between text-[10.5px] font-semibold tabular-nums">
-        <span className="text-sidebar-primary">{milestone.current.label}</span>
-        <span className="text-sidebar-foreground/45">Meta: {milestone.next.label}</span>
-      </div>
-
-      <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-sidebar-border/60">
-        <div
-          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-
-      <div className="mt-2.5 flex items-center justify-between">
-        <span className="text-[12px] font-bold tabular-nums text-sidebar-primary">{pct}%</span>
-        <span className="inline-flex items-center gap-0.5 text-[10.5px] font-semibold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
-          Ver Premiações
-          <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
+        <span className="rounded-md border border-sidebar-primary/30 bg-sidebar-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sidebar-primary">
+          {milestone.current.tier}
         </span>
+      </div>
+
+      {/* Big number */}
+      <p className="relative mt-2.5 font-display text-[26px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
+        {formatRevenue(revenue)}
+      </p>
+
+      {/* Today stats */}
+      <div className="relative mt-2.5 flex items-center gap-3 text-[11px]">
+        <span className="inline-flex items-center gap-1 text-success">
+          <TrendingUp className="h-3 w-3" strokeWidth={2.5} />
+          <span className="font-bold tabular-nums">{formatRevenue(todayRevenue)}</span>
+          <span className="font-medium text-sidebar-foreground/45">hoje</span>
+        </span>
+        <span className="h-3 w-px bg-sidebar-border/60" />
+        <span className="inline-flex items-center gap-1 text-sidebar-foreground/65">
+          <Activity className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} />
+          <span className="font-bold tabular-nums text-sidebar-accent-foreground">{salesToday}</span>
+          <span className="font-medium text-sidebar-foreground/45">vendas</span>
+        </span>
+      </div>
+
+      {/* Progress */}
+      <div className="relative mt-3.5">
+        <div className="mb-1.5 flex items-center justify-between text-[10.5px] font-semibold tabular-nums">
+          <span className="text-sidebar-primary">{milestone.current.label}</span>
+          <span className="text-sidebar-foreground/45">→ {milestone.next.label}</span>
+        </div>
+        <div className="h-[6px] overflow-hidden rounded-full bg-sidebar-border/60 ring-1 ring-inset ring-sidebar-border/40">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/70 shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.6)] transition-[width] duration-700 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-[12px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
+          <span className="inline-flex items-center gap-0.5 text-[10.5px] font-semibold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
+            Premiações
+            <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={2.5} />
+          </span>
+        </div>
       </div>
     </button>
   );
@@ -150,18 +181,23 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
 type SidebarSectionNavProps = {
   section: SidebarSection;
   pathname: string;
+  isFirst: boolean;
 };
 
-function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
+function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
   return (
     <SidebarGroup className="px-0 py-0">
-      <div className="px-3 pb-1.5 pt-3.5 group-data-[collapsible=icon]:hidden">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/35">
+      {!isFirst && (
+        <div className="mx-3 my-2 h-px bg-gradient-to-r from-transparent via-sidebar-border/70 to-transparent group-data-[collapsible=icon]:hidden" />
+      )}
+      <div className="flex items-center gap-2 px-4 pb-2 pt-2.5 group-data-[collapsible=icon]:hidden">
+        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-sidebar-foreground/40">
           {section.label}
         </span>
+        <span className="h-px flex-1 bg-sidebar-border/40" />
       </div>
       <SidebarGroupContent>
-        <SidebarMenu className="gap-0.5 px-0">
+        <SidebarMenu className="gap-1 px-0">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
@@ -172,42 +208,50 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[52px] w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[14px] font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-sidebar-primary/45 bg-sidebar-primary/10 text-sidebar-accent-foreground font-semibold shadow-[0_0_0_1px_hsl(var(--sidebar-primary)/0.08)_inset]"
-                        : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                        ? "border border-sidebar-primary/50 bg-gradient-to-r from-sidebar-primary/15 via-sidebar-primary/8 to-transparent text-sidebar-accent-foreground font-semibold shadow-[0_0_0_1px_hsl(var(--sidebar-primary)/0.1)_inset,0_2px_12px_-4px_hsl(var(--sidebar-primary)/0.25)]"
+                        : "border border-transparent text-sidebar-foreground/70 hover:border-sidebar-border/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
                     )}
                   >
+                    {/* Active indicator bar */}
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.7)] group-data-[collapsible=icon]:hidden" />
+                    )}
                     <span className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary/15 text-sidebar-primary"
-                        : "bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/nav:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary/20 text-sidebar-primary ring-1 ring-sidebar-primary/30 shadow-[0_0_12px_-2px_hsl(var(--sidebar-primary)/0.4)]"
+                        : "bg-sidebar-accent/50 text-sidebar-foreground/60 ring-1 ring-transparent group-hover/nav:bg-sidebar-accent/70 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:ring-sidebar-border/50",
                     )}>
                       <item.icon
-                        className="h-[16px] w-[16px]"
-                        strokeWidth={isActive ? 2.25 : 1.9}
+                        className="h-[17px] w-[17px]"
+                        strokeWidth={isActive ? 2.4 : 2}
                       />
                     </span>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-sidebar-primary ring-1 ring-sidebar-primary/25 group-data-[collapsible=icon]:hidden">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inset-0 animate-ping rounded-full bg-sidebar-primary opacity-70" />
+                          <span className="relative h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
+                        </span>
                         {item.badge}
                       </span>
                     )}
                     {item.count !== undefined && item.count > 0 && !item.badge && (
                       <span className={cn(
-                        "ml-auto rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
+                        "ml-auto rounded-md px-2 py-0.5 text-[10.5px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
                         isActive
-                          ? "bg-sidebar-primary/20 text-sidebar-primary"
-                          : "bg-sidebar-border/50 text-sidebar-foreground/55",
+                          ? "bg-sidebar-primary/25 text-sidebar-primary ring-1 ring-sidebar-primary/30"
+                          : "bg-sidebar-border/50 text-sidebar-foreground/60",
                       )}>
                         {item.count}
                       </span>
                     )}
-                    {isActive && !item.badge && item.count === undefined && (
+                    {isActive && !item.badge && (item.count === undefined || item.count === 0) && (
                       <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-sidebar-primary group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
                     )}
                   </NavLink>
@@ -330,16 +374,21 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/60 px-3 pb-3 pt-3.5">
-        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-card">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
+      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
+        {/* Brand */}
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-card to-sidebar-accent/40 shadow-[0_2px_10px_-2px_hsl(var(--sidebar-primary)/0.2)]">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[19px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
-              HOTZFY
-            </h1>
-            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-sidebar-foreground/50">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
+                HOTZFY
+              </h1>
+              <Sparkles className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+            </div>
+            <p className="mt-1.5 inline-flex items-center gap-1.5 text-[10.5px] font-semibold text-sidebar-foreground/55">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
                 <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
@@ -351,51 +400,61 @@ export function AppSidebar() {
         <RevenueCard
           collapsed={collapsed}
           revenue={revenue}
+          todayRevenue={todayRevenue}
+          salesToday={salesToday}
           milestone={milestone}
           onOpenRewards={() => navigate("/premiacoes")}
         />
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
-        {sections.map((section) => (
-          <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} />
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
+        {sections.map((section, idx) => (
+          <SidebarSectionNav
+            key={section.label}
+            section={section}
+            pathname={location.pathname}
+            isFirst={idx === 0}
+          />
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-2.5">
+      <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-3">
         {/* Solicitar Suporte — featured card */}
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup flex w-full items-center gap-3 rounded-2xl border border-sidebar-primary/35 bg-sidebar-primary/10 px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:bg-sidebar-primary/15 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-primary/10 to-sidebar-primary/5 px-3 py-3 text-left shadow-[0_2px_12px_-4px_hsl(var(--sidebar-primary)/0.3)] transition-all hover:border-sidebar-primary/60 hover:shadow-[0_4px_16px_-4px_hsl(var(--sidebar-primary)/0.45)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/15 text-sidebar-primary">
-            <Headphones className="h-[16px] w-[16px]" strokeWidth={2.25} />
+          <div className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full bg-sidebar-primary/15 blur-xl" />
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-sidebar-primary/20 text-sidebar-primary shadow-[0_0_12px_-2px_hsl(var(--sidebar-primary)/0.4)]">
+            <Headphones className="h-[17px] w-[17px]" strokeWidth={2.25} />
           </div>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
+          <div className="relative min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <p className="text-[13.5px] font-bold leading-tight text-sidebar-accent-foreground">
               Solicitar Suporte
             </p>
-            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/55">
-              24/7 ao seu dispor!
+            <p className="mt-1 text-[11px] leading-tight text-sidebar-foreground/60">
+              Time premium • 24/7 ao vivo
             </p>
           </div>
+          <ChevronRight className="relative ml-auto h-4 w-4 text-sidebar-primary/70 transition-transform group-hover/sup:translate-x-0.5 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
         </button>
 
         {/* User chip */}
         <button
           type="button"
           onClick={() => navigate("/perfil")}
-          className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2.5 text-left transition-colors hover:border-sidebar-border/60 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 text-[12px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/20">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary/35 via-sidebar-primary/20 to-sidebar-primary/10 text-[13px] font-black text-sidebar-primary ring-1 ring-sidebar-primary/30 shadow-[0_0_10px_-2px_hsl(var(--sidebar-primary)/0.35)]">
             {userInitial}
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-[12px] font-semibold leading-tight text-sidebar-accent-foreground">
+            <p className="truncate text-[12.5px] font-bold leading-tight text-sidebar-accent-foreground">
               {userName}
             </p>
-            <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/45">
+            <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/50">
               {user?.email}
             </p>
           </div>
@@ -404,9 +463,9 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] font-medium text-sidebar-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-[12.5px] font-semibold text-sidebar-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+          <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
         </button>
       </SidebarFooter>
