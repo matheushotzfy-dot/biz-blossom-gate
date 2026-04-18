@@ -181,41 +181,39 @@ type SidebarSectionNavProps = {
  pathname: string;
 };
 
-function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
+function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps & { isFirst?: boolean }) {
   return (
     <SidebarGroup className="px-0 py-0">
-      <div className="px-3 pb-1.5 pt-3 group-data-[collapsible=icon]:hidden">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/35">
-          {section.label}
-        </span>
-      </div>
+      {!isFirst && (
+        <div className="mx-3 my-2 h-px bg-sidebar-border/40 group-data-[collapsible=icon]:hidden" />
+      )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-0.5 px-0">
+        <SidebarMenu className="gap-1 px-0">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-md p-0 hover:bg-transparent active:bg-transparent">
+                <SidebarMenuButton asChild className="h-auto rounded-lg p-0 hover:bg-transparent active:bg-transparent">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium transition-colors duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-11 w-full items-center gap-3 rounded-lg px-3 text-[14px] font-medium transition-colors duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                        : "text-sidebar-foreground/55 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-5 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
                     <item.icon
                       className={cn(
-                        "h-4 w-4 shrink-0 transition-colors",
-                        isActive ? "text-sidebar-primary" : "text-sidebar-foreground/45 group-hover/nav:text-sidebar-accent-foreground",
+                        "h-[18px] w-[18px] shrink-0 transition-colors",
+                        isActive ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover/nav:text-sidebar-accent-foreground",
                       )}
-                      strokeWidth={isActive ? 2.25 : 1.85}
+                      strokeWidth={isActive ? 2.25 : 1.9}
                     />
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
@@ -285,8 +283,8 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
-        {sections.map((section) => (
-          <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} />
+        {sections.map((section, idx) => (
+          <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} isFirst={idx === 0} />
         ))}
       </SidebarContent>
 
