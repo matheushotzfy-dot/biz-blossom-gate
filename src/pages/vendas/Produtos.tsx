@@ -101,30 +101,15 @@ export default function Produtos() {
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
       {/* ── Page header ── */}
-      <div className="flex flex-col gap-5 px-5 pt-1 sm:px-7 md:pt-1">
-        <div className="flex items-end justify-between gap-4">
-          <div>
+      <div className="flex flex-col gap-6 px-5 pt-1 sm:px-7 md:pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-baseline gap-3">
             <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight text-foreground sm:text-[30px]">
               Produtos
             </h1>
-            <p className="mt-2 text-[13px] text-muted-foreground">
-              <span className="font-semibold text-foreground">{products.length}</span> no catálogo
-              {activeCount > 0 && (
-                <>
-                  <span className="mx-2 text-muted-foreground/40">·</span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                    <span className="font-semibold text-foreground">{activeCount}</span> ativos
-                  </span>
-                </>
-              )}
-              {pendingCount > 0 && (
-                <>
-                  <span className="mx-2 text-muted-foreground/40">·</span>
-                  <span className="font-semibold text-warning">{pendingCount}</span> em revisão
-                </>
-              )}
-            </p>
+            <span className="text-[13px] tabular-nums text-muted-foreground/60">
+              {products.length}
+            </span>
           </div>
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
@@ -135,10 +120,55 @@ export default function Produtos() {
           </button>
         </div>
 
+        {/* Tabs + Search row, integrated with list */}
+        <div className="flex flex-col gap-3 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-0.5">
+            {tabs.map((item) => {
+              const active = tab === item.value;
+              return (
+                <button
+                  key={item.value}
+                  onClick={() => setTab(item.value)}
+                  className={cn(
+                    "relative rounded-md px-3 py-1.5 text-[12px] font-semibold transition-all duration-150",
+                    active
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                  {item.count > 0 && (
+                    <span className={cn(
+                      "ml-1.5 text-[10.5px] tabular-nums",
+                      active ? "text-primary" : "text-muted-foreground/45"
+                    )}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar produto..."
+              className="h-8 w-full rounded-lg border border-border bg-secondary/50 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-64"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ── Product workspace ── */}
-      <div className="px-5 pt-5 pb-8 sm:px-7">
+      <div className="px-5 pt-4 pb-8 sm:px-7">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-24 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
@@ -165,54 +195,6 @@ export default function Produtos() {
             copiedId={copiedId}
             products={filtered}
             {...menuHandlers}
-            toolbar={
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                {/* Tabs */}
-                <div className="flex items-center gap-0.5">
-                  {tabs.map((item) => {
-                    const active = tab === item.value;
-                    return (
-                      <button
-                        key={item.value}
-                        onClick={() => setTab(item.value)}
-                        className={cn(
-                          "relative rounded-md px-3 py-1.5 text-[11px] font-semibold transition-all duration-150",
-                          active
-                            ? "bg-secondary text-foreground"
-                            : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {item.label}
-                        {item.count > 0 && (
-                          <span className={cn(
-                            "ml-1 text-[10px] tabular-nums",
-                            active ? "text-primary" : "text-muted-foreground/50"
-                          )}>
-                            {item.count}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar produto..."
-                    className="h-8 w-full rounded-lg border border-border bg-secondary/50 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-64"
-                  />
-                  {search && (
-                    <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            }
           />
         )}
       </div>
