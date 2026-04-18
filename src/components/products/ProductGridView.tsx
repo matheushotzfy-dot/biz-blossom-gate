@@ -15,8 +15,8 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-5xl">
       {toolbar && <div className="mb-5 px-1">{toolbar}</div>}
 
-      <div className="rounded-2xl border border-border/80 bg-[hsl(var(--card))] p-4 shadow-[0_1px_2px_0_hsl(0_0%_0%/0.06),0_12px_32px_-18px_hsl(0_0%_0%/0.4)] ring-1 ring-foreground/[0.04]">
-        <ul className="flex flex-col overflow-hidden rounded-xl bg-[hsl(var(--card-elevated))]">
+      <div className="rounded-2xl border border-border/70 bg-[hsl(var(--card))] p-3 shadow-[0_1px_2px_0_hsl(0_0%_0%/0.06),0_20px_48px_-24px_hsl(0_0%_0%/0.5)] ring-1 ring-foreground/[0.04]">
+        <ul className="flex flex-col overflow-hidden rounded-xl">
         {products.map((product, idx) => {
           const deliveryLabel = (DELIVERY_LABELS[product.delivery_type] || product.delivery_type).toUpperCase();
           const initial = product.name.charAt(0).toUpperCase();
@@ -32,50 +32,51 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
               className={cn(
-                "group relative flex min-h-[112px] cursor-pointer items-center gap-8 px-6 py-7 transition-colors duration-150 ease-out",
-                "hover:bg-foreground/[0.025]",
-                idx > 0 && "before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-border/25"
+                "group relative flex min-h-[128px] cursor-pointer items-center gap-10 px-7 py-8 transition-all duration-200 ease-out",
+                idx % 2 === 1 && "bg-foreground/[0.012]",
+                "hover:bg-foreground/[0.04] hover:shadow-[inset_0_0_0_1px_hsl(var(--foreground)/0.05)]",
+                idx > 0 && "before:absolute before:inset-x-7 before:top-0 before:h-px before:bg-border/20"
               )}
             >
-              {/* LEFT — product identity (dominant, ~70%) */}
-              <div className="flex min-w-0 flex-[1_1_auto] items-center gap-5">
-                <div className="relative h-16 w-16 shrink-0 self-center overflow-hidden rounded-2xl bg-[hsl(var(--card-elevated))] ring-1 ring-border/80 shadow-[0_2px_8px_-2px_hsl(0_0%_0%/0.22),inset_0_0_0_1px_hsl(0_0%_100%/0.03)]">
+              {/* LEFT — product identity (dominant, breathable) */}
+              <div className="flex min-w-0 flex-[1_1_65%] items-center gap-6">
+                <div className="relative h-[72px] w-[72px] shrink-0 self-center overflow-hidden rounded-2xl bg-[hsl(var(--card-elevated))] ring-1 ring-border/70 shadow-[0_4px_14px_-4px_hsl(0_0%_0%/0.35),inset_0_0_0_1px_hsl(0_0%_100%/0.04)] transition-transform duration-200 group-hover:scale-[1.02]">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/25 to-primary/[0.06]">
-                      <span className="font-display text-2xl font-black tracking-tight text-primary">{initial}</span>
+                      <span className="font-display text-[28px] font-black tracking-tight text-primary">{initial}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="flex min-w-0 flex-col">
-                  <div className="truncate font-display text-[18px] font-bold leading-tight tracking-[-0.02em] text-foreground">
+                  <div className="truncate font-display text-[20px] font-bold leading-[1.15] tracking-[-0.025em] text-foreground">
                     {product.name}
                   </div>
-                  <div className="mt-0.5 truncate text-[12.5px] font-normal leading-snug text-muted-foreground/50">
+                  <div className="mt-1 truncate text-[12px] font-normal leading-snug text-muted-foreground/40">
                     {product.description || "Sem descrição"}
                   </div>
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/40">
+                  <div className="mt-2 flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.04em] text-muted-foreground/35">
                     <span>{deliveryLabel}</span>
-                    <span>•</span>
+                    <span className="text-muted-foreground/25">•</span>
                     <span>{formatCompactDate(product.created_at)}</span>
-                    <span>•</span>
+                    <span className="text-muted-foreground/25">•</span>
                     <span className="font-mono normal-case tracking-normal">#{shortId}</span>
                   </div>
                 </div>
               </div>
 
-              {/* RIGHT — commercial block (compact, anchored) */}
-              <div className="flex shrink-0 items-center gap-5 border-l border-border/40 pl-6">
-                <div className="flex flex-col items-end gap-1.5">
+              {/* RIGHT — commercial block (anchored, lighter weight) */}
+              <div className="flex shrink-0 items-center gap-4 border-l border-border/30 pl-8">
+                <div className="flex flex-col items-end gap-2">
                   <div className="flex items-baseline gap-1">
                     {currencySymbol && (
-                      <span className="font-numbers text-[11px] font-medium leading-none text-muted-foreground/45">
+                      <span className="font-numbers text-[11px] font-medium leading-none text-muted-foreground/40">
                         {currencySymbol}
                       </span>
                     )}
-                    <span className="font-numbers text-[26px] font-extrabold leading-none tabular-nums tracking-[-0.03em] text-foreground">
+                    <span className="font-numbers text-[32px] font-black leading-none tabular-nums tracking-[-0.04em] text-foreground">
                       {priceValue}
                     </span>
                   </div>
@@ -83,7 +84,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 </div>
 
                 <div
-                  className="flex items-center gap-0.5 self-center opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  className="flex items-center gap-0.5 self-center opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
