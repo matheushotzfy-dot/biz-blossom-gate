@@ -1211,13 +1211,14 @@ button svg, a svg, [role="button"] svg {
   filter: none !important;
 }
 
-/* Tone down heavy decorative background blurs (blur-2xl / blur-3xl)
+/* Tone down heavy decorative background blurs (blur-2xl / blur-3xl / blur-xl)
    when used as ambient orbs (typically absolutely positioned).
    We keep backdrop-blur (functional glass) untouched. */
 .blur-3xl,
-.blur-2xl {
-  filter: blur(40px) !important;
-  opacity: 0.35 !important;
+.blur-2xl,
+.blur-xl {
+  filter: blur(20px) !important;
+  opacity: 0.18 !important;
 }
 
 /* Disable pulsing glow animation — replace with subtle static state */
@@ -1230,4 +1231,26 @@ button svg, a svg, [role="button"] svg {
 .ambient-backdrop::before,
 .ambient-backdrop::after {
   display: none !important;
+}
+
+/* ─── Aggressive glow neutralization ─── */
+/* Catches arbitrary box-shadow with colored alpha (shadow-[0_X_Y_hsl(...)]) */
+[class*="shadow-[0_"][class*="hsl("] {
+  box-shadow: 0 1px 2px hsl(var(--background) / 0.15), 0 4px 12px hsl(var(--background) / 0.08) !important;
+}
+
+/* Catches drop-shadow-[...hsl(...)] colored glows */
+[class*="drop-shadow-["][class*="hsl("] {
+  filter: none !important;
+}
+
+/* Neutralize colored shadow utilities (shadow-primary/N, shadow-success/N, etc.) */
+[class*="shadow-primary/"],
+[class*="shadow-success/"],
+[class*="shadow-info/"],
+[class*="shadow-warning/"],
+[class*="shadow-destructive/"],
+[class*="shadow-accent/"] {
+  --tw-shadow-color: hsl(var(--background) / 0.2) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
 }
