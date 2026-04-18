@@ -110,48 +110,51 @@ function RevenueCard({ collapsed, revenue, todayRevenue, salesToday, milestone, 
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev mt-4 block w-full rounded-xl border border-sidebar-border/60 bg-gradient-to-b from-sidebar-accent/40 to-sidebar-accent/10 p-3 text-left transition-all hover:border-sidebar-primary/30 hover:from-sidebar-accent/60"
+      className="group/rev relative mt-4 block w-full overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-sidebar-accent/50 via-sidebar-accent/25 to-sidebar-accent/10 p-3.5 text-left transition-all hover:border-sidebar-primary/40 hover:shadow-[0_8px_24px_-12px_hsl(var(--sidebar-primary)/0.4)]"
     >
+      {/* Subtle top accent line */}
+      <div className="pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-sidebar-primary/40 to-transparent" />
+
       {/* Top: label + tier */}
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45">
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
           Faturamento total
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-sidebar-primary">
+        <span className="inline-flex items-center gap-1 rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/20">
           <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
-          T{milestone.tier + 1}
+          Tier {milestone.tier + 1}
         </span>
       </div>
 
       {/* Big revenue */}
-      <p className="font-display text-[18px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
+      <p className="font-display text-[22px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
         {formatRevenue(revenue)}
       </p>
 
       {/* Progress bar */}
-      <div className="mt-2.5 flex items-center gap-2">
-        <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-sidebar-border/40">
+      <div className="mt-3 flex items-center gap-2">
+        <div className="h-1 flex-1 overflow-hidden rounded-full bg-sidebar-border/50">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-sidebar-primary/70 to-sidebar-primary transition-[width] duration-700 ease-out"
+            className="h-full rounded-full bg-gradient-to-r from-sidebar-primary/70 to-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.5)] transition-[width] duration-700 ease-out"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="text-[9.5px] font-semibold tabular-nums text-sidebar-foreground/55">
+        <span className="text-[10px] font-semibold tabular-nums text-sidebar-foreground/60">
           {milestone.next.label}
         </span>
       </div>
 
       {/* Today stats */}
-      <div className="mt-3 grid grid-cols-2 gap-2 border-t border-sidebar-border/40 pt-2.5">
+      <div className="mt-3.5 grid grid-cols-2 gap-3 border-t border-sidebar-border/40 pt-3">
         <div>
-          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">Hoje</p>
-          <p className="mt-0.5 text-[12px] font-bold tabular-nums text-sidebar-accent-foreground">
+          <p className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/45">Hoje</p>
+          <p className="mt-1 font-numbers text-[14px] font-bold tabular-nums leading-none text-sidebar-accent-foreground">
             {formatRevenue(todayRevenue)}
           </p>
         </div>
         <div>
-          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">Vendas</p>
-          <p className="mt-0.5 text-[12px] font-bold tabular-nums text-sidebar-accent-foreground">
+          <p className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/45">Vendas</p>
+          <p className="mt-1 font-numbers text-[14px] font-bold tabular-nums leading-none text-sidebar-accent-foreground">
             {salesToday}
           </p>
         </div>
