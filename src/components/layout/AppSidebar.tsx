@@ -350,8 +350,8 @@ export function AppSidebar() {
             </h1>
             <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-sidebar-foreground/50">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
               </span>
               Sistema operacional
             </p>
