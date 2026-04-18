@@ -96,7 +96,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
                     {/* Price overlay on image */}
                     <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                      <span className="font-numbers text-[26px] font-black leading-none tracking-tight text-emerald-400 tabular-nums drop-shadow-[0_2px_8px_hsl(152_76%_30%/0.6)]">
+                      <span className="font-numbers text-[26px] font-black leading-none tracking-tight text-success tabular-nums drop-shadow-[0_2px_8px_hsl(var(--success)/0.5)]">
                         {formatCurrency(Number(product.price))}
                       </span>
                     </div>
@@ -109,7 +109,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                         {formatCurrency(Number(product.price)).replace("R$", "").trim()}
                       </span>
                     </div>
-                    <span className="absolute right-4 bottom-3 font-numbers text-[16px] font-bold tabular-nums text-emerald-400 drop-shadow-md">
+                    <span className="absolute right-4 bottom-3 font-numbers text-[16px] font-bold tabular-nums text-success drop-shadow-md">
                       {formatCurrency(Number(product.price))}
                     </span>
                     {/* Initial chip top-left */}
@@ -157,7 +157,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       {linkPreview}
                     </span>
                     {isCopied ? (
-                      <Check className="h-3 w-3 shrink-0 text-emerald-400" strokeWidth={2.75} />
+                      <Check className="h-3 w-3 shrink-0 text-success" strokeWidth={2.75} />
                     ) : (
                       <Copy className="h-3 w-3 shrink-0 text-muted-foreground/50 transition-colors group-hover/link:text-primary" strokeWidth={2.25} />
                     )}
