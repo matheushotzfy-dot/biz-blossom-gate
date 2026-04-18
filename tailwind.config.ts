@@ -112,6 +112,10 @@ export default {
           "0%, 100%": { opacity: "0.4" },
           "50%": { opacity: "0.8" },
         },
+        kenburns: {
+          "0%": { transform: "scale(1.05) translate(0, 0)" },
+          "100%": { transform: "scale(1.18) translate(-2%, -1%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
