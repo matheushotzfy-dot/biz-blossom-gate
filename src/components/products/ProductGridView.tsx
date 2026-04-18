@@ -1,4 +1,4 @@
-import { ArrowUpRight, TrendingUp } from "lucide-react";
+import { ArrowUpRight, Package, TrendingUp, Users } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, formatCompactDate, type Product } from "./productPresentation";
 import { cn } from "@/lib/utils";
@@ -9,35 +9,38 @@ type ProductGridViewProps = ProductMenuHandlers & {
   toolbar?: React.ReactNode;
 };
 
-const STATUS_META: Record<string, { label: string; dot: string; text: string; ring: string }> = {
+const STATUS_META: Record<string, { label: string; dot: string; text: string; bg: string; ring: string }> = {
   active: {
     label: "Ativo",
     dot: "bg-emerald-400",
     text: "text-emerald-300",
-    ring: "shadow-[0_0_0_3px_hsl(152_76%_60%/0.12)]",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    ring: "shadow-[0_0_0_3px_hsl(152_76%_60%/0.18)]",
   },
   inactive: {
     label: "Inativo",
     dot: "bg-muted-foreground/50",
     text: "text-muted-foreground",
+    bg: "bg-muted/30 border-border/50",
     ring: "",
   },
   pending_review: {
     label: "Em revisão",
     dot: "bg-amber-400",
     text: "text-amber-300",
-    ring: "shadow-[0_0_0_3px_hsl(45_93%_60%/0.12)]",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    ring: "shadow-[0_0_0_3px_hsl(45_93%_60%/0.18)]",
   },
 };
 
 // Deterministic gradient per product for thumbnail fallback
 const GRADIENTS = [
-  "from-violet-500/30 via-fuchsia-500/20 to-rose-500/25",
-  "from-sky-500/30 via-cyan-500/20 to-emerald-500/25",
-  "from-amber-500/30 via-orange-500/20 to-rose-500/25",
-  "from-emerald-500/30 via-teal-500/20 to-cyan-500/25",
-  "from-indigo-500/30 via-violet-500/20 to-purple-500/25",
-  "from-rose-500/30 via-pink-500/20 to-fuchsia-500/25",
+  "from-violet-500/40 via-fuchsia-500/30 to-rose-500/35",
+  "from-sky-500/40 via-cyan-500/30 to-emerald-500/35",
+  "from-amber-500/40 via-orange-500/30 to-rose-500/35",
+  "from-emerald-500/40 via-teal-500/30 to-cyan-500/35",
+  "from-indigo-500/40 via-violet-500/30 to-purple-500/35",
+  "from-rose-500/40 via-pink-500/30 to-fuchsia-500/35",
 ];
 
 const gradientFor = (id: string) => {
@@ -47,118 +50,140 @@ const gradientFor = (id: string) => {
 
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
   return (
-    <div className="mx-auto w-full max-w-[1240px]">
+    <div className="mx-auto w-full max-w-[1280px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
 
-      {/* Premium panel — subtle ambient glow + crisp border */}
-      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card/60 shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_60px_-32px_hsl(0_0%_0%/0.6)]">
-        {/* Top accent line — premium signature */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      {/* Cards grid — premium squares */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {products.map((product) => {
+          const status = STATUS_META[product.status] || STATUS_META.inactive;
+          const initial = product.name.charAt(0).toUpperCase();
+          const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
+          const isCopied = copiedId === product.id;
+          const gradient = gradientFor(product.id);
 
-        {/* Header row */}
-        <div className="grid grid-cols-[minmax(0,1fr)_180px_140px_140px_44px] items-center gap-6 border-b border-border/50 bg-muted/[0.04] px-6 py-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
-          <div>Produto</div>
-          <div className="text-right">Preço</div>
-          <div>Status</div>
-          <div>Criado</div>
-          <div />
-        </div>
+          return (
+            <article
+              key={product.id}
+              onClick={() => handlers.onEditProduct(product)}
+              className={cn(
+                "group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card/70",
+                "shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_8px_24px_-12px_hsl(0_0%_0%/0.4)]",
+                "transition-all duration-300",
+                "hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_1px_0_0_hsl(var(--foreground)/0.06)_inset,0_20px_40px_-16px_hsl(var(--primary)/0.25)]",
+              )}
+            >
+              {/* Top accent — appears on hover */}
+              <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 transition-all duration-300 group-hover:scale-x-100 group-hover:opacity-100" />
 
-        {/* Rows */}
-        <ul>
-          {products.map((product, idx) => {
-            const status = STATUS_META[product.status] || STATUS_META.inactive;
-            const initial = product.name.charAt(0).toUpperCase();
-            const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
-            const isCopied = copiedId === product.id;
-            const shortId = `prod_${product.id.slice(0, 12)}`;
-            const gradient = gradientFor(product.id);
-            const isLast = idx === products.length - 1;
-
-            return (
-              <li
-                key={product.id}
-                onClick={() => handlers.onEditProduct(product)}
-                className={cn(
-                  "group relative grid cursor-pointer grid-cols-[minmax(0,1fr)_180px_140px_140px_44px] items-center gap-6 px-6 py-4 transition-all duration-200",
-                  !isLast && "border-b border-border/40",
-                  "hover:bg-foreground/[0.025]"
-                )}
-              >
-                {/* Left accent bar on hover — Linear-style */}
-                <span className="pointer-events-none absolute inset-y-2 left-0 w-[2px] origin-center scale-y-0 rounded-r-full bg-gradient-to-b from-primary/60 via-primary to-primary/60 opacity-0 transition-all duration-200 group-hover:scale-y-100 group-hover:opacity-100" />
-
-                {/* Name + identity */}
-                <div className="flex min-w-0 items-center gap-3.5">
-                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl ring-1 ring-border/70 shadow-[0_2px_8px_-2px_hsl(0_0%_0%/0.4),inset_0_1px_0_0_hsl(var(--foreground)/0.06)] transition-transform duration-200 group-hover:scale-[1.04]">
-                    {product.image_url ? (
-                      <img src={product.image_url} alt="" loading="lazy" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className={cn("flex h-full w-full items-center justify-center bg-gradient-to-br", gradient)}>
-                        <span className="font-display text-[15px] font-black text-foreground/90 drop-shadow-sm">{initial}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-display text-[14px] font-semibold leading-tight tracking-[-0.01em] text-foreground">
-                        {product.name}
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/0 transition-all duration-200 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
-                    </div>
-                    <div className="mt-1 flex items-center gap-1.5 text-[11px] leading-tight text-muted-foreground/70">
-                      <span className="capitalize font-medium">{deliveryLabel}</span>
-                      <span className="text-muted-foreground/30">·</span>
-                      <span className="font-mono text-[10px] tracking-tight text-muted-foreground/55">{shortId}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Price — strong, tabular, with subtle commission hint */}
-                <div className="text-right">
-                  <div className="font-numbers text-[15px] font-bold tabular-nums tracking-tight text-foreground">
-                    {formatCurrency(Number(product.price))}
-                  </div>
-                  {product.affiliate_enabled && (
-                    <div className="mt-0.5 flex items-center justify-end gap-1 text-[10px] font-medium text-primary/70">
-                      <TrendingUp className="h-2.5 w-2.5" strokeWidth={2.5} />
-                      {product.affiliate_commission}% afiliado
-                    </div>
-                  )}
-                </div>
-
-                {/* Status — refined badge with glow ring */}
-                <div className="flex items-center">
-                  <div className={cn("inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.04] px-2.5 py-1 text-[11px] font-medium", status.text)}>
-                    <span className={cn("relative flex h-1.5 w-1.5")}>
-                      <span className={cn("absolute inset-0 rounded-full", status.dot, status.ring)} />
+              {/* Thumbnail — square hero */}
+              <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/40">
+                {product.image_url ? (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className={cn("flex h-full w-full items-center justify-center bg-gradient-to-br", gradient)}>
+                    <span className="font-display text-[64px] font-black text-foreground/85 drop-shadow-lg">
+                      {initial}
                     </span>
-                    {status.label}
                   </div>
+                )}
+                {/* gradient overlay for status legibility */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card/70 via-transparent to-transparent" />
+
+                {/* Status badge — top-left over thumb */}
+                <div className={cn(
+                  "absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md",
+                  status.bg,
+                  status.text,
+                )}>
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className={cn("absolute inset-0 rounded-full", status.dot, status.ring)} />
+                  </span>
+                  {status.label}
                 </div>
 
-                {/* Created date */}
-                <div className="text-[11.5px] font-medium text-muted-foreground/75 tabular-nums">
-                  {formatCompactDate(product.created_at)}
-                </div>
-
-                {/* Actions */}
-                <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                {/* Actions — top-right, visible on hover */}
+                <div
+                  className="absolute right-2.5 top-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 data-[open=true]:opacity-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <ProductActionsMenu
                     copied={isCopied}
                     product={product}
-                    triggerClassName="h-8 w-8 rounded-lg text-muted-foreground/50 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100 data-[state=open]:bg-foreground/[0.06] data-[state=open]:text-foreground"
+                    triggerClassName="h-8 w-8 rounded-lg border border-border/60 bg-background/80 text-foreground/80 backdrop-blur-md hover:bg-background hover:text-foreground data-[state=open]:bg-background"
                     {...handlers}
                   />
                 </div>
-              </li>
-            );
-          })}
-        </ul>
+
+                {/* Delivery type pill — bottom-left */}
+                <div className="absolute bottom-3 left-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-border/40 bg-background/70 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-foreground/70 backdrop-blur-md">
+                    <Package className="h-2.5 w-2.5" strokeWidth={2.5} />
+                    {deliveryLabel}
+                  </span>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="flex flex-1 flex-col gap-3 p-5">
+                <div className="min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="line-clamp-1 font-display text-[16px] font-bold leading-snug tracking-[-0.01em] text-foreground">
+                      {product.name}
+                    </h3>
+                    <ArrowUpRight
+                      className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+                      strokeWidth={2.25}
+                    />
+                  </div>
+                  {product.description ? (
+                    <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-muted-foreground/70">
+                      {product.description}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[12.5px] italic text-muted-foreground/35">Sem descrição</p>
+                  )}
+                </div>
+
+                {/* Stats footer */}
+                <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/40 pt-3.5">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/50">
+                      Preço
+                    </p>
+                    <p className="mt-0.5 font-numbers text-[20px] font-bold tabular-nums leading-none tracking-tight text-foreground">
+                      {formatCurrency(Number(product.price))}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    {product.affiliate_enabled ? (
+                      <div className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-[10.5px] font-semibold text-primary">
+                        <TrendingUp className="h-2.5 w-2.5" strokeWidth={2.5} />
+                        {product.affiliate_commission}% afiliado
+                      </div>
+                    ) : (
+                      <div className="text-[10.5px] font-medium text-muted-foreground/50">
+                        Sem afiliação
+                      </div>
+                    )}
+                    <p className="mt-1 text-[10.5px] tabular-nums text-muted-foreground/50">
+                      {formatCompactDate(product.created_at)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
-      {/* Footer */}
-      <div className="mt-3 flex items-center justify-between px-1 text-[11px] text-muted-foreground/70">
+      {/* Footer count */}
+      <div className="mt-5 flex items-center justify-between px-1 text-[11.5px] text-muted-foreground/70">
         <span>
           <span className="font-mono font-semibold text-foreground/80 tabular-nums">{products.length}</span>{" "}
           {products.length === 1 ? "produto" : "produtos"}
