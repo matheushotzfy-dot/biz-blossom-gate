@@ -112,13 +112,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-gradient-to-br from-sidebar-accent/60 via-sidebar-accent/40 to-sidebar-accent/30 p-4 text-left transition-all hover:border-sidebar-primary/55 hover:from-sidebar-accent/70 hover:to-sidebar-accent/40"
+      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/45 p-4 text-left transition-all duration-200 hover:border-sidebar-primary/45 hover:bg-sidebar-accent/60"
     >
-      {/* glow corner */}
-      <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-sidebar-primary/15 blur-2xl" />
-
-      <div className="relative flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/40 bg-sidebar-primary/15 shadow-[0_0_16px_-2px_hsl(var(--sidebar-primary)/0.45)]">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/12">
           <Zap className="h-[18px] w-[18px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
         </div>
         <div className="min-w-0 flex-1">
@@ -131,21 +128,21 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
         </div>
       </div>
 
-      <div className="relative mt-4 flex items-center justify-between text-[11px] font-bold tabular-nums">
+      <div className="mt-4 flex items-center justify-between text-[11px] font-bold tabular-nums">
         <span className="text-sidebar-primary">{milestone.current.label}</span>
         <span className="text-sidebar-foreground/55">Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="relative mt-2 h-2 overflow-hidden rounded-full bg-sidebar-border/60">
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-sidebar-border/60">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/80 shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.5)] transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <div className="relative mt-3 flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between">
         <span className="text-[14px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
-        <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
+        <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-sidebar-primary/85 transition-colors group-hover/rev:text-sidebar-primary">
           Ver Premiações
           <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={2.5} />
         </span>
@@ -186,12 +183,12 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   >
                     {/* Active indicator bar */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_10px_hsl(var(--sidebar-primary)/0.8)] group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
                     <span className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary/20 text-sidebar-primary ring-1 ring-sidebar-primary/35 shadow-[0_0_14px_-2px_hsl(var(--sidebar-primary)/0.5)]"
+                        ? "bg-sidebar-primary/18 text-sidebar-primary ring-1 ring-sidebar-primary/30"
                         : "bg-sidebar-accent/55 text-sidebar-foreground/65 ring-1 ring-sidebar-border/40 group-hover/nav:bg-sidebar-accent/75 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:ring-sidebar-border/60",
                     )}>
                       <item.icon
@@ -344,7 +341,7 @@ export function AppSidebar() {
       <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-card to-sidebar-accent/40 shadow-[0_2px_10px_-2px_hsl(var(--sidebar-primary)/0.2)]">
+          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-card to-sidebar-accent/40">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1" />
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" />
           </div>
@@ -388,13 +385,12 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-primary/10 to-sidebar-primary/5 px-3 py-3 text-left shadow-[0_2px_12px_-4px_hsl(var(--sidebar-primary)/0.3)] transition-all hover:border-sidebar-primary/60 hover:shadow-[0_4px_16px_-4px_hsl(var(--sidebar-primary)/0.45)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/30 bg-sidebar-primary/8 px-3 py-3 text-left transition-all duration-200 hover:border-sidebar-primary/50 hover:bg-sidebar-primary/12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full bg-sidebar-primary/15 blur-xl" />
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-sidebar-primary/20 text-sidebar-primary shadow-[0_0_12px_-2px_hsl(var(--sidebar-primary)/0.4)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/35 bg-sidebar-primary/15 text-sidebar-primary">
             <Headphones className="h-[17px] w-[17px]" strokeWidth={2.25} />
           </div>
-          <div className="relative min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <p className="text-[13.5px] font-bold leading-tight text-sidebar-accent-foreground">
               Solicitar Suporte
             </p>
@@ -402,7 +398,7 @@ export function AppSidebar() {
               Time premium • 24/7 ao vivo
             </p>
           </div>
-          <ChevronRight className="relative ml-auto h-4 w-4 text-sidebar-primary/70 transition-transform group-hover/sup:translate-x-0.5 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
+          <ChevronRight className="ml-auto h-4 w-4 text-sidebar-primary/70 transition-transform group-hover/sup:translate-x-0.5 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
         </button>
 
         {/* User chip */}
@@ -411,7 +407,7 @@ export function AppSidebar() {
           onClick={() => navigate("/perfil")}
           className="flex w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2.5 text-left transition-colors hover:border-sidebar-border/60 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary/35 via-sidebar-primary/20 to-sidebar-primary/10 text-[13px] font-black text-sidebar-primary ring-1 ring-sidebar-primary/30 shadow-[0_0_10px_-2px_hsl(var(--sidebar-primary)/0.35)]">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/18 text-[13px] font-black text-sidebar-primary ring-1 ring-sidebar-primary/30">
             {userInitial}
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
           </div>
