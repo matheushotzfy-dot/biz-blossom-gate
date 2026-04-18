@@ -185,43 +185,53 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
   return (
     <SidebarGroup className="px-0 py-0">
       {!isFirst && (
-        <div className="mx-3 my-2 h-px bg-sidebar-border/40 group-data-[collapsible=icon]:hidden" />
+        <div className="mx-4 my-3 h-px bg-gradient-to-r from-transparent via-sidebar-border/60 to-transparent group-data-[collapsible=icon]:hidden" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0">
+        <SidebarMenu className="gap-[3px] px-0">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-lg p-0 hover:bg-transparent active:bg-transparent">
+                <SidebarMenuButton asChild className="h-auto rounded-xl p-0 hover:bg-transparent active:bg-transparent">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-11 w-full items-center gap-3 rounded-lg px-3 text-[14px] font-medium transition-colors duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[46px] w-full items-center gap-3.5 rounded-xl px-3.5 text-[14.5px] font-medium tracking-[-0.005em] transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                        ? "bg-gradient-to-r from-sidebar-accent to-sidebar-accent/60 text-sidebar-accent-foreground font-semibold"
+                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
-                    <item.icon
+                    <span
                       className={cn(
-                        "h-[18px] w-[18px] shrink-0 transition-colors",
-                        isActive ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover/nav:text-sidebar-accent-foreground",
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                        isActive
+                          ? "bg-sidebar-primary/15 text-sidebar-primary"
+                          : "text-sidebar-foreground/55 group-hover/nav:bg-sidebar-accent/70 group-hover/nav:text-sidebar-accent-foreground",
                       )}
-                      strokeWidth={isActive ? 2.25 : 1.9}
-                    />
+                    >
+                      <item.icon
+                        className="h-[19px] w-[19px]"
+                        strokeWidth={isActive ? 2.3 : 1.95}
+                      />
+                    </span>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto rounded bg-sidebar-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                      <span className="ml-auto flex items-center gap-1 rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.08em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                        <span className="h-1 w-1 rounded-full bg-sidebar-primary animate-pulse" />
                         {item.badge}
                       </span>
+                    )}
+                    {isActive && !item.badge && (
+                      <ChevronRight className="ml-auto h-3.5 w-3.5 text-sidebar-primary/70 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
                     )}
                   </NavLink>
                 </SidebarMenuButton>
@@ -268,42 +278,51 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
-        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-card">
+      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-5">
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/60 bg-gradient-to-br from-sidebar-accent to-card">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-sidebar-primary ring-2 ring-sidebar" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
+            <h1 className="text-[21px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
               HOTZFY
             </h1>
+            <p className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/45">
+              Seller Console
+            </p>
           </div>
         </div>
         <RevenueCard collapsed={collapsed} revenue={revenue} milestone={milestone} onOpenRewards={() => navigate("/premiacoes")} />
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
         {sections.map((section, idx) => (
           <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} isFirst={idx === 0} />
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2">
+      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5">
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="mb-0.5 flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[13px] font-medium text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup mb-1 flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[13.5px] font-medium text-sidebar-foreground/60 transition-all duration-200 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <Headphones className="h-4 w-4 shrink-0 text-sidebar-foreground/45" strokeWidth={1.85} />
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/40 text-sidebar-foreground/55">
+            <Headphones className="h-4 w-4" strokeWidth={1.95} />
+          </span>
           <span className="group-data-[collapsible=icon]:hidden">Suporte 24/7</span>
+          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
         </button>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium text-sidebar-foreground/55 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/out flex h-10 w-full items-center gap-3 rounded-xl px-3 text-[13.5px] font-medium text-sidebar-foreground/55 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.85} />
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/out:bg-destructive/15 group-hover/out:text-destructive">
+            <LogOut className="h-4 w-4" strokeWidth={1.95} />
+          </span>
           <span className="group-data-[collapsible=icon]:hidden">Sair</span>
         </button>
       </SidebarFooter>
