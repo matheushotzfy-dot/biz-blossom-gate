@@ -1,6 +1,6 @@
-import { ArrowUpRight, Package, TrendingUp, Users } from "lucide-react";
+import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
-import { DELIVERY_LABELS, formatCurrency, formatCompactDate, type Product } from "./productPresentation";
+import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink } from "./productPresentation";
 import { cn } from "@/lib/utils";
 
 type ProductGridViewProps = ProductMenuHandlers & {
@@ -9,27 +9,21 @@ type ProductGridViewProps = ProductMenuHandlers & {
   toolbar?: React.ReactNode;
 };
 
-const STATUS_META: Record<string, { label: string; dot: string; text: string; bg: string; ring: string }> = {
+const STATUS_META: Record<string, { label: string; dot: string; text: string }> = {
   active: {
     label: "Ativo",
-    dot: "bg-emerald-400",
+    dot: "bg-emerald-400 shadow-[0_0_8px_hsl(152_76%_60%/0.7)]",
     text: "text-emerald-300",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-    ring: "shadow-[0_0_0_3px_hsl(152_76%_60%/0.18)]",
   },
   inactive: {
     label: "Inativo",
     dot: "bg-muted-foreground/50",
     text: "text-muted-foreground",
-    bg: "bg-muted/30 border-border/50",
-    ring: "",
   },
   pending_review: {
     label: "Em revisão",
-    dot: "bg-amber-400",
+    dot: "bg-amber-400 shadow-[0_0_8px_hsl(45_93%_60%/0.7)]",
     text: "text-amber-300",
-    bg: "bg-amber-500/10 border-amber-500/20",
-    ring: "shadow-[0_0_0_3px_hsl(45_93%_60%/0.18)]",
   },
 };
 
@@ -43,9 +37,25 @@ const GRADIENTS = [
   "from-rose-500/40 via-pink-500/30 to-fuchsia-500/35",
 ];
 
+const THEME_LABELS: Record<string, string> = {
+  default: "Padrão",
+  dark: "Cinza Escuro",
+  light: "Cinza Suave",
+  premium: "Premium",
+};
+
 const gradientFor = (id: string) => {
   const sum = id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   return GRADIENTS[sum % GRADIENTS.length];
+};
+
+const shortenLink = (url: string) => {
+  try {
+    const full = getCheckoutLink(url);
+    return full.replace(/^https?:\/\//, "");
+  } catch {
+    return url;
+  }
 };
 
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
@@ -53,7 +63,6 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-[1280px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
 
-      {/* Cards grid — premium squares */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
           const status = STATUS_META[product.status] || STATUS_META.inactive;
@@ -61,120 +70,168 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const isCopied = copiedId === product.id;
           const gradient = gradientFor(product.id);
+          const themeLabel = THEME_LABELS[product.checkout_theme || "default"] || "Padrão";
+          const linkPreview = product.checkout_url ? shortenLink(product.checkout_url) : null;
 
           return (
             <article
               key={product.id}
-              onClick={() => handlers.onEditProduct(product)}
               className={cn(
-                "group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card/70",
+                "group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card",
                 "shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_8px_24px_-12px_hsl(0_0%_0%/0.4)]",
                 "transition-all duration-300",
-                "hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_1px_0_0_hsl(var(--foreground)/0.06)_inset,0_20px_40px_-16px_hsl(var(--primary)/0.25)]",
+                "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_1px_0_0_hsl(var(--foreground)/0.06)_inset,0_20px_44px_-16px_hsl(var(--primary)/0.3)]",
               )}
             >
-              {/* Top accent — appears on hover */}
-              <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 transition-all duration-300 group-hover:scale-x-100 group-hover:opacity-100" />
-
-              {/* Thumbnail — square hero */}
+              {/* ── Hero: image OR mega-price ── */}
               <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/40">
                 {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
+                  <>
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+                    {/* Price overlay on image */}
+                    <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                      <span className="font-numbers text-[26px] font-black leading-none tracking-tight text-emerald-400 tabular-nums drop-shadow-[0_2px_8px_hsl(152_76%_30%/0.6)]">
+                        {formatCurrency(Number(product.price))}
+                      </span>
+                    </div>
+                  </>
                 ) : (
-                  <div className={cn("flex h-full w-full items-center justify-center bg-gradient-to-br", gradient)}>
-                    <span className="font-display text-[64px] font-black text-foreground/85 drop-shadow-lg">
+                  <div className={cn("relative flex h-full w-full items-center justify-center bg-gradient-to-br", gradient)}>
+                    {/* Mega price - center stage like the reference */}
+                    <div className="absolute inset-0 flex items-center justify-center px-6">
+                      <span className="font-numbers text-[64px] font-black leading-none tracking-tighter text-foreground/90 tabular-nums drop-shadow-2xl">
+                        {formatCurrency(Number(product.price)).replace("R$", "").trim()}
+                      </span>
+                    </div>
+                    <span className="absolute right-4 bottom-3 font-numbers text-[16px] font-bold tabular-nums text-emerald-400 drop-shadow-md">
+                      {formatCurrency(Number(product.price))}
+                    </span>
+                    {/* Initial chip top-left */}
+                    <span className="absolute left-3 top-12 font-display text-[12px] font-black uppercase text-foreground/30">
                       {initial}
                     </span>
                   </div>
                 )}
-                {/* gradient overlay for status legibility */}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card/70 via-transparent to-transparent" />
 
-                {/* Status badge — top-left over thumb */}
-                <div className={cn(
-                  "absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md",
-                  status.bg,
-                  status.text,
-                )}>
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className={cn("absolute inset-0 rounded-full", status.dot, status.ring)} />
-                  </span>
-                  {status.label}
-                </div>
-
-                {/* Actions — top-right, visible on hover */}
-                <div
-                  className="absolute right-2.5 top-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 data-[open=true]:opacity-100"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ProductActionsMenu
-                    copied={isCopied}
-                    product={product}
-                    triggerClassName="h-8 w-8 rounded-lg border border-border/60 bg-background/80 text-foreground/80 backdrop-blur-md hover:bg-background hover:text-foreground data-[state=open]:bg-background"
-                    {...handlers}
-                  />
-                </div>
-
-                {/* Delivery type pill — bottom-left */}
-                <div className="absolute bottom-3 left-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-border/40 bg-background/70 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-foreground/70 backdrop-blur-md">
-                    <Package className="h-2.5 w-2.5" strokeWidth={2.5} />
-                    {deliveryLabel}
+                {/* Status pill - top right */}
+                <div className="absolute right-3 top-3">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2.5 py-1 text-[10.5px] font-bold backdrop-blur-md",
+                    status.text,
+                  )}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
+                    {status.label}
                   </span>
                 </div>
               </div>
 
-              {/* Body */}
-              <div className="flex flex-1 flex-col gap-3 p-5">
+              {/* ── Body ── */}
+              <div className="flex flex-1 flex-col gap-3 p-4">
                 <div className="min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="line-clamp-1 font-display text-[16px] font-bold leading-snug tracking-[-0.01em] text-foreground">
-                      {product.name}
-                    </h3>
-                    <ArrowUpRight
-                      className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
-                      strokeWidth={2.25}
-                    />
-                  </div>
-                  {product.description ? (
-                    <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-muted-foreground/70">
-                      {product.description}
-                    </p>
-                  ) : (
-                    <p className="mt-1 text-[12.5px] italic text-muted-foreground/35">Sem descrição</p>
-                  )}
+                  <h3 className="line-clamp-1 font-display text-[15.5px] font-bold leading-tight tracking-[-0.01em] text-foreground">
+                    {product.name}
+                  </h3>
+                  <p className={cn(
+                    "mt-1 line-clamp-1 text-[12px] leading-snug",
+                    product.description ? "text-muted-foreground/70" : "italic text-muted-foreground/40",
+                  )}>
+                    {product.description || "Sem descrição"}
+                  </p>
                 </div>
 
-                {/* Stats footer */}
-                <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/40 pt-3.5">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/50">
-                      Preço
-                    </p>
-                    <p className="mt-0.5 font-numbers text-[20px] font-bold tabular-nums leading-none tracking-tight text-foreground">
-                      {formatCurrency(Number(product.price))}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {product.affiliate_enabled ? (
-                      <div className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-[10.5px] font-semibold text-primary">
-                        <TrendingUp className="h-2.5 w-2.5" strokeWidth={2.5} />
-                        {product.affiliate_commission}% afiliado
-                      </div>
+                {/* Link preview pill */}
+                {linkPreview && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
+                    className="group/link flex items-center gap-2 rounded-lg border border-dashed border-border/60 bg-secondary/40 px-2.5 py-1.5 text-left transition-colors hover:border-primary/40 hover:bg-secondary/70"
+                  >
+                    <Link2 className="h-3 w-3 shrink-0 text-primary/70" strokeWidth={2.5} />
+                    <span className="flex-1 truncate font-mono text-[10.5px] text-muted-foreground/80">
+                      {linkPreview}
+                    </span>
+                    {isCopied ? (
+                      <Check className="h-3 w-3 shrink-0 text-emerald-400" strokeWidth={2.75} />
                     ) : (
-                      <div className="text-[10.5px] font-medium text-muted-foreground/50">
-                        Sem afiliação
-                      </div>
+                      <Copy className="h-3 w-3 shrink-0 text-muted-foreground/50 transition-colors group-hover/link:text-primary" strokeWidth={2.25} />
                     )}
-                    <p className="mt-1 text-[10.5px] tabular-nums text-muted-foreground/50">
-                      {formatCompactDate(product.created_at)}
-                    </p>
+                  </button>
+                )}
+
+                {/* Checkout Builder pill */}
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-secondary/30 px-2.5 py-1.5">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Sparkles className="h-3 w-3 shrink-0 text-primary/70" strokeWidth={2.5} />
+                    <div className="min-w-0">
+                      <p className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">
+                        Checkout builder
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[10.5px] font-semibold text-foreground/85">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        {themeLabel}
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
+                    className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-[10.5px] font-bold text-primary transition-colors hover:bg-primary/20"
+                  >
+                    <Palette className="h-3 w-3" strokeWidth={2.5} />
+                    Editar
+                  </button>
+                </div>
+
+                {/* Action row */}
+                <div className="mt-1 flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
+                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-secondary/50 text-[11.5px] font-bold text-foreground/85 transition-all hover:border-primary/40 hover:bg-secondary hover:text-primary"
+                  >
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
+                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-secondary/50 text-[11.5px] font-bold text-foreground/85 transition-all hover:border-primary/40 hover:bg-secondary hover:text-primary"
+                  >
+                    <Settings2 className="h-3.5 w-3.5" strokeWidth={2.25} />
+                    Customizar
+                  </button>
+                  {product.checkout_url && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-secondary/50 text-foreground/70 transition-all hover:border-primary/40 hover:bg-secondary hover:text-primary"
+                      title="Abrir checkout"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
+                    </button>
+                  )}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <ProductActionsMenu
+                      copied={isCopied}
+                      product={product}
+                      triggerClassName="h-9 w-9 rounded-lg border border-border/70 bg-secondary/50 text-foreground/70 hover:border-primary/40 hover:bg-secondary hover:text-primary data-[state=open]:bg-secondary"
+                      {...handlers}
+                    />
+                  </div>
+                </div>
+
+                {/* Footer meta */}
+                <div className="flex items-center justify-between border-t border-border/40 pt-2.5 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/50">
+                  <span>{deliveryLabel}</span>
+                  {product.affiliate_enabled && (
+                    <span className="text-primary/70">{product.affiliate_commission}% afiliado</span>
+                  )}
                 </div>
               </div>
             </article>
@@ -182,7 +239,6 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
         })}
       </div>
 
-      {/* Footer count */}
       <div className="mt-5 flex items-center justify-between px-1 text-[11.5px] text-muted-foreground/70">
         <span>
           <span className="font-mono font-semibold text-foreground/80 tabular-nums">{products.length}</span>{" "}
