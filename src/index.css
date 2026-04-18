@@ -1254,3 +1254,12 @@ button svg, a svg, [role="button"] svg {
   --tw-shadow-color: hsl(var(--background) / 0.2) !important;
   --tw-shadow: var(--tw-shadow-colored) !important;
 }
+
+/* Hide scrollbars (Netflix-style horizontal scroll rows) */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
