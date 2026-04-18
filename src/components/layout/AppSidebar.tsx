@@ -179,9 +179,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
 type SidebarSectionNavProps = {
  section: SidebarSection;
  pathname: string;
+ isFirst?: boolean;
 };
 
-function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps & { isFirst?: boolean }) {
+function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
   return (
     <SidebarGroup className="px-0 py-0">
       {!isFirst && (
