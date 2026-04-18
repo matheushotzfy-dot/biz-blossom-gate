@@ -370,16 +370,17 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup flex w-full items-center gap-3 rounded-2xl border border-sidebar-primary/35 bg-sidebar-primary/10 px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:bg-sidebar-primary/15 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/30 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-primary/8 to-transparent px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:shadow-[0_8px_24px_-8px_hsl(var(--sidebar-primary)/0.5)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/15 text-sidebar-primary">
+          <div aria-hidden className="pointer-events-none absolute -top-8 -right-4 h-20 w-20 rounded-full bg-sidebar-primary/20 blur-2xl opacity-0 transition-opacity group-hover/sup:opacity-100" />
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/25 to-sidebar-primary/10 text-sidebar-primary shadow-[0_0_16px_-4px_hsl(var(--sidebar-primary)/0.6)]">
             <Headphones className="h-[16px] w-[16px]" strokeWidth={2.25} />
           </div>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+          <div className="relative min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <p className="text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
               Solicitar Suporte
             </p>
-            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/55">
+            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/60">
               24/7 ao seu dispor!
             </p>
           </div>
