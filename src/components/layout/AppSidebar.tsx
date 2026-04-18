@@ -185,43 +185,53 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
   return (
     <SidebarGroup className="px-0 py-0">
       {!isFirst && (
-        <div className="mx-3 my-2 h-px bg-sidebar-border/40 group-data-[collapsible=icon]:hidden" />
+        <div className="mx-4 my-3 h-px bg-gradient-to-r from-transparent via-sidebar-border/60 to-transparent group-data-[collapsible=icon]:hidden" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0">
+        <SidebarMenu className="gap-[3px] px-0">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-lg p-0 hover:bg-transparent active:bg-transparent">
+                <SidebarMenuButton asChild className="h-auto rounded-xl p-0 hover:bg-transparent active:bg-transparent">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-11 w-full items-center gap-3 rounded-lg px-3 text-[14px] font-medium transition-colors duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[46px] w-full items-center gap-3.5 rounded-xl px-3.5 text-[14.5px] font-medium tracking-[-0.005em] transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                        ? "bg-gradient-to-r from-sidebar-accent to-sidebar-accent/60 text-sidebar-accent-foreground font-semibold"
+                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
-                    <item.icon
+                    <span
                       className={cn(
-                        "h-[18px] w-[18px] shrink-0 transition-colors",
-                        isActive ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover/nav:text-sidebar-accent-foreground",
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                        isActive
+                          ? "bg-sidebar-primary/15 text-sidebar-primary"
+                          : "text-sidebar-foreground/55 group-hover/nav:bg-sidebar-accent/70 group-hover/nav:text-sidebar-accent-foreground",
                       )}
-                      strokeWidth={isActive ? 2.25 : 1.9}
-                    />
+                    >
+                      <item.icon
+                        className="h-[19px] w-[19px]"
+                        strokeWidth={isActive ? 2.3 : 1.95}
+                      />
+                    </span>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto rounded bg-sidebar-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                      <span className="ml-auto flex items-center gap-1 rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.08em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                        <span className="h-1 w-1 rounded-full bg-sidebar-primary animate-pulse" />
                         {item.badge}
                       </span>
+                    )}
+                    {isActive && !item.badge && (
+                      <ChevronRight className="ml-auto h-3.5 w-3.5 text-sidebar-primary/70 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
                     )}
                   </NavLink>
                 </SidebarMenuButton>
