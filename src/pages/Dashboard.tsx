@@ -505,15 +505,24 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center rounded-xl border border-border bg-background p-0.5">
-                {PERIOD_PRESETS.map((opt) => (
-                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-lg px-3 py-1.5 text-[11px] font-heading font-semibold transition-all active:scale-[0.97]",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground border border-border" : "text-muted-foreground hover:text-foreground"
-                    )}>
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="inline-flex items-center gap-1 rounded-xl border border-border/40 bg-background/60 p-1 backdrop-blur-xl">
+                {PERIOD_PRESETS.map((opt) => {
+                  const isActive = !isCustom && selectedPeriod.label === opt.label;
+                  return (
+                    <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                      className={cn(
+                        "relative rounded-lg px-3 py-1.5 text-[11px] font-heading font-semibold transition-all duration-200 active:scale-[0.97] border",
+                        isActive
+                          ? "bg-primary/15 text-foreground border-primary/40 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_4px_20px_hsl(var(--primary)/0.12)] ring-1 ring-primary/25"
+                          : "opacity-60 text-muted-foreground border-transparent hover:opacity-90 hover:text-foreground hover:-translate-y-px hover:bg-muted/10"
+                      )}>
+                      {opt.label}
+                      {isActive && (
+                        <span className="absolute left-2.5 right-2.5 -bottom-[5px] h-[2px] rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
