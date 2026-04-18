@@ -969,17 +969,36 @@ export default function Vendas() {
                   refunded: "bg-info",
                   chargeback: "bg-destructive",
                 };
+                const activeRingColors: Record<string, string> = {
+                  all: "ring-primary/25 shadow-[0_4px_20px_hsl(var(--primary)/0.12)]",
+                  completed: "ring-success/25 shadow-[0_4px_20px_hsl(var(--success)/0.15)]",
+                  pending: "ring-warning/25 shadow-[0_4px_20px_hsl(var(--warning)/0.15)]",
+                  failed: "ring-destructive/25 shadow-[0_4px_20px_hsl(var(--destructive)/0.15)]",
+                  refunded: "ring-info/25 shadow-[0_4px_20px_hsl(var(--info)/0.15)]",
+                  chargeback: "ring-destructive/25 shadow-[0_4px_20px_hsl(var(--destructive)/0.15)]",
+                };
+                const activeBgColors: Record<string, string> = {
+                  all: "bg-primary/10 border-primary/40",
+                  completed: "bg-success/10 border-success/40",
+                  pending: "bg-warning/10 border-warning/40",
+                  failed: "bg-destructive/10 border-destructive/40",
+                  refunded: "bg-info/10 border-info/40",
+                  chargeback: "bg-destructive/10 border-destructive/40",
+                };
                 return (
                   <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                    className={cn("relative px-4 py-3 text-[12px] font-heading font-semibold whitespace-nowrap transition-colors",
-                      active ? (tabColors[tab.value] || "text-foreground") : "text-muted-foreground/40 hover:text-muted-foreground/70"
+                    className={cn(
+                      "relative mx-0.5 my-1 rounded-lg border px-4 py-2 text-[12px] font-heading font-semibold whitespace-nowrap transition-all duration-200",
+                      active
+                        ? cn(tabColors[tab.value] || "text-foreground", activeBgColors[tab.value] || "bg-primary/10 border-primary/40", "ring-1", activeRingColors[tab.value] || "ring-primary/25")
+                        : "border-transparent opacity-60 text-muted-foreground hover:opacity-90 hover:text-foreground hover:-translate-y-px hover:bg-muted/10"
                     )}>
                     <span className="flex items-center gap-1.5">
                       {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", active ? dotColors[tab.value] : "bg-muted-foreground/20")} />}
                       {tab.label}
                     </span>
-                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px] font-bold", active ? "opacity-60" : "text-muted-foreground/25")}>{tab.count}</span>}
-                    {active && <span className={cn("absolute bottom-0 left-4 right-4 h-[2px] rounded-full", activeBarColors[tab.value] || "bg-primary")} />}
+                    {tab.count > 0 && <span className={cn("ml-1 tabular-nums text-[10px] font-bold", active ? "opacity-70" : "text-muted-foreground/25")}>{tab.count}</span>}
+                    {active && <span className={cn("absolute -bottom-[5px] left-3 right-3 h-[2px] rounded-full", activeBarColors[tab.value] || "bg-primary", "shadow-[0_0_8px_currentColor]")} />}
                   </button>
                 );
               })}
