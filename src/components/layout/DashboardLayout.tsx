@@ -59,9 +59,9 @@ function DashboardLayoutInner() {
  }, []);
 
  return (
- <SidebarProvider
- style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
- >
+      <SidebarProvider
+        style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "4.5rem" } as { [key: string]: string }}
+      >
  <div className="flex w-full h-full bg-background">
  <AppSidebar />
 
