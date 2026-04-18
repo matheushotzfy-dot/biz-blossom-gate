@@ -466,332 +466,271 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HERO — COMMAND CENTER                                            */}
+      {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section
-        className="relative mb-8 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:p-10 overflow-hidden"
-      >
-        {/* Green accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/6 to-transparent pointer-events-none" />
-        <div className="relative">
-          {/* Header row */}
-          <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-1.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Dashboard</span>
-              </div>
-              {scaleModeUnlocked && (
-                <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-heading font-semibold transition-all active:scale-[0.97]",
-                  scaleMode ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
-                )}>
-                  <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
-                  <span>Escala</span>
-                </button>
-              )}
-              {!scaleModeUnlocked && (
-                <div className="group relative inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1.5 text-[10px] font-heading text-muted-foreground/40 cursor-not-allowed">
-                  <Lock className="h-3 w-3" />
-                  <span>Escala</span>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 rounded-xl bg-card border border-border/30 p-3 text-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                    <p className="text-[10px] font-semibold text-foreground mb-0.5">Modo Escala</p>
-                    <p className="text-[9px] text-muted-foreground/60">R$ 2.000 em 24h para desbloquear</p>
-                  </div>
-                </div>
-              )}
-            </div>
+      <section className="relative mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1 rounded-xl border border-border/40 bg-background/60 p-1.5 backdrop-blur-xl">
-                {PERIOD_PRESETS.map((opt) => {
-                  const isActive = !isCustom && selectedPeriod.label === opt.label;
-                  return (
-                    <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                      className={cn(
-                        "relative rounded-lg px-3.5 py-2 text-[11px] font-heading font-bold transition-all duration-200 active:scale-[0.97] border",
-                        isActive
-                          ? "bg-primary/20 text-foreground border-primary/60 shadow-[0_0_0_1px_hsl(var(--primary)/0.25),0_6px_24px_hsl(var(--primary)/0.25)] ring-1 ring-primary/40"
-                          : "opacity-55 text-muted-foreground border-transparent hover:opacity-90 hover:text-foreground hover:-translate-y-px hover:bg-muted/10"
-                      )}>
-                      {opt.label}
-                      {isActive && (
-                        <span className="absolute left-2.5 right-2.5 bottom-[2px] h-[2.5px] rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.8)]" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-xl border px-3 text-[10px] font-heading font-semibold transition-colors active:scale-[0.97]",
-                    isCustom ? "border-primary/20 bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"
-                  )}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3 w-3" />
-                      {isCustom && customRange?.from
-                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                        : "Custom"}
-                    </span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-popover p-0">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                </PopoverContent>
-              </Popover>
-              <button onClick={privacy.toggle} className={cn("flex h-8 w-8 items-center justify-center rounded-xl border transition-colors active:scale-[0.97]", privacy.hidden ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
-                {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3 lg:px-7">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <BarChart3 className="h-3.5 w-3.5" />
+            </div>
+            <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Visão Executiva</span>
+            {scaleModeUnlocked && (
+              <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors",
+                scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
+              )}>
+                <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
+                Escala
               </button>
-            </div>
+            )}
           </div>
 
-          {/* ── Main revenue display ── */}
-          <div className="mb-8">
-            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground">
-              {isCustom && customRange?.from
-                ? `Receita ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-                : `Receita — ${selectedPeriod.label}`}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="inline-flex items-center rounded-md border border-border bg-background p-0.5">
+              {PERIOD_PRESETS.map((opt) => (
+                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                  className={cn("rounded px-2.5 py-1 text-[11px] font-semibold transition-colors",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground border border-border shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className={cn("h-7 rounded-md border px-2.5 text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5",
+                  isCustom ? "border-primary/30 bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"
+                )}>
+                  <CalendarDays className="h-3 w-3" />
+                  {isCustom && customRange?.from
+                    ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                    : "Custom"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-popover p-0">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+              </PopoverContent>
+            </Popover>
+            <button onClick={privacy.toggle} className={cn("h-7 w-7 rounded-md border flex items-center justify-center transition-colors", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Main metric block */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
+          <div className="px-5 py-7 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/60">
+            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              Receita {isCustom && customRange?.from
+                ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                : `· ${selectedPeriod.label}`}
             </p>
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <span className="inline-flex items-baseline text-[clamp(2rem,8vw,72px)] font-heading font-black leading-none tracking-[-0.05em] text-primary whitespace-nowrap">
-                  {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="inline-flex items-baseline text-[clamp(2.2rem,7vw,68px)] font-heading font-black leading-none tracking-[-0.05em] text-foreground whitespace-nowrap">
+                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+              </span>
+              {approved.length > 0 && (
+                <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success">
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  {approved.length} venda{approved.length !== 1 ? "s" : ""}
                 </span>
-                <div className="mt-4 flex items-center gap-3">
-                  {approved.length > 0 && (
-                    <span className="text-[10px] font-heading text-primary/50 font-semibold">
-                      {approved.length} venda{approved.length !== 1 ? "s" : ""} aprovada{approved.length !== 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
+              )}
+            </div>
+            <div className="mt-5 flex items-center gap-5 text-[11px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="font-semibold text-foreground tabular-nums">{approved.length}</span> aprovadas
               </div>
-              <div className="text-right hidden sm:flex flex-col items-end gap-3">
-                <div className="rounded-2xl border border-border bg-background px-6 py-4">
-                  <p className="text-[10px] font-heading font-bold text-muted-foreground uppercase tracking-[0.14em] mb-2">Saldo Disponível</p>
-                  <p className="text-[28px] font-heading font-black tabular-nums text-primary tracking-[-0.03em] leading-none">
-                    {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
-                  </p>
-                </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" />
+                <span className="font-semibold text-foreground tabular-nums">{pending.length}</span> pendentes
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                <span className="font-semibold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> contestações
               </div>
             </div>
           </div>
 
-          {/* Chips row */}
-          <div className="flex flex-wrap items-center gap-2 mb-8">
-            {[
-              { icon: Check, label: `${approved.length} aprovadas`, color: "text-success", border: "border-border", bg: "bg-background" },
-              { icon: Clock3, label: `${pending.length} pendentes`, color: "text-warning", border: "border-border", bg: "bg-background" },
-              { icon: Target, label: `${conversion.toFixed(1)}% conversão`, color: "text-info", border: "border-border", bg: "bg-background" },
-              { icon: Users, label: `${uniqueCustomers} clientes`, color: "text-primary", border: "border-border", bg: "bg-background" },
-              { icon: Wallet, label: `ticket ${privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}`, color: "text-warning", border: "border-border", bg: "bg-background" },
-            ].map((chip, i) => (
-              <span key={i} className={cn("inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-[12px] font-semibold text-foreground", chip.bg, chip.border)}>
-                <chip.icon className={cn("h-3.5 w-3.5", chip.color)} />
-                {chip.label}
-              </span>
-            ))}
+          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
+            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
+            </div>
+            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
+              {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
+            </p>
+            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
+              Sacar agora <ChevronRight className="h-3 w-3" />
+            </Link>
+            {withdrawalPending > 0 && (
+              <p className="mt-3 text-[10px] text-muted-foreground">
+                <span className="font-semibold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
+              </p>
+            )}
           </div>
+        </div>
 
-          {/* ── KPI Strip ── */}
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {([
-              { label: "FATURAMENTO BRUTO", numValue: revenue, formatter: fmt, accent: "bg-primary" },
-              { label: "VENDAS APROVADAS", numValue: approved.length, formatter: (v: number) => String(Math.round(v)), accent: "bg-success" },
-              { label: "TAXA CONVERSÃO", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "bg-info" },
-              { label: "CLIENTES ÚNICOS", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "bg-primary" },
-            ] as const).map((item, idx) => (
-              <div
-                key={item.label}
-                className="group relative overflow-hidden rounded-[26px] border border-border/80 bg-card px-5 py-5 lg:px-6 lg:py-6 transition-all duration-200 hover:border-primary/20 hover:bg-card/95"
-              >
-                <div className={cn("absolute left-0 top-4 bottom-4 w-[3px] rounded-full", item.accent)} />
-                <div className="absolute inset-0 bg-gradient-to-br from-background/10 via-transparent to-transparent pointer-events-none" />
-                <div className="relative pl-2">
-                  <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/90">{item.label}</p>
-                  <p className="whitespace-nowrap text-[28px] lg:text-[34px] font-heading font-black leading-none tracking-[-0.04em] tabular-nums text-foreground">
-                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Compact supporting KPI strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/60 divide-x divide-border/60">
+          {([
+            { label: "Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "text-info" },
+            { label: "Ticket Médio", numValue: approved.length > 0 ? revenue / approved.length : 0, formatter: fmt, accent: "text-foreground" },
+            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground" },
+            { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success" },
+          ] as const).map((item, i) => (
+            <div key={item.label} className={cn("px-5 py-4 lg:px-7", i >= 2 && "border-t lg:border-t-0 border-border/60")}>
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/80 mb-1.5">{item.label}</p>
+              <p className={cn("text-[20px] lg:text-[24px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", item.accent)}>
+                {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* CHART + ANALYTICS                                                */}
+      {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12 mb-6">
-        {/* Chart */}
-        <div className="xl:col-span-8 rounded-2xl border border-border bg-card min-h-[340px] flex flex-col overflow-hidden">
-          <div className="flex-1 px-4 pt-4 pb-4 min-h-[320px]">
-            <div className="h-full rounded-[18px] border border-border/30 bg-background/40 px-4 py-3">
-              <div className="h-full min-h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 8, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                      <YAxis tickLine={false} axisLine={false} width={72} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
-                      <Tooltip
-                        content={({ active, payload, label }) => {
-                          if (!active || !payload?.length) return null;
-                          const value = payload[0].value as number;
-                          return (
-                            <div className="rounded-xl border border-primary/20 bg-card px-4 py-3 shadow-xl shadow-primary/10">
-                              <p className="mb-1 text-[9px] font-heading text-muted-foreground/60">{label}</p>
-                              <p className="text-sm font-heading font-black text-primary tabular-nums">
-                                R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </p>
-                            </div>
-                          );
-                        }}
-                      />
-                      <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+      <section className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
+          {/* Chart */}
+          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/60">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
+              <div>
+                <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Receita ao longo do tempo</p>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                  {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {selectedPeriod.label}
+                </p>
               </div>
+              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                Vendas aprovadas
+              </div>
+            </div>
+            <div className="flex-1 px-3 py-4 min-h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                  <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                  <Tooltip
+                    cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const value = payload[0].value as number;
+                      return (
+                        <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+                          <p className="text-[9px] font-heading text-muted-foreground/70 uppercase tracking-wider">{label}</p>
+                          <p className="text-[13px] font-heading font-black text-primary tabular-nums mt-0.5">
+                            R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Right panel — Conversion + Payment KPIs */}
-          <div className="xl:col-span-4 flex flex-col gap-3">
-            {/* Conversion rates */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border/30 bg-card p-5 flex flex-col">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-info">
-                  <Percent className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-heading text-foreground font-bold">Conversão</p>
-                  <p className="text-[9px] font-heading text-muted-foreground/50 uppercase tracking-[0.1em]">Por método</p>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                {[
-                  { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", value: `${pixConversion.toFixed(1)}%`, color: "text-success", bg: "bg-success/6", border: "border-success/10" },
-                  { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", value: `${cardConversion.toFixed(1)}%`, color: "text-info", bg: "bg-info/6", border: "border-info/10" },
-                  { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-success", bg: chargebackRate > 1 ? "bg-destructive/6" : "bg-success/6", border: chargebackRate > 1 ? "border-destructive/10" : "border-success/10" },
-                ].map((m) => (
-                  <div key={m.label} className={cn("flex items-center justify-between rounded-2xl border px-4 py-3", m.bg, m.border)}>
-                    <div className="flex items-center gap-2.5">
+          {/* Payment breakdown rail */}
+          <div className="flex flex-col">
+            <div className="px-5 py-4 border-b border-border/60">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Por método</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conversão e receita</p>
+            </div>
+            <div className="flex-1 divide-y divide-border/60">
+              {[
+                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
+                { icon: <CreditCard className="h-4 w-4" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
+              ].map((m) => (
+                <div key={m.label} className="px-5 py-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
                       <span className={m.color}>{m.icon}</span>
                       <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
                     </div>
-                    <span className={cn("text-[15px] font-heading font-black tabular-nums", m.color)}>{m.value}</span>
+                    <span className={cn("text-[13px] font-heading font-black tabular-nums", m.color)}>{m.conv.toFixed(1)}%</span>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Payment KPIs */}
-            <div className="grid grid-cols-2 gap-2.5 flex-1">
-              {([
-                { label: "PIX", isPix: true, numValue: pixRevenue, helper: `${pixApprovedCount}/${pixTotalCount}`, accentColor: "from-success to-success/60", glowColor: "hsla(142, 71%, 45%, 0.06)" },
-                { label: "CARTÃO", isPix: false, icon: CreditCard, numValue: cardRevenue, helper: `${cardApprovedCount}/${cardTotalCount}`, accentColor: "from-info to-info/60", glowColor: "hsla(217, 91%, 60%, 0.06)" },
-                { label: "TICKET MÉDIO", isPix: false, icon: Wallet, numValue: approved.length > 0 ? revenue / approved.length : 0, helper: "por venda", accentColor: "from-primary to-primary/60", glowColor: "hsla(160, 84%, 39%, 0.06)" },
-                { label: "SAQUES PEND.", isPix: false, icon: DollarSign, numValue: withdrawalPending, helper: `${withdrawals.filter(w => w.status === "pending").length} solic.`, accentColor: "from-warning to-warning/60", glowColor: "hsla(38, 92%, 50%, 0.06)" },
-              ] as const).map((item, idx) => (
-                <motion.div key={item.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 + idx * 0.04 }}
-                  className="group relative rounded-[16px] border border-border/25 bg-card p-4 overflow-hidden transition-all duration-300 hover:border-border/40 hover:translate-y-[-1px]"
-                  style={{ boxShadow: `0 0 30px ${item.glowColor}, inset 0 1px 0 hsla(0, 0%, 100%, 0.03)` }}
-                >
-                  <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", item.accentColor)} />
-                  <div className="flex items-center gap-1.5 mb-2.5">
-                    <span className="text-[8px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/50">{item.label}</span>
-                  </div>
-                  <p className="text-[20px] font-heading font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mb-1.5">
-                    {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} />}
+                  <p className="text-[18px] font-heading font-black tabular-nums text-foreground leading-none">
+                    {privacy.hidden ? CENSORED : fmt(m.revenue)}
                   </p>
-                  <span className="text-[10px] text-muted-foreground/40">{privacy.hidden ? "••••" : item.helper}</span>
-                </motion.div>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1.5">{m.count} aprovadas</p>
+                </div>
               ))}
+              <div className="px-5 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-warning" />
+                    <span className="text-[12px] text-foreground font-semibold">Saques pendentes</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/70 tabular-nums">{withdrawals.filter(w => w.status === "pending").length}</span>
+                </div>
+                <p className="text-[18px] font-heading font-black tabular-nums text-warning leading-none">
+                  {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                </p>
+                <Link to="/financeiro/saques" className="text-[10px] text-primary font-semibold mt-1.5 inline-flex items-center gap-0.5 hover:underline">
+                  Gerenciar <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* ACTIONS + ACTIVITY                                               */}
         {/* ════════════════════════════════════════════════════════════════ */}
-        <section className="grid grid-cols-1 gap-3 xl:grid-cols-2 mb-8">
-          {/* Quick actions */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[20px] border border-border/30 bg-card p-5 lg:p-6 flex flex-col overflow-hidden">
-            <div className="mb-5 flex items-center justify-between border-b border-border/20 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <Zap className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-heading font-bold text-foreground">Ações Rápidas</p>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.1em] text-muted-foreground/50">Operação diária</p>
-                </div>
-              </div>
-              <span className="rounded-full border border-border/30 bg-background px-2.5 py-1 text-[9px] font-heading font-bold uppercase tracking-[0.12em] text-muted-foreground/60">10 atalhos</span>
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.4fr] mb-8">
+          {/* Quick actions — operational support */}
+          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
+              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
             </div>
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="divide-y divide-border/60">
               {[
-                { label: "Criar Produto", href: "/vendas/produtos", icon: Package, desc: "Novo infoproduto", tone: "primary" as const },
-                { label: "Área De Membros", href: "/vendas/conteudo", icon: Layers, desc: "Módulos e aulas", tone: "success" as const },
-                { label: "Checkout", href: "/vendas/checkout", icon: CreditCard, desc: "Links de pagamento", tone: "info" as const },
-                { label: "Vendas", href: "/vendas", icon: BarChart3, desc: "Relatório", tone: "primary" as const },
-                { label: "Extrato", href: "/financeiro/extrato", icon: FileText, desc: "Fluxo financeiro", tone: "success" as const },
-                { label: "Saques", href: "/financeiro/saques", icon: ArrowDownRight, desc: "Transferir saldo", tone: "warning" as const },
-                { label: "Webhooks", href: "/vendas/webhooks", icon: Webhook, desc: "Automações", tone: "info" as const },
-                { label: "Meu Perfil", href: "/perfil", icon: User, desc: "Dados da conta", tone: "primary" as const },
-                { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen, desc: "Documentação", tone: "info" as const },
-                { label: "Cursos", href: "/membros", icon: GraduationCap, desc: "Minhas compras", tone: "success" as const },
-              ].map((action) => {
-                const colors: Record<string, { bg: string; text: string; ring: string }> = {
-                  primary: { bg: "bg-primary/10", text: "text-primary", ring: "group-hover:border-primary/20" },
-                  success: { bg: "bg-success/10", text: "text-success", ring: "group-hover:border-success/20" },
-                  info: { bg: "bg-info/10", text: "text-info", ring: "group-hover:border-info/20" },
-                  warning: { bg: "bg-warning/10", text: "text-warning", ring: "group-hover:border-warning/20" },
-                };
-                const c = colors[action.tone] || colors.primary;
-                return (
-                  <Link
-                    key={action.href}
-                    to={action.href}
-                    className={cn("group relative overflow-hidden rounded-[18px] border border-border/20 bg-background/50 p-3.5 transition-all duration-200 hover:-translate-y-[1px] hover:bg-background", c.ring)}
-                  >
-                    <div className="absolute inset-y-3 left-0 w-[3px] rounded-full bg-border/30 group-hover:bg-primary/50" />
-                    <div className="relative flex items-start gap-3 pl-2">
-                      <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border/30", c.bg, c.text)}>
-                        <action.icon className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-display font-black leading-tight text-foreground">{action.label}</p>
-                        <p className="mt-1 text-[10px] text-muted-foreground/55">{action.desc}</p>
-                      </div>
-                      <ChevronRight className="mt-1 h-3.5 w-3.5 shrink-0 text-muted-foreground/20 transition-colors group-hover:text-foreground/60" />
-                    </div>
-                  </Link>
-                );
-              })}
+                { label: "Criar produto", href: "/vendas/produtos", icon: Package },
+                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
+                { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
+                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
+                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
+                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
+                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
+                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
+                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  to={action.href}
+                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                    <action.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="flex-1 text-[12.5px] font-semibold text-foreground">{action.label}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+                </Link>
+              ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Activity feed */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-[20px] border border-border/30 bg-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/20 px-6 pt-5 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <PixLogoMark className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-heading font-bold text-foreground">Atividades</p>
-                  <p className="text-[9px] font-heading uppercase tracking-[0.1em] text-muted-foreground/50">Vendas e saques</p>
-                </div>
-              </div>
-              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-heading text-primary transition-colors hover:text-primary/80">
+          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Atividade recente</p>
+              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition-colors hover:text-primary/80">
                 Ver tudo <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
@@ -859,7 +798,7 @@ export default function Dashboard() {
                 })
               )}
             </div>
-          </motion.div>
+          </div>
         </section>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>

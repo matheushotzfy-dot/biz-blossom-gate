@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box,
   Loader2,
   Package,
   Plus,
@@ -101,45 +100,29 @@ export default function Produtos() {
 
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Header ── */}
-      <div className="px-5 pt-1 sm:px-7 md:pt-1">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-          <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-border">
-                <Box className="h-5 w-5 text-primary" strokeWidth={1.8} />
-              </div>
-              <div>
-                <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-                  Meus Produtos
-                </h1>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-xs text-muted-foreground">
-                    {products.length} {products.length === 1 ? "produto cadastrado" : "produtos cadastrados"}
-                  </p>
-                  {activeCount > 0 && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-success/70">
-                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                      {activeCount} ativo{activeCount !== 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+      {/* ── Page header ── */}
+      <div className="flex flex-col gap-6 px-5 pt-1 sm:px-7 md:pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-baseline gap-3">
+            <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight text-foreground sm:text-[30px]">
+              Produtos
+            </h1>
+            <span className="text-[13px] tabular-nums text-muted-foreground/60">
+              {products.length}
+            </span>
           </div>
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:-translate-y-px"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:-translate-y-px"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
             Novo produto
           </button>
         </div>
 
-        {/* ── Toolbar ── */}
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Tabs */}
-          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
+        {/* Tabs + Search row, integrated with list */}
+        <div className="flex flex-col gap-3 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-0.5">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -147,17 +130,17 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    "relative rounded-md px-3 py-1.5 text-[11px] font-semibold transition-all duration-150",
+                    "relative rounded-md px-3 py-1.5 text-[12px] font-semibold transition-all duration-150",
                     active
-                      ? "bg-card text-foreground shadow-sm"
+                      ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {item.label}
                   {item.count > 0 && (
                     <span className={cn(
-                      "ml-1 text-[10px] tabular-nums",
-                      active ? "text-primary" : "text-muted-foreground/50"
+                      "ml-1.5 text-[10.5px] tabular-nums",
+                      active ? "text-primary" : "text-muted-foreground/45"
                     )}>
                       {item.count}
                     </span>
@@ -167,14 +150,13 @@ export default function Produtos() {
             })}
           </div>
 
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar..."
-              className="h-8 w-full rounded-lg border border-border bg-secondary pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-52"
+              placeholder="Buscar produto..."
+              className="h-8 w-full rounded-lg border border-border bg-secondary/50 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-64"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
@@ -185,36 +167,37 @@ export default function Produtos() {
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="mx-5 mt-5 h-px bg-border sm:mx-7" />
-
-      {/* ── Product grid ── */}
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
-            <Package className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
+      {/* ── Product workspace ── */}
+      <div className="px-5 pt-4 pb-8 sm:px-7">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-24 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
+              <Package className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
+            </div>
+            <p className="mt-5 text-sm font-semibold text-foreground">
+              {search || tab !== "all" ? "Nenhum resultado" : "Comece por aqui"}
+            </p>
+            <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
+              {search || tab !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie seu primeiro produto e comece a faturar hoje."}
+            </p>
+            {!search && tab === "all" && (
+              <button
+                onClick={() => navigate("/vendas/produtos/novo/editar")}
+                className="mt-6 inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                Criar produto
+              </button>
+            )}
           </div>
-          <p className="mt-5 text-sm font-semibold text-foreground">
-            {search || tab !== "all" ? "Nenhum resultado" : "Comece por aqui"}
-          </p>
-          <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
-            {search || tab !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie seu primeiro produto e comece a faturar hoje."}
-          </p>
-          {!search && tab === "all" && (
-            <button
-              onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-6 inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
-            >
-              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Criar produto
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="px-5 pt-5 pb-8 sm:px-7">
-          <ProductGridView copiedId={copiedId} products={filtered} {...menuHandlers} />
-        </div>
-      )}
+        ) : (
+          <ProductGridView
+            copiedId={copiedId}
+            products={filtered}
+            {...menuHandlers}
+          />
+        )}
+      </div>
 
       {/* ── Dialogs ── */}
       {pixelProduct && (
