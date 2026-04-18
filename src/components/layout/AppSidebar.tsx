@@ -101,63 +101,49 @@ type RevenueCardProps = {
   onOpenRewards: () => void;
 };
 
-function RevenueCard({ collapsed, revenue, todayRevenue, salesToday, milestone, onOpenRewards }: RevenueCardProps) {
+function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
 
-  const pct = milestone.pct;
+  const pct = Math.round(milestone.pct);
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-4 block w-full overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-sidebar-accent/50 via-sidebar-accent/25 to-sidebar-accent/10 p-3.5 text-left transition-all hover:border-sidebar-primary/40 hover:shadow-[0_8px_24px_-12px_hsl(var(--sidebar-primary)/0.4)]"
+      className="group/rev relative mt-3.5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/40 p-3.5 text-left transition-all hover:border-sidebar-primary/50 hover:bg-sidebar-accent/55"
     >
-      {/* Subtle top accent line */}
-      <div className="pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-sidebar-primary/40 to-transparent" />
-
-      {/* Top: label + tier */}
-      <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
-          Faturamento total
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-sidebar-primary/15 px-1.5 py-0.5 text-[9.5px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/20">
-          <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
-          Tier {milestone.tier + 1}
-        </span>
-      </div>
-
-      {/* Big revenue */}
-      <p className="font-display text-[22px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
-        {formatRevenue(revenue)}
-      </p>
-
-      {/* Progress bar */}
-      <div className="mt-3 flex items-center gap-2">
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-sidebar-border/50">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-sidebar-primary/70 to-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.5)] transition-[width] duration-700 ease-out"
-            style={{ width: `${pct}%` }}
-          />
+      <div className="flex items-center gap-2.5">
+        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/10">
+          <Zap className="h-[15px] w-[15px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
         </div>
-        <span className="text-[10px] font-semibold tabular-nums text-sidebar-foreground/60">
-          {milestone.next.label}
-        </span>
-      </div>
-
-      {/* Today stats */}
-      <div className="mt-3.5 grid grid-cols-2 gap-3 border-t border-sidebar-border/40 pt-3">
-        <div>
-          <p className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/45">Hoje</p>
-          <p className="mt-1 font-numbers text-[14px] font-bold tabular-nums leading-none text-sidebar-accent-foreground">
-            {formatRevenue(todayRevenue)}
+        <div className="min-w-0 flex-1">
+          <p className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/45">
+            Faturamento total
+          </p>
+          <p className="mt-0.5 font-display text-[20px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
+            {formatRevenue(revenue)}
           </p>
         </div>
-        <div>
-          <p className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/45">Vendas</p>
-          <p className="mt-1 font-numbers text-[14px] font-bold tabular-nums leading-none text-sidebar-accent-foreground">
-            {salesToday}
-          </p>
-        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between text-[10.5px] font-semibold tabular-nums">
+        <span className="text-sidebar-primary">{milestone.current.label}</span>
+        <span className="text-sidebar-foreground/45">Meta: {milestone.next.label}</span>
+      </div>
+
+      <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-sidebar-border/60">
+        <div
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      <div className="mt-2.5 flex items-center justify-between">
+        <span className="text-[12px] font-bold tabular-nums text-sidebar-primary">{pct}%</span>
+        <span className="inline-flex items-center gap-0.5 text-[10.5px] font-semibold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
+          Ver Premiações
+          <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
+        </span>
       </div>
     </button>
   );
