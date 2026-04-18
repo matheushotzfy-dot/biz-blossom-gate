@@ -112,13 +112,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-gradient-to-br from-sidebar-accent/60 via-sidebar-accent/40 to-sidebar-accent/30 p-4 text-left transition-all hover:border-sidebar-primary/55 hover:from-sidebar-accent/70 hover:to-sidebar-accent/40"
+      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/45 p-4 text-left transition-all duration-200 hover:border-sidebar-primary/45 hover:bg-sidebar-accent/60"
     >
-      {/* glow corner */}
-      <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-sidebar-primary/15 blur-2xl" />
-
-      <div className="relative flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/40 bg-sidebar-primary/15 shadow-[0_0_16px_-2px_hsl(var(--sidebar-primary)/0.45)]">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/12">
           <Zap className="h-[18px] w-[18px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
         </div>
         <div className="min-w-0 flex-1">
@@ -131,21 +128,21 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
         </div>
       </div>
 
-      <div className="relative mt-4 flex items-center justify-between text-[11px] font-bold tabular-nums">
+      <div className="mt-4 flex items-center justify-between text-[11px] font-bold tabular-nums">
         <span className="text-sidebar-primary">{milestone.current.label}</span>
         <span className="text-sidebar-foreground/55">Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="relative mt-2 h-2 overflow-hidden rounded-full bg-sidebar-border/60">
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-sidebar-border/60">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-sidebar-primary to-sidebar-primary/80 shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.5)] transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <div className="relative mt-3 flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between">
         <span className="text-[14px] font-black tabular-nums text-sidebar-primary">{pct}%</span>
-        <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-sidebar-primary/90 transition-colors group-hover/rev:text-sidebar-primary">
+        <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-sidebar-primary/85 transition-colors group-hover/rev:text-sidebar-primary">
           Ver Premiações
           <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={2.5} />
         </span>
@@ -186,12 +183,12 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   >
                     {/* Active indicator bar */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary shadow-[0_0_10px_hsl(var(--sidebar-primary)/0.8)] group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
                     <span className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary/20 text-sidebar-primary ring-1 ring-sidebar-primary/35 shadow-[0_0_14px_-2px_hsl(var(--sidebar-primary)/0.5)]"
+                        ? "bg-sidebar-primary/18 text-sidebar-primary ring-1 ring-sidebar-primary/30"
                         : "bg-sidebar-accent/55 text-sidebar-foreground/65 ring-1 ring-sidebar-border/40 group-hover/nav:bg-sidebar-accent/75 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:ring-sidebar-border/60",
                     )}>
                       <item.icon
