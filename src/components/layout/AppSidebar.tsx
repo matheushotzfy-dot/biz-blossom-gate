@@ -174,7 +174,7 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     className={cn(
                       "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-sidebar-primary/45 bg-sidebar-primary/10 text-sidebar-accent-foreground font-semibold shadow-[0_0_0_1px_hsl(var(--sidebar-primary)/0.08)_inset]"
+                        ? "border border-sidebar-primary/45 bg-sidebar-primary/10 text-sidebar-accent-foreground font-semibold shadow-[0_0_0_1px_hsl(var(--sidebar-primary)/0.08)_inset] before:absolute before:left-0 before:top-1/2 before:h-6 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary before:content-['']"
                         : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
                     )}
                   >
