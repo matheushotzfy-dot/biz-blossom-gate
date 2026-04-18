@@ -373,8 +373,6 @@ export function AppSidebar() {
         <RevenueCard
           collapsed={collapsed}
           revenue={revenue}
-          todayRevenue={todayRevenue}
-          salesToday={salesToday}
           milestone={milestone}
           onOpenRewards={() => navigate("/premiacoes")}
         />
