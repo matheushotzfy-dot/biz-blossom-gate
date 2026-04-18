@@ -134,12 +134,7 @@ input[type="number"]::-webkit-inner-spin-button {
     text-rendering: optimizeLegibility;
     letter-spacing: -0.01em;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-image:
-      radial-gradient(circle at 12% 8%, hsl(var(--primary) / 0.05), transparent 28%),
-      radial-gradient(circle at 88% 12%, hsl(var(--info) / 0.04), transparent 24%),
-      radial-gradient(circle at 50% 100%, hsl(var(--accent) / 0.06), transparent 40%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
-    background-attachment: fixed;
+    background-color: hsl(var(--background));
   }
 
   #root {
@@ -1196,4 +1191,43 @@ button svg, a svg, [role="button"] svg {
   background: hsl(232 28% 12%) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL NO-GLOW OVERRIDES
+   Removes decorative neon glows, heavy decorative blurs, and
+   pulsing glow animations across the entire platform for a clean,
+   solid, professional look. Functional backdrop-blur (glass) and
+   subtle elevation shadows are preserved.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Neutralize "neon" arbitrary glow shadows (shadow-[0_0_*]) */
+[class*="shadow-[0_0_"] {
+  box-shadow: none !important;
+}
+
+/* Neutralize arbitrary drop-shadow glows */
+[class*="drop-shadow-[0_0_"] {
+  filter: none !important;
+}
+
+/* Tone down heavy decorative background blurs (blur-2xl / blur-3xl)
+   when used as ambient orbs (typically absolutely positioned).
+   We keep backdrop-blur (functional glass) untouched. */
+.blur-3xl,
+.blur-2xl {
+  filter: blur(40px) !important;
+  opacity: 0.35 !important;
+}
+
+/* Disable pulsing glow animation — replace with subtle static state */
+.animate-pulse-glow {
+  animation: none !important;
+  opacity: 0.6 !important;
+}
+
+/* Remove ambient backdrop radial overlays site-wide */
+.ambient-backdrop::before,
+.ambient-backdrop::after {
+  display: none !important;
 }
