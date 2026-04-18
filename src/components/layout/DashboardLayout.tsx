@@ -68,52 +68,46 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-20 hidden h-12 md:flex items-center border-b border-border/50 bg-background px-3 lg:px-5 sticky top-0">
-            <SidebarTrigger className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
-              <Menu className="h-[15px] w-[15px]" strokeWidth={1.85} />
-            </SidebarTrigger>
+ <header className="relative z-20 hidden h-14 md:flex items-center gap-2 border-b border-border/50 bg-background/82 backdrop-blur-2xl shadow-[0_1px_0_hsl(var(--foreground)/0.04)] px-4 lg:px-6 sticky top-0">
+ <SidebarTrigger className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center">
+ <Menu className="h-4 w-4 text-muted-foreground" />
+ </SidebarTrigger>
 
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="ml-1 h-8 px-2.5 rounded-md hover:bg-muted/60 transition-colors flex items-center gap-2 text-muted-foreground/70 hover:text-foreground"
-            >
-              <Search className="h-[14px] w-[14px]" strokeWidth={1.85} />
-              <span className="text-[12px] font-medium hidden lg:inline">Buscar</span>
-              <kbd className="hidden lg:inline-flex h-4 items-center gap-0.5 rounded border border-border/60 bg-muted/40 px-1 text-[9px] font-medium text-muted-foreground/60">⌘K</kbd>
-            </button>
+ <button
+ onClick={() => setSearchOpen(true)}
+ className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
+ >
+ <Search className="h-4 w-4 text-muted-foreground" />
+ </button>
 
-            <div className="flex-1" />
+ <div className="flex-1" />
 
-            <div className="flex items-center gap-0.5">
-              <button
-                onClick={toggleTheme}
-                className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
-              >
-                {theme === "dark" ? <Sun className="h-[15px] w-[15px]" strokeWidth={1.85} /> : <Moon className="h-[15px] w-[15px]" strokeWidth={1.85} />}
-              </button>
+ <button
+ onClick={toggleTheme}
+ className="h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
+ >
+ {theme === "dark" ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
+ </button>
 
-              <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                className="relative h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
-              >
-                <Bell className="h-[15px] w-[15px]" strokeWidth={1.85} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-primary rounded-full ring-2 ring-background" />
-                )}
-              </button>
-            </div>
+ <button
+ onClick={() => setNotifOpen(!notifOpen)}
+ className="relative h-9 w-9 rounded-full hover:bg-muted/40 transition-colors flex items-center justify-center"
+ >
+ <Bell className="h-4 w-4 text-muted-foreground" />
+ {unreadCount > 0 && (
+ <span className="absolute top-1 right-1 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-background flex items-center justify-center text-[9px] font-bold text-primary-foreground">{unreadCount}</span>
+ )}
+ </button>
 
-            <div className="mx-2 h-5 w-px bg-border/60" />
-
-            <button onClick={() => navigate("/perfil")} className="flex items-center">
-              <Avatar className="h-7 w-7 ring-1 ring-border/60 hover:ring-primary/40 transition-all cursor-pointer">
-                <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-muted text-foreground text-[11px] font-semibold">
-                  {(profile?.full_name || "U").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </button>
-          </header>
+ <button onClick={() => navigate("/perfil")} className="ml-1">
+ <Avatar className="h-8 w-8 ring-1 ring-border/40 hover:ring-primary/30 transition-all cursor-pointer">
+ <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
+ <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+ {(profile?.full_name || "U").charAt(0).toUpperCase()}
+ </AvatarFallback>
+ </Avatar>
+ </button>
+ </header>
 
  {/* ─── VERIFICATION BANNER ─── */}
  {profile && profile.account_status !== "approved" && (

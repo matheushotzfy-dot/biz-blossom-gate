@@ -371,29 +371,40 @@ export default function AdminConteudo() {
     { label: "Rascunhos", value: "draft" as const, count: draftCourses },
   ];
 
+  const statusLabel = (isPublished: boolean) => isPublished ? "Publicado" : "Rascunho";
+  const statusDot = (isPublished: boolean) => isPublished ? "bg-success" : "bg-muted-foreground/30";
+
   const totalStudents = Object.values(studentCounts).reduce((a, c) => a + c, 0);
   const totalModules = Object.values(courseStats).reduce((a, s) => a + s.modules, 0);
   const totalLessonsCount = Object.values(courseStats).reduce((a, s) => a + s.lessons, 0);
   const totalRevenue = courses.reduce((a, c) => a + getCourseRevenue(c), 0);
-
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
    return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
       {/* ── Header ── */}
       <div className="px-5 pt-1 sm:px-7 md:pt-1">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-border">
-              <GraduationCap className="h-5 w-5 text-primary" strokeWidth={1.8} />
-            </div>
-            <div>
-              <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-                Áreas de Membros
-              </h1>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Gerencie cursos, conteúdos e acessos dos seus alunos
-              </p>
+          <div>
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-border">
+                <GraduationCap className="h-5 w-5 text-primary" strokeWidth={1.8} />
+              </div>
+              <div>
+                <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                  Área de Membros
+                </h1>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-muted-foreground">
+                    {courses.length} {courses.length === 1 ? "curso cadastrado" : "cursos cadastrados"}
+                  </p>
+                  {publishedCourses > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-success/70">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                      {publishedCourses} publicado{publishedCourses !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <button
@@ -401,36 +412,13 @@ export default function AdminConteudo() {
             className="inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:-translate-y-px"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-            Nova área
+            Novo curso
           </button>
         </div>
 
-        {/* ── KPI strip ── */}
-        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
-          {[
-            { label: "Áreas", value: totalCourses, sub: `${publishedCourses} publicadas`, icon: GraduationCap },
-            { label: "Módulos", value: totalModules, sub: `${totalLessonsCount} aulas`, icon: Layers },
-            { label: "Alunos ativos", value: totalStudents, sub: "com acesso", icon: Users },
-            { label: "Receita vinculada", value: fmt(totalRevenue), sub: "produtos conectados", icon: DollarSign, isMoney: true },
-          ].map((kpi) => {
-            const Icon = kpi.icon;
-            return (
-              <div key={kpi.label} className="bg-card px-4 py-3.5">
-                <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                  <Icon className="h-3 w-3" strokeWidth={2} />
-                  {kpi.label}
-                </div>
-                <div className={cn("mt-1.5 font-numbers font-black tabular-nums tracking-tight text-foreground", kpi.isMoney ? "text-base" : "text-xl")}>
-                  {typeof kpi.value === "number" ? <AnimatedNumber value={kpi.value} /> : kpi.value}
-                </div>
-                <div className="mt-0.5 text-[10px] text-muted-foreground/70">{kpi.sub}</div>
-              </div>
-            );
-          })}
-        </div>
-
         {/* ── Toolbar ── */}
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Tabs */}
           <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
             {tabs.map((item) => {
               const active = filter === item.value;
@@ -440,12 +428,17 @@ export default function AdminConteudo() {
                   onClick={() => setFilter(item.value)}
                   className={cn(
                     "relative rounded-md px-3 py-1.5 text-[11px] font-semibold transition-all duration-150",
-                    active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    active
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {item.label}
                   {item.count > 0 && (
-                    <span className={cn("ml-1 text-[10px] tabular-nums", active ? "text-primary" : "text-muted-foreground/50")}>
+                    <span className={cn(
+                      "ml-1 text-[10px] tabular-nums",
+                      active ? "text-primary" : "text-muted-foreground/50"
+                    )}>
                       {item.count}
                     </span>
                   )}
@@ -454,37 +447,20 @@ export default function AdminConteudo() {
             })}
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar área..."
-                className="h-8 w-full rounded-lg border border-border bg-secondary pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-56"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-all", viewMode === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                title="Lista"
-              >
-                <List className="h-3.5 w-3.5" strokeWidth={2} />
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar..."
+              className="h-8 w-full rounded-lg border border-border bg-secondary pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-52"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
+                <X className="h-3 w-3" />
               </button>
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-all", viewMode === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                title="Grade"
-              >
-                <Grid3X3 className="h-3.5 w-3.5" strokeWidth={2} />
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -506,7 +482,7 @@ export default function AdminConteudo() {
             {search || filter !== "all" ? "Nenhum resultado" : "Comece por aqui"}
           </p>
           <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
-            {search || filter !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie sua primeira área de membros e entregue conteúdo."}
+            {search || filter !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie seu primeiro curso e comece a entregar conteúdo."}
           </p>
           {!search && filter === "all" && (
             <button
@@ -514,178 +490,11 @@ export default function AdminConteudo() {
               className="mt-6 inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
             >
               <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Criar área
+              Criar curso
             </button>
           )}
         </div>
-      ) : viewMode === "list" ? (
-        // ─── LIST VIEW (operational, default) ───────────────────
-        <div className="px-5 pt-5 pb-8 sm:px-7">
-          <div className="overflow-hidden rounded-xl border border-border bg-card">
-            {/* Header row */}
-            <div className="hidden grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_110px_110px_140px_120px] items-center gap-4 border-b border-border bg-secondary/40 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground md:grid">
-              <div>Área de membros</div>
-              <div>Produto vinculado</div>
-              <div className="text-right">Conteúdo</div>
-              <div className="text-right">Alunos</div>
-              <div className="text-right">Receita</div>
-              <div className="text-right pr-1">Ações</div>
-            </div>
-
-            {filtered.map((c) => {
-              const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
-              const product = products.find((p) => p.id === c.product_id);
-              const revenue = getCourseRevenue(c);
-              const students = studentCounts[c.id] || 0;
-              const isLive = !!c.is_published;
-              const initial = c.title.charAt(0).toUpperCase();
-
-              return (
-                <div
-                  key={c.id}
-                  onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                  className="group grid cursor-pointer grid-cols-1 items-center gap-4 border-b border-border px-4 py-3 transition-colors duration-150 last:border-b-0 hover:bg-accent/40 md:grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_110px_110px_140px_120px]"
-                >
-                  {/* Identity */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                      {c.thumbnail_url ? (
-                        <img src={c.thumbnail_url} alt={c.title} loading="lazy" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                          <span className="font-display text-base font-black text-primary/60">{initial}</span>
-                        </div>
-                      )}
-                      <div className="absolute bottom-0.5 right-0.5">
-                        <span className={cn("flex h-2 w-2 rounded-full ring-1 ring-card", isLive ? "bg-success" : "bg-muted-foreground/40")} />
-                      </div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="truncate text-[13.5px] font-bold leading-tight text-foreground">{c.title}</h3>
-                        <span className={cn(
-                          "shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                          isLive ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
-                        )}>
-                          {isLive ? "Live" : "Draft"}
-                        </span>
-                      </div>
-                      <p className="mt-0.5 truncate text-[11.5px] leading-snug text-muted-foreground">
-                        {c.description || "Sem descrição"}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground/70">
-                        <span className="inline-flex items-center gap-1">
-                          <Calendar className="h-2.5 w-2.5" strokeWidth={2} />
-                          {new Date(c.created_at).toLocaleDateString("pt-BR")}
-                        </span>
-                        <span className="font-mono uppercase tracking-widest">#{c.id.slice(0, 6)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Product link */}
-                  <div className="min-w-0">
-                    {product ? (
-                      <div className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-[11px] font-semibold text-primary">
-                        <LinkIcon className="h-3 w-3 shrink-0" strokeWidth={2} />
-                        <span className="truncate">{product.name}</span>
-                      </div>
-                    ) : (
-                      <div className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-2 py-1 text-[11px] font-medium text-muted-foreground/70">
-                        <Lock className="h-3 w-3" strokeWidth={2} />
-                        Sem produto
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Content count */}
-                  <div className="flex items-center justify-end gap-3 text-right md:gap-1">
-                    <div>
-                      <div className="font-numbers text-sm font-black tabular-nums text-foreground">{stats.modules}</div>
-                      <div className="text-[9px] uppercase tracking-wider text-muted-foreground/70">mód</div>
-                    </div>
-                    <div className="ml-2 border-l border-border pl-2">
-                      <div className="font-numbers text-sm font-black tabular-nums text-foreground">{stats.lessons}</div>
-                      <div className="text-[9px] uppercase tracking-wider text-muted-foreground/70">aulas</div>
-                    </div>
-                  </div>
-
-                  {/* Students */}
-                  <div className="text-right">
-                    <div className={cn("font-numbers text-sm font-black tabular-nums", students > 0 ? "text-foreground" : "text-muted-foreground/40")}>
-                      {students}
-                    </div>
-                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground/70">ativos</div>
-                  </div>
-
-                  {/* Revenue */}
-                  <div className="text-right">
-                    {revenue > 0 ? (
-                      <>
-                        <div className="font-numbers text-sm font-black tabular-nums text-success">{fmt(revenue)}</div>
-                        <div className="text-[9px] uppercase tracking-wider text-muted-foreground/70">vinculada</div>
-                      </>
-                    ) : (
-                      <div className="text-[11px] font-medium text-muted-foreground/40">—</div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                    {isLive && (
-                      <button
-                        onClick={() => copyMemberLink(c.id)}
-                        className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-md border transition-colors",
-                          copiedId === c.id
-                            ? "border-success/40 bg-success/15 text-success"
-                            : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent"
-                        )}
-                        title="Copiar link"
-                      >
-                        {copiedId === c.id ? <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-secondary px-2.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-accent"
-                    >
-                      Gerenciar
-                      <ChevronRight className="h-3 w-3" strokeWidth={2} />
-                    </button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-                          <MoreVertical className="h-3.5 w-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" sideOffset={6} className="w-[200px] rounded-xl border border-border bg-secondary p-1.5 shadow-none">
-                        <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground/80 cursor-pointer">
-                          <Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> Configurações
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground/80 cursor-pointer">
-                          {isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}
-                          {isLive ? "Despublicar" : "Publicar"}
-                        </DropdownMenuItem>
-                        {isLive && (
-                          <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground/80 cursor-pointer">
-                            <PlayCircle className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> Ver área
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator className="mx-1 my-1 bg-border" />
-                        <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-destructive cursor-pointer focus:bg-destructive/10">
-                          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} /> Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       ) : (
-        // ─── GRID VIEW ───────────────────────────────────────────
         <div className="px-5 pt-5 pb-8 sm:px-7">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filtered.map((c) => {
@@ -702,18 +511,23 @@ export default function AdminConteudo() {
                   onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
                   className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/50 hover:-translate-y-0.5"
                 >
+                  {/* Thumbnail */}
                   <div className="relative aspect-[16/9] overflow-hidden bg-muted">
                     {c.thumbnail_url ? (
                       <img src={c.thumbnail_url} alt={c.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                        <span className="font-display text-3xl font-black text-primary/60">{initial}</span>
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
+                        <span className="font-display text-3xl font-black text-muted-foreground/60">{initial}</span>
                       </div>
                     )}
+
+                    {/* Status */}
                     <div className="absolute left-3 top-3">
                       <span className={cn(
                         "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border",
-                        isLive ? "bg-success/15 text-success border-success/25" : "bg-card/95 text-muted-foreground border-border"
+                        isLive
+                          ? "bg-success/15 text-success border-success/25"
+                          : "bg-card/95 text-muted-foreground border-border"
                       )}>
                         {isLive && (
                           <span className="relative flex h-1.5 w-1.5">
@@ -724,6 +538,44 @@ export default function AdminConteudo() {
                         {isLive ? "Live" : "Rascunho"}
                       </span>
                     </div>
+
+                    {/* Menu on hover */}
+                    <div className="absolute right-3 top-3 opacity-0 transition-opacity duration-150 group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="flex h-7 w-7 items-center justify-center rounded-md bg-card border border-border text-foreground hover:bg-accent transition-colors">
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" sideOffset={8} className="w-[220px] rounded-2xl border border-border bg-secondary p-1.5 shadow-none">
+                          <DropdownMenuItem onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><ChevronRight className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Gerenciar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(c)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Configurações
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">{isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}</div> {isLive ? "Despublicar" : "Publicar"}
+                          </DropdownMenuItem>
+                          {isLive && (
+                            <>
+                              <DropdownMenuItem onClick={() => copyMemberLink(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><Copy className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Copiar link
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => window.open(getMemberLink(c.id), "_blank")} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/70 cursor-pointer">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent"><PlayCircle className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /></div> Ver área
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
+                          <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-3 rounded-xl px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive cursor-pointer focus:bg-destructive/10">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10"><Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} /></div> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {/* Tags */}
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
                       <span className="inline-flex items-center gap-1 rounded-md bg-card/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground border border-border">
                         <Layers className="h-3 w-3" strokeWidth={2} />
@@ -738,6 +590,7 @@ export default function AdminConteudo() {
                     </div>
                   </div>
 
+                  {/* Body */}
                   <div className="flex flex-1 flex-col p-4">
                     <h3 className="truncate text-[15px] font-bold leading-6 text-foreground">{c.title}</h3>
                     <p className="mt-1 truncate text-[13px] leading-5 text-muted-foreground">{c.description || "Sem descrição"}</p>
@@ -749,7 +602,9 @@ export default function AdminConteudo() {
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">receita</span>
                         </div>
                       ) : (
-                        <span className="text-sm font-semibold text-muted-foreground/40">Sem receita</span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-sm font-semibold text-muted-foreground/40">Sem receita</span>
+                        </div>
                       )}
                       {product && (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary truncate max-w-[120px]">
@@ -761,58 +616,48 @@ export default function AdminConteudo() {
 
                     <div className="mt-auto pt-4">
                       <div className="h-px bg-border mb-4" />
-                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                          className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-secondary text-[11px] font-medium text-foreground transition-colors hover:bg-accent"
-                        >
-                          <Edit className="h-3.5 w-3.5" strokeWidth={1.8} />
-                          Gerenciar
-                        </button>
-                        {isLive && (
-                          <>
-                            <button
-                              onClick={() => copyMemberLink(c.id)}
-                              className={cn(
-                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors",
-                                copiedId === c.id
-                                  ? "border-success/40 bg-success/15 text-success"
-                                  : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent"
-                              )}
-                              title="Copiar link"
-                            >
-                              <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />
-                            </button>
-                            <button
-                              onClick={() => window.open(getMemberLink(c.id), "_blank")}
-                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
-                              title="Ver área de membros"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
-                            </button>
-                          </>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-                              <MoreVertical className="h-3.5 w-3.5" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" sideOffset={6} className="w-[200px] rounded-xl border border-border bg-secondary p-1.5 shadow-none">
-                            <DropdownMenuItem onClick={() => openEdit(c)} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground/80 cursor-pointer">
-                              <Edit className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> Configurações
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => togglePublish(c.id, c.is_published ?? false)} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground/80 cursor-pointer">
-                              {isLive ? <EyeOff className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} /> : <Eye className="h-3.5 w-3.5 text-primary" strokeWidth={1.8} />}
-                              {isLive ? "Despublicar" : "Publicar"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="mx-1 my-1 bg-border" />
-                            <DropdownMenuItem onClick={() => deleteCourse(c.id)} className="gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-destructive cursor-pointer focus:bg-destructive/10">
-                              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} /> Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+                        className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-secondary text-[11px] font-medium text-foreground transition-colors hover:bg-accent"
+                      >
+                        <Edit className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        Gerenciar
+                      </button>
+                      {isLive && (
+                        <>
+                          <button
+                            onClick={() => copyMemberLink(c.id)}
+                            className={cn(
+                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                              copiedId === c.id
+                                ? "border-success/40 bg-success/15 text-success"
+                                : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent"
+                            )}
+                            title="Copiar link"
+                          >
+                            <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          </button>
+                          <button
+                            onClick={() => window.open(getMemberLink(c.id), "_blank")}
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                            title="Ver área de membros"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3" strokeWidth={1.8} />
+                        {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                      </span>
+                      <span className="font-mono uppercase tracking-widest">#{c.id.slice(0, 6)}</span>
+                    </div>
                     </div>
                   </div>
                 </article>

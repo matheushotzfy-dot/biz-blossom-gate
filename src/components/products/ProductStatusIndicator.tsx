@@ -15,20 +15,20 @@ const STATUS: Record<string, StatusMeta> = {
     label: "Ativo",
     text: "text-success",
     dot: "bg-success",
-    soft: "border-success/25 bg-success/[0.08]",
+    soft: "border-success/20 bg-success/10",
     pulse: true,
   },
   inactive: {
     label: "Inativo",
-    text: "text-muted-foreground/80",
-    dot: "bg-muted-foreground/50",
-    soft: "border-border/40 bg-muted/20",
+    text: "text-muted-foreground/70",
+    dot: "bg-muted-foreground/45",
+    soft: "border-border/25 bg-muted/15",
   },
   pending_review: {
     label: "Revisão",
     text: "text-warning",
     dot: "bg-warning",
-    soft: "border-warning/25 bg-warning/[0.08]",
+    soft: "border-warning/20 bg-warning/10",
   },
 };
 
@@ -46,15 +46,15 @@ export function ProductStatusIndicator({
       className={cn(
         "inline-flex items-center gap-1.5",
         tone === "soft"
-          ? ["rounded-full border px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-[0.06em]", meta.soft, meta.text]
-          : ["text-[9.5px] font-semibold uppercase tracking-[0.06em]", meta.text]
+          ? ["rounded-full border px-2.5 py-1 text-[10px] font-medium", meta.soft, meta.text]
+          : ["text-[10px] font-medium", meta.text]
       )}
     >
-      <span className="relative flex h-[5px] w-[5px]">
+      <span className="relative flex h-[6px] w-[6px]">
         {meta.pulse && (
-          <span className={cn("absolute inline-flex h-full w-full rounded-full animate-ping opacity-50", meta.dot)} />
+          <span className={cn("absolute inline-flex h-full w-full rounded-full animate-ping opacity-45", meta.dot)} />
         )}
-        <span className={cn("relative inline-flex h-[5px] w-[5px] rounded-full", meta.dot)} />
+        <span className={cn("relative inline-flex h-[6px] w-[6px] rounded-full", meta.dot)} />
       </span>
       {meta.label}
     </span>

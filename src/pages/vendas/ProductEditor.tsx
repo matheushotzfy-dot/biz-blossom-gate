@@ -751,8 +751,8 @@ export default function ProductEditor() {
  {...{ isNew: tabsLocked, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
  />}
 
-    {activeTab === "upsell" && <TabUpsell
- {...{ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }}
+ {activeTab === "upsell" && <TabUpsell
+ {...{ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }}
  />}
 
  {activeTab === "checkout" && <TabCheckout
@@ -788,170 +788,176 @@ export default function ProductEditor() {
  ═══════════════════════════════════════════════ */
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
-  const descValid = description.length >= 50;
-  const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
+ return (
+ <div className="space-y-6">
+ <SectionHeader icon={Package} title="Informações do Produto" subtitle="Dados principais exibidos na área de membros e programa de afiliados." />
 
-  return (
-    <div className="space-y-8">
-      {/* Section 1: Identity */}
-      <section>
-        <header className="mb-4">
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Identidade do produto</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
-        </header>
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
-            <div
-              className={cn("relative border-b md:border-b-0 md:border-r border-border transition-colors", isDragging ? "bg-primary/5" : "bg-secondary/40")}
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-            >
-              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
-              {imagePreview ? (
-                <div className="relative h-full min-h-[220px] group/img">
-                  <img src={imagePreview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-background/85 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 px-3 rounded-lg bg-card border border-border text-xs font-semibold text-foreground hover:border-primary/40 transition-colors flex items-center gap-1.5">
-                      <ImagePlus className="h-3.5 w-3.5" /> Trocar
-                    </button>
-                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border text-destructive hover:border-destructive/40 transition-colors flex items-center justify-center">
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="h-full min-h-[220px] w-full flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-foreground transition-colors p-6">
-                  <div className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center">
-                    <Upload className="h-5 w-5" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-semibold text-foreground">{isDragging ? "Solte aqui" : "Adicionar imagem"}</p>
-                    <p className="mt-1 text-[10px] text-muted-foreground/70">JPG, PNG, WebP — até 10MB</p>
-                    <p className="text-[10px] text-muted-foreground/50">Recomendado 300×250px</p>
-                  </div>
-                </button>
-              )}
-            </div>
-            <div className="p-5 space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nome do produto</label>
-                <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
-                  <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
-                  <span className="tabular-nums">{name.length}/200</span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Descrição</label>
-                <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
-                    {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground/60">{description.length}/2000</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+ {/* ─── Interactive Image Upload with Drag & Drop ─── */}
+ <div
+ className={cn(
+ "rounded-2xl border-2 border-dashed overflow-hidden transition-all duration-500 relative group/upload",
+ isDragging ? "border-primary/50 bg-primary/5 scale-[1.005]" : "border-border bg-card hover:border-border"
+ )}
+ onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+ onDragLeave={() => setIsDragging(false)}
+ onDrop={handleDrop}
+ >
+ <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
 
-      {/* Section 2: Classification & Pricing */}
-      <section>
-        <header className="mb-4">
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Categoria e preço</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto é classificado e cobrado.</p>
-        </header>
-        <div className="rounded-2xl border border-border bg-card divide-y divide-border">
-          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <div className="p-5 space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="infoproduto">Infoproduto</SelectItem>
-                  <SelectItem value="curso">Curso Online</SelectItem>
-                  <SelectItem value="ebook">E-book</SelectItem>
-                  <SelectItem value="mentoria">Mentoria</SelectItem>
-                  <SelectItem value="software">Software / SaaS</SelectItem>
-                  <SelectItem value="servico">Serviço</SelectItem>
-                  <SelectItem value="comunidade">Comunidade</SelectItem>
-                  <SelectItem value="outro">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="p-5 space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
-              <Select value={paymentType} onValueChange={setPaymentType}>
-                <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unico">Pagamento único</SelectItem>
-                  <SelectItem value="assinatura">Assinatura recorrente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="p-5">
-            <div className="flex items-end justify-between gap-6">
-              <div className="flex-1 space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Preço de venda</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
-                  <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success" placeholder="0,00" />
-                </div>
-              </div>
-              <div className="w-32 space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
-                <Select value={warrantyDays} onValueChange={setWarrantyDays}>
-                  <SelectTrigger className="h-14 bg-secondary border-border text-sm font-semibold"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 dias</SelectItem>
-                    <SelectItem value="14">14 dias</SelectItem>
-                    <SelectItem value="30">30 dias</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+ {imagePreview ? (
+ <div className="relative group/img">
+ <img src={imagePreview} alt="Preview" className="w-full h-56 object-cover" />
+ <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+ <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
+ <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => fileInputRef.current?.click()} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-colors duration-200">
+ <ImagePlus className="h-5 w-5 text-foreground" />
+ </motion.button>
+ <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-colors duration-200">
+ <X className="h-5 w-5" />
+ </motion.button>
+ </div>
+ <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary border border-border">
+ <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+ <span className="text-[10px] font-display font-black text-foreground">Imagem adicionada</span>
+ </div>
+ </div>
+ ) : (
+ <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full h-52 flex flex-col items-center justify-center gap-4 text-muted-foreground/30 hover:text-primary/50 transition-all duration-500 relative overflow-hidden">
+ <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+ <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-primary/[0.02] pointer-events-none" />
+ <motion.div
+ animate={isDragging ? { scale: 1.1, y: -8 } : { scale: 1, y: 0 }}
+ transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+ className="relative h-18 w-18 rounded-2xl bg-muted/8 group-hover/upload:bg-primary/8 flex items-center justify-center transition-all duration-500 border border-dashed border-border group-hover/upload:border-primary/20 ring-1 ring-transparent group-hover/upload:ring-primary/10"
+ >
+ <Upload className="h-8 w-8" />
+ </motion.div>
+ <div className="relative text-center space-y-1.5">
+ <span className="text-sm font-display font-bold block">{isDragging ? "Solte a imagem aqui" : "Arraste ou clique para enviar"}</span>
+ <span className="text-[10px] text-muted-foreground/25 block font-display">JPG, PNG, WebP, GIF • Máx: 10MB • Recomendado: 300×250px</span>
+ </div>
+ </button>
+ )}
+ </div>
 
-      {/* Section 3: Producer info */}
-      <section>
-        <header className="mb-4">
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Informações do produtor</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
-        </header>
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-                <ExternalLink className="h-3 w-3" /> Página de vendas
-              </label>
-              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
-              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "Insira o domínio completo"}</p>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-                <Mail className="h-3 w-3" /> E-mail de suporte
-              </label>
-              <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
-              <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-              <Users className="h-3 w-3" /> Nome de exibição do produtor
-            </label>
-            <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
-            <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
+ {/* ─── Product Details ─── */}
+ <EditorCard accentColor="bg-primary">
+ <div className="space-y-2">
+ <EditorLabel icon={Package}>Nome do produto</EditorLabel>
+ <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 bg-secondary border-border focus-visible:border-primary/40 text-base font-display font-bold" required maxLength={200} />
+ <div className="flex items-center justify-between">
+ <p className="text-[10px] text-muted-foreground/30">{name.length > 0 ? "✓ Nome preenchido" : "Obrigatório"}</p>
+ <p className="text-[10px] text-muted-foreground/30 font-numbers tabular-nums">{name.length}/200</p>
+ </div>
+ </div>
+
+ <div className="space-y-2">
+ <EditorLabel>Descrição <span className="text-destructive">*</span></EditorLabel>
+ <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva seu produto em detalhes (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border", description.length > 0 && description.length < 50 && "border-destructive/40")} maxLength={2000} />
+ <div className="flex items-center justify-between">
+ <p className={cn("text-[10px]", description.length >= 50 ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/30")}>
+ {description.length >= 50 ? "✓ Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres (mín. 50)` : "Obrigatório • Mínimo 50 caracteres"}
+ </p>
+ <p className="text-[10px] text-muted-foreground/40 text-right font-numbers tabular-nums">{description.length}/2000</p>
+ </div>
+ </div>
+
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div className="space-y-2">
+ <EditorLabel>Categoria</EditorLabel>
+ <Select value={category} onValueChange={setCategory}>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
+ <SelectContent>
+ <SelectItem value="infoproduto">Infoproduto</SelectItem>
+ <SelectItem value="curso">Curso Online</SelectItem>
+ <SelectItem value="ebook">E-book</SelectItem>
+ <SelectItem value="mentoria">Mentoria</SelectItem>
+ <SelectItem value="software">Software / SaaS</SelectItem>
+ <SelectItem value="servico">Serviço</SelectItem>
+ <SelectItem value="comunidade">Comunidade</SelectItem>
+ <SelectItem value="outro">Outro</SelectItem>
+ </SelectContent>
+ </Select>
+ </div>
+ <div className="space-y-2">
+ <EditorLabel>Tipo de pagamento</EditorLabel>
+ <Select value={paymentType} onValueChange={setPaymentType}>
+ <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
+ <SelectContent>
+ <SelectItem value="unico">Único</SelectItem>
+ <SelectItem value="assinatura">Assinatura</SelectItem>
+ </SelectContent>
+ </Select>
+ </div>
+ </div>
+ </EditorCard>
+
+ {/* ─── Interactive Pricing Card ─── */}
+ <EditorCard accentColor="bg-success">
+ <div className="flex items-center justify-between">
+ <EditorLabel icon={DollarSign}>Preço</EditorLabel>
+ <div className="flex items-center gap-2">
+ <EditorLabel icon={Shield}>Garantia</EditorLabel>
+ <Select value={warrantyDays} onValueChange={setWarrantyDays}>
+ <SelectTrigger className="h-8 w-24 text-xs bg-secondary border-border"><SelectValue /></SelectTrigger>
+ <SelectContent>
+ <SelectItem value="7">7 dias</SelectItem>
+ <SelectItem value="14">14 dias</SelectItem>
+ <SelectItem value="30">30 dias</SelectItem>
+ </SelectContent>
+ </Select>
+ </div>
+ </div>
+
+ <div className="space-y-5">
+ <div className="space-y-1.5">
+ <span className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-wider">Preço principal</span>
+ <div className="relative">
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-display font-bold text-muted-foreground">R$</span>
+ <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-10 text-2xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border" placeholder="0.00" />
+ </div>
+ </div>
+
+ </div>
+ </EditorCard>
+
+ {/* ─── Links & Support (Required) ─── */}
+ <EditorCard accentColor="bg-info">
+ <SectionHeader icon={Globe} title="Informações do Produtor" subtitle="Esses dados são obrigatórios e serão exibidos no checkout." />
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div className="space-y-2">
+ <EditorLabel icon={ExternalLink}>Página de vendas <span className="text-destructive">*</span></EditorLabel>
+ <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className="h-11 bg-secondary border-border" required />
+ <p className={cn("text-[10px]", /^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^https?:\/\/.+\..+/.test(pageUrl.trim()) ? "✓ Página preenchida" : "Obrigatório — insira o domínio completo"}</p>
+ </div>
+ <div className="space-y-2">
+ <EditorLabel icon={Mail}>E-mail de suporte <span className="text-destructive">*</span></EditorLabel>
+ <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className="h-11 bg-secondary border-border" required />
+ <p className={cn("text-[10px]", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "text-success" : "text-muted-foreground/30")}>{/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim()) ? "✓ E-mail preenchido" : "Obrigatório — insira um e-mail válido"}</p>
+ </div>
+ </div>
+ <div className="space-y-2">
+ <EditorLabel icon={Users}>Nome de exibição do produtor <span className="text-destructive">*</span></EditorLabel>
+ <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome exibido ao comprador no checkout" className="h-11 bg-secondary border-border" required />
+ <p className={cn("text-[10px]", displayName.trim() ? "text-success" : "text-muted-foreground/30")}>{displayName.trim() ? "✓ Nome preenchido" : "Obrigatório • Aparecerá no rodapé do checkout"}</p>
+ </div>
+ </EditorCard>
+
+ {/* ─── SEO Preview Card ─── */}
+ {name && (
+ <EditorCard accentColor="bg-warning">
+ <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
+ <Eye className="h-4 w-4 text-warning" /> Pré-visualização (Google)
+ </h3>
+ <div className="rounded-xl border border-border bg-card p-4 space-y-1">
+ <p className="text-[13px] text-info font-medium truncate">{pageUrl || "https://seusite.com/produto"}</p>
+ <p className="text-base text-primary font-display font-bold truncate">{name || "Nome do Produto"}{price ? ` — R$ ${Number(price).toFixed(2)}` : ""}</p>
+ <p className="text-xs text-muted-foreground line-clamp-2">{description.slice(0, 160) || "Descrição do produto aparecerá aqui..."}</p>
+ </div>
+ </EditorCard>
+ )}
+ </div>
+ );
 }
 
 function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }: any) {
@@ -1135,285 +1141,136 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
 }
 
-function TabUpsell({ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
+function TabUpsell({ hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
  const [upsellType, setUpsellType] = useState("none");
- const [upsellName, setUpsellName] = useState("");
- const [upsellPrice, setUpsellPrice] = useState("");
- const [upsellDiscount, setUpsellDiscount] = useState("30");
  const [downsellEnabled, setDownsellEnabled] = useState(false);
  const [downsellUrl, setDownsellUrl] = useState("");
- const [downsellPrice, setDownsellPrice] = useState("");
  const [downsellDelay, setDownsellDelay] = useState("5");
-
- const mainPrice = Number(price || 0);
- const upPrice = Number(upsellPrice || 0);
- const downPrice = Number(downsellPrice || 0);
- const isConfigured = upsellType !== "none";
-
- // Projected AOV: assume 18% accept upsell, 12% of refusers accept downsell
- const projectedAov = mainPrice + (upPrice * 0.18) + (downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
- const upliftPct = mainPrice > 0 ? Math.round(((projectedAov - mainPrice) / mainPrice) * 100) : 0;
 
  return (
  <div className="space-y-6">
- <SectionHeader icon={ArrowUpRight} title="Funil pós-pagamento" subtitle="Defina a sequência de ofertas exibidas após a compra inicial." />
+ <SectionHeader icon={ArrowUpRight} title="Upsell / Downsell" subtitle="Maximize o valor de cada venda com ofertas pós-compra inteligentes." />
 
- {/* ═══ FUNNEL FLOW VISUAL ═══ */}
- <div className="rounded-2xl border border-border bg-card overflow-hidden">
- <div className="px-5 py-4 border-b border-border flex items-center justify-between">
- <div>
- <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70 font-display font-bold">Sequência do funil</p>
- <p className="text-[15px] font-display font-black text-foreground mt-0.5 tracking-[-0.02em]">Jornada do comprador</p>
+ {/* Strategy info */}
+ <EditorCard accentColor="bg-success">
+ <div className="flex items-start gap-3">
+ <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+ <Rocket className="h-4 w-4 text-success" />
  </div>
- <div className="text-right">
- <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Ticket projetado</p>
- <p className="text-base font-numbers font-black text-success tabular-nums">
- R$ {projectedAov.toFixed(2)}
- {upliftPct > 0 && <span className="text-[10px] font-display font-bold text-success/80 ml-1.5">+{upliftPct}%</span>}
+ <div>
+ <p className="text-sm font-display font-bold text-foreground">Aumente seu LTV</p>
+ <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
+ Vendedores que usam upsell aumentam o valor médio por cliente em até 40%. Configure sua estratégia de pós-venda para maximizar a receita.
  </p>
  </div>
  </div>
+ </EditorCard>
 
- <div className="p-5 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-3 md:gap-2 items-stretch">
- <FunnelStep
- step="01"
- status="active"
- label="Produto principal"
- title={name || "Seu produto"}
- price={mainPrice}
- thumb={imagePreview}
- anchor
- />
- <FunnelArrow />
- <FunnelStep
- step="02"
- status={isConfigured ? "active" : "empty"}
- label={isConfigured ? "Upsell" : "Sem upsell"}
- title={isConfigured ? (upsellName || "Oferta complementar") : "Configure abaixo"}
- price={isConfigured ? upPrice : undefined}
- badge={isConfigured && upsellDiscount ? `-${upsellDiscount}%` : undefined}
- />
- <FunnelArrow />
- <FunnelStep
- step="03"
- status={downsellEnabled ? "active" : "empty"}
- label={downsellEnabled ? "Downsell" : "Sem downsell"}
- title={downsellEnabled ? "Oferta de recuperação" : "Opcional"}
- price={downsellEnabled ? downPrice : undefined}
- muted
- />
- <FunnelArrow />
- <FunnelStep
- step="04"
- status="active"
- label="Confirmação"
- title="Página de obrigado"
- icon={Check}
- />
- </div>
- </div>
-
- {/* ═══ STEP 02 EDITOR — UPSELL TYPE ═══ */}
- <div className="rounded-2xl border border-border bg-card">
- <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
- <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center text-[10px] font-numbers font-black text-primary tabular-nums">02</div>
- <div className="flex-1 min-w-0">
- <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Configurar oferta de upsell</p>
- <p className="text-xs text-muted-foreground/70 mt-0.5">Exibida imediatamente após o pagamento aprovado.</p>
- </div>
- </div>
-
- <div className="p-5 space-y-5">
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+ {/* Upsell Type Selection */}
+ <EditorCard accentColor="bg-primary">
+ <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
+ <Target className="h-4 w-4 text-primary" /> Tipo de Upsell
+ </h3>
+ <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
  {[
- { value: "none", label: "Nenhum", desc: "Ir direto para confirmação", icon: Check },
- { value: "page", label: "Página externa", desc: "Redirecionar para URL própria", icon: ExternalLink },
- { value: "popup", label: "Popup nativo", desc: "Oferta sobre página de obrigado", icon: Sparkles },
- ].map((opt) => {
- const selected = upsellType === opt.value;
- return (
- <button
+ { value: "none", label: "Sem Upsell", desc: "Redirecionar para obrigado padrão", icon: Check },
+ { value: "page", label: "Página Custom", desc: "Redirecionar para URL personalizada", icon: ExternalLink },
+ { value: "popup", label: "Popup Upsell", desc: "Exibir oferta em popup na página", icon: Sparkles },
+ ].map((opt) => (
+ <motion.button
  key={opt.value}
  type="button"
  onClick={() => { setUpsellType(opt.value); if (opt.value !== "none") setHasCustomThankYou(opt.value === "page"); }}
+ whileHover={{ scale: 1.01 }}
+ whileTap={{ scale: 0.98 }}
  className={cn(
- "group relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors",
- selected ? "bg-primary/5 border-primary/40" : "bg-card border-border hover:border-border/80"
+ "flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
+ upsellType === opt.value
+ ? "bg-primary/5 border-primary/20 shadow-sm"
+ : "bg-card border-border hover:border-border"
  )}
  >
- {selected && <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full bg-primary" />}
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors", selected ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
- <opt.icon className="h-4 w-4" />
+ {upsellType === opt.value && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
+ <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center ring-1 transition-all", upsellType === opt.value ? "bg-primary/10 ring-primary/20" : "bg-muted/10 ring-border/20")}>
+ <opt.icon className={cn("h-4 w-4", upsellType === opt.value ? "text-primary" : "text-muted-foreground/40")} />
  </div>
- <div className="min-w-0">
- <p className={cn("text-[13px] font-display font-bold leading-tight", selected ? "text-foreground" : "text-foreground/80")}>{opt.label}</p>
- <p className="text-[11px] text-muted-foreground/60 mt-1 leading-snug">{opt.desc}</p>
+ <p className="text-xs font-display font-bold text-foreground">{opt.label}</p>
+ <p className="text-[9px] text-muted-foreground/50">{opt.desc}</p>
+ </motion.button>
+ ))}
  </div>
- </button>
- );
- })}
- </div>
+ </EditorCard>
 
- <AnimatePresence initial={false}>
- {upsellType === "popup" && (
+ {/* Custom Thank You URL */}
+ <AnimatePresence>
+ {(upsellType === "page" || hasCustomThankYou) && (
  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-3 pt-1">
- <div className="space-y-1.5">
- <EditorLabel>Nome da oferta</EditorLabel>
- <Input value={upsellName} onChange={(e: any) => setUpsellName(e.target.value)} placeholder="Ex: Mentoria 1:1 com 30% OFF" className="h-10 bg-secondary border-border" />
+ <EditorCard accentColor="bg-warning">
+ <h4 className="text-[15px] font-display font-black flex items-center gap-2">
+ <ExternalLink className="h-4 w-4 text-warning" /> Página de obrigado / upsell
+ </h4>
+ <div className="space-y-2">
+ <EditorLabel>URL da página</EditorLabel>
+ <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/obrigado" type="url" className="h-11 bg-secondary border-border" />
+ <p className="text-[10px] text-muted-foreground/40">O comprador será redirecionado para esta URL após a compra</p>
  </div>
- <div className="space-y-1.5">
- <EditorLabel>Preço (R$)</EditorLabel>
- <Input type="number" value={upsellPrice} onChange={(e: any) => setUpsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
- </div>
- <div className="space-y-1.5">
- <EditorLabel>Desconto (%)</EditorLabel>
- <Input type="number" min="0" max="90" value={upsellDiscount} onChange={(e: any) => setUpsellDiscount(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums" />
- </div>
- </div>
- </motion.div>
- )}
- {upsellType === "page" && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="space-y-1.5 pt-1">
- <EditorLabel>URL da página de upsell</EditorLabel>
- <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/oferta-especial" type="url" className="h-10 bg-secondary border-border" />
- <p className="text-[11px] text-muted-foreground/60">O comprador será redirecionado após pagamento aprovado.</p>
- </div>
+ </EditorCard>
  </motion.div>
  )}
  </AnimatePresence>
- </div>
- </div>
 
- {/* ═══ STEP 03 EDITOR — DOWNSELL ═══ */}
- <div className={cn("rounded-2xl border bg-card transition-colors", downsellEnabled ? "border-border" : "border-border/60")}>
- <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
- <div className={cn("h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-numbers font-black tabular-nums", downsellEnabled ? "bg-info/10 text-info" : "bg-muted/40 text-muted-foreground/50")}>03</div>
- <div className="flex-1 min-w-0">
- <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Oferta de recuperação (Downsell)</p>
- <p className="text-xs text-muted-foreground/70 mt-0.5">Acionada apenas se o cliente recusar o upsell.</p>
- </div>
- <Switch checked={downsellEnabled} onCheckedChange={setDownsellEnabled} />
- </div>
-
- <AnimatePresence initial={false}>
+ {/* Downsell */}
+ <EditorCard accentColor="bg-info">
+ <ToggleRow icon={ArrowUpRight} label="Downsell (oferta de recuperação)" sublabel="Se o comprador recusar o upsell, exiba uma oferta com desconto" checked={downsellEnabled} onChange={setDownsellEnabled} />
+ <AnimatePresence>
  {downsellEnabled && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="p-5 grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr] gap-3">
- <div className="space-y-1.5">
- <EditorLabel>URL ou identificador da oferta</EditorLabel>
- <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-10 bg-secondary border-border" />
+ <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden space-y-4 pt-2">
+ <div className="space-y-2 pl-4 border-l-2 border-info/20">
+ <EditorLabel>URL da oferta downsell</EditorLabel>
+ <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-11 bg-secondary border-border" />
  </div>
- <div className="space-y-1.5">
- <EditorLabel>Preço reduzido (R$)</EditorLabel>
- <Input type="number" value={downsellPrice} onChange={(e: any) => setDownsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
- </div>
- <div className="space-y-1.5">
- <EditorLabel>Delay (s)</EditorLabel>
- <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums text-center" />
- </div>
+ <div className="space-y-2 pl-4 border-l-2 border-info/20">
+ <EditorLabel icon={Timer}>Delay antes de exibir (segundos)</EditorLabel>
+ <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="w-24 h-10 text-center font-numbers bg-secondary border-border" />
  </div>
  </motion.div>
  )}
  </AnimatePresence>
- </div>
+ </EditorCard>
 
- {/* ═══ STEP 04 EDITOR — CONFIRMATION EMAIL ═══ */}
- <div className="rounded-2xl border border-border bg-card">
- <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
- <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center text-[10px] font-numbers font-black text-success tabular-nums">04</div>
- <div className="flex-1 min-w-0">
- <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">E-mail de confirmação</p>
- <p className="text-xs text-muted-foreground/70 mt-0.5">Define quando o acesso é entregue ao comprador.</p>
- </div>
- <Switch checked={sendConfirmationEmail} onCheckedChange={setSendConfirmationEmail} />
- </div>
-
- <AnimatePresence initial={false}>
+ {/* Email confirmation */}
+ <EditorCard accentColor="bg-success">
+ <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]">
+ <Mail className="h-4 w-4 text-success" /> E-mail pós-compra
+ </h3>
+ <ToggleRow icon={Mail} label="Enviar e-mail de confirmação" checked={sendConfirmationEmail} onChange={setSendConfirmationEmail} />
+ <AnimatePresence>
  {sendConfirmationEmail && (
  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+ <div className="space-y-3 pl-4 border-l-2 border-success/20">
  {[
- { val: "immediate", label: "Enviar imediatamente", desc: "Logo após pagamento aprovado", icon: Zap },
- { val: "after_upsell", label: "Após o funil completo", desc: "Aguarda fim de upsell/downsell", icon: Clock },
- ].map(opt => {
- const selected = emailTiming === opt.val;
- return (
- <button
- key={opt.val}
- type="button"
- onClick={() => setEmailTiming(opt.val)}
- className={cn(
- "relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors",
- selected ? "bg-success/5 border-success/40" : "bg-card border-border hover:border-border/80"
- )}
- >
- {selected && <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full bg-success" />}
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", selected ? "bg-success/10 text-success" : "bg-muted/30 text-muted-foreground/50")}>
- <opt.icon className="h-4 w-4" />
+ { val: "immediate", label: "Enviar imediatamente após o pagamento", icon: Zap },
+ { val: "after_upsell", label: "Enviar após concluir as ofertas de upsell", icon: Clock },
+ ].map(opt => (
+ <label key={opt.val} className={cn(
+ "flex items-center gap-3 cursor-pointer rounded-xl p-3 border transition-all",
+ emailTiming === opt.val ? "border-primary/20 bg-primary/5" : "border-transparent hover:bg-muted/10"
+ )}>
+ <div className={cn(
+ "h-4 w-4 rounded-full border-2 flex items-center justify-center transition-all",
+ emailTiming === opt.val ? "border-primary" : "border-muted-foreground/30"
+ )}>
+ {emailTiming === opt.val && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-2 w-2 rounded-full bg-primary" />}
  </div>
- <div className="min-w-0">
- <p className="text-[13px] font-display font-bold leading-tight text-foreground">{opt.label}</p>
- <p className="text-[11px] text-muted-foreground/60 mt-1 leading-snug">{opt.desc}</p>
- </div>
- </button>
- );
- })}
+ <opt.icon className={cn("h-3.5 w-3.5", emailTiming === opt.val ? "text-primary" : "text-muted-foreground/40")} />
+ <span className="text-sm font-display font-medium">{opt.label}</span>
+ </label>
+ ))}
  </div>
  </motion.div>
  )}
  </AnimatePresence>
- </div>
- </div>
- );
-}
-
-/* ───── Funnel sub-primitives ───── */
-function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: any) {
- const isEmpty = status === "empty";
- return (
- <div className={cn(
- "relative rounded-xl border p-3.5 flex flex-col gap-2 min-h-[112px]",
- anchor ? "bg-primary/[0.04] border-primary/30" : isEmpty ? "bg-muted/10 border-dashed border-border/70" : "bg-card border-border"
- )}>
- <div className="flex items-center justify-between">
- <span className={cn(
- "text-[10px] font-numbers font-black tabular-nums tracking-wider",
- anchor ? "text-primary" : isEmpty ? "text-muted-foreground/40" : "text-muted-foreground/70"
- )}>{step}</span>
- {badge && (
- <span className="text-[9px] font-display font-black px-1.5 py-0.5 rounded-md bg-success/10 text-success tabular-nums">{badge}</span>
- )}
- </div>
- <div className="flex items-center gap-2.5 min-w-0">
- {thumb ? (
- <img src={thumb} alt="" className="h-9 w-9 rounded-lg object-cover border border-border shrink-0" />
- ) : Icon ? (
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", isEmpty ? "bg-muted/20 text-muted-foreground/40" : "bg-success/10 text-success")}>
- <Icon className="h-4 w-4" />
- </div>
- ) : (
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", isEmpty ? "bg-muted/20 text-muted-foreground/40" : "bg-muted/30 text-muted-foreground/60")}>
- <Package className="h-4 w-4" />
- </div>
- )}
- <div className="min-w-0 flex-1">
- <p className={cn("text-[10px] uppercase tracking-wider font-display font-bold leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
- <p className={cn("text-[13px] font-display font-bold truncate leading-tight mt-0.5", isEmpty ? "text-muted-foreground/60" : "text-foreground")}>{title}</p>
- </div>
- </div>
- {typeof price === "number" && price > 0 && (
- <p className={cn("text-xs font-numbers font-black tabular-nums mt-auto", anchor ? "text-primary" : "text-foreground/80")}>R$ {price.toFixed(2)}</p>
- )}
- </div>
- );
-}
-
-function FunnelArrow() {
- return (
- <div className="flex md:flex-col items-center justify-center text-muted-foreground/30 py-1 md:py-0">
- <ArrowUpRight className="h-3.5 w-3.5 rotate-45 md:rotate-0" />
+ </EditorCard>
  </div>
  );
 }
@@ -1863,173 +1720,125 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
 }
 
 function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
-  const [showQR, setShowQR] = useState(false);
-  const checkoutLink = getCheckoutLink();
-  const affiliateInviteLink = `${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`;
+ const [showQR, setShowQR] = useState(false);
+ const checkoutLink = getCheckoutLink();
 
-  const shareLinks = [
-    { label: "WhatsApp", icon: MessageSquare, url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
-    { label: "Telegram", icon: Share2, url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}` },
-    { label: "Twitter / X", icon: Megaphone, url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}&url=${encodeURIComponent(checkoutLink)}` },
-  ];
+ const shareLinks = [
+ { label: "WhatsApp", icon: MessageSquare, color: "bg-success/10 text-success ring-success/20", url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
+ { label: "Telegram", icon: Share2, color: "bg-info/10 text-info ring-info/20", url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}` },
+ { label: "Twitter/X", icon: Megaphone, color: "bg-foreground/5 text-foreground ring-border/20", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}&url=${encodeURIComponent(checkoutLink)}` },
+ ];
 
-  type LinkRow = {
-    type: string;
-    typeColor: string;
-    icon: React.ComponentType<{ className?: string }>;
-    label: string;
-    description: string;
-    url: string;
-    showQrToggle?: boolean;
-  };
+ return (
+ <div className="space-y-6">
+ <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie, compartilhe e monitore seus links de checkout." />
+ {isNew ? (
+ <EmptyCard icon={Link2} message="Salve o produto primeiro para gerar links." />
+ ) : (
+ <div className="space-y-4">
+ {/* Main checkout link with QR */}
+ {product?.checkout_url && (
+ <EditorCard accentColor="bg-primary">
+ <div className="flex items-center justify-between">
+ <h4 className="text-[15px] font-display font-black flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /> Link do Checkout</h4>
+ <button
+ onClick={() => setShowQR(!showQR)}
+ className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-all ring-1", showQR ? "bg-primary/10 ring-primary/20 text-primary" : "bg-muted/10 ring-border/20 text-muted-foreground/50 hover:text-foreground")}
+ >
+ <QrCode className="h-4 w-4" />
+ </button>
+ </div>
+ <div className="flex items-center gap-2">
+ <Input readOnly value={checkoutLink} className="h-10 font-mono text-xs bg-muted/10 border-border" />
+ <Button variant="outline" size="sm" onClick={() => copyLink(checkoutLink)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
+ <Copy className="h-3.5 w-3.5" /> Copiar
+ </Button>
+ <Button variant="outline" size="sm" onClick={() => window.open(checkoutLink, "_blank")} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
+ <Eye className="h-3.5 w-3.5" /> Abrir
+ </Button>
+ </div>
 
-  const rows: LinkRow[] = [];
-  if (product?.checkout_url && checkoutLink) {
-    rows.push({
-      type: "Checkout",
-      typeColor: "bg-primary/10 text-primary border-primary/20",
-      icon: ShoppingCart,
-      label: "Link do Checkout",
-      description: "Pagamento direto para este produto",
-      url: checkoutLink,
-      showQrToggle: true,
-    });
-  }
-  if (pageUrl) {
-    rows.push({
-      type: "Página",
-      typeColor: "bg-info/10 text-info border-info/20",
-      icon: Globe,
-      label: "Página de Vendas",
-      description: "Landing page pública do produto",
-      url: pageUrl,
-    });
-  }
-  if (affiliateEnabled) {
-    rows.push({
-      type: "Afiliado",
-      typeColor: "bg-warning/10 text-warning border-warning/20",
-      icon: Users,
-      label: "Convite de Afiliado",
-      description: "Compartilhe para recrutar parceiros",
-      url: affiliateInviteLink,
-    });
-  }
+ {/* QR Code */}
+ <AnimatePresence>
+ {showQR && (
+ <motion.div
+ initial={{ opacity: 0, height: 0 }}
+ animate={{ opacity: 1, height: "auto" }}
+ exit={{ opacity: 0, height: 0 }}
+ className="overflow-hidden"
+ >
+ <div className="flex flex-col items-center gap-3 py-4 border-t border-border mt-2">
+ <div className="bg-background p-4 rounded-xl border border-border shadow-sm">
+ <QRCodeSVG
+ value={checkoutLink}
+ size={180}
+ level="M"
+ bgColor="transparent"
+ fgColor="hsl(var(--foreground))"
+ />
+ </div>
+ <p className="text-[10px] text-muted-foreground/40 font-display">Escaneie para acessar o checkout</p>
+ </div>
+ </motion.div>
+ )}
+ </AnimatePresence>
+ </EditorCard>
+ )}
 
-  return (
-    <div className="space-y-6">
-      <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie, compartilhe e monitore seus links de checkout." />
+ {/* Social sharing */}
+ {checkoutLink && (
+ <EditorCard accentColor="bg-success">
+ <h4 className="text-[15px] font-display font-black flex items-center gap-2">
+ <Share2 className="h-4 w-4 text-success" /> Compartilhar
+ </h4>
+ <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+ {shareLinks.map(sl => (
+ <motion.a
+ key={sl.label}
+ href={sl.url}
+ target="_blank"
+ rel="noopener noreferrer"
+ whileHover={{ scale: 1.02 }}
+ whileTap={{ scale: 0.98 }}
+ className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-border bg-card transition-all"
+ >
+ <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1 shrink-0", sl.color)}>
+ <sl.icon className="h-4 w-4" />
+ </div>
+ <span className="text-sm font-display font-bold text-foreground">{sl.label}</span>
+ </motion.a>
+ ))}
+ </div>
+ </EditorCard>
+ )}
 
-      {isNew ? (
-        <EmptyCard icon={Link2} message="Salve o produto primeiro para gerar links." />
-      ) : rows.length === 0 ? (
-        <EmptyCard icon={Link2} message="Nenhum link disponível ainda." />
-      ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          {/* Header row */}
-          <div className="hidden md:grid grid-cols-[140px_1fr_auto] gap-4 px-4 py-2.5 border-b border-border bg-muted/20">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Link</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Ações</span>
-          </div>
+ {pageUrl && (
+ <EditorCard accentColor="bg-info">
+ <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Globe className="h-4 w-4 text-info" /> Página de Vendas</h4>
+ <div className="flex items-center gap-2">
+ <Input readOnly value={pageUrl} className="h-10 font-mono text-xs bg-muted/10 border-border" />
+ <Button variant="outline" size="sm" onClick={() => copyLink(pageUrl)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
+ <Copy className="h-3.5 w-3.5" /> Copiar
+ </Button>
+ </div>
+ </EditorCard>
+ )}
 
-          {rows.map((row, idx) => (
-            <div key={row.label} className={cn("border-b border-border last:border-0", idx % 2 === 1 && "bg-muted/[0.04]")}>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-3 md:gap-4 px-4 py-3.5 items-center">
-                {/* Type pill + icon */}
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center shrink-0">
-                    <row.icon className="h-3.5 w-3.5 text-foreground/70" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider border", row.typeColor)}>
-                      {row.type}
-                    </span>
-                    <p className="text-[11px] text-muted-foreground/70 mt-1 truncate md:hidden">{row.description}</p>
-                  </div>
-                </div>
-
-                {/* Link content */}
-                <div className="min-w-0">
-                  <p className="text-[12px] font-semibold text-foreground mb-0.5">{row.label}</p>
-                  <p className="text-[11px] text-muted-foreground/70 mb-1.5 hidden md:block">{row.description}</p>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted/30 border border-border">
-                    <Link2 className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-                    <span className="font-mono text-[11px] text-foreground/80 truncate">{row.url}</span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1.5 md:justify-end">
-                  {row.showQrToggle && (
-                    <Button
-                      type="button"
-                      variant={showQR ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setShowQR(!showQR)}
-                      className="h-8 w-8 p-0 rounded-md"
-                      title="Mostrar QR Code"
-                    >
-                      <QrCode className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm" onClick={() => window.open(row.url, "_blank")} className="h-8 w-8 p-0 rounded-md" title="Abrir link">
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button size="sm" onClick={() => copyLink(row.url)} className="h-8 gap-1.5 rounded-md font-semibold text-[11px] px-3">
-                    <Copy className="h-3.5 w-3.5" /> Copiar
-                  </Button>
-                </div>
-              </div>
-
-              {/* QR Code expansion (only for checkout row) */}
-              <AnimatePresence>
-                {row.showQrToggle && showQR && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="flex flex-col items-center gap-2 py-4 border-t border-border bg-muted/[0.03]">
-                      <div className="bg-background p-3 rounded-lg border border-border">
-                        <QRCodeSVG value={row.url} size={160} level="M" bgColor="transparent" fgColor="hsl(var(--foreground))" />
-                      </div>
-                      <p className="text-[10px] text-muted-foreground/60">Escaneie para acessar o checkout</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Quick share — compact strip */}
-      {!isNew && checkoutLink && (
-        <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Compartilhamento Rápido</h4>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {shareLinks.map(sl => (
-              <a
-                key={sl.label}
-                href={sl.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 h-10 rounded-lg border border-border bg-card hover:bg-muted/30 hover:border-primary/30 transition-colors text-[12px] font-semibold text-foreground"
-              >
-                <sl.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                {sl.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+ {affiliateEnabled && (
+ <EditorCard accentColor="bg-warning">
+ <h4 className="text-[15px] font-display font-black flex items-center gap-2"><Users className="h-4 w-4 text-warning" /> Link de Afiliado</h4>
+ <div className="flex items-center gap-2">
+ <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-10 font-mono text-xs bg-muted/10 border-border" />
+ <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-10 shrink-0 rounded-xl font-display font-bold">
+ <Copy className="h-3.5 w-3.5" /> Copiar
+ </Button>
+ </div>
+ </EditorCard>
+ )}
+ </div>
+ )}
+ </div>
+ );
 }
 
 /* ═══════════════════════════════════════════════
@@ -2037,189 +1846,151 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
  ═══════════════════════════════════════════════ */
 
 function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean }) {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [moduleStats, setModuleStats] = useState<Record<string, { modules: number; lessons: number }>>({});
-  const [creating, setCreating] = useState(false);
+ const navigate = useNavigate();
+ const { user } = useAuth();
+ const [courses, setCourses] = useState<any[]>([]);
+ const [loading, setLoading] = useState(true);
+ const [moduleStats, setModuleStats] = useState<Record<string, { modules: number; lessons: number }>>({});
 
-  useEffect(() => {
-    if (isNew || !productId) { setLoading(false); return; }
-    (async () => {
-      const { data: coursesData } = await supabase.from("courses").select("*").eq("product_id", productId).order("created_at", { ascending: false });
-      const courses = coursesData || [];
-      setCourses(courses);
-      if (courses.length > 0) {
-        const courseIds = courses.map(c => c.id);
-        const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
-        const modsData = mods || [];
-        const modIds = modsData.map(m => m.id);
-        let lessonsCount: Record<string, number> = {};
-        if (modIds.length > 0) {
-          const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
-          (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });
-        }
-        const stats: Record<string, { modules: number; lessons: number }> = {};
-        courses.forEach(c => {
-          const courseMods = modsData.filter(m => m.course_id === c.id);
-          stats[c.id] = { modules: courseMods.length, lessons: courseMods.reduce((a, m) => a + (lessonsCount[m.id] || 0), 0) };
-        });
-        setModuleStats(stats);
-      }
-      setLoading(false);
-    })();
-  }, [productId, isNew]);
+ useEffect(() => {
+ if (isNew || !productId) { setLoading(false); return; }
+ (async () => {
+ const { data: coursesData } = await supabase.from("courses").select("*").eq("product_id", productId).order("created_at", { ascending: false });
+ const courses = coursesData || [];
+ setCourses(courses);
+ if (courses.length > 0) {
+ const courseIds = courses.map(c => c.id);
+ const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
+ const modsData = mods || [];
+ const modIds = modsData.map(m => m.id);
+ let lessonsCount: Record<string, number> = {};
+ if (modIds.length > 0) {
+ const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
+ (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });
+ }
+ const stats: Record<string, { modules: number; lessons: number }> = {};
+ courses.forEach(c => {
+ const courseMods = modsData.filter(m => m.course_id === c.id);
+ stats[c.id] = { modules: courseMods.length, lessons: courseMods.reduce((a, m) => a + (lessonsCount[m.id] || 0), 0) };
+ });
+ setModuleStats(stats);
+ }
+ setLoading(false);
+ })();
+ }, [productId, isNew]);
 
-  const createCourse = async () => {
-    if (!user || creating) return;
-    setCreating(true);
-    const { data } = await supabase.from("courses").insert({
-      user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
-    } as any).select().single();
-    setCreating(false);
-    if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
-  };
+ if (isNew) {
+ return (
+ <div className="space-y-6">
+ <SectionHeader icon={GraduationCap} title="Conteúdo do Produto" subtitle="Salve o produto primeiro para gerenciar o conteúdo." />
+ <EmptyCard icon={Lock} message="Salve o produto para acessar esta seção" />
+ </div>
+ );
+ }
 
-  if (isNew) {
-    return (
-      <div className="space-y-6">
-        <header>
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Conteúdo do produto</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Salve o produto primeiro para gerenciar cursos, módulos e aulas.</p>
-        </header>
-        <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-16 gap-3">
-          <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center border border-border">
-            <Lock className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <p className="text-sm font-semibold text-foreground">Salve o produto para acessar o conteúdo</p>
-          <p className="text-xs text-muted-foreground">Você poderá criar cursos vinculados após o primeiro salvamento.</p>
-        </div>
-      </div>
-    );
-  }
+ return (
+ <div className="space-y-6">
+ <SectionHeader icon={GraduationCap} title="Conteúdo do Produto" subtitle="Cursos e aulas vinculados a este produto." />
 
-  // Aggregate totals
-  const totalModules = Object.values(moduleStats).reduce((a, s) => a + s.modules, 0);
-  const totalLessons = Object.values(moduleStats).reduce((a, s) => a + s.lessons, 0);
-  const publishedCount = courses.filter(c => c.is_published).length;
+ {loading ? (
+ <div className="flex items-center justify-center py-16">
+ <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+ </div>
+ ) : courses.length === 0 ? (
+ <EditorCard accentColor="bg-primary">
+ <div className="flex flex-col items-center py-10 gap-5">
+ <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+ <GraduationCap className="h-7 w-7 text-primary/40" />
+ </div>
+ <div className="text-center">
+ <p className="text-sm font-display font-bold text-foreground/50 mb-1">Nenhum curso vinculado</p>
+ <p className="text-xs text-muted-foreground/40">Crie um curso para entregar conteúdo aos compradores</p>
+ </div>
+ <Button
+ onClick={async () => {
+ if (!user) return;
+ const { data } = await supabase.from("courses").insert({
+ user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
+ } as any).select().single();
+ if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+ }}
+ className="gap-2 rounded-xl font-display font-bold text-sm h-10"
+ >
+ <Plus className="h-4 w-4" /> Criar Curso
+ </Button>
+ </div>
+ </EditorCard>
+ ) : (
+ <div className="space-y-3">
+ {courses.map((c: any, i: number) => {
+ const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
+ return (
+ <motion.div
+ key={c.id}
+ initial={{ opacity: 0, y: 8 }}
+ animate={{ opacity: 1, y: 0 }}
+ transition={{ delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+ >
+ <EditorCard accentColor={c.is_published ? "bg-success" : "bg-muted-foreground/20"}>
+ <div className="flex items-center gap-4">
+ <div className="h-18 w-28 rounded-xl overflow-hidden shrink-0 bg-muted/5 border border-border relative group/thumb">
+ {c.thumbnail_url ? (
+ <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500" />
+ ) : (
+ <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent relative">
+ <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+ <GraduationCap className="h-7 w-7 text-primary/12 relative z-10" />
+ </div>
+ )}
+ </div>
+ <div className="flex-1 min-w-0">
+ <div className="flex items-center gap-2.5 mb-1.5">
+ <h3 className="text-sm font-display font-black text-foreground truncate tracking-[-0.01em]">{c.title}</h3>
+ <span className={cn(
+ "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[9px] font-display font-black uppercase tracking-[0.08em] border ring-1",
+ c.is_published
+ ? "bg-success/10 text-success border-success/15 ring-success/10"
+ : "bg-muted/10 text-muted-foreground/50 border-border ring-border/5"
+ )}>
+ <span className={cn("h-1.5 w-1.5 rounded-full", c.is_published ? "bg-success animate-pulse shadow-[0_0_4px_hsl(var(--success)/0.3)]" : "bg-muted-foreground/30")} />
+ {c.is_published ? "Live" : "Rascunho"}
+ </span>
+ </div>
+ <div className="flex items-center gap-3 text-xs text-muted-foreground/50 font-display">
+ <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-primary/40" /> {stats.modules} módulo{stats.modules !== 1 ? "s" : ""}</span>
+ <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-info/40" /> {stats.lessons} aula{stats.lessons !== 1 ? "s" : ""}</span>
+ </div>
+ </div>
+ <Button
+ variant="ghost" size="sm"
+ onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
+ className="gap-2 rounded-xl text-xs font-display font-black text-primary hover:text-primary hover:bg-primary/8 h-10 px-4 active:scale-[0.98]"
+ >
+ Gerenciar <ChevronRight className="h-3.5 w-3.5" />
+ </Button>
+ </div>
+ </EditorCard>
+ </motion.div>
+ );
+ })}
 
-  return (
-    <div className="space-y-6">
-      {/* Header with primary action */}
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Conteúdo do produto</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Cursos, módulos e aulas entregues após a compra.</p>
-        </div>
-        {!loading && courses.length > 0 && (
-          <Button onClick={createCourse} disabled={creating} className="h-10 gap-2 rounded-xl text-xs font-semibold">
-            {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />}
-            Novo curso
-          </Button>
-        )}
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-16 rounded-2xl border border-border bg-card">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </div>
-      ) : courses.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-20 gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center border border-border">
-            <GraduationCap className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-foreground">Nenhum curso criado</p>
-            <p className="mt-1 text-xs text-muted-foreground max-w-[280px]">Crie seu primeiro curso para entregar conteúdo aos compradores deste produto.</p>
-          </div>
-          <Button onClick={createCourse} disabled={creating} className="h-10 gap-2 rounded-xl text-xs font-semibold">
-            {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />}
-            Criar primeiro curso
-          </Button>
-        </div>
-      ) : (
-        <>
-          {/* Stats strip */}
-          <div className="grid grid-cols-3 rounded-2xl border border-border bg-card divide-x divide-border overflow-hidden">
-            <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos</p>
-              <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{courses.length}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{publishedCount} publicado{publishedCount !== 1 ? "s" : ""}</p>
-            </div>
-            <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Módulos</p>
-              <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalModules}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">no total</p>
-            </div>
-            <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Aulas</p>
-              <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalLessons}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">disponíveis</p>
-            </div>
-          </div>
-
-          {/* Course list — dense rows */}
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-secondary/30">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos vinculados</p>
-              <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
-            </div>
-            <div className="divide-y divide-border">
-              {courses.map((c: any) => {
-                const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => navigate(`/vendas/conteudo/${c.id}/builder`)}
-                    className="group w-full flex items-center gap-4 p-4 text-left transition-colors hover:bg-secondary/40 active:bg-secondary/60"
-                  >
-                    {/* Thumb */}
-                    <div className="h-14 w-20 rounded-lg overflow-hidden shrink-0 bg-secondary border border-border relative">
-                      {c.thumbnail_url ? (
-                        <img src={c.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <GraduationCap className="h-5 w-5 text-muted-foreground/40" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Title + meta */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-semibold text-foreground truncate">{c.title}</h3>
-                        <span className={cn(
-                          "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider border",
-                          c.is_published
-                            ? "bg-success/10 text-success border-success/20"
-                            : "bg-secondary text-muted-foreground border-border"
-                        )}>
-                          <span className={cn("h-1 w-1 rounded-full", c.is_published ? "bg-success" : "bg-muted-foreground/50")} />
-                          {c.is_published ? "Publicado" : "Rascunho"}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground tabular-nums">
-                        <span className="flex items-center gap-1"><Layers className="h-3 w-3" /> {stats.modules} {stats.modules === 1 ? "módulo" : "módulos"}</span>
-                        <span className="text-border">·</span>
-                        <span className="flex items-center gap-1"><Video className="h-3 w-3" /> {stats.lessons} {stats.lessons === 1 ? "aula" : "aulas"}</span>
-                      </div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground group-hover:text-primary transition-colors">
-                      Gerenciar
-                      <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
+ <Button
+ variant="ghost"
+ onClick={async () => {
+ if (!user) return;
+ const { data } = await supabase.from("courses").insert({
+ user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
+ } as any).select().single();
+ if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+ }}
+ className="w-full gap-2 rounded-2xl font-display font-bold text-sm h-12 border-2 border-dashed border-border hover:border-primary/20 hover:bg-primary/[0.03] text-muted-foreground/30 hover:text-primary transition-all duration-500 active:scale-[0.99]"
+ >
+ <Plus className="h-4 w-4" /> Adicionar Curso
+ </Button>
+ </div>
+ )}
+ </div>
+ );
 }
 
 /* ═══════════════════════════════════════════════

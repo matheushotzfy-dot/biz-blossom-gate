@@ -176,16 +176,6 @@ export default function CourseBuilder() {
 
  useEffect(() => { loadAll(); }, [loadAll]);
 
- // Auto-select fallback: if no lesson is selected but lessons exist, pick the first
- useEffect(() => {
-   if (selectedLesson) return;
-   const firstLesson = modules.flatMap(m => m.lessons)[0];
-   if (firstLesson) {
-     selectLesson(firstLesson);
-   }
-   // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [modules, selectedLesson]);
-
  const loadAttachments = useCallback(async (lessonId: string) => {
  const { data } = await supabase
  .from("lesson_attachments" as any).select("*")
@@ -560,74 +550,55 @@ export default function CourseBuilder() {
  animate={{ width: 360, opacity: 1 }}
  exit={{ width: 0, opacity: 0 }}
  transition={{ duration: 0.4, ease }}
- className="bg-card border-r border-border flex flex-col overflow-hidden shrink-0"
+ className="bg-card/30 backdrop-blur-xl border-r border-border/15 flex flex-col overflow-hidden shrink-0"
  >
- {/* ── Sidebar header ── */}
- <div className="px-4 py-3.5 border-b border-border flex items-center justify-between shrink-0">
-   <div className="flex items-center gap-2.5 min-w-0">
-     <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-       <Layers className="h-4 w-4 text-primary" strokeWidth={1.8} />
-     </div>
-     <div className="min-w-0">
-       <span className="text-[13px] font-display font-bold text-foreground block leading-tight">Currículo</span>
-       <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
-         {modules.length} mód · {totalLessons} aulas · {Math.round(totalLessons > 0 ? (modules.flatMap(m => m.lessons).filter(l => l.video_url).length / totalLessons) * 100 : 0)}% prontas
-       </span>
-     </div>
-   </div>
-   <div className="flex items-center gap-1 shrink-0">
-     <button
-       onClick={() => setShowNewModule(true)}
-       className="h-7 w-7 rounded-md flex items-center justify-center bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary transition-colors active:scale-95"
-       title="Novo módulo"
-     >
-       <Plus className="h-3.5 w-3.5" strokeWidth={2.2} />
-     </button>
-     <button
-       onClick={() => setSidebarCollapsed(true)}
-       className="h-7 w-7 rounded-md flex items-center justify-center hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-       title="Recolher"
-     >
-       <PanelLeftClose className="h-3.5 w-3.5" />
-     </button>
-   </div>
+ {/* Sidebar header */}
+ <div className="px-4 py-4 border-b border-border/15 flex items-center justify-between shrink-0 relative overflow-hidden">
+ <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] to-transparent pointer-events-none" />
+ <div className="relative flex items-center gap-2.5">
+ <div className="h-9 w-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
+ <Layers className="h-4 w-4 text-primary/60" />
+ </div>
+ <div>
+ <span className="text-sm font-display font-black text-foreground/80 block">Estrutura</span>
+ <span className="text-[10px] text-muted-foreground/40 font-display">{modules.length} módulo{modules.length !== 1 ? "s" : ""} · {totalLessons} aula{totalLessons !== 1 ? "s" : ""}</span>
+ </div>
+ </div>
+ <button
+ onClick={() => setSidebarCollapsed(true)}
+ className="relative h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted/10 transition-colors text-muted-foreground/25 hover:text-muted-foreground/50"
+ >
+ <PanelLeftClose className="h-3.5 w-3.5" />
+ </button>
  </div>
 
- {/* ── Modules list ── */}
- <div className="flex-1 overflow-y-auto p-2 space-y-1.5" style={{ WebkitOverflowScrolling: "touch" }}>
+ {/* Modules list */}
+ <div className="flex-1 overflow-y-auto p-3 space-y-2.5" style={{ WebkitOverflowScrolling: "touch" }}>
  {modules.map((mod, idx) => {
  const lessonsWithVideo = mod.lessons.filter(l => l.video_url).length;
  const modPct = mod.lessons.length > 0 ? Math.round((lessonsWithVideo / mod.lessons.length) * 100) : 0;
- const isExpanded = expandedModules.has(mod.id);
- const containsActive = mod.lessons.some(l => l.id === selectedLesson?.id);
 
  return (
- <div
-   key={mod.id}
-   className={cn(
-     "rounded-lg overflow-hidden border transition-colors",
-     containsActive ? "border-primary/30 bg-primary/[0.03]" : "border-border bg-secondary/40 hover:border-border"
-   )}
- >
+ <div key={mod.id} className="rounded-xl overflow-hidden ring-1 ring-border/10 hover:ring-border/20 transition-all duration-300 bg-card/20">
  {/* Module Header */}
  <div
  className={cn(
- "flex items-center gap-2 px-2.5 py-2 cursor-pointer group transition-colors relative",
- isExpanded ? "bg-card" : "hover:bg-card/60"
+ "flex items-center gap-2.5 px-3.5 py-3 cursor-pointer group transition-all duration-300 relative",
+ expandedModules.has(mod.id) ? "bg-card/40" : "hover:bg-card/30"
  )}
  onClick={() => toggleExpand(mod.id)}
  >
- {containsActive && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary" />}
- <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.18 }} className="shrink-0">
-   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.2} />
+ {expandedModules.has(mod.id) && (
+ <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
+ )}
+ <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 90 : 0 }} transition={{ duration: 0.2 }}>
+ <ChevronRight className="h-3 w-3 text-muted-foreground/25" />
  </motion.div>
  <div className={cn(
-   "h-7 w-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-display font-black border transition-colors tabular-nums",
-   containsActive ? "bg-primary text-primary-foreground border-primary"
-   : isExpanded ? "bg-primary/10 text-primary border-primary/20"
-   : "bg-card text-muted-foreground border-border"
+ "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-display font-black ring-1 transition-colors",
+ expandedModules.has(mod.id) ? "bg-primary/10 text-primary ring-primary/15" : "bg-muted/8 text-muted-foreground/30 ring-border/10"
  )}>
-   {String(idx + 1).padStart(2, "0")}
+ {idx + 1}
  </div>
  <div className="flex-1 min-w-0">
  {editingModuleId === mod.id ? (
@@ -637,143 +608,112 @@ export default function CourseBuilder() {
  onBlur={() => renameModule(mod.id, editingModuleTitle)}
  onKeyDown={e => { if (e.key === "Enter") renameModule(mod.id, editingModuleTitle); if (e.key === "Escape") setEditingModuleId(null); }}
  onClick={e => e.stopPropagation()}
- className="w-full text-[12.5px] font-display font-bold text-foreground bg-transparent focus:outline-none border-b border-primary/40 pb-0.5"
+ className="w-full text-xs font-display font-bold text-foreground bg-transparent focus:outline-none border-b border-primary/25 pb-0.5"
  />
  ) : (
  <p
- className="text-[12.5px] font-display font-bold text-foreground truncate leading-tight"
+ className="text-xs font-display font-bold text-foreground/80 truncate"
  onDoubleClick={e => { e.stopPropagation(); setEditingModuleId(mod.id); setEditingModuleTitle(mod.title); }}
  >{mod.title}</p>
  )}
- <div className="flex items-center gap-2 mt-1">
-   <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
-     {mod.lessons.length} {mod.lessons.length === 1 ? "aula" : "aulas"}
-   </span>
-   {mod.lessons.length > 0 && (
-     <>
-       <span className="text-muted-foreground/40">·</span>
-       <div className="flex items-center gap-1.5 flex-1 min-w-0">
-         <div className="h-1 flex-1 max-w-[60px] rounded-full bg-muted overflow-hidden">
-           <div
-             className={cn("h-full rounded-full transition-all", modPct === 100 ? "bg-success" : "bg-primary")}
-             style={{ width: `${modPct}%` }}
-           />
-         </div>
-         <span className={cn("text-[9px] font-bold tabular-nums", modPct === 100 ? "text-success" : "text-muted-foreground")}>
-           {modPct}%
-         </span>
-       </div>
-     </>
-   )}
+ <div className="flex items-center gap-2 mt-0.5">
+ <p className="text-[10px] text-muted-foreground/30 font-display">{mod.lessons.length} aula{mod.lessons.length !== 1 ? "s" : ""}</p>
+ {mod.lessons.length > 0 && (
+ <div className="flex items-center gap-1">
+ <div className="h-1 w-8 rounded-full bg-muted/10 overflow-hidden">
+ <div className="h-full rounded-full bg-primary/50 transition-all" style={{ width: `${modPct}%` }} />
+ </div>
+ <span className="text-[9px] text-muted-foreground/20 font-display tabular-nums">{modPct}%</span>
+ </div>
+ )}
  </div>
  </div>
  <button
  onClick={e => { e.stopPropagation(); deleteModule(mod.id); }}
- className="h-7 w-7 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-all shrink-0"
- title="Excluir módulo"
+ className="h-7 w-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive/8 transition-all"
  >
- <Trash2 className="h-3 w-3 text-destructive" />
+ <Trash2 className="h-3 w-3 text-destructive/30" />
  </button>
  </div>
 
  {/* Lessons */}
- <AnimatePresence initial={false}>
- {isExpanded && (
+ <AnimatePresence>
+ {expandedModules.has(mod.id) && (
  <motion.div
  initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
- exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease }}
+ exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease }}
  className="overflow-hidden"
  >
- <div className="border-t border-border px-1.5 py-1.5 bg-card/40">
- <Reorder.Group axis="y" values={mod.lessons} onReorder={newOrder => reorderLessons(mod.id, newOrder)} className="space-y-px">
- {mod.lessons.map((lesson, li) => {
-   const isActive = selectedLesson?.id === lesson.id;
-   const hasVideo = !!lesson.video_url;
-   return (
+ <div className="border-t border-border/10 px-2.5 py-2">
+ <Reorder.Group axis="y" values={mod.lessons} onReorder={newOrder => reorderLessons(mod.id, newOrder)} className="space-y-0.5">
+ {mod.lessons.map((lesson, li) => (
  <Reorder.Item
  key={lesson.id} value={lesson}
   className={cn(
-  "relative flex items-center gap-2 pl-2.5 pr-1.5 py-2 rounded-md cursor-pointer group/lesson transition-colors duration-150",
-  isActive
-  ? "bg-primary text-primary-foreground"
-  : "hover:bg-accent"
+  "relative flex items-center gap-2.5 pl-3 pr-2.5 py-2.5 rounded-lg cursor-pointer group/lesson transition-all duration-200",
+  selectedLesson?.id === lesson.id
+  ? "bg-primary/12 ring-1 ring-primary/25 shadow-sm shadow-primary/5"
+  : "hover:bg-muted/8 ring-1 ring-transparent hover:ring-border/10"
   )}
   onClick={() => selectLesson(lesson)}
  >
- <GripVertical className={cn("h-3 w-3 opacity-0 group-hover/lesson:opacity-100 cursor-grab shrink-0 transition-opacity", isActive ? "text-primary-foreground/60" : "text-muted-foreground/50")} />
+ {selectedLesson?.id === lesson.id && (
+ <motion.div layoutId="lesson-active-bar" className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.3)]" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
+ )}
+ <GripVertical className="h-3 w-3 text-muted-foreground/10 opacity-0 group-hover/lesson:opacity-100 cursor-grab shrink-0 transition-opacity" />
  <div className={cn(
-   "h-5 w-5 rounded flex items-center justify-center shrink-0 text-[9px] font-display font-black tabular-nums border transition-colors",
-   isActive
-     ? hasVideo ? "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30" : "bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20"
-     : hasVideo
-       ? "bg-success/15 text-success border-success/25"
-       : "bg-muted text-muted-foreground border-border"
+ "h-7 w-7 rounded-lg ring-1 flex items-center justify-center shrink-0 text-[10px] font-display font-black transition-all",
+ lesson.video_url
+ ? selectedLesson?.id === lesson.id
+ ? "bg-primary/15 ring-primary/20 text-primary"
+ : "bg-success/8 ring-success/12 text-success/60"
+ : selectedLesson?.id === lesson.id
+ ? "bg-primary/10 ring-primary/15 text-primary/80"
+ : "bg-muted/5 ring-border/10 text-muted-foreground/25"
  )}>
-   {hasVideo ? <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} /> : li + 1}
+ {lesson.video_url ? <CheckCircle2 className="h-3 w-3" /> : li + 1}
  </div>
  <div className="flex-1 min-w-0">
- <p className={cn(
-   "text-[12px] truncate font-display font-semibold leading-tight",
-   isActive ? "text-primary-foreground" : "text-foreground"
- )}>{lesson.title}</p>
+ <p className={cn("text-xs truncate font-display transition-colors", selectedLesson?.id === lesson.id ? "text-primary font-bold" : "text-foreground/60 font-semibold")}>{lesson.title}</p>
  <div className="flex items-center gap-1.5 mt-0.5">
-   {lesson.is_free && (
-     <span className={cn(
-       "text-[8px] px-1 py-0.5 rounded font-display font-bold uppercase tracking-wider",
-       isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-success/15 text-success"
-     )}>FREE</span>
-   )}
-   <span className={cn(
-     "text-[9.5px] font-display font-semibold flex items-center gap-1",
-     isActive ? "text-primary-foreground/80" : hasVideo ? "text-success" : "text-warning"
-   )}>
-     <span className={cn("h-1 w-1 rounded-full", isActive ? "bg-primary-foreground/70" : hasVideo ? "bg-success" : "bg-warning")} />
-     {hasVideo ? "Vídeo" : "Pendente"}
-   </span>
-   {lesson.duration_minutes ? (
-     <span className={cn("text-[9.5px] font-display font-semibold tabular-nums", isActive ? "text-primary-foreground/70" : "text-muted-foreground")}>
-       {lesson.duration_minutes}m
-     </span>
-   ) : null}
-   {(lesson.drip_days || 0) > 0 && (
-     <span className={cn("text-[9.5px] font-display font-semibold flex items-center gap-0.5", isActive ? "text-primary-foreground/70" : "text-info")}>
-       <Clock className="h-2 w-2" strokeWidth={2.5} />{lesson.drip_days}d
-     </span>
-   )}
-   {(lessonStats.get(lesson.id) || 0) > 0 && (
-     <span className={cn("text-[9.5px] font-display font-semibold flex items-center gap-0.5", isActive ? "text-primary-foreground/70" : "text-primary")}>
-       <Users className="h-2 w-2" strokeWidth={2.5} />{lessonStats.get(lesson.id)}
-     </span>
-   )}
+ {lesson.is_free && <span className="text-[8px] bg-success/10 text-success/70 px-1.5 py-0.5 rounded font-display font-bold ring-1 ring-success/15">FREE</span>}
+ {lesson.video_url ? (
+ <span className="flex items-center gap-0.5 text-[10px] text-success/50 font-display font-semibold"><span className="h-1 w-1 rounded-full bg-success/60" /> Vídeo</span>
+ ) : (
+ <span className="flex items-center gap-0.5 text-[10px] text-warning/40 font-display font-semibold"><span className="h-1 w-1 rounded-full bg-warning/40" /> Pendente</span>
+ )}
+ {(lesson.drip_days || 0) > 0 && <span className="text-[10px] text-info/40 font-display font-semibold">{lesson.drip_days}d</span>}
+ {(lessonStats.get(lesson.id) || 0) > 0 && (
+ <span className="text-[10px] text-primary/40 font-display font-semibold flex items-center gap-0.5"><Users className="h-2 w-2" />{lessonStats.get(lesson.id)}</span>
+ )}
  </div>
  </div>
- <div className={cn("flex items-center gap-0.5 transition-opacity shrink-0", isActive ? "opacity-100" : "opacity-0 group-hover/lesson:opacity-100")}>
+ <div className="flex items-center gap-0.5 opacity-0 group-hover/lesson:opacity-100 transition-all shrink-0">
  <button
  onClick={e => { e.stopPropagation(); duplicateLesson(lesson); }}
- className={cn("h-6 w-6 rounded flex items-center justify-center transition-colors", isActive ? "hover:bg-primary-foreground/15 text-primary-foreground/80" : "hover:bg-card text-muted-foreground hover:text-foreground")}
+ className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-primary/8 transition-all"
  title="Duplicar aula"
  >
- <CopyPlus className="h-3 w-3" />
+ <CopyPlus className="h-2.5 w-2.5 text-primary/30" />
  </button>
  <button
  onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
- className={cn("h-6 w-6 rounded flex items-center justify-center transition-colors", isActive ? "hover:bg-primary-foreground/15 text-primary-foreground/80" : "hover:bg-destructive/10 text-destructive")}
+ className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-destructive/8 transition-all"
  title="Excluir aula"
  >
- <Trash2 className="h-3 w-3" />
+ <Trash2 className="h-2.5 w-2.5 text-destructive/30" />
  </button>
  </div>
  </Reorder.Item>
- );
- })}
+ ))}
  </Reorder.Group>
 
  <button
  onClick={() => createLesson(mod.id)}
- className="w-full mt-1 flex items-center gap-2 px-2.5 py-2 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/5 border border-dashed border-border hover:border-primary/30 transition-colors active:scale-[0.99]"
+ className="w-full mt-1.5 flex items-center gap-2 px-3 py-2.5 rounded-lg text-muted-foreground/20 hover:text-primary/60 hover:bg-primary/[0.04] transition-all duration-300 active:scale-[0.985]"
  >
- <Plus className="h-3 w-3" strokeWidth={2.5} />
- <span className="text-[11px] font-display font-bold">Adicionar aula</span>
+ <Plus className="h-3 w-3" />
+ <span className="text-[11px] font-display font-bold">Nova aula</span>
  </button>
  </div>
  </motion.div>
@@ -785,27 +725,28 @@ export default function CourseBuilder() {
 
  {/* New Module */}
  {showNewModule ? (
- <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-lg bg-primary/5 border border-primary/30 p-3 space-y-2.5">
-   <div className="text-[10px] font-bold uppercase tracking-wider text-primary/80">Novo módulo</div>
+ <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="rounded-xl bg-primary/5 border border-primary/15 p-4 space-y-3">
  <input
  autoFocus value={newModuleTitle}
  onChange={e => setNewModuleTitle(e.target.value)}
  onKeyDown={e => { if (e.key === "Enter") createModule(); if (e.key === "Escape") setShowNewModule(false); }}
- placeholder="Ex: Introdução ao curso"
- className="w-full bg-card border border-border rounded-md px-2.5 py-1.5 text-[13px] font-display font-semibold text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/40"
+ placeholder="Nome do módulo..."
+ className="w-full bg-transparent text-sm font-display font-bold text-foreground placeholder:text-muted-foreground/25 focus:outline-none"
  />
- <div className="flex gap-1.5">
- <button onClick={createModule} className="flex-1 h-8 rounded-md bg-primary text-primary-foreground text-[11px] font-display font-bold hover:bg-primary/90 transition-colors active:scale-[0.985]">Criar módulo</button>
- <button onClick={() => { setShowNewModule(false); setNewModuleTitle(""); }} className="h-8 px-3 rounded-md bg-secondary text-muted-foreground text-[11px] font-display font-bold hover:bg-accent transition-colors">Cancelar</button>
+ <div className="flex gap-2">
+ <button onClick={createModule} className="h-8 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-display font-bold hover:bg-primary/90 transition-colors shadow-md shadow-primary/15 active:scale-[0.985]">Criar</button>
+ <button onClick={() => setShowNewModule(false)} className="h-8 px-4 rounded-lg bg-muted/10 text-muted-foreground/50 text-xs font-display font-bold hover:bg-muted/20 transition-colors">Cancelar</button>
  </div>
  </motion.div>
  ) : (
  <button
  onClick={() => setShowNewModule(true)}
- className="w-full rounded-lg border border-dashed border-border py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors active:scale-[0.99]"
+ className="w-full rounded-xl border-2 border-dashed border-border/15 py-5 flex flex-col items-center gap-2.5 text-muted-foreground/15 hover:text-primary/50 hover:border-primary/20 hover:bg-primary/[0.03] transition-all duration-500 active:scale-[0.985] group/new"
  >
- <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
- <span className="text-[11.5px] font-display font-bold">Novo módulo</span>
+ <div className="h-10 w-10 rounded-xl bg-muted/5 flex items-center justify-center group-hover/new:bg-primary/8 group-hover/new:ring-1 group-hover/new:ring-primary/15 transition-all duration-300">
+ <Plus className="h-5 w-5" />
+ </div>
+ <span className="text-[11px] font-display font-bold">Novo Módulo</span>
  </button>
  )}
  </div>
@@ -1199,116 +1140,44 @@ export default function CourseBuilder() {
  </motion.div>
  </AnimatePresence>
  </div>
+ ) : (
+  /* ── Empty State — Action-oriented ── */
+  <div className="h-full flex flex-col items-center justify-center gap-8 relative overflow-hidden px-6">
+  <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.4, ease }} className="relative text-center max-w-md">
+  {modules.length === 0 ? (
+    <>
+      <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
+        <Layers className="h-9 w-9 text-primary/40" />
+      </div>
+      <h3 className="text-lg font-display font-black text-foreground/70 mb-2 tracking-[-0.02em]">Comece criando um módulo</h3>
+      <p className="text-sm text-muted-foreground/40 font-display leading-relaxed mb-6">Módulos organizam suas aulas em seções. Crie o primeiro para começar a adicionar conteúdo.</p>
+      <Button onClick={() => { setSidebarCollapsed(false); setShowNewModule(true); }} className="gap-2.5 rounded-xl font-display font-bold text-sm h-12 px-8 shadow-lg shadow-primary/20 active:scale-[0.985]">
+        <Plus className="h-4 w-4" /> Criar Primeiro Módulo
+      </Button>
+    </>
+  ) : totalLessons === 0 ? (
+    <>
+      <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
+        <PlayCircle className="h-9 w-9 text-primary/40" />
+      </div>
+      <h3 className="text-lg font-display font-black text-foreground/70 mb-2 tracking-[-0.02em]">Adicione sua primeira aula</h3>
+      <p className="text-sm text-muted-foreground/40 font-display leading-relaxed mb-6">Você tem {modules.length} módulo{modules.length !== 1 ? "s" : ""} criado{modules.length !== 1 ? "s" : ""}. Clique em "Nova aula" dentro de um módulo na sidebar.</p>
+      <Button onClick={() => { setSidebarCollapsed(false); createLesson(modules[0].id); }} className="gap-2.5 rounded-xl font-display font-bold text-sm h-12 px-8 shadow-lg shadow-primary/20 active:scale-[0.985]">
+        <Plus className="h-4 w-4" /> Criar Primeira Aula
+      </Button>
+    </>
   ) : (
-   /* ── Builder CTA — never dead, always actionable ── */
-   <div className="h-full flex items-center justify-center px-6 py-10 relative overflow-hidden">
-     {/* subtle grid backdrop to feel like a "stage" */}
-     <div
-       className="absolute inset-0 opacity-[0.04] pointer-events-none"
-       style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "32px 32px" }}
-     />
-     <motion.div
-       initial={{ opacity: 0, y: 16 }}
-       animate={{ opacity: 1, y: 0 }}
-       transition={{ duration: 0.4, ease }}
-       className="relative w-full max-w-xl"
-     >
-       {modules.length === 0 ? (
-         <div className="rounded-2xl border border-border bg-card p-8 sm:p-10">
-           <div className="flex items-center gap-3 mb-5">
-             <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-               <Layers className="h-5 w-5 text-primary" strokeWidth={1.8} />
-             </div>
-             <div>
-               <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Passo 1 de 2</div>
-               <h3 className="font-display text-lg font-black tracking-tight text-foreground">Crie o primeiro módulo</h3>
-             </div>
-           </div>
-           <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-             Módulos são as <span className="text-foreground font-semibold">seções</span> do seu curso. Cada módulo agrupa várias aulas em vídeo, anexos e configurações de acesso.
-           </p>
-           <div className="flex items-center gap-2">
-             <Button onClick={() => { setSidebarCollapsed(false); setShowNewModule(true); }} className="gap-2 rounded-xl font-display font-bold text-sm h-11 px-6 active:scale-[0.985]">
-               <Plus className="h-4 w-4" /> Criar módulo
-             </Button>
-             <Button variant="ghost" onClick={openCourseSettings} className="gap-2 rounded-xl font-display font-bold text-sm h-11 px-4 text-muted-foreground hover:text-foreground active:scale-[0.985]">
-               <Settings className="h-4 w-4" /> Configurar curso
-             </Button>
-           </div>
-           <div className="mt-6 pt-5 border-t border-border grid grid-cols-3 gap-3">
-             {[
-               { icon: Layers, label: "Módulos", value: "0" },
-               { icon: PlayCircle, label: "Aulas", value: "0" },
-               { icon: Users, label: "Alunos", value: String(studentCount) },
-             ].map((s) => (
-               <div key={s.label} className="text-center">
-                 <s.icon className="h-3.5 w-3.5 mx-auto text-muted-foreground/50" strokeWidth={1.8} />
-                 <div className="mt-1 font-numbers text-base font-black tabular-nums text-foreground">{s.value}</div>
-                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground/60">{s.label}</div>
-               </div>
-             ))}
-           </div>
-         </div>
-       ) : totalLessons === 0 ? (
-         <div className="rounded-2xl border border-border bg-card p-8 sm:p-10">
-           <div className="flex items-center gap-3 mb-5">
-             <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-               <PlayCircle className="h-5 w-5 text-primary" strokeWidth={1.8} />
-             </div>
-             <div>
-               <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Passo 2 de 2</div>
-               <h3 className="font-display text-lg font-black tracking-tight text-foreground">Adicione a primeira aula</h3>
-             </div>
-           </div>
-           <p className="text-sm leading-relaxed text-muted-foreground mb-5">
-             Você tem <span className="text-foreground font-semibold">{modules.length}</span> módulo{modules.length !== 1 ? "s" : ""}. Escolha onde criar a primeira aula:
-           </p>
-           <div className="space-y-1.5 mb-6 max-h-[200px] overflow-y-auto">
-             {modules.map((m, i) => (
-               <button
-                 key={m.id}
-                 onClick={() => createLesson(m.id)}
-                 className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-secondary hover:border-primary/40 hover:bg-accent transition-colors text-left"
-               >
-                 <span className="h-7 w-7 rounded-md bg-card border border-border flex items-center justify-center text-[11px] font-display font-black text-muted-foreground group-hover:text-primary group-hover:border-primary/30">
-                   {i + 1}
-                 </span>
-                 <span className="flex-1 truncate text-sm font-semibold text-foreground">{m.title}</span>
-                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 group-hover:text-primary">+ Aula</span>
-               </button>
-             ))}
-           </div>
-           <Button onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-xl font-display font-bold text-sm h-11 px-6 w-full active:scale-[0.985]">
-             <Plus className="h-4 w-4" /> Criar aula no primeiro módulo
-           </Button>
-         </div>
-       ) : (
-         <div className="rounded-2xl border border-border bg-card p-8 sm:p-10 text-center">
-           <div className="h-14 w-14 mx-auto rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-             <BookOpen className="h-6 w-6 text-primary" strokeWidth={1.8} />
-           </div>
-           <h3 className="font-display text-lg font-black tracking-tight text-foreground mb-2">Continue editando</h3>
-           <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-             Selecione uma aula para continuar de onde parou ou crie uma nova.
-           </p>
-           <div className="flex items-center justify-center gap-2">
-             {(() => {
-               const firstLesson = modules.flatMap(m => m.lessons)[0];
-               return firstLesson ? (
-                 <Button onClick={() => selectLesson(firstLesson)} className="gap-2 rounded-xl font-display font-bold text-sm h-11 px-6 active:scale-[0.985]">
-                   <PlayCircle className="h-4 w-4" /> Abrir "{firstLesson.title.length > 24 ? firstLesson.title.slice(0, 24) + "…" : firstLesson.title}"
-                 </Button>
-               ) : null;
-             })()}
-             <Button variant="ghost" onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-xl font-display font-bold text-sm h-11 px-4 text-muted-foreground hover:text-foreground active:scale-[0.985]">
-               <Plus className="h-4 w-4" /> Nova aula
-             </Button>
-           </div>
-         </div>
-       )}
-     </motion.div>
-   </div>
+    <>
+      <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-muted/10 to-muted/5 border border-border/15 flex items-center justify-center mx-auto mb-5">
+        <BookOpen className="h-9 w-9 text-muted-foreground/20" />
+      </div>
+      <h3 className="text-lg font-display font-black text-foreground/50 mb-2 tracking-[-0.02em]">Selecione uma aula</h3>
+      <p className="text-sm text-muted-foreground/30 font-display leading-relaxed">Clique em uma aula na sidebar para editar vídeo, conteúdo e configurações.</p>
+    </>
   )}
+  </motion.div>
+  </div>
+ )}
  </main>
  {/* ─── RIGHT: Student Preview Panel ─── */}
  <StudentPreviewPanel
