@@ -32,9 +32,9 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               key={product.id}
               onClick={() => handlers.onEditProduct(product)}
               className={cn(
-                "group relative flex min-h-[112px] cursor-pointer items-center gap-8 px-6 py-7 transition-colors duration-200 ease-out",
-                "hover:bg-foreground/[0.04]",
-                idx > 0 && "before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-border/40"
+                "group relative flex min-h-[112px] cursor-pointer items-center gap-8 px-6 py-7 transition-colors duration-150 ease-out",
+                "hover:bg-foreground/[0.025]",
+                idx > 0 && "before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-border/25"
               )}
             >
               {/* LEFT — product identity (dominant, ~70%) */}
