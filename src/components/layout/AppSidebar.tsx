@@ -362,12 +362,31 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2">
+      <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-2.5">
+        {/* Solicitar Suporte — featured card */}
+        <button
+          type="button"
+          onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
+          className="group/sup flex w-full items-center gap-3 rounded-2xl border border-sidebar-primary/35 bg-sidebar-primary/10 px-3 py-2.5 text-left transition-all hover:border-sidebar-primary/55 hover:bg-sidebar-primary/15 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/35 bg-sidebar-primary/15 text-sidebar-primary">
+            <Headphones className="h-[16px] w-[16px]" strokeWidth={2.25} />
+          </div>
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <p className="text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
+              Solicitar Suporte
+            </p>
+            <p className="mt-0.5 text-[10.5px] leading-tight text-sidebar-foreground/55">
+              24/7 ao seu dispor!
+            </p>
+          </div>
+        </button>
+
         {/* User chip */}
         <button
           type="button"
           onClick={() => navigate("/perfil")}
-          className="mb-1 flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 text-[12px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/20">
             {userInitial}
@@ -384,20 +403,11 @@ export function AppSidebar() {
 
         <button
           type="button"
-          onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[12.5px] font-medium text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-        >
-          <Headphones className="h-4 w-4 shrink-0 text-sidebar-foreground/45" strokeWidth={1.85} />
-          <span className="group-data-[collapsible=icon]:hidden">Suporte 24/7</span>
-        </button>
-
-        <button
-          type="button"
           onClick={handleLogout}
-          className="flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[12.5px] font-medium text-sidebar-foreground/55 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] font-medium text-sidebar-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.85} />
-          <span className="group-data-[collapsible=icon]:hidden">Sair</span>
+          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+          <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
         </button>
       </SidebarFooter>
     </Sidebar>
