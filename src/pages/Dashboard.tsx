@@ -468,8 +468,11 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-4 rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
+      <section className="relative mb-4 rounded-3xl border border-border/80 bg-card overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_30px_80px_-30px_hsl(var(--success)/0.18)]">
+        {/* Ambient glow */}
+        <div aria-hidden className="pointer-events-none absolute -top-40 -left-20 h-[420px] w-[520px] rounded-full bg-success/15 blur-[120px]" />
+        <div aria-hidden className="pointer-events-none absolute -top-32 right-1/3 h-[280px] w-[380px] rounded-full bg-primary/10 blur-[100px]" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-success to-transparent" />
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3 lg:px-7">
