@@ -468,11 +468,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-4 rounded-3xl border border-border/80 bg-card overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_30px_80px_-30px_hsl(var(--success)/0.18)]">
-        {/* Ambient glow */}
-        <div aria-hidden className="pointer-events-none absolute -top-40 -left-20 h-[420px] w-[520px] rounded-full bg-success/15 blur-[120px]" />
-        <div aria-hidden className="pointer-events-none absolute -top-32 right-1/3 h-[280px] w-[380px] rounded-full bg-primary/10 blur-[100px]" />
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-success to-transparent" />
+      <section className="relative mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3 lg:px-7">
@@ -524,61 +521,55 @@ export default function Dashboard() {
         </div>
 
         {/* Main metric block */}
-        <div className="relative grid grid-cols-1 lg:grid-cols-[1.8fr_1fr] gap-0">
-          <div className="px-5 py-8 lg:px-9 lg:py-12 border-b lg:border-b-0 lg:border-r border-border/60">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative h-2 w-2 rounded-full bg-success" />
-              </span>
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                Receita {isCustom && customRange?.from
-                  ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-                  : `· ${selectedPeriod.label}`}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
+          <div className="px-5 py-7 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/60">
+            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              Receita {isCustom && customRange?.from
+                ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                : `· ${selectedPeriod.label}`}
+            </p>
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="inline-flex items-baseline text-[clamp(2.6rem,8vw,84px)] font-heading font-black leading-[0.95] tracking-[-0.055em] text-success whitespace-nowrap drop-shadow-[0_8px_24px_hsl(var(--success)/0.25)]">
+              <span className="inline-flex items-baseline text-[clamp(2.2rem,7vw,68px)] font-heading font-black leading-none tracking-[-0.05em] text-foreground whitespace-nowrap">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-[11px] font-bold text-success">
+                <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success">
                   <ArrowUpRight className="h-3.5 w-3.5" />
                   {approved.length} venda{approved.length !== 1 ? "s" : ""}
                 </span>
               )}
             </div>
-            <div className="mt-6 flex items-center gap-5 text-[11px]">
+            <div className="mt-5 flex items-center gap-5 text-[11px]">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                <span className="font-bold text-foreground tabular-nums">{approved.length}</span> aprovadas
+                <span className="font-semibold text-foreground tabular-nums">{approved.length}</span> aprovadas
               </div>
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                <span className="font-bold text-foreground tabular-nums">{pending.length}</span> pendentes
+                <span className="font-semibold text-foreground tabular-nums">{pending.length}</span> pendentes
               </div>
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                <span className="font-bold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> contestações
+                <span className="font-semibold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> contestações
               </div>
             </div>
           </div>
 
-          <div className="relative px-5 py-6 lg:px-8 lg:py-8 bg-card-inset/40">
-            <span aria-hidden className="absolute left-0 top-8 bottom-8 w-[2px] rounded-full bg-gradient-to-b from-transparent via-foreground/15 to-transparent" />
-            <div className="flex items-center gap-2 mb-2.5">
-              <Wallet className="h-3.5 w-3.5 text-foreground/60" />
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.22em] text-muted-foreground">Saldo Disponível</p>
+          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
+            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
             </div>
-            <p className="text-[clamp(1.2rem,2.6vw,28px)] font-heading font-black tabular-nums text-foreground tracking-[-0.035em] leading-none">
+            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
-            <Link to="/financeiro/saques" className="group/wd mt-5 inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-[11px] font-bold text-foreground transition-all hover:border-success/40 hover:bg-success/10 hover:text-success">
-              Sacar agora <ChevronRight className="h-3 w-3 transition-transform group-hover/wd:translate-x-0.5" />
+            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
+              Sacar agora <ChevronRight className="h-3 w-3" />
             </Link>
             {withdrawalPending > 0 && (
               <p className="mt-3 text-[10px] text-muted-foreground">
-                <span className="font-bold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
+                <span className="font-semibold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
               </p>
             )}
           </div>
