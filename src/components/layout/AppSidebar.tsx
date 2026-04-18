@@ -175,21 +175,21 @@ function SidebarSectionNav({ section, pathname }: SidebarSectionNavProps) {
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-150 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-12 w-full items-center gap-3 rounded-2xl pl-2.5 pr-3 text-[13.5px] font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-sidebar-primary/45 bg-sidebar-primary/10 text-sidebar-accent-foreground font-semibold shadow-[0_0_0_1px_hsl(var(--sidebar-primary)/0.08)_inset] before:absolute before:left-0 before:top-1/2 before:h-6 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary before:content-['']"
-                        : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground",
+                        ? "border border-sidebar-primary/40 bg-gradient-to-r from-sidebar-primary/15 via-sidebar-primary/8 to-transparent text-sidebar-accent-foreground font-bold shadow-[inset_0_1px_0_0_hsl(var(--sidebar-primary)/0.15),0_4px_20px_-8px_hsl(var(--sidebar-primary)/0.4)] before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary before:shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.8)] before:content-['']"
+                        : "border border-transparent text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground hover:translate-x-0.5",
                     )}
                   >
                     <span className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all",
                       isActive
-                        ? "bg-sidebar-primary/15 text-sidebar-primary"
-                        : "bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/nav:text-sidebar-accent-foreground",
+                        ? "bg-gradient-to-br from-sidebar-primary/25 to-sidebar-primary/10 text-sidebar-primary shadow-[0_0_16px_-4px_hsl(var(--sidebar-primary)/0.6)]"
+                        : "bg-sidebar-accent/40 text-sidebar-foreground/55 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:bg-sidebar-accent/60",
                     )}>
                       <item.icon
                         className="h-[16px] w-[16px]"
-                        strokeWidth={isActive ? 2.25 : 1.9}
+                        strokeWidth={isActive ? 2.5 : 1.9}
                       />
                     </span>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
