@@ -283,8 +283,8 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-2 py-2">
-        {sections.map((section) => (
-          <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} />
+        {sections.map((section, idx) => (
+          <SidebarSectionNav key={section.label} section={section} pathname={location.pathname} isFirst={idx === 0} />
         ))}
       </SidebarContent>
 
