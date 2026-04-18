@@ -341,7 +341,7 @@ export function AppSidebar() {
       <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-card to-sidebar-accent/40 shadow-[0_2px_10px_-2px_hsl(var(--sidebar-primary)/0.2)]">
+          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-sidebar-border/60 bg-gradient-to-br from-card to-sidebar-accent/40">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1" />
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" />
           </div>
@@ -385,13 +385,12 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/40 bg-gradient-to-br from-sidebar-primary/15 via-sidebar-primary/10 to-sidebar-primary/5 px-3 py-3 text-left shadow-[0_2px_12px_-4px_hsl(var(--sidebar-primary)/0.3)] transition-all hover:border-sidebar-primary/60 hover:shadow-[0_4px_16px_-4px_hsl(var(--sidebar-primary)/0.45)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-sidebar-primary/30 bg-sidebar-primary/8 px-3 py-3 text-left transition-all duration-200 hover:border-sidebar-primary/50 hover:bg-sidebar-primary/12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full bg-sidebar-primary/15 blur-xl" />
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/40 bg-sidebar-primary/20 text-sidebar-primary shadow-[0_0_12px_-2px_hsl(var(--sidebar-primary)/0.4)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/35 bg-sidebar-primary/15 text-sidebar-primary">
             <Headphones className="h-[17px] w-[17px]" strokeWidth={2.25} />
           </div>
-          <div className="relative min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <p className="text-[13.5px] font-bold leading-tight text-sidebar-accent-foreground">
               Solicitar Suporte
             </p>
@@ -399,7 +398,7 @@ export function AppSidebar() {
               Time premium • 24/7 ao vivo
             </p>
           </div>
-          <ChevronRight className="relative ml-auto h-4 w-4 text-sidebar-primary/70 transition-transform group-hover/sup:translate-x-0.5 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
+          <ChevronRight className="ml-auto h-4 w-4 text-sidebar-primary/70 transition-transform group-hover/sup:translate-x-0.5 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
         </button>
 
         {/* User chip */}
@@ -408,7 +407,7 @@ export function AppSidebar() {
           onClick={() => navigate("/perfil")}
           className="flex w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2.5 text-left transition-colors hover:border-sidebar-border/60 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary/35 via-sidebar-primary/20 to-sidebar-primary/10 text-[13px] font-black text-sidebar-primary ring-1 ring-sidebar-primary/30 shadow-[0_0_10px_-2px_hsl(var(--sidebar-primary)/0.35)]">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/18 text-[13px] font-black text-sidebar-primary ring-1 ring-sidebar-primary/30">
             {userInitial}
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
           </div>
