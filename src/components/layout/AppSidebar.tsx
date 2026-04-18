@@ -312,7 +312,7 @@ export function AppSidebar() {
             <Headphones className="h-4 w-4" strokeWidth={1.95} />
           </span>
           <span className="group-data-[collapsible=icon]:hidden">Suporte 24/7</span>
-          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-500 group-data-[collapsible=icon]:hidden" />
+          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
         </button>
 
         <button
