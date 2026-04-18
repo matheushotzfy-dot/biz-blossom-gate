@@ -95,8 +95,6 @@ function isItemActive(pathname: string, item: SidebarItem) {
 type RevenueCardProps = {
   collapsed: boolean;
   revenue: number;
-  todayRevenue: number;
-  salesToday: number;
   milestone: ReturnType<typeof getMilestone>;
   onOpenRewards: () => void;
 };
