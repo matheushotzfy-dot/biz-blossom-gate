@@ -59,7 +59,7 @@ const _timeCache = new Map<string, string>();
 const fmtDate = (d: string) => { let v = _dateCache.get(d); if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); } return v; };
 const fmtTime = (d: string) => { let v = _timeCache.get(d); if (!v) { v = _timeFmt.format(new Date(d)); _timeCache.set(d, v); } return v; };
 
-type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
+type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback" | "medpix";
 type SortField = "date" | "amount" | "net" | "customer";
 type SortDir = "asc" | "desc";
 const HIDE = "•••";

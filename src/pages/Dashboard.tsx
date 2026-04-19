@@ -699,17 +699,22 @@ export default function Dashboard() {
               <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
               <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
             </div>
-            <div className="divide-y divide-border/60">
+            <div className="divide-y divide-border/60 max-h-[560px] overflow-y-auto">
               {[
                 { label: "Criar produto", href: "/vendas/produtos", icon: Package },
                 { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
+                { label: "Link de pagamento", href: "/vendas/links", icon: Hash },
                 { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
                 { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
                 { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
+                { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote },
+                { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck },
                 { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
                 { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
                 { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
+                { label: "Apps & Integrações", href: "/integracoes", icon: Layers },
                 { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
+                { label: "Suporte", href: "/suporte", icon: Sparkles },
               ].map((action) => (
                 <Link
                   key={action.href}
