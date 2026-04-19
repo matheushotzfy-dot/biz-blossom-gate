@@ -728,7 +728,10 @@ export default function Vendas() {
  const filtered = useMemo(() => {
  const q = search.toLowerCase();
  return dateFiltered.filter(t => {
- if (statusFilter !== "all" && t.status !== statusFilter) return false;
+ if (statusFilter === "medpix") {
+   if (t.payment_method !== "pix") return false;
+   if (t.status !== "refunded" && t.status !== "chargeback") return false;
+ } else if (statusFilter !== "all" && t.status !== statusFilter) return false;
  if (!search) return true;
  return t.customer_name?.toLowerCase().includes(q) || t.customer_email?.toLowerCase().includes(q) || t.customer_phone?.includes(q) || t.id.toLowerCase().includes(q);
  });
@@ -750,15 +753,19 @@ export default function Vendas() {
   const visibleItems = useMemo(() => sortedFiltered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE), [sortedFiltered, currentPage]);
 
  const statusTabs = useMemo(() => {
- const c: Record<string, number> = { all: dateFiltered.length, completed: 0, pending: 0, failed: 0, refunded: 0, chargeback: 0 };
- for (const t of dateFiltered) { if (t.status in c) c[t.status]++; }
+ const c: Record<string, number> = { all: dateFiltered.length, completed: 0, pending: 0, failed: 0, refunded: 0, chargeback: 0, medpix: 0 };
+ for (const t of dateFiltered) {
+   if (t.status in c) c[t.status]++;
+   if (t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")) c.medpix++;
+ }
  return [
  { label: "Todas", value: "all" as StatusFilter, count: c.all },
  { label: "Aprovadas", value: "completed" as StatusFilter, count: c.completed },
  { label: "Pendentes", value: "pending" as StatusFilter, count: c.pending },
+ { label: "Reembolsadas", value: "refunded" as StatusFilter, count: c.refunded },
+ { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback },
+ { label: "MedPix", value: "medpix" as StatusFilter, count: c.medpix },
  { label: "Falhas", value: "failed" as StatusFilter, count: c.failed },
- { label: "Reembolsos", value: "refunded" as StatusFilter, count: c.refunded },
-  { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback },
  ];
  }, [dateFiltered]);
 
