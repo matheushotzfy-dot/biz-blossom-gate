@@ -1302,15 +1302,15 @@ export default function Vendas() {
                </>
              )}
            </div>
-         </div>
+         </section>
 
-          {/* ═══════ NET RESULT — single line footer, no card duplication ═══════ */}
+          {/* ═══════ NET RESULT — single line footer ═══════ */}
           <div className="flex items-center justify-between gap-4 px-2 pt-1">
             <div className="flex items-center gap-2">
-              <Activity className="h-3.5 w-3.5 text-success" />
-              <span className="uppercase tracking-[0.14em] text-[10px] font-bold text-muted-foreground/60">Saldo líquido após reembolsos & chargebacks</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="uppercase tracking-[0.16em] text-[10px] font-bold text-muted-foreground/65">Saldo líquido após reembolsos &amp; chargebacks</span>
             </div>
-            <span className="text-[15px] font-heading font-black text-success tabular-nums tracking-[-0.02em]">
+            <span className="text-[16px] font-heading font-black text-success tabular-nums tracking-[-0.025em]">
               {hidden ? HIDE : fmt(m.totalNet - refundedAmount - chargebackAmount)}
             </span>
           </div>
