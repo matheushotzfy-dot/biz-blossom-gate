@@ -940,7 +940,32 @@ export default function Vendas() {
                         · pico {hidden ? HIDE : fmtCompact(Math.max(...metrics.chartData.map(d => d.value)))}
                       </span>
                     )}
+          </div>
+
+          {/* ═══════ KPI RIBBON — Métricas explícitas (PIX, Cartão, Reembolso, Chargeback, MedPix) ═══════ */}
+          <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 divide-x divide-y sm:divide-y-0 lg:divide-y-0 divide-border/50">
+              {([
+                { label: "Vendas", value: m.approved.length.toString(), sub: `${dateFiltered.length} tentativas`, icon: <ShoppingCart className="h-3.5 w-3.5" />, accent: "text-foreground" },
+                { label: "Líquido", value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "" : `bruto ${fmtCompact(m.totalGross)}`, icon: <DollarSign className="h-3.5 w-3.5" />, accent: "text-success" },
+                { label: "Reembolsado", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} venda${m.refunded.length !== 1 ? "s" : ""}`, icon: <RefreshCw className="h-3.5 w-3.5" />, accent: "text-info" },
+                { label: "% Reembolso", value: `${m.refundRate.toFixed(2)}%`, sub: m.refundRate > 5 ? "acima do ideal" : "saudável", icon: <Percent className="h-3.5 w-3.5" />, accent: m.refundRate > 5 ? "text-destructive" : "text-foreground" },
+                { label: "Vendas PIX", value: m.pixCount.toString(), sub: hidden ? HIDE : fmtCompact(m.pixRev), icon: <PixLogoMark className="h-3.5 w-3.5" />, accent: "text-success" },
+                { label: "Vendas Cartão", value: m.cardCount.toString(), sub: hidden ? HIDE : fmtCompact(m.cardRev), icon: <CreditCard className="h-3.5 w-3.5" />, accent: "text-info" },
+                { label: "MedPix", value: dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length.toString(), sub: "PIX contestados", icon: <Shield className="h-3.5 w-3.5" />, accent: "text-warning" },
+                { label: "Chargeback", value: m.chargebacks.length.toString(), sub: hidden ? HIDE : fmtCompact(chargebackAmount), icon: <AlertTriangle className="h-3.5 w-3.5" />, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-foreground/40" },
+              ]).map((kpi, i) => (
+                <div key={kpi.label} className="px-4 py-4">
+                  <div className="flex items-center gap-1.5 mb-2 text-muted-foreground/60">
+                    <span className={cn("[&_svg]:h-3 [&_svg]:w-3", kpi.accent)}>{kpi.icon}</span>
+                    <p className="text-[9.5px] font-heading font-bold uppercase tracking-[0.14em]">{kpi.label}</p>
                   </div>
+                  <p className={cn("text-[20px] font-heading font-black tabular-nums leading-none tracking-[-0.02em]", kpi.accent)}>{kpi.value}</p>
+                  {kpi.sub && <p className="text-[10px] text-muted-foreground/55 mt-1.5 truncate">{kpi.sub}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
                 </div>
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
@@ -1144,7 +1169,7 @@ export default function Vendas() {
                  const active = statusFilter === tab.value;
                  const dotColors: Record<string, string> = {
                    completed: "bg-success", pending: "bg-warning", failed: "bg-destructive",
-                   refunded: "bg-info", chargeback: "bg-destructive",
+                   refunded: "bg-info", chargeback: "bg-destructive", medpix: "bg-primary",
                  };
                  return (
                    <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
