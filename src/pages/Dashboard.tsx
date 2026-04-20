@@ -1237,55 +1237,66 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   );
 }
 
-/* ─── Editorial dashboard sub-components ─── */
+/* ─── Editorial dashboard sub-components (premium 4K) ─── */
 
 function EditorialKpi({ label, code, value, sub, accent }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
   const accentDot: Record<string, string> = {
-    success: "bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]",
-    warning: "bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]",
-    destructive: "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]",
+    success: "bg-success shadow-[0_0_10px_hsl(var(--success)/0.6)]",
+    warning: "bg-warning shadow-[0_0_10px_hsl(var(--warning)/0.6)]",
+    destructive: "bg-destructive shadow-[0_0_10px_hsl(var(--destructive)/0.6)]",
     neutral: "bg-muted-foreground/40",
+  };
+  const accentGlow: Record<string, string> = {
+    success: "from-success/[0.04]",
+    warning: "from-warning/[0.04]",
+    destructive: "from-destructive/[0.04]",
+    neutral: "from-foreground/[0.025]",
   };
 
   return (
-    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.02] transition-colors relative group overflow-hidden">
-      {/* Hover sweep line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
-          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em] group-hover:text-foreground/80 transition-colors">{label}</p>
+    <div className="relative rounded-[18px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_18px_40px_-20px_hsl(var(--foreground)/0.15)] hover:shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_28px_60px_-20px_hsl(var(--foreground)/0.22)] hover:-translate-y-px transition-all duration-300 group overflow-hidden">
+      <div className={cn("absolute inset-0 bg-gradient-to-br to-transparent pointer-events-none", accentGlow[accent])} />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/12 to-transparent" />
+      {/* Hover sweep */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      <div className="relative px-6 py-7 md:px-7 md:py-8">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
+            <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em] group-hover:text-foreground/85 transition-colors">{label}</p>
+          </div>
+          {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/40 tracking-[0.22em] px-2 py-0.5 rounded-[4px] bg-foreground/[0.04]">{code}</span>}
         </div>
-        {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/50 tracking-[0.2em]">{code}</span>}
+        <p className="font-display font-semibold tabular-nums tracking-[-0.045em] leading-none text-[34px] md:text-[42px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
+          {value}
+        </p>
+        <p className="mt-3.5 text-[11px] text-muted-foreground/85 font-medium leading-relaxed">{sub}</p>
       </div>
-      <p className="font-display font-semibold tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[34px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
-        {value}
-      </p>
-      <p className="mt-3 text-[10.5px] text-muted-foreground/80 font-medium leading-relaxed">{sub}</p>
     </div>
   );
 }
 
 function EditorialChannelRow({ index, name, approved, total, revenue, approvalRate, share, privacy }: { index?: string; name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-6 py-5 hover:bg-foreground/[0.02] transition-colors group relative">
+    <div className="px-7 md:px-9 py-5 md:py-6 hover:bg-foreground/[0.025] transition-colors group relative">
       <div className="flex items-baseline justify-between mb-3 gap-3">
-        <div className="flex items-baseline gap-2.5 min-w-0">
-          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0 group-hover:text-foreground/60 transition-colors">{index}</span>}
-          <p className="text-[13.5px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
+        <div className="flex items-baseline gap-3 min-w-0">
+          {index && <span className="font-mono text-[10px] font-bold text-muted-foreground/45 tracking-[0.18em] tabular-nums shrink-0 group-hover:text-foreground/65 transition-colors">{index}</span>}
+          <p className="text-[14px] md:text-[15px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
         </div>
-        <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+        <p className="text-[16px] md:text-[17px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
-      <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground mb-3 tracking-tight">
-        <span className="uppercase tracking-[0.12em]"><span className="text-foreground font-semibold tabular-nums">{approved}</span><span className="text-muted-foreground/60">/{total}</span></span>
+      <div className="flex items-center gap-3 text-[10.5px] font-mono text-muted-foreground mb-3.5 tracking-tight">
+        <span className="uppercase tracking-[0.14em]"><span className="text-foreground font-bold tabular-nums">{approved}</span><span className="text-muted-foreground/50">/{total}</span></span>
         <span className="text-foreground/15">·</span>
-        <span className="uppercase tracking-[0.12em]">APR <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
-        <span className="ml-auto uppercase tracking-[0.12em]">SHR <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
+        <span className="uppercase tracking-[0.14em]">APR <span className="text-foreground font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto uppercase tracking-[0.14em]">SHR <span className="text-foreground font-bold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
       <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
-        <div className="h-full rounded-full bg-gradient-to-r from-foreground/80 to-foreground/60 transition-all duration-700 ease-out shadow-[0_0_8px_hsl(var(--foreground)/0.2)]" style={{ width: `${Math.min(share, 100)}%` }} />
+        <div className="h-full rounded-full bg-gradient-to-r from-foreground/85 to-foreground/55 transition-all duration-700 ease-out shadow-[0_0_12px_hsl(var(--foreground)/0.25)]" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
