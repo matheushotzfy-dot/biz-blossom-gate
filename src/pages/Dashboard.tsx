@@ -811,7 +811,9 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <p className="text-[10.5px] text-muted-foreground mt-0.5 truncate">
-                        {item.kind === "withdrawal" ? "Saque" : "Venda"} · {item.paymentMethod === "pix" ? "PIX" : item.paymentMethod === "credit_card" || item.paymentMethod === "card" ? "Cartão" : item.label} · {timeAgo(item.createdAt)}
+                        {item.kind === "withdrawal"
+                          ? `Saque · ${timeAgo(item.createdAt)}`
+                          : `Venda · ${item.paymentMethod === "pix" ? "PIX" : item.paymentMethod === "credit_card" || item.paymentMethod === "card" ? "Cartão" : item.label} · ${timeAgo(item.createdAt)}`}
                       </p>
                     </div>
                   </button>
