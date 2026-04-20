@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
-import { ProductListView } from "@/components/products/ProductListView";
+import { ProductGridView } from "@/components/products/ProductGridView";
 import type { Product } from "@/components/products/productPresentation";
 import { formatCurrency, getCheckoutLink } from "@/components/products/productPresentation";
 import {
@@ -214,7 +214,7 @@ export default function Produtos() {
             )}
           </div>
         ) : (
-          <ProductListView
+          <ProductGridView
             copiedId={copiedId}
             products={filtered}
             {...menuHandlers}
