@@ -330,43 +330,43 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
      </div>
     </div>
    </td>
-   {/* Product + Date */}
-   <td className="px-3 py-[18px] align-middle">
-    <div className="min-w-0">
-     <p className="truncate text-[11.5px] font-heading font-semibold text-foreground/75 max-w-[180px]">{prodName}</p>
-     <p className="text-[10px] text-muted-foreground/30 mt-1 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-    </div>
-   </td>
-   {/* Status */}
-   <td className="px-3 py-[18px] align-middle">
-    <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-[5px] text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
-     <span className="relative flex h-[5px] w-[5px]">
-      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-      <span className={cn("h-[5px] w-[5px] rounded-full", st.dot)} />
+    {/* Product + Date */}
+    <td className="px-3 py-5 align-middle">
+     <div className="min-w-0">
+      <p className="truncate text-[12px] font-heading font-black text-foreground/80 max-w-[200px] leading-tight">{prodName}</p>
+      <p className="text-[10.5px] font-bold text-muted-foreground/35 mt-1.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+     </div>
+    </td>
+    {/* Status */}
+    <td className="px-3 py-5 align-middle">
+     <span className={cn("inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10.5px] font-black tracking-tight border shadow-sm", st.fg, st.bg, st.border)}>
+      <span className="relative flex h-1.5 w-1.5">
+       {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+       <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+      </span>
+      {st.label}
      </span>
-     {st.label}
-    </span>
-   </td>
-   {/* Method */}
-   <td className="px-3 py-[18px] align-middle">
-    <div className="flex items-center gap-2">
-     <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg border", method.iconBg, method.border)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
-     <span className={cn("text-[10.5px] font-heading font-semibold", method.color)}>{method.label}</span>
-    </div>
-   </td>
-   {/* Gross */}
-   <td className="px-3 py-[18px] align-middle text-right">
-    <p className="text-[12.5px] font-heading font-bold text-foreground/80 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
-    {fee > 0 && <p className="text-[9px] text-destructive/35 tabular-nums mt-0.5">−{fmt(fee)}</p>}
-   </td>
-   {/* Net */}
-   <td className="px-4 py-[18px] align-middle text-right">
-    <p className={cn("text-[15px] font-heading font-black tabular-nums tracking-[-0.03em]",
-     tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning/80" : "text-foreground/50"
-    )}>{fmt(net)}</p>
-   </td>
-   {/* Actions */}
-   <td className="pr-4 py-[18px] align-middle">
+    </td>
+    {/* Method */}
+    <td className="px-3 py-5 align-middle">
+     <div className="flex items-center gap-3">
+      <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl border-2 shadow-sm transition-transform group-hover:scale-105", method.iconBg, method.border)}><MethodIcon className={cn("h-4 w-4", method.color)} /></span>
+      <span className={cn("text-[11px] font-black tracking-tight", method.color)}>{method.label}</span>
+     </div>
+    </td>
+    {/* Gross */}
+    <td className="px-3 py-5 align-middle text-right">
+     <p className="text-[14px] font-heading font-black text-foreground/85 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
+     {fee > 0 && <p className="text-[10px] font-bold text-destructive/40 tabular-nums mt-1">−{fmt(fee)}</p>}
+    </td>
+    {/* Net */}
+    <td className="px-4 py-5 align-middle text-right">
+     <p className={cn("text-[17px] font-heading font-black tabular-nums tracking-[-0.035em] drop-shadow-sm",
+      tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning/80" : "text-foreground/50"
+     )}>{fmt(net)}</p>
+    </td>
+    {/* Actions */}
+    <td className="pr-6 py-5 align-middle">
     <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
      <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -996,17 +996,17 @@ export default function Vendas() {
                   )}
                 </div>
                 {metrics.topProducts.length === 0 ? (
-                  <div className="py-12 text-center border border-dashed border-border/40 rounded-xl bg-card-inset/20">
-                    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-muted/40 border border-border/40">
-                      <Package className="h-5 w-5 text-muted-foreground/50" />
+                    <div className="py-16 text-center border border-dashed border-border/50 rounded-2xl bg-muted/[0.03]">
+                      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-background border-2 border-border/30 shadow-sm transition-transform hover:scale-105">
+                        <Package className="h-6 w-6 text-muted-foreground/35" strokeWidth={1.5} />
+                      </div>
+                      <p className="text-[14px] font-black text-foreground tracking-tight mb-1.5">Nenhuma venda registrada</p>
+                      <p className="text-[11px] font-medium text-muted-foreground/45 max-w-[280px] mx-auto leading-relaxed">
+                        {productsRaw.length === 0
+                          ? "Cadastre seu primeiro produto para começar a monitorar suas métricas."
+                          : `Seus ${productsRaw.length} produtos ainda não converteram vendas neste filtro.`}
+                      </p>
                     </div>
-                    <p className="text-[12.5px] font-bold text-foreground mb-1">Nenhuma venda registrada</p>
-                    <p className="text-[10.5px] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
-                      {productsRaw.length === 0
-                        ? "Cadastre seu primeiro produto para começar."
-                        : `Você tem ${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, mas nenhum vendeu neste período.`}
-                    </p>
-                  </div>
                 ) : (
                   <div className="divide-y divide-border/30">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
@@ -1062,27 +1062,28 @@ export default function Vendas() {
                     )}
                   </div>
                   {m.totalNet === 0 ? (
-                    <p className="text-[11px] text-muted-foreground/60 py-2">Sem pagamentos no período.</p>
+                    <div className="py-8 text-center border border-dashed border-border/40 rounded-xl bg-muted/[0.02]">
+                      <p className="text-[11px] font-bold text-muted-foreground/40">Sem atividade no período</p>
+                    </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="divide-y divide-border/25">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                        const accent = pm.color === "success" ? "bg-success" : pm.color === "info" ? "bg-info" : "bg-warning";
                         const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
+                        const accentBg = pm.color === "success" ? "bg-success/8 border-success/15" : pm.color === "info" ? "bg-info/8 border-info/15" : "bg-warning/8 border-warning/15";
                         return (
-                          <div key={pm.label} className="flex items-center gap-3">
-                            <span className={cn("[&_svg]:h-3.5 [&_svg]:w-3.5 shrink-0", accentText)}>{pm.icon}</span>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-baseline justify-between gap-2">
-                                <span className="text-[11.5px] font-bold text-foreground">{pm.label}</span>
-                                <span className="text-[11px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</span>
+                          <div key={pm.label} className="py-3 flex items-center justify-between group first:pt-0 last:pb-0">
+                            <div className="flex items-center gap-3.5">
+                              <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl border shadow-sm transition-all group-hover:scale-110", accentBg, accentText)}>
+                                {pm.icon}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-[12px] font-black text-foreground leading-tight tracking-tight">{pm.label}</p>
+                                <p className="text-[10px] font-bold text-muted-foreground/35 mt-1">{pm.count} vendas · {pct.toFixed(0)}% do mix</p>
                               </div>
-                              <div className="mt-1 flex items-center gap-2">
-                                <div className="h-[2px] flex-1 rounded-full bg-muted/40 overflow-hidden">
-                                  <div className={cn("h-full rounded-full", accent)} style={{ width: `${pct}%` }} />
-                                </div>
-                                <span className="text-[9.5px] font-bold tabular-nums text-muted-foreground/70 shrink-0 w-10 text-right">{pct.toFixed(0)}% · {pm.count}</span>
-                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[13px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                             </div>
                           </div>
                         );
