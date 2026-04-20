@@ -428,66 +428,57 @@ export default function Dashboard() {
 
   return (
     <div className="relative mx-auto w-full max-w-[1340px] pb-24">
-      {/* Ambient luxury glow */}
-      <div className="pointer-events-none absolute top-0 right-[5%] -z-10 h-[500px] w-[500px] rounded-full bg-primary/[0.05] blur-[160px]" aria-hidden />
-      <div className="pointer-events-none absolute top-[400px] left-0 -z-10 h-[400px] w-[400px] rounded-full bg-primary/[0.03] blur-[140px]" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.018]" aria-hidden style={{ backgroundImage: "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "96px 96px" }} />
-
-      {/* ─── GREEN FIRE BORDER EFFECT ─── */}
+      {/* ─── GREEN FIRE BORDER EFFECT (Modo Escala milestone) ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          <div className="absolute inset-0 ring-2 ring-inset ring-success/40 animate-pulse" />
         </div>
       )}
 
       {/* ─── SCALE MODE POPUP ─── */}
       {showScalePopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-3xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
-            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
-            <div className="relative p-8 text-center">
-              <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center ring-4 ring-primary/15">
-                <Rocket className="h-10 w-10 text-primary" />
+          <div className="absolute inset-0 bg-background/80" onClick={() => setShowScalePopup(false)} />
+          <div className="relative w-full max-w-md rounded-2xl border border-border bg-card animate-scale-in overflow-hidden">
+            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
+            <div className="p-8 text-center">
+              <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-success/10 border border-success/20 flex items-center justify-center">
+                <Rocket className="h-8 w-8 text-success" />
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
-                <Flame className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
+              <div className="inline-flex items-center gap-2 rounded-full bg-success/10 border border-success/20 px-3 py-1 mb-4">
+                <Flame className="h-3.5 w-3.5 text-success" />
+                <span className="text-[10px] font-bold text-success uppercase tracking-wider">Modo Escala Desbloqueado</span>
               </div>
-              <h2 className="text-2xl font-display font-black text-foreground mb-3">MODO ESCALA<br /><span className="text-primary">ATIVADO! 🔥</span></h2>
-              <p className="text-sm text-muted-foreground mb-6">Você atingiu R$ 2.000 em 24h. A elite dos vendedores!</p>
-              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm">BORA DOMINAR!</button>
+              <h2 className="text-2xl font-display font-black text-foreground mb-3">Modo Escala<br /><span className="text-success">Ativado</span></h2>
+              <p className="text-sm text-muted-foreground mb-6">Você atingiu R$ 2.000 em 24h. A elite dos vendedores.</p>
+              <button onClick={() => setShowScalePopup(false)} className="w-full h-11 rounded-lg bg-foreground text-background font-bold text-sm hover:opacity-90 transition-opacity">Continuar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HOTZFY · DASHBOARD ULTRA PREMIUM                                  */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-
       {/* ─── BLOCO 1: VISÃO EXECUTIVA ─── */}
-      <section className="relative rounded-[20px] border border-border/50 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-xl overflow-hidden mb-6 shadow-[0_8px_32px_-12px_hsl(var(--foreground)/0.08),inset_0_1px_0_hsl(var(--background)/0.6)]">
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-
+      <section className="rounded-2xl border border-border bg-card overflow-hidden mb-5">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 px-6 md:px-8 py-5 border-b border-border/30 bg-gradient-to-b from-card/50 to-transparent">
+        <div className="flex items-center justify-between gap-4 px-6 md:px-7 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="relative h-9 w-9 rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.3),0_2px_8px_-2px_hsl(var(--primary)/0.3)]">
-              <BarChart3 className="h-4 w-4 text-primary" strokeWidth={2.2} />
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-success ring-2 ring-card animate-pulse" />
+            <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+              <BarChart3 className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
             </div>
             <div className="flex flex-col">
-              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-foreground">Visão Executiva</span>
-              <span className="text-[10px] text-muted-foreground/70 mt-0.5">Operação em tempo real</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Visão Executiva</span>
+              <span className="text-[10.5px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                <span className="relative inline-flex h-1.5 w-1.5">
+                  <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+                </span>
+                Operação em tempo real
+              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-0.5 rounded-[10px] bg-muted/40 border border-border/40 p-[3px] shadow-[inset_0_1px_2px_hsl(var(--foreground)/0.04)]">
+            <div className="flex items-center gap-0.5 rounded-lg bg-muted border border-border p-[3px]">
               {PERIOD_PRESETS.map((p) => {
                 const active = !isCustom && selectedPeriod.label === p.label;
                 return (
@@ -495,9 +486,9 @@ export default function Dashboard() {
                     key={p.label}
                     onClick={() => { setIsCustom(false); setSelectedPeriod(p); }}
                     className={cn(
-                      "h-7 px-3.5 rounded-[7px] text-[11.5px] font-bold transition-all duration-200",
+                      "h-7 px-3 rounded-md text-[11.5px] font-semibold transition-colors",
                       active
-                        ? "bg-background text-foreground shadow-[0_2px_6px_-2px_hsl(var(--foreground)/0.15),inset_0_1px_0_hsl(var(--background))]"
+                        ? "bg-card text-foreground border border-border"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -511,10 +502,10 @@ export default function Dashboard() {
               <PopoverTrigger asChild>
                 <button
                   className={cn(
-                    "h-[34px] px-3.5 rounded-[10px] text-[11.5px] font-bold transition-all flex items-center gap-1.5 border",
+                    "h-[34px] px-3 rounded-lg text-[11.5px] font-semibold transition-colors flex items-center gap-1.5 border",
                     isCustom
-                      ? "bg-background text-foreground border-border/60 shadow-[0_2px_6px_-2px_hsl(var(--foreground)/0.15)]"
-                      : "bg-muted/40 text-muted-foreground border-border/40 hover:text-foreground"
+                      ? "bg-card text-foreground border-border"
+                      : "bg-muted text-muted-foreground border-border hover:text-foreground"
                   )}
                 >
                   <CalendarDays className="h-3.5 w-3.5" />
@@ -538,7 +529,7 @@ export default function Dashboard() {
 
             <button
               onClick={privacy.toggle}
-              className="h-[34px] w-[34px] rounded-[10px] bg-muted/40 border border-border/40 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              className="h-[34px] w-[34px] rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors"
               title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
             >
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -547,119 +538,102 @@ export default function Dashboard() {
         </div>
 
         {/* Receita + Saldo */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-px bg-border/30">
-          <div className="relative bg-gradient-to-br from-card/70 via-card/50 to-card/30 px-7 md:px-10 py-9 overflow-hidden">
-            <div className="pointer-events-none absolute -top-20 -left-20 h-64 w-64 rounded-full bg-foreground/[0.025] blur-[100px]" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="h-px w-6 bg-gradient-to-r from-primary/60 to-transparent" />
-                <p className="text-[10px] font-black uppercase tracking-[0.26em] text-muted-foreground/80">
-                  Receita · {periodLabel}
-                </p>
-              </div>
-              <div className="text-[68px] md:text-[100px] font-display font-black tracking-[-0.055em] leading-[0.92] text-foreground tabular-nums bg-gradient-to-b from-foreground to-foreground/85 bg-clip-text">
-                {privacy.hidden ? CENSORED : <AnimatedNumber value={revenue} />}
-              </div>
-              <div className="mt-7 flex items-center gap-6 flex-wrap">
-                {[
-                  { count: approved.length, label: "aprovadas", color: "bg-success", glow: "shadow-[0_0_8px_hsl(var(--success)/0.6)]" },
-                  { count: pending.length, label: "pendentes", color: "bg-warning", glow: "shadow-[0_0_8px_hsl(var(--warning)/0.6)]" },
-                  { count: chargebacks.length, label: "contestações", color: "bg-destructive", glow: "shadow-[0_0_8px_hsl(var(--destructive)/0.6)]" },
-                ].map((s) => (
-                  <div key={s.label} className="flex items-center gap-2">
-                    <span className={cn("h-1.5 w-1.5 rounded-full", s.color, s.glow)} />
-                    <span className="text-[13px] font-bold text-foreground tabular-nums">{s.count}</span>
-                    <span className="text-[12px] text-muted-foreground font-medium">{s.label}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] divide-x divide-border border-b border-border">
+          <div className="px-7 md:px-9 py-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-4">
+              Receita · {periodLabel}
+            </p>
+            <div className="text-[60px] md:text-[88px] font-display font-black tracking-[-0.045em] leading-[0.92] text-foreground tabular-nums">
+              {privacy.hidden ? CENSORED : <AnimatedNumber value={revenue} />}
+            </div>
+            <div className="mt-7 flex items-center gap-7 flex-wrap">
+              {[
+                { count: approved.length, label: "aprovadas", color: "bg-success" },
+                { count: pending.length, label: "pendentes", color: "bg-warning" },
+                { count: chargebacks.length, label: "contestações", color: "bg-destructive" },
+              ].map((s) => (
+                <div key={s.label} className="flex items-center gap-2">
+                  <span className={cn("h-1.5 w-1.5 rounded-full", s.color)} />
+                  <span className="text-[13px] font-bold text-foreground tabular-nums">{s.count}</span>
+                  <span className="text-[12px] text-muted-foreground">{s.label}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="relative bg-gradient-to-br from-card/70 via-card/50 to-card/30 px-7 md:px-9 py-9 overflow-hidden">
-            <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-success/[0.06] blur-[100px]" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="relative inline-flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.8)]" />
-                </span>
-                <p className="text-[10px] font-black uppercase tracking-[0.26em] text-muted-foreground/80">Saldo Disponível</p>
-              </div>
-              <div className="text-[44px] md:text-[60px] font-display font-black tracking-[-0.045em] leading-[0.95] text-success tabular-nums">
-                {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
-              </div>
-              <Link
-                to="/financeiro/saques"
-                className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-[8px] bg-primary/10 border border-primary/20 text-[11.5px] font-bold text-primary hover:bg-primary/15 hover:border-primary/30 transition-all group"
-              >
-                Sacar agora
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+          <div className="px-7 md:px-8 py-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="relative inline-flex h-1.5 w-1.5">
+                <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+              </span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Saldo Disponível</p>
             </div>
+            <div className="text-[40px] md:text-[54px] font-display font-black tracking-[-0.04em] leading-[0.95] text-success tabular-nums">
+              {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
+            </div>
+            <Link
+              to="/financeiro/saques"
+              className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-foreground text-background text-[11.5px] font-bold hover:opacity-90 transition-opacity group"
+            >
+              Sacar agora
+              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </div>
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/30 border-t border-border/30">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
           {[
-            { label: "Conversão", value: `${conversion.toFixed(1)}%`, color: "text-primary", icon: Target },
-            { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), color: "text-foreground", icon: Wallet },
-            { label: "Clientes Únicos", value: String(uniqueCustomers), color: "text-foreground", icon: Users },
-            { label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, color: chargebackRate > 1 ? "text-destructive" : "text-foreground", icon: ShieldCheck },
+            { label: "Conversão", value: `${conversion.toFixed(1)}%`, icon: Target },
+            { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: Wallet },
+            { label: "Clientes Únicos", value: String(uniqueCustomers), icon: Users },
+            { label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, icon: ShieldCheck, danger: chargebackRate > 1 },
           ].map((kpi) => (
-            <div key={kpi.label} className="group relative bg-gradient-to-b from-card/40 to-card/60 hover:from-card/60 hover:to-card/80 transition-all px-6 md:px-7 py-6 overflow-hidden">
-              <div className="pointer-events-none absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-primary/[0.04] blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/80 mb-2.5">{kpi.label}</p>
-                  <p className={cn("text-[28px] md:text-[34px] font-display font-black tracking-[-0.035em] leading-none tabular-nums", kpi.color)}>
-                    {kpi.value}
-                  </p>
-                </div>
-                <div className="h-7 w-7 rounded-md bg-muted/30 border border-border/30 flex items-center justify-center text-muted-foreground/50 group-hover:text-primary group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
-                  <kpi.icon className="h-3.5 w-3.5" strokeWidth={2} />
-                </div>
+            <div key={kpi.label} className="px-6 md:px-7 py-6">
+              <div className="flex items-start justify-between mb-3">
+                <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{kpi.label}</p>
+                <kpi.icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2} />
               </div>
+              <p className={cn(
+                "text-[26px] md:text-[30px] font-display font-black tracking-[-0.03em] leading-none tabular-nums",
+                (kpi as any).danger ? "text-destructive" : "text-foreground"
+              )}>
+                {kpi.value}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ─── BLOCO 2: GRÁFICO + POR MÉTODO ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-5 mb-5">
         {/* Gráfico */}
-        <section className="relative rounded-[20px] border border-border/50 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-xl overflow-hidden shadow-[0_8px_32px_-12px_hsl(var(--foreground)/0.08),inset_0_1px_0_hsl(var(--background)/0.6)]">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b border-border/30">
+        <section className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-6 md:px-7 py-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.3)]">
-                <TrendingUp className="h-4 w-4 text-primary" strokeWidth={2.2} />
+              <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+                <TrendingUp className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-foreground">Receita ao Longo do Tempo</p>
-                <p className="text-[10.5px] text-muted-foreground/70 mt-0.5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Receita ao longo do tempo</p>
+                <p className="text-[10.5px] text-muted-foreground mt-0.5">
                   {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {periodLabel}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] bg-success/8 border border-success/15">
-              <span className="h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.6)]" />
-              <span className="text-[10.5px] font-bold text-success">Vendas aprovadas</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted border border-border">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="text-[10.5px] font-semibold text-foreground">Aprovadas</span>
             </div>
           </div>
-          <div className="px-4 md:px-5 py-5 h-[340px]">
+          <div className="px-3 md:px-4 py-4 h-[340px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 16, bottom: 8, left: 8 }}>
                 <defs>
                   <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.38} />
-                    <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="dashStroke" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.85} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={1} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -677,13 +651,12 @@ export default function Dashboard() {
                   width={50}
                 />
                 <Tooltip
-                  cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.2, strokeWidth: 1, strokeDasharray: "3 3" }}
+                  cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1, strokeDasharray: "3 3" }}
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: 12,
+                    borderRadius: 10,
                     fontSize: 12,
-                    boxShadow: "0 12px 32px -8px hsl(var(--foreground) / 0.18)",
                     padding: "10px 14px",
                   }}
                   labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}
@@ -693,10 +666,10 @@ export default function Dashboard() {
                 <Area
                   type="monotone"
                   dataKey="vendas"
-                  stroke="url(#dashStroke)"
-                  strokeWidth={2.5}
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
                   fill="url(#dashGrad)"
-                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -704,60 +677,57 @@ export default function Dashboard() {
         </section>
 
         {/* Por método */}
-        <section className="relative rounded-[20px] border border-border/50 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-xl overflow-hidden shadow-[0_8px_32px_-12px_hsl(var(--foreground)/0.08),inset_0_1px_0_hsl(var(--background)/0.6)]">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          <div className="flex items-center gap-3 px-6 md:px-7 py-5 border-b border-border/30">
-            <div className="h-9 w-9 rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.3)]">
-              <Layers className="h-4 w-4 text-primary" strokeWidth={2.2} />
+        <section className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center gap-3 px-6 md:px-7 py-4 border-b border-border">
+            <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+              <Layers className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-foreground">Por Método</p>
-              <p className="text-[10.5px] text-muted-foreground/70 mt-0.5">Conversão e receita</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Por Método</p>
+              <p className="text-[10.5px] text-muted-foreground mt-0.5">Conversão e receita</p>
             </div>
           </div>
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border">
             {[
-              { icon: Zap, label: "PIX", conv: pixConversion, revenue: pixRevenue, sub: `${pixApprovedCount}/${pixTotalCount} aprovadas`, accent: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-              { icon: CreditCard, label: "Cartão", conv: cardConversion, revenue: cardRevenue, sub: `${cardApprovedCount}/${cardTotalCount} aprovadas`, accent: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+              { icon: Zap, label: "PIX", conv: pixConversion, revenue: pixRevenue, sub: `${pixApprovedCount}/${pixTotalCount} aprovadas` },
+              { icon: CreditCard, label: "Cartão", conv: cardConversion, revenue: cardRevenue, sub: `${cardApprovedCount}/${cardTotalCount} aprovadas` },
             ].map((m) => (
-              <div key={m.label} className="group px-6 md:px-7 py-5 hover:bg-muted/15 transition-colors">
-                <div className="flex items-center justify-between mb-2.5">
+              <div key={m.label} className="px-6 md:px-7 py-5">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className={cn("h-8 w-8 rounded-[9px] flex items-center justify-center border", m.bg, m.border, "shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]")}>
-                      <m.icon className={cn("h-4 w-4", m.accent)} strokeWidth={2.2} />
+                    <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+                      <m.icon className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
                     </div>
-                    <span className="text-[13.5px] font-bold text-foreground tracking-tight">{m.label}</span>
+                    <span className="text-[13px] font-bold text-foreground tracking-tight">{m.label}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/8 border border-primary/15">
-                    <span className="text-[11.5px] font-black text-primary tabular-nums">{m.conv.toFixed(1)}%</span>
-                  </div>
+                  <span className="text-[11.5px] font-bold text-foreground tabular-nums px-2 py-1 rounded-md bg-muted border border-border">
+                    {m.conv.toFixed(1)}%
+                  </span>
                 </div>
-                <div className="text-[22px] font-display font-black text-foreground tabular-nums tracking-[-0.035em] leading-none">
+                <div className="text-[22px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
                   {privacy.hidden ? CENSORED : fmt(m.revenue)}
                 </div>
-                <p className="text-[10.5px] text-muted-foreground/80 mt-1.5 font-medium">{m.sub}</p>
+                <p className="text-[10.5px] text-muted-foreground mt-1.5 font-medium">{m.sub}</p>
               </div>
             ))}
 
             {/* Saques pendentes */}
-            <div className="group px-6 md:px-7 py-5 hover:bg-muted/15 transition-colors bg-gradient-to-r from-warning/[0.025] to-transparent">
-              <div className="flex items-center justify-between mb-2.5">
+            <div className="px-6 md:px-7 py-5">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-[9px] bg-warning/15 border border-warning/25 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]">
-                    <DollarSign className="h-4 w-4 text-warning" strokeWidth={2.2} />
+                  <div className="h-8 w-8 rounded-lg bg-warning/10 border border-warning/20 flex items-center justify-center">
+                    <DollarSign className="h-3.5 w-3.5 text-warning" strokeWidth={2.2} />
                   </div>
-                  <span className="text-[13.5px] font-bold text-foreground tracking-tight">Saques pendentes</span>
+                  <span className="text-[13px] font-bold text-foreground tracking-tight">Saques pendentes</span>
                 </div>
-                <div className="px-2 py-1 rounded-md bg-warning/10 border border-warning/20">
-                  <span className="text-[11.5px] font-black text-warning tabular-nums">
-                    {withdrawals.filter(w => w.status === "pending").length}
-                  </span>
-                </div>
+                <span className="text-[11.5px] font-bold text-warning tabular-nums px-2 py-1 rounded-md bg-warning/10 border border-warning/20">
+                  {withdrawals.filter(w => w.status === "pending").length}
+                </span>
               </div>
-              <div className="text-[22px] font-display font-black text-warning tabular-nums tracking-[-0.035em] leading-none">
+              <div className="text-[22px] font-display font-black text-warning tabular-nums tracking-[-0.03em] leading-none">
                 {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
               </div>
-              <Link to="/financeiro/saques" className="text-[10.5px] text-primary font-bold hover:underline mt-1.5 inline-flex items-center gap-1">
+              <Link to="/financeiro/saques" className="text-[10.5px] text-foreground font-bold hover:underline mt-1.5 inline-flex items-center gap-1">
                 Gerenciar <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
@@ -766,70 +736,69 @@ export default function Dashboard() {
       </div>
 
       {/* ─── BLOCO 3: AÇÕES RÁPIDAS + ATIVIDADE RECENTE ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Ações rápidas */}
-        <section className="relative rounded-[20px] border border-border/50 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-xl overflow-hidden shadow-[0_8px_32px_-12px_hsl(var(--foreground)/0.08),inset_0_1px_0_hsl(var(--background)/0.6)]">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          <div className="flex items-center justify-between px-6 md:px-7 py-5 border-b border-border/30">
+        <section className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-6 md:px-7 py-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.3)]">
-                <Sparkles className="h-4 w-4 text-primary" strokeWidth={2.2} />
+              <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+                <Sparkles className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-foreground">Ações Rápidas</p>
-                <p className="text-[10.5px] text-muted-foreground/70 mt-0.5">Atalhos da operação</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Ações Rápidas</p>
+                <p className="text-[10.5px] text-muted-foreground mt-0.5">Atalhos da operação</p>
               </div>
             </div>
-            <Link to="/vendas/produtos" className="text-[10.5px] text-muted-foreground hover:text-foreground font-bold uppercase tracking-wider">
-              tudo
-            </Link>
           </div>
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border">
             {[
-              { icon: Package, label: "Criar produto", desc: "Adicionar novo infoproduto", to: "/vendas/produtos" },
-              { icon: ShoppingCart, label: "Configurar checkout", desc: "Personalizar página de venda", to: "/vendas/checkout" },
+              { icon: Package, label: "Criar produto", desc: "Adicionar novo infoproduto", to: "/vendas/produtos/novo/editar" },
+              { icon: ShoppingCart, label: "Personalizar checkout", desc: "Editar página de venda", to: "/vendas/checkout" },
               { icon: Users, label: "Convidar afiliados", desc: "Expandir rede de vendedores", to: "/vendas/afiliados" },
               { icon: Webhook, label: "Configurar integrações", desc: "Conectar apps e webhooks", to: "/integracoes" },
+              { icon: Percent, label: "Criar cupom", desc: "Promoções e descontos", to: "/vendas/cupons" },
+              { icon: BookOpen, label: "Área de membros", desc: "Gerenciar conteúdo e alunos", to: "/vendas/conteudo" },
+              { icon: Banknote, label: "Solicitar saque", desc: "Transferir saldo disponível", to: "/financeiro/saques" },
+              { icon: FileText, label: "Documentação API", desc: "Integrar via REST", to: "/vendas/api-docs" },
             ].map((action) => (
               <Link
                 key={action.label}
                 to={action.to}
-                className="flex items-center gap-3.5 px-6 md:px-7 py-4 hover:bg-muted/15 transition-all group"
+                className="flex items-center gap-3.5 px-6 md:px-7 py-3.5 hover:bg-muted/40 transition-colors group"
               >
-                <div className="h-10 w-10 rounded-[10px] bg-muted/40 border border-border/40 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]">
-                  <action.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={2} />
+                <div className="h-9 w-9 rounded-lg bg-muted border border-border flex items-center justify-center group-hover:bg-foreground group-hover:border-foreground transition-colors">
+                  <action.icon className="h-4 w-4 text-foreground group-hover:text-background transition-colors" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13.5px] font-bold text-foreground tracking-tight">{action.label}</p>
-                  <p className="text-[10.5px] text-muted-foreground/70 mt-0.5">{action.desc}</p>
+                  <p className="text-[13px] font-bold text-foreground tracking-tight">{action.label}</p>
+                  <p className="text-[10.5px] text-muted-foreground mt-0.5">{action.desc}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
               </Link>
             ))}
           </div>
         </section>
 
         {/* Atividade recente */}
-        <section className="relative rounded-[20px] border border-border/50 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-xl overflow-hidden shadow-[0_8px_32px_-12px_hsl(var(--foreground)/0.08),inset_0_1px_0_hsl(var(--background)/0.6)]">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          <div className="flex items-center justify-between px-6 md:px-7 py-5 border-b border-border/30">
+        <section className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-6 md:px-7 py-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.3)]">
-                <Activity className="h-4 w-4 text-primary" strokeWidth={2.2} />
+              <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+                <Activity className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-foreground">Atividade Recente</p>
-                <p className="text-[10.5px] text-muted-foreground/70 mt-0.5">Últimos eventos</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Atividade Recente</p>
+                <p className="text-[10.5px] text-muted-foreground mt-0.5">Últimos eventos</p>
               </div>
             </div>
-            <Link to="/vendas" className="text-[10.5px] text-primary hover:underline font-bold uppercase tracking-wider inline-flex items-center gap-1">
+            <Link to="/vendas" className="text-[10.5px] text-foreground hover:underline font-bold uppercase tracking-wider inline-flex items-center gap-1">
               Ver tudo <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border">
             {activity.length === 0 ? (
               <div className="px-6 py-14 text-center">
-                <div className="mx-auto h-12 w-12 rounded-full bg-muted/40 border border-border/40 flex items-center justify-center mb-4 shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]">
+                <div className="mx-auto h-12 w-12 rounded-xl bg-muted border border-border flex items-center justify-center mb-4">
                   <Activity className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <p className="text-[13px] font-semibold text-foreground">Nenhuma atividade ainda</p>
@@ -842,44 +811,57 @@ export default function Dashboard() {
                 const isFailed = item.status === "refunded" || item.status === "chargeback" || item.status === "failed" || item.status === "rejected";
                 const statusColor = isCompleted ? "bg-success" : isPending ? "bg-warning" : isFailed ? "bg-destructive" : "bg-muted-foreground";
                 const statusLabel = isCompleted ? "Aprovada" : isPending ? "Pendente" : isFailed ? "Falhou" : item.status;
-                const Icon = item.kind === "withdrawal" ? Wallet : (item as any).paymentMethod === "pix" ? Zap : CreditCard;
+                const tx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) : null;
+                const product = tx?.product_id ? productsData?.find(p => p.id === tx.product_id) : null;
+                const customerName = tx?.customer_name?.split(" ")[0] || (tx?.customer_email?.split("@")[0]) || null;
+                const method = (item as any).paymentMethod;
+                const Icon = item.kind === "withdrawal" ? Wallet : method === "pix" ? Zap : CreditCard;
+                const methodLabel = item.kind === "withdrawal" ? "Saque" : method === "pix" ? "PIX" : method === "credit_card" || method === "card" ? "Cartão" : (item.label || "Venda");
 
                 return (
                   <button
                     key={item.id}
                     onClick={() => {
-                      if (item.kind === "transaction") {
-                        const tx = transactions.find(t => t.id === item.id);
-                        if (tx) setDetailTx(tx);
-                      }
+                      if (tx) setDetailTx(tx);
                     }}
-                    className="w-full flex items-center gap-3.5 px-6 md:px-7 py-4 hover:bg-muted/15 transition-all text-left group"
+                    className="w-full flex items-center gap-3.5 px-6 md:px-7 py-3.5 hover:bg-muted/40 transition-colors text-left group"
                   >
-                    <div className="h-10 w-10 rounded-[10px] bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 flex items-center justify-center shrink-0 shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]">
-                      <Icon className="h-4 w-4 text-primary" strokeWidth={2.2} />
+                    <div className={cn(
+                      "h-9 w-9 rounded-lg border flex items-center justify-center shrink-0",
+                      isCompleted && "bg-success/10 border-success/20",
+                      isPending && "bg-warning/10 border-warning/20",
+                      isFailed && "bg-destructive/10 border-destructive/20",
+                      !isCompleted && !isPending && !isFailed && "bg-muted border-border"
+                    )}>
+                      <Icon className={cn(
+                        "h-4 w-4",
+                        isCompleted && "text-success",
+                        isPending && "text-warning",
+                        isFailed && "text-destructive",
+                        !isCompleted && !isPending && !isFailed && "text-foreground"
+                      )} strokeWidth={2.2} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[14px] font-black text-foreground tabular-nums tracking-tight">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[13.5px] font-black text-foreground tabular-nums tracking-tight">
                           {privacy.hidden ? CENSORED : fmt(item.amount)}
                         </span>
-                        <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9.5px] font-black uppercase tracking-wider border",
-                          isCompleted && "bg-success/12 text-success border-success/20",
-                          isPending && "bg-warning/12 text-warning border-warning/20",
-                          isFailed && "bg-destructive/12 text-destructive border-destructive/20",
-                          !isCompleted && !isPending && !isFailed && "bg-muted/40 text-muted-foreground border-border/40"
-                        )}>
+                        <span className="text-[10.5px] text-muted-foreground font-medium">·</span>
+                        <span className="text-[11px] font-semibold text-foreground/80">{methodLabel}</span>
+                      </div>
+                      <p className="text-[10.5px] text-muted-foreground truncate font-medium flex items-center gap-1.5">
+                        <span className={cn("inline-flex items-center gap-1", isCompleted && "text-success", isPending && "text-warning", isFailed && "text-destructive")}>
                           <span className={cn("h-1 w-1 rounded-full", statusColor)} />
                           {statusLabel}
                         </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate font-medium">
-                        {item.kind === "withdrawal"
-                          ? `Saque · ${timeAgo(item.createdAt)}`
-                          : `Venda · ${(item as any).paymentMethod === "pix" ? "PIX" : (item as any).paymentMethod === "credit_card" || (item as any).paymentMethod === "card" ? "Cartão" : item.label} · ${timeAgo(item.createdAt)}`}
+                        {(customerName || product) && <span className="text-muted-foreground/60">·</span>}
+                        {customerName && <span className="truncate">{customerName}</span>}
+                        {product && <><span className="text-muted-foreground/60">·</span><span className="truncate">{product.name}</span></>}
+                        <span className="text-muted-foreground/60">·</span>
+                        <span className="shrink-0">{timeAgo(item.createdAt)}</span>
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 );
               })

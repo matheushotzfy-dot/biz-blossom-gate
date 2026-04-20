@@ -257,11 +257,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
             <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
           </linearGradient>
-          <filter id="glow-vendas" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
+          </defs>
         <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
         <XAxis 
           dataKey="label" 
@@ -284,7 +280,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
             if (!active || !payload?.length) return null;
             const value = payload[0].value as number;
             return (
-              <div className="rounded-xl border border-border/50 bg-card/90 backdrop-blur-md px-3.5 py-2.5 shadow-xl ring-1 ring-black/5">
+              <div className="rounded-lg border border-border bg-card px-3.5 py-2.5">
                 <p className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-widest mb-1">{label}</p>
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-primary" />
@@ -304,7 +300,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
           strokeWidth={3}
           fill="url(#rv-gradient-premium)"
           dot={false}
-          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 2.5, fill: "hsl(var(--primary))", filter: "url(#glow-vendas)" }}
+          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 2.5, fill: "hsl(var(--primary))" }}
           animationDuration={1500}
         />
       </ComposedChart>
@@ -422,7 +418,7 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
  const statusAccentBar = tx.status === "completed" ? "from-success via-success/40" : tx.status === "pending" ? "from-warning via-warning/40" : tx.status === "failed" ? "from-destructive via-destructive/40" : "from-muted-foreground/20 via-transparent";
 
  return (
-  <div className="group cursor-pointer overflow-hidden rounded-[22px] border border-border/15 bg-card/60 backdrop-blur-md active:scale-[0.98] transition-all duration-300 shadow-lg ring-1 ring-white/5" onClick={onClick}>
+  <div className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card active:bg-muted/40 transition-colors" onClick={onClick}>
    {/* Top accent line */}
    <div className={cn("h-[2.5px] bg-gradient-to-r to-transparent", statusAccentBar)} />
    
@@ -854,11 +850,6 @@ export default function Vendas() {
 
     return (
       <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-8 relative">
-        {/* Background glow effects - Sidebar Style */}
-        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -left-[10%] top-[5%] h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
-          <div className="absolute -right-[5%] top-[20%] h-[400px] w-[400px] rounded-full bg-info/5 blur-[100px]" />
-        </div>
 
           {/* ═══════ HEADER ═══════ */}
           <header className="flex flex-col gap-5 pb-1 sm:flex-row sm:items-end sm:justify-between">
@@ -877,15 +868,14 @@ export default function Vendas() {
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <button onClick={toggleHidden} className={cn("flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-300 shadow-sm", hidden ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:shadow-md")}>
+              <button onClick={toggleHidden} className={cn("flex h-10 w-10 items-center justify-center rounded-lg border transition-colors", hidden ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
                 {hidden ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
               </button>
-              <button onClick={() => window.location.reload()} className="group inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-[13px] font-bold text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all duration-300 shadow-sm hover:shadow-md">
+              <button onClick={() => window.location.reload()} className="group inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-[12.5px] font-bold text-muted-foreground hover:text-foreground transition-colors">
                 <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-700" /> 
                 <span className="hidden sm:inline">Atualizar</span>
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="relative overflow-hidden group inline-flex h-10 items-center gap-2 rounded-xl bg-foreground px-5 text-[13px] font-black text-background transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 active:translate-y-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-[12.5px] font-bold text-background hover:opacity-90 transition-opacity">
                 <Download className="h-4 w-4" /> 
                 <span>Exportar</span>
               </button>
@@ -922,13 +912,10 @@ export default function Vendas() {
             </span>
           </div>
 
-          <section className="relative group overflow-hidden rounded-3xl border border-border bg-card/50 backdrop-blur-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] transition-all duration-500 hover:shadow-[0_12px_48px_-8px_rgba(0,0,0,0.15)]">
-            {/* Background Glows */}
-            <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
-            <div className="absolute top-1/2 -right-24 h-64 w-64 rounded-full bg-info/5 blur-[100px] pointer-events-none" />
-            
+          <section className="relative group overflow-hidden rounded-2xl border border-border bg-card transition-colors">
+
             {/* Revenue header strip */}
-            <div className="relative flex flex-col gap-8 border-b border-border/50 px-8 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03]">
+            <div className="relative flex flex-col gap-8 border-b border-border px-8 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
               <div className="flex flex-col gap-3 min-w-0">
                 <div className="flex items-center gap-3">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -938,10 +925,9 @@ export default function Vendas() {
                   <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                 </div>
                 <div className="relative group/rev">
-                  <p className="text-[56px] sm:text-[64px] lg:text-[72px] font-display font-black tabular-nums tracking-[-0.06em] leading-[0.85] transition-all group-hover/rev:tracking-[-0.07em] bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground to-foreground/40">
+                  <p className="text-[56px] sm:text-[64px] lg:text-[72px] font-display font-black tabular-nums tracking-[-0.05em] leading-[0.9] text-foreground">
                     {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                   </p>
-                  <div className="absolute -inset-x-4 -inset-y-2 bg-primary/5 blur-2xl opacity-0 group-hover/rev:opacity-100 transition-opacity pointer-events-none" />
                 </div>
                 <div className="flex items-center gap-3 mt-1">
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border/50">
@@ -992,7 +978,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group overflow-hidden">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-success transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/10 text-success shadow-[0_0_15px_rgba(34,197,94,0.1)] group-hover:scale-110 group-hover:bg-success/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/10 text-success group-hover:bg-success/20 transition-all duration-300">
                     <CheckSquare className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Aprovação</p>
@@ -1011,7 +997,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-info transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 text-info shadow-[0_0_15px_rgba(14,165,233,0.1)] group-hover:scale-110 group-hover:bg-info/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 text-info group-hover:bg-info/20 transition-all duration-300">
                     <Smartphone className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">PIX</p>
@@ -1028,7 +1014,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.1)] group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-all duration-300">
                     <CreditCard className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Cartão</p>
@@ -1045,7 +1031,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-warning transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-warning/10 text-warning shadow-[0_0_15px_rgba(234,179,8,0.1)] group-hover:scale-110 group-hover:bg-warning/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-warning/10 text-warning group-hover:bg-warning/20 transition-all duration-300">
                     <FileText className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Boleto</p>
@@ -1062,7 +1048,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-muted-foreground/30 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/20 text-muted-foreground group-hover:scale-110 group-hover:bg-muted/30 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/20 text-muted-foreground group-hover:bg-muted/30 transition-all duration-300">
                     <RefreshCw className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Reembolsado</p>
@@ -1079,7 +1065,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-destructive transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 text-destructive shadow-[0_0_15px_rgba(239,68,68,0.1)] group-hover:scale-110 group-hover:bg-destructive/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 text-destructive group-hover:bg-destructive/20 transition-all duration-300">
                     <Shield className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Chargebacks</p>
@@ -1096,7 +1082,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-info transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 text-info shadow-[0_0_15px_rgba(14,165,233,0.1)] group-hover:scale-110 group-hover:bg-info/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 text-info group-hover:bg-info/20 transition-all duration-300">
                     <Users className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Base de Clientes</p>
@@ -1118,7 +1104,7 @@ export default function Vendas() {
               <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-amber-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)] group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 group-hover:bg-amber-500/20 transition-all duration-300">
                     <Crown className="h-4.5 w-4.5" strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Produto Top</p>
@@ -1135,7 +1121,7 @@ export default function Vendas() {
 
 
          {/* ═══════ TRANSACTIONS ═══════ */}
-         <section className="overflow-hidden rounded-[24px] border border-border/40 bg-card/80 backdrop-blur-md shadow-[0_8px_32px_-12px_rgba(0,0,0,0.15)] ring-1 ring-white/5">
+         <section className="overflow-hidden rounded-2xl border border-border bg-card">
            {/* Top contextual ribbon */}
            <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-5">
              <div>
@@ -1168,7 +1154,7 @@ export default function Vendas() {
                     )}>
                     <span className={cn(
                       "flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-300",
-                      active ? "bg-primary/10 text-primary shadow-[0_0_12px_rgba(var(--primary),0.2)]" : "bg-muted/50 group-hover:bg-muted"
+                      active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
                     )}>
                       <Icon className={cn("h-3.5 w-3.5", active ? "stroke-[2.5px]" : "stroke-[2px]")} />
                     </span>
@@ -1178,7 +1164,7 @@ export default function Vendas() {
                         active ? "bg-primary/5 border-primary/20 text-primary" : "bg-muted/30 border-border/40 text-muted-foreground/40"
                       )}>{tab.count}</span>
                     </span>
-                    {active && <motion.span layoutId="active-tab" className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_8px_rgba(var(--primary),0.4)]" />}
+                    {active && <motion.span layoutId="active-tab" className="absolute bottom-0 left-2 right-2 h-[2px] bg-foreground rounded-t-full" />}
                   </button>
                 );
               })}
