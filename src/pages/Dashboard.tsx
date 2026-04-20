@@ -789,13 +789,13 @@ export default function Dashboard() {
         {/* PERFORMANCE STRIP                                                */}
         {/* ─────────────────────────────────────────────────────────────── */}
         <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 03</span>
-            <span className="h-px flex-1 bg-foreground/10" />
-            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Indicadores Operacionais</span>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 03</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Indicadores Operacionais</span>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.08] rounded-[10px] overflow-hidden">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
             <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
             <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
             <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
