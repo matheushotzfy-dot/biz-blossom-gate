@@ -298,9 +298,12 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
         <Check className="h-2 w-2 text-success-foreground" strokeWidth={4} />
        </span>
       )}
-      {tx.status === "pending" && (
-       <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-[2px] ring-card">
-     </div>
+       {tx.status === "pending" && (
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-[2px] ring-card">
+          <Clock className="h-2 w-2 text-warning-foreground" strokeWidth={4} />
+        </span>
+       )}
+      </div>
      <div className="min-w-0">
       <p className="truncate text-[13px] font-heading font-bold text-foreground leading-tight tracking-[-0.01em]">{name}</p>
       <div className="flex items-center gap-1.5 mt-1">
