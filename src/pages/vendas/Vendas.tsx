@@ -1132,26 +1132,42 @@ export default function Vendas() {
                 <div className="p-6 lg:p-8 flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Saúde da operação</p>
-                    <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{approvalRate.toFixed(1)}% aprov.</span>
+                    <span className={cn(
+                      "text-[11.5px] font-heading font-semibold tabular-nums px-2 py-0.5 rounded-md border",
+                      approvalRate >= 80 ? "text-success bg-success/8 border-success/20" :
+                      approvalRate >= 60 ? "text-warning bg-warning/8 border-warning/20" :
+                      "text-destructive bg-destructive/8 border-destructive/20"
+                    )}>
+                      {approvalRate.toFixed(1)}% aprov.
+                    </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2.5">
                     {healthItems.map((hi) => {
                       const ok = hi.value <= hi.threshold;
+                      const ratio = hi.threshold > 0 ? Math.min((hi.value / hi.threshold) * 100, 100) : 0;
                       return (
-                        <div key={hi.label} className="rounded-lg border border-border px-3 py-2.5 bg-card hover:bg-muted/40 transition-colors">
-                          <p className="text-[10.5px] text-muted-foreground/85 font-medium uppercase tracking-[0.06em]">{hi.label}</p>
-                          <p className={cn("mt-1.5 text-[17px] font-heading font-semibold tabular-nums leading-none tracking-[-0.02em]", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                          <p className="text-[10.5px] text-muted-foreground/70 mt-1.5 tabular-nums">máx {hi.threshold}%</p>
+                        <div key={hi.label} className={cn(
+                          "rounded-xl border px-3 py-3 transition-all relative overflow-hidden",
+                          ok
+                            ? "border-border/60 bg-muted/[0.18] hover:bg-muted/30"
+                            : "border-destructive/25 bg-destructive/[0.06]"
+                        )}>
+                          <p className="text-[9.5px] text-muted-foreground/85 font-heading font-bold uppercase tracking-[0.12em]">{hi.label}</p>
+                          <p className={cn("mt-2 text-[19px] font-heading font-bold tabular-nums leading-none tracking-[-0.025em]", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}<span className="text-[12px] font-semibold opacity-60">%</span></p>
+                          <div className="mt-2.5 h-[3px] rounded-full bg-muted overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all", ok ? "bg-foreground/40" : "bg-destructive")} style={{ width: `${ratio}%` }} />
+                          </div>
+                          <p className="text-[9.5px] text-muted-foreground/70 mt-1.5 tabular-nums font-medium">máx {hi.threshold}%</p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-[11.5px] font-medium">
+                  <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between text-[11.5px] font-medium">
                     <span className="text-muted-foreground/85">
-                      Reembolso <span className="text-foreground font-semibold tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
+                      Reembolso <span className="text-foreground font-semibold tabular-nums ml-0.5">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
                     </span>
                     <span className="text-muted-foreground/85">
-                      Chargeback <span className={cn("font-semibold tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
+                      Chargeback <span className={cn("font-semibold tabular-nums ml-0.5", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
                     </span>
                   </div>
                 </div>
