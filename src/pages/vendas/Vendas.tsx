@@ -1159,47 +1159,47 @@ export default function Vendas() {
                <>
                  <div className="overflow-x-auto">
                    <table className="w-full min-w-[900px]">
-                     <thead>
-                        <tr className="border-b border-border bg-muted/30">
-                          <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
-                          <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                          <th className="h-10 px-3 text-left text-[11px] font-medium text-muted-foreground/70">Status</th>
-                          <th className="h-10 px-3 text-left text-[11px] font-medium text-muted-foreground/70">Método</th>
-                          <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
-                          <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-4" />
-                          <th className="w-12" />
-                        </tr>
-                     </thead>
-                     <tbody>
-                       {visibleItems.length === 0 ? (
-                         <tr><td colSpan={7} className="py-16">
-                           <div className="flex flex-col items-center justify-center">
-                             <ShoppingCart className="mb-2 h-5 w-5 text-muted-foreground/40" />
-                             <p className="text-[13px] font-medium text-foreground">Nenhuma venda encontrada</p>
-                             <p className="mt-1 text-[11.5px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
-                           </div>
-                         </td></tr>
-                       ) : visibleItems.map((tx, i) => (
-                         <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
-                       ))}
-                     </tbody>
-                   </table>
-                 </div>
-                 {visibleItems.length > 0 && (
-                   <div className="flex items-center justify-between border-t border-border px-5 py-2.5 bg-muted/20">
-                     <span className="text-[11.5px] text-muted-foreground tabular-nums">
-                       {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · página {currentPage} de {totalPages}
-                     </span>
-                     <div className="flex items-center gap-1.5">
-                       <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-                         <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
-                       </button>
-                       <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-                         Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
-                       </button>
-                     </div>
-                   </div>
-                 )}
+                      <thead>
+                         <tr className="border-b border-border bg-muted/30">
+                           <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
+                           <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                           <th className="h-12 px-4 text-left text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/55">Status</th>
+                           <th className="h-12 px-4 text-left text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/55">Método</th>
+                           <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
+                           <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-5" />
+                           <th className="w-12" />
+                         </tr>
+                      </thead>
+                      <tbody>
+                        {visibleItems.length === 0 ? (
+                          <tr><td colSpan={7} className="py-20">
+                            <div className="flex flex-col items-center justify-center">
+                              <ShoppingCart className="mb-3 h-6 w-6 text-muted-foreground/40" strokeWidth={1.5} />
+                              <p className="text-[13.5px] font-heading font-semibold text-foreground">Nenhuma venda encontrada</p>
+                              <p className="mt-1.5 text-[12px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
+                            </div>
+                          </td></tr>
+                        ) : visibleItems.map((tx, i) => (
+                          <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {visibleItems.length > 0 && (
+                    <div className="flex items-center justify-between border-t border-border px-6 py-3 bg-muted/[0.18]">
+                      <span className="text-[12px] text-muted-foreground/85 tabular-nums font-medium">
+                        {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · página <span className="text-foreground font-semibold">{currentPage}</span> de <span className="text-foreground font-semibold">{totalPages}</span>
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12px] font-heading font-semibold text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                          <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
+                        </button>
+                        <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12px] font-heading font-semibold text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                          Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                </>
              )}
            </div>
