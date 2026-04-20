@@ -681,9 +681,9 @@ export default function Dashboard() {
                   type="monotone"
                   dataKey="vendas"
                   stroke="hsl(var(--primary))"
-                  strokeWidth={2}
+                  strokeWidth={2.25}
                   fill="url(#dashGrad)"
-                  activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }}
+                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3, style: { filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.6))" } }}
                 />
               </AreaChart>
             </ResponsiveContainer>
