@@ -1,17 +1,18 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactions, useProducts } from "@/hooks/useQueryData";
+import { motion, AnimatePresence } from "framer-motion";
 import {
- ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X, EyeOff,
- Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
- RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
- Download, FileText, BarChart3, ArrowDownRight, Zap, Filter,
- MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
- Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
- Percent, UserCheck, Layers, ArrowUp, ArrowDown, ChevronUp, Radio, Flame,
- ArrowUpDown, SortAsc, SortDesc, CircleDot, Minus, Sparkles, Box,
- ChevronRight, Star, Shield, Banknote, Globe, Crown, Gauge, BadgeDollarSign,
- Coins, Timer, LayoutGrid, Radar, Signal, Gem, Bolt,
+  ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X, EyeOff,
+  Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
+  RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
+  Download, FileText, BarChart3, ArrowDownRight, Zap, Filter,
+  MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
+  Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
+  Percent, UserCheck, Layers, ArrowUp, ArrowDown, ChevronUp, Radio, Flame,
+  ArrowUpDown, SortAsc, SortDesc, CircleDot, Minus, Sparkles, Box,
+  ChevronRight, Star, Shield, Banknote, Globe, Crown, Gauge, BadgeDollarSign,
+  Coins, Timer, LayoutGrid, Radar, Signal, Gem, Bolt, Smartphone,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -317,7 +318,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/40 last:border-b-0">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/20 transition-all duration-300 hover:bg-primary/[0.02] active:bg-primary/[0.04] last:border-b-0">
    {/* Customer */}
    <td className="pl-6 pr-4 py-5 align-middle">
     <div className="flex items-center gap-3.5">
@@ -409,11 +410,11 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
  const statusAccentBar = tx.status === "completed" ? "from-success via-success/40" : tx.status === "pending" ? "from-warning via-warning/40" : tx.status === "failed" ? "from-destructive via-destructive/40" : "from-muted-foreground/20 via-transparent";
 
  return (
-  <div className="group cursor-pointer overflow-hidden rounded-2xl border border-border/15 bg-card active:scale-[0.98] transition-all duration-200" onClick={onClick}>
+  <div className="group cursor-pointer overflow-hidden rounded-[22px] border border-border/15 bg-card/60 backdrop-blur-md active:scale-[0.98] transition-all duration-300 shadow-lg ring-1 ring-white/5" onClick={onClick}>
    {/* Top accent line */}
-   <div className={cn("h-[2px] bg-gradient-to-r to-transparent", statusAccentBar)} />
+   <div className={cn("h-[2.5px] bg-gradient-to-r to-transparent", statusAccentBar)} />
    
-   <div className="p-4 space-y-3">
+   <div className="p-5 space-y-4">
     {/* Row 1: Avatar + Name + Net amount */}
     <div className="flex items-start justify-between gap-3">
      <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -765,15 +766,15 @@ export default function Vendas() {
    if (t.status in c) c[t.status]++;
    if (t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")) c.medpix++;
  }
- return [
- { label: "Todas", value: "all" as StatusFilter, count: c.all },
- { label: "Aprovadas", value: "completed" as StatusFilter, count: c.completed },
- { label: "Pendentes", value: "pending" as StatusFilter, count: c.pending },
- { label: "Reembolsadas", value: "refunded" as StatusFilter, count: c.refunded },
- { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback },
- { label: "MedPix", value: "medpix" as StatusFilter, count: c.medpix },
- { label: "Falhas", value: "failed" as StatusFilter, count: c.failed },
- ];
+    return [
+      { label: "Todas", value: "all" as StatusFilter, count: c.all, icon: Layers },
+      { label: "Aprovadas", value: "completed" as StatusFilter, count: c.completed, icon: CheckSquare },
+      { label: "Pendentes", value: "pending" as StatusFilter, count: c.pending, icon: Timer },
+      { label: "Reembolsadas", value: "refunded" as StatusFilter, count: c.refunded, icon: RefreshCw },
+      { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback, icon: Shield },
+      { label: "MedPix", value: "medpix" as StatusFilter, count: c.medpix, icon: Smartphone },
+      { label: "Falhas", value: "failed" as StatusFilter, count: c.failed, icon: X },
+    ];
  }, [dateFiltered]);
 
  const sanitize = useCallback((val: unknown): string => {
@@ -783,8 +784,8 @@ export default function Vendas() {
 
  const handleExportCSV = useCallback((txList: Tables<"transactions">[]) => {
  if (txList.length === 0) { toast.error("Nenhuma transação para exportar."); return; }
- const headers = ["ID", "Cliente", "Email", "Telefone", "CPF/CNPJ", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
- const rows = txList.map(t => [t.id, t.customer_name || "", t.customer_email || "", t.customer_phone || "", t.customer_document || "", t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount), t.payment_method || "", t.status, t.created_at]);
+    const headers = ["ID", "Cliente", "Email", "Telefone", "CPF/CNPJ", "Endereço", "Produto", "Valor Bruto", "Taxa", "Líquido", "Método", "Status", "Data"];
+    const rows = txList.map(t => [t.id, t.customer_name || "", t.customer_email || "", t.customer_phone || "", t.customer_document || "", t.customer_address || "", t.product_id ? products[t.product_id] || "" : "", Number(t.amount), Number(t.fee_amount), Number(t.net_amount), t.payment_method || "", t.status, t.created_at]);
  const csv = [headers.join(","), ...rows.map(r => r.map(c => `"${sanitize(c).replace(/"/g, '""')}"`).join(","))].join("\n");
  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
  const url = URL.createObjectURL(blob);
@@ -839,8 +840,13 @@ export default function Vendas() {
         muted:   { value: "text-foreground/60", iconBg: "bg-muted/60",         iconFg: "text-muted-foreground" },
       };
 
-      return (
-        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
+    return (
+      <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-8 relative">
+        {/* Background glow effects - Sidebar Style */}
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="absolute -left-[10%] top-[5%] h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
+          <div className="absolute -right-[5%] top-[20%] h-[400px] w-[400px] rounded-full bg-info/5 blur-[100px]" />
+        </div>
 
           {/* ═══════ HEADER ═══════ */}
           <header className="flex flex-col gap-5 pb-1 sm:flex-row sm:items-end sm:justify-between">
@@ -910,7 +916,7 @@ export default function Vendas() {
                   <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
                   <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                 </div>
-                <p className="text-[40px] sm:text-[46px] lg:text-[52px] font-heading font-semibold tabular-nums tracking-[-0.045em] text-foreground leading-[0.95]">
+                <p className="text-[44px] sm:text-[50px] lg:text-[60px] font-display font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9] drop-shadow-[0_0_25px_rgba(var(--primary),0.15)]">
                   {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                 </p>
                 <p className="text-[12px] text-muted-foreground/85 tabular-nums font-medium tracking-tight">
@@ -984,7 +990,7 @@ export default function Vendas() {
 
 
          {/* ═══════ TRANSACTIONS ═══════ */}
-         <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+         <section className="overflow-hidden rounded-[24px] border border-border/40 bg-card/80 backdrop-blur-md shadow-[0_8px_32px_-12px_rgba(0,0,0,0.15)] ring-1 ring-white/5">
            {/* Top contextual ribbon */}
            <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-5">
              <div>
@@ -999,33 +1005,40 @@ export default function Vendas() {
              </div>
            </header>
 
-           {/* Status tabs */}
-           <div className="border-b border-border px-6">
-             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-               {statusTabs.map((tab) => {
-                 const active = statusFilter === tab.value;
-                 const dotColors: Record<string, string> = {
-                   completed: "bg-success", pending: "bg-warning", failed: "bg-destructive",
-                   refunded: "bg-info", chargeback: "bg-destructive", medpix: "bg-warning",
-                 };
-                 return (
-                   <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                     className={cn("relative px-3.5 py-3.5 text-[12.5px] font-heading font-semibold whitespace-nowrap transition-colors tracking-[-0.005em]",
-                       active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                     )}>
-                     <span className="flex items-center gap-2">
-                       {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[tab.value], !active && "opacity-50")} />}
-                       {tab.label}
-                       <span className={cn("tabular-nums text-[11px] font-semibold px-1.5 rounded",
-                         active ? "bg-muted text-foreground" : "text-muted-foreground/85"
-                       )}>{tab.count}</span>
-                     </span>
-                     {active && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground rounded-t-full" />}
-                   </button>
-                 );
-               })}
-             </div>
-           </div>
+          {/* Status tabs — Sidebar Styled */}
+          <div className="border-b border-border/40 px-6">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth">
+              {statusTabs.map((tab) => {
+                const active = statusFilter === tab.value;
+                const Icon = tab.icon;
+                const dotColors: Record<string, string> = {
+                  completed: "bg-success", pending: "bg-warning", failed: "bg-destructive",
+                  refunded: "bg-info", chargeback: "bg-destructive", medpix: "bg-warning",
+                  all: "bg-primary",
+                };
+                return (
+                  <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
+                    className={cn("group relative flex items-center gap-2.5 px-4 py-4 text-[13px] font-bold whitespace-nowrap transition-all duration-300 tracking-tight",
+                      active ? "text-foreground" : "text-muted-foreground/50 hover:text-foreground"
+                    )}>
+                    <span className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-300",
+                      active ? "bg-primary/10 text-primary shadow-[0_0_12px_rgba(var(--primary),0.2)]" : "bg-muted/50 group-hover:bg-muted"
+                    )}>
+                      <Icon className={cn("h-3.5 w-3.5", active ? "stroke-[2.5px]" : "stroke-[2px]")} />
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      {tab.label}
+                      <span className={cn("tabular-nums text-[10px] font-black px-1.5 py-0.5 rounded-md border transition-colors",
+                        active ? "bg-primary/5 border-primary/20 text-primary" : "bg-muted/30 border-border/40 text-muted-foreground/40"
+                      )}>{tab.count}</span>
+                    </span>
+                    {active && <motion.span layoutId="active-tab" className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_8px_rgba(var(--primary),0.4)]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
            {/* Search & Toolbar */}
            <div className="flex flex-col gap-2.5 border-b border-border px-6 py-3.5 sm:flex-row sm:items-center sm:justify-between">
