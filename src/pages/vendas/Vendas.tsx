@@ -833,16 +833,26 @@ export default function Vendas() {
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
       /* ═══════════ RENDER ═══════════ */
-      const kpiData = [
-        { label: "Vendas aprovadas", value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"), sub: `${dateFiltered.length.toLocaleString("pt-BR")} tentativas · ${approvalRate.toFixed(1)}% conversão`, accent: "text-foreground" },
-        { label: "Receita líquida", value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`, accent: "text-success" },
-        { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgTicket), sub: `${m.uniqueCustomers.toLocaleString("pt-BR")} clientes únicos`, accent: "text-foreground" },
-        { label: "Receita em PIX", value: hidden ? HIDE : fmtCompact(m.pixRev), sub: `${m.pixCount.toLocaleString("pt-BR")} venda${m.pixCount !== 1 ? "s" : ""} aprovada${m.pixCount !== 1 ? "s" : ""}`, accent: "text-success" },
-        { label: "Receita em Cartão", value: hidden ? HIDE : fmtCompact(m.cardRev), sub: `${m.cardCount.toLocaleString("pt-BR")} venda${m.cardCount !== 1 ? "s" : ""} aprovada${m.cardCount !== 1 ? "s" : ""}`, accent: "text-info" },
-        { label: "Reembolsado", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} reembolso${m.refunded.length !== 1 ? "s" : ""} · ${m.refundRate.toFixed(2)}% do total`, accent: m.refundRate > 5 ? "text-destructive" : "text-info" },
-        { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} disputa${m.chargebacks.length !== 1 ? "s" : ""} · ${m.chargebackRate.toFixed(2)}% do total`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-foreground/50" },
-        { label: "MedPix", value: dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length.toLocaleString("pt-BR"), sub: "PIX contestados ou reembolsados", accent: "text-warning" },
+      type KpiTone = "success" | "info" | "warning" | "danger" | "neutral" | "muted";
+      const kpiData: { label: string; icon: typeof CheckSquare; value: string; sub: string; tone: KpiTone }[] = [
+        { label: "Vendas aprovadas",   icon: CheckSquare,    value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"),                                                                                                                          sub: `${dateFiltered.length.toLocaleString("pt-BR")} tentativas · ${approvalRate.toFixed(1)}% conversão`,             tone: "neutral" },
+        { label: "Receita líquida",    icon: DollarSign,     value: hidden ? HIDE : fmtCompact(m.totalNet),                                                                                                                                              sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`,                            tone: "success" },
+        { label: "Ticket médio",       icon: Target,         value: hidden ? HIDE : fmtCompact(m.avgTicket),                                                                                                                                             sub: `${m.uniqueCustomers.toLocaleString("pt-BR")} ${m.uniqueCustomers === 1 ? "cliente único" : "clientes únicos"}`, tone: "neutral" },
+        { label: "Receita em PIX",     icon: Zap,            value: hidden ? HIDE : fmtCompact(m.pixRev),                                                                                                                                                sub: `${m.pixCount.toLocaleString("pt-BR")} ${m.pixCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,             tone: "success" },
+        { label: "Receita em Cartão",  icon: CreditCard,     value: hidden ? HIDE : fmtCompact(m.cardRev),                                                                                                                                               sub: `${m.cardCount.toLocaleString("pt-BR")} ${m.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,           tone: "info" },
+        { label: "Reembolsado",        icon: RefreshCw,      value: hidden ? HIDE : fmtCompact(refundedAmount),                                                                                                                                          sub: `${m.refunded.length} ${m.refunded.length === 1 ? "reembolso" : "reembolsos"} · ${m.refundRate.toFixed(2)}%`,    tone: m.refundRate > 5 ? "danger" : "muted" },
+        { label: "Chargebacks",        icon: Shield,         value: hidden ? HIDE : fmtCompact(chargebackAmount),                                                                                                                                        sub: `${m.chargebacks.length} ${m.chargebacks.length === 1 ? "disputa" : "disputas"} · ${m.chargebackRate.toFixed(2)}%`, tone: m.chargebacks.length > 0 ? "danger" : "muted" },
+        { label: "MedPix",             icon: AlertTriangle,  value: dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length.toLocaleString("pt-BR"),                                       sub: "PIX contestados ou reembolsados",                                                                              tone: "warning" },
       ];
+
+      const kpiTone: Record<KpiTone, { value: string; iconBg: string; iconFg: string }> = {
+        success: { value: "text-success",       iconBg: "bg-success/10",       iconFg: "text-success" },
+        info:    { value: "text-info",          iconBg: "bg-info/10",          iconFg: "text-info" },
+        warning: { value: "text-warning",       iconBg: "bg-warning/10",       iconFg: "text-warning" },
+        danger:  { value: "text-destructive",   iconBg: "bg-destructive/10",   iconFg: "text-destructive" },
+        neutral: { value: "text-foreground",    iconBg: "bg-muted/70",         iconFg: "text-foreground/75" },
+        muted:   { value: "text-foreground/60", iconBg: "bg-muted/60",         iconFg: "text-muted-foreground" },
+      };
 
       return (
         <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-7">
@@ -949,23 +959,41 @@ export default function Vendas() {
             </div>
 
             {/* KPI RIBBON — merged inside hero */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/[0.18]">
-              {kpiData.map((kpi, i) => (
-                <div key={kpi.label} className={cn(
-                  "px-5 py-4.5 group/kpi transition-colors hover:bg-card",
-                  i % 4 !== 0 && "sm:border-l border-border",
-                  i % 8 !== 0 && "lg:border-l",
-                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border",
-                )}>
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/65 uppercase tracking-[0.14em] truncate leading-none">{kpi.label}</p>
-                  <p className={cn("mt-2.5 text-[18px] font-heading font-semibold tabular-nums leading-none tracking-[-0.025em]", kpi.accent)}>
-                    {kpi.value}
-                  </p>
-                  <p className="mt-2 text-[11px] text-muted-foreground/75 leading-snug truncate font-medium">
-                    {kpi.sub}
-                  </p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-border bg-gradient-to-b from-muted/[0.12] to-transparent">
+              {kpiData.map((kpi, i) => {
+                const tone = kpiTone[kpi.tone];
+                const Icon = kpi.icon;
+                const isFirstCol = i % 4 === 0;
+                const isFirstRow = i < 4;
+                return (
+                  <div
+                    key={kpi.label}
+                    className={cn(
+                      "relative px-6 py-5 transition-colors hover:bg-card/60",
+                      !isFirstCol && "lg:border-l border-border",
+                      i % 2 !== 0 && "sm:border-l lg:border-l border-border",
+                      !isFirstRow && "border-t border-border",
+                      i === 1 && "sm:border-t-0",
+                      i >= 2 && i < 4 && "sm:border-t border-border lg:border-t-0",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-3.5">
+                      <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em] truncate">
+                        {kpi.label}
+                      </p>
+                      <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-md", tone.iconBg)}>
+                        <Icon className={cn("h-3 w-3", tone.iconFg)} strokeWidth={2.25} />
+                      </span>
+                    </div>
+                    <p className={cn("text-[24px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", tone.value)}>
+                      {kpi.value}
+                    </p>
+                    <p className="mt-2.5 text-[11.5px] text-muted-foreground/85 leading-snug truncate font-medium tabular-nums">
+                      {kpi.sub}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </section>
 
