@@ -1091,28 +1091,25 @@ export default function Vendas() {
             </div>
           </div>
 
-         {/* ═══════ TRANSACTIONS — DOMINANT WORKSPACE ═══════ */}
-         <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]">
+         {/* ═══════ TRANSACTIONS ═══════ */}
+         <section className="overflow-hidden rounded-xl border border-border bg-card">
            {/* Top contextual ribbon */}
-           <header className="flex items-center justify-between gap-4 border-b border-border/40 px-8 py-6 bg-muted/[0.01]">
-             <div className="space-y-1">
-               <p className="text-[16px] font-heading font-black text-foreground tracking-tight leading-tight">Fluxo de Transações</p>
-               <p className="text-[11px] font-bold text-muted-foreground/40">
-                 {sortedFiltered.length.toLocaleString("pt-BR")} transações encontradas no período selecionado
+           <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+             <div>
+               <p className="text-[14px] font-semibold text-foreground leading-tight">Transações</p>
+               <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                 {sortedFiltered.length.toLocaleString("pt-BR")} resultado{sortedFiltered.length !== 1 ? "s" : ""}
                </p>
              </div>
-             <div className="hidden sm:flex items-center gap-6">
-               <div className="h-10 w-px bg-border/40" />
-               <div className="text-right">
-                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/35 leading-none">Total Liquido</p>
-                 <p className="text-[20px] font-heading font-black text-success tabular-nums leading-none mt-2 tracking-tight drop-shadow-sm">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
-               </div>
+             <div className="hidden sm:block text-right">
+               <p className="text-[10.5px] text-muted-foreground">Total filtrado</p>
+               <p className="text-[15px] font-semibold text-foreground tabular-nums leading-none mt-1">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
              </div>
            </header>
 
            {/* Status tabs */}
-           <div className="border-b border-border/30 px-8 bg-muted/[0.02]">
-             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+           <div className="border-b border-border px-5">
+             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                {statusTabs.map((tab) => {
                  const active = statusFilter === tab.value;
                  const dotColors: Record<string, string> = {
@@ -1121,17 +1118,17 @@ export default function Vendas() {
                  };
                  return (
                    <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                     className={cn("relative px-4 py-4 text-[12.5px] font-black whitespace-nowrap transition-all tracking-tight group/tab",
-                       active ? "text-foreground" : "text-muted-foreground/40 hover:text-foreground/70"
+                     className={cn("relative px-3 py-3 text-[12px] font-medium whitespace-nowrap transition-colors",
+                       active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                      )}>
-                     <span className="flex items-center gap-2.5">
-                       {dotColors[tab.value] && <span className={cn("h-2 w-2 rounded-full shadow-sm transition-transform group-hover/tab:scale-125", dotColors[tab.value], active ? "opacity-100" : "opacity-40")} />}
+                     <span className="flex items-center gap-1.5">
+                       {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[tab.value], !active && "opacity-50")} />}
                        {tab.label}
-                       <span className={cn("tabular-nums text-[10px] font-black px-2 py-0.5 rounded-full border transition-colors",
-                         active ? "bg-foreground/5 text-foreground/60 border-foreground/10" : "bg-muted/30 text-muted-foreground/30 border-transparent"
+                       <span className={cn("tabular-nums text-[11px] px-1.5 rounded",
+                         active ? "bg-muted text-foreground" : "text-muted-foreground"
                        )}>{tab.count}</span>
                      </span>
-                     {active && <span className="absolute bottom-0 left-0 right-0 h-[2.5px] rounded-t-full bg-foreground shadow-[0_-2px_8px_hsl(var(--foreground)/0.1)]" />}
+                     {active && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground" />}
                    </button>
                  );
                })}
@@ -1139,48 +1136,44 @@ export default function Vendas() {
            </div>
 
            {/* Search & Toolbar */}
-           <div className="flex flex-col gap-4 border-b border-border/25 px-8 py-4 sm:flex-row sm:items-center sm:justify-between bg-muted/[0.01]">
-             <div className="relative w-full sm:w-[420px] group">
-               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40 transition-colors group-focus-within:text-primary" />
-               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Busca inteligente (nome, email, telefone ou ID)…"
-                 className="h-11 w-full rounded-2xl border-2 border-border/30 bg-background/50 pl-11 pr-10 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:border-primary/20 focus:ring-4 focus:ring-primary/[0.03] transition-all" />
-               {search && <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:scale-110 transition-transform"><X className="h-4 w-4 text-muted-foreground/40 hover:text-foreground" /></button>}
+           <div className="flex flex-col gap-2.5 border-b border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+             <div className="relative w-full sm:w-[360px]">
+               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, email, telefone ou ID…"
+                 className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-9 text-[12.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
+               {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" /></button>}
              </div>
-             <div className="hidden sm:flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70">
-               <kbd className="inline-flex h-5 items-center rounded border border-border/60 bg-card px-1.5 text-[9.5px] font-bold text-muted-foreground/60 font-mono">⌘K</kbd>
-               <span>para focar</span>
-             </div>
+             <kbd className="hidden sm:inline-flex h-5 items-center rounded border border-border bg-card px-1.5 text-[10px] text-muted-foreground font-mono">⌘K</kbd>
            </div>
 
            {/* Desktop table */}
            <div className="hidden md:block">
              {loading ? (
                <div className="p-20 text-center">
-                 <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
-                 <p className="text-[11px] text-muted-foreground">Carregando…</p>
+                 <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+                 <p className="text-[11.5px] text-muted-foreground">Carregando…</p>
                </div>
              ) : (
                <>
                  <div className="overflow-x-auto">
                    <table className="w-full min-w-[900px]">
                      <thead>
-                        <tr className="border-b border-border/40 bg-muted/20">
-                          <th className="w-[3px]" />
-                          <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6 py-4" />
+                        <tr className="border-b border-border bg-muted/30">
+                          <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
                           <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                          <th className="px-3 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Status</th>
-                          <th className="px-3 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Método</th>
+                          <th className="h-10 px-3 text-left text-[11px] font-medium text-muted-foreground/70">Status</th>
+                          <th className="h-10 px-3 text-left text-[11px] font-medium text-muted-foreground/70">Método</th>
                           <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
-                          <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-6" />
-                          <th className="w-14" />
+                          <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-4" />
+                          <th className="w-12" />
                         </tr>
                      </thead>
                      <tbody>
                        {visibleItems.length === 0 ? (
-                         <tr><td colSpan={8} className="py-20">
+                         <tr><td colSpan={7} className="py-16">
                            <div className="flex flex-col items-center justify-center">
-                             <ShoppingCart className="mb-3 h-6 w-6 text-muted-foreground/30" />
-                             <p className="text-[13px] font-bold text-foreground">Nenhuma venda encontrada</p>
+                             <ShoppingCart className="mb-2 h-5 w-5 text-muted-foreground/40" />
+                             <p className="text-[13px] font-medium text-foreground">Nenhuma venda encontrada</p>
                              <p className="mt-1 text-[11.5px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
                            </div>
                          </td></tr>
@@ -1191,15 +1184,15 @@ export default function Vendas() {
                    </table>
                  </div>
                  {visibleItems.length > 0 && (
-                   <div className="flex items-center justify-between border-t border-border/40 px-5 py-3 bg-card-inset/20">
-                     <span className="text-[11.5px] font-semibold text-muted-foreground tabular-nums">
+                   <div className="flex items-center justify-between border-t border-border px-5 py-2.5 bg-muted/20">
+                     <span className="text-[11.5px] text-muted-foreground tabular-nums">
                        {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · página {currentPage} de {totalPages}
                      </span>
                      <div className="flex items-center gap-1.5">
-                       <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border/60 bg-card px-3 text-[11.5px] font-bold text-foreground hover:bg-muted/40 disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                       <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
                          <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
                        </button>
-                       <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border/60 bg-card px-3 text-[11.5px] font-bold text-foreground hover:bg-muted/40 disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                       <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
                          Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
                        </button>
                      </div>
