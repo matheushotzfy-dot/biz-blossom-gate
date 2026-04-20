@@ -421,9 +421,7 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1536px] pb-24 px-4 md:px-6 relative selection:bg-primary/20">
-      {/* Decorative noise texture overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] contrast-150 brightness-150 z-[100] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+    <div className="dashboard-page mx-auto w-full max-w-[1320px] pb-24 px-4 md:px-8 relative selection:bg-foreground/10">
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
