@@ -937,64 +937,54 @@ export default function Vendas() {
             </div>
           </section>
 
-          {/* ═══════ INTELLIGENCE STRIP — dense horizontal data ribbon, single surface ═══════ */}
-          <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border/50">
+          {/* ═══════ INTELLIGENCE STRIP ═══════ */}
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
 
-              {/* LEFT — Top products list (dominant, replaces 3 weak cards) */}
+              {/* LEFT — Top products */}
               <div className="p-5 lg:p-6">
                 <div className="flex items-end justify-between mb-4">
                   <div>
-                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Produtos que estão vendendo</p>
-                    <p className="text-[10.5px] text-muted-foreground/60 mt-0.5">Ranqueado por receita líquida no período</p>
+                    <p className="text-[12px] font-medium text-foreground">Top produtos</p>
+                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">Receita líquida no período</p>
                   </div>
                   {metrics.topProducts.length > 0 && (
-                    <span className="text-[10px] font-bold tabular-nums text-muted-foreground/70">
-                      {metrics.topProducts.length} de {productsRaw.length} ativos
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                      {metrics.topProducts.length} de {productsRaw.length}
                     </span>
                   )}
                 </div>
                 {metrics.topProducts.length === 0 ? (
-                    <div className="py-16 text-center border border-dashed border-border/50 rounded-2xl bg-muted/[0.03]">
-                      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-background border-2 border-border/30 shadow-sm transition-transform hover:scale-105">
-                        <Package className="h-6 w-6 text-muted-foreground/35" strokeWidth={1.5} />
-                      </div>
-                      <p className="text-[14px] font-black text-foreground tracking-tight mb-1.5">Nenhuma venda registrada</p>
-                      <p className="text-[11px] font-medium text-muted-foreground/45 max-w-[280px] mx-auto leading-relaxed">
+                    <div className="py-12 text-center">
+                      <Package className="h-5 w-5 text-muted-foreground/40 mx-auto mb-3" strokeWidth={1.5} />
+                      <p className="text-[13px] font-medium text-foreground mb-1">Sem vendas no período</p>
+                      <p className="text-[11.5px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
                         {productsRaw.length === 0
-                          ? "Cadastre seu primeiro produto para começar a monitorar suas métricas."
-                          : `Seus ${productsRaw.length} produtos ainda não converteram vendas neste filtro.`}
+                          ? "Cadastre seu primeiro produto para começar."
+                          : `${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, ainda sem conversões aqui.`}
                       </p>
                     </div>
                 ) : (
-                  <div className="divide-y divide-border/30">
+                  <div className="space-y-3">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
                       const maxRev = metrics.topProducts[0]?.revenue || 1;
                       const pct = (prod.revenue / maxRev) * 100;
                       const share = m.totalNet > 0 ? (prod.revenue / m.totalNet) * 100 : 0;
                       return (
-                        <div key={prod.id} className="py-3 first:pt-0 last:pb-0 group">
-                          <div className="flex items-center gap-3.5">
-                            <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-heading font-black tabular-nums shrink-0",
-                              i === 0 ? "bg-success/15 text-success border border-success/25" :
-                              i === 1 ? "bg-info/12 text-info border border-info/20" :
-                              "bg-muted/50 text-muted-foreground border border-border/40"
-                            )}>
-                              #{i + 1}
-                            </div>
+                        <div key={prod.id} className="group">
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-medium text-muted-foreground tabular-nums w-4 shrink-0">{i + 1}</span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-3">
-                                <p className="truncate text-[12.5px] font-bold text-foreground">{prod.name}</p>
-                                <p className="text-[13px] font-heading font-black text-foreground tabular-nums leading-none shrink-0">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                                <p className="truncate text-[12.5px] font-medium text-foreground">{prod.name}</p>
+                                <p className="text-[12.5px] font-semibold text-foreground tabular-nums leading-none shrink-0">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
                               </div>
                               <div className="mt-1.5 flex items-center gap-2.5">
-                                <div className="h-[2px] flex-1 rounded-full bg-muted/40 overflow-hidden">
-                                  <div className={cn("h-full rounded-full transition-all duration-500",
-                                    i === 0 ? "bg-success" : i === 1 ? "bg-info/80" : "bg-foreground/30"
-                                  )} style={{ width: `${pct}%` }} />
+                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full rounded-full bg-foreground/40" style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10px] text-muted-foreground tabular-nums font-semibold shrink-0">
-                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} · {share.toFixed(0)}%
+                                <span className="text-[10.5px] text-muted-foreground tabular-nums shrink-0 w-20 text-right">
+                                  {prod.sales} · {share.toFixed(0)}%
                                 </span>
                               </div>
                             </div>
@@ -1006,43 +996,39 @@ export default function Vendas() {
                 )}
               </div>
 
-              {/* RIGHT — Stacked: Payment mix (compact list) + Health (compact list) */}
+              {/* RIGHT — Payment mix + Health */}
               <div className="flex flex-col">
-                {/* Payment methods — clean data list */}
-                <div className="p-5 lg:p-6 border-b border-border/50">
-                  <div className="flex items-center justify-between mb-3.5">
-                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Mix de pagamentos</p>
+                {/* Payment methods */}
+                <div className="p-5 lg:p-6 border-b border-border">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[12px] font-medium text-foreground">Mix de pagamentos</p>
                     {dominantMethod.value > 0 && (
-                      <span className={cn("text-[9px] font-bold uppercase tracking-wider rounded px-1.5 py-[1px] border",
-                        dominantMethod.color === "success" ? "text-success bg-success/10 border-success/20" :
-                        dominantMethod.color === "info" ? "text-info bg-info/10 border-info/20" :
-                        "text-warning bg-warning/10 border-warning/20"
-                      )}>{dominantMethod.label} líder</span>
+                      <span className="text-[10.5px] text-muted-foreground">{dominantMethod.label} domina</span>
                     )}
                   </div>
                   {m.totalNet === 0 ? (
-                    <div className="py-8 text-center border border-dashed border-border/40 rounded-xl bg-muted/[0.02]">
-                      <p className="text-[11px] font-bold text-muted-foreground/40">Sem atividade no período</p>
-                    </div>
+                    <p className="text-[11.5px] text-muted-foreground py-3">Sem atividade no período.</p>
                   ) : (
-                    <div className="divide-y divide-border/25">
+                    <div className="space-y-2.5">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                         const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
-                        const accentBg = pm.color === "success" ? "bg-success/8 border-success/15" : pm.color === "info" ? "bg-info/8 border-info/15" : "bg-warning/8 border-warning/15";
                         return (
-                          <div key={pm.label} className="py-3 flex items-center justify-between group first:pt-0 last:pb-0">
-                            <div className="flex items-center gap-3.5">
-                              <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl border shadow-sm transition-all group-hover:scale-110", accentBg, accentText)}>
-                                {pm.icon}
-                              </span>
-                              <div className="min-w-0">
-                                <p className="text-[12px] font-black text-foreground leading-tight tracking-tight">{pm.label}</p>
-                                <p className="text-[10px] font-bold text-muted-foreground/35 mt-1">{pm.count} vendas · {pct.toFixed(0)}% do mix</p>
+                          <div key={pm.label} className="flex items-center gap-3">
+                            <span className={cn("flex h-7 w-7 items-center justify-center rounded-md bg-muted", accentText)}>
+                              {pm.icon}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <p className="text-[12px] font-medium text-foreground">{pm.label}</p>
+                                <p className="text-[12px] font-semibold text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[13px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                              <div className="mt-1 flex items-center gap-2">
+                                <div className="h-[2px] flex-1 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full bg-foreground/40 rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 w-16 text-right">{pm.count} · {pct.toFixed(0)}%</span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -1051,56 +1037,55 @@ export default function Vendas() {
                   )}
                 </div>
 
-                {/* Health — compact inline */}
+                {/* Health */}
                 <div className="p-5 lg:p-6 flex-1">
-                  <div className="flex items-center justify-between mb-3.5">
-                    <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Saúde da operação</p>
-                    <span className="text-[10px] font-bold tabular-nums text-success">{approvalRate.toFixed(1)}% aprov.</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[12px] font-medium text-foreground">Saúde da operação</p>
+                    <span className="text-[11px] text-muted-foreground tabular-nums">{approvalRate.toFixed(1)}% aprov.</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-2">
                     {healthItems.map((hi) => {
                       const ok = hi.value <= hi.threshold;
                       return (
-                        <div key={hi.label} className={cn("rounded-lg border px-2.5 py-2", ok ? "border-border/40 bg-card-inset/30" : "border-destructive/25 bg-destructive/[0.04]")}>
-                          <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground/70">{hi.label}</p>
-                          <p className={cn("mt-1 text-[15px] font-heading font-black tabular-nums leading-none", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                          <p className="text-[9px] text-muted-foreground/60 mt-1">máx {hi.threshold}%</p>
+                        <div key={hi.label} className="rounded-md border border-border px-2.5 py-2">
+                          <p className="text-[10.5px] text-muted-foreground">{hi.label}</p>
+                          <p className={cn("mt-1 text-[15px] font-semibold tabular-nums leading-none", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                          <p className="text-[10px] text-muted-foreground/70 mt-1">máx {hi.threshold}%</p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between text-[10.5px]">
+                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[11px]">
                     <span className="text-muted-foreground">
-                      Reembolsado <span className="text-info font-bold tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
+                      Reembolso <span className="text-foreground font-medium tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
                     </span>
                     <span className="text-muted-foreground">
-                      Chargeback <span className={cn("font-bold tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground/40")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
+                      Chargeback <span className={cn("font-medium tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom strip — Volume per hour, full width inside same surface */}
-            <div className="border-t border-border/50 px-5 lg:px-6 py-4 bg-card-inset/30">
-              <div className="flex items-center justify-between mb-2.5">
+            {/* Bottom strip — Volume per hour */}
+            <div className="border-t border-border px-5 lg:px-6 py-4 bg-muted/20">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground/50" />
-                  <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Volume por hora</p>
+                  <p className="text-[12px] font-medium text-foreground">Volume por hora</p>
                   {peakHour !== null && (
-                    <span className="text-[9.5px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-[1px]">Pico {peakHour}h</span>
+                    <span className="text-[10.5px] text-muted-foreground">Pico {peakHour}h</span>
                   )}
                 </div>
-                <span className="text-[10.5px] text-muted-foreground tabular-nums font-semibold">{m.approved.length} aprovadas · ticket médio {hidden ? HIDE : fmtCompact(m.avgTicket)}</span>
+                <span className="text-[11px] text-muted-foreground tabular-nums">{m.approved.length} aprovadas</span>
               </div>
-              <div className="flex h-[44px] items-end gap-[3px]">
+              <div className="flex h-[40px] items-end gap-[3px]">
                 {metrics.hours.map((v, i) => (
-                  <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-all duration-300",
-                    peakHour === i ? "bg-primary" : v > 0 ? "bg-foreground/35" : "bg-muted/40"
-                  )} style={{ height: `${Math.max((v / maxHour) * 100, 6)}%` }} title={`${i}h: ${v} vendas`} />
+                  <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors",
+                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30" : "bg-muted"
+                  )} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} title={`${i}h: ${v} vendas`} />
                 ))}
               </div>
-              <div className="flex justify-between mt-1.5 text-[9px] text-muted-foreground/50 font-mono tabular-nums">
+              <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground/70 tabular-nums">
                 <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
               </div>
             </div>
