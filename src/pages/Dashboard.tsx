@@ -521,71 +521,77 @@ export default function Dashboard() {
         </div>
 
         {/* Main metric block */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
-          <div className="px-5 py-7 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/60">
-            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-0">
+          <div className="px-5 py-6 lg:px-7 lg:py-8 border-b lg:border-b-0 lg:border-r border-border/40 bg-gradient-to-br from-card to-muted/10">
+            <p className="mb-2.5 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
               Receita {isCustom && customRange?.from
                 ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                 : `· ${selectedPeriod.label}`}
             </p>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="inline-flex items-baseline text-[clamp(2.2rem,7vw,68px)] font-heading font-black leading-none tracking-[-0.05em] text-foreground whitespace-nowrap">
+            <div className="flex items-baseline gap-3.5 flex-wrap">
+              <span className="inline-flex items-baseline text-[clamp(2.5rem,8vw,74px)] font-heading font-black leading-none tracking-[-0.06em] text-foreground whitespace-nowrap drop-shadow-sm">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
-                <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success">
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                  {approved.length} venda{approved.length !== 1 ? "s" : ""}
-                </span>
+                <div className="inline-flex flex-col items-start gap-0.5">
+                  <span className="inline-flex items-center gap-1 text-[13px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded-md">
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    {approved.length} venda{approved.length !== 1 ? "s" : ""}
+                  </span>
+                  <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider ml-1">aprovadas</span>
+                </div>
               )}
             </div>
-            <div className="mt-5 flex items-center gap-5 text-[11px]">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                <span className="font-semibold text-foreground tabular-nums">{approved.length}</span> aprovadas
+            <div className="mt-6 flex items-center gap-4 text-[10.5px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-success/80" />
+                <span className="font-bold text-foreground tabular-nums">{approved.length}</span> aprovadas
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                <span className="font-semibold text-foreground tabular-nums">{pending.length}</span> pendentes
+              <div className="flex items-center gap-1.5 text-muted-foreground/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-warning/80" />
+                <span className="font-bold text-foreground tabular-nums">{pending.length}</span> pendentes
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                <span className="font-semibold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> contestações
+              <div className="flex items-center gap-1.5 text-muted-foreground/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-destructive/80" />
+                <span className="font-bold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> reembolsos
               </div>
             </div>
           </div>
 
-          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
-            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
-            <div className="flex items-center gap-2 mb-3">
+          <div className="relative px-5 py-6 lg:px-7 lg:py-8 flex flex-col justify-center">
+            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[3px] rounded-full bg-success/60" />
+            <div className="flex items-center gap-2 mb-2">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
+              <p className="text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/80">Disponível para saque</p>
             </div>
-            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
+            <p className="text-[clamp(1.8rem,5vw,46px)] font-heading font-black tabular-nums text-success tracking-[-0.05em] leading-none drop-shadow-sm">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
-            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
-              Sacar agora <ChevronRight className="h-3 w-3" />
-            </Link>
-            {withdrawalPending > 0 && (
-              <p className="mt-3 text-[10px] text-muted-foreground">
-                <span className="font-semibold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
-              </p>
-            )}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Link to="/financeiro/saques" className="h-8 px-4 rounded-lg bg-success/10 text-success text-[11px] font-bold hover:bg-success/20 transition-colors inline-flex items-center gap-1.5">
+                Solicitar Saque <ArrowRight className="h-3 w-3" />
+              </Link>
+              {withdrawalPending > 0 && (
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none">Em análise</span>
+                  <span className="text-[12px] font-black text-warning tabular-nums leading-tight">{fmt(withdrawalPending)}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Compact supporting KPI strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/60 divide-x divide-border/60">
+        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/40 divide-x divide-border/40 bg-muted/5">
           {([
             { label: "Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "text-info" },
             { label: "Ticket Médio", numValue: approved.length > 0 ? revenue / approved.length : 0, formatter: fmt, accent: "text-foreground" },
             { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground" },
-            { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success" },
+            { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success/80" },
           ] as const).map((item, i) => (
-            <div key={item.label} className={cn("px-5 py-4 lg:px-7", i >= 2 && "border-t lg:border-t-0 border-border/60")}>
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/80 mb-1.5">{item.label}</p>
-              <p className={cn("text-[20px] lg:text-[24px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", item.accent)}>
+            <div key={item.label} className={cn("px-5 py-3 lg:px-7", i >= 2 && "border-t lg:border-t-0 border-border/40")}>
+              <p className="text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/60 mb-1">{item.label}</p>
+              <p className={cn("text-[18px] lg:text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.04em]", item.accent)}>
                 {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
               </p>
             </div>
@@ -597,22 +603,22 @@ export default function Dashboard() {
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_260px]">
           {/* Chart */}
-          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/60">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
+          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/40">
+            <div className="flex items-center justify-between px-6 py-3 border-b border-border/40 bg-muted/5">
               <div>
-                <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Receita ao longo do tempo</p>
-                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                  {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {selectedPeriod.label}
+                <p className="text-[10px] font-heading font-bold uppercase tracking-[0.16em] text-foreground/80">Desempenho de vendas</p>
+                <p className="text-[9px] text-muted-foreground/60 mt-0.5">
+                  {!isCustom && selectedPeriod.days <= 1 ? "Escala horária" : "Evolução diária"} · {selectedPeriod.label}
                 </p>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-primary" />
+              <div className="hidden sm:flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Vendas aprovadas
               </div>
             </div>
-            <div className="flex-1 px-3 py-4 min-h-[360px]">
+            <div className="flex-1 px-2 py-4 min-h-[420px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
                   <defs>
@@ -646,43 +652,39 @@ export default function Dashboard() {
 
           {/* Payment breakdown rail */}
           <div className="flex flex-col">
-            <div className="px-5 py-4 border-b border-border/60">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Por método</p>
-              <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conversão e receita</p>
+            <div className="px-5 py-3 border-b border-border/40 bg-muted/5">
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.16em] text-foreground/80">Por método</p>
             </div>
-            <div className="flex-1 divide-y divide-border/60">
+            <div className="flex-1 divide-y divide-border/40">
               {[
-                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
-                { icon: <CreditCard className="h-4 w-4" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
+                { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
               ].map((m) => (
-                <div key={m.label} className="px-5 py-4">
+                <div key={m.label} className="px-5 py-4 bg-gradient-to-br from-card to-muted/5">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className={m.color}>{m.icon}</span>
-                      <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
+                      <span className="text-[11px] text-foreground/70 font-bold">{m.label}</span>
                     </div>
-                    <span className={cn("text-[13px] font-heading font-black tabular-nums", m.color)}>{m.conv.toFixed(1)}%</span>
+                    <span className={cn("text-[12px] font-heading font-black tabular-nums", m.color)}>{m.conv.toFixed(1)}%</span>
                   </div>
-                  <p className="text-[18px] font-heading font-black tabular-nums text-foreground leading-none">
+                  <p className="text-[17px] font-heading font-black tabular-nums text-foreground leading-none tracking-tight">
                     {privacy.hidden ? CENSORED : fmt(m.revenue)}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-1.5">{m.count} aprovadas</p>
+                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-wider mt-2">{m.count} aprovadas</p>
                 </div>
               ))}
-              <div className="px-5 py-4">
+              <div className="px-5 py-4 bg-muted/5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-warning" />
-                    <span className="text-[12px] text-foreground font-semibold">Saques pendentes</span>
+                    <DollarSign className="h-3.5 w-3.5 text-warning/80" />
+                    <span className="text-[11px] text-foreground/70 font-bold">Aguardando</span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground/70 tabular-nums">{withdrawals.filter(w => w.status === "pending").length}</span>
+                  <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">{withdrawals.filter(w => w.status === "pending").length} saques</span>
                 </div>
-                <p className="text-[18px] font-heading font-black tabular-nums text-warning leading-none">
+                <p className="text-[17px] font-heading font-black tabular-nums text-warning/80 leading-none tracking-tight">
                   {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                 </p>
-                <Link to="/financeiro/saques" className="text-[10px] text-primary font-semibold mt-1.5 inline-flex items-center gap-0.5 hover:underline">
-                  Gerenciar <ChevronRight className="h-3 w-3" />
-                </Link>
               </div>
             </div>
           </div>
