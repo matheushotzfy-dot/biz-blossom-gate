@@ -1001,35 +1001,35 @@ export default function Vendas() {
               {/* RIGHT — Payment mix + Health */}
               <div className="flex flex-col">
                 {/* Payment methods */}
-                <div className="p-5 lg:p-6 border-b border-border">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-[12px] font-medium text-foreground">Mix de pagamentos</p>
+                <div className="p-6 lg:p-8 border-b border-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Mix de pagamentos</p>
                     {dominantMethod.value > 0 && (
-                      <span className="text-[10.5px] text-muted-foreground">{dominantMethod.label} domina</span>
+                      <span className="text-[11px] text-muted-foreground/85 font-medium"><span className="text-foreground font-semibold">{dominantMethod.label}</span> domina</span>
                     )}
                   </div>
                   {m.totalNet === 0 ? (
-                    <p className="text-[11.5px] text-muted-foreground py-3">Sem atividade no período.</p>
+                    <p className="text-[12px] text-muted-foreground/85 py-4">Sem atividade no período.</p>
                   ) : (
-                    <div className="space-y-2.5">
+                    <div className="space-y-3.5">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                         const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
                         return (
-                          <div key={pm.label} className="flex items-center gap-3">
-                            <span className={cn("flex h-7 w-7 items-center justify-center rounded-md bg-muted", accentText)}>
+                          <div key={pm.label} className="flex items-center gap-3.5">
+                            <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg bg-muted ring-1 ring-border/30", accentText)}>
                               {pm.icon}
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <p className="text-[12px] font-medium text-foreground">{pm.label}</p>
-                                <p className="text-[12px] font-semibold text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                                <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">{pm.label}</p>
+                                <p className="text-[13px] font-heading font-semibold text-foreground tabular-nums tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                               </div>
-                              <div className="mt-1 flex items-center gap-2">
-                                <div className="h-[2px] flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full bg-foreground/40 rounded-full" style={{ width: `${pct}%` }} />
+                              <div className="mt-1.5 flex items-center gap-2.5">
+                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full bg-foreground/55 rounded-full transition-all" style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 w-16 text-right">{pm.count} · {pct.toFixed(0)}%</span>
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-20 text-right font-medium">{pm.count} · {pct.toFixed(0)}%</span>
                               </div>
                             </div>
                           </div>
@@ -1040,29 +1040,29 @@ export default function Vendas() {
                 </div>
 
                 {/* Health */}
-                <div className="p-5 lg:p-6 flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-[12px] font-medium text-foreground">Saúde da operação</p>
-                    <span className="text-[11px] text-muted-foreground tabular-nums">{approvalRate.toFixed(1)}% aprov.</span>
+                <div className="p-6 lg:p-8 flex-1">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Saúde da operação</p>
+                    <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{approvalRate.toFixed(1)}% aprov.</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {healthItems.map((hi) => {
                       const ok = hi.value <= hi.threshold;
                       return (
-                        <div key={hi.label} className="rounded-md border border-border px-2.5 py-2">
-                          <p className="text-[10.5px] text-muted-foreground">{hi.label}</p>
-                          <p className={cn("mt-1 text-[15px] font-semibold tabular-nums leading-none", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                          <p className="text-[10px] text-muted-foreground/70 mt-1">máx {hi.threshold}%</p>
+                        <div key={hi.label} className="rounded-lg border border-border px-3 py-2.5 bg-card hover:bg-muted/40 transition-colors">
+                          <p className="text-[10.5px] text-muted-foreground/85 font-medium uppercase tracking-[0.06em]">{hi.label}</p>
+                          <p className={cn("mt-1.5 text-[17px] font-heading font-semibold tabular-nums leading-none tracking-[-0.02em]", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                          <p className="text-[10.5px] text-muted-foreground/70 mt-1.5 tabular-nums">máx {hi.threshold}%</p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">
-                      Reembolso <span className="text-foreground font-medium tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
+                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-[11.5px] font-medium">
+                    <span className="text-muted-foreground/85">
+                      Reembolso <span className="text-foreground font-semibold tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
                     </span>
-                    <span className="text-muted-foreground">
-                      Chargeback <span className={cn("font-medium tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
+                    <span className="text-muted-foreground/85">
+                      Chargeback <span className={cn("font-semibold tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
                     </span>
                   </div>
                 </div>
@@ -1070,24 +1070,24 @@ export default function Vendas() {
             </div>
 
             {/* Bottom strip — Volume per hour */}
-            <div className="border-t border-border px-5 lg:px-6 py-4 bg-muted/20">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <p className="text-[12px] font-medium text-foreground">Volume por hora</p>
+            <div className="border-t border-border px-6 lg:px-8 py-5 bg-muted/[0.18]">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Volume por hora</p>
                   {peakHour !== null && (
-                    <span className="text-[10.5px] text-muted-foreground">Pico {peakHour}h</span>
+                    <span className="text-[11px] text-muted-foreground/85 font-medium">Pico <span className="text-foreground font-semibold tabular-nums">{peakHour}h</span></span>
                   )}
                 </div>
-                <span className="text-[11px] text-muted-foreground tabular-nums">{m.approved.length} aprovadas</span>
+                <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{m.approved.length} aprovadas</span>
               </div>
-              <div className="flex h-[40px] items-end gap-[3px]">
+              <div className="flex h-[48px] items-end gap-[3px]">
                 {metrics.hours.map((v, i) => (
                   <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors",
-                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30" : "bg-muted"
+                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30 hover:bg-foreground/50" : "bg-muted"
                   )} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} title={`${i}h: ${v} vendas`} />
                 ))}
               </div>
-              <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground/70 tabular-nums">
+              <div className="flex justify-between mt-2 text-[10.5px] text-muted-foreground/70 tabular-nums font-medium">
                 <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
               </div>
             </div>
