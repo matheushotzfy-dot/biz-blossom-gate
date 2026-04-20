@@ -957,9 +957,6 @@ export default function Dashboard() {
                 <span className="h-1.5 w-1.5 rounded-full bg-success" />
                 Sistemas operacionais · uptime 99.99%
               </span>
-              <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.14em]">Sistema operacional</span>
-            </span>
           </div>
         </footer>
       </motion.div>
