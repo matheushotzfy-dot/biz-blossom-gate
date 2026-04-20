@@ -177,16 +177,28 @@ function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: num
 
 /* ─────────────────────── Micro Components ─────────────────────── */
 function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
- if (prev === 0 && cur === 0) return null;
- if (prev === 0) return <span className="text-[9px] font-semibold text-success bg-success/8 px-2 py-0.5 rounded-md inline-flex items-center gap-0.5 border border-success/10"><Sparkles className="h-2.5 w-2.5" />novo</span>;
- const pct = ((cur - prev) / prev) * 100;
- const up = pct >= 0;
- return (
-  <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold tabular-nums px-2 py-0.5 rounded-md border", up ? "text-success bg-success/6 border-success/10" : "text-destructive bg-destructive/6 border-destructive/10")}>
- {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
- {Math.abs(pct).toFixed(1)}%
-  </span>
- );
+  if (prev === 0 && cur === 0) return null;
+  if (prev === 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-success bg-success/10 px-2.5 py-1 rounded-full border border-success/20 shadow-[0_2px_10px_-4px_rgba(34,197,94,0.3)] animate-in fade-in zoom-in duration-500">
+        <Sparkles className="h-2.5 w-2.5" />
+        NOVO
+      </span>
+    );
+  }
+  const pct = ((cur - prev) / prev) * 100;
+  const up = pct >= 0;
+  return (
+    <span className={cn(
+      "inline-flex items-center gap-1 text-[10px] font-bold tabular-nums px-2.5 py-1 rounded-full border transition-all duration-300",
+      up 
+        ? "text-success bg-success/10 border-success/20 shadow-[0_2px_10px_-4px_rgba(34,197,94,0.3)]" 
+        : "text-destructive bg-destructive/10 border-destructive/20 shadow-[0_2px_10px_-4px_rgba(239,68,68,0.2)]"
+    )}>
+      {up ? <ArrowUpRight className="h-3 w-3" strokeWidth={3} /> : <ArrowDownRight className="h-3 w-3" strokeWidth={3} />}
+      {Math.abs(pct).toFixed(1)}%
+    </span>
+  );
 }
 
 function Sparkline({ data, color = "primary" }: { data: number[]; color?: string }) {
@@ -864,15 +876,18 @@ export default function Vendas() {
                 <span className="tabular-nums">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-lg border transition-all", hidden ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20")}>
-                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            <div className="flex items-center gap-3 shrink-0">
+              <button onClick={toggleHidden} className={cn("flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-300 shadow-sm", hidden ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:shadow-md")}>
+                {hidden ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
               </button>
-              <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all">
-                <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+              <button onClick={() => window.location.reload()} className="group inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-[13px] font-bold text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all duration-300 shadow-sm hover:shadow-md">
+                <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-700" /> 
+                <span className="hidden sm:inline">Atualizar</span>
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-3.5 text-[12.5px] font-semibold text-background hover:bg-foreground/90 transition-colors shadow-sm">
-                <Download className="h-3.5 w-3.5" /> Exportar
+              <button onClick={() => setShowExportDialog(true)} className="relative overflow-hidden group inline-flex h-10 items-center gap-2 rounded-xl bg-foreground px-5 text-[13px] font-black text-background transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 active:translate-y-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <Download className="h-4 w-4" /> 
+                <span>Exportar</span>
               </button>
             </div>
           </header>
@@ -907,170 +922,212 @@ export default function Vendas() {
             </span>
           </div>
 
-          {/* ═══════ HERO: Dense KPI Grid (no empty chart) ═══════ */}
-          <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_24px_-12px_rgba(0,0,0,0.08)]">
+          <section className="relative group overflow-hidden rounded-3xl border border-border bg-card/50 backdrop-blur-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.1)] transition-all duration-500 hover:shadow-[0_12px_48px_-8px_rgba(0,0,0,0.15)]">
+            {/* Background Glows */}
+            <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/2 -right-24 h-64 w-64 rounded-full bg-info/5 blur-[100px] pointer-events-none" />
+            
             {/* Revenue header strip */}
-            <div className="flex flex-col gap-5 border-b border-border px-6 py-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-8 lg:py-6 bg-gradient-to-b from-muted/[0.10] to-transparent">
-              <div className="flex flex-col gap-2 min-w-0">
-                <div className="flex items-center gap-2.5">
-                  <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
+            <div className="relative flex flex-col gap-8 border-b border-border/50 px-8 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12 bg-gradient-to-br from-primary/[0.03] via-transparent to-info/[0.03]">
+              <div className="flex flex-col gap-3 min-w-0">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Gem className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </span>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Receita líquida total</p>
                   <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                 </div>
-                <p className="text-[44px] sm:text-[50px] lg:text-[60px] font-display font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9]">
-                  {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
-                </p>
-                <p className="text-[12px] text-muted-foreground/85 tabular-nums font-medium tracking-tight">
-                  Bruto <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalGross)}</span> · Taxas <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalFees)}</span>
-                </p>
+                <div className="relative group/rev">
+                  <p className="text-[56px] sm:text-[64px] lg:text-[72px] font-display font-black tabular-nums tracking-[-0.06em] leading-[0.85] transition-all group-hover/rev:tracking-[-0.07em] bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground to-foreground/40">
+                    {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
+                  </p>
+                  <div className="absolute -inset-x-4 -inset-y-2 bg-primary/5 blur-2xl opacity-0 group-hover/rev:opacity-100 transition-opacity pointer-events-none" />
+                </div>
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border/50">
+                    <span className="text-[11px] text-muted-foreground/60 font-medium uppercase tracking-wider">Bruto</span>
+                    <span className="text-[13px] text-foreground font-bold tabular-nums">{fmtCompact(m.totalGross)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border/50">
+                    <span className="text-[11px] text-muted-foreground/60 font-medium uppercase tracking-wider">Taxas</span>
+                    <span className="text-[13px] text-destructive font-bold tabular-nums">-{fmtCompact(m.totalFees)}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Inline summary stats */}
-              <div className="flex items-stretch gap-6 sm:gap-8 lg:gap-10 lg:border-l lg:border-border lg:pl-8 shrink-0">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Vendas</p>
-                  <p className="text-[24px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2 tracking-[-0.02em]">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                  <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium tabular-nums">{approvalRate.toFixed(1)}% aprovação</p>
+              <div className="flex items-stretch gap-8 sm:gap-10 lg:gap-14 lg:border-l lg:border-border/50 lg:pl-12 shrink-0">
+                <div className="group/stat flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                    <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">Vendas</p>
+                  </div>
+                  <p className="text-[28px] font-display font-bold text-foreground tabular-nums leading-none tracking-[-0.03em] group-hover/stat:text-primary transition-colors">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Sparkline data={m.approved.slice(-7).map(t => Number(t.amount))} color="success" />
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Ticket médio</p>
-                  <p className="text-[24px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2 tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                  <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium tabular-nums">{m.uniqueCustomers} clientes</p>
+                <div className="group/stat flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-info" />
+                    <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">Ticket médio</p>
+                  </div>
+                  <p className="text-[28px] font-display font-bold text-foreground tabular-nums leading-none tracking-[-0.03em] group-hover/stat:text-info transition-colors">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                  <p className="text-[11px] text-muted-foreground/70 font-semibold">{m.uniqueCustomers} clientes</p>
                 </div>
-                <div className="min-w-0 hidden sm:block">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Pendente</p>
-                  <p className="text-[24px] font-heading font-semibold text-warning tabular-nums leading-none mt-2 tracking-[-0.02em]">{m.pending.length.toLocaleString("pt-BR")}</p>
-                  <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium tabular-nums">aguardando</p>
+                <div className="group/stat hidden sm:flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-warning" />
+                    <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">Aguardando</p>
+                  </div>
+                  <p className="text-[28px] font-display font-bold text-warning tabular-nums leading-none tracking-[-0.03em]">{m.pending.length.toLocaleString("pt-BR")}</p>
+                  <p className="text-[11px] text-muted-foreground/70 font-semibold">{fmtCompact(m.pending.reduce((a, t) => a + Number(t.amount), 0))}</p>
                 </div>
               </div>
             </div>
 
-            {/* DENSE KPI GRID — 8 cards funcionais (sem espaço vazio) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-border [&>*]:border-border">
+            {/* DENSE KPI GRID — Refined visual style */}
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-border/50 [&>*]:border-border/50">
               {/* Aprovação */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Aprovação</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-success/10 group-hover:scale-110 transition-transform">
-                    <CheckSquare className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group overflow-hidden">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-success transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/10 text-success shadow-[0_0_15px_rgba(34,197,94,0.1)] group-hover:scale-110 group-hover:bg-success/20 transition-all duration-300">
+                    <CheckSquare className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Aprovação</p>
                 </div>
-                <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", approvalRate >= 80 ? "text-success" : approvalRate >= 50 ? "text-warning" : "text-destructive")}>
-                  {approvalRate.toFixed(1)}%
-                </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {m.approved.length} de {m.approved.length + m.failed.length} tentativas
-                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className={cn("text-[26px] font-display font-bold tabular-nums leading-none tracking-[-0.04em]", approvalRate >= 80 ? "text-success" : approvalRate >= 50 ? "text-warning" : "text-destructive")}>
+                    {approvalRate.toFixed(1)}%
+                  </p>
+                </div>
+                <div className="mt-4 h-1 w-full bg-muted/30 rounded-full overflow-hidden">
+                  <div className={cn("h-full transition-all duration-1000", approvalRate >= 80 ? "bg-success" : "bg-warning")} style={{ width: `${approvalRate}%` }} />
+                </div>
               </div>
 
               {/* PIX */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">PIX</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-info/10 group-hover:scale-110 transition-transform">
-                    <Smartphone className="h-3.5 w-3.5 text-info" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-info transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 text-info shadow-[0_0_15px_rgba(14,165,233,0.1)] group-hover:scale-110 group-hover:bg-info/20 transition-all duration-300">
+                    <Smartphone className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">PIX</p>
                 </div>
-                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                <p className="text-[26px] font-display font-bold text-foreground tabular-nums leading-none tracking-[-0.04em]">
                   {hidden ? HIDE : fmtCompact(m.pixRev)}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {m.pixCount} venda{m.pixCount !== 1 ? "s" : ""} · {m.totalNet > 0 ? ((m.pixRev / m.totalNet) * 100).toFixed(0) : 0}%
+                <p className="mt-2 text-[12px] text-muted-foreground/60 font-medium tabular-nums">
+                  {m.pixCount} vendas <span className="mx-1 opacity-30">·</span> {m.totalNet > 0 ? ((m.pixRev / m.totalNet) * 100).toFixed(0) : 0}%
                 </p>
               </div>
 
               {/* Cartão */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Cartão</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:scale-110 transition-transform">
-                    <CreditCard className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.1)] group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                    <CreditCard className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Cartão</p>
                 </div>
-                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                <p className="text-[26px] font-display font-bold text-foreground tabular-nums leading-none tracking-[-0.04em]">
                   {hidden ? HIDE : fmtCompact(m.cardRev)}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {m.cardCount} venda{m.cardCount !== 1 ? "s" : ""} · {m.totalNet > 0 ? ((m.cardRev / m.totalNet) * 100).toFixed(0) : 0}%
+                <p className="mt-2 text-[12px] text-muted-foreground/60 font-medium tabular-nums">
+                  {m.cardCount} vendas <span className="mx-1 opacity-30">·</span> {m.totalNet > 0 ? ((m.cardRev / m.totalNet) * 100).toFixed(0) : 0}%
                 </p>
               </div>
 
               {/* Boleto */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Boleto</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warning/10 group-hover:scale-110 transition-transform">
-                    <FileText className="h-3.5 w-3.5 text-warning" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-warning transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-warning/10 text-warning shadow-[0_0_15px_rgba(234,179,8,0.1)] group-hover:scale-110 group-hover:bg-warning/20 transition-all duration-300">
+                    <FileText className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Boleto</p>
                 </div>
-                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                <p className="text-[26px] font-display font-bold text-foreground tabular-nums leading-none tracking-[-0.04em]">
                   {hidden ? HIDE : fmtCompact(m.boletoRev)}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {m.boletoCount} venda{m.boletoCount !== 1 ? "s" : ""} · {m.totalNet > 0 ? ((m.boletoRev / m.totalNet) * 100).toFixed(0) : 0}%
+                <p className="mt-2 text-[12px] text-muted-foreground/60 font-medium tabular-nums">
+                  {m.boletoCount} vendas <span className="mx-1 opacity-30">·</span> {m.totalNet > 0 ? ((m.boletoRev / m.totalNet) * 100).toFixed(0) : 0}%
                 </p>
               </div>
 
               {/* Reembolsado */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Reembolsado</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/50 group-hover:scale-110 transition-transform">
-                    <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-muted-foreground/30 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/20 text-muted-foreground group-hover:scale-110 group-hover:bg-muted/30 transition-all duration-300">
+                    <RefreshCw className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Reembolsado</p>
                 </div>
-                <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", m.refunded.length > 0 ? "text-warning" : "text-foreground")}>
+                <p className={cn("text-[26px] font-display font-bold tabular-nums leading-none tracking-[-0.04em]", m.refunded.length > 0 ? "text-warning" : "text-foreground")}>
                   {hidden ? HIDE : fmtCompact(m.refunded.reduce((a, t) => a + Number(t.net_amount), 0))}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {m.refunded.length} reembolso{m.refunded.length !== 1 ? "s" : ""} · {m.refundRate.toFixed(2)}%
+                <p className="mt-2 text-[12px] text-muted-foreground/60 font-medium tabular-nums">
+                  {m.refunded.length} pedidos <span className="mx-1 opacity-30">·</span> {m.refundRate.toFixed(2)}%
                 </p>
               </div>
 
               {/* Chargebacks */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Chargebacks</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10 group-hover:scale-110 transition-transform">
-                    <Shield className="h-3.5 w-3.5 text-destructive" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-destructive transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 text-destructive shadow-[0_0_15px_rgba(239,68,68,0.1)] group-hover:scale-110 group-hover:bg-destructive/20 transition-all duration-300">
+                    <Shield className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Chargebacks</p>
                 </div>
-                <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", m.chargebacks.length > 0 ? "text-destructive" : "text-foreground")}>
+                <p className={cn("text-[26px] font-display font-bold tabular-nums leading-none tracking-[-0.04em]", m.chargebacks.length > 0 ? "text-destructive" : "text-foreground")}>
                   {hidden ? HIDE : fmtCompact(m.chargebacks.reduce((a, t) => a + Number(t.net_amount), 0))}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {m.chargebacks.length} disputa{m.chargebacks.length !== 1 ? "s" : ""} · {m.chargebackRate.toFixed(2)}%
+                <p className="mt-2 text-[12px] text-muted-foreground/60 font-medium tabular-nums">
+                  {m.chargebacks.length} disputas <span className="mx-1 opacity-30">·</span> {m.chargebackRate.toFixed(2)}%
                 </p>
               </div>
 
               {/* Clientes únicos */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Clientes</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-info/10 group-hover:scale-110 transition-transform">
-                    <Users className="h-3.5 w-3.5 text-info" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-info transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 text-info shadow-[0_0_15px_rgba(14,165,233,0.1)] group-hover:scale-110 group-hover:bg-info/20 transition-all duration-300">
+                    <Users className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Base de Clientes</p>
                 </div>
-                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
-                  {m.uniqueCustomers}
+                <p className="text-[26px] font-display font-bold text-foreground tabular-nums leading-none tracking-[-0.04em]">
+                  {hidden ? HIDE : m.uniqueCustomers.toLocaleString("pt-BR")}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  únicos · {m.uniqueCustomers > 0 ? (m.approved.length / m.uniqueCustomers).toFixed(1) : "0"} compras/cli
-                </p>
+                <div className="mt-3 flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-5 w-5 rounded-full border border-card bg-muted flex items-center justify-center">
+                      <div className={cn("h-full w-full rounded-full opacity-60", i % 2 === 0 ? "bg-primary" : "bg-info")} />
+                    </div>
+                  ))}
+                  <div className="h-5 px-1.5 rounded-full border border-card bg-muted flex items-center justify-center text-[9px] font-bold text-muted-foreground">+{m.uniqueCustomers > 4 ? m.uniqueCustomers - 4 : 0}</div>
+                </div>
               </div>
 
               {/* Top Produto */}
-              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Top Produto</p>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:scale-110 transition-transform">
-                    <Crown className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
-                  </span>
+              <div className="relative px-6 py-6 hover:bg-muted/40 transition-all group">
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-amber-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)] group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
+                    <Crown className="h-4.5 w-4.5" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[11px] font-heading font-bold text-muted-foreground/50 uppercase tracking-[0.12em]">Produto Top</p>
                 </div>
-                <p className="text-[15px] font-heading font-semibold text-foreground leading-tight tracking-[-0.01em] truncate" title={metrics.topProducts[0]?.name || "—"}>
-                  {metrics.topProducts[0]?.name || "—"}
+                <p className="text-[16px] font-heading font-bold text-foreground leading-tight line-clamp-2 min-h-[2.5rem] tracking-tight">
+                  {metrics.topProducts[0]?.name || "Nenhum produto"}
                 </p>
-                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
-                  {metrics.topProducts[0] ? `${metrics.topProducts[0].sales} vendas · ${fmtCompact(metrics.topProducts[0].revenue)}` : "Sem dados"}
+                <p className="mt-1 text-[11px] text-muted-foreground/70 font-bold uppercase tracking-wider">
+                  {metrics.topProducts[0]?.sales || 0} vendas este período
                 </p>
               </div>
             </div>
