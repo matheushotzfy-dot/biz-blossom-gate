@@ -807,59 +807,59 @@ export default function Dashboard() {
         {/* CHART · Volume processado                                        */}
         {/* ─────────────────────────────────────────────────────────────── */}
         <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 04</span>
-            <span className="h-px flex-1 bg-foreground/10" />
-            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Série Histórica · Volume</span>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 04</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Série Histórica · Volume</span>
           </div>
 
-          <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden">
-            <div className="px-7 md:px-9 pt-7 pb-5 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap">
+          <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
+            <div className="px-7 md:px-9 pt-8 pb-6 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap bg-gradient-to-b from-foreground/[0.015] to-transparent">
               <div>
-                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2">Receita acumulada</p>
-                <p className="font-display font-semibold text-foreground tabular-nums tracking-[-0.035em] text-[28px] md:text-[36px] leading-none">
+                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2.5">Receita acumulada</p>
+                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[30px] md:text-[40px] leading-none">
                   {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : (
-                    <span className="inline-flex items-baseline gap-2">
-                      <span className="text-[0.4em] font-medium text-muted-foreground/70">R$</span>
+                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                      <span className="text-[0.4em] font-medium text-muted-foreground/70 not-italic">R$</span>
                       {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-2">
+                <p className="text-[11px] text-muted-foreground mt-2.5">
                   {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
                 </p>
               </div>
               <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-foreground" />
-                  Receita líquida
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                  <span className="font-bold tracking-[0.14em]">Receita líquida</span>
                 </span>
-                <span className="hidden md:inline h-3 w-px bg-foreground/15" />
-                <span className="hidden md:inline tabular-nums">{chartData.length} pts</span>
+                <span className="hidden md:inline tabular-nums font-medium">{chartData.length} pts</span>
               </div>
             </div>
-            <div className="h-[280px] md:h-[320px] px-3 pb-5 pt-5 bg-foreground/[0.005]">
+            <div className="h-[280px] md:h-[340px] px-3 pb-5 pt-6 bg-gradient-to-b from-transparent via-foreground/[0.005] to-foreground/[0.01]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="institutional-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.22} />
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.28} />
+                      <stop offset="60%" stopColor="hsl(var(--foreground))" stopOpacity={0.08} />
                       <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
-                    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.04" strokeWidth="1" />
+                    <pattern id="grid-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
+                      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.035" strokeWidth="1" />
                     </pattern>
                   </defs>
                   <rect width="100%" height="100%" fill="url(#grid-pattern)" />
                   <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={6} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.2, strokeDasharray: "3 3" }}
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.15)", borderRadius: 6, fontSize: 12, fontWeight: 500, padding: "10px 14px", boxShadow: "0 8px 24px -8px hsl(var(--foreground) / 0.18)" }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 4 }}
+                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.25, strokeDasharray: "3 3" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.18)", borderRadius: 8, fontSize: 12, fontWeight: 500, padding: "11px 15px", boxShadow: "0 12px 32px -10px hsl(var(--foreground) / 0.22)" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 5 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.75} fill="url(#institutional-grad)" />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.85} fill="url(#institutional-grad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
