@@ -476,160 +476,416 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* SINGLE LUXURY CARD — CENTERED                                    */}
+      {/* GATEWAY EXECUTIVE DASHBOARD — Stripe/Adyen inspired              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center py-8">
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative w-full max-w-[680px]"
-        >
-          {/* Ambient glow halo */}
-          <div className="absolute -inset-32 pointer-events-none opacity-60">
-            <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-[120px]" />
-            <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-info/8 blur-[120px]" />
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="px-4 md:px-6 py-6 space-y-5"
+      >
+        {/* ─── HEADER BAR ─── */}
+        <header className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 pb-5 border-b border-border/40">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-success/10 border border-success/20 px-2 py-0.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[10px] font-bold text-success uppercase tracking-wider">Live</span>
+              </span>
+              <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">
+                Gateway · Painel Executivo
+              </span>
+            </div>
+            <h1 className="text-[22px] md:text-[26px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">
+              Bem-vindo{nickname ? `, ${nickname}` : ""}
+            </h1>
+            <p className="text-[12px] text-muted-foreground/70 font-medium mt-1">
+              {format(new Date(), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })} · Atualizado em tempo real
+            </p>
           </div>
 
-          {/* Main luxury card */}
-          <div className="relative overflow-hidden rounded-[28px] border border-border/40 bg-gradient-to-b from-card/95 via-card/90 to-card/95 backdrop-blur-2xl shadow-[0_24px_80px_-20px_rgba(0,0,0,0.4),0_8px_32px_-12px_rgba(0,0,0,0.2),inset_0_1px_0_0_hsl(var(--foreground)/0.04)]">
-            {/* Subtle inner glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none" />
-            <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-info/6 blur-[80px] pointer-events-none" />
-
-            {/* Top hairline accent */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-
-            {/* Card content */}
-            <div className="relative px-10 md:px-14 py-12 md:py-14">
-              {/* Brand mark / monogram */}
-              <div className="flex justify-center mb-8">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.08),0_4px_12px_-2px_hsl(var(--primary)/0.2)]">
-                    <Crown className="h-5 w-5 text-primary" strokeWidth={2.2} />
-                  </div>
-                  <div className="absolute -inset-2 rounded-2xl bg-primary/20 blur-xl opacity-50 -z-10" />
-                </div>
-              </div>
-
-              {/* Greeting */}
-              <div className="text-center mb-10">
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.32em] mb-3">
-                  Painel Executivo
-                </p>
-                <h1 className="text-[28px] md:text-[32px] font-display font-black text-foreground tracking-[-0.04em] leading-[1.1]">
-                  Olá{nickname ? `, ${nickname}` : ""}
-                </h1>
-                <p className="text-[13px] text-muted-foreground/70 font-medium mt-2">
-                  Resumo do seu dia · {format(new Date(), "dd 'de' MMMM", { locale: ptBR })}
-                </p>
-              </div>
-
-              {/* Period selector — minimal */}
-              <div className="flex items-center justify-center mb-10">
-                <div className="inline-flex items-center rounded-full border border-border/40 bg-background/40 backdrop-blur-xl p-1 shadow-sm">
-                  {PERIOD_PRESETS.map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                      className={cn(
-                        "rounded-full px-4 py-1.5 text-[11px] font-bold transition-all duration-300",
-                        !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-foreground text-background shadow-sm"
-                          : "text-muted-foreground/60 hover:text-foreground"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
+          {/* Right cluster: filters + actions */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Product filter */}
+            {productsData && productsData.length > 0 && (
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                <SelectTrigger className="h-9 w-[180px] text-[12px] font-semibold rounded-lg border-border/60 bg-card/40">
+                  <SelectValue placeholder="Todos os produtos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os produtos</SelectItem>
+                  {productsData.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
+            )}
 
-              {/* Hero metric — Revenue */}
-              <div className="text-center mb-10">
-                <div className="inline-flex items-center gap-2 mb-3">
-                  <div className="h-1 w-1 rounded-full bg-success animate-pulse" />
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.28em]">
-                    Receita Líquida
-                  </p>
-                  <button onClick={privacy.toggle} className="ml-1 text-muted-foreground/40 hover:text-foreground transition-colors">
-                    {privacy.hidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  </button>
-                </div>
-                <p className="text-[56px] md:text-[64px] font-display font-black text-foreground tabular-nums tracking-[-0.05em] leading-[0.9]">
-                  {privacy.hidden ? "R$ ••••••" : <AnimatedNumber value={revenue} />}
-                </p>
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20">
-                    <ArrowUpRight className="h-3 w-3 text-success" strokeWidth={2.5} />
-                    <span className="text-[11px] font-bold text-success tabular-nums">{approved.length} {approved.length === 1 ? "venda" : "vendas"}</span>
-                  </span>
-                  {conversion > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/40 border border-border/40">
-                      <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{conversion.toFixed(1)}% conv.</span>
-                    </span>
+            {/* Period segmented control */}
+            <div className="inline-flex items-center rounded-lg border border-border/60 bg-card/40 backdrop-blur-xl p-0.5 shadow-sm">
+              {PERIOD_PRESETS.map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-[11px] font-bold transition-all duration-200",
+                    !isCustom && selectedPeriod.label === opt.label
+                      ? "bg-foreground text-background shadow-sm"
+                      : "text-muted-foreground/70 hover:text-foreground"
                   )}
-                </div>
-              </div>
-
-              {/* Hairline divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent mb-8" />
-
-              {/* Three secondary metrics — refined */}
-              <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
-                <div className="text-center px-2 py-3 rounded-xl hover:bg-muted/20 transition-colors">
-                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">Saldo</p>
-                  <p className="text-[18px] md:text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
-                    {privacy.hidden ? "•••" : fmt(balance)}
-                  </p>
-                </div>
-                <div className="text-center px-2 py-3 rounded-xl hover:bg-muted/20 transition-colors border-x border-border/30">
-                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">Ticket Médio</p>
-                  <p className="text-[18px] md:text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
-                    {privacy.hidden ? "•••" : fmt(approved.length > 0 ? revenue / approved.length : 0)}
-                  </p>
-                </div>
-                <div className="text-center px-2 py-3 rounded-xl hover:bg-muted/20 transition-colors">
-                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">Pendentes</p>
-                  <p className="text-[18px] md:text-[20px] font-display font-black text-warning tabular-nums tracking-[-0.03em] leading-none">
-                    {privacy.hidden ? "•••" : pending.length}
-                  </p>
-                </div>
-              </div>
-
-              {/* CTA actions */}
-              <div className="flex items-center justify-center gap-3">
-                <Link
-                  to="/vendas"
-                  className="group inline-flex items-center gap-2 h-11 px-5 rounded-full bg-foreground text-background text-[12.5px] font-bold shadow-[0_4px_16px_-4px_hsl(var(--foreground)/0.4)] hover:shadow-[0_6px_20px_-4px_hsl(var(--foreground)/0.5)] hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  Ver vendas
-                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-                <Link
-                  to="/financeiro/saques"
-                  className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-border/60 bg-background/40 backdrop-blur-xl text-foreground text-[12.5px] font-bold hover:bg-muted/30 hover:border-border transition-all duration-300"
-                >
-                  Sacar
-                </Link>
-              </div>
-
-              {/* Bottom signature */}
-              <div className="flex items-center justify-center gap-2 mt-10 pt-6 border-t border-border/30">
-                <div className="h-1 w-1 rounded-full bg-primary/60" />
-                <p className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.24em]">
-                  Hotzfy · Painel Premium
-                </p>
-                <div className="h-1 w-1 rounded-full bg-primary/60" />
-              </div>
+                  {opt.label}
+                </button>
+              ))}
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className={cn(
+                      "rounded-md px-3 py-1.5 text-[11px] font-bold transition-all duration-200 flex items-center gap-1.5",
+                      isCustom ? "bg-foreground text-background shadow-sm" : "text-muted-foreground/70 hover:text-foreground"
+                    )}
+                  >
+                    <CalendarDays className="h-3 w-3" />
+                    Custom
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="range"
+                    selected={customRange}
+                    onSelect={(range) => {
+                      setCustomRange(range);
+                      if (range?.from) setIsCustom(true);
+                      if (range?.from && range?.to) setDatePickerOpen(false);
+                    }}
+                    numberOfMonths={2}
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Bottom hairline accent */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-1/2 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+            {/* Privacy toggle */}
+            <button
+              onClick={privacy.toggle}
+              className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-border/60 bg-card/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-border transition-all"
+              title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+            >
+              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+
+            <Link
+              to="/financeiro/saques"
+              className="h-9 inline-flex items-center gap-1.5 px-4 rounded-lg bg-foreground text-background text-[12px] font-bold shadow-sm hover:opacity-90 transition-all"
+            >
+              <Wallet className="h-3.5 w-3.5" />
+              Sacar saldo
+            </Link>
           </div>
-        </motion.section>
-      </div>
+        </header>
+
+        {/* ─── PRIMARY KPI ROW — Gateway core metrics ─── */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* TPV — Total Payment Volume (gross) */}
+          <GatewayKpi
+            label="TPV · Volume Bruto"
+            value={privacy.hidden ? CENSORED : fmt(approved.reduce((acc, t) => acc + Number(t.amount), 0))}
+            sub={`${approved.length} transações aprovadas`}
+            tone="primary"
+            trend={approved.length > 0 ? "up" : "neutral"}
+          />
+          {/* Net revenue */}
+          <GatewayKpi
+            label="Receita Líquida"
+            value={privacy.hidden ? CENSORED : fmt(revenue)}
+            sub={`Após taxas · MDR efetivo ${(() => {
+              const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
+              const fees = approved.reduce((acc, t) => acc + Number(t.fee_amount), 0);
+              return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%";
+            })()}`}
+            tone="success"
+            trend="up"
+          />
+          {/* Approval rate */}
+          <GatewayKpi
+            label="Taxa de Aprovação"
+            value={privacy.hidden ? CENSORED : `${conversion.toFixed(2)}%`}
+            sub={`${approved.length} de ${filteredTx.length} processadas`}
+            tone={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"}
+            trend={conversion >= 80 ? "up" : "down"}
+          />
+          {/* Chargeback rate */}
+          <GatewayKpi
+            label="Chargeback Rate"
+            value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
+            sub={`${chargebacks.length} disputa${chargebacks.length === 1 ? "" : "s"} · meta < 1%`}
+            tone={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"}
+            trend={chargebackRate < 1 ? "up" : "down"}
+          />
+        </section>
+
+        {/* ─── MAIN GRID: Chart (left) + Settlement panel (right) ─── */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Chart card */}
+          <div className="lg:col-span-2 rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/40">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Volume processado</p>
+                <p className="text-[15px] font-display font-black text-foreground tracking-tight mt-0.5">
+                  {privacy.hidden ? CENSORED : fmt(revenue)}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-sm bg-primary" />
+                  Receita líquida
+                </span>
+              </div>
+            </div>
+            <div className="h-[280px] px-2 pt-3 pb-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 8, bottom: 4 }}>
+                  <defs>
+                    <linearGradient id="gw-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : `${v}`} width={40} />
+                  <Tooltip
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, fontSize: 12, fontWeight: 600 }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em" }}
+                    formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
+                  />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#gw-grad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Settlement panel — what matters for cash management */}
+          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden flex flex-col">
+            <div className="px-5 py-3.5 border-b border-border/40">
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Liquidação · Settlement</p>
+              <p className="text-[15px] font-display font-black text-foreground tracking-tight mt-0.5">Posição de caixa</p>
+            </div>
+            <div className="flex-1 px-5 py-4 space-y-4">
+              {/* Available */}
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Saldo disponível</p>
+                <p className="text-[28px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none mt-1">
+                  {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
+                </p>
+                <p className="text-[11px] text-muted-foreground/60 font-medium mt-1.5">Pronto para saque imediato</p>
+              </div>
+
+              <div className="h-px bg-border/40" />
+
+              {/* In transit */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-1">Em análise</p>
+                  <p className="text-[16px] font-display font-black text-warning tabular-nums tracking-tight">
+                    {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">Saques em processamento</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-1">Retido</p>
+                  <p className="text-[16px] font-display font-black text-info tabular-nums tracking-tight">
+                    {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((acc, t) => acc + Number(t.retained_amount), 0))}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">Reserva de segurança</p>
+                </div>
+              </div>
+
+              <div className="h-px bg-border/40" />
+
+              {/* Quick actions */}
+              <div className="space-y-2 pt-1">
+                <Link to="/financeiro/extrato" className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:border-border hover:bg-muted/20 transition-all group">
+                  <span className="text-[12px] font-semibold text-foreground/80 group-hover:text-foreground">Extrato detalhado</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+                </Link>
+                <Link to="/financeiro/antecipacao" className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:border-border hover:bg-muted/20 transition-all group">
+                  <span className="text-[12px] font-semibold text-foreground/80 group-hover:text-foreground">Antecipar recebíveis</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── PAYMENT METHOD BREAKDOWN + RISK SIGNALS ─── */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Payment methods */}
+          <div className="lg:col-span-2 rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-border/40 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Métodos de pagamento</p>
+                <p className="text-[15px] font-display font-black text-foreground tracking-tight mt-0.5">Performance por canal</p>
+              </div>
+              <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">{filteredTx.length} processadas</span>
+            </div>
+            <div className="divide-y divide-border/40">
+              <PaymentMethodRow
+                name="PIX"
+                approved={pixApprovedCount}
+                total={pixTotalCount}
+                revenue={pixRevenue}
+                approvalRate={pixConversion}
+                share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0}
+                privacy={privacy.hidden}
+                tone="success"
+              />
+              <PaymentMethodRow
+                name="Cartão de Crédito"
+                approved={cardApprovedCount}
+                total={cardTotalCount}
+                revenue={cardRevenue}
+                approvalRate={cardConversion}
+                share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0}
+                privacy={privacy.hidden}
+                tone="info"
+              />
+              <PaymentMethodRow
+                name="Boleto"
+                approved={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length}
+                total={filteredTx.filter(t => t.payment_method === "boleto").length}
+                revenue={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((acc, t) => acc + Number(t.net_amount), 0)}
+                approvalRate={(() => {
+                  const total = filteredTx.filter(t => t.payment_method === "boleto").length;
+                  const ok = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length;
+                  return total > 0 ? (ok / total) * 100 : 0;
+                })()}
+                share={(() => {
+                  const rev = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((acc, t) => acc + Number(t.net_amount), 0);
+                  return revenue > 0 ? (rev / revenue) * 100 : 0;
+                })()}
+                privacy={privacy.hidden}
+                tone="warning"
+              />
+            </div>
+          </div>
+
+          {/* Risk signals */}
+          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-border/40 flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Risk Signals</p>
+            </div>
+            <div className="divide-y divide-border/40">
+              <RiskRow label="Pendentes" value={pending.length.toString()} hint="Aguardando captura" tone={pending.length > 5 ? "warning" : "neutral"} />
+              <RiskRow label="Reembolsos" value={refunded.length.toString()} hint={privacy.hidden ? CENSORED : `${fmt(refunded.reduce((acc, t) => acc + Number(t.net_amount), 0))} debitados`} tone={refunded.length > 0 ? "warning" : "neutral"} />
+              <RiskRow label="Chargebacks" value={chargebacks.length.toString()} hint={`${chargebackRate.toFixed(2)}% do total`} tone={chargebacks.length > 0 ? "destructive" : "neutral"} />
+              <RiskRow label="Clientes únicos" value={uniqueCustomers.toString()} hint="No período" tone="neutral" />
+              <RiskRow label="Ticket médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} hint="Por transação aprovada" tone="neutral" />
+            </div>
+          </div>
+        </section>
+
+        {/* ─── ACTIVITY FEED + OPERATIONAL TOOLS ─── */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Recent activity */}
+          <div className="lg:col-span-2 rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-border/40 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5 text-muted-foreground/60" />
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Atividade recente</p>
+              </div>
+              <Link to="/vendas" className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider">Ver tudo</Link>
+            </div>
+            {activity.length === 0 ? (
+              <div className="px-5 py-12 text-center">
+                <p className="text-[12px] text-muted-foreground/60">Sem atividade no momento</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border/40">
+                {activity.map((item) => {
+                  const isWithdrawal = item.kind === "withdrawal";
+                  const statusColor = item.status === "completed" || item.status === "approved" ? "text-success bg-success/10 border-success/20"
+                    : item.status === "pending" ? "text-warning bg-warning/10 border-warning/20"
+                    : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "text-destructive bg-destructive/10 border-destructive/20"
+                    : "text-muted-foreground bg-muted/20 border-border/40";
+                  const statusLabel = item.status === "completed" ? "Aprovada" : item.status === "approved" ? "Aprovado" : item.status === "pending" ? "Pendente" : item.status === "refunded" ? "Reembolso" : item.status === "chargeback" ? "Chargeback" : item.status === "rejected" ? "Recusado" : item.status;
+
+                  return (
+                    <button
+                      key={`${item.kind}-${item.id}`}
+                      onClick={() => {
+                        if (!isWithdrawal) {
+                          const tx = transactions.find(t => t.id === item.id);
+                          if (tx) setDetailTx(tx);
+                        }
+                      }}
+                      className="w-full flex items-center gap-3 px-5 py-3 hover:bg-muted/20 transition-colors text-left"
+                    >
+                      <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", isWithdrawal ? "bg-info/10 text-info" : "bg-primary/10 text-primary")}>
+                        {isWithdrawal ? <ArrowDownRight className="h-3.5 w-3.5" /> : <CreditCard className="h-3.5 w-3.5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-[12.5px] font-semibold text-foreground truncate">
+                            {isWithdrawal ? "Saque solicitado" : (item.label === "pix" ? "PIX" : item.label === "credit_card" || item.label === "card" ? "Cartão de Crédito" : item.label === "boleto" ? "Boleto" : "Pagamento")}
+                          </p>
+                          <span className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", statusColor)}>
+                            {statusLabel}
+                          </span>
+                        </div>
+                        <p className="text-[10.5px] text-muted-foreground/60 mt-0.5 font-mono">ID {item.id.slice(0, 8)} · {timeAgo(item.createdAt)}</p>
+                      </div>
+                      <p className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
+                        {privacy.hidden ? CENSORED : fmt(item.amount)}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Operational tools */}
+          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-border/40 flex items-center gap-2">
+              <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Operação</p>
+            </div>
+            <div className="divide-y divide-border/40">
+              {[
+                { label: "Produtos", value: products.toString(), href: "/vendas/produtos", icon: Package },
+                { label: "Configurar checkout", value: "", href: "/vendas/checkout", icon: CreditCard },
+                { label: "Webhooks & API", value: "", href: "/vendas/webhooks", icon: Webhook },
+                { label: "Apps & Integrações", value: "", href: "/integracoes", icon: Layers },
+                { label: "Cupons", value: "", href: "/vendas/cupons", icon: Percent },
+                { label: "Identidade & KYC", value: "", href: "/financeiro/identidade", icon: ShieldCheck },
+                { label: "Dados bancários", value: "", href: "/financeiro/dados-bancarios", icon: Banknote },
+                { label: "Suporte", value: "", href: "/suporte", icon: Sparkles },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  to={action.href}
+                  className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/20 transition-colors group"
+                >
+                  <action.icon className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-foreground transition-colors shrink-0" />
+                  <span className="flex-1 text-[12px] font-semibold text-foreground/80 group-hover:text-foreground">{action.label}</span>
+                  {action.value && <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{action.value}</span>}
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── FOOTER SIGNATURE ─── */}
+        <footer className="flex items-center justify-between pt-4 mt-2 border-t border-border/30 text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.18em]">
+          <span>Hotzfy Gateway · v1.0</span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
+            Sistema operacional
+          </span>
+        </footer>
+      </motion.div>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
         <DialogContent className="sm:max-w-[460px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-[20px]">
@@ -819,6 +1075,86 @@ function PixLogoMark({ className, variant = "teal" }: { className?: string; vari
         fill="currentColor"
       />
     </svg>
+  );
+}
+
+/* ─── Gateway dashboard sub-components ─── */
+
+function GatewayKpi({ label, value, sub, tone, trend }: { label: string; value: string; sub: string; tone: "primary" | "success" | "warning" | "destructive" | "info"; trend: "up" | "down" | "neutral" }) {
+  const toneAccent: Record<string, string> = {
+    primary: "bg-primary",
+    success: "bg-success",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
+    info: "bg-info",
+  };
+  const toneText: Record<string, string> = {
+    primary: "text-primary",
+    success: "text-success",
+    warning: "text-warning",
+    destructive: "text-destructive",
+    info: "text-info",
+  };
+
+  return (
+    <div className="relative rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl p-4 overflow-hidden hover:border-border transition-colors">
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[2px]", toneAccent[tone])} />
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.16em]">{label}</p>
+        {trend === "up" && <ArrowUpRight className={cn("h-3 w-3", toneText[tone])} strokeWidth={2.5} />}
+        {trend === "down" && <ArrowDownRight className="h-3 w-3 text-destructive" strokeWidth={2.5} />}
+      </div>
+      <p className="text-[22px] md:text-[24px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">{value}</p>
+      <p className="text-[10.5px] text-muted-foreground/60 font-medium mt-2">{sub}</p>
+    </div>
+  );
+}
+
+function PaymentMethodRow({ name, approved, total, revenue, approvalRate, share, privacy, tone }: { name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean; tone: "success" | "info" | "warning" }) {
+  const toneAccent: Record<string, string> = {
+    success: "bg-success",
+    info: "bg-info",
+    warning: "bg-warning",
+  };
+
+  return (
+    <div className="px-5 py-3.5 hover:bg-muted/10 transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className={cn("h-2 w-2 rounded-sm", toneAccent[tone])} />
+          <p className="text-[12.5px] font-bold text-foreground">{name}</p>
+        </div>
+        <p className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight">
+          {privacy ? CENSORED : fmt(revenue)}
+        </p>
+      </div>
+      <div className="flex items-center gap-4 text-[10.5px] text-muted-foreground/70 font-semibold mb-2">
+        <span><span className="text-foreground/80 font-bold tabular-nums">{approved}</span> / {total} aprovadas</span>
+        <span>Aprovação <span className="text-foreground/80 font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto">Share <span className="text-foreground/80 font-bold tabular-nums">{share.toFixed(1)}%</span></span>
+      </div>
+      <div className="h-1 w-full rounded-full bg-muted/30 overflow-hidden">
+        <div className={cn("h-full rounded-full transition-all", toneAccent[tone])} style={{ width: `${Math.min(share, 100)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function RiskRow({ label, value, hint, tone }: { label: string; value: string; hint: string; tone: "neutral" | "warning" | "destructive" }) {
+  const toneText: Record<string, string> = {
+    neutral: "text-foreground",
+    warning: "text-warning",
+    destructive: "text-destructive",
+  };
+
+  return (
+    <div className="flex items-center justify-between px-5 py-2.5">
+      <div className="min-w-0 flex-1">
+        <p className="text-[12px] font-semibold text-foreground/80">{label}</p>
+        <p className="text-[10px] text-muted-foreground/60 font-medium truncate">{hint}</p>
+      </div>
+      <p className={cn("text-[15px] font-display font-black tabular-nums tracking-tight ml-3", toneText[tone])}>{value}</p>
+    </div>
   );
 }
 
