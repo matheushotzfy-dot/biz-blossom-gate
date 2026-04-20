@@ -237,31 +237,24 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
   }
   const peak = data.reduce((a, b) => (b.value > a.value ? b : a), data[0]);
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <ComposedChart data={data} margin={{ top: 24, right: 18, left: 6, bottom: 4 }}>
+    <ResponsiveContainer width="100%" height={340}>
+      <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.32} />
-            <stop offset="55%" stopColor="hsl(var(--success))" stopOpacity={0.08} />
+            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
             <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
           </linearGradient>
-          <linearGradient id="rv-bar-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.18} />
-            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.04} />
-          </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 5" stroke="hsl(var(--border))" strokeOpacity={0.28} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={{ stroke: "hsl(var(--border))", strokeOpacity: 0.4 }} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
-        <YAxis width={56} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `R$${v}`} />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.15} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground) / 0.5)", fontWeight: 700 }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground) / 0.5)", fontWeight: 700 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11, padding: "10px 12px", boxShadow: "0 8px 24px hsl(var(--background) / 0.4)" }}
-          formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
-          labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}
-          cursor={{ stroke: "hsl(var(--success))", strokeWidth: 1, strokeDasharray: "3 4", strokeOpacity: 0.6 }}
+          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border) / 0.4)", borderRadius: 12, fontSize: 11, padding: "8px 12px", boxShadow: "0 10px 30px -10px hsl(var(--background) / 0.5)" }}
+          formatter={(v: number) => [fmt(v), "Receita"]}
+          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground) / 0.6)", marginBottom: 4, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em" }}
+          cursor={{ stroke: "hsl(var(--success) / 0.2)", strokeWidth: 2 }}
         />
-        <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1.25} strokeDasharray="3 4" fill="none" opacity={0.4} dot={false} />
-        <Bar dataKey="value" barSize={14} radius={[3, 3, 0, 0]} fill="url(#rv-bar-premium)" />
-        <Area type="monotone" dataKey="value" stroke="hsl(var(--success))" strokeWidth={2.25} fill="url(#rv-gradient-premium)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--success))", strokeWidth: 2, fill: "hsl(var(--card))" }} />
+        <Area type="monotone" dataKey="value" stroke="hsl(var(--success))" strokeWidth={3} fill="url(#rv-gradient-premium)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--success))" }} />
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -905,64 +898,50 @@ export default function Vendas() {
           </div>
 
           {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <section className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--border)/0.4)]">
-            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr]">
-              <div className="relative border-b lg:border-b-0 lg:border-r border-border/60 p-7 flex flex-col justify-between gap-8">
-                <div className="absolute left-0 top-7 bottom-7 w-[2px] rounded-r-full bg-gradient-to-b from-success via-success/40 to-transparent" />
+          <section className="rounded-2xl border border-border/40 bg-card overflow-hidden shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
+              <div className="relative border-b lg:border-b-0 lg:border-r border-border/30 p-8 flex flex-col justify-between gap-10 bg-muted/[0.02]">
+                <div className="absolute left-0 top-8 bottom-8 w-[3px] rounded-r-full bg-success/60 shadow-[0_0_12px_hsl(var(--success)/0.3)]" />
                 <div className="pl-4">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">Receita líquida</p>
-                    <span className="text-[9.5px] font-bold uppercase tracking-wider text-success bg-success/[0.08] border border-success/20 rounded px-1.5 py-[2px]">{periodLabel}</span>
-                  </div>
-                  <p className="mt-3 text-[46px] lg:text-[54px] font-heading font-black tracking-[-0.045em] text-success tabular-nums leading-[0.95]">
-                    {hidden ? HIDE : fmt(m.totalNet)}
-                  </p>
-                  <div className="mt-3.5 flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 mb-3">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Receita líquida</p>
                     <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                    <span className="text-[11px] text-muted-foreground/70 font-medium">
-                      vs período anterior {hidden ? "" : `· ${fmtCompact(p.totalNet)}`}
-                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[52px] font-heading font-black tabular-nums tracking-[-0.06em] text-foreground leading-none drop-shadow-sm">
+                      {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
+                    </p>
+                    <p className="text-[12px] font-semibold text-muted-foreground/40 tabular-nums">
+                      Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-5 pt-6 border-t border-border/50 pl-4">
+                <div className="grid grid-cols-2 gap-y-8 pl-4 border-t border-border/30 pt-8">
                   <div>
-                    <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Vendas</p>
-                    <p className="mt-1.5 text-[20px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em] leading-none">{hidden ? HIDE : m.approved.length}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-1.5">{approvalRate.toFixed(1)}% aprov.</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Vendas</p>
+                    <p className="text-[22px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[10px] font-bold text-success mt-1.5">{approvalRate.toFixed(1)}% conversão</p>
                   </div>
                   <div>
-                    <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Ticket médio</p>
-                    <p className="mt-1.5 text-[20px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em] leading-none">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-1.5">por venda</p>
-                  </div>
-                  <div>
-                    <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">Bruto</p>
-                    <p className="mt-1.5 text-[20px] font-heading font-black text-foreground tabular-nums tracking-[-0.02em] leading-none">{hidden ? HIDE : fmtCompact(m.totalGross)}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-1.5">−{hidden ? HIDE : fmtCompact(m.totalFees)} taxas</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Ticket Médio</p>
+                    <p className="text-[22px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground/40 mt-1.5">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 lg:p-7">
-                <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-                  <div className="flex items-center gap-5">
-                    <p className="text-[13px] font-heading font-bold text-foreground tracking-[-0.01em]">Evolução da receita</p>
-                    <div className="flex items-center gap-3.5 text-[10.5px] text-muted-foreground font-semibold">
-                      <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Atual</span>
-                      <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground/60" />Anterior</span>
-                    </div>
+              <div className="p-4 lg:p-6 bg-muted/[0.01]">
+                <div className="flex items-center justify-between px-2 mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.4)]" />
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-foreground/80">Desempenho por período</p>
                   </div>
-                  <div className="flex items-center gap-2 text-[10.5px]">
-                    <span className="text-muted-foreground/70 font-semibold tabular-nums">{metrics.chartData.length} {metrics.chartData.length === 1 ? "dia" : "dias"}</span>
-                    {metrics.chartData.length > 0 && (
-                      <span className="text-foreground/75 font-bold tabular-nums">
-                        · pico {hidden ? HIDE : fmtCompact(Math.max(...metrics.chartData.map(d => d.value)))}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                    <span>{periodLabel}</span>
                   </div>
                 </div>
-                <RevenueChart data={metrics.chartData} hidden={hidden} />
+                <RevenueChart data={chartData} hidden={hidden} />
               </div>
             </div>
           </section>
