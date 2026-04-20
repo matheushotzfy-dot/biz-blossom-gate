@@ -28,9 +28,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── Constants ─── */
 const TABS = [
-  { id: "visual", label: "Design", icon: Palette },
-  { id: "form", label: "Formulário", icon: Mail },
-  { id: "cro", label: "Conversão", icon: Zap },
+ { id: "visual", label: "Visual", icon: Palette },
+ { id: "payment", label: "Pagamento", icon: CreditCard },
+ { id: "form", label: "Formulário", icon: Mail },
+ { id: "bumps", label: "Order Bumps", icon: Package },
+ { id: "cro", label: "Conversão", icon: Zap },
 ] as const;
 type TabId = typeof TABS[number]["id"];
 
@@ -248,14 +250,16 @@ export default function CheckoutBuilder() {
  })();
 
  // Tab feature counts
-  const getTabFeatureCount = (tabId: TabId): number => {
-    switch (tabId) {
-      case "visual": return [timerEnabled, socialProof, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
-      case "form": return [emailConfirm, phoneRequired, cpfRequired, addressRequired, nameOnCardRequired].filter(Boolean).length;
-      case "cro": return [vslEnabled, fakeViewersEnabled, exitIntentEnabled, progressBarEnabled, testimonialEnabled, scarcityEnabled, whatsappEnabled, discountBadgeEnabled, trustBadgesEnabled].filter(Boolean).length;
-      default: return 0;
-    }
-  };
+ const getTabFeatureCount = (tabId: TabId): number => {
+ switch (tabId) {
+ case "visual": return [timerEnabled, socialProof, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
+ case "payment": return [pixEnabled, boletoEnabled, creditCardEnabled].filter(Boolean).length;
+ case "form": return [emailConfirm, phoneRequired, cpfRequired, addressRequired, nameOnCardRequired].filter(Boolean).length;
+ case "bumps": return orderBumps.length;
+ case "cro": return [vslEnabled, fakeViewersEnabled, exitIntentEnabled, progressBarEnabled, testimonialEnabled, scarcityEnabled, whatsappEnabled, discountBadgeEnabled, trustBadgesEnabled].filter(Boolean).length;
+ default: return 0;
+ }
+ };
 
  // Load product
  useEffect(() => {
@@ -616,6 +620,35 @@ export default function CheckoutBuilder() {
  </>
  )}
 
+ {/* ── PAYMENT TAB ── */}
+ {activeTab === "payment" && (
+ <>
+ <SectionHeader icon={CreditCard} title="Pagamento" desc="Formas de pagamento aceitas" badge="Core" />
+
+ {/* Payment summary cards */}
+ <div className="grid grid-cols-3 gap-2">
+ {[
+ { enabled: pixEnabled, icon: QrCode, label: "PIX", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
+ { enabled: boletoEnabled, icon: FileText, label: "Boleto", color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
+ { enabled: creditCardEnabled, icon: CreditCard, label: "Cartão", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20" },
+ ].map(pm => (
+ <div key={pm.label} className={cn(
+ "rounded-lg p-3 text-center border transition-all",
+ pm.enabled ? pm.bg : "border-border/20 bg-muted/10 opacity-40"
+ )}>
+ <pm.icon className={cn("h-5 w-5 mx-auto mb-1", pm.enabled ? pm.color : "text-muted-foreground/30")} />
+ <p className="text-[10px] font-bold">{pm.label}</p>
+ <p className={cn("text-[9px] font-medium mt-0.5", pm.enabled ? "text-success" : "text-muted-foreground/40")}>{pm.enabled ? "Ativo" : "Inativo"}</p>
+ </div>
+ ))}
+ </div>
+
+ <ToggleRow icon={QrCode} title="PIX" desc="Pagamento instantâneo — 99% aprovação" checked={pixEnabled} onChange={setPixEnabled} />
+ <ToggleRow icon={FileText} title="Boleto Bancário" desc="Vencimento em 3 dias úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />
+ <ToggleRow icon={CreditCard} title="Cartão de Crédito" desc="Até 12x sem juros" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
+ <ConversionTip text="PIX + Cartão maximiza a conversão. PIX converte 99% e cartão captura quem prefere parcelar." />
+ </>
+ )}
 
  {/* ── FORM TAB ── */}
  {activeTab === "form" && (
@@ -642,6 +675,94 @@ export default function CheckoutBuilder() {
  </>
  )}
 
+ {/* ── BUMPS TAB ── */}
+ {activeTab === "bumps" && (
+ <>
+ <SectionHeader icon={Package} title="Order Bumps" desc="Ofertas adicionais no checkout" badge={orderBumps.length > 0 ? `${orderBumps.length} ativo${orderBumps.length > 1 ? "s" : ""}` : undefined} />
+
+ {orderBumps.length > 0 && (
+ <div className="space-y-2">
+ {orderBumps.map((bump, i) => {
+ const prod = allProducts.find(p => p.id === bump.bump_product_id);
+ return (
+ <motion.div
+ key={bump.id}
+ initial={{ opacity: 0, x: -12 }}
+ animate={{ opacity: 1, x: 0 }}
+ transition={{ delay: i * 0.05 }}
+ className="group relative flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/[0.04]"
+ >
+ <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-primary/50" />
+ {prod?.image_url ? (
+ <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-lg object-cover border border-border/20" />
+ ) : (
+ <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+ <Package className="h-4 w-4 text-primary/60" />
+ </div>
+ )}
+ <div className="min-w-0 flex-1">
+ <p className="text-xs font-semibold truncate">{prod?.name || "Produto"}</p>
+ <p className="text-xs font-bold text-primary">+ R$ {Number(prod?.price || 0).toFixed(2)}</p>
+ </div>
+ <Button variant="ghost" size="icon" onClick={() => removeBump(bump.id)} className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all">
+ <Trash2 className="h-3.5 w-3.5" />
+ </Button>
+ </motion.div>
+ );
+ })}
+ </div>
+ )}
+
+ {availableForBump.length > 0 ? (
+ <SectionCard>
+ <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Adicionar Bump</Label>
+ <div className="max-h-[200px] overflow-y-auto divide-y divide-border/20 rounded-lg border border-border/30 bg-muted/10">
+ {availableForBump.map(p => (
+ <button
+ key={p.id}
+ onClick={() => setSelectedBumpProduct(prev => prev === p.id ? "" : p.id)}
+ className={cn(
+ "w-full flex items-center gap-3 p-3 text-left transition-colors",
+ selectedBumpProduct === p.id ? "bg-primary/[0.06]" : "hover:bg-muted/20"
+ )}
+ >
+ <div className={cn(
+ "h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all",
+ selectedBumpProduct === p.id ? "border-primary bg-primary" : "border-border/40"
+ )}>
+ {selectedBumpProduct === p.id && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+ </div>
+ {p.image_url ? (
+ <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-lg object-cover border border-border/20" />
+ ) : (
+ <div className="h-9 w-9 rounded-lg bg-muted/20 flex items-center justify-center">
+ <Package className="h-3.5 w-3.5 text-muted-foreground/40" />
+ </div>
+ )}
+ <div className="min-w-0 flex-1">
+ <p className="text-xs font-medium truncate">{p.name}</p>
+ <p className="text-[11px] font-bold text-primary">R$ {Number(p.price).toFixed(2)}</p>
+ </div>
+ </button>
+ ))}
+ </div>
+ {selectedBumpProduct && (
+ <Button onClick={addBump} className="w-full gap-2 h-9 text-xs font-bold">
+ <Plus className="h-3.5 w-3.5" /> Adicionar como Bump
+ </Button>
+ )}
+ </SectionCard>
+ ) : orderBumps.length === 0 ? (
+ <div className="rounded-xl border border-dashed border-border/30 p-8 text-center space-y-2">
+ <Package className="h-8 w-8 text-muted-foreground/30 mx-auto" />
+ <p className="text-xs font-semibold text-muted-foreground">Nenhum produto disponível</p>
+ <p className="text-[11px] text-muted-foreground/60">Crie mais produtos para usar como bumps</p>
+ </div>
+ ) : null}
+
+ <ConversionTip text="Bumps podem aumentar o ticket médio em até 40%. Ofereça produtos complementares de baixo custo." icon={TrendingUp} />
+ </>
+ )}
 
  {/* ── CRO TAB ── */}
  {activeTab === "cro" && (

@@ -7,7 +7,6 @@ import {
   Activity,
   AlertTriangle,
   ArrowDownRight,
-  ArrowRight,
   ArrowUpRight,
   BarChart3,
   CalendarDays,
@@ -57,8 +56,6 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { motion } from "framer-motion";
-import { StatCard } from "@/components/StatCard";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /* ─────────────────────── Animated Number ─────────────────────── */
 function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
@@ -163,7 +160,6 @@ export default function Dashboard() {
   const products = productsData?.length ?? 0;
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
-  const [selectedProductId, setSelectedProductId] = useState<string>("all");
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [scaleMode, setScaleMode] = useState(false);
@@ -194,18 +190,13 @@ export default function Dashboard() {
   }, [user?.id, refetchTx]);
 
   const filteredTx = useMemo(() => {
-    let base = transactions;
-    if (selectedProductId !== "all") {
-      base = base.filter(t => t.product_id === selectedProductId);
-    }
-
     // Custom date range
     if (isCustom && customRange?.from) {
       const start = new Date(customRange.from);
       start.setHours(0, 0, 0, 0);
       const end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
       end.setHours(23, 59, 59, 999);
-      return base.filter((t) => {
+      return transactions.filter((t) => {
         const d = new Date(t.created_at);
         return d >= start && d <= end;
       });
@@ -215,22 +206,22 @@ export default function Dashboard() {
 
     if (selectedPeriod.days === 0) {
       const todayStr = today.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return base.filter((t) => toBrasiliaDate(t.created_at) === todayStr);
+      return transactions.filter((t) => toBrasiliaDate(t.created_at) === todayStr);
     }
 
     if (selectedPeriod.days === 1) {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return base.filter((t) => toBrasiliaDate(t.created_at) === yesterdayStr);
+      return transactions.filter((t) => toBrasiliaDate(t.created_at) === yesterdayStr);
     }
 
     const start = new Date(today);
     start.setDate(start.getDate() - selectedPeriod.days);
     start.setHours(0, 0, 0, 0);
 
-    return base.filter((t) => new Date(t.created_at) >= start);
-  }, [transactions, selectedPeriod, isCustom, customRange, selectedProductId]);
+    return transactions.filter((t) => new Date(t.created_at) >= start);
+  }, [transactions, selectedPeriod, isCustom, customRange]);
 
   // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
@@ -335,7 +326,6 @@ export default function Dashboard() {
     const revenueByDate = new Map<string, number>();
     for (const t of transactions) {
       if (t.status !== "completed") continue;
-      if (selectedProductId !== "all" && t.product_id !== selectedProductId) continue;
       const dateKey = toBrasiliaDate(t.created_at);
       revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
     }
@@ -420,488 +410,627 @@ export default function Dashboard() {
 
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
-  const periodLabel = isCustom && customRange?.from
-    ? customRange.to
-      ? `${format(customRange.from, "dd/MM", { locale: ptBR })} - ${format(customRange.to, "dd/MM", { locale: ptBR })}`
-      : format(customRange.from, "dd/MM/yyyy", { locale: ptBR })
-    : selectedPeriod.label;
-
   return (
-    <div className="relative mx-auto w-full max-w-[1340px] pb-24">
-      {/* ─── GREEN FIRE BORDER EFFECT (Modo Escala milestone) ─── */}
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-1 relative">
+
+      {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
-          <div className="absolute inset-0 ring-2 ring-inset ring-success/40 animate-pulse" />
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="absolute rounded-full bg-primary/60" style={{ width: `${Math.random() * 6 + 2}px`, height: `${Math.random() * 6 + 2}px`, left: `${Math.random() * 100}%`, bottom: `${Math.random() * 30}%`, animation: `fireParticle ${1 + Math.random() * 2}s ease-out ${Math.random() * 0.5}s forwards` }} />
+          ))}
         </div>
       )}
 
       {/* ─── SCALE MODE POPUP ─── */}
       {showScalePopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-2xl border border-border bg-card animate-scale-in overflow-hidden">
-            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
-            <div className="p-8 text-center">
-              <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-success/10 border border-success/20 flex items-center justify-center">
-                <Rocket className="h-8 w-8 text-success" />
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" onClick={() => setShowScalePopup(false)} />
+          <div className="relative w-full max-w-md rounded-3xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
+            <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
+            <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
+            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
+             <div className="relative p-8 md:p-10 text-center">
+              <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '2.5s' }} />
+                <div className="absolute inset-2 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center ring-4 ring-primary/15 shadow-lg shadow-primary/20">
+                  <Rocket className="h-10 w-10 text-primary drop-shadow-lg" />
+                </div>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-success/10 border border-success/20 px-3 py-1 mb-4">
-                <Flame className="h-3.5 w-3.5 text-success" />
-                <span className="text-[10px] font-bold text-success uppercase tracking-wider">Modo Escala Desbloqueado</span>
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
+                <Flame className="h-4 w-4 text-primary animate-pulse" />
+                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
               </div>
-              <h2 className="text-2xl font-display font-black text-foreground mb-3">Modo Escala<br /><span className="text-success">Ativado</span></h2>
-              <p className="text-sm text-muted-foreground mb-6">Você atingiu R$ 2.000 em 24h. A elite dos vendedores.</p>
-              <button onClick={() => setShowScalePopup(false)} className="w-full h-11 rounded-lg bg-foreground text-background font-bold text-sm hover:opacity-90 transition-opacity">Continuar</button>
+              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3 leading-tight tracking-[-0.04em]">
+                MODO ESCALA<br /><span className="text-gradient">ATIVADO! 🔥</span>
+              </h2>
+              <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-6">
+                <p className="font-bold text-foreground text-base">Você atingiu a elite dos vendedores!</p>
+                <p>R$ 2.000 em 24h comprovam: você tem <strong className="text-primary">mentalidade de escala</strong>. Poucos chegam aqui — e você é um deles.</p>
+                <p>A partir de agora, cada venda te aproxima do <strong className="text-foreground">próximo nível</strong>. Sem limites.</p>
+              </div>
+              <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 mb-6">
+                <div className="flex items-start gap-3"><ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" /><div className="text-left"><p className="text-sm font-bold text-foreground mb-1">Suporte Prioritário Ativado</p><p className="text-xs text-muted-foreground">No Modo Escala, o suporte e a fluidez da plataforma estarão 100% disponíveis para você. Qualquer ajuda para escalar que precisar, pode nos chamar!</p></div></div>
+              </div>
+              <p className="text-lg font-display font-black text-primary mb-6">O CÉU NÃO É O LIMITE 🚀</p>
+              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR!</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ─── BLOCO 1: VISÃO EXECUTIVA ─── */}
-      <section className="relative rounded-2xl border border-border bg-card overflow-hidden mb-5 shadow-[0_1px_0_0_hsl(var(--border)),0_24px_48px_-24px_hsl(var(--background))]">
-        {/* Ambient glow + dot pattern */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:radial-gradient(hsl(var(--foreground))_1px,transparent_1px)] [background-size:18px_18px]" />
-        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/[0.06] blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-success/[0.05] blur-3xl" />
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HERO — ONE DOMINANT METRIC                                       */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <section className="relative mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
 
-        {/* Header */}
-        <div className="relative flex items-center justify-between gap-4 px-6 md:px-7 py-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-muted to-muted/40 border border-border flex items-center justify-center shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04)]">
-              <BarChart3 className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3 lg:px-7">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <BarChart3 className="h-3.5 w-3.5" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Visão Executiva</span>
-              <span className="text-[10.5px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                <span className="relative inline-flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                Operação em tempo real
-              </span>
-            </div>
+            <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Visão Executiva</span>
+            {scaleModeUnlocked && (
+              <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors",
+                scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
+              )}>
+                <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
+                Escala
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-0.5 rounded-lg bg-muted border border-border p-[3px]">
-              {PERIOD_PRESETS.map((p) => {
-                const active = !isCustom && selectedPeriod.label === p.label;
-                return (
-                  <button
-                    key={p.label}
-                    onClick={() => { setIsCustom(false); setSelectedPeriod(p); }}
-                    className={cn(
-                      "h-7 px-3 rounded-md text-[11.5px] font-semibold transition-colors",
-                      active
-                        ? "bg-card text-foreground border border-border"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                );
-              })}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="inline-flex items-center rounded-md border border-border bg-background p-0.5">
+              {PERIOD_PRESETS.map((opt) => (
+                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                  className={cn("rounded px-2.5 py-1 text-[11px] font-semibold transition-colors",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground border border-border shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                  {opt.label}
+                </button>
+              ))}
             </div>
-
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
-                <button
-                  className={cn(
-                    "h-[34px] px-3 rounded-lg text-[11.5px] font-semibold transition-colors flex items-center gap-1.5 border",
-                    isCustom
-                      ? "bg-card text-foreground border-border"
-                      : "bg-muted text-muted-foreground border-border hover:text-foreground"
-                  )}
-                >
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  {isCustom && customRange?.from ? periodLabel : "Custom"}
+                <button className={cn("h-7 rounded-md border px-2.5 text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5",
+                  isCustom ? "border-primary/30 bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"
+                )}>
+                  <CalendarDays className="h-3 w-3" />
+                  {isCustom && customRange?.from
+                    ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                    : "Custom"}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="range"
-                  selected={customRange}
-                  onSelect={(range) => {
-                    setCustomRange(range);
-                    if (range?.from) setIsCustom(true);
-                    if (range?.from && range?.to) setDatePickerOpen(false);
-                  }}
-                  numberOfMonths={2}
-                  locale={ptBR}
-                />
+              <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-popover p-0">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
               </PopoverContent>
             </Popover>
-
-            <button
-              onClick={privacy.toggle}
-              className="h-[34px] w-[34px] rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors"
-              title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-            >
+            <button onClick={privacy.toggle} className={cn("h-7 w-7 rounded-md border flex items-center justify-center transition-colors", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>
 
-        {/* Receita + Saldo */}
-        <div className="relative grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] divide-x divide-border border-b border-border">
-          <div className="relative px-7 md:px-9 py-8">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-4 flex items-center gap-2">
-              <span className="h-px w-6 bg-gradient-to-r from-transparent via-foreground/40 to-foreground/40" />
-              Receita · {periodLabel}
+        {/* Main metric block */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
+          <div className="px-5 py-7 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/60">
+            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              Receita {isCustom && customRange?.from
+                ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                : `· ${selectedPeriod.label}`}
             </p>
-            <div className="text-[60px] md:text-[88px] font-display font-black tracking-[-0.045em] leading-[0.92] bg-gradient-to-b from-foreground to-foreground/85 bg-clip-text text-transparent tabular-nums">
-              {privacy.hidden ? CENSORED : <AnimatedNumber value={revenue} />}
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="inline-flex items-baseline text-[clamp(2.2rem,7vw,68px)] font-heading font-black leading-none tracking-[-0.05em] text-foreground whitespace-nowrap">
+                {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
+              </span>
+              {approved.length > 0 && (
+                <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success">
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  {approved.length} venda{approved.length !== 1 ? "s" : ""}
+                </span>
+              )}
             </div>
-            <div className="mt-7 flex items-center gap-7 flex-wrap">
-              {[
-                { count: approved.length, label: "aprovadas", color: "bg-success" },
-                { count: pending.length, label: "pendentes", color: "bg-warning" },
-                { count: chargebacks.length, label: "contestações", color: "bg-destructive" },
-              ].map((s) => (
-                <div key={s.label} className="flex items-center gap-2">
-                  <span className={cn("h-1.5 w-1.5 rounded-full", s.color)} />
-                  <span className="text-[13px] font-bold text-foreground tabular-nums">{s.count}</span>
-                  <span className="text-[12px] text-muted-foreground">{s.label}</span>
-                </div>
-              ))}
+            <div className="mt-5 flex items-center gap-5 text-[11px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="font-semibold text-foreground tabular-nums">{approved.length}</span> aprovadas
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" />
+                <span className="font-semibold text-foreground tabular-nums">{pending.length}</span> pendentes
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                <span className="font-semibold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> contestações
+              </div>
             </div>
           </div>
 
-          <div className="relative px-7 md:px-8 py-8 bg-gradient-to-br from-success/[0.025] via-transparent to-transparent">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="relative inline-flex h-1.5 w-1.5">
-                <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.6)]" />
-              </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Saldo Disponível</p>
+          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
+            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
             </div>
-            <div className="text-[40px] md:text-[54px] font-display font-black tracking-[-0.04em] leading-[0.95] bg-gradient-to-b from-success to-success/80 bg-clip-text text-transparent tabular-nums drop-shadow-[0_0_24px_hsl(var(--success)/0.15)]">
-              {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
-            </div>
-            <Link
-              to="/financeiro/saques"
-              className="relative mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-foreground text-background text-[11.5px] font-bold hover:opacity-90 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_hsl(var(--foreground)/0.4)] group overflow-hidden"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700" />
-              <span className="relative">Sacar agora</span>
-              <ArrowRight className="relative h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
+              {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
+            </p>
+            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
+              Sacar agora <ChevronRight className="h-3 w-3" />
             </Link>
+            {withdrawalPending > 0 && (
+              <p className="mt-3 text-[10px] text-muted-foreground">
+                <span className="font-semibold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
+              </p>
+            )}
           </div>
         </div>
 
-        {/* KPIs */}
-        <div className="relative grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-          {[
-            { label: "Conversão", value: `${conversion.toFixed(1)}%`, icon: Target },
-            { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: Wallet },
-            { label: "Clientes Únicos", value: String(uniqueCustomers), icon: Users },
-            { label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, icon: ShieldCheck, danger: chargebackRate > 1 },
-          ].map((kpi) => (
-            <div key={kpi.label} className="group relative px-6 md:px-7 py-6 transition-colors hover:bg-muted/30">
-              <div className="flex items-start justify-between mb-3">
-                <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{kpi.label}</p>
-                <div className="h-6 w-6 rounded-md bg-muted/60 border border-border/60 flex items-center justify-center transition-all group-hover:bg-foreground group-hover:border-foreground">
-                  <kpi.icon className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-background" strokeWidth={2.2} />
-                </div>
-              </div>
-              <p className={cn(
-                "text-[26px] md:text-[30px] font-display font-black tracking-[-0.03em] leading-none tabular-nums",
-                (kpi as any).danger ? "text-destructive" : "text-foreground"
-              )}>
-                {kpi.value}
+        {/* Compact supporting KPI strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/60 divide-x divide-border/60">
+          {([
+            { label: "Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "text-info" },
+            { label: "Ticket Médio", numValue: approved.length > 0 ? revenue / approved.length : 0, formatter: fmt, accent: "text-foreground" },
+            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground" },
+            { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success" },
+          ] as const).map((item, i) => (
+            <div key={item.label} className={cn("px-5 py-4 lg:px-7", i >= 2 && "border-t lg:border-t-0 border-border/60")}>
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/80 mb-1.5">{item.label}</p>
+              <p className={cn("text-[20px] lg:text-[24px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", item.accent)}>
+                {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
               </p>
-              <div className={cn(
-                "absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity",
-                (kpi as any).danger && "via-destructive/40"
-              )} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── BLOCO 2: GRÁFICO + POR MÉTODO ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-5 mb-5">
-        {/* Gráfico */}
-        <section className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-6 md:px-7 py-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-                <TrendingUp className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
-              </div>
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* DOMINANT CHART AREA                                              */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <section className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
+          {/* Chart */}
+          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/60">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Receita ao longo do tempo</p>
-                <p className="text-[10.5px] text-muted-foreground mt-0.5">
-                  {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {periodLabel}
+                <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Receita ao longo do tempo</p>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                  {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {selectedPeriod.label}
                 </p>
               </div>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted border border-border">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              <span className="text-[10.5px] font-semibold text-foreground">Aprovadas</span>
-            </div>
-          </div>
-          <div className="px-3 md:px-4 py-4 h-[340px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 16, bottom: 8, left: 8 }}>
-                <defs>
-                  <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
-                    <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600 }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600 }}
-                  tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`}
-                  width={50}
-                />
-                <Tooltip
-                  cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1, strokeDasharray: "3 3" }}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: 10,
-                    fontSize: 12,
-                    padding: "10px 14px",
-                  }}
-                  labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}
-                  itemStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
-                  formatter={(value: number) => [fmt(value), "Receita"]}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="vendas"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2.25}
-                  fill="url(#dashGrad)"
-                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3, style: { filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.6))" } }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        {/* Por método */}
-        <section className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center gap-3 px-6 md:px-7 py-4 border-b border-border">
-            <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-              <Layers className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Por Método</p>
-              <p className="text-[10.5px] text-muted-foreground mt-0.5">Conversão e receita</p>
-            </div>
-          </div>
-          <div className="divide-y divide-border">
-            {[
-              { icon: Zap, label: "PIX", conv: pixConversion, revenue: pixRevenue, sub: `${pixApprovedCount}/${pixTotalCount} aprovadas` },
-              { icon: CreditCard, label: "Cartão", conv: cardConversion, revenue: cardRevenue, sub: `${cardApprovedCount}/${cardTotalCount} aprovadas` },
-            ].map((m) => (
-              <div key={m.label} className="px-6 md:px-7 py-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-                      <m.icon className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
-                    </div>
-                    <span className="text-[13px] font-bold text-foreground tracking-tight">{m.label}</span>
-                  </div>
-                  <span className="text-[11.5px] font-bold text-foreground tabular-nums px-2 py-1 rounded-md bg-muted border border-border">
-                    {m.conv.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="text-[22px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
-                  {privacy.hidden ? CENSORED : fmt(m.revenue)}
-                </div>
-                <p className="text-[10.5px] text-muted-foreground mt-1.5 font-medium">{m.sub}</p>
-              </div>
-            ))}
-
-            {/* Saques pendentes */}
-            <div className="px-6 md:px-7 py-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-warning/10 border border-warning/20 flex items-center justify-center">
-                    <DollarSign className="h-3.5 w-3.5 text-warning" strokeWidth={2.2} />
-                  </div>
-                  <span className="text-[13px] font-bold text-foreground tracking-tight">Saques pendentes</span>
-                </div>
-                <span className="text-[11.5px] font-bold text-warning tabular-nums px-2 py-1 rounded-md bg-warning/10 border border-warning/20">
-                  {withdrawals.filter(w => w.status === "pending").length}
-                </span>
-              </div>
-              <div className="text-[22px] font-display font-black text-warning tabular-nums tracking-[-0.03em] leading-none">
-                {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
-              </div>
-              <Link to="/financeiro/saques" className="text-[10.5px] text-foreground font-bold hover:underline mt-1.5 inline-flex items-center gap-1">
-                Gerenciar <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ─── BLOCO 3: AÇÕES RÁPIDAS + ATIVIDADE RECENTE ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Ações rápidas */}
-        <section className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-6 md:px-7 py-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Ações Rápidas</p>
-                <p className="text-[10.5px] text-muted-foreground mt-0.5">Atalhos da operação</p>
+              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                Vendas aprovadas
               </div>
             </div>
-          </div>
-          <div className="divide-y divide-border">
-            {[
-              { icon: Package, label: "Criar produto", desc: "Adicionar novo infoproduto", to: "/vendas/produtos/novo/editar" },
-              { icon: ShoppingCart, label: "Personalizar checkout", desc: "Editar página de venda", to: "/vendas/checkout" },
-              { icon: Users, label: "Convidar afiliados", desc: "Expandir rede de vendedores", to: "/vendas/afiliados" },
-              { icon: Webhook, label: "Configurar integrações", desc: "Conectar apps e webhooks", to: "/integracoes" },
-              { icon: Percent, label: "Criar cupom", desc: "Promoções e descontos", to: "/vendas/cupons" },
-              { icon: BookOpen, label: "Área de membros", desc: "Gerenciar conteúdo e alunos", to: "/vendas/conteudo" },
-              { icon: Banknote, label: "Solicitar saque", desc: "Transferir saldo disponível", to: "/financeiro/saques" },
-              { icon: FileText, label: "Documentação API", desc: "Integrar via REST", to: "/vendas/api-docs" },
-            ].map((action) => (
-              <Link
-                key={action.label}
-                to={action.to}
-                className="flex items-center gap-3.5 px-6 md:px-7 py-3.5 hover:bg-muted/40 transition-colors group"
-              >
-                <div className="h-9 w-9 rounded-lg bg-muted border border-border flex items-center justify-center group-hover:bg-foreground group-hover:border-foreground transition-colors">
-                  <action.icon className="h-4 w-4 text-foreground group-hover:text-background transition-colors" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-bold text-foreground tracking-tight">{action.label}</p>
-                  <p className="text-[10.5px] text-muted-foreground mt-0.5">{action.desc}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Atividade recente */}
-        <section className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-6 md:px-7 py-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-                <Activity className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">Atividade Recente</p>
-                <p className="text-[10.5px] text-muted-foreground mt-0.5">Últimos eventos</p>
-              </div>
-            </div>
-            <Link to="/vendas" className="text-[10.5px] text-foreground hover:underline font-bold uppercase tracking-wider inline-flex items-center gap-1">
-              Ver tudo <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="divide-y divide-border">
-            {activity.length === 0 ? (
-              <div className="px-6 py-14 text-center">
-                <div className="mx-auto h-12 w-12 rounded-xl bg-muted border border-border flex items-center justify-center mb-4">
-                  <Activity className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-[13px] font-semibold text-foreground">Nenhuma atividade ainda</p>
-                <p className="text-[11px] text-muted-foreground mt-1">Novos eventos aparecerão aqui</p>
-              </div>
-            ) : (
-              activity.map((item) => {
-                const isCompleted = item.status === "completed" || item.status === "approved";
-                const isPending = item.status === "pending";
-                const isFailed = item.status === "refunded" || item.status === "chargeback" || item.status === "failed" || item.status === "rejected";
-                const statusColor = isCompleted ? "bg-success" : isPending ? "bg-warning" : isFailed ? "bg-destructive" : "bg-muted-foreground";
-                const statusLabel = isCompleted ? "Aprovada" : isPending ? "Pendente" : isFailed ? "Falhou" : item.status;
-                const tx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) : null;
-                const product = tx?.product_id ? productsData?.find(p => p.id === tx.product_id) : null;
-                const customerName = tx?.customer_name?.split(" ")[0] || (tx?.customer_email?.split("@")[0]) || null;
-                const method = (item as any).paymentMethod;
-                const Icon = item.kind === "withdrawal" ? Wallet : method === "pix" ? Zap : CreditCard;
-                const methodLabel = item.kind === "withdrawal" ? "Saque" : method === "pix" ? "PIX" : method === "credit_card" || method === "card" ? "Cartão" : (item.label || "Venda");
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      if (tx) setDetailTx(tx);
+            <div className="flex-1 px-3 py-4 min-h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                  <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                  <Tooltip
+                    cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const value = payload[0].value as number;
+                      return (
+                        <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+                          <p className="text-[9px] font-heading text-muted-foreground/70 uppercase tracking-wider">{label}</p>
+                          <p className="text-[13px] font-heading font-black text-primary tabular-nums mt-0.5">
+                            R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      );
                     }}
-                    className="w-full flex items-center gap-3.5 px-6 md:px-7 py-3.5 hover:bg-muted/40 transition-colors text-left group"
-                  >
-                    <div className={cn(
-                      "h-9 w-9 rounded-lg border flex items-center justify-center shrink-0",
-                      isCompleted && "bg-success/10 border-success/20",
-                      isPending && "bg-warning/10 border-warning/20",
-                      isFailed && "bg-destructive/10 border-destructive/20",
-                      !isCompleted && !isPending && !isFailed && "bg-muted border-border"
-                    )}>
-                      <Icon className={cn(
-                        "h-4 w-4",
-                        isCompleted && "text-success",
-                        isPending && "text-warning",
-                        isFailed && "text-destructive",
-                        !isCompleted && !isPending && !isFailed && "text-foreground"
-                      )} strokeWidth={2.2} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[13.5px] font-black text-foreground tabular-nums tracking-tight">
-                          {privacy.hidden ? CENSORED : fmt(item.amount)}
-                        </span>
-                        <span className="text-[10.5px] text-muted-foreground font-medium">·</span>
-                        <span className="text-[11px] font-semibold text-foreground/80">{methodLabel}</span>
-                      </div>
-                      <p className="text-[10.5px] text-muted-foreground truncate font-medium flex items-center gap-1.5">
-                        <span className={cn("inline-flex items-center gap-1", isCompleted && "text-success", isPending && "text-warning", isFailed && "text-destructive")}>
-                          <span className={cn("h-1 w-1 rounded-full", statusColor)} />
-                          {statusLabel}
-                        </span>
-                        {(customerName || product) && <span className="text-muted-foreground/60">·</span>}
-                        {customerName && <span className="truncate">{customerName}</span>}
-                        {product && <><span className="text-muted-foreground/60">·</span><span className="truncate">{product.name}</span></>}
-                        <span className="text-muted-foreground/60">·</span>
-                        <span className="shrink-0">{timeAgo(item.createdAt)}</span>
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                );
-              })
-            )}
+                  />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </section>
-      </div>
 
-      {/* ─── DETAIL DIALOG ─── */}
-      {detailTx && (
-        <Dialog open={!!detailTx} onOpenChange={() => setDetailTx(null)}>
-          <DialogContent className="max-w-md">
-            <div className="space-y-3">
-              <h3 className="text-lg font-bold">Detalhes da transação</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><span className="font-semibold tabular-nums">{fmt(Number(detailTx.amount))}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Líquido</span><span className="font-semibold tabular-nums">{fmt(Number(detailTx.net_amount))}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-semibold capitalize">{detailTx.status}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Método</span><span className="font-semibold uppercase">{detailTx.payment_method}</span></div>
-                {detailTx.customer_name && <div className="flex justify-between"><span className="text-muted-foreground">Cliente</span><span className="font-semibold">{detailTx.customer_name}</span></div>}
-                {detailTx.customer_email && <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-semibold truncate max-w-[200px]">{detailTx.customer_email}</span></div>}
+          {/* Payment breakdown rail */}
+          <div className="flex flex-col">
+            <div className="px-5 py-4 border-b border-border/60">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Por método</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conversão e receita</p>
+            </div>
+            <div className="flex-1 divide-y divide-border/60">
+              {[
+                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
+                { icon: <CreditCard className="h-4 w-4" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
+              ].map((m) => (
+                <div key={m.label} className="px-5 py-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={m.color}>{m.icon}</span>
+                      <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
+                    </div>
+                    <span className={cn("text-[13px] font-heading font-black tabular-nums", m.color)}>{m.conv.toFixed(1)}%</span>
+                  </div>
+                  <p className="text-[18px] font-heading font-black tabular-nums text-foreground leading-none">
+                    {privacy.hidden ? CENSORED : fmt(m.revenue)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1.5">{m.count} aprovadas</p>
+                </div>
+              ))}
+              <div className="px-5 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-warning" />
+                    <span className="text-[12px] text-foreground font-semibold">Saques pendentes</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/70 tabular-nums">{withdrawals.filter(w => w.status === "pending").length}</span>
+                </div>
+                <p className="text-[18px] font-heading font-black tabular-nums text-warning leading-none">
+                  {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                </p>
+                <Link to="/financeiro/saques" className="text-[10px] text-primary font-semibold mt-1.5 inline-flex items-center gap-0.5 hover:underline">
+                  Gerenciar <ChevronRight className="h-3 w-3" />
+                </Link>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+        </div>
+      </section>
+
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* ACTIONS + ACTIVITY                                               */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.4fr] mb-8">
+          {/* Quick actions — operational support */}
+          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
+              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
+            </div>
+            <div className="divide-y divide-border/60 max-h-[560px] overflow-y-auto">
+              {[
+                { label: "Criar produto", href: "/vendas/produtos", icon: Package },
+                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
+                { label: "Link de pagamento", href: "/vendas/links", icon: Hash },
+                { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
+                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
+                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
+                { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote },
+                { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck },
+                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
+                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
+                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
+                { label: "Apps & Integrações", href: "/integracoes", icon: Layers },
+                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
+                { label: "Suporte", href: "/suporte", icon: Sparkles },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  to={action.href}
+                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                    <action.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="flex-1 text-[12.5px] font-semibold text-foreground">{action.label}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Activity feed */}
+          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Atividade recente</p>
+              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition-colors hover:text-primary/80">
+                Ver tudo <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
+              {activity.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
+                    <PixLogoMark className="h-6 w-6" />
+                  </div>
+                  <p className="text-sm font-display font-bold text-muted-foreground/40">Sem movimentações ainda</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground/25">Suas vendas aparecerão aqui</p>
+                </div>
+              ) : (
+                activity.map((item, idx) => {
+                  const txStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
+                    completed: { label: "Aprovada", pillBg: "bg-success/6", pillText: "text-success", pillBorder: "border-success/10", iconBg: "bg-success/10", iconText: "text-success" },
+                    pending: { label: "Pendente", pillBg: "bg-warning/6", pillText: "text-warning", pillBorder: "border-warning/10", iconBg: "bg-warning/10", iconText: "text-warning" },
+                    failed: { label: "Falhou", pillBg: "bg-destructive/6", pillText: "text-destructive", pillBorder: "border-destructive/10", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                    refunded: { label: "Reembolso", pillBg: "bg-info/6", pillText: "text-info", pillBorder: "border-info/10", iconBg: "bg-info/10", iconText: "text-info" },
+                    chargeback: { label: "Chargeback", pillBg: "bg-destructive/6", pillText: "text-destructive", pillBorder: "border-destructive/10", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                    default: { label: "Status", pillBg: "bg-muted/6", pillText: "text-muted-foreground", pillBorder: "border-border/10", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
+                  };
+                  const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
+                    pending: { label: "Em análise", pillBg: "bg-warning/6", pillText: "text-warning", pillBorder: "border-warning/10", iconBg: "bg-warning/10", iconText: "text-warning" },
+                    approved: { label: "Aprovado", pillBg: "bg-success/6", pillText: "text-success", pillBorder: "border-success/10", iconBg: "bg-success/10", iconText: "text-success" },
+                    rejected: { label: "Rejeitado", pillBg: "bg-destructive/6", pillText: "text-destructive", pillBorder: "border-destructive/10", iconBg: "bg-destructive/10", iconText: "text-destructive" },
+                    default: { label: "Saque", pillBg: "bg-muted/6", pillText: "text-muted-foreground", pillBorder: "border-border/10", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
+                  };
+                  const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
+                  const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
+
+                  return (
+                    <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-3 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1.5")}>
+                      <div className="flex items-center gap-3">
+                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border/20", s.iconBg, s.iconText)}>
+                          {item.kind === "transaction"
+                            ? item.paymentMethod === "pix"
+                              ? <PixLogoMark className="h-4 w-4" />
+                              : item.paymentMethod === "credit_card" || item.paymentMethod === "card"
+                                ? <CreditCard className="h-4 w-4" />
+                                : <DollarSign className="h-4 w-4" />
+                            : <Wallet className="h-4 w-4" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-[13px] font-display font-black tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                            <span className={cn("rounded-full border px-2.5 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText, s.pillBorder)}>
+                              {s.label}
+                            </span>
+                          </div>
+                          <p className="mt-1 truncate text-[10px] text-muted-foreground/45">{item.kind === "transaction" ? `Venda • ${item.label === "credit_card" || item.label === "card" ? "Cartão" : item.label === "pix" ? "PIX" : item.label}` : item.label}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          {fullTx && (
+                            <button onClick={() => setDetailTx(fullTx)} className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground/30 transition-all hover:bg-accent hover:text-foreground">
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          <span className="text-[9px] font-mono tabular-nums text-muted-foreground/25">{timeAgo(item.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </section>
+
+      <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
+        <DialogContent className="sm:max-w-[460px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-[20px]">
+          {detailTx && (() => {
+            const statusMap: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
+              completed: { label: "Aprovada", color: "text-success", bg: "bg-success/10", border: "border-success/20", dot: "bg-success" },
+              pending: { label: "Pendente", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20", dot: "bg-warning" },
+              failed: { label: "Falhou", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", dot: "bg-destructive" },
+              refunded: { label: "Reembolso", color: "text-info", bg: "bg-info/10", border: "border-info/20", dot: "bg-info" },
+              chargeback: { label: "Chargeback", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", dot: "bg-destructive" },
+            };
+            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "text-foreground", bg: "bg-muted/10", border: "border-border/20", dot: "bg-muted-foreground" };
+            const productName = productsData?.find(p => p.id === detailTx.product_id)?.name;
+
+            return (
+              <div>
+                {/* Header */}
+                <div className="relative px-7 pt-8 pb-6 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-primary/[0.02] to-transparent pointer-events-none" />
+                  <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2.5 mb-4">
+                      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
+                        {s.label}
+                      </span>
+                      {detailTx.payment_method && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold text-muted-foreground border border-border/20 bg-muted/5">
+                          <CreditCard className="h-3 w-3" />
+                          {detailTx.payment_method === "credit_card" ? "Cartão" : detailTx.payment_method === "pix" ? "PIX" : detailTx.payment_method}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-4xl font-heading font-black text-foreground tabular-nums tracking-tight leading-none">{fmt(Number(detailTx.amount))}</p>
+                    {productName && <p className="text-[13px] text-muted-foreground/70 mt-2">{productName}</p>}
+                  </div>
+                </div>
+
+                <div className="h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
+
+                {/* Dados do cliente */}
+                <div className="px-7 py-5 space-y-3.5">
+                  {[
+                    { show: !!detailTx.customer_name, icon: User, label: "Cliente", value: detailTx.customer_name },
+                    { show: !!detailTx.customer_email, icon: Mail, label: "Email", value: detailTx.customer_email },
+                    { show: !!detailTx.customer_phone, icon: Phone, label: "Telefone", value: detailTx.customer_phone },
+                  ].filter(f => f.show).map((field, i) => (
+                    <div key={i} className="flex items-center gap-3.5 group">
+                      <div className="h-10 w-10 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/12 transition-colors">
+                        <field.icon className="h-4 w-4 text-primary/70" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-heading uppercase tracking-[0.18em] text-muted-foreground/40">{field.label}</p>
+                        <p className="text-[13px] font-semibold text-foreground truncate mt-0.5">{field.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
+
+                {/* Financial breakdown */}
+                <div className="px-7 py-5">
+                  <div className="rounded-xl border border-border/15 bg-gradient-to-b from-muted/5 to-transparent p-4 space-y-3">
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="text-muted-foreground/70">Valor bruto</span>
+                      <span className="font-semibold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="text-muted-foreground/70">Taxas da plataforma</span>
+                      <span className="font-semibold text-destructive/80 tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
+                    </div>
+                    <div className="border-t border-border/10 pt-3 flex justify-between items-center">
+                      <span className="text-[13px] font-bold text-foreground">Valor líquido</span>
+                      <span className="font-black text-primary tabular-nums text-[18px] font-heading tracking-tight">{fmt(Number(detailTx.net_amount))}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-7 pb-6 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
+                    <Clock3 className="h-3 w-3" />
+                    {new Date(detailTx.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                  </span>
+                  <p className="text-[9px] text-muted-foreground/25 font-mono truncate max-w-[180px]">ID: {detailTx.id}</p>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+/* ─── Sub-components ─── */
+
+type Tone = "primary" | "info" | "success" | "warning" | "destructive";
+
+const toneMap: Record<Tone, { bg: string; text: string }> = {
+  primary: { bg: "bg-primary/12", text: "text-primary" },
+  info: { bg: "bg-info/12", text: "text-info" },
+  success: { bg: "bg-success/12", text: "text-success" },
+  warning: { bg: "bg-warning/12", text: "text-warning" },
+  destructive: { bg: "bg-destructive/12", text: "text-destructive" },
+};
+
+function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.ReactNode; label: string; value: string; tone: Tone; idx?: number }) {
+  const accentBar: Record<Tone, string> = {
+    primary: "bg-primary",
+    info: "bg-info",
+    success: "bg-success",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
+  };
+
+  return (
+    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3.5 md:p-5 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+      {/* Left accent bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
+      <div className="relative z-10 pl-1.5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className={`h-7 w-7 md:h-8 md:w-8 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold truncate">{label}</span>
+        </div>
+        <p className="text-xl md:text-2xl lg:text-[28px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.ReactNode; label: string; value: string; helper: string; tone: Tone; delay?: string }) {
+  const accentBar: Record<Tone, string> = {
+    primary: "bg-primary",
+    info: "bg-info",
+    success: "bg-success",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
+  };
+
+  return (
+    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3.5 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in flex flex-col justify-between min-h-[130px] ${delay || ""}`}>
+      {/* Left accent bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
+      <div className="pl-1.5 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-auto">
+          <span className="text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-extrabold">{label}</span>
+          <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${toneMap[tone].bg} ring-1 ring-border/20`}>
+            <span className={toneMap[tone].text}>{icon}</span>
+          </div>
+        </div>
+        <div className="mt-auto">
+          <p className="text-[22px] md:text-[26px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums leading-none">{value}</p>
+          <p className="mt-1.5 text-[10px] md:text-[11px] text-muted-foreground/70 font-medium">{helper}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PixLogoMark({ className, variant = "teal" }: { className?: string; variant?: "teal" | "white" }) {
+  const color = variant === "white" ? "hsl(var(--primary-foreground))" : "hsl(173 58% 47%)";
+
+  return (
+    <svg
+      viewBox="538 29 73 73"
+      fill="none"
+      aria-hidden="true"
+      preserveAspectRatio="xMidYMid meet"
+      shapeRendering="geometricPrecision"
+      className={cn("select-none", className)}
+      style={{ color }}
+    >
+      <path
+        d="m 596.82737,86.620206 c -3.08045,0 -5.97782,-1.19944 -8.15622,-3.37679 l -11.77678,-11.77713 c -0.82691,-0.82903 -2.26801,-0.82656 -3.09456,0 l -11.81982,11.82017 c -2.17841,2.17734 -5.07577,3.37679 -8.15623,3.37679 h -2.32092 l 14.9158,14.915444 c 4.65807,4.65808 12.21069,4.65808 16.86912,0 l 14.95813,-14.958484 z"
+        fill="currentColor"
+      />
+      <path
+        d="m 553.82362,44.963326 c 3.08046,0 5.97782,1.19944 8.15622,3.37679 l 11.81982,11.82193 c 0.85125,0.85161 2.2412,0.85479 3.09457,-10e-4 l 11.77678,-11.77784 c 2.1784,-2.17735 5.07576,-3.37679 8.15622,-3.37679 h 1.41852 l -14.95778,-14.95813 c -4.65878,-4.658432 -12.2114,-4.658432 -16.86948,0 l -14.91509,14.91509 z"
+        fill="currentColor"
+      />
+      <path
+        d="m 610.61844,57.378776 -9.03922,-9.03922 c -0.19897,0.0797 -0.41452,0.12946 -0.64206,0.12946 h -4.10986 c -2.12478,0 -4.20476,0.86184 -5.70618,2.36432 l -11.77643,11.77678 c -1.10207,1.10208 -2.55022,1.65347 -3.99697,1.65347 -1.44815,0 -2.89524,-0.55139 -3.99697,-1.65241 l -11.82088,-11.82088 c -1.50142,-1.50283 -3.5814,-2.36431 -5.70618,-2.36431 h -5.05354 c -0.21555,0 -0.41698,-0.0508 -0.60713,-0.12242 l -9.07521,9.07521 c -4.65843,4.65843 -4.65843,12.2107 0,16.86913 l 9.07486,9.07485 c 0.1905,-0.0716 0.39193,-0.12241 0.60748,-0.12241 h 5.05354 c 2.12478,0 4.20476,-0.86148 5.70618,-2.36396 l 11.81982,-11.81982 c 2.13643,-2.13466 5.8607,-2.13537 7.995,0.001 l 11.77643,11.77573 c 1.50142,1.50248 3.5814,2.36431 5.70618,2.36431 h 4.10986 c 0.22754,0 0.44309,0.0497 0.64206,0.12947 l 9.03922,-9.03922 c 4.65808,-4.65843 4.65808,-12.2107 0,-16.86913"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
+  const styles: Record<string, { bg: string; text: string; ring: string }> = {
+    success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/20" },
+    warning: { bg: "bg-warning/10", text: "text-warning", ring: "ring-warning/20" },
+    destructive: { bg: "bg-destructive/10", text: "text-destructive", ring: "ring-destructive/20" },
+    info: { bg: "bg-info/10", text: "text-info", ring: "ring-info/20" },
+  };
+
+  return (
+    <div className="flex items-center gap-3.5 rounded-xl border border-border/40 bg-muted/10 px-4 py-3.5 transition-all duration-200 hover:bg-muted/20 hover:border-border/60">
+      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ring-1 ${styles[tone].bg} ${styles[tone].text} ${styles[tone].ring}`}>{icon}</div>
+      <span className="flex-1 text-[13px] font-semibold text-foreground/80">{label}</span>
+      <span className="text-base font-display font-black text-foreground tabular-nums tracking-tight">{value}</span>
+    </div>
+  );
+}
+
+function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactNode; label: string; value: string; tone?: "success" | "info" | "destructive" }) {
+  const tStyles: Record<string, { text: string; valueTxt: string; iconBg: string }> = {
+    success: { text: "text-success", valueTxt: "text-success", iconBg: "bg-success/10" },
+    info: { text: "text-info", valueTxt: "text-foreground", iconBg: "bg-info/10" },
+    destructive: { text: "text-destructive", valueTxt: "text-destructive", iconBg: "bg-destructive/10" },
+  };
+  const s = tStyles[tone] || tStyles.info;
+
+  return (
+    <div className="dashboard-action-link flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors">
+      <div className="flex items-center gap-2.5">
+        <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", s.iconBg)}>
+          <span className={s.text}>{icon}</span>
+        </div>
+        <span className="text-[11px] text-muted-foreground/70 font-semibold">{label}</span>
+      </div>
+      <p className={`text-lg font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
     </div>
   );
 }

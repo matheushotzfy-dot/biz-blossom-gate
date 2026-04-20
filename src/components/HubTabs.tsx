@@ -2,15 +2,15 @@ import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 export type HubTab = {
-  id: string;
-  label: string;
-  icon: LucideIcon;
+ id: string;
+ label: string;
+ icon: LucideIcon;
 };
 
 type HubTabsProps = {
-  tabs: HubTab[];
-  active: string;
-  onChange: (id: string) => void;
+ tabs: HubTab[];
+ active: string;
+ onChange: (id: string) => void;
 };
 
 export function HubTabs({ tabs, active, onChange }: HubTabsProps) {

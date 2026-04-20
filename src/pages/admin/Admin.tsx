@@ -99,12 +99,12 @@ export default function Admin() {
  <p className="text-muted-foreground text-sm mt-1">Controle total da operação</p>
  </div>
 
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-  <StatCard title="Usuários" value={String(profiles.length)} icon={Users} change="total registrados" changeType="neutral" />
-  <StatCard title="Produtos" value={String(products.length)} icon={Package} change="cadastrados" changeType="neutral" />
-  <StatCard title="Receita Total" value={`R$ ${totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={DollarSign} change={`R$ ${totalFees.toFixed(2)} em taxas`} changeType="positive" />
-  <StatCard title="Saques Pendentes" value={`R$ ${pendingAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={ArrowDownToLine} change={`${pendingWd.length} solicitações`} changeType={pendingWd.length > 0 ? "negative" : "neutral"} />
-  </div>
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+ <StatCard title="Usuários" value={String(profiles.length)} icon={Users} change="total registrados" changeType="neutral" />
+ <StatCard title="Produtos" value={String(products.length)} icon={Package} change="cadastrados" changeType="neutral" />
+ <StatCard title="Receita Total" value={`R$ ${totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={DollarSign} change={`R$ ${totalFees.toFixed(2)} em taxas`} changeType="positive" />
+ <StatCard title="Saques Pendentes" value={`R$ ${pendingAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={ArrowDownToLine} change={`${pendingWd.length} solicitações`} changeType={pendingWd.length > 0 ? "negative" : "neutral"} />
+ </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
  <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
