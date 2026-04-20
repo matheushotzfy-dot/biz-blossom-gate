@@ -923,7 +923,7 @@ export default function Vendas() {
                   <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                 </div>
                 <div className="relative group/rev">
-                  <p className="text-[56px] sm:text-[64px] lg:text-[72px] font-display font-black tabular-nums tracking-[-0.06em] text-foreground leading-[0.85] transition-all group-hover/rev:tracking-[-0.07em]">
+                  <p className="text-[56px] sm:text-[64px] lg:text-[72px] font-display font-black tabular-nums tracking-[-0.06em] leading-[0.85] transition-all group-hover/rev:tracking-[-0.07em] bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground to-foreground/40">
                     {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                   </p>
                   <div className="absolute -inset-x-4 -inset-y-2 bg-primary/5 blur-2xl opacity-0 group-hover/rev:opacity-100 transition-opacity pointer-events-none" />
