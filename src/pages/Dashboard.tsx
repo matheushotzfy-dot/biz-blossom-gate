@@ -684,62 +684,72 @@ export default function Dashboard() {
             </div>
 
             {/* Saldo / Liquidação */}
-            <div className="lg:col-span-4 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)] group/balance">
+            <div className="lg:col-span-4 relative rounded-[22px] border border-foreground/[0.08] bg-gradient-to-br from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_hsl(var(--background)/0.4)_inset,0_1px_0_hsl(var(--foreground)/0.04),0_30px_70px_-28px_hsl(var(--foreground)/0.22)] group/balance">
               <div className="absolute inset-0 bg-gradient-to-bl from-foreground/[0.03] via-transparent to-transparent pointer-events-none" />
-              <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/[0.05] blur-[100px] pointer-events-none" />
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+              <div className="absolute -top-28 -left-28 h-72 w-72 rounded-full bg-primary/[0.06] blur-[110px] pointer-events-none" />
+              <div className="absolute -bottom-20 -right-16 h-52 w-52 rounded-full bg-primary/[0.04] blur-[100px] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.18] to-transparent" />
+              <div className="absolute top-5 right-5 flex flex-col items-end gap-1 pointer-events-none">
+                <span className="font-mono text-[8px] font-bold text-muted-foreground/35 tracking-[0.22em] uppercase">N° 002</span>
+                <span className="h-px w-12 bg-gradient-to-r from-foreground/20 to-transparent" />
+              </div>
 
-              <div className="relative px-7 md:px-9 pt-9 pb-9 md:pt-11 md:pb-11 flex flex-col gap-7 h-full">
+              <div className="relative px-7 md:px-9 pt-10 pb-9 md:pt-12 md:pb-11 flex flex-col gap-7 h-full">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Saldo Disponível</span>
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.1] border border-success/20 font-mono text-[9px] font-bold text-success tracking-[0.16em] uppercase shadow-[0_0_10px_-2px_hsl(var(--success)/0.3)]">
-                      <span className="h-1 w-1 rounded-full bg-success" />
+                    <div className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                      <span className="font-mono text-[9.5px] font-bold text-foreground/85 uppercase tracking-[0.26em]">Saldo Disponível</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.1] border border-success/25 font-mono text-[9px] font-bold text-success tracking-[0.18em] uppercase shadow-[0_0_12px_-2px_hsl(var(--success)/0.35)]">
+                      <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
                       Free
                     </span>
                   </div>
-                  <p className="font-display font-semibold tabular-nums leading-[0.95] tracking-[-0.04em] text-[40px] md:text-[50px]">
+                  <p className="font-display font-semibold tabular-nums leading-[0.92] tracking-[-0.045em] text-[42px] md:text-[52px]">
                     {privacy.hidden ? (
-                      <span className="text-foreground/20">{CENSORED}</span>
+                      <span className="text-foreground/15">{CENSORED}</span>
                     ) : (
-                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-br from-foreground via-foreground/97 to-foreground/65 bg-clip-text text-transparent drop-shadow-[0_2px_18px_hsl(var(--foreground)/0.08)]">
                         <AnimatedNumber value={balance} />
                       </span>
                     )}
                   </p>
-                  <p className="mt-3 text-[11.5px] text-muted-foreground/85 leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
+                  <p className="mt-3 text-[11.5px] text-muted-foreground/85 leading-relaxed font-medium">Liquidez imediata · saque em D+0 via PIX</p>
                 </div>
 
-                <div className="border-t border-foreground/[0.08] pt-6 space-y-5 flex-1">
+                <div className="border-t border-foreground/[0.07] pt-6 space-y-5 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-warning shadow-[0_0_6px_hsl(var(--warning)/0.6)]" />
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em]">Em análise</p>
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.6)]" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em]">Em análise</p>
                       </div>
-                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3">Saques em processamento</p>
+                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3 font-medium">Saques em processamento</p>
                     </div>
-                    <p className="text-[16px] font-display font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[17px] font-display font-semibold text-foreground tabular-nums tracking-[-0.02em]">
                       {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                     </p>
                   </div>
                   <div className="flex items-baseline justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-info shadow-[0_0_6px_hsl(var(--info)/0.6)]" />
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em]">Reserva técnica</p>
+                        <span className="h-1.5 w-1.5 rounded-full bg-info shadow-[0_0_8px_hsl(var(--info)/0.6)]" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em]">Reserva técnica</p>
                       </div>
-                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3">Liberação programada · D+30</p>
+                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3 font-medium">Liberação programada · D+30</p>
                     </div>
-                    <p className="text-[16px] font-display font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[17px] font-display font-semibold text-foreground tabular-nums tracking-[-0.02em]">
                       {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
                     </p>
                   </div>
                 </div>
 
-                <Link to="/financeiro/saques" className="border-t border-foreground/[0.08] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
-                  <span className="text-[10px] font-mono text-muted-foreground tracking-[0.18em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
+                <Link to="/financeiro/saques" className="border-t border-foreground/[0.07] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
+                  <span className="text-[10px] font-mono text-muted-foreground tracking-[0.2em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
+                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-foreground/[0.1] bg-foreground/[0.03] group-hover/link:bg-foreground group-hover/link:text-background transition-all">
+                    <ChevronRight className="h-3 w-3 text-muted-foreground group-hover/link:text-background group-hover/link:translate-x-0.5 transition-all" />
+                  </span>
                 </Link>
               </div>
             </div>
