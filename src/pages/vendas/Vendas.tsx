@@ -287,17 +287,17 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/30 last:border-b-0">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/40 last:border-b-0">
    {/* Customer */}
-   <td className="pl-5 pr-3 py-3.5 align-middle">
-    <div className="flex items-center gap-3">
-     <Avatar className="h-9 w-9 shrink-0 rounded-full">
-      <AvatarFallback className={cn("text-[11px] font-semibold rounded-full", avatarColor(name))}>{initials(name)}</AvatarFallback>
+   <td className="pl-6 pr-4 py-5 align-middle">
+    <div className="flex items-center gap-3.5">
+     <Avatar className="h-10 w-10 shrink-0 rounded-full ring-1 ring-border/30">
+      <AvatarFallback className={cn("text-[12px] font-heading font-semibold rounded-full", avatarColor(name))}>{initials(name)}</AvatarFallback>
      </Avatar>
      <div className="min-w-0">
-      <p className="truncate text-[13px] font-semibold text-foreground leading-tight">{name}</p>
-      <div className="flex items-center gap-1.5 mt-0.5">
-       {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground/70 max-w-[200px]">{tx.customer_email}</p>}
+      <p className="truncate text-[14px] font-heading font-semibold text-foreground leading-[1.25] tracking-[-0.01em]">{name}</p>
+      <div className="flex items-center gap-2 mt-1">
+       {tx.customer_email && <p className="truncate text-[11.5px] text-muted-foreground/75 max-w-[220px] leading-tight">{tx.customer_email}</p>}
        {tx.customer_phone && (
         <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-muted-foreground/40 hover:text-success transition-colors">
          <MessageCircle className="h-3 w-3" />
@@ -308,49 +308,49 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
     </div>
    </td>
     {/* Product + Date */}
-    <td className="px-3 py-3.5 align-middle">
-     <p className="truncate text-[12.5px] text-foreground/80 max-w-[220px] leading-tight">{prodName}</p>
-     <p className="text-[11px] text-muted-foreground/60 mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+    <td className="px-4 py-5 align-middle">
+     <p className="truncate text-[13px] font-medium text-foreground/85 max-w-[240px] leading-[1.3] tracking-[-0.005em]">{prodName}</p>
+     <p className="text-[11.5px] text-muted-foreground/70 mt-1 tabular-nums tracking-tight">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
     </td>
     {/* Status */}
-    <td className="px-3 py-3.5 align-middle">
-     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium", st.fg, st.bg)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)}>
-       {tx.status === "pending" && <span className={cn("absolute inline-flex h-1.5 w-1.5 rounded-full animate-ping opacity-50", st.dot)} />}
+    <td className="px-4 py-5 align-middle">
+     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-heading font-semibold tracking-tight", st.fg, st.bg)}>
+      <span className={cn("relative flex h-1.5 w-1.5 rounded-full", st.dot)}>
+       {tx.status === "pending" && <span className={cn("absolute inset-0 inline-flex rounded-full animate-ping opacity-60", st.dot)} />}
       </span>
       {st.label}
      </span>
     </td>
     {/* Method */}
-    <td className="px-3 py-3.5 align-middle">
-     <div className="flex items-center gap-2">
-      <span className={cn("flex h-6 w-6 items-center justify-center rounded-md", method.iconBg)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
-      <span className="text-[12px] text-foreground/80">{method.label}</span>
+    <td className="px-4 py-5 align-middle">
+     <div className="flex items-center gap-2.5">
+      <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg ring-1 ring-border/30", method.iconBg)}><MethodIcon className={cn("h-3.5 w-3.5", method.color)} /></span>
+      <span className="text-[12.5px] font-medium text-foreground/85">{method.label}</span>
      </div>
     </td>
     {/* Gross */}
-    <td className="px-3 py-3.5 align-middle text-right">
-     <p className="text-[12.5px] text-foreground/80 tabular-nums">{fmt(gross)}</p>
-     {fee > 0 && <p className="text-[10.5px] text-muted-foreground/60 tabular-nums mt-0.5">−{fmt(fee)}</p>}
+    <td className="px-4 py-5 align-middle text-right">
+     <p className="text-[13.5px] font-medium text-foreground/85 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
+     {fee > 0 && <p className="text-[11px] text-muted-foreground/55 tabular-nums mt-0.5">−{fmt(fee)}</p>}
     </td>
     {/* Net */}
-    <td className="px-4 py-3.5 align-middle text-right">
-     <p className={cn("text-[14px] font-semibold tabular-nums",
+    <td className="px-5 py-5 align-middle text-right">
+     <p className={cn("text-[15.5px] font-heading font-semibold tabular-nums tracking-[-0.02em]",
       tx.status === "completed" ? "text-foreground" : tx.status === "pending" ? "text-warning" : "text-muted-foreground"
      )}>{fmt(net)}</p>
     </td>
     {/* Actions */}
-    <td className="pr-4 py-3.5 align-middle w-12">
+    <td className="pr-5 py-5 align-middle w-12">
     <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
      <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-       <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted transition-colors"><MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" /></button>
+       <button className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted transition-colors"><MoreHorizontal className="h-4 w-4 text-muted-foreground" /></button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 rounded-lg border-border bg-popover p-1">
-       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px] rounded-md py-1.5"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
-       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2 text-[12px] rounded-md py-1.5"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
-       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2 text-[12px] rounded-md py-1.5"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
-       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[12px] text-destructive focus:text-destructive rounded-md py-1.5"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
+      <DropdownMenuContent align="end" className="w-48 rounded-xl border-border bg-popover p-1.5">
+       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2.5 text-[12.5px] rounded-lg py-2"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2.5 text-[12.5px] rounded-lg py-2"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
+       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2.5 text-[12.5px] rounded-lg py-2"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
+       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2.5 text-[12.5px] text-destructive focus:text-destructive rounded-lg py-2"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
       </DropdownMenuContent>
      </DropdownMenu>
     </div>
