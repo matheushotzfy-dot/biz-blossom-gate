@@ -261,7 +261,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
           strokeWidth={4}
           fill="url(#rv-gradient-premium)"
           dot={false}
-          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 3, fill: "hsl(var(--success))", shadow: "0 0 10px hsl(var(--success)/0.5)" }}
+          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 3, fill: "hsl(var(--success))" }}
         />
       </ComposedChart>
     </ResponsiveContainer>
