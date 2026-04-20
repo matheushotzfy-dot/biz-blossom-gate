@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, MoreHorizontal, Palette, Pencil, Settings2, Sparkles, Check } from "lucide-react";
+import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, TrendingUp } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink } from "./productPresentation";
 import { cn } from "@/lib/utils";
@@ -9,24 +9,27 @@ type ProductGridViewProps = ProductMenuHandlers & {
   toolbar?: React.ReactNode;
 };
 
-const STATUS_META: Record<string, { label: string; dot: string; pillBg: string; text: string }> = {
+const STATUS_META: Record<string, { label: string; dot: string; ring: string; text: string; glow: string }> = {
   active: {
     label: "Ativo",
     dot: "bg-emerald-400",
-    pillBg: "bg-background/80 border-border/70",
+    ring: "ring-emerald-400/25",
     text: "text-emerald-300",
+    glow: "shadow-[0_0_12px_-2px_hsl(var(--success)/0.45)]",
   },
   inactive: {
     label: "Inativo",
-    dot: "bg-muted-foreground/60",
-    pillBg: "bg-background/80 border-border/70",
+    dot: "bg-muted-foreground/50",
+    ring: "ring-border/60",
     text: "text-muted-foreground",
+    glow: "",
   },
   pending_review: {
     label: "Em revisão",
     dot: "bg-amber-400",
-    pillBg: "bg-background/80 border-border/70",
+    ring: "ring-amber-400/25",
     text: "text-amber-300",
+    glow: "shadow-[0_0_12px_-2px_hsl(45_95%_55%/0.4)]",
   },
 };
 
@@ -40,7 +43,7 @@ const THEME_LABELS: Record<string, string> = {
 const shortenLink = (url: string) => {
   try {
     const full = getCheckoutLink(url);
-    return full.replace(/^https?:\/\//, "");
+    return full.replace(/^https?:\/\//, "").replace(/\/$/, "");
   } catch {
     return url;
   }
@@ -60,53 +63,81 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           const linkPreview = product.checkout_url ? shortenLink(product.checkout_url) : null;
           const priceFormatted = formatCurrency(Number(product.price));
           const priceNumberOnly = priceFormatted.replace(/^R\$\s?/, "");
+          const isActive = product.status === "active";
 
           return (
             <article
               key={product.id}
               className={cn(
-                "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card",
-                "transition-colors duration-200 hover:border-border/90",
+                "group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card",
+                "shadow-[0_1px_0_0_hsl(var(--border)/0.4)_inset,0_1px_2px_0_hsl(var(--background)/0.4)]",
+                "transition-all duration-300 ease-out",
+                "hover:border-border hover:shadow-[0_1px_0_0_hsl(var(--border)/0.6)_inset,0_8px_24px_-12px_hsl(var(--background)/0.8)]",
+                "hover:-translate-y-0.5",
               )}
             >
               {/* ── Hero ── */}
-              <div className="relative aspect-[16/11] w-full overflow-hidden border-b border-border">
+              <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/80 bg-gradient-to-br from-muted/40 via-muted/20 to-background">
                 {product.image_url ? (
                   <>
                     <img
                       src={product.image_url}
                       alt={product.name}
                       loading="lazy"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                     />
+                    {/* Top vignette for status pill legibility */}
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background/60 via-background/10 to-transparent" />
                     {/* Bottom gradient for price legibility */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/70 to-transparent" />
                   </>
                 ) : (
-                  <div className="relative flex h-full w-full items-center justify-center bg-muted/40">
+                  <div className="relative flex h-full w-full items-center justify-center">
+                    {/* Subtle dot grid */}
+                    <div
+                      className="absolute inset-0 opacity-[0.05]"
+                      style={{
+                        backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+                        backgroundSize: "16px 16px",
+                      }}
+                    />
                     {/* Mega translucent price */}
-                    <span className="font-display text-[88px] font-black leading-none tracking-tighter text-foreground/12 tabular-nums select-none">
+                    <span className="relative font-display text-[92px] font-black leading-none tracking-tighter text-foreground/[0.08] tabular-nums select-none">
                       {priceNumberOnly}
                     </span>
                   </div>
                 )}
 
-                {/* Price (green, bold, bottom-left) */}
-                <div className="absolute bottom-3 left-4">
-                  <span className="font-display text-[22px] font-black leading-none tracking-tight text-success tabular-nums">
-                    {priceFormatted}
+                {/* Price (bottom-left) - with subtle backdrop */}
+                <div className="absolute bottom-3.5 left-4 flex items-end gap-1.5">
+                  <span className="font-display text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/90 mb-1">
+                    R$
+                  </span>
+                  <span className="font-display text-[26px] font-black leading-none tracking-tight text-success tabular-nums drop-shadow-[0_2px_8px_hsl(var(--success)/0.3)]">
+                    {priceNumberOnly}
                   </span>
                 </div>
 
                 {/* Status pill - top right */}
                 <div className="absolute right-3 top-3">
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10.5px] font-bold backdrop-blur-md",
-                    status.pillBg,
+                    "inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-[10.5px] font-bold backdrop-blur-md ring-1",
+                    status.ring,
                     status.text,
                   )}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
+                    <span className={cn("relative h-1.5 w-1.5 rounded-full", status.dot, status.glow)}>
+                      {isActive && (
+                        <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
+                      )}
+                    </span>
                     {status.label}
+                  </span>
+                </div>
+
+                {/* Delivery type pill - top left */}
+                <div className="absolute left-3 top-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground backdrop-blur-md ring-1 ring-border/60">
+                    {deliveryLabel}
                   </span>
                 </div>
               </div>
@@ -114,7 +145,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               {/* ── Body ── */}
               <div className="flex flex-1 flex-col gap-3 p-4">
                 <div className="min-w-0">
-                  <h3 className="line-clamp-1 font-display text-[15px] font-bold leading-tight tracking-[-0.01em] text-foreground">
+                  <h3 className="line-clamp-1 font-display text-[16px] font-bold leading-tight tracking-[-0.015em] text-foreground">
                     {product.name}
                   </h3>
                   <p className={cn(
@@ -130,30 +161,40 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
-                    className="group/link flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-1.5 text-left transition-colors hover:border-border/90 hover:bg-muted/50"
+                    className={cn(
+                      "group/link flex items-center gap-2 rounded-lg border bg-muted/20 px-2.5 py-1.5 text-left transition-all",
+                      isCopied
+                        ? "border-success/40 bg-success/5"
+                        : "border-border/70 hover:border-border hover:bg-muted/40",
+                    )}
                   >
-                    <span className="text-[11px] text-muted-foreground/60">🔗</span>
+                    <Link2 className="h-3 w-3 shrink-0 text-muted-foreground/60" strokeWidth={2.25} />
                     <span className="flex-1 truncate font-mono text-[11px] text-muted-foreground">
                       {linkPreview}
                     </span>
                     {isCopied ? (
-                      <Check className="h-3 w-3 shrink-0 text-success" strokeWidth={2.75} />
+                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-success">
+                        <Check className="h-3 w-3 shrink-0" strokeWidth={2.75} />
+                        Copiado
+                      </span>
                     ) : (
-                      <Copy className="h-3 w-3 shrink-0 text-muted-foreground/60 transition-colors group-hover/link:text-foreground" strokeWidth={2.25} />
+                      <Copy className="h-3 w-3 shrink-0 text-muted-foreground/50 transition-colors group-hover/link:text-foreground" strokeWidth={2.25} />
                     )}
                   </button>
                 )}
 
                 {/* Checkout Builder pill */}
-                <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-1.5">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-success" strokeWidth={2.25} />
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-gradient-to-br from-success/[0.04] via-muted/10 to-transparent px-2.5 py-2">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-success/10 ring-1 ring-success/20">
+                      <Sparkles className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
+                    </div>
                     <div className="min-w-0">
-                      <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80">
                         Checkout builder
                       </p>
-                      <p className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                      <p className="flex items-center gap-1.5 text-[11.5px] font-bold text-foreground">
+                        <span className="h-1 w-1 rounded-full bg-success" />
                         {themeLabel}
                       </p>
                     </div>
@@ -161,7 +202,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                    className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-2.5 py-1 text-[10.5px] font-bold text-success transition-colors hover:bg-success/20"
+                    className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-2.5 py-1 text-[10.5px] font-bold text-success transition-all hover:bg-success/20 hover:border-success/40 active:scale-[0.97]"
                   >
                     <Palette className="h-3 w-3" strokeWidth={2.5} />
                     Editar
@@ -173,7 +214,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-card text-[11.5px] font-bold text-foreground transition-colors hover:bg-muted/50"
+                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-card text-[11.5px] font-bold text-foreground transition-all hover:border-border hover:bg-muted/40 active:scale-[0.98]"
                   >
                     <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
                     Editar
@@ -181,7 +222,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-card text-[11.5px] font-bold text-foreground transition-colors hover:bg-muted/50"
+                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-card text-[11.5px] font-bold text-foreground transition-all hover:border-border hover:bg-muted/40 active:scale-[0.98]"
                   >
                     <Settings2 className="h-3.5 w-3.5" strokeWidth={2.25} />
                     Customizar
@@ -190,7 +231,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-muted/50"
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card text-foreground transition-all hover:border-border hover:bg-muted/40 active:scale-[0.95]"
                       title="Abrir checkout"
                     >
                       <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -200,19 +241,24 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <ProductActionsMenu
                       copied={isCopied}
                       product={product}
-                      triggerClassName="h-9 w-9 rounded-lg border border-border bg-card text-foreground hover:bg-muted/50 data-[state=open]:bg-muted"
+                      triggerClassName="h-9 w-9 rounded-lg border border-border/70 bg-card text-foreground hover:border-border hover:bg-muted/40 data-[state=open]:bg-muted/60 transition-all"
                       {...handlers}
                     />
                   </div>
                 </div>
 
                 {/* Footer meta */}
-                <div className="flex items-center justify-between border-t border-border pt-2.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">
-                  <span>{deliveryLabel}</span>
-                  {product.affiliate_enabled && (
-                    <span className="text-success/80">{product.affiliate_commission}% afiliado</span>
-                  )}
-                </div>
+                {product.affiliate_enabled && (
+                  <div className="flex items-center justify-between border-t border-border/60 pt-2.5">
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                      <TrendingUp className="h-3 w-3" strokeWidth={2.5} />
+                      Afiliados ativos
+                    </span>
+                    <span className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10.5px] font-black tabular-nums text-success ring-1 ring-success/20">
+                      {product.affiliate_commission}%
+                    </span>
+                  </div>
+                )}
               </div>
             </article>
           );
@@ -221,6 +267,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
       <div className="mt-5 flex items-center justify-between px-1 text-[11.5px] text-muted-foreground/70">
         <span>
+          Exibindo{" "}
           <span className="font-mono font-semibold text-foreground tabular-nums">{products.length}</span>{" "}
           {products.length === 1 ? "produto" : "produtos"}
         </span>
