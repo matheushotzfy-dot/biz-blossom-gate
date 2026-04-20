@@ -510,8 +510,8 @@ export default function AdminConteudo() {
         </div>
       ) : viewMode === "list" ? (
         // ─── LIST VIEW (operational, default) ───────────────────
-        <div className="px-5 pt-5 pb-8 sm:px-7">
-          <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
             {/* Header row */}
             <div className="hidden grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_110px_110px_140px_120px] items-center gap-4 border-b border-border bg-secondary/40 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground md:grid">
               <div>Área de membros</div>
