@@ -214,14 +214,14 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
-  <th onClick={() => onSort(field)} className={cn("text-left py-3 px-4 text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
- <span className="inline-flex items-center gap-1">
- {label}
- {active
- ? (sort.dir === "desc" ? <ChevronDown className="h-3 w-3 text-primary" /> : <ChevronUp className="h-3 w-3 text-primary" />)
- : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-30 transition-opacity" />}
- </span>
- </th>
+  <th onClick={() => onSort(field)} className={cn("text-left py-4 px-4 text-[10px] font-heading font-black uppercase tracking-[0.12em] text-muted-foreground/45 cursor-pointer select-none hover:text-foreground transition-all group", className)}>
+    <span className="inline-flex items-center gap-1.5">
+      {label}
+      {active
+        ? (sort.dir === "desc" ? <ChevronDown className="h-3.5 w-3.5 text-primary" /> : <ChevronUp className="h-3.5 w-3.5 text-primary" />)
+        : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />}
+    </span>
+  </th>
  );
 }
 
@@ -241,20 +241,28 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
       <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
+            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.02} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.15} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground) / 0.5)", fontWeight: 700 }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
-        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground) / 0.5)", fontWeight: 700 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`} />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.12} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.4)", fontWeight: 800 }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.4)", fontWeight: 800 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border) / 0.4)", borderRadius: 12, fontSize: 11, padding: "8px 12px", boxShadow: "0 10px 30px -10px hsl(var(--background) / 0.5)" }}
+          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border) / 0.4)", borderRadius: 14, fontSize: 11, padding: "10px 14px", boxShadow: "0 10px 40px -10px hsl(var(--background) / 0.8)", backdropFilter: "blur(8px)" }}
           formatter={(v: number) => [fmt(v), "Receita"]}
-          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground) / 0.6)", marginBottom: 4, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em" }}
-          cursor={{ stroke: "hsl(var(--success) / 0.2)", strokeWidth: 2 }}
+          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground) / 0.6)", marginBottom: 6, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em" }}
+          cursor={{ stroke: "hsl(var(--success) / 0.15)", strokeWidth: 20 }}
         />
-        <Area type="monotone" dataKey="value" stroke="hsl(var(--success))" strokeWidth={3} fill="url(#rv-gradient-premium)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--success))" }} />
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke="hsl(var(--success))"
+          strokeWidth={4}
+          fill="url(#rv-gradient-premium)"
+          dot={false}
+          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 3, fill: "hsl(var(--success))" }}
+        />
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -278,36 +286,38 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/30 transition-all hover:bg-muted/10">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/25 transition-all hover:bg-muted/15">
    {/* Left accent rail */}
    <td className="w-[3px] p-0 relative">
     <div className={cn(
-      "absolute inset-y-2 left-0 w-[3px] rounded-r-full transition-all duration-300",
-      tx.status === "completed" ? "bg-success/50 group-hover:bg-success" : tx.status === "pending" ? "bg-warning/50 group-hover:bg-warning" : "bg-muted-foreground/20 group-hover:bg-muted-foreground/40"
+      "absolute inset-y-3 left-0 w-[4px] rounded-r-full transition-all duration-300",
+      tx.status === "completed" ? "bg-success group-hover:shadow-[0_0_10px_hsl(var(--success)/0.4)]" : 
+      tx.status === "pending" ? "bg-warning group-hover:shadow-[0_0_10px_hsl(var(--warning)/0.4)]" : 
+      "bg-muted-foreground/30"
     )} />
    </td>
    {/* Customer */}
-   <td className="pl-6 pr-3 py-4 align-middle">
+   <td className="pl-6 pr-3 py-5 align-middle">
     <div className="flex items-center gap-4">
      <div className="relative">
-      <Avatar className="h-11 w-11 shrink-0 rounded-xl border border-border/40 shadow-sm bg-card transition-transform group-hover:scale-105">
-       <AvatarFallback className={cn("text-[11px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      <Avatar className="h-12 w-12 shrink-0 rounded-2xl border-2 border-border/40 shadow-sm bg-card transition-all group-hover:scale-105 group-hover:border-primary/20">
+       <AvatarFallback className={cn("text-[12px] font-black tracking-tight rounded-2xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
       </Avatar>
       {tx.status === "completed" && (
-       <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-success ring-[2px] ring-card">
-        <Check className="h-2 w-2 text-success-foreground" strokeWidth={4} />
+       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-success ring-[2.5px] ring-card shadow-sm">
+        <Check className="h-2.5 w-2.5 text-success-foreground" strokeWidth={4} />
        </span>
       )}
        {tx.status === "pending" && (
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-[2px] ring-card">
-          <Clock className="h-2 w-2 text-warning-foreground" strokeWidth={4} />
+        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning ring-[2.5px] ring-card shadow-sm">
+          <Clock className="h-2.5 w-2.5 text-warning-foreground" strokeWidth={4} />
         </span>
        )}
       </div>
      <div className="min-w-0">
-      <p className="truncate text-[13px] font-heading font-bold text-foreground leading-tight tracking-[-0.01em]">{name}</p>
-      <div className="flex items-center gap-1.5 mt-1">
-       {tx.customer_email && <p className="truncate text-[10px] text-muted-foreground/40 max-w-[150px]">{tx.customer_email}</p>}
+      <p className="truncate text-[14px] font-heading font-black text-foreground leading-tight tracking-[-0.015em] group-hover:text-primary transition-colors">{name}</p>
+      <div className="flex items-center gap-1.5 mt-1.5">
+       {tx.customer_email && <p className="truncate text-[11px] font-medium text-muted-foreground/45 max-w-[180px]">{tx.customer_email}</p>}
        {tx.customer_phone && (
         <>
          <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/15 shrink-0" />
@@ -320,43 +330,43 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
      </div>
     </div>
    </td>
-   {/* Product + Date */}
-   <td className="px-3 py-[18px] align-middle">
-    <div className="min-w-0">
-     <p className="truncate text-[11.5px] font-heading font-semibold text-foreground/75 max-w-[180px]">{prodName}</p>
-     <p className="text-[10px] text-muted-foreground/30 mt-1 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-    </div>
-   </td>
-   {/* Status */}
-   <td className="px-3 py-[18px] align-middle">
-    <span className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-[5px] text-[10px] font-heading font-bold border", st.fg, st.bg, st.border)}>
-     <span className="relative flex h-[5px] w-[5px]">
-      {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-      <span className={cn("h-[5px] w-[5px] rounded-full", st.dot)} />
+    {/* Product + Date */}
+    <td className="px-3 py-5 align-middle">
+     <div className="min-w-0">
+      <p className="truncate text-[12px] font-heading font-black text-foreground/80 max-w-[200px] leading-tight">{prodName}</p>
+      <p className="text-[10.5px] font-bold text-muted-foreground/35 mt-1.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+     </div>
+    </td>
+    {/* Status */}
+    <td className="px-3 py-5 align-middle">
+     <span className={cn("inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10.5px] font-black tracking-tight border shadow-sm", st.fg, st.bg, st.border)}>
+      <span className="relative flex h-1.5 w-1.5">
+       {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
+       <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+      </span>
+      {st.label}
      </span>
-     {st.label}
-    </span>
-   </td>
-   {/* Method */}
-   <td className="px-3 py-[18px] align-middle">
-    <div className="flex items-center gap-2">
-     <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg border", method.iconBg, method.border)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
-     <span className={cn("text-[10.5px] font-heading font-semibold", method.color)}>{method.label}</span>
-    </div>
-   </td>
-   {/* Gross */}
-   <td className="px-3 py-[18px] align-middle text-right">
-    <p className="text-[12.5px] font-heading font-bold text-foreground/80 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
-    {fee > 0 && <p className="text-[9px] text-destructive/35 tabular-nums mt-0.5">−{fmt(fee)}</p>}
-   </td>
-   {/* Net */}
-   <td className="px-4 py-[18px] align-middle text-right">
-    <p className={cn("text-[15px] font-heading font-black tabular-nums tracking-[-0.03em]",
-     tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning/80" : "text-foreground/50"
-    )}>{fmt(net)}</p>
-   </td>
-   {/* Actions */}
-   <td className="pr-4 py-[18px] align-middle">
+    </td>
+    {/* Method */}
+    <td className="px-3 py-5 align-middle">
+     <div className="flex items-center gap-3">
+      <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl border-2 shadow-sm transition-transform group-hover:scale-105", method.iconBg, method.border)}><MethodIcon className={cn("h-4 w-4", method.color)} /></span>
+      <span className={cn("text-[11px] font-black tracking-tight", method.color)}>{method.label}</span>
+     </div>
+    </td>
+    {/* Gross */}
+    <td className="px-3 py-5 align-middle text-right">
+     <p className="text-[14px] font-heading font-black text-foreground/85 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
+     {fee > 0 && <p className="text-[10px] font-bold text-destructive/40 tabular-nums mt-1">−{fmt(fee)}</p>}
+    </td>
+    {/* Net */}
+    <td className="px-4 py-5 align-middle text-right">
+     <p className={cn("text-[17px] font-heading font-black tabular-nums tracking-[-0.035em] drop-shadow-sm",
+      tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning/80" : "text-foreground/50"
+     )}>{fmt(net)}</p>
+    </td>
+    {/* Actions */}
+    <td className="pr-6 py-5 align-middle">
     <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
      <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -898,71 +908,69 @@ export default function Vendas() {
           </div>
 
           {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <section className="rounded-2xl border border-border/40 bg-card overflow-hidden shadow-sm">
-            <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
-              <div className="relative border-b lg:border-b-0 lg:border-r border-border/30 p-8 flex flex-col justify-between gap-10 bg-muted/[0.02]">
-                <div className="absolute left-0 top-8 bottom-8 w-[3px] rounded-r-full bg-success/60 shadow-[0_0_12px_hsl(var(--success)/0.3)]" />
+          <section className="rounded-[24px] border border-border/40 bg-card overflow-hidden shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr]">
+              <div className="relative border-b lg:border-b-0 lg:border-r border-border/30 p-10 flex flex-col justify-between gap-12 bg-muted/[0.02]">
+                <div className="absolute left-0 top-10 bottom-10 w-[4px] rounded-r-full bg-success shadow-[0_0_15px_hsl(var(--success)/0.4)]" />
                 <div className="pl-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Receita líquida</p>
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/45">Receita líquida</p>
                     <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[52px] font-heading font-black tabular-nums tracking-[-0.06em] text-foreground leading-none drop-shadow-sm">
+                  <div className="space-y-1.5">
+                    <p className="text-[58px] font-heading font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9] drop-shadow-sm">
                       {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                     </p>
-                    <p className="text-[12px] font-semibold text-muted-foreground/40 tabular-nums">
+                    <p className="text-[13px] font-bold text-muted-foreground/40 tabular-nums">
                       Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-8 pl-4 border-t border-border/30 pt-8">
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Vendas</p>
-                    <p className="text-[22px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                    <p className="text-[10px] font-bold text-success mt-1.5">{approvalRate.toFixed(1)}% conversão</p>
+                <div className="grid grid-cols-2 gap-y-10 pl-4 border-t border-border/30 pt-10">
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/35 leading-none">Vendas</p>
+                    <p className="text-[26px] font-heading font-black text-foreground tabular-nums leading-none tracking-tight">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[11px] font-black text-success/80 flex items-center gap-1.5"><TrendingUp className="h-3 w-3" /> {approvalRate.toFixed(1)}%</p>
                   </div>
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Ticket Médio</p>
-                    <p className="text-[22px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[10px] font-bold text-muted-foreground/40 mt-1.5">{m.uniqueCustomers} clientes</p>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/35 leading-none">Ticket Médio</p>
+                    <p className="text-[26px] font-heading font-black text-foreground tabular-nums leading-none tracking-tight">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[11px] font-bold text-muted-foreground/40">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 lg:p-6 bg-muted/[0.01]">
-                <div className="flex items-center justify-between px-2 mb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.4)]" />
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-foreground/80">Desempenho por período</p>
+              <div className="p-6 lg:p-8 bg-muted/[0.01]">
+                <div className="flex items-center justify-between px-2 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_10px_hsl(var(--success)/0.6)]" />
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/80">Desempenho no período</p>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                  <div className="flex items-center gap-4 text-[10px] font-black text-muted-foreground/35 uppercase tracking-widest">
                     <span>{periodLabel}</span>
                   </div>
                 </div>
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
             </div>
-          </section>
 
-          {/* ═══════ KPI RIBBON — métricas explícitas ═══════ */}
-          <section className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--border)/0.4)]">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
+            {/* KPI RIBBON — merged into hero section for tighter hierarchy */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border/35 bg-muted/[0.03]">
               {kpiData.map((kpi, i) => (
                 <div key={kpi.label} className={cn(
-                  "px-5 py-5 transition-colors hover:bg-card-inset/40",
-                  i % 4 !== 0 && "sm:border-l border-border/45",
+                  "px-6 py-6 transition-all hover:bg-card/60 group/kpi",
+                  i % 4 !== 0 && "sm:border-l border-border/30",
                   i % 8 !== 0 && "lg:border-l",
-                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border/45",
+                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border/30",
                 )}>
-                  <p className="text-[9.5px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/65 leading-none">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none group-hover/kpi:text-muted-foreground/80 transition-colors">
                     {kpi.label}
                   </p>
-                  <p className={cn("mt-3 text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.025em]", kpi.accent)}>
+                  <p className={cn("mt-3.5 text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", kpi.accent)}>
                     {kpi.value}
                   </p>
-                  <p className="mt-2 text-[10.5px] text-muted-foreground/65 leading-relaxed truncate">
+                  <p className="mt-2 text-[10.5px] font-bold text-muted-foreground/35 leading-tight truncate group-hover/kpi:text-muted-foreground/50 transition-colors">
                     {kpi.sub}
                   </p>
                 </div>
@@ -988,17 +996,17 @@ export default function Vendas() {
                   )}
                 </div>
                 {metrics.topProducts.length === 0 ? (
-                  <div className="py-12 text-center border border-dashed border-border/40 rounded-xl bg-card-inset/20">
-                    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-muted/40 border border-border/40">
-                      <Package className="h-5 w-5 text-muted-foreground/50" />
+                    <div className="py-16 text-center border border-dashed border-border/50 rounded-2xl bg-muted/[0.03]">
+                      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-background border-2 border-border/30 shadow-sm transition-transform hover:scale-105">
+                        <Package className="h-6 w-6 text-muted-foreground/35" strokeWidth={1.5} />
+                      </div>
+                      <p className="text-[14px] font-black text-foreground tracking-tight mb-1.5">Nenhuma venda registrada</p>
+                      <p className="text-[11px] font-medium text-muted-foreground/45 max-w-[280px] mx-auto leading-relaxed">
+                        {productsRaw.length === 0
+                          ? "Cadastre seu primeiro produto para começar a monitorar suas métricas."
+                          : `Seus ${productsRaw.length} produtos ainda não converteram vendas neste filtro.`}
+                      </p>
                     </div>
-                    <p className="text-[12.5px] font-bold text-foreground mb-1">Nenhuma venda registrada</p>
-                    <p className="text-[10.5px] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
-                      {productsRaw.length === 0
-                        ? "Cadastre seu primeiro produto para começar."
-                        : `Você tem ${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, mas nenhum vendeu neste período.`}
-                    </p>
-                  </div>
                 ) : (
                   <div className="divide-y divide-border/30">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
@@ -1054,27 +1062,28 @@ export default function Vendas() {
                     )}
                   </div>
                   {m.totalNet === 0 ? (
-                    <p className="text-[11px] text-muted-foreground/60 py-2">Sem pagamentos no período.</p>
+                    <div className="py-8 text-center border border-dashed border-border/40 rounded-xl bg-muted/[0.02]">
+                      <p className="text-[11px] font-bold text-muted-foreground/40">Sem atividade no período</p>
+                    </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="divide-y divide-border/25">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                        const accent = pm.color === "success" ? "bg-success" : pm.color === "info" ? "bg-info" : "bg-warning";
                         const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
+                        const accentBg = pm.color === "success" ? "bg-success/8 border-success/15" : pm.color === "info" ? "bg-info/8 border-info/15" : "bg-warning/8 border-warning/15";
                         return (
-                          <div key={pm.label} className="flex items-center gap-3">
-                            <span className={cn("[&_svg]:h-3.5 [&_svg]:w-3.5 shrink-0", accentText)}>{pm.icon}</span>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-baseline justify-between gap-2">
-                                <span className="text-[11.5px] font-bold text-foreground">{pm.label}</span>
-                                <span className="text-[11px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</span>
+                          <div key={pm.label} className="py-3 flex items-center justify-between group first:pt-0 last:pb-0">
+                            <div className="flex items-center gap-3.5">
+                              <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl border shadow-sm transition-all group-hover:scale-110", accentBg, accentText)}>
+                                {pm.icon}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-[12px] font-black text-foreground leading-tight tracking-tight">{pm.label}</p>
+                                <p className="text-[10px] font-bold text-muted-foreground/35 mt-1">{pm.count} vendas · {pct.toFixed(0)}% do mix</p>
                               </div>
-                              <div className="mt-1 flex items-center gap-2">
-                                <div className="h-[2px] flex-1 rounded-full bg-muted/40 overflow-hidden">
-                                  <div className={cn("h-full rounded-full", accent)} style={{ width: `${pct}%` }} />
-                                </div>
-                                <span className="text-[9.5px] font-bold tabular-nums text-muted-foreground/70 shrink-0 w-10 text-right">{pct.toFixed(0)}% · {pm.count}</span>
-                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[13px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                             </div>
                           </div>
                         );
@@ -1141,24 +1150,25 @@ export default function Vendas() {
          {/* ═══════ TRANSACTIONS — DOMINANT WORKSPACE ═══════ */}
          <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]">
            {/* Top contextual ribbon */}
-           <header className="flex items-center justify-between gap-4 border-b border-border/50 px-6 py-4">
-             <div>
-               <p className="text-[14px] font-heading font-bold text-foreground tracking-[-0.015em] leading-tight">Transações</p>
-               <p className="text-[11px] text-muted-foreground/70 mt-1 font-medium">
-                 {sortedFiltered.length.toLocaleString("pt-BR")} resultado{sortedFiltered.length !== 1 ? "s" : ""} · clique nas colunas para ordenar
+           <header className="flex items-center justify-between gap-4 border-b border-border/40 px-8 py-6 bg-muted/[0.01]">
+             <div className="space-y-1">
+               <p className="text-[16px] font-heading font-black text-foreground tracking-tight leading-tight">Fluxo de Transações</p>
+               <p className="text-[11px] font-bold text-muted-foreground/40">
+                 {sortedFiltered.length.toLocaleString("pt-BR")} transações encontradas no período selecionado
                </p>
              </div>
-             <div className="hidden sm:flex items-center">
+             <div className="hidden sm:flex items-center gap-6">
+               <div className="h-10 w-px bg-border/40" />
                <div className="text-right">
-                 <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Total filtrado</p>
-                 <p className="text-[16px] font-heading font-black text-success tabular-nums leading-none mt-1.5 tracking-[-0.02em]">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
+                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/35 leading-none">Total Liquido</p>
+                 <p className="text-[20px] font-heading font-black text-success tabular-nums leading-none mt-2 tracking-tight drop-shadow-sm">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
                </div>
              </div>
            </header>
 
            {/* Status tabs */}
-           <div className="border-b border-border/50 px-6 bg-card-inset/20">
-             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+           <div className="border-b border-border/30 px-8 bg-muted/[0.02]">
+             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                {statusTabs.map((tab) => {
                  const active = statusFilter === tab.value;
                  const dotColors: Record<string, string> = {
@@ -1167,30 +1177,30 @@ export default function Vendas() {
                  };
                  return (
                    <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                     className={cn("relative px-3.5 py-3.5 text-[12px] font-bold whitespace-nowrap transition-colors tracking-tight",
-                       active ? "text-foreground" : "text-muted-foreground/65 hover:text-foreground"
+                     className={cn("relative px-4 py-4 text-[12.5px] font-black whitespace-nowrap transition-all tracking-tight group/tab",
+                       active ? "text-foreground" : "text-muted-foreground/40 hover:text-foreground/70"
                      )}>
-                     <span className="flex items-center gap-2">
-                       {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[tab.value])} />}
+                     <span className="flex items-center gap-2.5">
+                       {dotColors[tab.value] && <span className={cn("h-2 w-2 rounded-full shadow-sm transition-transform group-hover/tab:scale-125", dotColors[tab.value], active ? "opacity-100" : "opacity-40")} />}
                        {tab.label}
-                       <span className={cn("tabular-nums text-[10.5px] font-heading font-black px-1.5 py-px rounded",
-                         active ? "bg-foreground/[0.06] text-foreground/80" : "text-muted-foreground/45"
+                       <span className={cn("tabular-nums text-[10px] font-black px-2 py-0.5 rounded-full border transition-colors",
+                         active ? "bg-foreground/5 text-foreground/60 border-foreground/10" : "bg-muted/30 text-muted-foreground/30 border-transparent"
                        )}>{tab.count}</span>
                      </span>
-                     {active && <span className="absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-foreground" />}
+                     {active && <span className="absolute bottom-0 left-0 right-0 h-[2.5px] rounded-t-full bg-foreground shadow-[0_-2px_8px_hsl(var(--foreground)/0.1)]" />}
                    </button>
                  );
                })}
              </div>
            </div>
 
-           {/* Search */}
-           <div className="flex flex-col gap-2.5 border-b border-border/40 px-6 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-             <div className="relative w-full sm:w-[380px]">
-               <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/55" />
-               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, email, telefone ou ID da transação…"
-                 className="h-9 w-full rounded-lg border border-border/60 bg-background pl-10 pr-9 text-[12.5px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/40 focus:ring-2 focus:ring-foreground/[0.04] transition-all" />
-               {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" /></button>}
+           {/* Search & Toolbar */}
+           <div className="flex flex-col gap-4 border-b border-border/25 px-8 py-4 sm:flex-row sm:items-center sm:justify-between bg-muted/[0.01]">
+             <div className="relative w-full sm:w-[420px] group">
+               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40 transition-colors group-focus-within:text-primary" />
+               <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Busca inteligente (nome, email, telefone ou ID)…"
+                 className="h-11 w-full rounded-2xl border-2 border-border/30 bg-background/50 pl-11 pr-10 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:border-primary/20 focus:ring-4 focus:ring-primary/[0.03] transition-all" />
+               {search && <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:scale-110 transition-transform"><X className="h-4 w-4 text-muted-foreground/40 hover:text-foreground" /></button>}
              </div>
              <div className="hidden sm:flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70">
                <kbd className="inline-flex h-5 items-center rounded border border-border/60 bg-card px-1.5 text-[9.5px] font-bold text-muted-foreground/60 font-mono">⌘K</kbd>
