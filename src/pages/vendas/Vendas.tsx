@@ -877,61 +877,61 @@ export default function Vendas() {
           </div>
 
           {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <section className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr]">
+          <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_24px_-12px_rgba(0,0,0,0.08)]">
+            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr]">
               {/* Left: Revenue summary */}
-              <div className="border-b lg:border-b-0 lg:border-r border-border p-6 lg:p-7 flex flex-col justify-between gap-8">
+              <div className="border-b lg:border-b-0 lg:border-r border-border p-8 lg:p-10 flex flex-col justify-between gap-10 bg-gradient-to-b from-muted/10 to-transparent">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <p className="text-[12px] font-medium text-muted-foreground">Receita líquida</p>
+                  <div className="flex items-center justify-between gap-3 mb-5">
+                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
                     <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                   </div>
-                  <p className="text-[42px] font-semibold tabular-nums tracking-[-0.03em] text-foreground leading-none">
+                  <p className="text-[52px] lg:text-[58px] font-heading font-semibold tabular-nums tracking-[-0.045em] text-foreground leading-[0.95]">
                     {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                   </p>
-                  <p className="text-[12px] text-muted-foreground/80 tabular-nums mt-2.5">
-                    Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
+                  <p className="text-[12.5px] text-muted-foreground/85 tabular-nums mt-4 font-medium tracking-tight">
+                    Bruto <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalGross)}</span> · Taxas <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalFees)}</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-5">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-border pt-7">
                   <div>
-                    <p className="text-[11px] text-muted-foreground">Vendas</p>
-                    <p className="text-[20px] font-semibold text-foreground tabular-nums leading-none mt-1.5">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                    <p className="text-[11px] text-muted-foreground/80 mt-1.5">{approvalRate.toFixed(1)}% aprovação</p>
+                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Vendas</p>
+                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em]">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{approvalRate.toFixed(1)}% aprovação</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground">Ticket médio</p>
-                    <p className="text-[20px] font-semibold text-foreground tabular-nums leading-none mt-1.5">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[11px] text-muted-foreground/80 mt-1.5">{m.uniqueCustomers} clientes</p>
+                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Ticket médio</p>
+                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
               </div>
 
               {/* Right: Chart */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-center justify-between px-2 mb-4">
-                  <p className="text-[12px] font-medium text-foreground">Desempenho no período</p>
-                  <span className="text-[11px] text-muted-foreground tabular-nums">{periodLabel}</span>
+              <div className="p-6 lg:p-8">
+                <div className="flex items-center justify-between px-2 mb-5">
+                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Desempenho no período</p>
+                  <span className="text-[11.5px] text-muted-foreground/80 tabular-nums font-medium">{periodLabel}</span>
                 </div>
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
             </div>
 
             {/* KPI RIBBON — merged inside hero */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/20">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/[0.18]">
               {kpiData.map((kpi, i) => (
                 <div key={kpi.label} className={cn(
-                  "px-4 py-3.5",
+                  "px-5 py-4.5 group/kpi transition-colors hover:bg-card",
                   i % 4 !== 0 && "sm:border-l border-border",
                   i % 8 !== 0 && "lg:border-l",
                   i >= 4 && "border-t sm:border-t lg:border-t-0 border-border",
                 )}>
-                  <p className="text-[10.5px] text-muted-foreground truncate">{kpi.label}</p>
-                  <p className={cn("mt-1.5 text-[15px] font-semibold tabular-nums leading-none tracking-[-0.01em]", kpi.accent)}>
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/65 uppercase tracking-[0.14em] truncate leading-none">{kpi.label}</p>
+                  <p className={cn("mt-2.5 text-[18px] font-heading font-semibold tabular-nums leading-none tracking-[-0.025em]", kpi.accent)}>
                     {kpi.value}
                   </p>
-                  <p className="mt-1.5 text-[10.5px] text-muted-foreground/70 leading-tight truncate">
+                  <p className="mt-2 text-[11px] text-muted-foreground/75 leading-snug truncate font-medium">
                     {kpi.sub}
                   </p>
                 </div>
