@@ -1225,17 +1225,19 @@ export default function Vendas() {
                        </tr>
                      </thead>
                      <tbody>
-                       {visibleItems.length === 0 ? (
-                         <tr><td colSpan={8} className="py-20">
-                           <div className="flex flex-col items-center justify-center">
-                             <ShoppingCart className="mb-3 h-6 w-6 text-muted-foreground/30" />
-                             <p className="text-[13px] font-bold text-foreground">Nenhuma venda encontrada</p>
-                             <p className="mt-1 text-[11.5px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
-                           </div>
-                         </td></tr>
-                       ) : visibleItems.map((tx, i) => (
-                         <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
-                       ))}
+                        {visibleItems.length === 0 ? (
+                          <tr><td colSpan={8} className="py-10">
+                            <div className="flex flex-col items-center justify-center gap-1.5">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/30 border border-border/40">
+                                <ShoppingCart className="h-4 w-4 text-muted-foreground/40" />
+                              </div>
+                              <p className="text-[12.5px] font-bold text-foreground">Nenhuma venda encontrada</p>
+                              <p className="text-[10.5px] text-muted-foreground/70">Ajuste o período ou refine a pesquisa.</p>
+                            </div>
+                          </td></tr>
+                        ) : visibleItems.map((tx, i) => (
+                          <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
+                        ))}
                      </tbody>
                    </table>
                  </div>
