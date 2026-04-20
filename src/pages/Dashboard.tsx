@@ -527,16 +527,16 @@ export default function Dashboard() {
               <p className="text-[11px] font-bold text-primary/80 uppercase tracking-[0.32em] mb-3">
                 {selectedPeriod.label === "Hoje" ? "Edição de Hoje" : `Edição · ${selectedPeriod.label}`}
               </p>
-              <h1 className="font-display font-black text-foreground tracking-[-0.045em] leading-[0.92] text-[44px] md:text-[60px] lg:text-[72px] drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)]">
+              <h1 className="font-display font-black tracking-[-0.045em] leading-[0.92] text-[44px] md:text-[60px] lg:text-[72px]">
                 {nickname ? (
                   <>
-                    <span className="bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">Bem-vindo,</span><br />
+                    <span className="text-gradient-premium">Bem-vindo,</span><br />
                     <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{nickname}</span>
                     <span className="text-primary animate-pulse">.</span>
                   </>
                 ) : (
                   <>
-                    <span className="bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">Painel</span><br />
+                    <span className="text-gradient-premium">Painel</span><br />
                     <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Executivo</span>
                     <span className="text-primary animate-pulse">.</span>
                   </>
@@ -624,14 +624,14 @@ export default function Dashboard() {
         {/* HERO METRIC · The signature piece                         */}
         {/* ─────────────────────────────────────────────────────── */}
         <section className="relative mb-10 md:mb-14 group/hero">
-          <div className="relative rounded-[32px] border border-foreground/10 bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-3xl overflow-hidden shadow-[0_40px_100px_-30px_hsl(var(--primary)/0.25)] transition-all duration-500 hover:shadow-[0_50px_120px_-30px_hsl(var(--primary)/0.35)]">
+          <div className="relative rounded-[32px] border border-foreground/10 bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-3xl overflow-hidden shadow-[0_40px_100px_-30px_hsl(var(--primary)/0.25)] transition-all duration-500 hover:shadow-[0_50px_120px_-30px_hsl(var(--primary)/0.35)] mesh-gradient-hero">
             {/* Inner luxury accents */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.12),transparent_65%)] pointer-events-none" />
             <div className="absolute -top-40 -right-20 h-[460px] w-[460px] rounded-full bg-primary/[0.12] blur-[120px] pointer-events-none group-hover/hero:bg-primary/[0.18] transition-colors duration-700" />
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-50" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-30" />
-
-            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0">
+            
+            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0 z-10">
               {/* Left: hero revenue */}
               <div className="lg:col-span-7 p-7 md:p-10 lg:p-12 lg:border-r border-foreground/[0.06]">
                 <div className="flex items-center gap-2 mb-6">
