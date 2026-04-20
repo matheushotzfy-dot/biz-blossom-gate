@@ -20,17 +20,17 @@ const STATUS_HELPERS: Record<string, string> = {
 export function ProductListView({ products, copiedId, ...handlers }: ProductListViewProps) {
   return (
     <>
-      <div className="hidden md:block p-4 lg:p-5">
-        <div className="overflow-hidden rounded-[32px] border border-sidebar-border/70 bg-sidebar-accent/36 shadow-[0_18px_44px_hsl(var(--background)/0.16)]">
-          <div className="grid grid-cols-[minmax(0,2.2fr)_260px_230px_180px_64px] gap-6 bg-sidebar/74 px-7 py-5 text-[11px] font-heading uppercase tracking-[0.22em] text-sidebar-foreground/46 lg:grid-cols-[minmax(0,2.1fr)_270px_240px_190px_64px]">
+      <div className="hidden md:block">
+        <div className="overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm">
+          <div className="grid grid-cols-[minmax(0,2.5fr)_140px_160px_130px_60px] gap-4 bg-muted/30 px-6 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 border-b border-border/40">
             <span>Produto</span>
-            <span>Publicação</span>
-            <span className="text-right">Monetização</span>
+            <span className="text-center">Preço</span>
+            <span className="text-center">Vínculo</span>
             <span className="text-center">Status</span>
             <span />
           </div>
 
-          <div className="divide-y divide-sidebar-border/60">
+          <div className="divide-y divide-border/30">
             {products.map((product) => {
               const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
               const hasCheckout = Boolean(product.checkout_url);
@@ -40,69 +40,63 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                 <article
                   key={product.id}
                   onClick={() => handlers.onEditProduct(product)}
-                  className="group relative grid cursor-pointer grid-cols-[minmax(0,2.2fr)_260px_230px_180px_64px] items-center gap-6 px-7 py-6 transition-all hover:bg-sidebar-accent/74 lg:grid-cols-[minmax(0,2.1fr)_270px_240px_190px_64px]"
+                  className="group relative grid cursor-pointer grid-cols-[minmax(0,2.5fr)_140px_160px_130px_60px] items-center gap-4 px-6 py-4 transition-all hover:bg-muted/10"
                 >
-                  <span className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full bg-sidebar-primary opacity-0 shadow-[0_0_20px_hsl(var(--sidebar-primary)/0.34)] transition-opacity group-hover:opacity-100" />
+                  <span className="absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-r-full bg-primary opacity-0 transition-opacity group-hover:opacity-100" />
 
-                  <div className="min-w-0 flex items-center gap-5">
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[22px] border border-sidebar-border/70 bg-sidebar shadow-[inset_0_1px_0_hsl(var(--foreground)/0.03)]">
+                  <div className="min-w-0 flex items-center gap-4">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border/40 bg-muted/40">
                       {product.image_url ? (
                         <img src={product.image_url} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <Package className="h-5 w-5 text-sidebar-foreground/28" strokeWidth={1.5} />
+                          <Package className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
                         </div>
                       )}
-                      <div className="pointer-events-none absolute inset-0 rounded-[22px] ring-1 ring-inset ring-sidebar-border/60" />
                     </div>
 
-                    <div className="min-w-0 space-y-2.5">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <p className="truncate font-display text-[19px] font-black tracking-[-0.04em] text-foreground">{product.name}</p>
-                        <span className="seller-pill rounded-full px-3 py-1.5 text-[11px] font-semibold">{deliveryLabel}</span>
+                    <div className="min-w-0">
+                      <p className="truncate font-heading text-[15px] font-bold text-foreground group-hover:text-primary transition-colors">{product.name}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-muted-foreground/50 truncate max-w-[200px]">{product.description || "Sem descrição"}</span>
+                        <span className="h-1 w-1 rounded-full bg-border/40 shrink-0" />
+                        <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-wider shrink-0">{deliveryLabel}</span>
                       </div>
-                      <p className="truncate text-[14px] leading-7 text-muted-foreground/72">{product.description || "Sem descrição"}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="text-center">
+                    <p className="font-heading text-[17px] font-black text-foreground tabular-nums tracking-tight">{formatCurrency(Number(product.price))}</p>
+                    {product.affiliate_enabled && (
+                      <p className="mt-0.5 text-[9px] font-bold text-primary/60 uppercase tracking-wider">{product.affiliate_commission}% comissão</p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-center">
                     <span
                       className={cn(
-                        "inline-flex items-center gap-2.5 rounded-full border px-4 py-2 text-[12px] font-semibold",
+                        "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-bold transition-all",
                         hasCheckout
-                          ? "border-primary/20 bg-primary/10 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.10)]"
-                          : "border-sidebar-border/70 bg-sidebar/80 text-sidebar-foreground/68"
+                          ? "border-primary/20 bg-primary/5 text-primary"
+                          : "border-border/40 bg-muted/40 text-muted-foreground/50"
                       )}
                     >
-                      {hasCheckout ? <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} /> : <span className="h-2 w-2 rounded-full bg-sidebar-foreground/35" />}
-                      {hasCheckout ? "Checkout publicado" : "Sem checkout"}
+                      {hasCheckout ? <ExternalLink className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-current opacity-30" />}
+                      {hasCheckout ? "Checkout Ativo" : "Sem Checkout"}
                     </span>
-                    <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-sidebar-foreground/52">Atualizado {formatCompactDate(product.updated_at)}</p>
                   </div>
 
-                  <div className="text-right">
-                    <p className="font-numbers text-[28px] font-black tracking-[-0.06em] text-foreground">{formatCurrency(Number(product.price))}</p>
-                    <p className="mt-2 text-[13px] leading-6 text-muted-foreground/64">
-                      {product.affiliate_enabled ? `${product.affiliate_commission}% com afiliados` : "Afiliados desativados"}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2.5 text-center">
-                    <div className="flex justify-center">
-                      <ProductStatusIndicator status={product.status} tone="soft" />
-                    </div>
-                    <p className="text-[13px] leading-6 text-muted-foreground/60">{statusHelper}</p>
+                  <div className="flex justify-center">
+                    <ProductStatusIndicator status={product.status} tone="soft" />
                   </div>
 
                   <div className="flex justify-end" onClick={(event) => event.stopPropagation()}>
-                    <div className="opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                      <ProductActionsMenu
-                        copied={copiedId === product.id}
-                        product={product}
-                        triggerClassName="h-11 w-11 rounded-[16px] border border-sidebar-border/70 bg-sidebar/84 text-sidebar-foreground/60 transition-all hover:border-sidebar-primary/25 hover:bg-sidebar hover:text-foreground"
-                        {...handlers}
-                      />
-                    </div>
+                    <ProductActionsMenu
+                      copied={copiedId === product.id}
+                      product={product}
+                      triggerClassName="h-8 w-8 rounded-lg border border-border/40 bg-transparent text-muted-foreground/40 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                      {...handlers}
+                    />
                   </div>
                 </article>
               );
