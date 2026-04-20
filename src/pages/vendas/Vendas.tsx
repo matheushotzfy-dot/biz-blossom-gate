@@ -241,20 +241,28 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
       <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
+            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.02} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.15} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground) / 0.5)", fontWeight: 700 }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
-        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground) / 0.5)", fontWeight: 700 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`} />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.12} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.4)", fontWeight: 800 }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.4)", fontWeight: 800 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border) / 0.4)", borderRadius: 12, fontSize: 11, padding: "8px 12px", boxShadow: "0 10px 30px -10px hsl(var(--background) / 0.5)" }}
+          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border) / 0.4)", borderRadius: 14, fontSize: 11, padding: "10px 14px", boxShadow: "0 10px 40px -10px hsl(var(--background) / 0.8)", backdropFilter: "blur(8px)" }}
           formatter={(v: number) => [fmt(v), "Receita"]}
-          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground) / 0.6)", marginBottom: 4, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em" }}
-          cursor={{ stroke: "hsl(var(--success) / 0.2)", strokeWidth: 2 }}
+          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground) / 0.6)", marginBottom: 6, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em" }}
+          cursor={{ stroke: "hsl(var(--success) / 0.15)", strokeWidth: 20 }}
         />
-        <Area type="monotone" dataKey="value" stroke="hsl(var(--success))" strokeWidth={3} fill="url(#rv-gradient-premium)" dot={false} activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--success))" }} />
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke="hsl(var(--success))"
+          strokeWidth={4}
+          fill="url(#rv-gradient-premium)"
+          dot={false}
+          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 3, fill: "hsl(var(--success))", shadow: "0 0 10px hsl(var(--success)/0.5)" }}
+        />
       </ComposedChart>
     </ResponsiveContainer>
   );
