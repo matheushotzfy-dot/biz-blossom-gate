@@ -811,6 +811,7 @@ export default function AdminConteudo() {
           </div>
         </div>
       )}
+      </div>
 
       <CourseCreationWizard
         open={wizardOpen}
