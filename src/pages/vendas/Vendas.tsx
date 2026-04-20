@@ -318,7 +318,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/40 last:border-b-0">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/20 transition-all duration-300 hover:bg-primary/[0.02] active:bg-primary/[0.04] last:border-b-0">
    {/* Customer */}
    <td className="pl-6 pr-4 py-5 align-middle">
     <div className="flex items-center gap-3.5">
@@ -990,7 +990,7 @@ export default function Vendas() {
 
 
          {/* ═══════ TRANSACTIONS ═══════ */}
-         <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+         <section className="overflow-hidden rounded-[24px] border border-border/40 bg-card/80 backdrop-blur-md shadow-[0_8px_32px_-12px_rgba(0,0,0,0.15)] ring-1 ring-white/5">
            {/* Top contextual ribbon */}
            <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-5">
              <div>
