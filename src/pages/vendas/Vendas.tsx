@@ -959,23 +959,41 @@ export default function Vendas() {
             </div>
 
             {/* KPI RIBBON — merged inside hero */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/[0.18]">
-              {kpiData.map((kpi, i) => (
-                <div key={kpi.label} className={cn(
-                  "px-5 py-4.5 group/kpi transition-colors hover:bg-card",
-                  i % 4 !== 0 && "sm:border-l border-border",
-                  i % 8 !== 0 && "lg:border-l",
-                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border",
-                )}>
-                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/65 uppercase tracking-[0.14em] truncate leading-none">{kpi.label}</p>
-                  <p className={cn("mt-2.5 text-[18px] font-heading font-semibold tabular-nums leading-none tracking-[-0.025em]", kpi.accent)}>
-                    {kpi.value}
-                  </p>
-                  <p className="mt-2 text-[11px] text-muted-foreground/75 leading-snug truncate font-medium">
-                    {kpi.sub}
-                  </p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-border bg-gradient-to-b from-muted/[0.12] to-transparent">
+              {kpiData.map((kpi, i) => {
+                const tone = kpiTone[kpi.tone];
+                const Icon = kpi.icon;
+                const isFirstCol = i % 4 === 0;
+                const isFirstRow = i < 4;
+                return (
+                  <div
+                    key={kpi.label}
+                    className={cn(
+                      "relative px-6 py-5 transition-colors hover:bg-card/60",
+                      !isFirstCol && "lg:border-l border-border",
+                      i % 2 !== 0 && "sm:border-l lg:border-l border-border",
+                      !isFirstRow && "border-t border-border",
+                      i === 1 && "sm:border-t-0",
+                      i >= 2 && i < 4 && "sm:border-t border-border lg:border-t-0",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-3.5">
+                      <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em] truncate">
+                        {kpi.label}
+                      </p>
+                      <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-md", tone.iconBg)}>
+                        <Icon className={cn("h-3 w-3", tone.iconFg)} strokeWidth={2.25} />
+                      </span>
+                    </div>
+                    <p className={cn("text-[24px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", tone.value)}>
+                      {kpi.value}
+                    </p>
+                    <p className="mt-2.5 text-[11.5px] text-muted-foreground/85 leading-snug truncate font-medium tabular-nums">
+                      {kpi.sub}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </section>
 
