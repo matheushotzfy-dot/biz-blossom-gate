@@ -763,54 +763,78 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* PERFORMANCE STRIP */}
-        <section className="mb-10 md:mb-12">
-          <div className="flex items-baseline justify-between mb-4">
-            <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Performance operacional</h2>
-            <span className="text-[10.5px] text-muted-foreground font-medium">Indicadores chave</span>
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* PERFORMANCE STRIP                                                */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        <section className="mb-16 md:mb-20">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 03</span>
+            <span className="h-px flex-1 bg-foreground/10" />
+            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Indicadores Operacionais</span>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border/60 rounded-xl overflow-hidden border border-border">
-            <EditorialKpi label="Taxa de aprovação" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
-            <EditorialKpi label="Chargeback" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
-            <EditorialKpi label="Pagamentos pendentes" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
-            <EditorialKpi label="Clientes únicos" value={uniqueCustomers.toString()} sub="No período" accent="neutral" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.08] rounded-[10px] overflow-hidden">
+            <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
+            <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
+            <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
+            <EditorialKpi label="Clientes únicos" code="CST" value={uniqueCustomers.toString()} sub="No período" accent="neutral" />
           </div>
         </section>
 
-        {/* CHART · Volume processado */}
-        <section className="mb-10 md:mb-12">
-          <div className="flex items-baseline justify-between mb-4">
-            <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Volume processado</h2>
-            <div className="flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
-              Receita líquida
-            </div>
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* CHART · Volume processado                                        */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        <section className="mb-16 md:mb-20">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 04</span>
+            <span className="h-px flex-1 bg-foreground/10" />
+            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Série Histórica · Volume</span>
           </div>
 
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="px-6 md:px-8 pt-6 pb-3 border-b border-border">
-              <p className="font-display font-semibold text-foreground tabular-nums tracking-[-0.03em] text-[26px] md:text-[32px] leading-none">
-                {privacy.hidden ? CENSORED : fmt(revenue)}
-              </p>
-              <p className="text-[11.5px] text-muted-foreground mt-2">
-                {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
-              </p>
+          <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden">
+            <div className="px-7 md:px-9 pt-7 pb-5 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap">
+              <div>
+                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2">Receita acumulada</p>
+                <p className="font-display font-semibold text-foreground tabular-nums tracking-[-0.035em] text-[28px] md:text-[36px] leading-none">
+                  {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : (
+                    <span className="inline-flex items-baseline gap-2">
+                      <span className="text-[0.4em] font-medium text-muted-foreground/70">R$</span>
+                      {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  )}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
+                </p>
+              </div>
+              <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-sm bg-foreground" />
+                  Receita líquida
+                </span>
+                <span className="hidden md:inline h-3 w-px bg-foreground/15" />
+                <span className="hidden md:inline tabular-nums">{chartData.length} pts</span>
+              </div>
             </div>
-            <div className="h-[260px] md:h-[300px] px-3 pb-4 pt-4">
+            <div className="h-[280px] md:h-[320px] px-3 pb-5 pt-5 bg-foreground/[0.005]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="institutional-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.18} />
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.22} />
                       <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
+                    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.04" strokeWidth="1" />
+                    </pattern>
                   </defs>
-                  <XAxis dataKey="name" tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
+                  <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={6} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, fontWeight: 500, padding: "8px 12px" }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 4 }}
+                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.2, strokeDasharray: "3 3" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.15)", borderRadius: 6, fontSize: 12, fontWeight: 500, padding: "10px 14px", boxShadow: "0 8px 24px -8px hsl(var(--foreground) / 0.18)" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 4 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
                   <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.75} fill="url(#institutional-grad)" />
