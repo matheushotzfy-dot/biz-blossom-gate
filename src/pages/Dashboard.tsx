@@ -421,7 +421,9 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-1 relative">
+    <div className="dashboard-page mx-auto w-full max-w-[1536px] pb-24 px-4 md:px-6 relative selection:bg-primary/20">
+      {/* Decorative noise texture overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] contrast-150 brightness-150 z-[100] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
@@ -637,11 +639,14 @@ export default function Dashboard() {
                   <span className="text-[10px] font-bold text-primary uppercase tracking-[0.32em]">Receita Líquida</span>
                 </div>
 
-                <div className="font-display font-black text-foreground tabular-nums leading-[0.88] tracking-[-0.05em] text-[56px] md:text-[80px] lg:text-[96px]">
+                <div className="font-display font-black text-foreground tabular-nums leading-[0.88] tracking-[-0.05em] text-[56px] md:text-[80px] lg:text-[110px] drop-shadow-[0_0_20px_rgba(var(--primary-rgb),0.15)] group-hover/hero:scale-[1.01] transition-transform duration-700 ease-out">
                   {privacy.hidden ? (
                     <span className="text-foreground/30">{CENSORED}</span>
                   ) : (
-                    <AnimatedNumber value={revenue} />
+                    <div className="inline-flex items-baseline gap-2">
+                      <span className="text-[0.4em] font-medium text-foreground/40 self-center">R$</span>
+                      <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
+                    </div>
                   )}
                 </div>
 
