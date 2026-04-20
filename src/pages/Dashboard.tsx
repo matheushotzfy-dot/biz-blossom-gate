@@ -476,85 +476,56 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HOTZFY · EDITORIAL EXECUTIVE DASHBOARD                          */}
-      {/* Identidade visual única — luxo discreto, tipografia editorial    */}
+      {/* HOTZFY · INSTITUTIONAL DASHBOARD                                 */}
+      {/* Sério, clean, profissional — Mercury / Ramp / Stripe Atlas       */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative px-4 md:px-8 lg:px-12 py-8 md:py-12"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative py-8 md:py-12"
       >
-        {/* Ambient signature glow */}
-        <div className="pointer-events-none absolute inset-x-0 -top-20 h-[420px] -z-10 overflow-hidden">
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[420px] w-[820px] rounded-full bg-primary/[0.07] blur-[120px]" />
-          <div className="absolute right-[10%] top-[60px] h-[260px] w-[260px] rounded-full bg-info/[0.05] blur-[100px]" />
-        </div>
-
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* EDITORIAL HEADER · Magazine masthead style                */}
-        {/* ─────────────────────────────────────────────────────── */}
-        <header className="mb-10 md:mb-14">
-          <div className="flex items-center justify-between gap-4 pb-5 border-b border-foreground/10">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.32em]">
-                Hotzfy
-              </span>
-              <span className="h-3 w-px bg-foreground/15" />
-              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-[0.28em]">
-                Painel Executivo
-              </span>
+        {/* HEADER · masthead institucional */}
+        <header className="mb-12 md:mb-16">
+          <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.18em]">Hotzfy</span>
+              <span className="h-2.5 w-px bg-border" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.16em]">Painel de Controle</span>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="hidden md:inline text-[10px] font-medium text-muted-foreground/60 uppercase tracking-[0.24em]">
-                {format(new Date(), "EEEE · dd MMM yyyy", { locale: ptBR })}
+            <div className="flex items-center gap-4">
+              <span className="hidden md:inline text-[10.5px] font-medium text-muted-foreground tabular-nums">
+                {format(new Date(), "dd MMM yyyy", { locale: ptBR })}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/5 px-2.5 py-1">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 rounded-full bg-success/50 animate-ping" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                <span className="text-[9px] font-bold text-success uppercase tracking-[0.2em]">Live</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="text-[10px] font-semibold text-foreground/80 uppercase tracking-[0.14em]">Operacional</span>
               </span>
             </div>
           </div>
 
-          {/* Editorial title block */}
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mt-8 md:mt-10">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mt-10 md:mt-12">
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-primary/80 uppercase tracking-[0.32em] mb-3">
-                {selectedPeriod.label === "Hoje" ? "Edição de Hoje" : `Edição · ${selectedPeriod.label}`}
+              <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-[0.22em] mb-4">
+                {selectedPeriod.label}
               </p>
-              <h1 className="font-display font-black tracking-[-0.045em] leading-[0.92] text-[44px] md:text-[60px] lg:text-[72px]">
-                {nickname ? (
-                  <>
-                    <span className="text-gradient-premium">Bem-vindo,</span><br />
-                    <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{nickname}</span>
-                    <span className="text-primary animate-pulse">.</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-gradient-premium">Painel</span><br />
-                    <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Executivo</span>
-                    <span className="text-primary animate-pulse">.</span>
-                  </>
-                )}
+              <h1 className="font-display font-semibold text-foreground tracking-[-0.035em] leading-[1.05] text-[34px] md:text-[42px] lg:text-[48px]">
+                {nickname ? <>Bem-vindo de volta, {nickname}.</> : <>Painel executivo.</>}
               </h1>
-              <p className="mt-5 max-w-xl text-[14px] text-muted-foreground leading-relaxed font-medium">
-                Visão consolidada da sua operação em tempo real.
+              <p className="mt-4 max-w-2xl text-[14px] text-muted-foreground leading-relaxed">
+                Visão consolidada de receita, liquidação e performance operacional.
                 {approved.length > 0 && (
-                  <> <span className="text-foreground font-semibold">{approved.length}</span> {approved.length === 1 ? "transação aprovada" : "transações aprovadas"} no período.</>
+                  <> <span className="text-foreground font-medium tabular-nums">{approved.length}</span> {approved.length === 1 ? "transação aprovada" : "transações aprovadas"} no período selecionado.</>
                 )}
               </p>
             </div>
 
-            {/* Right: filters as refined controls */}
-            <div className="flex flex-col items-stretch lg:items-end gap-3 shrink-0">
-              <div className="flex items-center gap-1.5">
+            <div className="flex flex-col items-stretch lg:items-end gap-2.5 shrink-0">
+              <div className="flex items-center gap-2">
                 {productsData && productsData.length > 0 && (
                   <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                    <SelectTrigger className="h-9 w-[160px] text-[11.5px] font-semibold rounded-full border-foreground/15 bg-background/50 backdrop-blur-xl hover:border-foreground/30 transition-colors">
-                      <SelectValue placeholder="Todos produtos" />
+                    <SelectTrigger className="h-9 w-[180px] text-[12px] font-medium rounded-md border-border bg-background hover:border-foreground/30 transition-colors">
+                      <SelectValue placeholder="Todos os produtos" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos os produtos</SelectItem>
@@ -566,23 +537,24 @@ export default function Dashboard() {
                 )}
                 <button
                   onClick={privacy.toggle}
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-full border border-foreground/15 bg-background/50 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                   title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
                 >
                   {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
 
-              <div className="inline-flex items-center rounded-full border border-foreground/10 bg-background/40 backdrop-blur-xl p-1">
-                {PERIOD_PRESETS.map((opt) => (
+              <div className="inline-flex items-center rounded-md border border-border bg-background overflow-hidden">
+                {PERIOD_PRESETS.map((opt, idx) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "rounded-full px-3.5 py-1.5 text-[10.5px] font-bold transition-all duration-300",
+                      "px-3.5 py-2 text-[11px] font-semibold transition-colors",
+                      idx > 0 && "border-l border-border",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-foreground text-background shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.4)]"
-                        : "text-muted-foreground/70 hover:text-foreground"
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                     )}
                   >
                     {opt.label}
@@ -592,8 +564,8 @@ export default function Dashboard() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-all duration-300 inline-flex items-center gap-1.5",
-                        isCustom ? "bg-foreground text-background shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.4)]" : "text-muted-foreground/70 hover:text-foreground"
+                        "px-3 py-2 text-[11px] font-semibold transition-colors border-l border-border inline-flex items-center gap-1.5",
+                        isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                       )}
                     >
                       <CalendarDays className="h-3 w-3" />
@@ -618,264 +590,180 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* HERO METRIC · The signature piece                         */}
-        {/* ─────────────────────────────────────────────────────── */}
-        <section className="relative mb-10 md:mb-14 group/hero">
-          <div className="relative rounded-[32px] border border-foreground/10 bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-3xl overflow-hidden shadow-[0_40px_100px_-30px_hsl(var(--primary)/0.25)] transition-all duration-500 hover:shadow-[0_50px_120px_-30px_hsl(var(--primary)/0.35)] mesh-gradient-hero">
-            {/* Inner luxury accents */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.12),transparent_65%)] pointer-events-none" />
-            <div className="absolute -top-40 -right-20 h-[460px] w-[460px] rounded-full bg-primary/[0.12] blur-[120px] pointer-events-none group-hover/hero:bg-primary/[0.18] transition-colors duration-700" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-50" />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-30" />
-            
-            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0 z-10">
-              {/* Left: hero revenue */}
-              <div className="lg:col-span-7 p-7 md:p-10 lg:p-12 lg:border-r border-foreground/[0.06]">
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="h-px w-8 bg-primary" />
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-[0.32em]">Receita Líquida</span>
-                </div>
+        {/* PRIMARY METRICS · Receita + Saldo */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-border/60 rounded-xl overflow-hidden border border-border mb-10 md:mb-12">
+          <div className="lg:col-span-2 bg-card p-8 md:p-10 lg:p-12">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-[0.18em]">Receita líquida</p>
+              <span className="text-[10.5px] font-medium text-muted-foreground tabular-nums">{selectedPeriod.label}</span>
+            </div>
 
-                <div className="font-display font-black text-foreground tabular-nums leading-[0.88] tracking-[-0.05em] text-[56px] md:text-[80px] lg:text-[110px] drop-shadow-[0_0_20px_rgba(var(--primary-rgb),0.15)] group-hover/hero:scale-[1.01] transition-transform duration-700 ease-out">
-                  {privacy.hidden ? (
-                    <span className="text-foreground/30">{CENSORED}</span>
-                  ) : (
-                    <div className="inline-flex items-baseline gap-2">
-                      <span className="text-[0.4em] font-medium text-foreground/40 self-center">R$</span>
-                      <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-                    </div>
-                  )}
-                </div>
+            <div className="font-display font-semibold text-foreground tabular-nums leading-[0.95] tracking-[-0.04em] text-[44px] md:text-[64px] lg:text-[76px]">
+              {privacy.hidden ? (
+                <span className="text-foreground/30">{CENSORED}</span>
+              ) : (
+                <span className="inline-flex items-baseline gap-2.5">
+                  <span className="text-[0.42em] font-medium text-muted-foreground self-center">R$</span>
+                  <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
+                </span>
+              )}
+            </div>
 
-                <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] font-medium text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <ArrowUpRight className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
-                    <span>TPV bruto <span className="text-foreground font-bold tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0))}</span></span>
-                  </span>
-                  <span className="text-foreground/20">·</span>
-                  <span>MDR efetivo <span className="text-foreground font-bold tabular-nums">{(() => {
-                    const gross = approved.reduce((a, t) => a + Number(t.amount), 0);
-                    const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
-                    return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%";
-                  })()}</span></span>
-                  <span className="text-foreground/20">·</span>
-                  <span>Ticket médio <span className="text-foreground font-bold tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}</span></span>
+            <div className="mt-8 grid grid-cols-3 gap-px bg-border/60 border-y border-border -mx-8 md:-mx-10 lg:-mx-12">
+              {[
+                { label: "TPV bruto", value: privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0)) },
+                { label: "MDR efetivo", value: (() => { const gross = approved.reduce((a, t) => a + Number(t.amount), 0); const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0); return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%"; })() },
+                { label: "Ticket médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
+              ].map((m, i) => (
+                <div key={i} className="bg-card px-8 md:px-10 lg:px-12 py-5">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em] mb-1.5">{m.label}</p>
+                  <p className="text-[15px] font-semibold text-foreground tabular-nums tracking-tight">{m.value}</p>
                 </div>
+              ))}
+            </div>
 
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <Link
-                    to="/financeiro/saques"
-                    className="group inline-flex items-center gap-2 h-11 px-5 rounded-full bg-foreground text-background text-[12.5px] font-bold tracking-tight shadow-[0_8px_24px_-8px_hsl(var(--foreground)/0.5)] hover:shadow-[0_12px_32px_-8px_hsl(var(--foreground)/0.6)] transition-all"
-                  >
-                    <Wallet className="h-3.5 w-3.5" />
-                    Sacar saldo
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                  <Link
-                    to="/vendas"
-                    className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-foreground/15 text-foreground text-[12.5px] font-bold tracking-tight hover:bg-foreground/5 transition-all"
-                  >
-                    Ver vendas
-                  </Link>
-                </div>
-              </div>
+            <div className="mt-8 flex flex-wrap items-center gap-2.5">
+              <Link to="/financeiro/saques" className="group inline-flex items-center gap-2 h-10 px-4 rounded-md bg-foreground text-background text-[12px] font-semibold hover:bg-foreground/90 transition-colors">
+                <Wallet className="h-3.5 w-3.5" />
+                Solicitar saque
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-border text-foreground text-[12px] font-semibold hover:bg-muted/40 transition-colors">
+                Ver transações
+              </Link>
+            </div>
+          </div>
 
-              {/* Right: signature side panel — Saldo + Liquidação */}
-              <div className="lg:col-span-5 p-7 md:p-10 lg:p-12 bg-gradient-to-b from-transparent to-foreground/[0.02] flex flex-col justify-between gap-6">
+          <div className="bg-card p-8 md:p-10 flex flex-col gap-8">
+            <div>
+              <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-[0.18em] mb-5">Saldo disponível</p>
+              <p className="font-display font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em] text-[32px] md:text-[40px]">
+                {privacy.hidden ? <span className="text-foreground/30">{CENSORED}</span> : <AnimatedNumber value={balance} />}
+              </p>
+              <p className="mt-3 text-[11.5px] text-muted-foreground">Disponível para saque imediato</p>
+            </div>
+
+            <div className="border-t border-border pt-6 space-y-4">
+              <div className="flex items-baseline justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2 mb-5">
-                    <span className="h-px w-8 bg-foreground/20" />
-                    <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.32em]">Saldo Disponível</span>
-                  </div>
-                  <p className="font-display font-black text-foreground tabular-nums leading-none tracking-[-0.04em] text-[40px] md:text-[48px]">
-                    {privacy.hidden ? <span className="text-foreground/30">{CENSORED}</span> : <AnimatedNumber value={balance} />}
-                  </p>
-                  <p className="mt-3 text-[11.5px] text-muted-foreground/70 font-medium">
-                    Pronto para saque imediato
-                  </p>
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em]">Em análise</p>
+                  <p className="text-[10.5px] text-muted-foreground/80 mt-0.5">Saques processando</p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-px bg-foreground/[0.08] rounded-2xl overflow-hidden">
-                  <div className="bg-card/60 backdrop-blur-xl p-5">
-                    <p className="text-[9.5px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em] mb-2">Em análise</p>
-                    <p className="text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
-                      {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
-                    </p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground/60 font-medium">Saques processando</p>
-                  </div>
-                  <div className="bg-card/60 backdrop-blur-xl p-5">
-                    <p className="text-[9.5px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em] mb-2">Retido</p>
-                    <p className="text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
-                      {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
-                    </p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground/60 font-medium">Reserva segurança</p>
-                  </div>
+                <p className="text-[15px] font-semibold text-foreground tabular-nums tracking-tight">
+                  {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                </p>
+              </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em]">Reserva de segurança</p>
+                  <p className="text-[10.5px] text-muted-foreground/80 mt-0.5">Liberação programada</p>
                 </div>
+                <p className="text-[15px] font-semibold text-foreground tabular-nums tracking-tight">
+                  {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* PERFORMANCE STRIP · Editorial KPI row                     */}
-        {/* ─────────────────────────────────────────────────────── */}
-        <section className="mb-10 md:mb-14">
-          <div className="flex items-baseline justify-between mb-5">
-            <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
-              <span className="text-primary mr-2">01</span> Performance Operacional
-            </h2>
-            <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-[0.2em]">indicadores chave</span>
+        {/* PERFORMANCE STRIP */}
+        <section className="mb-10 md:mb-12">
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Performance operacional</h2>
+            <span className="text-[10.5px] text-muted-foreground font-medium">Indicadores chave</span>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.06] rounded-2xl overflow-hidden border border-foreground/10">
-            <EditorialKpi
-              label="Aprovação"
-              value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`}
-              sub={`${approved.length} de ${filteredTx.length} processadas`}
-              accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"}
-            />
-            <EditorialKpi
-              label="Chargeback"
-              value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
-              sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`}
-              accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"}
-            />
-            <EditorialKpi
-              label="Pendentes"
-              value={pending.length.toString()}
-              sub="Aguardando captura"
-              accent={pending.length > 5 ? "warning" : "neutral"}
-            />
-            <EditorialKpi
-              label="Clientes únicos"
-              value={uniqueCustomers.toString()}
-              sub="No período selecionado"
-              accent="neutral"
-            />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border/60 rounded-xl overflow-hidden border border-border">
+            <EditorialKpi label="Taxa de aprovação" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
+            <EditorialKpi label="Chargeback" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
+            <EditorialKpi label="Pagamentos pendentes" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
+            <EditorialKpi label="Clientes únicos" value={uniqueCustomers.toString()} sub="No período" accent="neutral" />
           </div>
         </section>
 
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* CHART · Editorial canvas                                  */}
-        {/* ─────────────────────────────────────────────────────── */}
-        <section className="mb-10 md:mb-14">
-          <div className="flex items-baseline justify-between mb-5">
-            <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
-              <span className="text-primary mr-2">02</span> Volume Processado
-            </h2>
-            <div className="flex items-center gap-3 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.2em]">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-primary" />
-                Receita líquida
-              </span>
+        {/* CHART · Volume processado */}
+        <section className="mb-10 md:mb-12">
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Volume processado</h2>
+            <div className="flex items-center gap-2 text-[10.5px] font-medium text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+              Receita líquida
             </div>
           </div>
 
-          <div className="rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-xl overflow-hidden">
-            <div className="px-6 md:px-8 pt-6 pb-2">
-              <p className="font-display font-black text-foreground tabular-nums tracking-[-0.04em] text-[32px] md:text-[40px] leading-none">
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="px-6 md:px-8 pt-6 pb-3 border-b border-border">
+              <p className="font-display font-semibold text-foreground tabular-nums tracking-[-0.03em] text-[26px] md:text-[32px] leading-none">
                 {privacy.hidden ? CENSORED : fmt(revenue)}
               </p>
-              <p className="text-[11.5px] text-muted-foreground/60 font-medium mt-2">
+              <p className="text-[11.5px] text-muted-foreground mt-2">
                 {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
               </p>
             </div>
-            <div className="h-[260px] md:h-[300px] px-3 pb-4">
+            <div className="h-[260px] md:h-[300px] px-3 pb-4 pt-4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 8, bottom: 8 }}>
+                <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
                   <defs>
-                    <linearGradient id="editorial-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    <linearGradient id="institutional-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.18} />
+                      <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12, fontWeight: 600, boxShadow: "0 12px 40px -12px hsl(var(--primary)/0.2)" }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, fontWeight: 500, padding: "8px 12px" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 4 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.25} fill="url(#editorial-grad)" />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.75} fill="url(#institutional-grad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
         </section>
 
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* PAYMENT METHODS + RECENT ACTIVITY                         */}
-        {/* ─────────────────────────────────────────────────────── */}
+        {/* CHANNELS + ACTIVITY */}
         <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-10">
-          {/* Payment methods column */}
           <div className="lg:col-span-3">
-            <div className="flex items-baseline justify-between mb-5">
-              <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
-                <span className="text-primary mr-2">03</span> Canais de Pagamento
-              </h2>
-              <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-[0.2em]">{filteredTx.length} processadas</span>
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Canais de pagamento</h2>
+              <span className="text-[10.5px] text-muted-foreground font-medium">{filteredTx.length} processadas</span>
             </div>
 
-            <div className="rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-xl overflow-hidden divide-y divide-foreground/[0.06]">
-              <EditorialChannelRow
-                name="PIX"
-                approved={pixApprovedCount}
-                total={pixTotalCount}
-                revenue={pixRevenue}
-                approvalRate={pixConversion}
-                share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0}
-                privacy={privacy.hidden}
-              />
-              <EditorialChannelRow
-                name="Cartão de Crédito"
-                approved={cardApprovedCount}
-                total={cardTotalCount}
-                revenue={cardRevenue}
-                approvalRate={cardConversion}
-                share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0}
-                privacy={privacy.hidden}
-              />
+            <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
+              <EditorialChannelRow name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
+              <EditorialChannelRow name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
                 name="Boleto"
                 approved={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length}
                 total={filteredTx.filter(t => t.payment_method === "boleto").length}
                 revenue={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)}
-                approvalRate={(() => {
-                  const total = filteredTx.filter(t => t.payment_method === "boleto").length;
-                  const ok = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length;
-                  return total > 0 ? (ok / total) * 100 : 0;
-                })()}
-                share={(() => {
-                  const rev = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0);
-                  return revenue > 0 ? (rev / revenue) * 100 : 0;
-                })()}
+                approvalRate={(() => { const total = filteredTx.filter(t => t.payment_method === "boleto").length; const ok = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length; return total > 0 ? (ok / total) * 100 : 0; })()}
+                share={(() => { const rev = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0); return revenue > 0 ? (rev / revenue) * 100 : 0; })()}
                 privacy={privacy.hidden}
               />
             </div>
           </div>
 
-          {/* Recent activity column */}
           <div className="lg:col-span-2">
-            <div className="flex items-baseline justify-between mb-5">
-              <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
-                <span className="text-primary mr-2">04</span> Atividade
-              </h2>
-              <Link to="/vendas" className="text-[10px] text-muted-foreground/60 hover:text-foreground font-semibold uppercase tracking-[0.2em] transition-colors inline-flex items-center gap-1">
-                Tudo <ArrowRight className="h-2.5 w-2.5" />
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Atividade recente</h2>
+              <Link to="/vendas" className="text-[10.5px] text-muted-foreground hover:text-foreground font-medium transition-colors inline-flex items-center gap-1">
+                Ver tudo <ArrowRight className="h-2.5 w-2.5" />
               </Link>
             </div>
 
-            <div className="rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-xl overflow-hidden">
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
               {activity.length === 0 ? (
                 <div className="px-5 py-16 text-center">
-                  <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] flex items-center justify-center mb-3">
-                    <Activity className="h-4 w-4 text-muted-foreground/40" />
+                  <div className="mx-auto h-9 w-9 rounded-full bg-muted/40 flex items-center justify-center mb-3">
+                    <Activity className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="text-[11.5px] text-muted-foreground/50 font-medium">Sem atividade no momento</p>
+                  <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
                 </div>
               ) : (
-                <div className="divide-y divide-foreground/[0.06]">
+                <div className="divide-y divide-border">
                   {activity.slice(0, 6).map((item) => {
                     const isWithdrawal = item.kind === "withdrawal";
                     const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success"
@@ -896,16 +784,16 @@ export default function Dashboard() {
                             if (tx) setDetailTx(tx);
                           }
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-foreground/[0.03] transition-colors text-left group"
+                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-muted/30 transition-colors text-left"
                       >
-                        <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColor)} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-bold text-foreground truncate">{labelText}</p>
-                          <p className="text-[10px] text-muted-foreground/60 mt-0.5 font-mono tracking-tight">
+                          <p className="text-[12px] font-semibold text-foreground truncate">{labelText}</p>
+                          <p className="text-[10.5px] text-muted-foreground mt-0.5 font-mono tracking-tight">
                             {item.id.slice(0, 8)} · {timeAgo(item.createdAt)}
                           </p>
                         </div>
-                        <p className="text-[12.5px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
+                        <p className="text-[12.5px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
                           {privacy.hidden ? CENSORED : fmt(item.amount)}
                         </p>
                       </button>
@@ -917,19 +805,22 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* EDITORIAL FOOTER                                          */}
-        {/* ─────────────────────────────────────────────────────── */}
-        <footer className="flex items-center justify-between pt-6 mt-2 border-t border-foreground/10">
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.32em]">Hotzfy</span>
-            <span className="h-3 w-px bg-foreground/15" />
-            <span className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-[0.24em]">Painel Executivo · Edição {format(new Date(), "MMM yyyy", { locale: ptBR })}</span>
+        {/* FOOTER */}
+        <footer className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-6 mt-2 border-t border-border">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.18em]">Hotzfy</span>
+            <span className="h-2.5 w-px bg-border" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.16em]">
+              Painel de Controle · {format(new Date(), "MMM yyyy", { locale: ptBR })}
+            </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground/40 uppercase tracking-[0.24em]">
-            <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
-            Sistema operacional
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.16em]">Dados em tempo real</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.14em]">Sistema operacional</span>
+            </span>
+          </div>
         </footer>
       </motion.div>
 
