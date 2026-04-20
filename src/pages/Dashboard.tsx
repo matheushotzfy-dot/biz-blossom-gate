@@ -478,57 +478,122 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-4 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-xl overflow-hidden shadow-sm transition-all hover:shadow-md hover:border-border/80">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
-
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3 lg:px-7">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <BarChart3 className="h-3.5 w-3.5" />
-            </div>
-            <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Visão Executiva</span>
-            {scaleModeUnlocked && (
-              <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors",
-                scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
-              )}>
-                <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
-                Escala
-              </button>
-            )}
+      <section className="relative mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-display font-black text-foreground tracking-tight flex items-center gap-2">
+              Olá{nickname ? `, ${nickname}` : ""} <span className="animate-wave origin-bottom-right">👋</span>
+            </h1>
+            <p className="text-xs text-muted-foreground font-medium">Veja como estão seus negócios hoje.</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            <div className="inline-flex items-center rounded-md border border-border bg-background p-0.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="w-[200px]">
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                <SelectTrigger className="h-9 text-xs font-semibold bg-card/40 backdrop-blur-xl border-border/50">
+                  <div className="flex items-center gap-2 truncate">
+                    <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                    <SelectValue placeholder="Todos os produtos" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os produtos</SelectItem>
+                  {productsData?.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="inline-flex items-center rounded-lg border border-border/50 bg-card/40 backdrop-blur-xl p-1 shadow-sm">
               {PERIOD_PRESETS.map((opt) => (
                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn("rounded px-2.5 py-1 text-[11px] font-semibold transition-colors",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground border border-border shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  className={cn("rounded-md px-3 py-1.5 text-[11px] font-bold transition-all",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}>
                   {opt.label}
                 </button>
               ))}
             </div>
+
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
-                <button className={cn("h-7 rounded-md border px-2.5 text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5",
-                  isCustom ? "border-primary/30 bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"
+                <button className={cn("h-9 rounded-lg border px-3 text-[11px] font-bold transition-all inline-flex items-center gap-2 shadow-sm",
+                  isCustom ? "border-primary/30 bg-primary/10 text-primary" : "border-border/50 bg-card/40 backdrop-blur-xl text-muted-foreground hover:text-foreground"
                 )}>
-                  <CalendarDays className="h-3 w-3" />
+                  <CalendarDays className="h-3.5 w-3.5" />
                   {isCustom && customRange?.from
                     ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                    : "Custom"}
+                    : "Personalizado"}
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-popover p-0">
-                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+              <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-popover p-0 shadow-2xl">
+                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
               </PopoverContent>
             </Popover>
-            <button onClick={privacy.toggle} className={cn("h-7 w-7 rounded-md border flex items-center justify-center transition-colors", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
-              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+
+            <button onClick={privacy.toggle} className={cn("h-9 w-9 rounded-lg border flex items-center justify-center transition-all shadow-sm", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border/50 bg-card/40 backdrop-blur-xl text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+              {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <StatCard title="Receita Bruta" value={privacy.hidden ? "R$ •••••••" : fmt(revenue)} icon={DollarSign} change={approved.length > 0 ? `${approved.length} vendas` : undefined} changeType="positive" className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Saldo Disponível" value={privacy.hidden ? CENSORED : fmt(balance)} icon={Wallet} change={withdrawalPending > 0 ? `${fmt(withdrawalPending)} em análise` : "Pronto para saque"} changeType={balance > 0 ? "positive" : "neutral"} className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Taxa de Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} icon={TrendingUp} change="Total de acessos" className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} icon={ShoppingCart} className="bg-card/40 backdrop-blur-xl border-border/50" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Receita PIX</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-success tabular-nums">{privacy.hidden ? CENSORED : fmt(pixRevenue)}</p>
+              <PixLogoMark className="h-4 w-4 text-success/50" />
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{pixConversion.toFixed(1)}% de conversão</p>
+          </div>
+
+          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Receita Cartão</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-info tabular-nums">{privacy.hidden ? CENSORED : fmt(cardRevenue)}</p>
+              <CreditCard className="h-4 w-4 text-info/50" />
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{cardConversion.toFixed(1)}% de conversão</p>
+          </div>
+
+          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Chargeback</p>
+            <div className="flex items-center justify-between">
+              <p className={cn("text-xl font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success/80")}>
+                {privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
+              </p>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground/30" />
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{chargebacks.length} ocorrências</p>
+          </div>
+
+          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Reembolsos</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-destructive/80 tabular-nums">{privacy.hidden ? CENSORED : fmt(refunded.reduce((acc, t) => acc + Number(t.net_amount), 0))}</p>
+              <RefreshCw className="h-4 w-4 text-destructive/40" />
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{refunded.length} vendas devolvidas</p>
+          </div>
+
+          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Vendas Pendentes</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-warning tabular-nums">{privacy.hidden ? CENSORED : pending.length}</p>
+              <Clock3 className="h-4 w-4 text-warning/50" />
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">Aguardando pagamento</p>
+          </div>
+        </div>
+      </section>
 
         {/* Main metric block */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-0">
