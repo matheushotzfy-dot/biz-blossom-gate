@@ -875,69 +875,61 @@ export default function Vendas() {
           </div>
 
           {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <section className="rounded-[24px] border border-border/40 bg-card overflow-hidden shadow-sm">
-            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr]">
-              <div className="relative border-b lg:border-b-0 lg:border-r border-border/30 p-10 flex flex-col justify-between gap-12 bg-muted/[0.02]">
-                <div className="absolute left-0 top-10 bottom-10 w-[4px] rounded-r-full bg-success shadow-[0_0_15px_hsl(var(--success)/0.4)]" />
-                <div className="pl-4">
-                  <div className="flex items-center gap-2.5 mb-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/45">Receita líquida</p>
+          <section className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr]">
+              {/* Left: Revenue summary */}
+              <div className="border-b lg:border-b-0 lg:border-r border-border p-6 lg:p-7 flex flex-col justify-between gap-8">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <p className="text-[12px] font-medium text-muted-foreground">Receita líquida</p>
                     <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                   </div>
-                  <div className="space-y-1.5">
-                    <p className="text-[58px] font-heading font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9] drop-shadow-sm">
-                      {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
-                    </p>
-                    <p className="text-[13px] font-bold text-muted-foreground/40 tabular-nums">
-                      Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
-                    </p>
-                  </div>
+                  <p className="text-[42px] font-semibold tabular-nums tracking-[-0.03em] text-foreground leading-none">
+                    {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
+                  </p>
+                  <p className="text-[12px] text-muted-foreground/80 tabular-nums mt-2.5">
+                    Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-10 pl-4 border-t border-border/30 pt-10">
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/35 leading-none">Vendas</p>
-                    <p className="text-[26px] font-heading font-black text-foreground tabular-nums leading-none tracking-tight">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                    <p className="text-[11px] font-black text-success/80 flex items-center gap-1.5"><TrendingUp className="h-3 w-3" /> {approvalRate.toFixed(1)}%</p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-5">
+                  <div>
+                    <p className="text-[11px] text-muted-foreground">Vendas</p>
+                    <p className="text-[20px] font-semibold text-foreground tabular-nums leading-none mt-1.5">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[11px] text-muted-foreground/80 mt-1.5">{approvalRate.toFixed(1)}% aprovação</p>
                   </div>
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/35 leading-none">Ticket Médio</p>
-                    <p className="text-[26px] font-heading font-black text-foreground tabular-nums leading-none tracking-tight">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[11px] font-bold text-muted-foreground/40">{m.uniqueCustomers} clientes</p>
+                  <div>
+                    <p className="text-[11px] text-muted-foreground">Ticket médio</p>
+                    <p className="text-[20px] font-semibold text-foreground tabular-nums leading-none mt-1.5">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[11px] text-muted-foreground/80 mt-1.5">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 lg:p-8 bg-muted/[0.01]">
-                <div className="flex items-center justify-between px-2 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_10px_hsl(var(--success)/0.6)]" />
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/80">Desempenho no período</p>
-                  </div>
-                  <div className="flex items-center gap-4 text-[10px] font-black text-muted-foreground/35 uppercase tracking-widest">
-                    <span>{periodLabel}</span>
-                  </div>
+              {/* Right: Chart */}
+              <div className="p-5 lg:p-6">
+                <div className="flex items-center justify-between px-2 mb-4">
+                  <p className="text-[12px] font-medium text-foreground">Desempenho no período</p>
+                  <span className="text-[11px] text-muted-foreground tabular-nums">{periodLabel}</span>
                 </div>
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
             </div>
 
-            {/* KPI RIBBON — merged into hero section for tighter hierarchy */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border/35 bg-muted/[0.03]">
+            {/* KPI RIBBON — merged inside hero */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/20">
               {kpiData.map((kpi, i) => (
                 <div key={kpi.label} className={cn(
-                  "px-6 py-6 transition-all hover:bg-card/60 group/kpi",
-                  i % 4 !== 0 && "sm:border-l border-border/30",
+                  "px-4 py-3.5",
+                  i % 4 !== 0 && "sm:border-l border-border",
                   i % 8 !== 0 && "lg:border-l",
-                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border/30",
+                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border",
                 )}>
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none group-hover/kpi:text-muted-foreground/80 transition-colors">
-                    {kpi.label}
-                  </p>
-                  <p className={cn("mt-3.5 text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", kpi.accent)}>
+                  <p className="text-[10.5px] text-muted-foreground truncate">{kpi.label}</p>
+                  <p className={cn("mt-1.5 text-[15px] font-semibold tabular-nums leading-none tracking-[-0.01em]", kpi.accent)}>
                     {kpi.value}
                   </p>
-                  <p className="mt-2 text-[10.5px] font-bold text-muted-foreground/35 leading-tight truncate group-hover/kpi:text-muted-foreground/50 transition-colors">
+                  <p className="mt-1.5 text-[10.5px] text-muted-foreground/70 leading-tight truncate">
                     {kpi.sub}
                   </p>
                 </div>
