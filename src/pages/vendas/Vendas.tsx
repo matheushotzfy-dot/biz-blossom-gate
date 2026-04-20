@@ -237,32 +237,62 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
   }
   return (
     <ResponsiveContainer width="100%" height={320}>
-      <ComposedChart data={data} margin={{ top: 12, right: 12, left: -18, bottom: 4 }}>
+      <ComposedChart data={data} margin={{ top: 20, right: 20, left: -10, bottom: 4 }}>
         <defs>
           <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.22} />
-            <stop offset="55%" stopColor="hsl(var(--foreground))" stopOpacity={0.06} />
-            <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+            <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
           </linearGradient>
+          <filter id="glow-vendas" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
-        <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" strokeOpacity={0.5} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500, letterSpacing: "0.02em" }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
-        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} width={48} />
+        <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
+        <XAxis 
+          dataKey="label" 
+          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.6)", fontWeight: 600 }} 
+          axisLine={false} 
+          tickLine={false} 
+          tickMargin={12} 
+          interval="preserveStartEnd" 
+        />
+        <YAxis 
+          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.6)", fontWeight: 600 }} 
+          axisLine={false} 
+          tickLine={false} 
+          tickMargin={10} 
+          tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} 
+          width={45} 
+        />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 10, fontSize: 12.5, padding: "10px 14px", boxShadow: "0 8px 24px -8px hsl(var(--background) / 0.55)" }}
-          formatter={(v: number) => [fmt(v), "Receita"]}
-          labelStyle={{ fontSize: 10.5, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}
-          itemStyle={{ fontWeight: 600, color: "hsl(var(--foreground))" }}
-          cursor={{ stroke: "hsl(var(--foreground) / 0.25)", strokeWidth: 1, strokeDasharray: "3 3" }}
+          content={({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            const value = payload[0].value as number;
+            return (
+              <div className="rounded-xl border border-border/50 bg-card/90 backdrop-blur-md px-3.5 py-2.5 shadow-xl ring-1 ring-black/5">
+                <p className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-widest mb-1">{label}</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <p className="text-[14px] font-heading font-black text-foreground tabular-nums">
+                    {fmt(value)}
+                  </p>
+                </div>
+              </div>
+            );
+          }}
+          cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 1.5, strokeDasharray: "4 4" }}
         />
         <Area
           type="monotone"
           dataKey="value"
-          stroke="hsl(var(--foreground))"
-          strokeWidth={2}
+          stroke="hsl(var(--primary))"
+          strokeWidth={3}
           fill="url(#rv-gradient-premium)"
           dot={false}
-          activeDot={{ r: 5, stroke: "hsl(var(--background))", strokeWidth: 2.5, fill: "hsl(var(--foreground))" }}
+          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 2.5, fill: "hsl(var(--primary))", filter: "url(#glow-vendas)" }}
+          animationDuration={1500}
         />
       </ComposedChart>
     </ResponsiveContainer>
