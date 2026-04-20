@@ -278,31 +278,28 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer transition-all duration-200 hover:bg-primary/[0.02] border-b border-border/[0.06] last:border-b-0">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/30 transition-all hover:bg-muted/10">
    {/* Left accent rail */}
    <td className="w-[3px] p-0 relative">
     <div className={cn(
-      "absolute inset-y-1 left-0 w-[3px] rounded-r-full transition-all duration-300",
-      tx.status === "completed" ? "bg-success/30 group-hover:bg-success" : tx.status === "pending" ? "bg-warning/30 group-hover:bg-warning" : tx.status === "failed" ? "bg-destructive/30 group-hover:bg-destructive" : "bg-transparent group-hover:bg-primary/40"
+      "absolute inset-y-2 left-0 w-[3px] rounded-r-full transition-all duration-300",
+      tx.status === "completed" ? "bg-success/50 group-hover:bg-success" : tx.status === "pending" ? "bg-warning/50 group-hover:bg-warning" : "bg-muted-foreground/20 group-hover:bg-muted-foreground/40"
     )} />
    </td>
    {/* Customer */}
-   <td className="pl-5 pr-3 py-[18px] align-middle">
-    <div className="flex items-center gap-3.5">
+   <td className="pl-6 pr-3 py-4 align-middle">
+    <div className="flex items-center gap-4">
      <div className="relative">
-      <Avatar className="h-10 w-10 shrink-0 rounded-xl ring-1 ring-border/10 shadow-sm">
+      <Avatar className="h-11 w-11 shrink-0 rounded-xl border border-border/40 shadow-sm bg-card transition-transform group-hover:scale-105">
        <AvatarFallback className={cn("text-[11px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
       </Avatar>
       {tx.status === "completed" && (
-       <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-success ring-[2.5px] ring-card">
-        <Check className="h-1.5 w-1.5 text-success-foreground" strokeWidth={3} />
+       <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-success ring-[2px] ring-card">
+        <Check className="h-2 w-2 text-success-foreground" strokeWidth={4} />
        </span>
       )}
       {tx.status === "pending" && (
-       <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-warning ring-[2.5px] ring-card">
-        <Clock className="h-1.5 w-1.5 text-warning-foreground" strokeWidth={3} />
-       </span>
-      )}
+       <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-[2px] ring-card">
      </div>
      <div className="min-w-0">
       <p className="truncate text-[13px] font-heading font-bold text-foreground leading-tight tracking-[-0.01em]">{name}</p>
@@ -1210,16 +1207,16 @@ export default function Vendas() {
                  <div className="overflow-x-auto">
                    <table className="w-full min-w-[900px]">
                      <thead>
-                       <tr className="border-b border-border/40 bg-card-inset/20">
-                         <th className="w-[3px]" />
-                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
-                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                         <th className="px-3 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">Status</th>
-                         <th className="px-3 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">Método</th>
-                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
-                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right" />
-                         <th className="w-14" />
-                       </tr>
+                        <tr className="border-b border-border/40 bg-muted/20">
+                          <th className="w-[3px]" />
+                          <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6 py-4" />
+                          <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                          <th className="px-3 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Status</th>
+                          <th className="px-3 py-4 text-left text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Método</th>
+                          <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
+                          <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-6" />
+                          <th className="w-14" />
+                        </tr>
                      </thead>
                      <tbody>
                        {visibleItems.length === 0 ? (
