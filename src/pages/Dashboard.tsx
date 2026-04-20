@@ -7,6 +7,7 @@ import {
   Activity,
   AlertTriangle,
   ArrowDownRight,
+  ArrowRight,
   ArrowUpRight,
   BarChart3,
   CalendarDays,
