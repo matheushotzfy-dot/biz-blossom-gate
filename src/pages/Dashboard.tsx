@@ -458,11 +458,16 @@ export default function Dashboard() {
       )}
 
       {/* ─── BLOCO 1: VISÃO EXECUTIVA ─── */}
-      <section className="rounded-2xl border border-border bg-card overflow-hidden mb-5">
+      <section className="relative rounded-2xl border border-border bg-card overflow-hidden mb-5 shadow-[0_1px_0_0_hsl(var(--border)),0_24px_48px_-24px_hsl(var(--background))]">
+        {/* Ambient glow + dot pattern */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:radial-gradient(hsl(var(--foreground))_1px,transparent_1px)] [background-size:18px_18px]" />
+        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/[0.06] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-success/[0.05] blur-3xl" />
+
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 px-6 md:px-7 py-4 border-b border-border">
+        <div className="relative flex items-center justify-between gap-4 px-6 md:px-7 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+            <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-muted to-muted/40 border border-border flex items-center justify-center shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04)]">
               <BarChart3 className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
             </div>
             <div className="flex flex-col">
@@ -538,12 +543,13 @@ export default function Dashboard() {
         </div>
 
         {/* Receita + Saldo */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] divide-x divide-border border-b border-border">
-          <div className="px-7 md:px-9 py-8">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-4">
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] divide-x divide-border border-b border-border">
+          <div className="relative px-7 md:px-9 py-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-4 flex items-center gap-2">
+              <span className="h-px w-6 bg-gradient-to-r from-transparent via-foreground/40 to-foreground/40" />
               Receita · {periodLabel}
             </p>
-            <div className="text-[60px] md:text-[88px] font-display font-black tracking-[-0.045em] leading-[0.92] text-foreground tabular-nums">
+            <div className="text-[60px] md:text-[88px] font-display font-black tracking-[-0.045em] leading-[0.92] bg-gradient-to-b from-foreground to-foreground/85 bg-clip-text text-transparent tabular-nums">
               {privacy.hidden ? CENSORED : <AnimatedNumber value={revenue} />}
             </div>
             <div className="mt-7 flex items-center gap-7 flex-wrap">
@@ -561,39 +567,42 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="px-7 md:px-8 py-8">
+          <div className="relative px-7 md:px-8 py-8 bg-gradient-to-br from-success/[0.025] via-transparent to-transparent">
             <div className="flex items-center gap-2 mb-4">
               <span className="relative inline-flex h-1.5 w-1.5">
                 <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.6)]" />
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Saldo Disponível</p>
             </div>
-            <div className="text-[40px] md:text-[54px] font-display font-black tracking-[-0.04em] leading-[0.95] text-success tabular-nums">
+            <div className="text-[40px] md:text-[54px] font-display font-black tracking-[-0.04em] leading-[0.95] bg-gradient-to-b from-success to-success/80 bg-clip-text text-transparent tabular-nums drop-shadow-[0_0_24px_hsl(var(--success)/0.15)]">
               {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
             </div>
             <Link
               to="/financeiro/saques"
-              className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-foreground text-background text-[11.5px] font-bold hover:opacity-90 transition-opacity group"
+              className="relative mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-foreground text-background text-[11.5px] font-bold hover:opacity-90 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_hsl(var(--foreground)/0.4)] group overflow-hidden"
             >
-              Sacar agora
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700" />
+              <span className="relative">Sacar agora</span>
+              <ArrowRight className="relative h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+        <div className="relative grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
           {[
             { label: "Conversão", value: `${conversion.toFixed(1)}%`, icon: Target },
             { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: Wallet },
             { label: "Clientes Únicos", value: String(uniqueCustomers), icon: Users },
             { label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, icon: ShieldCheck, danger: chargebackRate > 1 },
           ].map((kpi) => (
-            <div key={kpi.label} className="px-6 md:px-7 py-6">
+            <div key={kpi.label} className="group relative px-6 md:px-7 py-6 transition-colors hover:bg-muted/30">
               <div className="flex items-start justify-between mb-3">
                 <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{kpi.label}</p>
-                <kpi.icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2} />
+                <div className="h-6 w-6 rounded-md bg-muted/60 border border-border/60 flex items-center justify-center transition-all group-hover:bg-foreground group-hover:border-foreground">
+                  <kpi.icon className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-background" strokeWidth={2.2} />
+                </div>
               </div>
               <p className={cn(
                 "text-[26px] md:text-[30px] font-display font-black tracking-[-0.03em] leading-none tabular-nums",
@@ -601,6 +610,10 @@ export default function Dashboard() {
               )}>
                 {kpi.value}
               </p>
+              <div className={cn(
+                "absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity",
+                (kpi as any).danger && "via-destructive/40"
+              )} />
             </div>
           ))}
         </div>
@@ -632,7 +645,8 @@ export default function Dashboard() {
               <AreaChart data={chartData} margin={{ top: 10, right: 16, bottom: 8, left: 8 }}>
                 <defs>
                   <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
+                    <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -667,9 +681,9 @@ export default function Dashboard() {
                   type="monotone"
                   dataKey="vendas"
                   stroke="hsl(var(--primary))"
-                  strokeWidth={2}
+                  strokeWidth={2.25}
                   fill="url(#dashGrad)"
-                  activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 2 }}
+                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3, style: { filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.6))" } }}
                 />
               </AreaChart>
             </ResponsiveContainer>
