@@ -1952,6 +1952,7 @@ export type Database = {
           amount: number
           checkout_session_id: string | null
           created_at: string
+          customer_address: string | null
           customer_document: string | null
           customer_email: string | null
           customer_name: string | null
@@ -1975,6 +1976,7 @@ export type Database = {
           amount: number
           checkout_session_id?: string | null
           created_at?: string
+          customer_address?: string | null
           customer_document?: string | null
           customer_email?: string | null
           customer_name?: string | null
@@ -1998,6 +2000,7 @@ export type Database = {
           amount?: number
           checkout_session_id?: string | null
           created_at?: string
+          customer_address?: string | null
           customer_document?: string | null
           customer_email?: string | null
           customer_name?: string | null
