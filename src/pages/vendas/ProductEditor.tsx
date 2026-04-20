@@ -20,10 +20,22 @@ import {
  CreditCard, QrCode, FileText, Mail, MapPin, Shield, Timer, Eye,
  Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
  Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
- Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
- MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle,
- RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award
+  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
+  MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle,
+  RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award
 } from "lucide-react";
+
+function PixLogoMark({ className, variant = "teal" }: { className?: string; variant?: "teal" | "white" }) {
+  const color = variant === "white" ? "hsl(var(--primary-foreground))" : "hsl(173 58% 47%)";
+
+  return (
+    <svg viewBox="538 29 73 73" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet" shapeRendering="geometricPrecision" className={cn("select-none", className)} style={{ color }}>
+      <path d="m 596.82737,86.620206 c -3.08045,0 -5.97782,-1.19944 -8.15622,-3.37679 l -11.77678,-11.77713 c -0.82691,-0.82903 -2.26801,-0.82656 -3.09456,0 l -11.81982,11.82017 c -2.17841,2.17734 -5.07577,3.37679 -8.15623,3.37679 h -2.32092 l 14.9158,14.915444 c 4.65807,4.65808 12.21069,4.65808 16.86912,0 l 14.95813,-14.958484 z" fill="currentColor" />
+      <path d="m 553.82398,44.565556 c 3.08046,0 5.97782,1.19945 8.15623,3.37679 l 11.81981,11.81982 c 0.82691,0.82691 2.26766,0.82691 3.09457,0 l 11.77677,-11.77678 c 2.17841,-2.17734 5.07577,-3.37678 8.15622,-3.37678 h 2.27859 l -14.91545,-14.91545 c -4.65843,-4.65843 -12.21069,-4.65843 -16.86912,0 l -14.9158,14.91545 z" fill="currentColor" />
+      <path d="m 609.05953,47.875036 h -2.23272 c -1.52542,0 -3.04195,0.62759 -4.14374,1.73009 l -11.77678,11.77713 c -2.64724,2.64688 -6.95364,2.64688 -9.60088,0 l -11.81981,-11.82017 c -1.10214,-1.10215 -2.61867,-1.72975 -4.14375,-1.72975 h -2.27577 l 15.00244,15.00244 c 0.82692,0.82726 0.82692,2.26801 0,3.09492 l -15.00244,15.00244 h 2.27577 c 1.52508,0 3.04161,-0.6276 4.14375,-1.72974 l 11.82016,-11.82017 c 2.64689,-2.64689 6.95329,-2.64689 9.60053,0 l 11.77678,11.77712 c 1.10179,1.1025 2.61832,1.7301 4.14374,1.7301 h 2.23272 l -15.04547,-15.04548 c -0.82727,-0.82691 -0.82727,-2.26766 0,-3.09457 z" fill="currentColor" />
+    </svg>
+  );
+}
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -755,9 +767,9 @@ export default function ProductEditor() {
  {...{ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }}
  />}
 
- {activeTab === "checkout" && <TabCheckout
- {...{ isNew: tabsLocked, name, price, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
- />}
+  {activeTab === "checkout" && <TabCheckout
+  {...{ isNew: tabsLocked, name, price, productId: effectiveProductId, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, getCheckoutLink, copyLink, navigate, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, showCouponField, setShowCouponField }}
+  />}
 
  {activeTab === "co-producao" && <TabCoProducao
  {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }}
@@ -1418,189 +1430,102 @@ function FunnelArrow() {
  );
 }
 
-function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: any) {
- const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+function TabCheckout({ isNew, name, price, productId, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, getCheckoutLink, copyLink, navigate, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, showCouponField, setShowCouponField }: any) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <SectionHeader icon={ShoppingCart} title="Configuração Comercial" subtitle="Defina as regras de venda e pagamentos do seu produto." />
+        {!isNew && (
+          <Button onClick={() => navigate(`/vendas/produtos/${productId}/checkout-builder`)} className="h-10 gap-2 rounded-xl gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/10">
+            <Palette className="h-4 w-4" /> Abrir Checkout Builder
+          </Button>
+        )}
+      </div>
 
- return (
- <div className="space-y-6">
- <SectionHeader icon={ShoppingCart} title="Checkout" subtitle="Gerencie e personalize seus checkouts." />
- {isNew ? (
- <EmptyCard icon={ShoppingCart} message="Salve o produto primeiro para personalizar o checkout." />
- ) : (
- <>
- {/* Checkout Quick Actions Card */}
- <div className="rounded-2xl border border-border bg-card overflow-hidden relative">
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
- <div className="p-5 flex items-center justify-between">
- <div className="flex items-center gap-4">
- <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
- <ShoppingCart className="h-5 w-5 text-primary" />
- </div>
- <div>
- <p className="text-[15px] font-display font-black text-foreground">Checkout Padrão</p>
- <p className="text-sm font-numbers font-black text-primary">R$ {Number(price || 0).toFixed(2)}</p>
- </div>
- </div>
- <div className="flex items-center gap-2">
- <Button variant="outline" size="sm" onClick={() => navigate(`/vendas/produtos/${productId}/checkout-builder`)} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
- <Palette className="h-3.5 w-3.5" /> Personalizar
- </Button>
- <Button variant="outline" size="sm" onClick={() => copyLink(getCheckoutLink())} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
- <Copy className="h-3.5 w-3.5" /> Copiar
- </Button>
- <Button variant="outline" size="sm" onClick={() => window.open(getCheckoutLink(), "_blank")} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
- <Eye className="h-3.5 w-3.5" /> Abrir
- </Button>
- </div>
- </div>
- </div>
+      {isNew ? (
+        <EmptyCard icon={ShoppingCart} message="Salve o produto primeiro para configurar o checkout." />
+      ) : (
+        <>
+          {/* Checkout Quick Actions Card */}
+          <div className="rounded-2xl border border-border bg-card overflow-hidden relative shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
+            <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/5">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Link2 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-0.5">Link do checkout</p>
+                  <p className="font-mono text-xs text-foreground/80 truncate max-w-[200px] sm:max-w-[400px]">{getCheckoutLink()}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => copyLink(getCheckoutLink())} className="h-9 text-xs gap-1.5 rounded-xl font-bold">
+                  <Copy className="h-3.5 w-3.5" /> Copiar Link
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.open(getCheckoutLink(), "_blank")} className="h-9 text-xs gap-1.5 rounded-xl font-bold">
+                  <ExternalLink className="h-3.5 w-3.5" /> Abrir
+                </Button>
+              </div>
+            </div>
+          </div>
 
- {/* Live Mini Preview */}
- <EditorCard accentColor="bg-primary">
- <div className="flex items-center justify-between mb-3">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <Eye className="h-4 w-4 text-primary" /> Pré-visualização
- </h3>
- <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-0.5">
- <button
- onClick={() => setPreviewDevice("desktop")}
- className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "desktop" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
- >
- <Monitor className="h-3.5 w-3.5" />
- </button>
- <button
- onClick={() => setPreviewDevice("mobile")}
- className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "mobile" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
- >
- <Smartphone className="h-3.5 w-3.5" />
- </button>
- </div>
- </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Payment Methods */}
+            <EditorCard accentColor="bg-primary">
+              <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 mb-4">
+                <CreditCard className="h-4 w-4 text-primary" /> Meios de Pagamento
+              </h3>
+              <div className="space-y-3">
+                <ToggleRow icon={PixLogoMark} label="Habilitar PIX" sublabel="Pagamento instantâneo com aprovação imediata" checked={pixEnabled} onChange={setPixEnabled} />
+                <ToggleRow icon={CreditCard} label="Cartão de Crédito" sublabel="Parcelamento em até 12x" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
+                <ToggleRow icon={FileText} label="Boleto Bancário" sublabel="Compensação em até 72h úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />
+              </div>
+            </EditorCard>
 
- {/* Mini checkout preview */}
- <div className={cn(
- "mx-auto rounded-xl border border-border bg-background overflow-hidden transition-all duration-300",
- previewDevice === "mobile" ? "max-w-[320px]" : "max-w-full"
- )}>
- {/* Banner area */}
- {(previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview) && (
- <img src={previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="" className="w-full h-20 object-cover" />
- )}
- <div className="p-4 space-y-3">
- {/* Timer preview */}
- {timerEnabled && (
- <div className="flex items-center justify-center gap-2 rounded-lg bg-destructive/10 border border-destructive/15 py-1.5 px-3">
- <Timer className="h-3 w-3 text-destructive" />
- <span className="text-[10px] font-numbers font-bold text-destructive">{timerMinutes}:00</span>
- <span className="text-[9px] text-destructive/60">restantes</span>
- </div>
- )}
+            {/* Rules & Behavior */}
+            <EditorCard accentColor="bg-info">
+              <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 mb-4">
+                <Settings className="h-4 w-4 text-info" /> Regras e Comportamento
+              </h3>
+              <div className="space-y-3">
+                <ToggleRow icon={Tag} label="Habilitar Cupons" sublabel="Permitir que o cliente use cupons de desconto" checked={showCouponField} onChange={setShowCouponField} />
+                <ToggleRow icon={Shield} label="Selo de Garantia" sublabel={`Exibir selo de ${warrantyDays} dias no checkout`} checked={guaranteeEnabled} onChange={setGuaranteeEnabled} />
+                <div className="p-3 rounded-xl border border-border/40 bg-muted/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center border border-info/10">
+                      <Clock className="h-4 w-4 text-info" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">Prazo de Garantia</p>
+                      <p className="text-[10px] text-muted-foreground leading-snug">Dias garantidos por lei ou política</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-background border border-border px-3 py-1.5 rounded-lg">
+                    <span className="text-xs font-bold text-foreground">{warrantyDays} dias</span>
+                  </div>
+                </div>
+              </div>
+            </EditorCard>
+          </div>
 
- {/* Product */}
- <div className="flex items-center gap-3">
- <div className="h-10 w-10 rounded-lg bg-muted/10 flex items-center justify-center shrink-0 border border-border">
- <Package className="h-4 w-4 text-muted-foreground/30" />
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-xs font-display font-bold truncate text-foreground">{name || "Produto"}</p>
- <p className="text-xs font-numbers font-black text-primary">R$ {Number(price || 0).toFixed(2)}</p>
- </div>
- </div>
-
- {/* Payment methods preview */}
- <div className="flex items-center gap-2">
- {pixEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-success/10 text-success border border-success/20 font-display font-bold">PIX</span>}
- {creditCardEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-info/10 text-info border border-info/20 font-display font-bold">Cartão</span>}
- {boletoEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-warning/10 text-warning border border-warning/20 font-display font-bold">Boleto</span>}
- </div>
-
- {/* Social proof */}
- {socialProof && (
- <p className="text-[9px] text-muted-foreground/50 flex items-center gap-1">
- <Users className="h-2.5 w-2.5" /> 127 pessoas compraram recentemente
- </p>
- )}
-
- {/* CTA Button preview */}
- <div className="rounded-lg py-2.5 text-center text-xs font-display font-black text-primary-foreground shadow-md" style={{ backgroundColor: buttonColor }}>
- Comprar Agora
- </div>
-
- {/* Guarantee badge */}
- {guaranteeEnabled && (
- <div className="flex items-center justify-center gap-1.5 py-1.5">
- <Shield className="h-3 w-3 text-success/50" />
- <span className="text-[9px] text-muted-foreground/50 font-display">Garantia de {warrantyDays} dias</span>
- </div>
- )}
- </div>
- </div>
- </EditorCard>
-
- {/* Visual customization */}
- <EditorCard accentColor="bg-info">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <Palette className="h-4 w-4 text-info" /> Personalização visual
- </h3>
-
- <div className="space-y-2">
- <EditorLabel icon={Palette}>Cor do botão de compra</EditorLabel>
- <div className="flex items-center gap-3">
- <div className="relative">
- <input type="color" value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="w-12 h-12 rounded-xl border border-border cursor-pointer" />
- </div>
- <Input value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-secondary border-border h-11" />
- <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-primary-foreground cursor-default" style={{ backgroundColor: buttonColor }}>
- Comprar Agora
- </motion.div>
- </div>
- {/* Quick color presets */}
- <div className="flex items-center gap-2 mt-2">
- <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mr-1">Cores populares</span>
- {["#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#f59e0b", "#ec4899", "#06b6d4", "#000000"].map(c => (
- <button
- key={c}
- onClick={() => setButtonColor(c)}
- className={cn("h-6 w-6 rounded-lg border-2 transition-all hover:scale-110", buttonColor === c ? "border-foreground ring-1 ring-foreground/20 scale-110" : "border-border")}
- style={{ backgroundColor: c }}
- />
- ))}
- </div>
- </div>
- </EditorCard>
-
- <EditorCard accentColor="bg-warning">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <Zap className="h-4 w-4 text-warning" /> Elementos de conversão
- </h3>
- <div className="space-y-2">
- <ToggleRow icon={Timer} label="Timer de urgência" sublabel="Contador regressivo no checkout" checked={timerEnabled} onChange={setTimerEnabled}>
- {timerEnabled && (
- <div className="flex items-center gap-1.5">
- <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e: any) => setTimerMinutes(e.target.value)} className="w-16 h-8 text-center text-xs bg-secondary border-border" />
- <span className="text-[10px] text-muted-foreground">min</span>
- </div>
- )}
- </ToggleRow>
- <ToggleRow icon={Users} label="Prova social" sublabel="'X pessoas compraram'" checked={socialProof} onChange={setSocialProof} />
- <ToggleRow icon={Shield} label="Selo de garantia" sublabel={`${warrantyDays} dias no checkout`} checked={guaranteeEnabled} onChange={setGuaranteeEnabled} />
- </div>
- </EditorCard>
-
- {/* Banners */}
- <EditorCard accentColor="bg-success">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <ImagePlus className="h-4 w-4 text-success" /> Banners do Checkout
- </h3>
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <BannerUpload label="Banner Desktop" sublabel="Recomendado: 1200×200px" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e: any) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} />
- <BannerUpload label="Banner Mobile" sublabel="Recomendado: 600×200px" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e: any) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} />
- </div>
- </EditorCard>
- </>
- )}
- </div>
- );
+          {/* Checkout Builder Banner Call to Action */}
+          <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/[0.02] p-8 text-center">
+            <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Palette className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-display font-black text-foreground mb-2">Personalize a experiência visual</h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+              Use o Checkout Builder para customizar cores, banners, adicionar depoimentos, VSLs e cronômetros de urgência para aumentar sua conversão.
+            </p>
+            <Button onClick={() => navigate(`/vendas/produtos/${productId}/checkout-builder`)} className="h-11 px-8 gap-2 rounded-xl gradient-primary text-primary-foreground font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform">
+              <Palette className="h-4 w-4" /> Personalizar Design do Checkout
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }: any) {

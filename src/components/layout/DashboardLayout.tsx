@@ -68,18 +68,18 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-20 hidden h-12 md:flex items-center border-b border-border/50 bg-background px-3 lg:px-5 sticky top-0">
-            <SidebarTrigger className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
-              <Menu className="h-[15px] w-[15px]" strokeWidth={1.85} />
+          <header className="relative z-20 hidden h-10 md:flex items-center border-b border-border/30 bg-background/80 backdrop-blur-md px-3 lg:px-4 sticky top-0">
+            <SidebarTrigger className="h-7 w-7 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-center text-muted-foreground/50 hover:text-foreground">
+              <Menu className="h-[14px] w-[14px]" strokeWidth={1.85} />
             </SidebarTrigger>
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="ml-1 h-8 px-2.5 rounded-md hover:bg-muted/60 transition-colors flex items-center gap-2 text-muted-foreground/70 hover:text-foreground"
+              className="ml-1 h-7 px-2 rounded-md hover:bg-muted/40 transition-colors flex items-center gap-2 text-muted-foreground/50 hover:text-foreground"
             >
-              <Search className="h-[14px] w-[14px]" strokeWidth={1.85} />
-              <span className="text-[12px] font-medium hidden lg:inline">Buscar</span>
-              <kbd className="hidden lg:inline-flex h-4 items-center gap-0.5 rounded border border-border/60 bg-muted/40 px-1 text-[9px] font-medium text-muted-foreground/60">⌘K</kbd>
+              <Search className="h-[13px] w-[13px]" strokeWidth={1.85} />
+              <span className="text-[11px] font-medium hidden lg:inline">Buscar</span>
+              <kbd className="hidden lg:inline-flex h-3.5 items-center gap-0.5 rounded border border-border/40 bg-muted/30 px-1 text-[8px] font-medium text-muted-foreground/50">⌘K</kbd>
             </button>
 
             <div className="flex-1" />
@@ -87,28 +87,28 @@ function DashboardLayoutInner() {
             <div className="flex items-center gap-0.5">
               <button
                 onClick={toggleTheme}
-                className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
+                className="h-7 w-7 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-center text-muted-foreground/50 hover:text-foreground"
               >
-                {theme === "dark" ? <Sun className="h-[15px] w-[15px]" strokeWidth={1.85} /> : <Moon className="h-[15px] w-[15px]" strokeWidth={1.85} />}
+                {theme === "dark" ? <Sun className="h-[14px] w-[14px]" strokeWidth={1.85} /> : <Moon className="h-[14px] w-[14px]" strokeWidth={1.85} />}
               </button>
 
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="relative h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
+                className="relative h-7 w-7 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-center text-muted-foreground/50 hover:text-foreground"
               >
-                <Bell className="h-[15px] w-[15px]" strokeWidth={1.85} />
+                <Bell className="h-[14px] w-[14px]" strokeWidth={1.85} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-primary rounded-full ring-2 ring-background" />
                 )}
               </button>
             </div>
 
-            <div className="mx-2 h-5 w-px bg-border/60" />
+            <div className="mx-1.5 h-4 w-px bg-border/40" />
 
             <button onClick={() => navigate("/perfil")} className="flex items-center">
-              <Avatar className="h-7 w-7 ring-1 ring-border/60 hover:ring-primary/40 transition-all cursor-pointer">
+              <Avatar className="h-6 w-6 ring-1 ring-border/40 hover:ring-primary/40 transition-all cursor-pointer">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-muted text-foreground text-[11px] font-semibold">
+                <AvatarFallback className="bg-muted text-foreground text-[10px] font-semibold">
                   {(profile?.full_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -133,8 +133,8 @@ function DashboardLayoutInner() {
 
  <MobileRevenueBar />
 
- <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
- <div className="mx-auto w-full max-w-[1180px] py-4 md:py-8">
+  <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-4 md:px-6 lg:px-8 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+  <div className="mx-auto w-full max-w-[1240px] py-4 md:py-8 lg:py-10">
  <Outlet />
  </div>
  </div>
