@@ -68,7 +68,7 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-20 hidden h-10 md:flex items-center border-b border-border/30 bg-background/80 backdrop-blur-md px-3 lg:px-4 sticky top-0">
+          <header className="relative z-20 hidden h-9 md:flex items-center border-b border-border/20 bg-background/60 backdrop-blur-md px-3 lg:px-4 sticky top-0">
             <SidebarTrigger className="h-7 w-7 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-center text-muted-foreground/50 hover:text-foreground">
               <Menu className="h-[14px] w-[14px]" strokeWidth={1.85} />
             </SidebarTrigger>

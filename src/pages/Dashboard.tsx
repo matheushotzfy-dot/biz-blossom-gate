@@ -522,15 +522,15 @@ export default function Dashboard() {
         </div>
 
         {/* Main metric block */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-0">
-          <div className="px-5 py-6 lg:px-7 lg:py-8 border-b lg:border-b-0 lg:border-r border-border/40 bg-gradient-to-br from-card to-muted/10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-0">
+          <div className="px-5 py-8 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/40 bg-gradient-to-br from-card to-muted/5">
             <p className="mb-2.5 text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
               Receita {isCustom && customRange?.from
                 ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                 : `· ${selectedPeriod.label}`}
             </p>
             <div className="flex items-baseline gap-3.5 flex-wrap">
-              <span className="inline-flex items-baseline text-[clamp(2.5rem,8vw,74px)] font-heading font-black leading-none tracking-[-0.06em] text-foreground whitespace-nowrap drop-shadow-sm">
+              <span className="inline-flex items-baseline text-[clamp(2.8rem,9vw,82px)] font-heading font-black leading-none tracking-[-0.06em] text-foreground whitespace-nowrap drop-shadow-sm">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
@@ -583,14 +583,14 @@ export default function Dashboard() {
         </div>
 
         {/* Compact supporting KPI strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/40 divide-x divide-border/40 bg-muted/5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/40 divide-x divide-border/40 bg-muted/5/30">
           {([
             { label: "Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "text-info" },
             { label: "Ticket Médio", numValue: approved.length > 0 ? revenue / approved.length : 0, formatter: fmt, accent: "text-foreground" },
             { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground" },
             { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success/80" },
           ] as const).map((item, i) => (
-            <div key={item.label} className={cn("px-5 py-3 lg:px-7", i >= 2 && "border-t lg:border-t-0 border-border/40")}>
+            <div key={item.label} className={cn("px-5 py-2.5 lg:px-8", i >= 2 && "border-t lg:border-t-0 border-border/40")}>
               <p className="text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/60 mb-1">{item.label}</p>
               <p className={cn("text-[18px] lg:text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.04em]", item.accent)}>
                 {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
@@ -619,7 +619,7 @@ export default function Dashboard() {
                 Vendas aprovadas
               </div>
             </div>
-            <div className="flex-1 px-2 py-4 min-h-[420px]">
+            <div className="flex-1 px-2 py-4 min-h-[480px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
                   <defs>
@@ -654,14 +654,14 @@ export default function Dashboard() {
           {/* Payment breakdown rail */}
           <div className="flex flex-col">
             <div className="px-5 py-3 border-b border-border/40 bg-muted/5">
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.16em] text-foreground/80">Por método</p>
+              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.16em] text-foreground/70">Por método</p>
             </div>
             <div className="flex-1 divide-y divide-border/40">
               {[
                 { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
                 { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
               ].map((m) => (
-                <div key={m.label} className="px-5 py-4 bg-gradient-to-br from-card to-muted/5">
+                <div key={m.label} className="px-5 py-3 bg-gradient-to-br from-card to-muted/5">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className={m.color}>{m.icon}</span>
@@ -772,9 +772,9 @@ export default function Dashboard() {
                   const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
 
                   return (
-                    <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-3 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1.5")}>
+                    <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-2.5 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1")}>
                       <div className="flex items-center gap-3">
-                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border/20", s.iconBg, s.iconText)}>
+                        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/20", s.iconBg, s.iconText)}>
                           {item.kind === "transaction"
                             ? item.paymentMethod === "pix"
                               ? <PixLogoMark className="h-4 w-4" />
@@ -926,7 +926,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3.5 md:p-5 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="relative z-10 pl-1.5">

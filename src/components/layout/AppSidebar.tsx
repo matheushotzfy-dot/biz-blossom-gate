@@ -112,14 +112,14 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-3 block w-full overflow-hidden rounded-xl border border-sidebar-border/40 bg-sidebar-accent/30 p-3 text-left transition-all duration-200 hover:border-sidebar-primary/30 hover:bg-sidebar-accent/50"
+      className="group/rev relative mt-3 block w-full overflow-hidden rounded-xl border border-sidebar-border/30 bg-sidebar-accent/20 p-3 text-left transition-all duration-200 hover:border-sidebar-primary/20 hover:bg-sidebar-accent/40"
     >
       <div className="flex items-center gap-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sidebar-primary/20 bg-sidebar-primary/5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sidebar-border/40 bg-sidebar-accent/40">
           <Zap className="h-4 w-4 text-sidebar-primary/80" strokeWidth={2.5} fill="currentColor" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/40">
+          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/35">
             Faturamento total
           </p>
           <p className="mt-0.5 font-display text-[20px] font-black leading-none tracking-tight text-sidebar-accent-foreground tabular-nums">
@@ -177,19 +177,19 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     className={cn(
                       "group/nav relative flex h-[48px] w-full items-center gap-3 rounded-xl px-2.5 text-[14px] font-medium transition-all duration-200 group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-sidebar-primary/8 text-sidebar-primary font-bold shadow-sm ring-1 ring-sidebar-primary/10"
-                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary/5 text-sidebar-primary font-semibold"
+                        : "text-sidebar-foreground/45 hover:bg-sidebar-accent/20 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     {/* Active indicator bar */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden shadow-[1px_0_4px_-1px_rgba(var(--sidebar-primary),0.3)]" />
                     )}
                     <span className={cn(
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary/10 text-sidebar-primary"
-                        : "bg-sidebar-accent/40 text-sidebar-foreground/50 ring-1 ring-sidebar-border/20 group-hover/nav:bg-sidebar-accent/60 group-hover/nav:text-sidebar-accent-foreground group-hover/nav:ring-sidebar-border/40",
+                        ? "bg-sidebar-primary/8 text-sidebar-primary"
+                        : "bg-sidebar-accent/30 text-sidebar-foreground/40 ring-1 ring-sidebar-border/15 group-hover/nav:bg-sidebar-accent/40 group-hover/nav:text-sidebar-accent-foreground",
                     )}>
                       <item.icon
                         className="h-[17px] w-[17px]"
