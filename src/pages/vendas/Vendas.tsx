@@ -907,16 +907,16 @@ export default function Vendas() {
             </span>
           </div>
 
-          {/* ═══════ HERO: Revenue summary + Chart + KPI ribbon ═══════ */}
+          {/* ═══════ HERO: Dense KPI Grid (no empty chart) ═══════ */}
           <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_24px_-12px_rgba(0,0,0,0.08)]">
             {/* Revenue header strip */}
-            <div className="flex flex-col gap-5 border-b border-border px-6 py-5 lg:flex-row lg:items-end lg:justify-between lg:gap-8 lg:px-8 lg:py-6 bg-gradient-to-b from-muted/[0.10] to-transparent">
+            <div className="flex flex-col gap-5 border-b border-border px-6 py-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-8 lg:py-6 bg-gradient-to-b from-muted/[0.10] to-transparent">
               <div className="flex flex-col gap-2 min-w-0">
                 <div className="flex items-center gap-2.5">
                   <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
                   <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                 </div>
-                <p className="text-[44px] sm:text-[50px] lg:text-[60px] font-display font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9] drop-shadow-[0_0_25px_rgba(var(--primary),0.15)]">
+                <p className="text-[44px] sm:text-[50px] lg:text-[60px] font-display font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9]">
                   {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                 </p>
                 <p className="text-[12px] text-muted-foreground/85 tabular-nums font-medium tracking-tight">
@@ -944,47 +944,135 @@ export default function Vendas() {
               </div>
             </div>
 
-            {/* Chart — full width */}
-            <div className="px-4 pt-5 pb-3 lg:px-6 lg:pt-6">
-              <div className="flex items-center justify-between px-2 mb-3">
-                <p className="text-[12px] font-heading font-semibold text-foreground tracking-tight">Desempenho no período</p>
-                <span className="text-[11px] text-muted-foreground/80 tabular-nums font-medium">{periodLabel}</span>
+            {/* DENSE KPI GRID — 8 cards funcionais (sem espaço vazio) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-border [&>*]:border-border">
+              {/* Aprovação */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Aprovação</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-success/10 group-hover:scale-110 transition-transform">
+                    <CheckSquare className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", approvalRate >= 80 ? "text-success" : approvalRate >= 50 ? "text-warning" : "text-destructive")}>
+                  {approvalRate.toFixed(1)}%
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {m.approved.length} de {m.approved.length + m.failed.length} tentativas
+                </p>
               </div>
-              <RevenueChart data={metrics.chartData} hidden={hidden} />
-            </div>
 
-            {/* KPI RIBBON — 4 cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border bg-gradient-to-b from-muted/[0.12] to-transparent">
-              {kpiData.map((kpi, i) => {
-                const tone = kpiTone[kpi.tone];
-                const Icon = kpi.icon;
-                return (
-                  <div
-                    key={kpi.label}
-                    className={cn(
-                      "relative px-5 py-5 transition-all hover:bg-muted/30 group cursor-default",
-                      i > 0 && "lg:border-l border-border",
-                      i % 2 === 1 && "border-l border-border lg:border-l",
-                      i >= 2 && "border-t border-border lg:border-t-0",
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em] truncate">
-                        {kpi.label}
-                      </p>
-                      <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110", tone.iconBg)}>
-                        <Icon className={cn("h-3.5 w-3.5", tone.iconFg)} strokeWidth={2.5} />
-                      </span>
-                    </div>
-                    <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", tone.value)}>
-                      {kpi.value}
-                    </p>
-                    <p className="mt-2 text-[11px] text-muted-foreground/85 leading-snug truncate font-medium tabular-nums">
-                      {kpi.sub}
-                    </p>
-                  </div>
-                );
-              })}
+              {/* PIX */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">PIX</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-info/10 group-hover:scale-110 transition-transform">
+                    <Smartphone className="h-3.5 w-3.5 text-info" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                  {hidden ? HIDE : fmtCompact(m.pixRev)}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {m.pixCount} venda{m.pixCount !== 1 ? "s" : ""} · {m.totalNet > 0 ? ((m.pixRev / m.totalNet) * 100).toFixed(0) : 0}%
+                </p>
+              </div>
+
+              {/* Cartão */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Cartão</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:scale-110 transition-transform">
+                    <CreditCard className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                  {hidden ? HIDE : fmtCompact(m.cardRev)}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {m.cardCount} venda{m.cardCount !== 1 ? "s" : ""} · {m.totalNet > 0 ? ((m.cardRev / m.totalNet) * 100).toFixed(0) : 0}%
+                </p>
+              </div>
+
+              {/* Boleto */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Boleto</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warning/10 group-hover:scale-110 transition-transform">
+                    <FileText className="h-3.5 w-3.5 text-warning" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                  {hidden ? HIDE : fmtCompact(m.boletoRev)}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {m.boletoCount} venda{m.boletoCount !== 1 ? "s" : ""} · {m.totalNet > 0 ? ((m.boletoRev / m.totalNet) * 100).toFixed(0) : 0}%
+                </p>
+              </div>
+
+              {/* Reembolsado */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Reembolsado</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/50 group-hover:scale-110 transition-transform">
+                    <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", m.refunded.length > 0 ? "text-warning" : "text-foreground")}>
+                  {hidden ? HIDE : fmtCompact(m.refunded.reduce((a, t) => a + Number(t.net_amount), 0))}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {m.refunded.length} reembolso{m.refunded.length !== 1 ? "s" : ""} · {m.refundRate.toFixed(2)}%
+                </p>
+              </div>
+
+              {/* Chargebacks */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Chargebacks</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-destructive/10 group-hover:scale-110 transition-transform">
+                    <Shield className="h-3.5 w-3.5 text-destructive" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", m.chargebacks.length > 0 ? "text-destructive" : "text-foreground")}>
+                  {hidden ? HIDE : fmtCompact(m.chargebacks.reduce((a, t) => a + Number(t.net_amount), 0))}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {m.chargebacks.length} disputa{m.chargebacks.length !== 1 ? "s" : ""} · {m.chargebackRate.toFixed(2)}%
+                </p>
+              </div>
+
+              {/* Clientes únicos */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Clientes</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-info/10 group-hover:scale-110 transition-transform">
+                    <Users className="h-3.5 w-3.5 text-info" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className="text-[22px] font-heading font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                  {m.uniqueCustomers}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  únicos · {m.uniqueCustomers > 0 ? (m.approved.length / m.uniqueCustomers).toFixed(1) : "0"} compras/cli
+                </p>
+              </div>
+
+              {/* Top Produto */}
+              <div className="relative px-5 py-4 hover:bg-muted/30 transition-all group">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em]">Top Produto</p>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:scale-110 transition-transform">
+                    <Crown className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+                  </span>
+                </div>
+                <p className="text-[15px] font-heading font-semibold text-foreground leading-tight tracking-[-0.01em] truncate" title={metrics.topProducts[0]?.name || "—"}>
+                  {metrics.topProducts[0]?.name || "—"}
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/85 tabular-nums font-medium truncate">
+                  {metrics.topProducts[0] ? `${metrics.topProducts[0].sales} vendas · ${fmtCompact(metrics.topProducts[0].revenue)}` : "Sem dados"}
+                </p>
+              </div>
             </div>
           </section>
 
