@@ -645,7 +645,8 @@ export default function Dashboard() {
               <AreaChart data={chartData} margin={{ top: 10, right: 16, bottom: 8, left: 8 }}>
                 <defs>
                   <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
+                    <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
