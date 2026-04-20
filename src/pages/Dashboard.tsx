@@ -727,16 +727,10 @@ export default function Dashboard() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* PERFORMANCE STRIP                                                */}
+        {/* KPIs · Indicadores operacionais (premium tiles)                  */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 03</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Indicadores Operacionais</span>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
+        <section className="mb-7 md:mb-9">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
             <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
             <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
@@ -745,81 +739,90 @@ export default function Dashboard() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* CHART · Volume processado                                        */}
+        {/* CHART · Série histórica (premium 4K)                             */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 04</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Série Histórica · Volume</span>
-          </div>
+        <section className="mb-7 md:mb-9">
+          <div className="relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-          <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
-            <div className="px-7 md:px-9 pt-8 pb-6 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap bg-gradient-to-b from-foreground/[0.015] to-transparent">
+            <div className="relative px-7 md:px-10 pt-8 pb-6 flex items-end justify-between gap-6 flex-wrap">
               <div>
-                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2.5">Receita acumulada</p>
-                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[30px] md:text-[40px] leading-none">
-                  {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : (
-                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Série Histórica</span>
+                  <span className="h-px w-8 bg-foreground/20" />
+                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Volume</span>
+                </div>
+                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[34px] md:text-[44px] leading-none">
+                  {privacy.hidden ? <span className="text-foreground/20">{CENSORED}</span> : (
+                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent">
                       <span className="text-[0.4em] font-medium text-muted-foreground/70 not-italic">R$</span>
                       {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-2.5">
-                  {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
+                <p className="text-[11.5px] text-muted-foreground/85 mt-3">
+                  {selectedPeriod.label === "Hoje" ? "Distribuição por hora · America/São Paulo" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
                 </p>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
+              <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
                   <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
-                  <span className="font-bold tracking-[0.14em]">Receita líquida</span>
+                  <span className="font-bold tracking-[0.14em] text-foreground/85">Receita líquida</span>
                 </span>
-                <span className="hidden md:inline tabular-nums font-medium">{chartData.length} pts</span>
+                <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.025] border border-foreground/[0.06] tabular-nums font-medium">
+                  {chartData.length} pts
+                </span>
               </div>
             </div>
-            <div className="h-[280px] md:h-[340px] px-3 pb-5 pt-6 bg-gradient-to-b from-transparent via-foreground/[0.005] to-foreground/[0.01]">
+
+            <div className="relative h-[320px] md:h-[400px] px-3 pb-5 pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="institutional-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.28} />
-                      <stop offset="60%" stopColor="hsl(var(--foreground))" stopOpacity={0.08} />
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.32} />
+                      <stop offset="55%" stopColor="hsl(var(--foreground))" stopOpacity={0.1} />
                       <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
-                    <pattern id="grid-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
-                      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.035" strokeWidth="1" />
+                    <linearGradient id="institutional-stroke" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={1} />
+                      <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0.7} />
+                    </linearGradient>
+                    <pattern id="grid-pattern" width="56" height="56" patternUnits="userSpaceOnUse">
+                      <path d="M 56 0 L 0 0 0 56" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.04" strokeWidth="1" />
                     </pattern>
                   </defs>
                   <rect width="100%" height="100%" fill="url(#grid-pattern)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={6} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={8} />
+                  <YAxis tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={48} />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.25, strokeDasharray: "3 3" }}
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.18)", borderRadius: 8, fontSize: 12, fontWeight: 500, padding: "11px 15px", boxShadow: "0 12px 32px -10px hsl(var(--foreground) / 0.22)" }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 5 }}
+                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.3, strokeDasharray: "3 3" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.18)", borderRadius: 10, fontSize: 12.5, fontWeight: 500, padding: "12px 16px", boxShadow: "0 24px 48px -12px hsl(var(--foreground) / 0.28)" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.16em", fontWeight: 700, marginBottom: 6 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.85} fill="url(#institutional-grad)" />
+                  <Area type="monotone" dataKey="vendas" stroke="url(#institutional-stroke)" strokeWidth={2.25} fill="url(#institutional-grad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
         </section>
 
-        {/* CHANNELS + ACTIVITY */}
         {/* ─────────────────────────────────────────────────────────────── */}
         {/* CHANNELS + ACTIVITY                                              */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-16">
-          <div className="lg:col-span-3">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 05</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-              <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Canais · Mix de Pagamento</span>
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5 mb-10">
+          <div className="lg:col-span-3 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+            <div className="px-7 md:px-9 pt-7 pb-5 border-b border-foreground/[0.06]">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Canais</span>
+                <span className="h-px w-8 bg-foreground/20" />
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Mix de Pagamento</span>
+              </div>
             </div>
-
-            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden divide-y divide-foreground/[0.06] shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
+            <div className="divide-y divide-foreground/[0.06]">
               <EditorialChannelRow index="01" name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow index="02" name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
@@ -835,90 +838,90 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 06</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-              <Link to="/vendas" className="font-mono text-[10px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.22em] inline-flex items-center gap-1.5 transition-colors group">
+          <div className="lg:col-span-2 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+            <div className="px-6 md:px-7 pt-7 pb-5 border-b border-foreground/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Atividade</span>
+                <span className="h-px w-8 bg-foreground/20" />
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Recente</span>
+              </div>
+              <Link to="/vendas" className="font-mono text-[9.5px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.18em] inline-flex items-center gap-1.5 transition-colors group">
                 Ver tudo <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
-            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
-              {activity.length === 0 ? (
-                <div className="px-5 py-20 text-center">
-                  <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] border border-foreground/[0.06] flex items-center justify-center mb-3">
-                    <Activity className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
+            {activity.length === 0 ? (
+              <div className="px-5 py-20 text-center">
+                <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] border border-foreground/[0.06] flex items-center justify-center mb-3">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
                 </div>
-              ) : (
-                <div className="divide-y divide-foreground/[0.06]">
-                  {activity.slice(0, 6).map((item, idx) => {
-                    const isWithdrawal = item.kind === "withdrawal";
-                    const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success"
-                      : item.status === "pending" ? "bg-warning"
-                      : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "bg-destructive"
-                      : "bg-muted-foreground/40";
-                    const labelText = isWithdrawal ? "Saque solicitado"
-                      : (item.label === "pix" ? "PIX"
-                        : item.label === "credit_card" || item.label === "card" ? "Cartão"
-                          : item.label === "boleto" ? "Boleto" : "Pagamento");
+                <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-foreground/[0.06]">
+                {activity.slice(0, 6).map((item, idx) => {
+                  const isWithdrawal = item.kind === "withdrawal";
+                  const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success shadow-[0_0_8px_hsl(var(--success)/0.6)]"
+                    : item.status === "pending" ? "bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.6)]"
+                    : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.6)]"
+                    : "bg-muted-foreground/40";
+                  const labelText = isWithdrawal ? "Saque solicitado"
+                    : (item.label === "pix" ? "PIX"
+                      : item.label === "credit_card" || item.label === "card" ? "Cartão"
+                        : item.label === "boleto" ? "Boleto" : "Pagamento");
 
-                    return (
-                      <button
-                        key={`${item.kind}-${item.id}`}
-                        onClick={() => {
-                          if (!isWithdrawal) {
-                            const tx = transactions.find(t => t.id === item.id);
-                            if (tx) setDetailTx(tx);
-                          }
-                        }}
-                        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-foreground/[0.025] transition-colors text-left group"
-                      >
-                        <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.1em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 ring-2 ring-background", dotColor)} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[12.5px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 font-mono tracking-tight">
-                            {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
-                          </p>
-                        </div>
-                        <p className="text-[13px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
-                          {privacy.hidden ? CENSORED : fmt(item.amount)}
+                  return (
+                    <button
+                      key={`${item.kind}-${item.id}`}
+                      onClick={() => {
+                        if (!isWithdrawal) {
+                          const tx = transactions.find(t => t.id === item.id);
+                          if (tx) setDetailTx(tx);
+                        }
+                      }}
+                      className="w-full flex items-center gap-3.5 px-6 py-4 hover:bg-foreground/[0.025] transition-colors text-left group"
+                    >
+                      <span className="font-mono text-[9.5px] font-bold text-muted-foreground/50 tracking-[0.12em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
+                      <span className={cn("h-2 w-2 rounded-full shrink-0 ring-2 ring-background", dotColor)} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
+                        <p className="text-[10.5px] text-muted-foreground mt-0.5 font-mono tracking-tight">
+                          {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
                         </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      </div>
+                      <p className="text-[14px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+                        {privacy.hidden ? CENSORED : fmt(item.amount)}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* COLOPHON · Footer institucional                                  */}
+        {/* COLOPHON                                                          */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <footer className="pt-8 mt-4 border-t border-foreground/10">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="h-5 w-5 rounded-[4px] bg-foreground text-background flex items-center justify-center">
-                  <span className="font-display font-black text-[9px] tracking-[-0.06em] leading-none">H</span>
-                </div>
-                <span className="font-display font-bold text-[11px] text-foreground tracking-[-0.01em]">HOTZFY</span>
-                <span className="h-2.5 w-px bg-foreground/15" />
-                <span className="font-mono text-[9.5px] text-muted-foreground uppercase tracking-[0.18em]">Capital Operations</span>
+        <footer className="pt-7 mt-2 border-t border-foreground/[0.08]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-5 w-5 rounded-[5px] bg-foreground text-background flex items-center justify-center">
+                <span className="font-display font-black text-[9px] tracking-[-0.06em] leading-none">H</span>
               </div>
-              <p className="text-[10.5px] text-muted-foreground/70 max-w-md leading-relaxed">
-                Demonstrativo gerado em tempo real. Os valores apresentados estão sujeitos à conciliação final dos provedores de pagamento e às janelas regulamentares de liquidação.
-              </p>
+              <span className="font-display font-bold text-[11px] text-foreground tracking-[-0.01em]">HOTZFY</span>
+              <span className="h-2.5 w-px bg-foreground/15" />
+              <span className="font-mono text-[9.5px] text-muted-foreground uppercase tracking-[0.18em]">Capital Operations · Treasury</span>
             </div>
-            <div className="flex flex-col items-start md:items-end gap-2 font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground">
+            <div className="flex items-center gap-4 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="tabular-nums">REF · {format(new Date(), "yyyyMMdd-HHmm")}</span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                Sistemas operacionais · uptime 99.99%
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                </span>
+                Uptime 99.99%
               </span>
             </div>
           </div>
