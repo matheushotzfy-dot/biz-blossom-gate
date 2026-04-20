@@ -940,53 +940,53 @@ export default function Vendas() {
           </section>
 
           {/* ═══════ INTELLIGENCE STRIP ═══════ */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
 
               {/* LEFT — Top products */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-end justify-between mb-4">
+              <div className="p-6 lg:p-8">
+                <div className="flex items-end justify-between mb-6">
                   <div>
-                    <p className="text-[12px] font-medium text-foreground">Top produtos</p>
-                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">Receita líquida no período</p>
+                    <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Top produtos</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 mt-1 font-medium">Receita líquida no período</p>
                   </div>
                   {metrics.topProducts.length > 0 && (
-                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11.5px] tabular-nums text-muted-foreground/85 font-medium">
                       {metrics.topProducts.length} de {productsRaw.length}
                     </span>
                   )}
                 </div>
                 {metrics.topProducts.length === 0 ? (
-                    <div className="py-12 text-center">
-                      <Package className="h-5 w-5 text-muted-foreground/40 mx-auto mb-3" strokeWidth={1.5} />
-                      <p className="text-[13px] font-medium text-foreground mb-1">Sem vendas no período</p>
-                      <p className="text-[11.5px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
+                    <div className="py-14 text-center">
+                      <Package className="h-6 w-6 text-muted-foreground/40 mx-auto mb-4" strokeWidth={1.5} />
+                      <p className="text-[13.5px] font-heading font-semibold text-foreground mb-1.5">Sem vendas no período</p>
+                      <p className="text-[12px] text-muted-foreground max-w-[300px] mx-auto leading-relaxed">
                         {productsRaw.length === 0
                           ? "Cadastre seu primeiro produto para começar."
                           : `${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, ainda sem conversões aqui.`}
                       </p>
                     </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
                       const maxRev = metrics.topProducts[0]?.revenue || 1;
                       const pct = (prod.revenue / maxRev) * 100;
                       const share = m.totalNet > 0 ? (prod.revenue / m.totalNet) * 100 : 0;
                       return (
                         <div key={prod.id} className="group">
-                          <div className="flex items-center gap-3">
-                            <span className="text-[11px] font-medium text-muted-foreground tabular-nums w-4 shrink-0">{i + 1}</span>
+                          <div className="flex items-center gap-3.5">
+                            <span className="text-[11.5px] font-heading font-semibold text-muted-foreground/65 tabular-nums w-5 shrink-0">{(i + 1).toString().padStart(2, "0")}</span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-3">
-                                <p className="truncate text-[12.5px] font-medium text-foreground">{prod.name}</p>
-                                <p className="text-[12.5px] font-semibold text-foreground tabular-nums leading-none shrink-0">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                                <p className="truncate text-[13px] font-heading font-medium text-foreground tracking-[-0.005em]">{prod.name}</p>
+                                <p className="text-[13.5px] font-heading font-semibold text-foreground tabular-nums leading-none shrink-0 tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
                               </div>
-                              <div className="mt-1.5 flex items-center gap-2.5">
-                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full rounded-full bg-foreground/40" style={{ width: `${pct}%` }} />
+                              <div className="mt-2 flex items-center gap-3">
+                                <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full rounded-full bg-foreground/55 transition-all" style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10.5px] text-muted-foreground tabular-nums shrink-0 w-20 text-right">
-                                  {prod.sales} · {share.toFixed(0)}%
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-24 text-right font-medium">
+                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} · {share.toFixed(0)}%
                                 </span>
                               </div>
                             </div>
