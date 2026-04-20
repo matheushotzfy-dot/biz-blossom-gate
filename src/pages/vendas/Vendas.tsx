@@ -1025,26 +1025,40 @@ export default function Vendas() {
                       </p>
                     </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
                       const maxRev = metrics.topProducts[0]?.revenue || 1;
                       const pct = (prod.revenue / maxRev) * 100;
                       const share = m.totalNet > 0 ? (prod.revenue / m.totalNet) * 100 : 0;
+                      const isLeader = i === 0;
                       return (
                         <div key={prod.id} className="group">
-                          <div className="flex items-center gap-3.5">
-                            <span className="text-[11.5px] font-heading font-semibold text-muted-foreground/65 tabular-nums w-5 shrink-0">{(i + 1).toString().padStart(2, "0")}</span>
+                          <div className="flex items-center gap-4">
+                            <span className={cn(
+                              "flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[10.5px] font-heading font-bold tabular-nums tracking-tight transition-colors",
+                              isLeader
+                                ? "bg-foreground text-background"
+                                : "bg-muted text-muted-foreground/85 group-hover:text-foreground"
+                            )}>{(i + 1).toString().padStart(2, "0")}</span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-3">
-                                <p className="truncate text-[13px] font-heading font-medium text-foreground tracking-[-0.005em]">{prod.name}</p>
-                                <p className="text-[13.5px] font-heading font-semibold text-foreground tabular-nums leading-none shrink-0 tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                                <p className="truncate text-[13.5px] font-heading font-semibold text-foreground tracking-[-0.01em] leading-tight">{prod.name}</p>
+                                <p className="text-[14px] font-heading font-bold text-foreground tabular-nums leading-none shrink-0 tracking-[-0.025em]">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
                               </div>
-                              <div className="mt-2 flex items-center gap-3">
-                                <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full rounded-full bg-foreground/55 transition-all" style={{ width: `${pct}%` }} />
+                              <div className="mt-2.5 flex items-center gap-3.5">
+                                <div className="h-[6px] flex-1 rounded-full bg-muted/70 overflow-hidden ring-1 ring-border/40">
+                                  <div
+                                    className={cn(
+                                      "h-full rounded-full transition-all duration-700",
+                                      isLeader
+                                        ? "bg-gradient-to-r from-foreground via-foreground to-foreground/85"
+                                        : "bg-gradient-to-r from-foreground/55 to-foreground/35"
+                                    )}
+                                    style={{ width: `${pct}%` }}
+                                  />
                                 </div>
-                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-24 text-right font-medium">
-                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} · {share.toFixed(0)}%
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-[110px] text-right font-medium">
+                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} <span className="text-muted-foreground/60">·</span> <span className="text-foreground/85 font-semibold">{share.toFixed(0)}%</span>
                                 </span>
                               </div>
                             </div>
