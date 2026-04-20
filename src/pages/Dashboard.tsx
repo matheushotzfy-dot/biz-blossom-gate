@@ -1281,39 +1281,53 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
 
 /* ─── Editorial dashboard sub-components (premium 4K) ─── */
 
-function EditorialKpi({ label, code, value, sub, accent }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
+function EditorialKpi({ label, code, value, sub, accent, index }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral"; index?: string }) {
   const accentDot: Record<string, string> = {
-    success: "bg-success shadow-[0_0_10px_hsl(var(--success)/0.6)]",
-    warning: "bg-warning shadow-[0_0_10px_hsl(var(--warning)/0.6)]",
-    destructive: "bg-destructive shadow-[0_0_10px_hsl(var(--destructive)/0.6)]",
-    neutral: "bg-muted-foreground/40",
+    success: "bg-success shadow-[0_0_12px_hsl(var(--success)/0.7)]",
+    warning: "bg-warning shadow-[0_0_12px_hsl(var(--warning)/0.7)]",
+    destructive: "bg-destructive shadow-[0_0_12px_hsl(var(--destructive)/0.7)]",
+    neutral: "bg-muted-foreground/45",
   };
   const accentGlow: Record<string, string> = {
-    success: "from-success/[0.04]",
-    warning: "from-warning/[0.04]",
-    destructive: "from-destructive/[0.04]",
+    success: "from-success/[0.05]",
+    warning: "from-warning/[0.05]",
+    destructive: "from-destructive/[0.05]",
     neutral: "from-foreground/[0.025]",
+  };
+  const accentBar: Record<string, string> = {
+    success: "from-success/40 via-success/15",
+    warning: "from-warning/40 via-warning/15",
+    destructive: "from-destructive/40 via-destructive/15",
+    neutral: "from-foreground/25 via-foreground/10",
   };
 
   return (
-    <div className="relative rounded-[18px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_18px_40px_-20px_hsl(var(--foreground)/0.15)] hover:shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_28px_60px_-20px_hsl(var(--foreground)/0.22)] hover:-translate-y-px transition-all duration-300 group overflow-hidden">
+    <div className="relative rounded-[18px] border border-foreground/[0.08] bg-gradient-to-br from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_hsl(var(--background)/0.4)_inset,0_1px_0_hsl(var(--foreground)/0.04),0_22px_50px_-22px_hsl(var(--foreground)/0.18)] hover:shadow-[0_1px_0_hsl(var(--background)/0.4)_inset,0_1px_0_hsl(var(--foreground)/0.04),0_32px_70px_-22px_hsl(var(--foreground)/0.26)] hover:-translate-y-0.5 hover:border-foreground/[0.16] transition-all duration-300 group">
       <div className={cn("absolute inset-0 bg-gradient-to-br to-transparent pointer-events-none", accentGlow[accent])} />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/12 to-transparent" />
+      {/* Top accent line */}
+      <div className={cn("absolute top-0 left-0 right-0 h-px bg-gradient-to-r to-transparent", accentBar[accent])} />
       {/* Hover sweep */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      {/* Index marker */}
+      {index && (
+        <span className="absolute top-5 right-5 font-mono text-[8px] font-bold text-muted-foreground/30 tracking-[0.22em] tabular-nums">N° {index}</span>
+      )}
 
-      <div className="relative px-6 py-7 md:px-7 md:py-8">
-        <div className="flex items-center justify-between mb-5">
+      <div className="relative px-6 py-7 md:px-7 md:py-9">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
-            <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em] group-hover:text-foreground/85 transition-colors">{label}</p>
+            <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125 duration-300", accentDot[accent])} />
+            <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] group-hover:text-foreground/85 transition-colors">{label}</p>
           </div>
-          {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/40 tracking-[0.22em] px-2 py-0.5 rounded-[4px] bg-foreground/[0.04]">{code}</span>}
+          {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/45 tracking-[0.24em] px-2 py-0.5 rounded-[5px] bg-foreground/[0.04] border border-foreground/[0.04]">{code}</span>}
         </div>
-        <p className="font-display font-semibold tabular-nums tracking-[-0.045em] leading-none text-[34px] md:text-[42px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
+        <p className="font-display font-semibold tabular-nums tracking-[-0.05em] leading-none text-[36px] md:text-[44px] bg-gradient-to-br from-foreground via-foreground/97 to-foreground/65 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300 drop-shadow-[0_2px_14px_hsl(var(--foreground)/0.06)]">
           {value}
         </p>
-        <p className="mt-3.5 text-[11px] text-muted-foreground/85 font-medium leading-relaxed">{sub}</p>
+        <div className="mt-4 flex items-center gap-2 pt-3 border-t border-foreground/[0.06]">
+          <span className="h-px w-3 bg-foreground/15" />
+          <p className="text-[11px] text-muted-foreground/85 font-medium leading-relaxed">{sub}</p>
+        </div>
       </div>
     </div>
   );
@@ -1321,24 +1335,24 @@ function EditorialKpi({ label, code, value, sub, accent }: { label: string; code
 
 function EditorialChannelRow({ index, name, approved, total, revenue, approvalRate, share, privacy }: { index?: string; name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-7 md:px-9 py-5 md:py-6 hover:bg-foreground/[0.025] transition-colors group relative">
-      <div className="flex items-baseline justify-between mb-3 gap-3">
-        <div className="flex items-baseline gap-3 min-w-0">
-          {index && <span className="font-mono text-[10px] font-bold text-muted-foreground/45 tracking-[0.18em] tabular-nums shrink-0 group-hover:text-foreground/65 transition-colors">{index}</span>}
-          <p className="text-[14px] md:text-[15px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
+    <div className="px-7 md:px-10 py-6 md:py-7 hover:bg-foreground/[0.025] transition-colors group relative">
+      <div className="flex items-baseline justify-between mb-3.5 gap-3">
+        <div className="flex items-baseline gap-3.5 min-w-0">
+          {index && <span className="font-mono text-[10px] font-bold text-muted-foreground/45 tracking-[0.2em] tabular-nums shrink-0 group-hover:text-foreground/65 transition-colors">{index}</span>}
+          <p className="text-[15px] md:text-[16px] font-semibold text-foreground tracking-[-0.015em] truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
         </div>
-        <p className="text-[16px] md:text-[17px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+        <p className="text-[17px] md:text-[18px] font-display font-semibold text-foreground tabular-nums tracking-[-0.025em] shrink-0 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
-      <div className="flex items-center gap-3 text-[10.5px] font-mono text-muted-foreground mb-3.5 tracking-tight">
-        <span className="uppercase tracking-[0.14em]"><span className="text-foreground font-bold tabular-nums">{approved}</span><span className="text-muted-foreground/50">/{total}</span></span>
-        <span className="text-foreground/15">·</span>
-        <span className="uppercase tracking-[0.14em]">APR <span className="text-foreground font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
-        <span className="ml-auto uppercase tracking-[0.14em]">SHR <span className="text-foreground font-bold tabular-nums">{share.toFixed(1)}%</span></span>
+      <div className="flex items-center gap-3 text-[10.5px] font-mono text-muted-foreground mb-4 tracking-tight">
+        <span className="uppercase tracking-[0.16em]"><span className="text-foreground font-bold tabular-nums">{approved}</span><span className="text-muted-foreground/45">/{total}</span></span>
+        <span className="text-foreground/12">·</span>
+        <span className="uppercase tracking-[0.16em]">APR <span className="text-foreground font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto uppercase tracking-[0.16em]">SHR <span className="text-foreground font-bold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
-      <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
-        <div className="h-full rounded-full bg-gradient-to-r from-foreground/85 to-foreground/55 transition-all duration-700 ease-out shadow-[0_0_12px_hsl(var(--foreground)/0.25)]" style={{ width: `${Math.min(share, 100)}%` }} />
+      <div className="relative h-[3px] w-full rounded-full bg-foreground/[0.05] overflow-hidden">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-foreground/85 via-foreground/70 to-foreground/55 transition-all duration-700 ease-out shadow-[0_0_14px_hsl(var(--foreground)/0.3)]" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
