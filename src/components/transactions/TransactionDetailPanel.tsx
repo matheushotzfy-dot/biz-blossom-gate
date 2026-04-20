@@ -255,13 +255,14 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  </SectionCard>
  </div>
 
- <div className="space-y-4">
- <SectionCard title="Cliente">
- <DataRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
- <DataRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
- <DataRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3.5 w-3.5 shrink-0" />} />
- {tx.customer_document && <DataRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />}
- </SectionCard>
+  <div className="space-y-4">
+  <SectionCard title="Cliente">
+  <DataRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
+  <DataRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
+  <DataRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3.5 w-3.5 shrink-0" />} />
+  {tx.customer_document && <DataRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />}
+  {(tx as any).customer_address && <DataRow label="Endereço" value={(tx as any).customer_address} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />}
+  </SectionCard>
 
  <SectionCard title="Resumo rápido">
  <div className="space-y-3">
