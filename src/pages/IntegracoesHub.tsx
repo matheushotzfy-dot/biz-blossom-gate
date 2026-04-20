@@ -8,10 +8,10 @@ import Documentacao from "./vendas/Documentacao";
 import ApiKeys from "./vendas/ApiKeys";
 
 const TABS: HubTab[] = [
- { id: "apps", label: "Integrações" },
- { id: "webhooks", label: "Webhooks" },
- { id: "api", label: "API Docs" },
- { id: "keys", label: "Credenciais API" },
+ { id: "apps", label: "Integrações", icon: Puzzle },
+ { id: "webhooks", label: "Webhooks", icon: Webhook },
+ { id: "api", label: "API Docs", icon: BookOpen },
+ { id: "keys", label: "Credenciais API", icon: KeyRound },
 ];
 
 const COMPONENTS: Record<string, React.FC> = {
