@@ -1083,25 +1083,42 @@ export default function Vendas() {
                   {m.totalNet === 0 ? (
                     <p className="text-[12px] text-muted-foreground/85 py-4">Sem atividade no período.</p>
                   ) : (
-                    <div className="space-y-3.5">
+                    <div className="space-y-4">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                        const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
+                        const tone = pm.color === "success" ? {
+                          text: "text-success",
+                          bg: "bg-success/12",
+                          ring: "ring-success/25",
+                          bar: "bg-gradient-to-r from-success to-success/70",
+                        } : pm.color === "info" ? {
+                          text: "text-info",
+                          bg: "bg-info/12",
+                          ring: "ring-info/25",
+                          bar: "bg-gradient-to-r from-info to-info/70",
+                        } : {
+                          text: "text-warning",
+                          bg: "bg-warning/12",
+                          ring: "ring-warning/25",
+                          bar: "bg-gradient-to-r from-warning to-warning/70",
+                        };
                         return (
-                          <div key={pm.label} className="flex items-center gap-3.5">
-                            <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg bg-muted ring-1 ring-border/30", accentText)}>
+                          <div key={pm.label} className="flex items-center gap-3.5 group">
+                            <span className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1 transition-all", tone.bg, tone.ring, tone.text, "group-hover:scale-105")}>
                               {pm.icon}
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">{pm.label}</p>
-                                <p className="text-[13px] font-heading font-semibold text-foreground tabular-nums tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                                <p className="text-[13px] font-heading font-semibold text-foreground tracking-[-0.005em]">{pm.label}</p>
+                                <p className="text-[13.5px] font-heading font-bold text-foreground tabular-nums tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                               </div>
-                              <div className="mt-1.5 flex items-center gap-2.5">
-                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full bg-foreground/55 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                              <div className="mt-2 flex items-center gap-3">
+                                <div className="h-[5px] flex-1 rounded-full bg-muted/70 overflow-hidden ring-1 ring-border/40">
+                                  <div className={cn("h-full rounded-full transition-all duration-700", tone.bar)} style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-20 text-right font-medium">{pm.count} · {pct.toFixed(0)}%</span>
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-[78px] text-right font-medium">
+                                  {pm.count} <span className="text-muted-foreground/55">·</span> <span className={cn("font-semibold", pct > 0 ? tone.text : "text-muted-foreground/65")}>{pct.toFixed(0)}%</span>
+                                </span>
                               </div>
                             </div>
                           </div>
